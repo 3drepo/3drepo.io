@@ -45,6 +45,7 @@ type ContainerOrFederationParam = IContainer | IFederation | string;
 
 const relativeViewerRoute = (
 	teamspace: string,
+	project,
 	containerOrFederation: ContainerOrFederationParam,
 	revision: RevisionParam,
 ) => {
@@ -55,6 +56,7 @@ const relativeViewerRoute = (
 
 	const params = {
 		teamspace,
+		project,
 		containerOrFederation: containerOrFederationId,
 		revision: revisionId,
 	};
@@ -64,12 +66,13 @@ const relativeViewerRoute = (
 
 export const viewerRoute = (
 	teamspace: string,
+	project: string,
 	containerOrFederation: ContainerOrFederationParam,
 	revision: RevisionParam = undefined,
 	withDomain: boolean = false,
 ) => {
 	const domain = withDomain ? getBaseDomain() : '';
-	return `${domain}${relativeViewerRoute(teamspace, containerOrFederation, revision)}`;
+	return `${domain}${relativeViewerRoute(teamspace, project, containerOrFederation, revision)}`;
 };
 
 export const RouteExcept = ({ path, exceptPath, children }) => (

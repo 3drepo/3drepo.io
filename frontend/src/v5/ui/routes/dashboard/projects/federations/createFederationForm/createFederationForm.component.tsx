@@ -27,10 +27,10 @@ import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { IContainer } from '@/v5/store/containers/containers.types';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
 import { HalfWidth } from './createFederationForm.styles';
 import { EditFederationModal } from '../editFederationModal/editFederationModal.component';
-import { IContainer } from '@/v5/store/containers/containers.types';
 
 const UNITS = [
 	{

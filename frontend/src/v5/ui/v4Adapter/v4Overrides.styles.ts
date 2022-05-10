@@ -28,6 +28,7 @@ import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButto
 import { LeftPanels, LeftPanelsButtons } from '@/v4/routes/viewerGui/viewerGui.styles';
 import { ButtonWrapper } from '@/v4/routes/viewerGui/components/panelButton/panelButton.styles';
 import { Container, Submenu } from '@/v4/routes/viewerGui/components/toolbar/toolbar.styles';
+import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
 import { hexToOpacity } from '../themes/theme';
 
 // all the .simplebar-... stuff is to disable simplebar
@@ -245,4 +246,7 @@ export const V4OverridesContainer = styled.div`
 	${PanelsMenuStyling}
 
 	${BottomToolbar}
+	${RevisionsSwitchContainer} {
+		display: none;
+	}
 `;

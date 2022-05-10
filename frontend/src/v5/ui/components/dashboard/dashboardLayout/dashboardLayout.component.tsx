@@ -31,7 +31,7 @@ interface IDashboardLayout {
 }
 
 export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
+	const { teamspace, project, containerOrFederation } = useParams<DashboardParams>();
 
 	useEffect(() => {
 		if (teamspace) {
@@ -49,7 +49,7 @@ export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => 
 	return (
 		<>
 			<AppBar />
-			{project && <ProjectHeader />}
+			{project && !containerOrFederation && <ProjectHeader />}
 			<Content>
 				{children}
 			</Content>
