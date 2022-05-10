@@ -97,6 +97,11 @@ export default css`
 				// delete comment icon
 				[aria-label="Remove"] > button {
 					margin: 8px 48px 0 0;
+					padding: 3px;
+					
+					svg {
+						font-size: .625rem;
+					}
 				}
 			}
 
