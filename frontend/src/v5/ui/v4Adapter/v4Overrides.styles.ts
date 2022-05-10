@@ -20,6 +20,7 @@ import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highli
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
+import properties from './overrides/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
@@ -38,6 +39,8 @@ export const V4OverridesContainer = styled.div`
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
+
+	${properties}
 
 	${customTable}
 
