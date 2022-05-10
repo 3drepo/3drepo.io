@@ -31,9 +31,10 @@ import { enableRealtimeFederationUpdates } from '@/v5/services/realtime/federati
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
+import { DashboardParams } from '../../../routes.constants';
 
 export const Federations = (): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const {
 		federations,
 		favouriteFederations,

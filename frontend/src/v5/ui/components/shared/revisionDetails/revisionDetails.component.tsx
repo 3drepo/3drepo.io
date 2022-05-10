@@ -31,6 +31,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -49,7 +50,7 @@ interface IRevisionDetails {
 }
 
 export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
 	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
 	const selected = revisions.findIndex((r) => !r.void);

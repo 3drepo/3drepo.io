@@ -14,7 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { IFederation } from '@/v5/store/federations/federations.types';
 import { Route, Switch } from 'react-router-dom';
+import { generatePath } from 'react-router';
+import { IRevision } from '@/v5/store/revisions/revisions.types';
+import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
@@ -35,9 +40,40 @@ export const uriCombine = (uri, path) => {
 
 const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
 
-export const viewerShareLink = (teamspace: string, containerOrFederationId: string) => (
-	`${getBaseDomain()}/viewer/${teamspace}/${containerOrFederationId}`
-);
+type RevisionParam = IRevision | string | null | undefined;
+type ContainerOrFederationParam = IContainer | IFederation | string;
+
+const relativeViewerRoute = (
+	teamspace: string,
+	project,
+	containerOrFederation: ContainerOrFederationParam,
+	revision: RevisionParam,
+) => {
+	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
+		|| (containerOrFederation as string);
+
+	const revisionId = (revision as IRevision)?._id || (revision as string);
+
+	const params = {
+		teamspace,
+		project,
+		containerOrFederation: containerOrFederationId,
+		revision: revisionId,
+	};
+
+	return generatePath(VIEWER_ROUTE, params);
+};
+
+export const viewerRoute = (
+	teamspace: string,
+	project: string,
+	containerOrFederation: ContainerOrFederationParam,
+	revision: RevisionParam = undefined,
+	withDomain: boolean = false,
+) => {
+	const domain = withDomain ? getBaseDomain() : '';
+	return `${domain}${relativeViewerRoute(teamspace, project, containerOrFederation, revision)}`;
+};
 
 export const RouteExcept = ({ path, exceptPath, children }) => (
 	<Switch>

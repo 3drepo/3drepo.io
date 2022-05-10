@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { push } from 'connected-react-router';
+import { goBack, push } from 'connected-react-router';
+import { matchPath } from 'react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
@@ -366,10 +367,11 @@ function* setCamera({ params }) {
 }
 
 function* loadModel() {
+	const { teamspace, model, v5 } = yield select(selectUrlParams);
+
 	try {
 		yield Viewer.isViewerReady();
 
-		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
@@ -386,6 +388,13 @@ function* loadModel() {
 			'or you are not authorized to view it. ' +
 			' You will now be redirected to the teamspace page.';
 		yield put(DialogActions.showDialog({ title: 'Model Error', content }));
+
+		if (v5) {
+			if (matchPath(location.pathname, { path: ROUTES.V5_MODEL_VIEWER })) {
+				yield put(goBack());
+			}
+			return;
+		}
 		yield put(push(ROUTES.TEAMSPACES));
 	}
 }
