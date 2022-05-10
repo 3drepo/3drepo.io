@@ -22,6 +22,7 @@ import { createSelector } from 'reselect';
 const selectCurrentUserDomain = (state) => ({...state.currentUser, ...(isV5() && state.currentUser2)});
 
 const selectCurrentTeampspaceV5 = createSelector(
+	// @ts-ignore
 	(state) => state.teamspaces2,
 	(state) => state.currentTeamspace
 );
