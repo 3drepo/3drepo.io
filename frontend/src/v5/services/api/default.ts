@@ -50,7 +50,6 @@ axios.interceptors.response.use(
 				case 403:
 					// eslint-disable-next-line no-param-reassign
 					error.handled = true;
-					dispatch(push('/'));
 					break;
 				default:
 					break;
