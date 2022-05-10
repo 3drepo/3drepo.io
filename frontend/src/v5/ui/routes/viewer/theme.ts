@@ -29,9 +29,10 @@ export const theme = createTheme(
 				MuiDialog: {
 					styleOverrides: {
 						paper: {
-							maxWidth: 'unset !important',
+							minWidth: 'unset !important',
 							'& .MuiDialogTitle-root': {
 								padding: '14px 0 !important',
+								minWidth: 'fit-content',
 								'& .MuiIconButton-root': {
 									position: 'absolute',
 									right: 0,
