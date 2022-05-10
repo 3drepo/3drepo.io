@@ -64,8 +64,8 @@ export const theme = createTheme(
 						select: {
 							lineHeight: '22px',
 							height: '24px',
-							padding: '0 12px',
-							marginTop: '27px',
+							padding: '0 15px',
+							marginTop: '18px',
 							left: '-14px',
 						},
 					},
