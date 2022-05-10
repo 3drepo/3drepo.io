@@ -20,7 +20,7 @@ import { Container } from '@/v5/ui/components/shared/modals/modals.styles';
 
 export const V5ModalContainer = styled(Container)`
 	min-height: 229px;
-    position: relative;
-    margin-top: -60px;
-    background: ${({ theme }) => theme.palette.primary.contrast};
+	position: relative;
+	margin-top: -60px;
+	background: ${({ theme }) => theme.palette.primary.contrast};
 `;

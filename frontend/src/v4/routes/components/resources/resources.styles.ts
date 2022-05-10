@@ -68,16 +68,16 @@ export const ResourceItemRightColumn = styled.div`
 `;
 
 export const ResourceItemLeftColumn = styled.div`
-	display: contents;`
-;
+	display: contents;
+`;
 
 export const ResourceItemContainer = styled.div`
 	font-size: 14px;
 	color: ${COLOR.BLACK_60};
 	display: flex;
 	align-items: center;
-	& ${ResourceItemRightColumn},
-	& ${ResourceItemLeftColumn} > * {
+	& ${/* sc-selector */ResourceItemRightColumn},
+	& ${/* sc-selector */ResourceItemLeftColumn} > * {
 		padding-left: 3px;
 		padding-right: 3px;
 		padding-top: 1px;
