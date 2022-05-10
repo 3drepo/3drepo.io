@@ -27,10 +27,7 @@ import { EmptyStateInfo } from '../components.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {
 	ActionContainer,
-	DocumentIcon,
 	IconButton,
-	LinkIcon,
-	PhotoIcon,
 	QuoteIcon,
 	ResourcesContainer,
 	ResourcesList,
@@ -40,10 +37,10 @@ import {
 	ResourceLink,
 	UploadSizeLabel,
 	Size,
-	ResourceIconContainer,
 	ResourceItemLeftColumn,
 } from './resources.styles';
 import { RemoveButton } from './removeButton.component';
+import { ResourceIcon } from './resourceIcon';
 
 interface IResource {
 	_id: string;
@@ -71,18 +68,6 @@ export const QuoteButton = (props) => (
 	<IconButton {...props} aria-label="Quote resource" size="large">
 		<QuoteIcon />
 	</IconButton>
-);
-
-const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
-
-export const ResourceIcon = ({type}) => (
-	<ResourceIconContainer>
-		{(type === 'http')
-			? (<LinkIcon />)
-			: (imageExtensions.indexOf(type) >= 0)
-				? (<PhotoIcon />)
-				: (<DocumentIcon />)}
-	</ResourceIconContainer>
 );
 
 const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit, onClickQuote}) => {

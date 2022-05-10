@@ -24,7 +24,7 @@ import {
 	StyledFormControl
 } from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { RemoveButton } from '../removeButton.component';
-import { ResourceIcon } from '../resources.component';
+import { ResourceIcon } from "../resourceIcon";
 import { ResourceListItem } from './attachResourcesDialog.styles';
 
 export const FileEntry = ({onClickRemove, index, entry}) => {
