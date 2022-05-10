@@ -167,7 +167,7 @@ describe("Job", function () {
 			},
 			function(done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
-					.send(oldJobs[1])
+					.send(oldJobs[2])
 					.expect(200, done);
 			},
 			function(done) {
@@ -316,7 +316,7 @@ describe("Job", function () {
 			},
 			function(done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
-					.send(oldJobs[1])
+					.send(oldJobs[2])
 					.expect(200, done);
 			}
 		], done);
