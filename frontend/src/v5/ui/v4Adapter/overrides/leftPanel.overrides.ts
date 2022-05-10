@@ -24,6 +24,7 @@ import {
 	FiltersButton,
 	PlaceholderText,
 } from '@/v4/routes/components/filterPanel/filterPanel.styles';
+import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export default css`
 	${LeftPanels} .MuiPaper-root {
@@ -103,6 +104,10 @@ export default css`
 		${({ theme }) => theme.typography.caption};
 		color: ${({ theme }) => theme.palette.base.light} !important;
 		box-sizing: border-box;
+
+		${StyledIconButton} {
+			height: 26px;
+		}
 
 		button {
 			background-color: ${({ theme }) => theme.palette.primary.main};
