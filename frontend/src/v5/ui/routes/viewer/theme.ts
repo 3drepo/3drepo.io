@@ -63,6 +63,14 @@ export const theme = createTheme(
 				},
 				MuiInputBase: {
 					styleOverrides: {
+						root: {
+							'&.Mui-focused fieldset': {
+								borderWidth: '1px !important',
+							},
+							'& input': {
+								padding: '0px 12px !important',
+							},
+						},
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
 								opacity: '1 !important',

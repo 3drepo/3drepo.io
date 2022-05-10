@@ -41,7 +41,7 @@ import { LoaderContainer } from '@/v4/routes/components/messagesList/messagesLis
 
 const buttonsStyling = css`
 	${IconButton} { 
-		padding: 5px 0 0 0;
+		padding: 2px 0 0 0;
 		height: fit-content;
 
 		&:hover {
@@ -50,7 +50,7 @@ const buttonsStyling = css`
 		
 		svg {
 			color: ${({ theme }) => theme.palette.secondary.main};
-			font-size: 15px;
+			font-size: 19px;
 		} 
 	}
 `;
@@ -75,28 +75,37 @@ export const AttachResourcesFile = css`
 		// TODO - fix after new palette is released
 		border-top: solid 1px #e0e5f0;
 	}
-		
+
 	// style the icon 
 	${FieldsRow} {
 		flex-direction: row;
 
-		${StyledFormControl}:nth-of-type(even) {
-			flex-direction: row;
-			margin-left: -11px;
-
-			${ResourceListItem} {
-				width: 100%;
-				
-				button {
-					width: fit-content;
-				}
+		${StyledFormControl} {
+			&:nth-child(odd) {
+				margin-right: 10px;
 			}
-			
-			${ResourceIconContainer} svg {
-				font-size: 18px;
-				margin-top: 2px;
-				margin-right: 4px;
-				color: ${({ theme }) => theme.palette.primary.main};
+
+			&:nth-of-type(even) {
+				flex-direction: row;
+				justify-content: flex-end;
+
+				& > *:not(${ResourceIconContainer}) {
+					width: 100%;
+				}
+
+				${ResourceListItem} {
+					width: 100%;
+
+					button {
+						width: fit-content;
+					}
+				}
+
+				${ResourceIconContainer} svg {
+					font-size: 18px;
+					margin: 2px 4px 0 6px;
+					color: ${({ theme }) => theme.palette.primary.main};
+				}
 			}
 		}
 	}
@@ -112,9 +121,21 @@ export const AttachResourcesLink = css`
 			width: 100%;
 			box-sizing: border-box;
 			padding: 0 23px;
+			display: flex;
+			flex-direction: column-reverse;
 
 			${FieldsRow} {
-				&:first-of-type {
+				min-height: 35px;
+
+				& > *:nth-child(odd) {
+					flex-grow: 5;
+				}
+
+				& > *:nth-child(even) {
+					flex-grow: 6;
+				}
+
+				&:last-of-type {
 					margin-top: 20px;
 				}
 
@@ -175,26 +196,20 @@ export const AttachResourcesModalStyling = css`
 		box-sizing: border-box;
 
 		${NeutralActionButton} {
-			&:first-of-type {
-				color: ${({ theme }) => theme.palette.secondary.main};
-				background-color: transparent;
-				border: solid 1px currentColor;
+			color: ${({ theme }) => theme.palette.secondary.main};
+			background-color: transparent;
+			border: solid 1px currentColor;
 
-				&:hover {
-					background-color: ${({ theme }) => theme.palette.secondary.main};
-					border-color: ${({ theme }) => theme.palette.secondary.main};
-					color: ${({ theme }) => theme.palette.primary.contrast};
-				}
-
-				&:active {
-					background-color: ${({ theme }) => theme.palette.secondary.dark};
-					border-color: ${({ theme }) => theme.palette.secondary.dark};
-					color: ${({ theme }) => theme.palette.primary.contrast};
-				}
+			&:hover {
+				background-color: ${({ theme }) => theme.palette.secondary.main};
+				border-color: ${({ theme }) => theme.palette.secondary.main};
+				color: ${({ theme }) => theme.palette.primary.contrast};
 			}
-			
-			&:last-of-type {
-				${labelButtonPrimaryStyles}
+
+			&:active {
+				background-color: ${({ theme }) => theme.palette.secondary.dark};
+				border-color: ${({ theme }) => theme.palette.secondary.dark};
+				color: ${({ theme }) => theme.palette.primary.contrast};
 			}
 		}
 	}
