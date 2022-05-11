@@ -271,6 +271,13 @@ export default css`
 			}
 
 			${buttonsStyling}
+			
+			${IconButton} { 
+				padding-top: 5px;
+				svg {
+					font-size: 15px;
+				} 
+			}
 		}
 		
 		${FieldsRow} {
