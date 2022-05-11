@@ -29,6 +29,7 @@ import previewComments from './overrides/preview/previewComments.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
 import measurements from './overrides/cards/measurements.overrides';
+import tree from './overrides/cards/tree.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -60,6 +61,7 @@ export const V4OverridesContainer = styled.div`
 
 	${issueShapes}
 	${measurements}
+	${tree}
 	${RevisionsSwitchContainer} {
 		display: none;
 	}
