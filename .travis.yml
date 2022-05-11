@@ -58,6 +58,7 @@ matrix:
 
       install:
         - cd ./backend
+        - echo $PWD
         - yarn install
         - cd ./../frontend
         - DETECT_CHROMEDRIVER_VERSION=true yarn install
