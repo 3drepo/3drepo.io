@@ -47,7 +47,6 @@ export const V4OverridesContainer = styled.div`
 	}
 
 	${panelsMenu}
-
 	
 	${customTable}
 	
