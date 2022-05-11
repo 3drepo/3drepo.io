@@ -29,6 +29,7 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FlexContainer, SectionTitle, ShareTextField, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -156,7 +157,7 @@ export const SettingsForm = ({
 
 	const currentUnit = watch('unit');
 
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 
 	const resetValues = () => { reset(DEFAULT_VALUES); };
 
