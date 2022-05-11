@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { cond, constant, isEqual, matches, stubTrue } from 'lodash';
 import styled, { css } from 'styled-components';
 import {
@@ -77,17 +78,44 @@ const getButtonBackgroundColor = (props) => {
 };
 
 const containerIndentation = cond([
-	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(38)],
-	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(20)],
+	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(isV5() ? 15 : 38)],
+	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(isV5() ? 15 : 20)],
 	[stubTrue, ({ level, hasFederationRoot }) => {
-		const indentation = level * 10;
-		return !hasFederationRoot ? indentation + 10 : indentation;
+		const INDENTATION_STEP = isV5() ? 8 : 10;
+		const indentation = level * INDENTATION_STEP;
+		return !hasFederationRoot ? indentation + INDENTATION_STEP : indentation;
 	}]
 ]);
 
 export const Actions = styled.div`
 	align-self: center;
 	display: none;
+`;
+
+export const StyledExpandableButton = styled.button<IExpandableButton>`
+	background-color: ${getButtonBackgroundColor};
+	border-radius: 3px;
+	color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};
+	border: none;
+	width: 18px;
+	height: 18px;
+	display: flex;
+	margin: 0;
+	padding: 0;
+	flex: none;
+	justify-content: center;
+
+	&:focus {
+		outline: none;
+	}
+
+	svg {
+		font-size: 16px;
+	}
+
+	${({ theme, hasChildren, expanded }) => isV5() && hasChildren && `
+		background-color: ${expanded ? theme.palette.secondary.main : theme.palette.base.main};
+	`}
 `;
 
 const containerBorder = css`
@@ -118,6 +146,21 @@ export const Container = styled.li<IContainer>`
 			display: block;
 		}
 	` : ''};
+
+	${({ theme: { palette }, nodeType, active, expandable }) => isV5() && css`
+		border: none;
+		background-color: transparent;
+		${(nodeType === TREE_ITEM_MODEL_TYPE) && `
+			border-top: 1px solid ${palette.base.lightest};
+		`};
+		${!expandable && css`
+			color: ${active ? palette.primary.main : palette.base.main};
+
+			${StyledExpandableButton} {
+				color: inherit;
+			}
+		`}
+	`}
 `;
 
 export const Name = styled.div<IName>`
@@ -127,28 +170,6 @@ export const Name = styled.div<IName>`
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-`;
-
-export const StyledExpandableButton = styled.button<IExpandableButton>`
-	background-color: ${getButtonBackgroundColor};
-	border-radius: 3px;
-	color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};
-	border: none;
-	width: 18px;
-	height: 18px;
-	display: flex;
-	margin: 0;
-	padding: 0;
-	flex: none;
-	justify-content: center;
-
-	&:focus {
-		outline: none;
-	}
-
-	svg {
-		font-size: 16px;
-	}
 `;
 
 export const NameWrapper = styled.div`

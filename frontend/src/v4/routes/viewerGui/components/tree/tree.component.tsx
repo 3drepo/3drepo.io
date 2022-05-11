@@ -34,6 +34,7 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import TreeNode from './components/treeNode/treeNode.container';
+import { TreeListContainer } from './tree.styles';
 
 interface IProps {
 	className: string;
@@ -121,7 +122,7 @@ export class Tree extends PureComponent<IProps, IState> {
 		const treeNodesHeight = Math.min(maxHeight, treeHeight) + 1;
 
 		return (
-			<div style={{ height: treeNodesHeight, flex: 1 }}>
+			<TreeListContainer style={{ height: treeNodesHeight, flex: 1 }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
@@ -139,7 +140,7 @@ export class Tree extends PureComponent<IProps, IState> {
 						</List>
 					)}
 				</AutoSizer>
-			</div>
+			</TreeListContainer>
 		);
 	});
 

@@ -16,6 +16,45 @@
  */
 
 import { css } from 'styled-components';
+import { TreeListContainer } from '@/v4/routes/viewerGui/components/tree/tree.styles';
+import {
+	StyledExpandableButton,
+	Name,
+	Actions,
+} from '@/v4/routes/viewerGui/components/tree/components/treeNode/treeNode.styles';
 
 export default css`
+	${TreeListContainer} {
+		font-weight: 500;
+		color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+
+		${StyledExpandableButton} {
+			&:hover {
+				cursor: pointer;
+			}
+			margin-right: 12px;
+			align-items: center;
+		}
+
+		${Name} {
+			margin-left: 0;
+		}
+
+		${Actions} {
+			& > span { 
+				padding: 4px;
+				margin: 4px;
+				
+				&:hover {
+					background-color: transparent;
+				}
+
+				svg { 
+					font-size: 19px;
+					color: inherit;
+				}
+			}
+		}
+	}
 `;
