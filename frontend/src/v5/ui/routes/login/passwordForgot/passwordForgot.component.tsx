@@ -20,12 +20,12 @@ import EmailIcon from '@assets/icons/email.svg';
 import { AuthPage } from '@components/authPage';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Gap } from '@controls/gap';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
-import { Gap } from './passwordForgot.styles';
 
 export const PasswordForgot = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
