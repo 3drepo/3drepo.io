@@ -16,9 +16,6 @@
  */
 
 import axios from 'axios';
-import { push } from 'connected-react-router';
-
-import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 
