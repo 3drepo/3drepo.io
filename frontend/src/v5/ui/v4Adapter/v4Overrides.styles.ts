@@ -29,7 +29,6 @@ import avatarPopover from './overrides/avatarPopover.overrides';
 
 import issueProperties from './overrides/cards/issues/properties.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
-import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
 
 export const V4OverridesContainer = styled.div`
@@ -60,7 +59,6 @@ export const V4OverridesContainer = styled.div`
 	
 	${issueShapes}
 	${issueProperties}
-	${measurements}
 	${tree}
 	${RevisionsSwitchContainer} {
 		display: none;

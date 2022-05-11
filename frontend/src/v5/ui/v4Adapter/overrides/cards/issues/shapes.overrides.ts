@@ -21,118 +21,11 @@ import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/c
 import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
 import { SectionHeader, List, StyledIconButton as ExpandListButton, Container as MeasurementType } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
 import { StyledTextField, MeasurementPoint, MeasurementValue } from '@/v4/routes/viewerGui/components/measurements/components/measureItem/measureItem.styles';
-import { ColorSelect, Dot, StyledIconButton as ColorPickerStyledButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { StyledMarkdownField, StyledLinkableField, ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
-export const measurementsStying = css`
-	${Measurement} {
-		margin: 0 8px;
-		height: 24px;
-	}
-
-	// expandable list header
-	${SectionHeader} {
-		background-color: inherit;
-		border-bottom: none;
-
-		${ExpandListButton} {
-			margin: 0;
-			background-color: transparent;
-		}
-
-		* {
-			font-size: 12px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-			font-weight: 500;
-
-			svg {
-				font-size: 24px;
-			}
-		}
-	}
-
-	${MeasurementType}:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-
-	// expandable list
-	${List} {
-		// icons
-		${SmallIconButtonStyled} {
-			height: 7px;
-			width: 7px;
-			padding: 4px;
-			&, &:hover {
-				background-color: ${({ theme }) => theme.palette.secondary.main};
-			}
-
-			svg {
-				font-size: 13px;
-				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-		}
-
-		svg {
-			font-size: 17px;
-		}
-
-		&:last-of-type {
-			margin-bottom: -5px;
-		}
-
-		// measurement item
-		li { 
-			background-color: inherit;
-			border: none;
-
-			button {
-				&:hover {
-					background-color: transparent;
-				}
-				
-				svg {
-					color: ${({ theme }) => theme.palette.secondary.main};
-				}
-			}
-
-			&:last-of-type {
-				padding-bottom: 10px;
-			}
-		}
-
-		${MeasurementPoint},
-		${MeasurementValue} {
-			font-size: 12px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-		}
-
-		.MuiFormControl-root {
-			width: 113%;
-			margin-left: -15px;
-		}
-
-		${StyledTextField} {
-			overflow: visible;
-
-			${StyledMarkdownField},
-			${StyledLinkableField} {
-				font-size: 12px;
-				color: ${({ theme }) => theme.palette.secondary.main};
-			}
-
-			${ActionsLine} {
-				bottom: 4px;
-
-				button { 
-					margin: 0;
-				}
-			}
-		}
-	}
-`;
-
-export const colorPickerStyling = css`
+export default css`
 	// color picker
 	${ColorSelect} {
 		width: unset;
@@ -145,7 +38,7 @@ export const colorPickerStyling = css`
 			height: 13px;
 		}
 
-		${ColorPickerStyledButton} {
+		${StyledIconButton} {
 			margin: 0;
 
 			&:hover {
@@ -153,10 +46,6 @@ export const colorPickerStyling = css`
 			}
 		}
 	}
-`;
-
-export default css`
-	${colorPickerStyling}
 
 	${Content} {
 		align-items: center;
@@ -166,10 +55,98 @@ export default css`
 			font-size: 10px;
 		}
 
-		${measurementsStying}
+		${Measurement} {
+			margin: 0 8px;
+			height: 24px;
+		}
 
-		${MeasurementType} {
-			margin: 0 -14px;
+		// expandable list header
+		${SectionHeader} {
+			background-color: inherit;
+			border-bottom: none;
+
+			${ExpandListButton} {
+				margin: 0;
+			}
+
+			* {
+				font-size: 12px;
+				color: ${({ theme }) => theme.palette.secondary.main};
+				font-weight: 500;
+
+				svg {
+					font-size: 24px;
+				}
+			}
+		}
+
+		${MeasurementType}:not(:last-of-type) {
+			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		}
+
+		// expandable list
+		${List} {
+			// icons
+			${SmallIconButtonStyled} {
+				height: 7px;
+				width: 7px;
+				padding: 4px;
+				&, &:hover {
+					background-color: ${({ theme }) => theme.palette.secondary.main};
+				}
+
+				svg {
+					font-size: 13px;
+					color: ${({ theme }) => theme.palette.primary.contrast};
+				}
+			}
+
+			svg {
+				font-size: 17px;
+			}
+
+			&:last-of-type {
+				margin-bottom: -5px;
+			}
+
+			// measurement item
+			li { 
+				background-color: inherit;
+				border: none;
+
+				&:last-of-type {
+					padding-bottom: 10px;
+				}
+			}
+
+			${MeasurementPoint},
+			${MeasurementValue} {
+				font-size: 12px;
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+
+			.MuiFormControl-root {
+				width: 113%;
+				margin-left: -15px;
+			}
+
+			${StyledTextField} {
+				overflow: visible;
+
+				${StyledMarkdownField},
+				${StyledLinkableField} {
+					font-size: 12px;
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
+
+				${ActionsLine} {
+					bottom: 4px;
+
+					button { 
+						margin: 0;
+					}
+				}
+			}
 		}
 	}
 `;

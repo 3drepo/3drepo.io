@@ -35,16 +35,6 @@ export const theme = createTheme(
 						},
 					},
 				},
-				MuiOutlinedInput: {
-					styleOverrides: {
-						root: {
-							'& input': {
-								height: 34,
-								lineHeight: 34,
-							},
-						},
-					},
-				},
 				MuiInputLabel: {
 					styleOverrides: {
 						root: {
@@ -83,7 +73,7 @@ export const theme = createTheme(
 				MuiMenuItem: {
 					styleOverrides: {
 						root: {
-							'&&': {
+							'&&&': {
 								padding: '4px 10px',
 								fontSize: '12px',
 							},
