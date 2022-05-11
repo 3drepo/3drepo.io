@@ -55,6 +55,7 @@ interface IContainersList {
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
 	onClickCreate: () => void;
+	onClickUpload: () => void;
 }
 
 export const ContainersList = ({
@@ -65,6 +66,7 @@ export const ContainersList = ({
 	onClickCreate,
 	filterQuery,
 	onFilterQueryChange,
+	onClickUpload,
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
@@ -113,6 +115,7 @@ export const ContainersList = ({
 							startIcon={<ArrowUpCircleIcon />}
 							variant="contained"
 							color="primary"
+							onClick={onClickUpload}
 						>
 							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 						</Button>

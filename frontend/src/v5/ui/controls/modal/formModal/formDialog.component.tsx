@@ -27,11 +27,13 @@ import {
 	FormDialogContent,
 	FormDialogActions,
 	RemoveWhiteCorners,
+	Subtitle,
 } from './formDialog.styles';
 
 interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
-	title?: string;
+	title: string;
+	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
 	isValid?: boolean;
@@ -44,6 +46,7 @@ export const FormModal = (props: IFormModal) => {
 	const {
 		onClickClose,
 		title,
+		subtitle,
 		confirmLabel,
 		open,
 		children,
@@ -65,15 +68,18 @@ export const FormModal = (props: IFormModal) => {
 		>
 			<Form {...formProps}>
 				<Header>
-					<Title>
-						{title}
-					</Title>
+					<div>
+						<Title>
+							{title}
+						</Title>
+						{subtitle && <Subtitle>{subtitle}</Subtitle>}
+					</div>
 					<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 						<CloseIcon />
 					</CloseButton>
 				</Header>
 				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
-					<FormDialogContent zeroMargin={zeroMargin}>
+					<FormDialogContent $zeromargin={zeroMargin}>
 						{children}
 					</FormDialogContent>
 				</ScrollArea>

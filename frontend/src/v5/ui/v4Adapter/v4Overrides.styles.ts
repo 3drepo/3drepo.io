@@ -17,10 +17,11 @@
 
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
+import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
-import properties from './overrides/properties.overrides';
+import properties from './overrides/cards/issues/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
@@ -34,12 +35,16 @@ export const V4OverridesContainer = styled.div`
 	flex-direction: column;
 	height: 100%;
 
+	${customTable}
+
 	${avatarPopover}
 
 	${HighlighterMark} {
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
+
+	${panelsMenu}
 
 	${properties}
 
@@ -55,4 +60,7 @@ export const V4OverridesContainer = styled.div`
 
 	${issueShapes}
 	${measurements}
+	${RevisionsSwitchContainer} {
+		display: none;
+	}
 `;

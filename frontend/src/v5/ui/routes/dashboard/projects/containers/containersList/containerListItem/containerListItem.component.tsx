@@ -58,7 +58,7 @@ export const ContainerListItem = ({
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
-	const { teamspace } = useParams<DashboardParams>();
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
@@ -88,7 +88,7 @@ export const ContainerListItem = ({
 						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 					}
 				>
-					<Link to={viewerRoute(teamspace, container)}>
+					<Link to={viewerRoute(teamspace, project, container)}>
 						<Highlight search={filterQuery}>
 							{container.name}
 						</Highlight>

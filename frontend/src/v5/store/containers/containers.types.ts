@@ -14,6 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { formatMessage } from '@/v5/services/intl';
+
 export enum UploadStatuses {
 	OK = 'ok',
 	FAILED = 'failed',
@@ -25,6 +28,80 @@ export enum UploadStatuses {
 	QUEUED_FOR_UNITY = 'Queued for Unity',
 }
 
+export const CONTAINER_TYPES = [
+	{
+		value: 'Uncategorised',
+		name: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }),
+	},
+	{
+		value: 'Architectural',
+		name: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }),
+	},
+	{
+		value: 'Existing',
+		name: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }),
+	},
+	{
+		value: 'GIS',
+		name: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }),
+	},
+	{
+		value: 'Infrastructure',
+		name: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }),
+	},
+	{
+		value: 'Interior',
+		name: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }),
+	},
+	{
+		value: 'Landscape',
+		name: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }),
+	},
+	{
+		value: 'MEP',
+		name: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }),
+	},
+	{
+		value: 'Mechanical',
+		name: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }),
+	},
+	{
+		value: 'Structural',
+		name: formatMessage({ id: 'containers.type.structural', defaultMessage: 'Structural' }),
+	},
+	{
+		value: 'Survey',
+		name: formatMessage({ id: 'containers.type.survey', defaultMessage: 'Survey' }),
+	},
+	{
+		value: 'Other',
+		name: formatMessage({ id: 'containers.type.other', defaultMessage: 'Other' }),
+	},
+];
+
+export const CONTAINER_UNITS = [
+	{
+		value: 'mm',
+		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
+	},
+	{
+		value: 'cm',
+		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
+	},
+	{
+		value: 'dm',
+		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
+	},
+	{
+		value: 'm',
+		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
+	},
+	{
+		value: 'ft',
+		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
+	},
+];
+
 export interface IContainer {
 	_id: string;
 	name: string;
@@ -34,7 +111,8 @@ export interface IContainer {
 	type: string;
 	code: string;
 	status: UploadStatuses;
-	unit?: string;
+	unit: string;
+	desc?: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -73,4 +151,35 @@ export type ContainerStats = {
 	status: UploadStatuses;
 	unit: string;
 	code: string;
+};
+
+export type DestinationOption = {
+	containerId: string;
+	containerName: string;
+	containerUnit?: string;
+	containerType?: string;
+	containerDesc?: string;
+	containerCode?: string;
+	latestRevision: string;
+};
+
+export type UploadItemFields = {
+	uploadId: string;
+	file: File;
+	progress: number;
+	extension: string;
+	containerId: string;
+	containerName: string;
+	containerUnit: string;
+	containerType: string;
+	containerDesc?: string;
+	containerCode?: string;
+	revisionTag: string;
+	revisionDesc?: string;
+	importAnimations?: boolean;
+	timezone?: string;
+};
+
+export type UploadFieldArray = {
+	uploads: UploadItemFields[];
 };
