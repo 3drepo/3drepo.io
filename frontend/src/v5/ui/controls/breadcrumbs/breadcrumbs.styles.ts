@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Button, Breadcrumbs } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { TextOverflow } from '@controls/textOverflow';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
 export const Container = styled(Breadcrumbs)`
 	&& {
@@ -55,6 +56,9 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 		max-width: 100%;
 		padding-right: 9px;
 		margin-right: 0;
+		${({ secondary }) => secondary && css`
+		font-weight: ${FONT_WEIGHT.SLIM}
+		`};
 	}
 `;
 

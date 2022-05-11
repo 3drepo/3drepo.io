@@ -57,11 +57,10 @@ queue.purgeQueues = async () => {
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = async (userCredentials, tsList = [], customData = {}) => {
+db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
+	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);

@@ -40,7 +40,6 @@ export const Root = () => {
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
-
 	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();

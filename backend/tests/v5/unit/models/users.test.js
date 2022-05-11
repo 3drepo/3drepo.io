@@ -19,6 +19,7 @@ const { src } = require('../../helper/path');
 
 const _ = require('lodash');
 
+jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
@@ -49,6 +50,7 @@ const testGetAccessibleTeamspaces = () => {
 				roles: [
 					{ db: 'ts1', role: 'a' },
 					{ db: 'ts2', role: 'b' },
+					{ db: 'admin', role: generateRandomString() },
 				],
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
