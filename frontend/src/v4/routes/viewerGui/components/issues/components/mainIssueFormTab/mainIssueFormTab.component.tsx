@@ -33,6 +33,7 @@ import {
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { Content, DescriptionImage } from '../issueDetails/issueDetails.styles';
 import { IssueSchema } from '../issueDetails/issueDetailsForm.component';
+import { DateFieldContainer } from './mainIssueFormTab.styles';
 
 interface IProps {
 	active: boolean;
@@ -154,12 +155,14 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 				<StyledFormControl>
 					<InputLabel shrink>Due date</InputLabel>
 					<Field name="due_date" render={({ field }) => (
-						<DateField
-							{...field}
-							inputFormat={NAMED_MONTH_DATE_FORMAT}
-							disabled={!canEditBasicProperty}
-							placeholder="Choose a due date"
-						/>
+						<DateFieldContainer>
+							<DateField
+								{...field}
+								inputFormat={NAMED_MONTH_DATE_FORMAT}
+								disabled={!canEditBasicProperty}
+								placeholder="Choose a due date"
+							/>
+						</DateFieldContainer>
 					)} />
 				</StyledFormControl>
 			</FieldsRow>

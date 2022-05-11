@@ -17,12 +17,17 @@
 
 const Crypto = require('crypto');
 const amqp = require('amqplib');
+const http = require('http');
 
 const { src, srcV4 } = require('./path');
 
 const { createApp } = require(`${srcV4}/services/api`);
+const { io: ioClient } = require('socket.io-client');
+
+const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const config = require(`${src}/utils/config`);
+const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -30,7 +35,7 @@ const ExternalServices = require('../../../src/v5/handler/externalServices');
 
 const db = {};
 const queue = {};
-const ServiceHelper = { db, queue };
+const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
 	try {
@@ -52,11 +57,10 @@ queue.purgeQueues = async () => {
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = async (userCredentials, tsList = [], customData = {}) => {
+db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
+	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
@@ -171,6 +175,37 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
+ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
+	id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	permissions: projectAdmins.map(({ user }) => ({ user, permissions: ['admin_project'] })),
+});
+
+ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collaborators, properties = {} } = {}) => {
+	const permissions = [];
+	if (viewers?.length) {
+		permissions.push(...viewers.map((user) => ({ user, permission: 'viewer' })));
+	}
+
+	if (commenters?.length) {
+		permissions.push(...commenters.map((user) => ({ user, permission: 'commenter' })));
+	}
+
+	if (collaborators?.length) {
+		permissions.push(...collaborators.map((user) => ({ user, permission: 'collaborator' })));
+	}
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		permissions,
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			...(isFederation ? { federate: true } : {}),
+			...properties },
+	};
+};
+
 ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 	const _id = ServiceHelper.generateUUIDString();
 	const entry = {
@@ -263,6 +298,63 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 });
 
 ServiceHelper.app = () => createApp().listen(8080);
+
+ServiceHelper.chatApp = () => {
+	const server = http.createServer();
+	const chatConfig = config.servers.find(({ service }) => service === 'chat');
+	server.listen(chatConfig.port, config.hostname);
+
+	// doing a local import as this includes the session service which doesn't clean itself up properly
+	// eslint-disable-next-line global-require
+	const ChatService = require(`${src}/services/chat`);
+	return ChatService.createApp(server);
+};
+
+ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) => {
+	const res = await agent.post('/v5/login')
+		.set(headers)
+		.send({ user, password })
+		.expect(templates.ok.status);
+	const [, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
+	return cookie;
+};
+
+ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject) => {
+	const { port } = config.servers.find(({ service }) => service === 'chat');
+	const socket = ioClient(`http://${config.host}:${port}`,
+		{
+			path: '/chat',
+			transports: ['websocket'],
+			reconnection: true,
+			reconnectionDelay: 500,
+			...(session ? { extraHeaders: { Cookie: `connect.sid=${session}` } } : {}),
+		});
+	socket.on('connect', () => resolve(socket));
+	socket.on('connect_error', reject);
+});
+
+ServiceHelper.socket.loginAndGetSocket = async (agent, user, password) => {
+	const cookie = await ServiceHelper.loginAndGetCookie(agent, user, password);
+	return ServiceHelper.socket.connectToSocket(cookie);
+};
+
+ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) => {
+	socket.on(EVENTS.MESSAGE, (msg) => {
+		expect(msg).toEqual(expect.objectContaining(
+			{ event: EVENTS.SUCCESS, data: { action: ACTIONS.JOIN, data } },
+		));
+		socket.off(EVENTS.MESSAGE);
+		socket.off(EVENTS.ERROR);
+		resolve();
+	});
+
+	socket.on(EVENTS.ERROR, () => {
+		socket.off(EVENTS.MESSAGE);
+		socket.off(EVENTS.ERROR);
+		reject();
+	});
+	socket.emit('join', data);
+});
 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();

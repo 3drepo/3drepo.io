@@ -35,6 +35,10 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { Link } from 'react-router-dom';
+import { useParams } from 'react-router';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { viewerRoute } from '@/v5/services/routing/routing';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
 
@@ -61,6 +65,8 @@ export const ContainerListItem = ({
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
+	const { teamspace, project } = useParams<DashboardParams>();
+
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
@@ -90,9 +96,11 @@ export const ContainerListItem = ({
 						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 					}
 				>
-					<Highlight search={filterQuery}>
-						{container.name}
-					</Highlight>
+					<Link to={viewerRoute(teamspace, project, container)}>
+						<Highlight search={filterQuery}>
+							{container.name}
+						</Highlight>
+					</Link>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(container._id)}

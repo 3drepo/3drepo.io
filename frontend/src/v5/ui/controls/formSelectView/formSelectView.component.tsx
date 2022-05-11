@@ -21,6 +21,7 @@ import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Thumbnail, ThumbnailPlaceholder, FormSelect, ViewLabel, MenuItemView } from './formSelectView.styles';
 
 const getThumbnailBasicPath = (
@@ -43,7 +44,7 @@ type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
 };
 
 export const FormSelectView = ({ views, containerOrFederationId, isContainer, ...formProps }: FormSelectViewProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 	const getThumbnail = getThumbnailBasicPath(teamspace, project, containerOrFederationId, isContainer);
 
 	return (

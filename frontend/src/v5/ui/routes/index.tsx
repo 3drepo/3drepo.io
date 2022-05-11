@@ -28,7 +28,7 @@ import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authAct
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
-import { Dashboard } from './dashboard';
+import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
@@ -38,7 +38,6 @@ export const Root = () => {
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
-
 	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
@@ -55,7 +54,7 @@ export const Root = () => {
 				<StylesProvider injectFirst>
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
-							<Dashboard />
+							<MainRoute />
 						</V4Adapter>
 					</IntlProvider>
 				</StylesProvider>

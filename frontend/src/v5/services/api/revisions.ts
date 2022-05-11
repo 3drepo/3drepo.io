@@ -14,11 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import api from './default';
+import { AxiosResponse } from 'axios';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import api, { generateV5ApiUrl } from './default';
 
 export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid=true' : ''}`);
 
 export const setRevisionVoidStatus = (teamspace: string, projectId: string, containerId: string, revision: string, isVoid = true) => api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}`, {
 	void: isVoid,
 });
+
+export const createRevision = (
+	teamspace,
+	projectId,
+	containerId,
+	onProgress,
+	body,
+): Promise<AxiosResponse<void>> => {
+	const config = {
+		onUploadProgress: (progressEvent) => onProgress(
+			Math.round((progressEvent.loaded * 100) / progressEvent.total),
+		),
+	};
+	return api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`, body, config);
+};
+
+export const getRevisionFileUrl = (teamspace: string, projectId: string, containerId: string, revision: string) => (
+	generateV5ApiUrl(
+		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}/files`,
+		clientConfigService.GET_API,
+	)
+);

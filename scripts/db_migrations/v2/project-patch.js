@@ -8,7 +8,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 		if(project.permissions){
 			project.permissions.forEach(function(permission){
 				if(permission.permissions.length){
-					db.getSiblingDB('admin').system.users.update({ user: permission.user}, { '$addToSet': {
+					db.getSiblingDB('admin').system.users.updateOne({ user: permission.user}, { '$addToSet': {
 						'customData.projects': {
 							account: database.name,
 							project: project._id,

@@ -34,7 +34,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 				models: orphanIds
 			});
 		} else {
-			myDb.getCollection('projects').update({ name: 'Default' }, { '$addToSet' : { models: { '$each' : orphanIds }}});
+			myDb.getCollection('projects').updateMany({ name: 'Default' }, { '$addToSet' : { models: { '$each' : orphanIds }}});
 
 		}
 	}
@@ -55,7 +55,7 @@ db.getSiblingDB('admin').getCollection('system.users').forEach(function(user){
 		}
 	}
 
-	db.getSiblingDB('admin').getCollection('system.users').update({  _id: user._id}, {  '$set': {'customData.models': models}});
+	db.getSiblingDB('admin').getCollection('system.users').updateOne({  _id: user._id}, {  '$set': {'customData.models': models}});
 
 });
 

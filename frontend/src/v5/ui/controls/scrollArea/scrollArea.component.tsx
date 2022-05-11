@@ -21,10 +21,12 @@ import { ScrollbarWrapper } from './scrollArea.styles';
 type IScrollArea = ScrollbarProps & {
 	variant?: 'base' | 'secondary';
 	as?: React.ElementType;
+	hideHorizontal?: boolean;
 };
 
-export const ScrollArea = ({ variant = 'base', children, ...props }: IScrollArea) => (
+export const ScrollArea = ({ variant = 'base', hideHorizontal = true, children, ...props }: IScrollArea) => (
 	<ScrollbarWrapper
+		$hidehorizontal={hideHorizontal}
 		variant={variant}
 		{...props}
 	>

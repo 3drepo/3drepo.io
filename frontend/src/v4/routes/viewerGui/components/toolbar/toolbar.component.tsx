@@ -308,8 +308,9 @@ export class Toolbar extends PureComponent<IProps, IState> {
 					active={button.active}
 					disabled={button.disabled}
 					placement="top"
-				/>
-				{this.renderSubmenuDot(subMenu.length)}
+				>
+					{this.renderSubmenuDot(subMenu.length)}
+				</ToolbarButton>
 				{this.renderSubmenu(subMenu, button.label)}
 			</ButtonWrapper>
 		))(show));
