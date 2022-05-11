@@ -22,7 +22,7 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Typography } from '@controls/typography';
 import { Display } from '@/v5/ui/themes/media';
 
-export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Display }>`
+export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Display; hidden: boolean; }>`
 	align-items: center;
 	display: flex;
 	
@@ -31,6 +31,8 @@ export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Di
 			display: none;
 		}
 	`};
+
+	${({ hidden }) => hidden && 'display: none;'}
 `;
 
 export const Label = styled(Typography).attrs({

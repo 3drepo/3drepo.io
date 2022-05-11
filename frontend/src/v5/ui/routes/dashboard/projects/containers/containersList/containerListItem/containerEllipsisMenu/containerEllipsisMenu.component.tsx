@@ -49,7 +49,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-				to={viewerRoute(teamspace, container)}
+				to={viewerRoute(teamspace, project, container)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

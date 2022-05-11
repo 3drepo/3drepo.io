@@ -28,12 +28,16 @@ export const FormSelect = ({
 	label,
 	children,
 	control,
+	disabled,
+	hidden,
 	...otherProps
 }: FormSelectProps) => (
 	<FormControl>
 		<InputLabel
 			id={`${name}-label`}
 			required={required}
+			disabled={disabled}
+			hidden={hidden}
 		>
 			{label}
 		</InputLabel>
@@ -47,6 +51,8 @@ export const FormSelect = ({
 					labelId={`${name}-label`}
 					id={name}
 					label={label}
+					disabled={disabled}
+					hidden={hidden}
 					{...otherProps}
 				>
 					{children}
