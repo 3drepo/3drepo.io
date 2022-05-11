@@ -16,15 +16,15 @@
  */
 
 import { css } from 'styled-components';
-import { TreeListContainer } from '@/v4/routes/viewerGui/components/tree/tree.styles';
 import {
 	StyledExpandableButton,
 	Name,
 	Actions,
 } from '@/v4/routes/viewerGui/components/tree/components/treeNode/treeNode.styles';
+import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export default css`
-	${TreeListContainer} {
+	#tree-card {
 		font-weight: 500;
 		color: ${({ theme }) => theme.palette.secondary.main};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -55,6 +55,11 @@ export default css`
 					color: inherit;
 				}
 			}
+		}
+
+		${EmptyStateInfo} {
+			margin: 12px 14px;
+			width: unset; 
 		}
 	}
 `;
