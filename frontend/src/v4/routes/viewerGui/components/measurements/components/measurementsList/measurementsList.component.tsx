@@ -19,6 +19,7 @@ import { useState } from 'react';
 
 import MoreIcon from '@mui/icons-material/ChevronRight';
 import LessIcon from '@mui/icons-material/ExpandMore';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measurements/measurements.constants';
 import { MeasureItem } from '../measureItem/';
@@ -32,6 +33,8 @@ import {
 	Total,
 	Units,
 	Container,
+	ExpandIcon,
+	CollapseIcon,
 } from './measurementsList.styles';
 
 interface IProps {
@@ -64,7 +67,10 @@ export const MeasurementsList = ({
 		<Container>
 			<SectionHeader>
 				<StyledIconButton onClick={handleOnClick}>
-					{expanded ? <LessIcon /> : <MoreIcon />}
+					{isV5()
+						? (expanded ? <CollapseIcon /> : <ExpandIcon />)
+						: (expanded ? <LessIcon /> : <MoreIcon />)
+					}
 				</StyledIconButton>
 
 				<Title>{MEASURE_TYPE_NAME[measureType]}</Title>

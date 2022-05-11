@@ -21,7 +21,7 @@ import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/c
 import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
 import { SectionHeader, List, StyledIconButton as ExpandListButton, Container as MeasurementType } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
 import { StyledTextField, MeasurementPoint, MeasurementValue } from '@/v4/routes/viewerGui/components/measurements/components/measureItem/measureItem.styles';
-import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { ColorSelect, Dot, StyledIconButton as ColorPickerStyledButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { StyledMarkdownField, StyledLinkableField, ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
@@ -38,6 +38,7 @@ export const measurementsStying = css`
 
 		${ExpandListButton} {
 			margin: 0;
+			background-color: transparent;
 		}
 
 		* {
@@ -144,7 +145,7 @@ export const colorPickerStyling = css`
 			height: 13px;
 		}
 
-		${StyledIconButton} {
+		${ColorPickerStyledButton} {
 			margin: 0;
 
 			&:hover {

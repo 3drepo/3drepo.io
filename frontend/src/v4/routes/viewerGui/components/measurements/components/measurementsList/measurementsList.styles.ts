@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 
 import IconButton from '@mui/material/IconButton';
+import ExpandIconBase from '@mui/icons-material/ExpandMore';
 
 import { COLOR } from '../../../../../../styles';
 import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
@@ -83,4 +84,10 @@ export const Units = styled.div<{ sum: any }>`
 	text-align: right;
 	padding-right: 10px;
 	${({ sum }) => sum && sumUnitsStyle};
+`;
+
+export const ExpandIcon = ExpandIconBase;
+
+export const CollapseIcon = styled(ExpandIconBase)`
+	transform: rotate(180deg);
 `;
