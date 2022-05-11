@@ -20,7 +20,7 @@ import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highli
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
-import properties from './overrides/properties.overrides';
+import issueProperties from './overrides/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
@@ -34,6 +34,8 @@ export const V4OverridesContainer = styled.div`
 	flex-direction: column;
 	height: 100%;
 
+	${customTable}
+
 	${avatarPopover}
 
 	${HighlighterMark} {
@@ -41,18 +43,19 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	${properties}
-
+	${panelsMenu}
+	
 	${customTable}
-
+	
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
-
+	
 	${previewItem}
 	${previewDetails}
 	${previewComments}
-
+	
 	${issueShapes}
+	${issueProperties}
 	${views}
 `;
