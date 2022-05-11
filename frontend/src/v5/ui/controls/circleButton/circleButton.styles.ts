@@ -42,10 +42,6 @@ const mainFabStyles = css<{ disabled?: boolean }>`
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
 
-		path {
-			stroke: ${({ theme }) => theme.palette.secondary.light};
-		}
-
 		${({ disabled }) => disabled && css`
 			&& {
 				path {

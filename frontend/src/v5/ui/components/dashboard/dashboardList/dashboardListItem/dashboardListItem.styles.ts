@@ -32,6 +32,10 @@ export const Container = styled.li<{ selected?: boolean }>`
 
 		${DashboardListItemRowStyles.Container} {
 			${({ selected }) => selected && css`
+				&:only-child {
+					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: 5px;
+				}
 				& + * {
 					border-radius: 0 0 5px 5px;
 				}
