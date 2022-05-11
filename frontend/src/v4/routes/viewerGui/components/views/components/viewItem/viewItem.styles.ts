@@ -24,6 +24,8 @@ import ShareIcon from '@mui/icons-material/Share';
 
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
+import { Button } from '@controls/button';
 
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
@@ -42,6 +44,10 @@ export const ViewpointItem = styled(MenuItem)<{ active?: boolean }>`
 		background-color: ${({ active }) => active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		box-sizing: border-box;
+
+		${({ active }) => isV5() && `
+			padding: ${active ? '12px 15px' : '12px 40px 12px 15px'};
+		`}
 	}
 ` as any;
 
@@ -164,5 +170,24 @@ export const HamburgerIconButton = styled(IconButton)`
 
 	&&:hover {
 		background-color: ${COLOR.TRANSPARENT}
+	}
+`;
+
+export const SaveButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+})`
+	height: 23px;
+	font-size: 10px;
+	padding: 5px 7px;
+	min-width: 44px;
+	left: 17px;
+
+	&:hover { 
+		background-color: ${({ theme }) => theme.palette.secondary.main} !important;
+	}
+
+	&:active {
+		background-color: ${({ theme }) => theme.palette.secondary.dark} !important;
 	}
 `;
