@@ -22,7 +22,9 @@ declare global {
 		Module: any;
 		zxcvbn: any;
 		io: any;
-		ClientConfig: any;
+		ClientConfig: {
+			acceptedFormats: string[],
+		};
 		TDR: any;
 		UnityUtil: any;
 		Viewer: any;
