@@ -17,8 +17,8 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { CentredContainer } from '@controls/centredContainer';
 import { Typography } from '@controls/typography';
-import { Link } from 'react-router-dom';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
 import styled from 'styled-components';
@@ -75,10 +75,8 @@ export const AuthParagraph = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const CenteredLink = styled(Link)`
-	display: flex;
+export const ReturnLinkContainer = styled(CentredContainer)`
 	margin: 15px auto 12px;
-	justify-content: center;
 	color: ${({ theme }) => theme.palette.primary.main};
 	text-decoration: none;
 	&:hover, &:visited {

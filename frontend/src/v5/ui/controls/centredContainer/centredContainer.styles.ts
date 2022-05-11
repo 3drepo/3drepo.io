@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
-import { LOGIN_PATH } from '../../routes.constants';
-import { ReturnLinkContainer } from './components.styles';
+import styled from 'styled-components';
 
-export const ReturnLink = () => (
-	<ReturnLinkContainer>
-		<Link to={LOGIN_PATH}>
-			<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
-		</Link>
-	</ReturnLinkContainer>
-);
+export const CentredContainer = styled.div`
+	width: fit-content;
+	margin: inherit auto;
+`;
