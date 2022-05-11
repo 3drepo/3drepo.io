@@ -193,14 +193,6 @@ export const Content = styled.div<{ active: boolean }>`
 	}
 `;
 
-export const ExpandAction = styled.span<{ top?: boolean }>`
-	font-size: 11px;
-	cursor: pointer;
-	display: block;
-	text-align: center;
-	margin-top: ${({ top }) => top ? '5px' : 0};
-`;
-
 export const SuggestionButtonWrapper = styled.div`
 	position: absolute;
 	z-index: 1;

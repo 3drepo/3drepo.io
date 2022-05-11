@@ -30,34 +30,35 @@ interface V5RedirectToTeamspaceDialogProps {
 	handleResolve: () => void;
 }
 
-export const V5RedirectToTeamspaceDialog = (props: V5RedirectToTeamspaceDialogProps) => {
-	const { content, message, status, handleResolve } = props;
-
-	return (
-		<V5ModalContainer>
-			<WarningIcon />
-			<CloseButton type="submit" onClick={handleResolve}>
-				<CloseIcon />
-			</CloseButton>
-			<DialogTitle>{content}</DialogTitle>
-			<DialogContent>
-				<DialogContentText>{message}</DialogContentText>
-				{!!status && <Status>{status}</Status>}
-			</DialogContent>
-			<Actions bottomMargin>
-				<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
-					<FormattedMessage
-						id="backToTeamspaceDialog.action.ok"
-						defaultMessage="Back to teamspace"
-					/>
-				</Button>
-				<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
-					<FormattedMessage
-						id="backToTeamspaceDialog.action.contactSupport"
-						defaultMessage="Contact support"
-					/>
-				</Button>
-			</Actions>
-		</V5ModalContainer>
-	);
-};
+export const V5RedirectToTeamspaceDialog = ({
+	content,
+	message,
+	status,
+	handleResolve,
+}: V5RedirectToTeamspaceDialogProps) => (
+	<V5ModalContainer>
+		<WarningIcon />
+		<CloseButton type="submit" onClick={handleResolve}>
+			<CloseIcon />
+		</CloseButton>
+		<DialogTitle>{content}</DialogTitle>
+		<DialogContent>
+			<DialogContentText>{message}</DialogContentText>
+			{!!status && <Status>{status}</Status>}
+		</DialogContent>
+		<Actions bottomMargin>
+			<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
+				<FormattedMessage
+					id="backToTeamspaceDialog.action.ok"
+					defaultMessage="Back to teamspace"
+				/>
+			</Button>
+			<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
+				<FormattedMessage
+					id="backToTeamspaceDialog.action.contactSupport"
+					defaultMessage="Contact support"
+				/>
+			</Button>
+		</Actions>
+	</V5ModalContainer>
+);

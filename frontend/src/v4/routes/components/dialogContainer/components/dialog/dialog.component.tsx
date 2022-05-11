@@ -136,7 +136,7 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 		}
 	};
 
-	const renderV4ThemeProviders = ({ children }) => (
+	const renderV5ThemeProviders = ({ children }) => (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
 				{children}
@@ -145,7 +145,7 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 	);
 
 	return (
-		<ConditionalV5Wrapper v5Wrapper={renderV4ThemeProviders}>
+		<ConditionalV5Wrapper v5Wrapper={renderV5ThemeProviders}>
 			<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
 				<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
 				{renderContent(content && !DialogTemplate)}
