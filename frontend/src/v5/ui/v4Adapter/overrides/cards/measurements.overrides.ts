@@ -23,6 +23,7 @@ export default css`
 	${colorPickerStyling}
 
 	${MeasurementsContainer} {
+		padding: 0 14px;
 		${measurementsStying}
 	}
 `;
