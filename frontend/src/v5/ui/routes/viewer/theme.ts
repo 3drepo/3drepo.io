@@ -183,6 +183,29 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiDialog: {
+					styleOverrides: {
+						container: {
+							'.MuiPaper-root .MuiDialogActions-root .MuiButton-root': {
+								backgroundColor: COLOR.PRIMARY_MAIN,
+								color: COLOR.PRIMARY_MAIN_CONTRAST,
+								textDecoration: 'none',
+								':hover': {
+									backgroundColor: COLOR.PRIMARY_DARK,
+								},
+								':first-child': {
+									':hover': {
+										backgroundColor: COLOR.SECONDARY_MAIN,
+										color: COLOR.PRIMARY_MAIN_CONTRAST,
+									},
+									backgroundColor: 'transparent',
+									color: COLOR.SECONDARY_MAIN,
+									border: `1px solid ${COLOR.SECONDARY_MAIN}`,
+								},
+							},
+						},
+					},
+				},
 				MuiDialogContent: {
 					styleOverrides: {
 						root: {
