@@ -210,7 +210,7 @@ export class ViewItem extends PureComponent<IProps, any> {
 					<IconsGroup disabled={this.state.isDeletePending}>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
 						{isV5() ? (
-							<SaveButton> Save </SaveButton>
+							<SaveButton type="submit" disableRipple id="views-card-save-button"> Save </SaveButton>
 						) : (
 							<SaveIconButton type="submit" disableRipple id="views-card-save-button">
 								<StyledSaveIcon />

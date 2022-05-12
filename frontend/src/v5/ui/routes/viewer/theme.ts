@@ -26,6 +26,15 @@ export const theme = createTheme(
 		_.cloneDeep(oldTheme),
 		{
 			components: {
+				MuiOutlinedInput: {
+					styleOverrides: {
+						root: {
+							'& input': {
+								padding: '0px 8px',
+							},
+						},
+					},
+				},
 				MuiInput: {
 					styleOverrides: {
 						formControl: {

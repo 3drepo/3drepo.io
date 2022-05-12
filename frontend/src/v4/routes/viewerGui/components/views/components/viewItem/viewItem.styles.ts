@@ -183,7 +183,7 @@ export const SaveButton = styled(Button).attrs({
 	font-size: 10px;
 	padding: 5px 7px;
 
-	&:hover { 
+	&:hover {
 		background-color: ${({ theme }) => theme.palette.secondary.main} !important;
 		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
