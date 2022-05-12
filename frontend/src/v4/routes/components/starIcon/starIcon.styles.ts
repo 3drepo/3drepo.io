@@ -28,8 +28,9 @@ const starColourV4 = (active) => css`
 	color: ${active ? COLOR.SUNGLOW : COLOR.BLACK_20};
 `;
 
+// TODO - fix after new palette is released
 const starColourV5 = (active) => css`
-	color: ${active ? '#F5CB34' : '#516079'}; // TODO - fix after new palette is released
+	color: ${active ? '#F5CB34' : '#516079'};
 `;
 
 export const IconWrapper = styled(Icon)<IIconWrapper>`
