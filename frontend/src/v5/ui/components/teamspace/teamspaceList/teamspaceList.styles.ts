@@ -24,9 +24,7 @@ export const Container = styled.div`
 export const CardList = styled.ul`
 	flex-direction: row;
 	justify-content: center;
-	width: 798px;
 	padding: 0;
-	max-width: 70vw;
 	display: flex;
 	flex-wrap: wrap;
 `;

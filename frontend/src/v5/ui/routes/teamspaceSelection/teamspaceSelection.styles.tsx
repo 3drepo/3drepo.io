@@ -25,18 +25,15 @@ export const ScrollBar = styled(ScrollArea).attrs({
 })`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
 	border-top: 1px solid rgb(255 255 255 / 10%);
-	overflow-y: auto;
-	flex-flow: column;
-	height: 100%;
-	display: flex;
-	align-items: center;
 `;
 
-export const VerticalCentre = styled.div`
-	display: flex;
-	align-items: center;
-	flex-flow: column;
+export const HomeContent = styled.div`
+	padding: 60px;
 	height: 100%;
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
 `;
 
 export const WelcomeMessage = styled(Typography).attrs({
@@ -44,9 +41,11 @@ export const WelcomeMessage = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	text-align: center;
-	margin: auto auto 40px;
+	margin-bottom: 40px;
+	margin-top: auto;
 `;
 
 export const TeamspaceCards = styled(TeamspaceList)`
+	width: clamp(40px, 85vw, 798px);
 	margin-bottom: auto;
 `;
