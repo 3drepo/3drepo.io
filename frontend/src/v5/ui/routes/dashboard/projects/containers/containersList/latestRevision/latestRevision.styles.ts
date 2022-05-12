@@ -20,6 +20,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
 	display: flex;
 	padding-right: 10px;
+	align-items: center;
 `;
 
 export const Label = styled.span`

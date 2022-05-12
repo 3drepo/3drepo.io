@@ -24,6 +24,7 @@ import {
 	FiltersButton,
 	PlaceholderText,
 } from '@/v4/routes/components/filterPanel/filterPanel.styles';
+import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export default css`
 	${LeftPanels} .MuiPaper-root {
@@ -34,8 +35,9 @@ export default css`
 		color: ${({ theme }) => theme.palette.secondary.main};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		${({ theme }) => theme.typography.h3};
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.light};
+		border-bottom: 1px solid #E0E5F0; // TODO - fix after new palette is released
 		height: 48px;
+		font-size: 17px;
 
 		.panelTitle { 
 			margin: 0 0 0 -16px;
@@ -43,20 +45,34 @@ export default css`
 		}
 
 		// back arrow icon
-		${TitleIcon} .MuiIconButton-root {
-			background: transparent;
-			color: ${({ theme }) => theme.palette.primary.main};
-			border-radius: 0;
+		${TitleIcon} {
+			width: 30px;
+			padding-left: 8px;
+
+			svg {
+				font-size: 1.4rem;
+			}
+			
+			.MuiIconButton-root {
+				background: transparent;
+				color: ${({ theme }) => theme.palette.primary.main};
+				border-radius: 0;
+				margin: 0;
+			}
 		}
 
 		// action icons
 		.MuiIconButton-root {
-			background-color: #edf0f8; // TODO - fix when new palette is released
+			background-color: #edf0f8; // TODO - fix after new palette is released
 			color: currentColor;
 			border-radius: 50%;
 			height: 32px;
 			width: 32px;
 			margin: 0 0 0 5px;
+
+			svg {
+				font-size: 1.2rem;
+			}
 		}
 	}
 	
@@ -103,6 +119,11 @@ export default css`
 		${({ theme }) => theme.typography.caption};
 		color: ${({ theme }) => theme.palette.base.light} !important;
 		box-sizing: border-box;
+		border-color: #E0E5F0; // TODO - fix after new palette is released
+
+		${StyledIconButton} {
+			height: 26px;
+		}
 
 		button {
 			background-color: ${({ theme }) => theme.palette.primary.main};

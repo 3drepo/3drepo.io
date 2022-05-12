@@ -29,23 +29,23 @@ const Elastic = {};
 
 const loginRecordIndex = "io-teamspace-loginrecord";
 const loginRecordMapping = {
-	"username" : { "type": "text" },
-	"loginTime" : {
+	"Username" : { "type": "text" },
+	"LoginTime" : {
 		"type": "date",
 		"format": "ccc MMM dd uuuu HH:mm:ss zZ (zzzz)||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
 	},
-	"ipAddr" : { "type": "ip" },
-	"location.country" : { "type": "text" },
-	"location.city" : { "type": "text" },
-	"referrer" : { "type": "text" },
-	"application.name": { "type": "text" },
-	"application.version": { "type": "text" },
-	"application.type": { "type": "text" },
-	"engine.name": { "type": "text" },
-	"engine.version": { "type": "text" },
-	"os.name": { "type": "text" },
-	"os.version": { "type": "text" },
-	"device": { "type": "text" },
+	"IpAddress" : { "type": "ip" },
+	"Location.Country" : { "type": "text" },
+	"Location.City" : { "type": "text" },
+	"Referrer" : { "type": "text" },
+	"Application.Name": { "type": "text" },
+	"Application.Version": { "type": "text" },
+	"Application.Type": { "type": "text" },
+	"Engine.Name": { "type": "text" },
+	"Engine.Version": { "type": "text" },
+	"OS.Name": { "type": "text" },
+	"OS.Version": { "type": "text" },
+	"Device": { "type": "text" },
 	"licenseKey": { "type": "keyword" }
 };
 

@@ -52,6 +52,7 @@ export default css`
 			display: flex;
 			align-items: start;
 			min-height: 84px;
+			padding: 0 16px;
 
 			${Grid} {
 

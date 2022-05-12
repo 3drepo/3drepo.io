@@ -37,6 +37,8 @@ export const MenuItem: typeof Link = styled(MenuItemComponent).attrs({
 		padding-right: 14px;
 		justify-content: space-between;
 
+		${({ theme }) => theme.typography.body1}
+
 		${({ disabled }) => disabled && css`
 			&& {
 				pointer-events: none;

@@ -78,7 +78,7 @@ const testGetTeamspaceList = () => {
 			const res = await agent.get('/v5/teamspaces/').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
-		test('give return a teamspace list if the user has a valid session', async () => {
+		test('return a teamspace list if the user has a valid session', async () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
 			expect(res.body.teamspaces.length).toBe(testUserTSAccess.length);
 			expect(res.body.teamspaces).toEqual(expect.arrayContaining(testUserTSAccess));

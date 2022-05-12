@@ -17,6 +17,7 @@
 
 const RolesConstants = {};
 
+RolesConstants.DEFAULT = 'user';
 RolesConstants.TEAM_MEMBER = 'team_member';
 
 module.exports = RolesConstants;
