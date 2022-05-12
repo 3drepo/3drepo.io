@@ -42,7 +42,7 @@ export const V5AttachResourcesDialog = ({
 					<CloseIcon />
 				</CloseButton>
 			</Header>
-			<FormDialogContent zeroMargin>
+			<FormDialogContent $zeromargin>
 				{children}
 			</FormDialogContent>
 		</Form>
