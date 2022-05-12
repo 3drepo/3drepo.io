@@ -337,7 +337,7 @@ export class TextField extends PureComponent<IProps, IState> {
 								$isPlaceholder={!this.fieldValue && isV5()}
 								{...this.additionalProps()}
 							>
-								{this.fieldValue || placeholder}
+								{isV5() ? (this.fieldValue || placeholder) : this.fieldValue }
 							</StyledMarkdownField>
 							}
 							{!enableMarkdown &&
