@@ -80,7 +80,7 @@ export default css`
 		margin-top: 0px;
 		margin-bottom: 0px;
 		font-size: 0.75rem;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};	
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		p {
 			margin: 0;
 		}

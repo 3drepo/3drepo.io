@@ -45,7 +45,7 @@ export const theme = createTheme(
 				MuiInputBase: {
 					styleOverrides: {
 						root: {
-							'& svg' {
+							'& svg': {
 								color: COLOR.SECONDARY_MAIN,
 								'& path': {
 									fill: 'currentColor !important',
