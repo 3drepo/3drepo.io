@@ -16,6 +16,7 @@
  */
 
 import { Tabs, Container } from '@/v4/routes/viewerGui/components/bim/bim.styles';
+import { Title, Data, Header, Actions } from '@/v4/routes/viewerGui/components/bim/components/metaRecord/metaRecord.styles';
 import { css } from 'styled-components';
 
 export default css`
@@ -27,6 +28,28 @@ export default css`
 			font-size: 13px;
 			padding: 0 0 12px;
 			margin: 0 16px;
+		}
+	}
+
+	${Container} {
+		${Header} {
+			${Title} {
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+			${Data} {
+				color: ${({ theme }) => theme.palette.base.main};
+				${Actions} {
+					button {
+						padding: 0;
+						margin: 7px;
+						svg {
+							color: ${({ theme }) => theme.palette.base.main};
+							max-width: 15px;
+							max-height: 15px;
+						}
+					}
+				}
+			}
 		}
 	}
 `;
