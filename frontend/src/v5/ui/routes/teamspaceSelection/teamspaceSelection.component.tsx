@@ -18,27 +18,28 @@
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
-import { TeamspaceList } from '@components/teamspace/teamspaceList/teamspaceList.component';
 import { FormattedMessage } from 'react-intl';
-import { Content, WelcomeMessage } from './teamspaceSelection.styles';
+import { ScrollBar, TeamspaceCards, VerticalCentre, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
 	return (
 		<>
 			<AppBar />
-			<Content>
-				<WelcomeMessage>
-					{
-						firstName ? (
-							<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
-						) : (
-							<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
-						)
-					}
-				</WelcomeMessage>
-				<TeamspaceList />
-			</Content>
+			<ScrollBar>
+				<VerticalCentre>
+					<WelcomeMessage>
+						{
+							firstName ? (
+								<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
+							) : (
+								<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
+							)
+						}
+					</WelcomeMessage>
+					<TeamspaceCards />
+				</VerticalCentre>
+			</ScrollBar>
 			<ModalsDispatcher />
 		</>
 	);

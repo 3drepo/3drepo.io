@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { ScrollArea } from '@controls/scrollArea';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Content = styled(ScrollArea).attrs({
+export const ScrollBar = styled(ScrollArea).attrs({
 	variant: 'secondary',
 })`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
@@ -28,6 +29,14 @@ export const Content = styled(ScrollArea).attrs({
 	flex-flow: column;
 	height: 100%;
 	display: flex;
+	align-items: center;
+`;
+
+export const VerticalCentre = styled.div`
+	display: flex;
+	align-items: center;
+	flex-flow: column;
+	height: 100%;
 `;
 
 export const WelcomeMessage = styled(Typography).attrs({
@@ -35,5 +44,9 @@ export const WelcomeMessage = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	text-align: center;
-	margin: 75px auto 40px;
+	margin: auto auto 40px;
+`;
+
+export const TeamspaceCards = styled(TeamspaceList)`
+	margin-bottom: auto;
 `;

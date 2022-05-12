@@ -25,7 +25,6 @@ export const CardList = styled.ul`
 	flex-direction: row;
 	justify-content: center;
 	width: 798px;
-	margin: 0 auto 75px;
 	padding: 0;
 	max-width: 70vw;
 	display: flex;

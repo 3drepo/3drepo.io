@@ -24,13 +24,17 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CardList } from './teamspaceList.styles';
 
-export const TeamspaceList = (): JSX.Element => {
+type ITeamspaceList = {
+	className?: string;
+};
+
+export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
 
 	return (
-		<CardList>
+		<CardList className={className}>
 			{
 				teamspaces.length ? (
 					sortedTeamspaces.map((teamspace) => (
