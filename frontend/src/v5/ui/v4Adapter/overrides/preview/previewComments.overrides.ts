@@ -20,7 +20,7 @@ import { Select, FilterWrapper, Container as CommentListContainer, Label as Show
 import { CommentContainer, Comment, Container as CommentAndDeleteButtonContainer } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
 import { Container as CommentPadding } from '@/v4/routes/components/messagesList/components/message/message.styles';
 import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
-import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollaspableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollapsableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 import { Container as TabContainer } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { TabContent, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
@@ -47,7 +47,7 @@ export default css`
 		}
 	}
 
-	${CollaspableContainerButton} {
+	${CollapsableContainerButton} {
 		background-color: #f7f8fa; // TODO - fix after new palette is released
 		
 		button {
