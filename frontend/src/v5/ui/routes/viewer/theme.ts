@@ -73,7 +73,7 @@ export const theme = createTheme(
 				MuiMenuItem: {
 					styleOverrides: {
 						root: {
-							'&&&': {
+							'&&': {
 								padding: '4px 10px',
 								fontSize: '12px',
 							},

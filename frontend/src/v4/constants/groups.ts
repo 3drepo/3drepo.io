@@ -21,9 +21,10 @@ import Delete from '@mui/icons-material/Delete';
 import InvertColors from '@mui/icons-material/InvertColors';
 import OfflineBolt from '@mui/icons-material/OfflineBolt';
 import PanTool from '@mui/icons-material/PanTool';
-
+import { isV5 } from '@/v4/helpers/isV5';
 import { capitalize } from 'lodash';
 
+import { COLOR as V5_COLOR } from './../../v5/ui/themes/theme';
 import { COLOR } from '../styles';
 
 export const GROUP_PANEL_NAME = 'group';
@@ -94,4 +95,4 @@ export const GROUPS_ACTIONS_MENU = [
 	}
 ];
 
-export const DEFAULT_OVERRIDE_COLOR = COLOR.BLACK_54;
+export const DEFAULT_OVERRIDE_COLOR = isV5() ? V5_COLOR.SECONDARY_MAIN : COLOR.BLACK_54;
