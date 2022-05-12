@@ -21,11 +21,13 @@ import {
 	Container as PreviewListItemContainer,
 	Content as PreviewListItemContent,
 	RoleIndicator,
-	Name,
+	Description,
 	Actions
 } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { Date, Details, Status, Icon, Author, UserAndModelDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
+import { Date, Details, Status, Icon, Author, UserAndModelDetails, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
+import { Actions as BottomLeftButtons } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
+import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
 const previewGrouItem = css`
 	${PreviewListItemContainer} {
@@ -55,6 +57,19 @@ const previewGrouItem = css`
 		}
 	}
 
+	${Description} {
+		font-size: 10px;
+
+		&, ${ExtraInfo} {
+			color: ${({ theme }) => theme.palette.base.main};
+			font-weight: 500;
+		}
+	}
+
+	${ExtraInfo} {
+		font-size: 9px;
+	}
+
 	${GroupListItem} {
 		${Actions} {
 			right: 10px;
@@ -80,6 +95,20 @@ const previewGrouItem = css`
 const expandedGroupItem = css`
 	${GroupDetails} {
 		background-color: red;
+	}
+
+	// footer 
+	${BottomLeftButtons} {
+		${ColorSelect} {
+			background-color: transparent;
+			border-bottom: none;
+		}
+
+		button {
+			&, &:hover {
+				background-color: transparent;
+			}
+		}
 	}
 `;
 
