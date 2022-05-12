@@ -35,8 +35,7 @@ export const PasswordChange = () => {
 	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
 	const { control, handleSubmit, formState: { isValid, isDirty, errors }, trigger } = useForm({
-		mode: 'onChange',
-		reValidateMode: 'onChange',
+		mode: 'onBlur',
 		defaultValues: { newPassword: '', newPasswordConfirm: '' },
 		resolver: yupResolver(PasswordChangeSchema),
 	});
@@ -67,7 +66,7 @@ export const PasswordChange = () => {
 							name="newPassword"
 							label={formatMessage({
 								id: 'auth.passwordChange.newPassword',
-								defaultMessage: 'Password',
+								defaultMessage: 'New password',
 							})}
 							formError={errors.newPassword}
 						/>

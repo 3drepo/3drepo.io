@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { LOGIN_PATH } from '../../routes.constants';
-import { CenteredLink } from './components.styles';
+import { ReturnLinkContainer } from './components.styles';
 
 export const ReturnLink = () => (
-	<CenteredLink to={LOGIN_PATH}>
-		<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
-	</CenteredLink>
+	<ReturnLinkContainer>
+		<Link to={LOGIN_PATH}>
+			<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
+		</Link>
+	</ReturnLinkContainer>
 );

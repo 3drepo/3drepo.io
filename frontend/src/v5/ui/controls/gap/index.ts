@@ -15,27 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Typography } from '@controls/typography';
-
-export const OtherOptions = styled.div`
-	display: flex;
-	padding: 14px 0 14px;
-	color: ${({ theme }) => theme.palette.base.main};
-	a {
-		color: ${({ theme }) => theme.palette.primary.main};
-		text-decoration: none;
-	}
-`;
-
-const StyledTypography = styled(Typography).attrs({
-	variant: 'body1',
-})``;
-
-export const SignUpPrompt = styled(StyledTypography)`
-	margin-right: auto;
-`;
-
-export const ForgotPasswordPrompt = styled(StyledTypography)`
-	margin-left: auto;
-`;
+export { Gap } from './gap.styles';

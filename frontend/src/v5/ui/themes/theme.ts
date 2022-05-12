@@ -257,6 +257,11 @@ export const theme = createTheme({
 							color: COLOR.TERTIARY_MAIN,
 						},
 					},
+					'.Mui-error': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderWidth: 1,
+						},
+					},
 				},
 			},
 		},
