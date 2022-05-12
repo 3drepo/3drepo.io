@@ -32,7 +32,8 @@ import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton, 
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
-import properties from './overrides/properties.overrides';
+import issueSequences from './overrides/sequences.overrides';
+import issueProperties from './overrides/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
@@ -256,10 +257,8 @@ export const V4OverridesContainer = styled.div`
 
 	${PanelsMenuStyling}
 
-	${properties}
-
 	${customTable}
-
+	
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
@@ -267,8 +266,11 @@ export const V4OverridesContainer = styled.div`
 	${previewItem}
 	${previewDetails}
 	${previewComments}
-
+	
 	${issueShapes}
+	${issueSequences}
+	${issueProperties}
+
 	${BottomToolbar}
 	${RevisionsSwitchContainer} {
 		display: none;

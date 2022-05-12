@@ -88,8 +88,8 @@ export default css`
 
 	// Drop-down inputs
 	${StyledFormControl} {
-		label { left: -14px; }
-		.MuiInput-root svg { margin-top: 23px; }
+		/* label { left: -14px; } */
+		.MuiInput-root svg { margin-top: 16px; }
 
 		// Drop down icon for date selector
 		.MuiInputAdornment-root {
@@ -108,7 +108,7 @@ export default css`
 	}
 
 	${DateFieldContainer} {
-		margin-top: 27px;
+		margin-top: 18px;
 		input {
 			cursor: pointer;
 			height: 24px;
