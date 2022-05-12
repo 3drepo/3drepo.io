@@ -25,6 +25,8 @@ import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Login } from '../login';
+import { PasswordForgot } from '../login/passwordForgot';
+import { PasswordChange } from '../login/passwordChange';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
 
@@ -39,6 +41,12 @@ export const MainRoute = () => {
 			<Switch>
 				<Route exact path={`${path}/login`}>
 					<Login />
+				</Route>
+				<Route exact path={`${path}/password-forgot`}>
+					<PasswordForgot />
+				</Route>
+				<Route exact path={`${path}/password-change`}>
+					<PasswordChange />
 				</Route>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
