@@ -159,15 +159,16 @@ export const SettingsForm = ({
 
 	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 
-	const resetValues = () => { reset(DEFAULT_VALUES); };
-
 	useEffect(() => {
 		if (open) {
 			fetchSettings(teamspace, project, containerOrFederation._id);
 			fetchViews(teamspace, project, containerOrFederation._id);
-			resetValues();
 		}
 	}, [open]);
+
+	useEffect(() => {
+		reset(getDefaultValues(containerOrFederation, isContainer));
+	}, [containerOrFederation]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
