@@ -23,3 +23,45 @@ export interface IRevision {
 	desc: string;
 	void?: boolean;
 }
+
+export interface IUploadStatus {
+	isComplete: boolean;
+	errorMessage: string;
+	progress: number;
+}
+
+export type FetchRevisionsPayload = {
+	teamspace: string;
+	projectId: string;
+	containerId: string;
+};
+
+export type RevisionVoidStatusPayload = {
+	teamspace?: string;
+	projectId: string;
+	containerId: string;
+	revisionId: string;
+	isVoid: boolean;
+};
+
+export type CreateRevisionBody = {
+	revisionTag: string;
+	revisionDesc?: string;
+	file: File;
+	importAnimations?: boolean;
+	timezone?: string;
+
+	containerId?: string;
+	containerName: string;
+	containerType: string;
+	containerUnit: string;
+	containerDesc?: string;
+	containerCode?: string;
+};
+
+export type CreateRevisionPayload = {
+	teamspace: string;
+	projectId: string;
+	uploadId: string;
+	body: CreateRevisionBody;
+};
