@@ -29,7 +29,7 @@ const starColourV4 = (active) => css`
 `;
 
 const starColourV5 = (active) => css`
-	color: ${active ? '#F5CB34' : '#516079'};
+	color: ${active ? '#F5CB34' : '#516079'}; // TODO - fix after new palette is released
 `;
 
 export const IconWrapper = styled(Icon)<IIconWrapper>`
