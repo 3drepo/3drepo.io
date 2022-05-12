@@ -302,15 +302,6 @@ export const theme = createTheme({
 				},
 			},
 		},
-		MuiFormHelperText: {
-			styleOverrides: {
-				root: {
-					position: 'absolute',
-					margin: 0,
-					bottom: '-21px',
-				},
-			},
-		},
 		MuiCheckbox: {
 			defaultProps: {
 				color: 'primary',
