@@ -63,6 +63,7 @@ export const COLOR = {
 };
 
 export const FONT_WEIGHT = {
+	SLIM: 300,
 	REGULAR: 400,
 	MEDIUM: 500,
 	BOLD: 600,
@@ -254,6 +255,11 @@ export const theme = createTheme({
 
 						'&:not(.Mui-error).Mui-focused': {
 							color: COLOR.TERTIARY_MAIN,
+						},
+					},
+					'.Mui-error': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderWidth: 1,
 						},
 					},
 				},

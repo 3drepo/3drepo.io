@@ -24,7 +24,7 @@ import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { UserMenu } from '../userMenu';
 import { Items } from './appBar.styles';
-import { Breadcrumbs } from '../breadcrumbs';
+import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
@@ -32,7 +32,7 @@ export const AppBar = (): JSX.Element => {
 		<MuiAppBar position="static">
 			<Items>
 				<LogoIcon />
-				<Breadcrumbs />
+				<BreadcrumbsRouting />
 			</Items>
 			<Items>
 				<CircleButton variant="contrast" aria-label="intercom">

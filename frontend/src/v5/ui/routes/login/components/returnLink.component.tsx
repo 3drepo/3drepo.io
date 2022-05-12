@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AxiosResponse } from 'axios';
-import api from './default';
+import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
+import { LOGIN_PATH } from '../../routes.constants';
+import { ReturnLinkContainer } from './components.styles';
 
-export const authenticate = async (): Promise<string> => {
-	const { data } = await api.get('login');
-	return data.username;
-};
-
-export const login = (user, password): Promise<AxiosResponse<void>> => api.post('login', { user, password });
-
-export const logout = (): Promise<AxiosResponse<void>> => api.post('logout');
-
-export const resetPassword = (user) => api.post('user/password', { user });
-
-export const changePassword = (user, newPassword, token) => api.put('user/password', { user, newPassword, token });
+export const ReturnLink = () => (
+	<ReturnLinkContainer>
+		<Link to={LOGIN_PATH}>
+			<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
+		</Link>
+	</ReturnLinkContainer>
+);
