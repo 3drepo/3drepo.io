@@ -457,9 +457,6 @@ export const theme = createTheme({
 					minWidth: '30%',
 					borderRadius: 10,
 				},
-				paperWidthFalse: {
-					maxWidth: 633,
-				},
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
