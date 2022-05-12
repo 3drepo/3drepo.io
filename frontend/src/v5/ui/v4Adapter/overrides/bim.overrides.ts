@@ -15,7 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tabs, Container } from '@/v4/routes/viewerGui/components/bim/bim.styles';
 import { css } from 'styled-components';
 
 export default css`
+	${Tabs} {
+		height: 43px;
+		button {
+			height: 43px;
+ 			box-sizing: content-box;
+			font-size: 13px;
+			padding: 0 0 12px;
+			margin: 0 16px;
+		}
+	}
 `;
