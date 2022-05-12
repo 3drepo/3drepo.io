@@ -109,6 +109,18 @@ export default css`
 				legend {
 					display: none;
 				}
+
+				form {
+					button {
+						&:hover {
+							background-color: transparent;
+						}
+						svg {
+							color: ${({ theme }) => theme.palette.secondary.main};
+							font-size: 1rem;
+						}
+					}
+				}
 			}
 
 			// user + status + clone button
