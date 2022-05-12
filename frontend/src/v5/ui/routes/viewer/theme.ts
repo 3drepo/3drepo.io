@@ -44,6 +44,14 @@ export const theme = createTheme(
 				},
 				MuiInputBase: {
 					styleOverrides: {
+						root: {
+							'& svg' {
+								color: COLOR.SECONDARY_MAIN,
+								'& path': {
+									fill: 'currentColor !important',
+								},
+							},
+						},
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
 								opacity: '1 !important',
@@ -73,7 +81,7 @@ export const theme = createTheme(
 				MuiMenuItem: {
 					styleOverrides: {
 						root: {
-							'&&&': {
+							'&&': {
 								padding: '4px 10px',
 								fontSize: '12px',
 							},
@@ -118,6 +126,7 @@ export const theme = createTheme(
 							marginRight: 15,
 							paddingTop: 0,
 							fontWeight: 400,
+							color: COLOR.SECONDARY_MAIN,
 						},
 					},
 				},
