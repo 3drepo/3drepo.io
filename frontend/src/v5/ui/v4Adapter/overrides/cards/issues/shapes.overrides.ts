@@ -21,31 +21,10 @@ import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/c
 import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
 import { SectionHeader, List, StyledIconButton as ExpandListButton, Container as MeasurementType } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
 import { StyledTextField, MeasurementPoint, MeasurementValue } from '@/v4/routes/viewerGui/components/measurements/components/measureItem/measureItem.styles';
-import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { StyledMarkdownField, StyledLinkableField, ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
 export default css`
-	// color picker
-	${ColorSelect} {
-		width: unset;
-		padding-left: 8px;
-		border-radius: 5px;
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-
-		${Dot} {
-			width: 13px;
-			height: 13px;
-		}
-
-		${StyledIconButton} {
-			margin: 0;
-
-			&:hover {
-				background-color: transparent;
-			}
-		}
-	}
 
 	${Content} {
 		align-items: center;

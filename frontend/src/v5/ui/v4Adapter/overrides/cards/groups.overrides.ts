@@ -94,7 +94,6 @@ const previewGrouItem = css`
 
 const expandedGroupItem = css`
 	${GroupDetails} {
-		background-color: red;
 	}
 
 	// footer 
@@ -115,6 +114,9 @@ const expandedGroupItem = css`
 export default css`
 	#groups-card {
 		${previewGrouItem}
+	}
+
+	#groups-card-details {
 		${expandedGroupItem}
 	}
 `;

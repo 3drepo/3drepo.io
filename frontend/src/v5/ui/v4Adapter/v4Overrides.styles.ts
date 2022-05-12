@@ -30,6 +30,8 @@ import avatarPopover from './overrides/avatarPopover.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
 import groups from './overrides/cards/groups.overrides';
 
+import colorPicker from './overrides/colorPicker.overrides';
+
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -56,6 +58,7 @@ export const V4OverridesContainer = styled.div`
 	${previewDetails}
 	${previewComments}
 	
+	${colorPicker}
 	${issueShapes}
 
 	${groups}
