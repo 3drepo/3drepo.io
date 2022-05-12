@@ -15,16 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { Icon } from '@mui/material';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../styles';
 
 interface IIconWrapper {
 	active: boolean;
 }
 
+const starColourV4 = (active) => css`
+	color: ${active ? COLOR.SUNGLOW : COLOR.BLACK_20};
+`;
+
+const starColourV5 = (active) => css`
+	color: ${active ? '#F5CB34' : '#516079'};
+`;
+
 export const IconWrapper = styled(Icon)<IIconWrapper>`
-	color: ${(props) => props.active ? COLOR.SUNGLOW : COLOR.BLACK_20};
+	${({ active }) => isV5() ? starColourV5(active) : starColourV4(active) }
 	cursor: pointer;
 	display: flex;
 	align-items: center;
