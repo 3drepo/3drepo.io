@@ -83,7 +83,9 @@ export const ActionsGroup = styled.div`
 	display: flex;
 `;
 
-export const FileUploadContainer = styled.div``;
+export const FileUploadContainer = styled.div`
+	display: contents;
+`;
 
 export const FileUploadInvoker = styled.input.attrs({
 	type: 'file',
