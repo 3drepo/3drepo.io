@@ -18,8 +18,9 @@
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
+import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { FormattedMessage } from 'react-intl';
-import { HomeContent, ScrollBar, TeamspaceCards, WelcomeMessage } from './teamspaceSelection.styles';
+import { HomeContent, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
@@ -37,7 +38,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 							)
 						}
 					</WelcomeMessage>
-					<TeamspaceCards />
+					<TeamspaceList />
 				</HomeContent>
 			</ScrollBar>
 			<ModalsDispatcher />

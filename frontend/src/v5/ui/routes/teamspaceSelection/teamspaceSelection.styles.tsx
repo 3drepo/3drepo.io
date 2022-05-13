@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { ScrollArea } from '@controls/scrollArea';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
@@ -43,9 +42,4 @@ export const WelcomeMessage = styled(Typography).attrs({
 	text-align: center;
 	margin-bottom: 40px;
 	margin-top: auto;
-`;
-
-export const TeamspaceCards = styled(TeamspaceList)`
-	width: clamp(40px, 85vw, 798px);
-	margin-bottom: auto;
 `;
