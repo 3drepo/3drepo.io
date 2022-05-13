@@ -25,6 +25,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { AlertModal as V5AlertModal } from '@/v5/ui/v4Adapter/components/alertModal.component';
 import { isV5 } from '@/v4/helpers/isV5';
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
@@ -32,7 +33,6 @@ import { dispatch } from '../../../../../modules/store';
 import { COLOR } from '../../../../../styles';
 import { SearchButton } from '../../../../viewerGui/components/panelBarActions/searchButton';
 import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
-import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
 interface IProps {
 	id: number;

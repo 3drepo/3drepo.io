@@ -21,8 +21,6 @@ import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 import { isV5 } from '@/v4/helpers/isV5';
-import { V5ErrorDialog } from '@/v5/ui/v4Adapter/dialogs/errorDialog/errorDialog.component';
-import { V5RedirectToTeamspaceDialog } from '@/v5/ui/v4Adapter/dialogs/redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
 import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 
@@ -84,7 +82,7 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	const messageText = typeof message === 'object' && message.message ? message.message : message;
 	const config = {
 		title: 'Error',
-		template: isV5() ? V5ErrorDialog : Dialogs.ErrorDialog,
+		template: Dialogs.ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -175,7 +173,7 @@ const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Error',
 		content: 'We cannot load the model due to the following:',
-		template: isV5() ? V5RedirectToTeamspaceDialog : Dialogs.RedirectToTeamspaceDialog,
+		template: Dialogs.RedirectToTeamspaceDialog,
 		onCancel: () => push(teamspaceRoute),
 		onConfirm: () => push(teamspaceRoute),
 		data: {
