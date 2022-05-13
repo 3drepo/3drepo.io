@@ -37,7 +37,7 @@ export function* createFederation({ teamspace, projectId, newFederation, contain
 	try {
 		const federationId = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
 		yield put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId));
-		if (containers) {
+		if (containers.length) {
 			yield put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, containers));
 		}
 	} catch (error) {

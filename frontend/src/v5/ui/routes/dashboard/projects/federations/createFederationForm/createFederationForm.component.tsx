@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { FederationCreationSchema } from '@/v5/validation/federations';
@@ -26,72 +26,32 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
+import { CONTAINER_UNITS, IContainer } from '@/v5/store/containers/containers.types';
+import { NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
 import { HalfWidth } from './createFederationForm.styles';
 import { EditFederationModal } from '../editFederationModal/editFederationModal.component';
 
-const UNITS = [
-	{
-		name: formatMessage({ id: 'units.mm.name', defaultMessage: 'Millimetres' }),
-		abbreviation: formatMessage({ id: 'units.mm.abbreviation', defaultMessage: 'mm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.cm.name', defaultMessage: 'Centimetres' }),
-		abbreviation: formatMessage({ id: 'units.cm.abbreviation', defaultMessage: 'cm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.dm.name', defaultMessage: 'Decimetres' }),
-		abbreviation: formatMessage({ id: 'units.dm.abbreviation', defaultMessage: 'dm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.m.name', defaultMessage: 'Metres' }),
-		abbreviation: formatMessage({ id: 'units.m.abbreviation', defaultMessage: 'm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.ft.name', defaultMessage: 'Feet and inches' }),
-		abbreviation: formatMessage({ id: 'units.ft.abbreviation', defaultMessage: 'ft' }),
-	},
-];
 interface ICreateFederation {
 	open: boolean;
 	onClickClose: () => void;
 }
 
-interface IFormInput {
-	name: string;
-	desc: string;
-	code: string;
-	unit: string;
-	containers: IContainer[];
-}
-
 const defaultValues = {
-	_id: '',
-	desc: '',
 	name: '',
-	role: '',
-	isFavourite: false,
-	code: '',
-	status: '',
-	containers: [],
-	issues: 0,
-	risks: 0,
-	category: 'Uncategorised',
-	lastUpdated: new Date(),
-	hasStatsPending: false,
 	unit: 'mm',
 };
 
-export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) => {
+export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
 	const {
 		handleSubmit,
 		control,
 		getValues,
 		reset,
 		formState: { errors, isValid, isSubmitSuccessful },
+	} = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(FederationCreationSchema),
@@ -163,10 +123,10 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 						formError={errors.name}
 					/>
 					<FormTextField
-						name="description"
+						name="desc"
 						control={control}
-						label={formatMessage({ id: 'createFederation.form.description', defaultMessage: 'Description' })}
-						formError={errors.description}
+						label={formatMessage({ id: 'createFederation.form.desc', defaultMessage: 'Description' })}
+						formError={errors.desc}
 					/>
 					<HalfWidth>
 						<FormSelect
@@ -177,10 +137,9 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 								defaultMessage: 'Units',
 							})}
 							control={control}
-							defaultValue="mm"
 						>
-							{UNITS.map(({ name, abbreviation }) => (
-								<MenuItem key={abbreviation} value={abbreviation}>
+							{CONTAINER_UNITS.map(({ name, value }) => (
+								<MenuItem key={value} value={value}>
 									{name}
 								</MenuItem>
 							))}
