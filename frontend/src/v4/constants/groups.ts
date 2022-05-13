@@ -24,8 +24,8 @@ import PanTool from '@mui/icons-material/PanTool';
 import { isV5 } from '@/v4/helpers/isV5';
 import { capitalize } from 'lodash';
 
-import { COLOR as V5_COLOR } from './../../v5/ui/themes/theme';
 import { COLOR } from '../styles';
+import { COLOR as V5_COLOR } from '../../v5/ui/themes/theme';
 
 export const GROUP_PANEL_NAME = 'group';
 

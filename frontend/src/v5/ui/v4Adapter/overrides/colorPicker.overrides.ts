@@ -18,7 +18,6 @@
 import { css } from 'styled-components';
 import { ColorSelect, Dot, OpacityVisibilityCheckbox, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
-
 export default css`
 	// color picker
 	${ColorSelect} {

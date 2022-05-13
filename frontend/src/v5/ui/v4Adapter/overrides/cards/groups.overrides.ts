@@ -16,17 +16,16 @@
  */
 
 import { GroupActions, GroupListItem } from '@/v4/routes/viewerGui/components/groups/groups.styles';
-import { Container as GroupDetails } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
-import { 
+import { Container as GroupDetails, Actions as BottomLeftButtons } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
+import {
 	Container as PreviewListItemContainer,
 	Content as PreviewListItemContent,
 	RoleIndicator,
 	Description,
-	Actions
+	Actions,
 } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
-import { Actions as BottomLeftButtons } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
 const previewGrouItem = css`
