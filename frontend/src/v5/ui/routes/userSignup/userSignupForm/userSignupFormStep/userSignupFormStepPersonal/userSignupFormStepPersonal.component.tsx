@@ -88,7 +88,7 @@ export const UserSignupFormStepPersonal = ({
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.firstName',
-					defaultMessage: 'Firstname',
+					defaultMessage: 'First name',
 				})}
 				required
 				formError={errors.firstName}
@@ -98,7 +98,7 @@ export const UserSignupFormStepPersonal = ({
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.lastName',
-					defaultMessage: 'Lastname',
+					defaultMessage: 'Last name',
 				})}
 				required
 				formError={errors.lastName}
