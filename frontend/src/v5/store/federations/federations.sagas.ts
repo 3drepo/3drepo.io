@@ -35,10 +35,15 @@ import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/ser
 
 export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
 	try {
-		const { _id } = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
+		const federationId = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
+		yield put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId));
+		yield put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, containers));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to create federation',
+			currentActions: formatMessage({
+				id: 'federation.create.error',
+				defaultMessage: 'trying to create federation',
+			}),
 			error,
 		}));
 	}

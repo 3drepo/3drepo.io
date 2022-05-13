@@ -30,7 +30,7 @@ export const createFederation = async (
 	{ teamspace, projectId, newFederation }: CreateFederationParams,
 ): Promise<CreateFederationResponse> => {
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/federations`, newFederation);
-	return data;
+	return data._id;
 };
 
 export const addFavourites = (

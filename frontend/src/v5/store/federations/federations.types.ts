@@ -20,7 +20,7 @@ export interface IFederation {
 	name: string;
 	role: string;
 	isFavourite: boolean;
-	code: string;
+	code?: string;
 	status: string;
 	containers: string[];
 	issues: number;
@@ -45,7 +45,6 @@ export type NewFederation = {
 	unit: string;
 	desc?: string;
 	code?: string;
-	type: string;
 };
 
 export type FederationBackendSettings = {
