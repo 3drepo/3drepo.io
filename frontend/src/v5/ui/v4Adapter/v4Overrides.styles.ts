@@ -45,8 +45,6 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	${customTable}
-
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
@@ -56,7 +54,6 @@ export const V4OverridesContainer = styled.div`
 	${previewComments}
 
 	${issueShapes}
-	${issueProperties}
 	${views}
 
 	${issueSequences}
