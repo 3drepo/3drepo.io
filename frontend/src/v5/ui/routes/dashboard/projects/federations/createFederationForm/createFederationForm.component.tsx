@@ -92,7 +92,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 		onSubmit: handleSubmit(onClickContinue),
 	};
 	const EditModalProps = {
-		title: formatMessage({ id: 'createFederation.modal.edit.title', defaultMessage: 'New Federation' }),
+		title: formatMessage({ id: 'createFederation.modal.edit.title', defaultMessage: 'Edit Federation' }),
 		confirmLabel: formatMessage({ id: 'createFederation.modal.edit.submit', defaultMessage: 'Create Federation' }),
 		onClickCancel: onClickBack,
 		onSubmit: handleSubmit(onClickSubmit),
