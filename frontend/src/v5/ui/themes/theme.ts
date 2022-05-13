@@ -76,16 +76,16 @@ export const GRADIENT = {
 };
 
 export const SHADOW = {
-	LEVEL_1: '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)',
-	LEVEL_2: '0px 2px 2px rgba(0, 0, 0, 0.14), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 1px 5px rgba(0, 0, 0, 0.2)',
-	LEVEL_3: '0px 3px 4px rgba(0, 0, 0, 0.14), 0px 3px 3px rgba(0, 0, 0, 0.12), 0px 1px 8px rgba(0, 0, 0, 0.2)',
-	LEVEL_4: '0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2)',
-	LEVEL_5: '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2)',
-	LEVEL_6: '0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2)',
-	LEVEL_7: '0px 9px 12px rgba(0, 0, 0, 0.14), 0px 3px 16px rgba(0, 0, 0, 0.12), 0px 5px 6px rgba(0, 0, 0, 0.2)',
-	LEVEL_8: '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)',
-	LEVEL_9: '0px 16px 24px rgba(0, 0, 0, 0.14), 0px 6px 30px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.2)',
-	LEVEL_10: '0px 24px 38px rgba(0, 0, 0, 0.14), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 11px 15px rgba(0, 0, 0, 0.2)',
+	LEVEL_1: '0px 1px 1px rgba(0, 0, 0, 0.14)',
+	LEVEL_2: '0px 1px 5px rgba(0, 0, 0, 0.2), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.14)',
+	LEVEL_3: '0px 1px 10px rgba(23, 43, 77, 0.15)',
+	LEVEL_4: '0px 2px 4px rgba(0, 0, 0, 0.2), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 4px 5px rgba(0, 0, 0, 0.14)',
+	LEVEL_5: '0px 6px 10px rgba(0, 0, 0, 0.14)',
+	LEVEL_6: '0px 5px 5px rgba(0, 0, 0, 0.2), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.14)',
+	LEVEL_7: '0px 5px 6px rgba(0, 0, 0, 0.2), 0px 3px 16px rgba(0, 0, 0, 0.12), 0px 9px 12px rgba(0, 0, 0, 0.14)',
+	LEVEL_8: '0px 7px 8px rgba(0, 0, 0, 0.2), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 12px 17px rgba(0, 0, 0, 0.14)',
+	LEVEL_9: '0px 8px 10px rgba(0, 0, 0, 0.2), 0px 6px 30px rgba(0, 0, 0, 0.12), 0px 16px 24px rgba(0, 0, 0, 0.14)',
+	LEVEL_10: '0px 11px 15px rgba(0, 0, 0, 0.2), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 24px 38px rgba(0, 0, 0, 0.14)',
 };
 
 const typography: TypographyOptions = {
@@ -255,6 +255,11 @@ export const theme = createTheme({
 
 						'&:not(.Mui-error).Mui-focused': {
 							color: COLOR.TERTIARY_MAIN,
+						},
+					},
+					'.Mui-error': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderWidth: 1,
 						},
 					},
 				},
@@ -449,6 +454,16 @@ export const theme = createTheme({
 				elevation: 8,
 			},
 		},
+		MuiCard: {
+			styleOverrides: {
+				root: {
+					padding: '12px',
+					borderRadius: '5px',
+					boxShadow: 'none',
+					boxSizing: 'border-box',
+				},
+			},
+		},
 		MuiDialog: {
 			styleOverrides: {
 				paper: {
@@ -625,7 +640,6 @@ export const theme = createTheme({
 						overflow: 'hidden',
 					},
 					'& > a': {
-						color: COLOR.PRIMARY_MAIN_CONTRAST,
 						...typography.h3,
 					},
 					'& > button > span > span': {

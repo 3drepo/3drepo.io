@@ -19,14 +19,13 @@ import { createActions, createReducer } from 'reduxsauce';
 import {
 	FederationSettings,
 	FederationStats,
-	FederationView,
 	IFederation,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Action } from 'redux';
 import { Constants } from '../../helpers/actions.helper';
-import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId } from '../store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View } from '../store.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
@@ -240,7 +239,7 @@ export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_S
 export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: string[] };
 export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & ProjectAndFederationId & { containers: string[] };
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & TeamspaceProjectAndFederationId;
-export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & ProjectAndFederationId & { views: FederationView[] };
+export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & ProjectAndFederationId & { views: View[] };
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings};
 export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: FederationSettings };
@@ -276,7 +275,7 @@ export interface IFederationsActionCreators {
 	fetchFederationViewsSuccess: (
 		projectId: string,
 		federationId: string,
-		views: FederationView[],
+		views: View[],
 	) => FetchFederationViewsSuccessAction;
 	fetchFederationSettings: (
 		teamspace: string,
