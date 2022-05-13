@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
-	ResourceIconContainer,
 	ResourceItemContainer,
 	ResourceItemLeftColumn,
 	ResourcesContainer,
@@ -25,212 +24,6 @@ import {
 	Size,
 	IconButton,
 } from '@/v4/routes/components/resources/resources.styles';
-import { Form, Header } from '@controls/modal/formModal/formDialog.styles';
-import { DialogTabs, NeutralActionButton, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
-import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
-import {
-	AddLinkContainer,
-	ResourceListItem,
-	ResourcesListContainer,
-	ResourcesListScroller,
-	StyledDropZone,
-	Content,
-} from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
-import { LoaderContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
-
-const buttonsStyling = css`
-	${IconButton} { 
-		padding: 2px 0 0 0;
-		height: fit-content;
-
-		&:hover {
-			background-color: transparent;
-		}
-		
-		svg {
-			color: ${({ theme }) => theme.palette.secondary.main};
-			font-size: 19px;
-		} 
-	}
-`;
-
-export const AttachResourcesFile = css`
-	${LoaderContainer} {
-		padding-top: 20px;
-	}
-
-	${ResourceListItem} {
-		line-height: 14px;
-		color: ${({ theme }) => theme.palette.primary.main};
-		text-decoration: underline;
-		text-underline-offset: 2px;
-
-		${buttonsStyling}
-	}
-
-	${StyledDropZone} {
-		padding: 27px 0 28px;
-		margin: 0 23px;
-		// TODO - fix after new palette is released
-		border-top: solid 1px #e0e5f0;
-	}
-
-	// style the icon 
-	${FieldsRow} {
-		flex-direction: row;
-
-		${StyledFormControl} {
-			&:nth-child(odd) {
-				margin-right: 10px;
-			}
-
-			&:nth-of-type(even) {
-				flex-direction: row;
-				justify-content: flex-end;
-
-				& > *:not(${ResourceIconContainer}) {
-					width: 100%;
-				}
-
-				${ResourceListItem} {
-					width: 100%;
-
-					button {
-						width: fit-content;
-					}
-				}
-
-				${ResourceIconContainer} svg {
-					font-size: 18px;
-					margin: 2px 4px 0 6px;
-					color: ${({ theme }) => theme.palette.primary.main};
-				}
-			}
-		}
-	}
-`;
-
-export const AttachResourcesLink = css`
-	${ResourcesListScroller} {
-		margin-top: 0px;
-		overflow-y: overlay;
-		max-height: 207px;
-
-		${ResourcesListContainer} {
-			width: 100%;
-			box-sizing: border-box;
-			padding: 0 23px;
-			display: flex;
-			flex-direction: column-reverse;
-
-			${FieldsRow} {
-				min-height: 35px;
-
-				& > * {
-					height: fit-content;
-					
-					&:nth-child(odd) {
-						flex-grow: 5;
-					}
-	
-					&:nth-child(even) {
-						flex-grow: 6;
-					}
-				}
-
-				.MuiFormHelperText-contained {
-					position: unset;
-				}
-
-				&:last-of-type {
-					margin-top: 20px;
-				}
-
-				button {
-					margin: 0;
-					margin-left: 21px;
-					width: fit-content;
-				}
-			}
-		}
-		
-		${buttonsStyling}
-	}
-
-	${AddLinkContainer} {
-		padding: 28px 0;
-		margin: 0 23px;
-		// TODO - fix after new palette is released
-		border-top: solid 1px #e0e5f0;
-
-		${LabelButton} {
-			${labelButtonPrimaryStyles}
-			text-decoration: none !important;
-			padding: 4px 19px;
-			margin: 0;
-			border-radius: 5px;
-		}
-	}
-`;
-
-// used in the attach resources modal styling file
-export const AttachResourcesModalStyling = css`
-	padding: 0;
-	min-width: 450px;
-
-	${Header} {
-		position: relative;
-	}
-
-	.MuiDialogContent-root {
-		padding: 0px;
-		overflow-x: hidden;
-	}
-
-	${DialogTabs} {
-		padding-left: 10px;
-		box-shadow: 0px 1px 10px rgba(23, 43, 77, 0.15);
-	}
-
-	${VisualSettingsButtonsContainer} {
-		display: flex;
-		justify-content: flex-end;
-		position: unset;
-		box-shadow: 0px 6px 10px rgb(0 0 0 / 14%),
-					0px 1px 18px rgb(0 0 0 / 12%),
-					0px 3px 5px rgb(0 0 0 / 20%);
-		padding: 8px;
-		box-sizing: border-box;
-
-		${NeutralActionButton} {
-			color: ${({ theme }) => theme.palette.secondary.main};
-			background-color: transparent;
-			border: solid 1px currentColor;
-
-			&:hover {
-				background-color: ${({ theme }) => theme.palette.secondary.main};
-				border-color: ${({ theme }) => theme.palette.secondary.main};
-				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-
-			&:active {
-				background-color: ${({ theme }) => theme.palette.secondary.dark};
-				border-color: ${({ theme }) => theme.palette.secondary.dark};
-				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-		}
-	}
-
-	${Form}${Form} {
-		padding-bottom: 0;
-		height: fit-content;
-
-		${Content} {
-			min-height: 160px;
-		}
-	}
-`;
 
 export default css`
 	${ResourcesContainer} {
@@ -278,11 +71,16 @@ export default css`
 				width: 23px;
 			}
 
-			${buttonsStyling}
-			
 			${IconButton} { 
-				padding-top: 5px;
+				padding: 5px 0 0 0;
+				height: fit-content;
+
+				&:hover {
+					background-color: transparent;
+				}
+				
 				svg {
+					color: ${({ theme }) => theme.palette.secondary.main};
 					font-size: 15px;
 				} 
 			}

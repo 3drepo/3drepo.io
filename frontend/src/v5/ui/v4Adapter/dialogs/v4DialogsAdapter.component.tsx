@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { V4DialogsOverridesContainer } from './v4DialogsOverrides.styles';
 import { ThemeProvider } from 'styled-components';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
+import { V4DialogsOverridesContainer } from './v4DialogsOverrides.styles';
 
 export const V4DialogsAdapter = ({ children }) => (
 	<ThemeProvider theme={theme}>
