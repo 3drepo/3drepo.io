@@ -17,7 +17,7 @@
 
 import { Card } from '@mui/material';
 import styled, { css } from 'styled-components';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import AddCircleIcon from '@assets/icons/add_circle_filled.svg';
 
 export const Container = styled(Card)<{ $variant: string; }>`
 	color: ${({ theme }) => theme.palette.primary.main};
