@@ -148,18 +148,22 @@ export const Container = styled.li<IContainer>`
 	` : ''};
 
 	${({ theme: { palette }, nodeType, active, expandable }) => isV5() && css`
+		/* TODO - fix after new palette is released */
+		background-color: ${active ? '#F7F8FA' : palette.primary.contrast};
 		border: none;
-		background-color: transparent;
+		color: ${active ? palette.primary.main : palette.base.main};
 		${(nodeType === TREE_ITEM_MODEL_TYPE) && `
 			border-top: 1px solid ${palette.base.lightest};
 		`};
-		${!expandable && css`
-			color: ${active ? palette.primary.main : palette.base.main};
 
-			${StyledExpandableButton} {
+		${StyledExpandableButton} {
+			${expandable ? css`
+				background-color: ${active ? palette.primary.main : palette.secondary.main};
+			}` : css`
 				color: inherit;
-			}
-		`}
+				background-color: transparent;
+			`
+		}
 	`}
 `;
 

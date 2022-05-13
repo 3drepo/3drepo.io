@@ -20,6 +20,7 @@ import {
 	StyledExpandableButton,
 	Name,
 	Actions,
+	ParentOfVisible,
 } from '@/v4/routes/viewerGui/components/tree/components/treeNode/treeNode.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
@@ -53,6 +54,10 @@ export default css`
 				svg { 
 					font-size: 19px;
 					color: inherit;
+				}
+
+				${ParentOfVisible} {
+					color: ${({ theme }) => theme.palette.secondary.main};
 				}
 			}
 		}
