@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { formatMessage } from '@/v5/services/intl';
+import { SurveyPoint, View } from '../store.types';
 
 export enum UploadStatuses {
 	OK = 'ok',
@@ -111,8 +111,6 @@ export interface IContainer {
 	type: string;
 	code: string;
 	status: UploadStatuses;
-	unit: string;
-	desc?: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -120,6 +118,12 @@ export interface IContainer {
 		message: string;
 		date: Date | null;
 	};
+	desc?: string;
+	views?: View[];
+	surveyPoint?: SurveyPoint;
+	angleFromNorth?: number;
+	defaultView?: string;
+	unit?: string;
 }
 
 export interface MinimumContainer {
@@ -152,6 +156,31 @@ export type ContainerStats = {
 	unit: string;
 	code: string;
 };
+
+export type ContainerBackendSettings = {
+	_id?: string;
+	desc?: string;
+	name?: string;
+	surveyPoints?: SurveyPoint[];
+	status?: UploadStatuses;
+	timestamp?: number;
+	type?: string;
+	angleFromNorth: number;
+	code?: string;
+	unit?: string;
+	defaultView?: string;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+		errorCode: string;
+	}
+};
+
+export type ContainerSettings = Omit<ContainerBackendSettings, 'surveyPoints'> & {
+	surveyPoint: SurveyPoint;
+};
+
+export type FetchContainerViewsResponseView = { views: View[] };
 
 export type DestinationOption = {
 	containerId: string;
