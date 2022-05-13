@@ -22,7 +22,7 @@ jest.mock('../../../../../src/v5/handler/realTimeMsging');
 const RTM = require(`${src}/handler/realTimeMsging`);
 
 jest.mock('../../../../../src/v5/services/sessions', () => ({
-	session: Promise.resolve({ middleware: jest.fn(), deinitStore: jest.fn() }),
+	session: Promise.resolve({ middleware: jest.fn() }),
 	SESSION_HEADER: 'sessionHeader',
 }));
 const SessionService = require(`${src}/services/sessions`);
@@ -74,7 +74,6 @@ const testInit = () => {
 			await expect(chatServiceClose()).resolves.toBeUndefined();
 			expect(server.close).toHaveBeenCalledTimes(1);
 			expect(socketCloseFn).toHaveBeenCalledTimes(1);
-			expect((await SessionService.session).deinitStore).toHaveBeenCalledTimes(1);
 		});
 	});
 };
