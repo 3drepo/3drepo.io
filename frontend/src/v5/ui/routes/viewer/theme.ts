@@ -26,6 +26,15 @@ export const theme = createTheme(
 		_.cloneDeep(oldTheme),
 		{
 			components: {
+				MuiOutlinedInput: {
+					styleOverrides: {
+						root: {
+							'& input': {
+								padding: '0px 8px',
+							},
+						},
+					},
+				},
 				MuiInput: {
 					styleOverrides: {
 						formControl: {
@@ -44,6 +53,14 @@ export const theme = createTheme(
 				},
 				MuiInputBase: {
 					styleOverrides: {
+						root: {
+							'& svg': {
+								color: COLOR.SECONDARY_MAIN,
+								'& path': {
+									fill: 'currentColor !important',
+								},
+							},
+						},
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
 								opacity: '1 !important',
@@ -64,8 +81,8 @@ export const theme = createTheme(
 						select: {
 							lineHeight: '22px',
 							height: '24px',
-							padding: '0 12px',
-							marginTop: '27px',
+							padding: '0 15px',
+							marginTop: '18px',
 							left: '-14px',
 						},
 					},
@@ -118,6 +135,7 @@ export const theme = createTheme(
 							marginRight: 15,
 							paddingTop: 0,
 							fontWeight: 400,
+							color: COLOR.SECONDARY_MAIN,
 						},
 					},
 				},
@@ -179,6 +197,38 @@ export const theme = createTheme(
 								'&:hover': {
 									backgroundColor: '#f0f5ff', // TODO: fix after new palette is released
 								},
+							},
+						},
+					},
+				},
+				MuiDialog: {
+					styleOverrides: {
+						container: {
+							'.MuiPaper-root .MuiDialogActions-root .MuiButton-root': {
+								backgroundColor: COLOR.PRIMARY_MAIN,
+								color: COLOR.PRIMARY_MAIN_CONTRAST,
+								textDecoration: 'none',
+								':hover': {
+									backgroundColor: COLOR.PRIMARY_DARK,
+								},
+								':first-child': {
+									':hover': {
+										backgroundColor: COLOR.SECONDARY_MAIN,
+										color: COLOR.PRIMARY_MAIN_CONTRAST,
+									},
+									backgroundColor: 'transparent',
+									color: COLOR.SECONDARY_MAIN,
+									border: `1px solid ${COLOR.SECONDARY_MAIN}`,
+								},
+							},
+						},
+					},
+				},
+				MuiDialogContent: {
+					styleOverrides: {
+						root: {
+							'.PrivatePickersToolbar-dateTitleContainer button': {
+								margin: 0,
 							},
 						},
 					},

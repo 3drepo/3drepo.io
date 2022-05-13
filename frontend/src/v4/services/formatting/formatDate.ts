@@ -24,6 +24,7 @@ export const LONG_DATE_TIME_FORMAT = 'DD/MM/YYYY HH:mm';
 export const LONG_DATE_TIME_FORMAT_NO_MINUTES = 'DD/MM/YYYY HH:00';
 export const NAMED_MONTH_DATE_FORMAT = 'DD MMM YYYY';
 export const NAMED_MONTH_DATETIME_FORMAT = 'DD MMM YYYY HH:mm';
+export const LONG_DATE_TIME_FORMAT_V5 = 'DD / MM / YYYY [at] HH:mm';
 
 export const invoiceDate = (input) => {
 	const date: Date = new Date(input);
