@@ -14,39 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Tooltip as TooltipComponent } from '@mui/material';
 
-import withStyles from '@mui/styles/withStyles';
+import styled from 'styled-components';
 
 export const Container = styled.div`
-	display: inline-block;
-	height: 15px;
+	margin: 16px;
 `;
 
-export const Tooltip = withStyles((theme: any) => ({
-	popper: {
-		width: 180,
-	},
-	tooltip: {
-		backgroundColor: theme.palette.primary.contrast,
-		color: theme.palette.error.main,
-		fontSize: theme.typography.pxToRem(12),
-		boxShadow: theme.palette.shadows.level_5,
-		border: 'none',
-		borderRadius: 5,
-		padding: '15px 15px 17px 15px',
-	},
-	tooltipPlacementRight: {
-		margin: '-17px 0px 0 -1px',
-	},
-}))(TooltipComponent);
-
-export const IconWrapper = styled.div`
-	height: max-content;
-	width: max-content;
-	margin: 0 5px;
-
-	align-items: center;
+export const CardList = styled.ul`
+	flex-direction: row;
+	justify-content: center;
+	padding: 0;
 	display: flex;
+	flex-wrap: wrap;
+	width: clamp(40px, 85vw, 798px);
+	margin-bottom: auto;
 `;

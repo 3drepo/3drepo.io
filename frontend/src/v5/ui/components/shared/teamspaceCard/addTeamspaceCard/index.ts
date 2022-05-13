@@ -15,18 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-
-const selectCurrentUserDomain = (state) => (state.currentUser2);
-
-export const selectCurrentUser = createSelector(
-	selectCurrentUserDomain, (state) => state.currentUser || {},
-);
-
-export const selectUsername: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.username || '',
-);
-
-export const selectFirstName: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.firstName || '',
-);
+export { AddTeamspaceCard } from './addTeamspaceCard.component';
