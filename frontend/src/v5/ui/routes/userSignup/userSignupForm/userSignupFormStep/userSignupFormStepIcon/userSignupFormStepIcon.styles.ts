@@ -15,36 +15,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import CheckIcon from '@assets/icons/check.svg';
 import ErrorIcon from '@assets/icons/stepper_error.svg';
 
-export const StepIconContainer = styled.div`
-	border-radius: 50%;
+const stepIconStyle = css`
+	width: 28px;
+	height: 28px;
 	padding: 5px;
-	width: 22px;
-	height: 22px;
+	border-radius: 50%;
+	box-sizing: border-box;
+`;
+
+export const StepIconContainer = styled.div`
+	${stepIconStyle}
+
 	background-color: currentColor;
 	font-family: ${({ theme }) => theme.typography.fontFamily};
-	font-size: 11px;
-	box-sizing: border-box;
+	font-size: 12px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+    font-weight: 700;
 
 	& > * {
 		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;
 
-export const CompletedStepIcon = styled(CheckIcon)``;
+export const CompletedStepIcon = styled(CheckIcon)`
+	width: 14px;
+`;
 
 export const ErrorStepIcon = styled(ErrorIcon)`
-	width: 22px;
-	height: 22px;
-	padding: 5px;
-	border-radius: 50%;
-	box-sizing: border-box;
+	${stepIconStyle}
+	
+    padding: 7px;
 	overflow: visible;
 	background-color: ${({ theme }) => theme.palette.error.main};
 	& path {

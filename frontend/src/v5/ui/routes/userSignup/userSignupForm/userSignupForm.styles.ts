@@ -50,6 +50,11 @@ export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`
 			cursor: pointer;
 		}
 	`}
+
+	.MuiStepLabel-label {
+		font-size: 15px;
+		font-weight: 600;
+	}
 `;
 
 export const LoginPrompt = styled.div`
