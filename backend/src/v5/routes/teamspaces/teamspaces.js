@@ -17,6 +17,7 @@
 
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
+const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -37,6 +38,19 @@ const getTeamspaceMembers = (req, res) => {
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
 	);
+};
+
+const getAvatar = async (req, res) => {
+	try {
+		const { teamspace } = req.params;
+		const buffer = await Teamspaces.getAvatar(teamspace);
+		const fileExt = await fileExtensionFromBuffer(buffer);
+		req.params.format = fileExt || 'png';
+		respond(req, res, templates.ok, buffer);
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
 };
 
 const establishRoutes = () => {
@@ -129,6 +143,36 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.get('/:teamspace/members', hasAccessToTeamspace, getTeamspaceMembers);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/avatar:
+	*   get:
+	*     description: Gets the avatar of the teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - teamspace:
+	*         name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getTeamspaceAvatar
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Gets the avatar of the Teamspace
+	*         produces:
+	*           image/png:
+	*         content:
+	*           image/png:
+	*             schema:
+	*               type: string
+	*               format: binary
+	*/
+	router.get('/:teamspace/avatar', hasAccessToTeamspace, getAvatar);
 
 	return router;
 };
