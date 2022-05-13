@@ -23,7 +23,7 @@ import {
 	IFederation,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
+import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Action } from 'redux';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId } from '../store.types';
@@ -66,12 +66,7 @@ export const createFederationSuccess = (state = INITIAL_STATE, {
 		[projectId]: [
 			...state.federationsByProject[projectId],
 			{
-				...prepareSingleFederationData({
-					...newFederation,
-					_id: federationId,
-					role: '',
-					isFavourite: false,
-				}),
+				...prepareNewFederation(newFederation, federationId),
 			},
 		],
 	},

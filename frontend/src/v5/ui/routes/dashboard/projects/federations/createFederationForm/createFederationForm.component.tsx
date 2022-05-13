@@ -26,6 +26,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
+import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
@@ -183,9 +184,11 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 				</>
 			) : (
 				<EditFederationModal
-					federation={getValues()}
+					federation={prepareNewFederation(getValues())}
 					isNewFederation
-					onChange={(includedContainers: IContainer[]) => setContainers(includedContainers)}
+					onContainersChange={(includedContainers: IContainer[]) => setContainers(
+						includedContainers.map((container) => container._id),
+					)}
 				/>
 			)}
 		</FormModal>

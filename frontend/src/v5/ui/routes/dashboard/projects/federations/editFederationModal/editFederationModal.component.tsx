@@ -34,11 +34,11 @@ import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './
 import { useContainersData } from '../../containers/containers.hooks';
 
 type EditFederationModalProps = IFormModal & {
-	openState: boolean;
+	openState?: boolean;
 	federation: IFederation;
 	isNewFederation?: boolean;
-	onClickClose: () => void;
-	onChange?: (containers) => void;
+	onClickClose?: () => void;
+	onContainersChange?: (containers) => void;
 };
 
 export const EditFederationModal = ({
@@ -46,7 +46,7 @@ export const EditFederationModal = ({
 	federation,
 	isNewFederation,
 	onClickClose,
-	onChange,
+	onContainersChange,
 	...otherProps
 }: EditFederationModalProps): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -64,7 +64,7 @@ export const EditFederationModal = ({
 	}, [containers]);
 
 	useEffect(() => {
-		if (isNewFederation) onChange(includedContainers);
+		if (isNewFederation) onContainersChange(includedContainers);
 	}, [includedContainers]);
 
 	const partitionContainersByQuery = (
