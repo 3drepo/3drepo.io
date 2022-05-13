@@ -21,7 +21,8 @@ import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/com
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
-import properties from './overrides/cards/issues/properties.overrides';
+import issueSequences from './overrides/sequences.overrides';
+import issueProperties from './overrides/cards/issues/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
@@ -29,6 +30,7 @@ import previewComments from './overrides/preview/previewComments.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
 import measurements from './overrides/cards/measurements.overrides';
+import views from './overrides/cards/views.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -44,12 +46,6 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	${panelsMenu}
-
-	${properties}
-
-	${customTable}
-
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
@@ -60,6 +56,11 @@ export const V4OverridesContainer = styled.div`
 
 	${issueShapes}
 	${measurements}
+	${views}
+
+	${issueSequences}
+	${issueProperties}
+
 	${RevisionsSwitchContainer} {
 		display: none;
 	}

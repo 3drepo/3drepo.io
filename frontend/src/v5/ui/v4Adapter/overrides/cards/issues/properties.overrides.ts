@@ -27,27 +27,48 @@ import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateB
 export default css`
 	.description {
 		margin: 14px 0;
+
 		${StyledTextField} {
 			margin: 0;
 		}
+
 		label {
 			font-size: 12px;
 			transform: scale(1);
 			left: 1px;
 			top: -18px;
 		}
+
 		.MuiFormControl-root {
 			margin-top: 0;
 		}
+		
 		.MuiInputBase-root {
 			padding: 0;
-			>textarea {
+			& > textarea {
 				min-height: 2rem;
 				padding: 5px 10px;
 			}
-		} 
+		}
+
 		button {
-			margin: 8px 4px 2px 0;
+			margin: 0 10px 0 0;
+			height: 15px;
+			width: 15px;
+			color: ${({ theme }) => theme.palette.secondary.main};
+
+			&:hover {
+				background-color: transparent;
+			}
+
+			svg {
+				font-size: 1rem;
+			}
+		}
+
+		${ActionsLine} {
+			top: 4px;
+			right: 0;
 		}
 	}
 
@@ -69,8 +90,7 @@ export default css`
 
 		// Drop-down inputs
 		${StyledFormControl} {
-			label { left: -14px; }
-			.MuiInput-root svg { margin-top: 23px; }
+			.MuiInput-root svg { margin-top: 16px; }
 
 			// Drop down icon for date selector
 			.MuiInputAdornment-root {
@@ -110,6 +130,29 @@ export default css`
 			${ButtonContainer} {
 				min-height: 26px;
 			}
+		}
+	}
+
+	${DescriptionImage} img {
+		border-radius: 5px;
+	}
+
+	${DateFieldContainer} {
+		margin-top: 18px;
+		input {
+			cursor: pointer;
+			height: 24px;
+		}
+	}
+
+	${UpdateButtonsContainer} {
+		justify-content: left;
+		${StyledButton} {
+			margin: 0;
+		}
+
+		${ButtonContainer} {
+			min-height: 26px;
 		}
 	}
 `;

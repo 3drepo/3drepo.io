@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, sleepMS } = require('../../helper/services');
 
 const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
@@ -56,6 +56,8 @@ const testQueueMessages = () => {
 			await expect(Queue.listenToQueue(queueName, fn)).resolves.toBeUndefined();
 
 			const msgAfter = await sendQueueMessage(queueName);
+			// ensure msg is consumed
+			await sleepMS(10);
 
 			expect(fn).toHaveBeenCalledTimes(2);
 
@@ -71,6 +73,9 @@ const testQueueMessages = () => {
 			await expect(Queue.listenToQueue(queueName, fn)).resolves.toBeUndefined();
 
 			const msgAfter = await sendQueueMessage(queueName);
+
+			// ensure msg is consumed
+			await sleepMS(10);
 
 			expect(fn).toHaveBeenCalledTimes(2);
 
@@ -93,6 +98,9 @@ const testExchangeMessages = () => {
 
 			const messageAfter = await sendExchangeMessage(exchangeName);
 
+			// ensure msg is consumed
+			await sleepMS(10);
+
 			expect(fn).toHaveBeenCalledTimes(1);
 			checkExchangeMessage(fn, messageAfter);
 		});
@@ -103,6 +111,9 @@ const testExchangeMessages = () => {
 			await expect(Queue.listenToExchange(exchangeName, fn)).resolves.toBeUndefined();
 
 			const messageAfter = await sendExchangeMessage(exchangeName);
+
+			// ensure msg is consumed
+			await sleepMS(10);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			checkExchangeMessage(fn, messageAfter);
@@ -141,6 +152,9 @@ const testConnection = () => {
 			const messageQu = await sendQueueMessage(queueName);
 
 			checkExchangeMessage(fnExchange, messageEx);
+
+			// ensure msg is consumed
+			await sleepMS(10);
 
 			expect(fnQueue).toHaveBeenCalledTimes(1);
 			checkQueueData(messageQu, fnQueue.mock.calls[0][0]);
