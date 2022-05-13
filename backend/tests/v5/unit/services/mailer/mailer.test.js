@@ -61,6 +61,7 @@ const testSendEmail = () => {
 		test('should fail if config.mail.smtpConfig is not set and config.mail.generateCredentials is false', async () => {
 			Mailer.reset();
 			config.mail.generateCredentials = false;
+			delete config.mail.smtpConfig;
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.smtpConfig is not set');
 			config.mail.generateCredentials = true;
