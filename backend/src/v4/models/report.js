@@ -166,7 +166,7 @@ class ReportGenerator {
 						if(field.mapping) {
 							attri.value = field.mapping[value];
 						} else if (field.isDate) {
-							attri.value = formatDate(entry[value], false);
+							attri.value = formatDate(value, false);
 						} else {
 							attri.value =  Array.isArray(entry[field.field]) ?
 								entry[field.field].join(", ") : entry[field.field];
