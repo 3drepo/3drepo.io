@@ -17,9 +17,11 @@
 
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
+import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
+import issueSequences from './overrides/sequences.overrides';
 import issueProperties from './overrides/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
@@ -43,19 +45,24 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	${panelsMenu}
-	
 	${customTable}
-	
+
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
-	
+
 	${previewItem}
 	${previewDetails}
 	${previewComments}
-	
+
 	${issueShapes}
 	${issueProperties}
 	${views}
+
+	${issueSequences}
+	${issueProperties}
+
+	${RevisionsSwitchContainer} {
+		display: none;
+	}
 `;
