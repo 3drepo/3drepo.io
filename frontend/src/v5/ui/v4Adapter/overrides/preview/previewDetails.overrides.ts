@@ -52,6 +52,7 @@ export default css`
 			display: flex;
 			align-items: start;
 			min-height: 84px;
+			padding: 0 16px;
 
 			${Grid} {
 
@@ -107,6 +108,18 @@ export default css`
 				// weird floating legend
 				legend {
 					display: none;
+				}
+
+				form {
+					button {
+						&:hover {
+							background-color: transparent;
+						}
+						svg {
+							color: ${({ theme }) => theme.palette.secondary.main};
+							font-size: 1rem;
+						}
+					}
 				}
 			}
 

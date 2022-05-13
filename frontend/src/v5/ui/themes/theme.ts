@@ -257,6 +257,11 @@ export const theme = createTheme({
 							color: COLOR.TERTIARY_MAIN,
 						},
 					},
+					'.Mui-error': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderWidth: 1,
+						},
+					},
 				},
 			},
 		},
@@ -456,9 +461,6 @@ export const theme = createTheme({
 				paper: {
 					minWidth: '30%',
 					borderRadius: 10,
-				},
-				paperWidthFalse: {
-					maxWidth: 633,
 				},
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',

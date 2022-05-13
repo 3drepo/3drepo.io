@@ -27,9 +27,11 @@ import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 
+import issueSequences from './overrides/cards/issues/sequences.overrides';
 import issueProperties from './overrides/cards/issues/properties.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
 import tree from './overrides/cards/tree.overrides';
+import views from './overrides/cards/views.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -60,6 +62,11 @@ export const V4OverridesContainer = styled.div`
 	${issueShapes}
 	${issueProperties}
 	${tree}
+	${views}
+
+	${issueSequences}
+	${issueProperties}
+
 	${RevisionsSwitchContainer} {
 		display: none;
 	}

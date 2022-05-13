@@ -166,13 +166,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 	}
 
 	public renderEmptyState = renderWhenTrue(() => (
-		isV5() ? (
-			<DashedContainer>
-				<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
-			</DashedContainer>
-		) : (
-			<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
-		)
+		<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
 	));
 
 	public renderNotFound = renderWhenTrue(() => (

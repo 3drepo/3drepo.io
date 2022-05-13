@@ -20,7 +20,7 @@ import { Select, FilterWrapper, Container as CommentListContainer, Label as Show
 import { CommentContainer, Comment, Container as CommentAndDeleteButtonContainer } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
 import { Container as CommentPadding } from '@/v4/routes/components/messagesList/components/message/message.styles';
 import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
-import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollaspableButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollapsableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 import { Container as TabContainer } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { TabContent, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
@@ -31,7 +31,7 @@ export default css`
 		padding: 0;
 
 		${Tabs} {
-			padding: 0 14px;
+			padding: 0 16px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 			width: unset;
 		}
@@ -43,17 +43,25 @@ export default css`
 
 		${TabContent} {
 			background-color: inherit;
-			padding: 0 14px;
+			padding: 0 16px;
 		}
 	}
 
-	${CollaspableButton} {
+	${CollapsableContainerButton} {
 		background-color: #f7f8fa; // TODO - fix after new palette is released
+		
+		button {
+			color: ${({ theme }) => theme.palette.secondary.main};
+
+			&:hover {
+				background-color: transparent;
+			}
+		}
 	}
 
 	${NotCollapsableContent} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		padding: 15px 12px 10px;
+		padding: 15px 16px 10px;
 
 		// comments header section
 		${FilterWrapper} {
@@ -97,6 +105,11 @@ export default css`
 				// delete comment icon
 				[aria-label="Remove"] > button {
 					margin: 8px 48px 0 0;
+					padding: 3px;
+					
+					svg {
+						font-size: 1rem;
+					}
 				}
 			}
 

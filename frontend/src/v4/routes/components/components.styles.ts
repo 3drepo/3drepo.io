@@ -61,9 +61,9 @@ const V5EmptyStateInfo = styled(DashedContainerBase).attrs({
 	font-size: 13px;
 	background-color: transparent;
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 12px auto;
+	margin: 12px;
 	padding: 10px;
-	width: 315px;
+	box-sizing: border-box;
 `;
 
 const V4EmptyStateInfo = styled.p`
