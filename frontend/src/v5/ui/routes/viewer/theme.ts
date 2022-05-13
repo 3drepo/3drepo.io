@@ -31,6 +31,8 @@ export const theme = createTheme(
 						root: {
 							'& input': {
 								padding: '0px 8px',
+								height: 34,
+								lineHeight: 34,
 							},
 						},
 					},
@@ -40,16 +42,6 @@ export const theme = createTheme(
 						formControl: {
 							'& svg': {
 								top: 13,
-							},
-						},
-					},
-				},
-				MuiOutlinedInput: {
-					styleOverrides: {
-						root: {
-							'& input': {
-								height: 34,
-								lineHeight: 34,
 							},
 						},
 					},
