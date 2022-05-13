@@ -22,7 +22,7 @@ import DialogBase from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { AlertModal } from '@/v5/ui/v4Adapter/components/alertModal.component';
+import { AlertModal as V5AlertModal } from '@/v5/ui/v4Adapter/components/alertModal.component';
 import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -137,7 +137,7 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 		const data = { content, ...(props.data || {})};
 
 		return (
-			<AlertModal
+			<V5AlertModal
 				{...data}
 				handleResolve={handleResolve}
 				handleClose={handleClose}
@@ -150,7 +150,13 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 
 	return (
         <DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
-			{isV5() ? (
+			{/*
+				Here we are assuming that if the data has a method (an error dialog)
+				it can be rendered by the v5 alert dialog.
+				We are also assuming that is has content it can also be rendered by
+				the v5 alert dialog.
+			*/}
+			{isV5() && (content || props.data?.method) ? (
 				renderV5Dialog()
 			) : (
 				<>
