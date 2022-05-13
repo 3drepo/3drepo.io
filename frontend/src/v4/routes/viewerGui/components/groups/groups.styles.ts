@@ -65,13 +65,11 @@ export const GroupListItem = styled(PreviewListItem).attrs({
 
 	${({ active }) => isV5() && active && css`
 		&& ${Actions} {
-			flex-direction: column;
-			right: 45px !important;
-			top: 3px;
+			right: 38px !important;
 		}
 
 		&& ${Description} {
-			max-width: 272px;
+			max-width: 320px;
 		}
 	`}
 `;

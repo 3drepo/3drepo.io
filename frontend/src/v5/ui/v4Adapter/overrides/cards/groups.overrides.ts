@@ -24,7 +24,7 @@ import {
 	Description,
 	Actions
 } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { Date, Details, Status, Icon, Author, UserAndModelDetails, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
+import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
 import { Actions as BottomLeftButtons } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
