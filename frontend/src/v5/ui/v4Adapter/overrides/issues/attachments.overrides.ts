@@ -127,12 +127,20 @@ export const AttachResourcesLink = css`
 			${FieldsRow} {
 				min-height: 35px;
 
-				& > *:nth-child(odd) {
-					flex-grow: 5;
+				& > * {
+					height: fit-content;
+					
+					&:nth-child(odd) {
+						flex-grow: 5;
+					}
+	
+					&:nth-child(even) {
+						flex-grow: 6;
+					}
 				}
 
-				& > *:nth-child(even) {
-					flex-grow: 6;
+				.MuiFormHelperText-contained {
+					position: unset;
 				}
 
 				&:last-of-type {
