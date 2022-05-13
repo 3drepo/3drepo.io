@@ -17,8 +17,6 @@
 import { PureComponent } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourcesDialog/attachResourcesDialog.component';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
@@ -123,11 +121,7 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 	public render() {
 		const {selectedTab} = this.state;
 		return (
-			<ConditionalV5Wrapper
-				v5Wrapper={V5AttachResourcesDialog}
-				v5WrapperProps={{ onClickClose: this.onCancel }}
-				v4Wrapper={Container}
-			>
+			<Container>
 				<DialogTabs
 					value={selectedTab}
 					indicatorColor="primary"
@@ -156,7 +150,7 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 						</Form>
 					)}
 				/>
-			</ConditionalV5Wrapper>
+			</Container>
 		);
 	}
 }
