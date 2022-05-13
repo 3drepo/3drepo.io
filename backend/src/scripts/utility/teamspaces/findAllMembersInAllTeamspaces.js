@@ -67,7 +67,7 @@ const genYargs = (yargs) => {
 	const argsSpec = (subYargs) => subYargs.option('out', {
 		describe: 'file path for the output CSV',
 		type: 'string',
-		default: './output.csv',
+		default: './membersInTeamspaces.csv',
 	});
 	return yargs.command(commandName,
 		'Create a CSV dump of all members from all teamspaces',

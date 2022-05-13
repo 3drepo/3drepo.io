@@ -123,7 +123,7 @@ const genYargs = (yargs) => {
 		}).option('out', {
 			describe: 'File path to output the results to',
 			type: 'string',
-			default: 'out.csv',
+			default: 'singularlyAnimatedMeshes.csv',
 		});
 
 	return yargs.command(

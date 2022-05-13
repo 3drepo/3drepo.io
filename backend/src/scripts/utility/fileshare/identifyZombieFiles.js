@@ -16,7 +16,7 @@
  */
 
 /**
- * This script identifies zombie files and remove them if instructed
+ * This script identifies zombie files and removes them if instructed
  */
 const { v5Path } = require('../../../interop');
 
