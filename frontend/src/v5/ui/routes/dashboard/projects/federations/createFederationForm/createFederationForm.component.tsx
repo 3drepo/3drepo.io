@@ -90,8 +90,8 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 		handleSubmit,
 		control,
 		getValues,
-		formState: { errors, isValid },
-	} = useForm<IFormInput>({
+		reset,
+		formState: { errors, isValid, isSubmitSuccessful },
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(FederationCreationSchema),
@@ -100,11 +100,21 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [containers, setContainers] = useState([]);
 
-	const onClickBack = () => {
+	const closeAndReset = (): void => {
+		onClickClose();
+		reset();
 		setModalPhase('settings');
 	};
 
-	const onClickContinue = () => {
+	useEffect(() => {
+		if (isSubmitSuccessful && (modalPhase === 'settings')) closeAndReset();
+	}, [open, reset]);
+
+	const onClickBack = (): void => {
+		setModalPhase('settings');
+	};
+
+	const onClickContinue = (): void => {
 		if (modalPhase === 'settings') {
 			setModalPhase('edit');
 		}
@@ -113,18 +123,18 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 	const onClickSubmit = (newFederation: NewFederation): void => {
 		FederationsActionsDispatchers.createFederation(teamspace, project, newFederation, containers);
 		onClickClose();
+		setModalPhase('settings');
 	};
 
 	const SettingsModalProps = {
 		title: formatMessage({ id: 'createFederation.modal.settings.title', defaultMessage: 'New Federation' }),
 		confirmLabel: formatMessage({ id: 'createFederation.modal.settings.submit', defaultMessage: 'Continue' }),
-		onClickClose,
 		onSubmit: handleSubmit(onClickContinue),
 	};
 	const EditModalProps = {
 		title: formatMessage({ id: 'createFederation.modal.edit.title', defaultMessage: 'New Federation' }),
 		confirmLabel: formatMessage({ id: 'createFederation.modal.edit.submit', defaultMessage: 'Create Federation' }),
-		onClickClose: onClickBack,
+		onClickCancel: onClickBack,
 		onSubmit: handleSubmit(onClickSubmit),
 		cancelLabel: formatMessage({ id: 'createFederation.modal.settings.cancel', defaultMessage: 'Back' }),
 		maxWidth: 'lg',
@@ -134,6 +144,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 		<FormModal
 			isValid={isValid}
 			open={open}
+			onClickClose={closeAndReset}
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
 		>
 			{modalPhase === 'settings' ? (
