@@ -16,6 +16,7 @@
  */
 
 import axios from 'axios';
+import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 
@@ -30,7 +31,7 @@ axios.interceptors.response.use(
 			switch (error.response.status) {
 				case 401:
 					if (error.response.data) {
-						const notLogin = error.response.data.place !== 'GET /v5/login';
+						const notLogin = error.response.data.place !== `GET ${LOGIN_PATH}`;
 						const unauthorized = invalidMessages.includes(error.response.data.message);
 
 						const sessionHasExpired = unauthorized && notLogin;

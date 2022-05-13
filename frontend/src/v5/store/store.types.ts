@@ -29,3 +29,14 @@ export type TeamspaceProjectAndFederationId= TeamspaceId & ProjectId & Federatio
 export type ProjectAndContainerId = ProjectId & ContainerId;
 
 export type ProjectAndFederationId = ProjectId & FederationId;
+
+export type SurveyPoint = {
+	latLong: [number, number];
+	position: [number, number, number];
+};
+
+export type View = {
+	_id: string;
+	name: string;
+	hasThumbnail: boolean;
+};
