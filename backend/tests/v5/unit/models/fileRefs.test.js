@@ -152,7 +152,7 @@ const testFetchFileStream = () => {
 			await expect(FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename')).rejects.toEqual(templates.fileNotFound);
 		});
 
-		test('should download the revision files using grid fs if entry has invalid type', async () => {
+		test('should throw an error if entry has invalid type', async () => {
 			const fileEntry = { size: '12345', type: unrecognisedType };
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
 			await expect(FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename')).rejects.toEqual();
