@@ -18,8 +18,8 @@ module.exports = (env, options) => ({
 	},
 	output: {
 		path: PATHS.DIST_DIR,
-		filename: '[name].[chunkhash].js', 
-		...options.output 
+		filename: '[name].[chunkhash].js',
+		...options.output
 	},
 	module: {
 		rules: [
@@ -39,6 +39,7 @@ module.exports = (env, options) => ({
 				{ from: 'manifest.json', to: '../' },
 				{ from: 'assets/images/**', to: '../' },
 				{ from: 'assets/icons/*', to: '../' },
+				{ from: 'assets/email-resources/*', to: '../' },
 				{ from: 'unity/**', to: '../' },
 				//backwards compatibility to Unity 2019 (added on 4.12)
 				{ from: 'unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },

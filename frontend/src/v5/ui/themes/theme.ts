@@ -22,6 +22,7 @@ import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
@@ -62,6 +63,7 @@ export const COLOR = {
 };
 
 export const FONT_WEIGHT = {
+	SLIM: 300,
 	REGULAR: 400,
 	MEDIUM: 500,
 	BOLD: 600,
@@ -255,6 +257,11 @@ export const theme = createTheme({
 							color: COLOR.TERTIARY_MAIN,
 						},
 					},
+					'.Mui-error': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderWidth: 1,
+						},
+					},
 				},
 			},
 		},
@@ -343,6 +350,98 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiAutocomplete: {
+			defaultProps: {
+				clearIcon: createElement(ClearIcon),
+				popupIcon: createElement(ChevronIcon),
+				openText: '',
+				closeText: '',
+				clearText: '',
+				handleHomeEndKeys: true,
+			},
+			styleOverrides: {
+				root: {
+					height: '31px',
+					'.MuiFormControl-root .MuiInputBase-root': {
+						'&.MuiAutocomplete-inputRoot ': {
+							padding: '0 0 0 10px',
+							height: '31px',
+							lineHeight: '31px',
+						},
+					},
+					'&.Mui-focused .MuiAutocomplete-inputRoot .MuiOutlinedInput-notchedOutline': {
+						borderWidth: 1,
+					},
+				},
+				input: {
+					height: '100%',
+					padding: 0,
+				},
+				inputRoot: {
+					'&.Mui-disabled': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+						'.MuiAutocomplete-endAdornment': {
+							display: 'none',
+						},
+					},
+				},
+				endAdornment: {
+					position: 'static',
+					height: '100%',
+					top: 'unset',
+					display: 'flex',
+					alignItems: 'center',
+					margin: '0 10px',
+					'button:hover': {
+						backgroundColor: 'unset',
+					},
+				},
+				popupIndicator: {
+					width: '20px',
+					height: '20px',
+					margin: '8px 0px',
+				},
+				clearIndicator: {
+					width: '20px',
+					height: '20px',
+					margin: '0 5px 0 0',
+					padding: '2px',
+				},
+				listbox: {
+					'.MuiAutocomplete-option': {
+						height: 'auto',
+						alignItems: 'baseline',
+						margin: 'auto 0',
+						display: 'flex',
+						padding: '6px 12px',
+						wordWrap: 'break-word',
+						boxSizing: 'border-box',
+					},
+				},
+			},
+		},
+		MuiLinearProgress: {
+			defaultProps: {
+				color: 'primary',
+				variant: 'determinate',
+			},
+			styleOverrides: {
+				root: {
+					borderRadius: '5px',
+					height: '18px',
+					margin: 'auto 10px',
+				},
+				barColorPrimary: {
+					backgroundColor: COLOR.TERTIARY_MAIN,
+				},
+				colorPrimary: {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+				bar1Determinate: {
+					transition: 'none',
+				},
+			},
+		},
 		MuiBackdrop: {
 			styleOverrides: {
 				root: {
@@ -367,6 +466,12 @@ export const theme = createTheme({
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
+				},
+				paperFullWidth: {
+					width: 'calc(100% - 100px)',
+				},
+				paperScrollPaper: {
+					maxHeight: '100vh',
 				},
 			},
 		},
@@ -498,6 +603,9 @@ export const theme = createTheme({
 						height: 17,
 						width: 'auto',
 					},
+					'&:active': {
+						boxShadow: 'none',
+					},
 				},
 				extended: {
 					height: null,
@@ -543,7 +651,6 @@ export const theme = createTheme({
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
-					padidng: 0,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					'& input': {
 						padding: '0px 15px',
@@ -585,6 +692,14 @@ export const theme = createTheme({
 						},
 						'& path': {
 							fill: COLOR.ERROR_MAIN,
+						},
+					},
+				},
+				adornedStart: {
+					'&$error': {
+						paddingLeft: '6px',
+						'& $input': {
+							paddingLeft: '0px',
 						},
 					},
 				},
@@ -635,6 +750,10 @@ export const theme = createTheme({
 					'&:not(.Mui-error).Mui-focused': {
 						color: COLOR.TERTIARY_MAIN,
 					},
+
+					'&.Mui-disabled.MuiInputLabel-asterisk': {
+						display: 'none',
+					},
 				},
 				formControl: {
 					top: '18px',
@@ -650,6 +769,22 @@ export const theme = createTheme({
 				root: {
 					width: '100%',
 					boxSizing: 'border-box',
+				},
+			},
+		},
+		MuiFormControlLabel: {
+			styleOverrides: {
+				label: {
+					color: COLOR.BASE_MAIN,
+				},
+			},
+		},
+		MuiFormHelperText: {
+			styleOverrides: {
+				contained: {
+					position: 'absolute',
+					bottom: '-16px',
+					margin: 0,
 				},
 			},
 		},
@@ -671,6 +806,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					transition: 'none',
+					color: 'inherit',
 					padding: 12,
 				},
 			},

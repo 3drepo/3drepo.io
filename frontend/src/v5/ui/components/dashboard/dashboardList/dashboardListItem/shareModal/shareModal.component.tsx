@@ -39,8 +39,8 @@ export const ShareModal = ({
 	containerOrFederation,
 	onClickClose,
 }: IShareModal): JSX.Element => {
-	const { teamspace } = useParams<DashboardParams>();
-	const link = viewerRoute(teamspace, containerOrFederation, null, true);
+	const { teamspace, project } = useParams<DashboardParams>();
+	const link = viewerRoute(teamspace, project, containerOrFederation, null, true);
 
 	return (
 		<FormModal

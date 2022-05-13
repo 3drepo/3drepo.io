@@ -29,23 +29,23 @@ const Elastic = {};
 
 const loginRecordIndex = "io-teamspace-loginrecord";
 const loginRecordMapping = {
-	"username" : { "type": "text" },
-	"loginTime" : {
+	"Username" : { "type": "text" },
+	"LoginTime" : {
 		"type": "date",
 		"format": "ccc MMM dd uuuu HH:mm:ss zZ (zzzz)||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
 	},
-	"ipAddr" : { "type": "ip" },
-	"location.country" : { "type": "text" },
-	"location.city" : { "type": "text" },
-	"referrer" : { "type": "text" },
-	"application.name": { "type": "text" },
-	"application.version": { "type": "text" },
-	"application.type": { "type": "text" },
-	"engine.name": { "type": "text" },
-	"engine.version": { "type": "text" },
-	"os.name": { "type": "text" },
-	"os.version": { "type": "text" },
-	"device": { "type": "text" },
+	"IpAddress" : { "type": "ip" },
+	"Location.Country" : { "type": "text" },
+	"Location.City" : { "type": "text" },
+	"Referrer" : { "type": "text" },
+	"Application.Name": { "type": "text" },
+	"Application.Version": { "type": "text" },
+	"Application.Type": { "type": "text" },
+	"Engine.Name": { "type": "text" },
+	"Engine.Version": { "type": "text" },
+	"OS.Name": { "type": "text" },
+	"OS.Version": { "type": "text" },
+	"Device": { "type": "text" },
 	"licenseKey": { "type": "keyword" }
 };
 
@@ -114,20 +114,20 @@ const createElasticRecord = async (index, body, id) => {
 Elastic.createLoginRecord = async (username, loginRecord) => {
 	const elasticBody = {
 		"Id" : loginRecord._id,
-		"username" : username,
-		"loginTime" : Date(loginRecord.loginTime),
-		"ipAddr" : loginRecord.ipAddr,
-		"location.country" : loginRecord.location.country,
-		"location.city" : loginRecord.location.city,
-		"referrer" : loginRecord.referrer,
-		"application.name" : loginRecord.application.name,
-		"application.version" : loginRecord.application.version,
-		"application.type" : loginRecord.application.type,
-		"engine.name" : loginRecord.engine.name,
-		"engine.version" : loginRecord.engine.version,
-		"os.name" : loginRecord.os.name,
-		"os.version" : loginRecord.os.version,
-		"device" : loginRecord.device,
+		"Username" : username,
+		"LoginTime" : Date(loginRecord.loginTime),
+		"IpAddress" : loginRecord.ipAddr,
+		"Location.Country" : loginRecord.location.country,
+		"Location.City" : loginRecord.location.city,
+		"Referrer" : loginRecord.referrer,
+		"Application.Name" : loginRecord.application.name,
+		"Application.Version" : loginRecord.application.version,
+		"Application.Type" : loginRecord.application.type,
+		"Engine.Name" : loginRecord.engine.name,
+		"Engine.Version" : loginRecord.engine.version,
+		"OS.Name" : loginRecord.os.name,
+		"OS.Version" : loginRecord.os.version,
+		"Device" : loginRecord.device,
 		"licenseKey": repoLicense
 	};
 
