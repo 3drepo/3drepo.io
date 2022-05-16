@@ -25,7 +25,9 @@ import styled from 'styled-components';
 export const Container = styled.div`
 	margin: auto;
 	min-height: 100vh;
-	width: 400px;
+	min-width: 510px;
+	max-width: 510px;
+	box-sizing: border-box;
 	padding: 0 70px;
 	display: flex;
 	flex-direction: column;
