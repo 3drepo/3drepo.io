@@ -84,6 +84,7 @@ export const theme = createTheme(
 							padding: '0 15px',
 							marginTop: '18px',
 							left: '-14px',
+							color: `${COLOR.SECONDARY_MAIN} !important`,
 						},
 					},
 				},
