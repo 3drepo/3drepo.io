@@ -44,7 +44,7 @@ const testSendEmail = () => {
 		const mailerConfig = { ...config.mail };
 
 		beforeEach(() => {
-			config.mail = mailerConfig;
+			config.mail = { ...mailerConfig };
 		});
 
 		test('should fail if config.mail.sender is not set', async () => {
