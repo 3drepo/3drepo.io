@@ -49,12 +49,10 @@ const testSendEmail = () => {
 
 		test('should fail if config.mail.sender is not set', async () => {
 			Mailer.reset();
-			const { sender } = config.mail;
 			config.mail.sender = undefined;
 
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.sender is not set');
-			config.mail.sender = sender;
 			Mailer.reset();
 		});
 
