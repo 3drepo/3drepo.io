@@ -205,10 +205,10 @@ User.getAvatar = async (username) => {
 	const avatar = user.customData?.avatar;
 
 	if (!avatar) {
-		throw templates.userDoesNotHaveAvatar;
+		throw templates.avatarNotFound;
 	}
 
-	return avatar;
+	return avatar.data.buffer;
 };
 
 User.addUser = async (newUserData) => {

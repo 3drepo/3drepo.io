@@ -21,6 +21,7 @@ const { validateAvatarFile, validateForgotPasswordData, validateLoginData, valid
 	validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
+const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
@@ -78,12 +79,17 @@ const deleteApiKey = (req, res) => {
 	);
 };
 
-const getAvatar = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.getAvatar(user).then((avatar) => {
-		req.params.format = 'png';
-		respond(req, res, templates.ok, avatar.data.buffer);
-	}).catch((err) => respond(req, res, err));
+const getAvatar = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		const buffer = await Users.getAvatar(user);
+		const fileExt = await fileExtensionFromBuffer(buffer);
+		req.params.format = fileExt || 'png';
+		respond(req, res, templates.ok, buffer);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const uploadAvatar = (req, res) => {

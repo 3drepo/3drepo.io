@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.23.1",
+  "version": "4.23.2",
   "engines": {
     "node": "14.x.x"
   },
@@ -28,7 +28,7 @@
     "apidoc": "0.17.7",
     "app-config": "1.0.0",
     "archiver": "3.0.0",
-    "async": "2.6.1",
+    "async": "2.6.4",
     "axios": "0.26.1",
     "body-parser": "1.18.3",
     "combined-stream": "1.0.8",
