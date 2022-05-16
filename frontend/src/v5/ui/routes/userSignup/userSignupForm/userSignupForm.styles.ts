@@ -62,6 +62,7 @@ export const LoginPrompt = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	text-decoration: none;
+	font-weight: 400;
 `;
 
 export const LoginPromptLink = styled(Link)`
