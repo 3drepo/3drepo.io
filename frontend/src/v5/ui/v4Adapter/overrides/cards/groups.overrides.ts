@@ -27,6 +27,7 @@ import {
 import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { Container as FiltersContainer, ChipsContainer, InputLabel, SelectedCriteria, ButtonContainer } from '@/v4/routes/components/criteriaField/criteriaField.styles';
 
 const previewGrouItem = css`
 	${PreviewListItemContainer} {
@@ -93,6 +94,21 @@ const previewGrouItem = css`
 
 const expandedGroupItem = css`
 	${GroupDetails} {
+		${FiltersContainer} {
+			border: none;
+			${InputLabel} {
+				padding: 0;
+			}
+			${SelectedCriteria} {
+				padding: 5px 0 12px;
+				${ChipsContainer} {
+					padding-top: 20px;
+				}
+				${ButtonContainer} {
+					bottom: 6px;
+				}
+			}
+		}
 	}
 
 	// footer 

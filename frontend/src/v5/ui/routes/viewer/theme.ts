@@ -139,6 +139,22 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiChip: {
+					styleOverrides: {
+						root: {
+							backgroundColor: COLOR.TERTIARY_LIGHTEST,
+							color: COLOR.SECONDARY_MAIN,
+							borderRadius: 5,
+							fontWeight: 600,
+							margin: '3px 4px 3px 0',
+						},
+						deleteIcon: {
+							color: 'inherit',
+							height: 15,
+							width: 15,
+						},
+					},
+				},
 				MuiList: {
 					styleOverrides: {
 						root: {

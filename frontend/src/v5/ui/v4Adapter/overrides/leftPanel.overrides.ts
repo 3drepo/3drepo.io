@@ -98,15 +98,7 @@ export default css`
 		}
 
 		.MuiChip-root {
-			border-radius: 5px;
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			color: ${({ theme }) => theme.palette.secondary.main};
-			font-weight: 600;
 			margin: 3px 4px 3px 0;
-
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
 		}
 	}
 
