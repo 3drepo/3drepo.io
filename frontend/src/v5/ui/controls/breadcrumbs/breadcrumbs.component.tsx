@@ -44,7 +44,7 @@ export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-			<HomeIconBreadcrumb color="inherit" to={DASHBOARD_ROUTE}>
+			<HomeIconBreadcrumb $active={!breadcrumbs.length} color="inherit" to={DASHBOARD_ROUTE}>
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 

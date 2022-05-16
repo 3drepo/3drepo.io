@@ -66,11 +66,11 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false) => {
+db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
-			{ permissions: breaking ? undefined : permissions }),
+			{ permissions: breaking ? undefined : permissions, ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
 	]);
 };
