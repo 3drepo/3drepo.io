@@ -27,6 +27,7 @@ import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
+import bim from './overrides/bim.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
@@ -56,6 +57,8 @@ export const V4OverridesContainer = styled.div`
 	${previewComments}
 	
 	${colorPicker}
+
+	${bim}
 	${issueShapes}
 
 	${groups}
