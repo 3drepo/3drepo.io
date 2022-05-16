@@ -113,7 +113,7 @@ export const measurementsStying = css`
 			}
 
 			&:last-of-type {
-				margin-bottom: 14px;
+				margin-bottom: 10px;
 			}
 		}
 
