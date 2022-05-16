@@ -20,7 +20,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
-import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
@@ -32,6 +31,7 @@ import {
 	TermsContainer,
 	ErrorContainer,
 	ErrorMessage,
+	FormCheckbox,
 	ErrorIcon,
 	Link,
 	Gap,
@@ -138,7 +138,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					<FormCheckbox
 						name="termsAgreed"
 						control={control}
-						formError={errors.termsAgreed}
 						label={(
 							<CheckboxMessage>
 								<FormattedMessage
@@ -191,7 +190,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					<FormCheckbox
 						name="mailListAgreed"
 						control={control}
-						formError={errors.mailListAgreed}
 						label={(
 							<CheckboxMessage>
 								<FormattedMessage

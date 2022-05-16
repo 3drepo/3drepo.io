@@ -30,20 +30,23 @@ import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
+import { LOGIN_PATH, PASSWORD_CHANGE_PATH } from './routes.constants';
 
 export const Root = () => {
 	const history = useHistory();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
+	const { location: { pathname } } = history;
 
 	const isRegistrationRoute = () => {
 		const registrationRoutes = ['v5/signup', 'v5/register-verify'];
 		return registrationRoutes.some((route) => history.location.pathname.endsWith(route));
 	};
 
+	const isPasswordChangeRoute = () => pathname === PASSWORD_CHANGE_PATH;
+
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
-
 	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
@@ -52,8 +55,9 @@ export const Root = () => {
 		if (!isNull(isAuthenticated)
 			&& !isAuthenticated
 			&& !isRegistrationRoute()
+			&& !isPasswordChangeRoute()
 		) {
-			history.push('/v5/login');
+			history.push(LOGIN_PATH);
 		}
 	}, [isAuthenticated]);
 

@@ -57,21 +57,20 @@ queue.purgeQueues = async () => {
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = async (userCredentials, tsList = [], customData = {}) => {
+db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
+	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false) => {
+db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
-			{ permissions: breaking ? undefined : permissions }),
+			{ permissions: breaking ? undefined : permissions, ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
 	]);
 };
@@ -151,6 +150,8 @@ db.createLegends = (teamspace, modelId, legends) => {
 	const formattedLegends = legends.map((legend) => ({ ...legend, _id: stringToUUID(legend._id) }));
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
+
+ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();

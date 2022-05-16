@@ -17,30 +17,30 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
 import { getPasswordStrength } from '@/v4/services/validation';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 
 const numberField = Yup.number().typeError(formatMessage({
-	id: 'federations.surveyPoint.error.number',
+	id: 'settings.surveyPoint.error.number',
 	defaultMessage: 'Must be a decimal number or integer',
 }));
 
-export const FederationSettingsSchema = Yup.object().shape({
+const SettingsSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2,
 			formatMessage({
-				id: 'federations.name.error.min',
-				defaultMessage: 'Federation Name must be at least 2 characters',
+				id: 'settings.name.error.min',
+				defaultMessage: 'Name must be at least 2 characters',
 			}))
 		.max(120,
 			formatMessage({
-				id: 'federations.name.error.max',
-				defaultMessage: 'Federation Name is limited to 120 characters',
+				id: 'settings.name.error.max',
+				defaultMessage: 'Name is limited to 120 characters',
 			}))
 		.required(
 			formatMessage({
-				id: 'federations.name.error.required',
-				defaultMessage: 'Federation Name is a required field',
+				id: 'settings.name.error.required',
+				defaultMessage: 'Name is a required field',
 			}),
 		),
 	desc: Yup.lazy((value) => (
@@ -49,13 +49,13 @@ export const FederationSettingsSchema = Yup.object().shape({
 			: Yup.string()
 				.min(1,
 					formatMessage({
-						id: 'federations.desc.error.min',
-						defaultMessage: 'Federation Description must be at least 1 character',
+						id: 'settings.desc.error.min',
+						defaultMessage: 'Description must be at least 1 character',
 					}))
 				.max(600,
 					formatMessage({
-						id: 'federations.desc.error.max',
-						defaultMessage: 'Federation Description is limited to 600 characters',
+						id: 'settings.desc.error.max',
+						defaultMessage: 'Description is limited to 600 characters',
 					}))
 	)),
 	unit: Yup.string().required().default('mm'),
@@ -65,17 +65,17 @@ export const FederationSettingsSchema = Yup.object().shape({
 			: Yup.string()
 				.min(1,
 					formatMessage({
-						id: 'federations.code.error.min',
+						id: 'settings.code.error.min',
 						defaultMessage: 'Code must be at least 1 character',
 					}))
 				.max(50,
 					formatMessage({
-						id: 'federations.code.error.max',
+						id: 'settings.code.error.max',
 						defaultMessage: 'Code is limited to 50 characters',
 					}))
 				.matches(/^[\w|_|-]*$/,
 					formatMessage({
-						id: 'federations.code.error.characters',
+						id: 'settings.code.error.characters',
 						defaultMessage: 'Code can only consist of letters and numbers',
 					}))
 	)),
@@ -87,12 +87,12 @@ export const FederationSettingsSchema = Yup.object().shape({
 	angleFromNorth: numberField
 		.min(0,
 			formatMessage({
-				id: 'federations.angle.error.min',
+				id: 'settings.angle.error.min',
 				defaultMessage: 'Angle cannot be smaller than 0',
 			}))
 		.max(360,
 			formatMessage({
-				id: 'federations.angle.error.max',
+				id: 'settings.angle.error.max',
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
 		.transform((value) => value ?? 0),
@@ -226,3 +226,6 @@ export const UserSignupSchemaPersonal = Yup.object().shape({
 export const UserSignupSchemaTermsAndSubmit = Yup.object().shape({
 	termsAgreed: Yup.boolean().oneOf([true]),
 });
+
+export const FederationSettingsSchema = SettingsSchema;
+export const ContainerSettingsSchema = SettingsSchema.shape({ type: Yup.string() });

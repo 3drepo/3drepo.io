@@ -31,6 +31,7 @@ type ContainerEllipsisMenuProps = {
 	container: IContainer,
 	onSelectOrToggleItem: (id: string) => void,
 	openShareModal: () => void,
+	openContainerSettings: () => void,
 };
 
 export const ContainerEllipsisMenu = ({
@@ -38,6 +39,7 @@ export const ContainerEllipsisMenu = ({
 	container,
 	onSelectOrToggleItem,
 	openShareModal,
+	openContainerSettings,
 }: ContainerEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const dispatch = useDispatch();
@@ -49,7 +51,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-				to={viewerRoute(teamspace, container)}
+				to={viewerRoute(teamspace, project, container)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -63,7 +65,6 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
-
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -99,6 +100,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
+				onClick={openContainerSettings}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

@@ -16,43 +16,15 @@
  */
 
 import styled from 'styled-components';
-import UserIcon from '@assets/icons/user.svg';
-import PasswordIcon from '@assets/icons/lock.svg';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
-
-export const Heading = styled(Typography).attrs({
-	variant: 'h1',
-})`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	user-select: none;
-`;
-
-export const AuthField = styled(FormTextField).attrs({
-	required: true,
-
-})`
-	> * { color: ${({ theme }) => theme.palette.secondary.main}; }
-`;
-
-export const UsernameField = styled(AuthField).attrs({
-	InputProps: {
-		startAdornment: <UserIcon />,
-	},
-})``;
-
-export const PasswordField = styled(AuthField).attrs({
-	InputProps: {
-		startAdornment: <PasswordIcon />,
-	},
-})``;
 
 export const OtherOptions = styled.div`
 	display: flex;
-	padding: 14px 0 20px;
+	padding: 14px 0 14px;
 	color: ${({ theme }) => theme.palette.base.main};
 	a {
 		color: ${({ theme }) => theme.palette.primary.main};
+		text-decoration: none;
 	}
 `;
 
@@ -66,14 +38,4 @@ export const SignUpPrompt = styled(StyledTypography)`
 
 export const ForgotPasswordPrompt = styled(StyledTypography)`
 	margin-left: auto;
-`;
-
-export const ErrorMessage = styled(StyledTypography)`
-	color: ${({ theme }) => theme.palette.error.main};
-	display: flex;
-	align-items: center;
-	margin-top: 15px;
-	svg {
-		margin-right: 5px;
-	}
 `;

@@ -61,7 +61,7 @@ export const FederationListItem = ({
 	filterQuery,
 	onFavouriteChange,
 }: IFederationListItem): JSX.Element => {
-	const { teamspace } = useParams<DashboardParams>();
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
@@ -82,7 +82,7 @@ export const FederationListItem = ({
 						subtitle={federation.desc}
 						minWidth={90}
 					>
-						<Link to={viewerRoute(teamspace, federation)}>
+						<Link to={viewerRoute(teamspace, project, federation)}>
 							<Highlight search={filterQuery}>
 								{federation.name}
 							</Highlight>

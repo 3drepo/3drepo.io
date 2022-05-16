@@ -48,7 +48,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.loadFederation',
 					defaultMessage: 'Load Federation in 3D Viewer',
 				})}
-				to={viewerRoute(teamspace, federation)}
+				to={viewerRoute(teamspace, project, federation)}
 			/>
 
 			<EllipsisMenuItem

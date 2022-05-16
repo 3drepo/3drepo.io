@@ -19,7 +19,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 			print("invoice items updated: " + JSON.stringify(invoice.items));
 
 			if(!dryRun) {
-				userDB.getCollection("invoices").update({_id: invoice._id}, {$set: {items : invoice.items}});
+				userDB.getCollection("invoices").updateOne({_id: invoice._id}, {$set: {items : invoice.items}});
 			}
 		});
 	}

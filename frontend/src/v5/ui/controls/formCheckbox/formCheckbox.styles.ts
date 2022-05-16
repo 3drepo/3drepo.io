@@ -23,7 +23,6 @@ export const Checkbox = styled(CheckboxBase)`
 
 	svg {
 		border-radius: 3px;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		
 		& > rect {
 			stroke: ${({ theme }) => theme.palette.base.light};

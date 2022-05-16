@@ -20,8 +20,10 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
-import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
+import { PasswordForgot } from '../login/passwordForgot';
+import { PasswordChange } from '../login/passwordChange';
+import { TeamspaceSelection } from '../teamspaceSelection';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Login } from '../login';
@@ -39,14 +41,26 @@ export const MainRoute = () => {
 			<GlobalStyle />
 			<ViewerCanvas location={{ pathname }} />
 			<Switch>
-				<Route exact path={`${path}/login`} component={Login} />
-				<Route exact path={`${path}/signup`} component={UserSignup} />
-				<Route exact path={`${path}/register-verify`} component={UserVerification} />
-				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
+				<Route exact path={`${path}/login`}>
+					<Login />
+				</Route>
+				<Route exact path={`${path}/signup`}>
+					<UserSignup />
+				</Route>
+				<Route exact path={`${path}/register-verify`}>
+					<UserVerification />
+				</Route>
+				<Route exact path={`${path}/password-forgot`}>
+					<PasswordForgot />
+				</Route>
+				<Route exact path={`${path}/password-change`}>
+					<PasswordChange />
+				</Route>
+				<Route exact path={`${path}/dashboard/`}>
+					<TeamspaceSelection />
+				</Route>
+				<Route path={`${path}/dashboard/:teamspace/:project?`}>
 					<DashboardLayout>
-						<Route exact path={`${path}/dashboard/`}>
-							<TeamspacesList />
-						</Route>
 						<Route path={`${path}/dashboard/:teamspace/`}>
 							<TeamspaceContent />
 						</Route>

@@ -128,7 +128,7 @@ User.getFavourites = async (user, teamspace) => {
 
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.map((role) => role.db);
+	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== 'admin' ? [roleDB] : []));
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
@@ -205,10 +205,10 @@ User.getAvatar = async (username) => {
 	const avatar = user.customData?.avatar;
 
 	if (!avatar) {
-		throw templates.userDoesNotHaveAvatar;
+		throw templates.avatarNotFound;
 	}
 
-	return avatar;
+	return avatar.data.buffer;
 };
 
 User.addUser = async (newUserData) => {

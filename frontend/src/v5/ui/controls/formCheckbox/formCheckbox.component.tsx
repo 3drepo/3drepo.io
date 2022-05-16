@@ -15,26 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CheckboxProps, FormControlLabel } from '@mui/material';
 import { Controller } from 'react-hook-form';
+import { CheckboxProps, FormControlLabel } from '@mui/material';
 import { Checkbox } from './formCheckbox.styles';
 
 export type FormCheckboxProps = CheckboxProps & {
 	control: any,
-	formError: any,
 	label: string | JSX.Element,
 };
 
 export const FormCheckbox = ({
 	name,
 	control,
-	formError,
 	label,
 	...otherProps
 }: FormCheckboxProps) => (
 	<Controller
-		name={name}
 		control={control}
+		name={name}
 		render={({ field }) => (
 			<FormControlLabel
 				label={label}

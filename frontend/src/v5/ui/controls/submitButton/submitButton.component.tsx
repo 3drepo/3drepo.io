@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button } from '@controls/button';
 import { IButton } from '@controls/button/button.component';
+import { Button } from './submitButton.styles';
 
 export const SubmitButton = ({
 	variant = 'contained',
@@ -29,7 +29,6 @@ export const SubmitButton = ({
 		fullWidth
 		variant={variant}
 		color={color}
-		style={{ marginLeft: 0, marginRight: 0 }}
 		{...props}
 	>
 		{children}
