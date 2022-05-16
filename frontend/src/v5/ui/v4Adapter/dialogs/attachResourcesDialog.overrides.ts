@@ -178,7 +178,7 @@ const AttachResourcesLink = css`
 			flex-direction: column-reverse;
 
 			${FieldsRow} {
-				min-height: 35px;
+				min-height: 42px;
 
 				& > * {
 					height: fit-content;
@@ -214,8 +214,6 @@ const AttachResourcesLink = css`
 	${AddLinkContainer} {
 		padding: 28px 0;
 		margin: 0 23px;
-		// TODO - fix after new palette is released
-		border-top: solid 1px #e0e5f0;
 
 		${LabelButton} {
 			${labelButtonPrimaryStyles}
