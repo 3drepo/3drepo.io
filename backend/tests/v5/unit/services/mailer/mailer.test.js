@@ -65,6 +65,25 @@ const testSendEmail = () => {
 			Mailer.reset();
 		});
 
+		test('should pass if config.mail.smtpConfig is not set and config.mail.generateCredentials is true', async () => {
+			Mailer.reset();
+			config.mail.generateCredentials = true;
+			delete config.mail.smtpConfig;
+			await Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: recipient,
+				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				html: await BaseTemplate.html({
+					...data,
+					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+				}),
+				attachments,
+			});
+			Mailer.reset();
+		});
+
 		test('should send email if attachments are provided', async () => {
 			await Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments);
 			expect(sendMailMock).toBeCalledTimes(1);
