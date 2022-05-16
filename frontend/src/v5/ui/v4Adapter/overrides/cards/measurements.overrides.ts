@@ -17,6 +17,7 @@
 
 import { css } from 'styled-components';
 import { Container as MeasurementsContainer } from '@/v4/routes/viewerGui/components/measurements/measurements.styles';
+import { StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 import { measurementsStying, colorPickerStyling } from './issues/shapes.overrides';
 
 export default css`
@@ -24,5 +25,9 @@ export default css`
 
 	${MeasurementsContainer} {
 		${measurementsStying}
+
+		${StyledTextField} {
+			margin: 1px 0;
+		}
 	}
 `;
