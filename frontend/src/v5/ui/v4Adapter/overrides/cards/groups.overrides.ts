@@ -28,7 +28,7 @@ import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemI
 import { css } from 'styled-components';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { CollapsableContent, NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
-import { Container as FiltersContainer, ChipsContainer, InputLabel, SelectedCriteria, FormContainer, ButtonContainer } from '@/v4/routes/components/criteriaField/criteriaField.styles';
+import { Container as FiltersContainer, ChipsContainer, InputLabel, SelectedCriteria, FormContainer, ButtonContainer, FormControl } from '@/v4/routes/components/criteriaField/criteriaField.styles';
 
 const previewGrouItem = css`
 	${PreviewListItemContainer} {
@@ -111,12 +111,33 @@ const expandedGroupItem = css`
 						bottom: 6px;
 					}
 				}
-				// Field / Operation / Value box
+				// Field / Operation / Value box area
 				${FormContainer} {
 					border: none;
 					background-color: #F7F8FA;
 					border-top: 1px solid #E0E5F0;
 					padding: 12px 15px;
+
+					${FormControl} {
+						margin: 0 0 11px;
+						label {
+							transform: none;
+							font-size: 10px;
+							top: -2px;
+						}
+						.MuiInputBase-input {
+							height: 24px;
+						}
+						&.operation {
+							margin-top: -16px;
+							.MuiInputBase-root {
+								margin-top: 16px;
+								.MuiSelect-select, .MuiSelect-select ~ svg {
+									margin-top: 0;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
