@@ -45,10 +45,7 @@ const initialiseSession = async () => {
 		store,
 	});
 
-	return { middleware,
-		deinitStore:
-		// istanbul ignore next
-		() => new Promise((resolve) => store.client.close(true, resolve)) };
+	return { middleware };
 };
 
 Sessions.session = initialiseSession();
