@@ -15,18 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { FormattedMessage } from 'react-intl';
+import { ListItem } from '../teamspaceCard.styles';
+import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
 
-const selectCurrentUserDomain = (state) => (state.currentUser2);
+interface IAddTeamspaceCard {
+	variant?: 'primary' | 'secondary',
+}
 
-export const selectCurrentUser = createSelector(
-	selectCurrentUserDomain, (state) => state.currentUser || {},
-);
-
-export const selectUsername: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.username || '',
-);
-
-export const selectFirstName: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.firstName || '',
+export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+	<ListItem>
+		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
+			<Container $variant={variant}>
+				<AddTeamspaceIcon />
+				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
+			</Container>
+		</a>
+	</ListItem>
 );
