@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ScrollArea } from '@controls/scrollArea';
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	margin: 16px;
+export const ScrollBar = styled(ScrollArea).attrs({
+	variant: 'secondary',
+})`
+	background: ${({ theme }) => theme.palette.gradient.secondary};
+	border-top: 1px solid rgb(255 255 255 / 10%);
+`;
+
+export const HomeContent = styled.div`
+	padding: 60px;
+	height: 100%;
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+`;
+
+export const WelcomeMessage = styled(Typography).attrs({
+	variant: 'h1',
+})`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	text-align: center;
+	margin-bottom: 40px;
+	margin-top: auto;
 `;

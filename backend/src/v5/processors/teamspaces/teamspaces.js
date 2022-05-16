@@ -18,12 +18,14 @@
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
+const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 
 const Teamspaces = {};
+
+Teamspaces.getAvatar = getAvatar;
 
 Teamspaces.initTeamspace = async (username) => {
 	try {

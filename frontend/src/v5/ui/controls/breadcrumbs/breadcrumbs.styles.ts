@@ -62,8 +62,9 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 	}
 `;
 
-export const HomeIconBreadcrumb = styled(Breadcrumb)`
+export const HomeIconBreadcrumb = styled(Breadcrumb)<{ $active: boolean; }>`
 	&& {
+		${({ $active, theme }) => $active && `color: ${theme.palette.primary.main}`};
 		padding: 10px;
 	}
 `;

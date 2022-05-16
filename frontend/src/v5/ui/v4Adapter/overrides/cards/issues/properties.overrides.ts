@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { css } from 'styled-components';
 import { ActionsLine, StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
-import { DescriptionImage } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { DescriptionImage, Content as PropertiesTabContent } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { DateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
 import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
-import { css } from 'styled-components';
 
 export default css`
 	.description {
@@ -72,38 +72,68 @@ export default css`
 		}
 	}
 
-	${StyledMarkdownField} {
-		border: 1px solid #C1C8D5; // TODO: fix after new palette is released
-		border-radius: 5px;
-		min-height: 32px;
-		padding: 4px 10px;
-		margin-top: 0px;
-		margin-bottom: 0px;
-		font-size: 0.75rem;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		p {
-			margin: 0;
-		}
-	}
+	${PropertiesTabContent} {
 
-	// Drop-down inputs
-	${StyledFormControl} {
-		input {
-			padding: 0px 11px;
+		${StyledMarkdownField} {
+			border: 1px solid #C1C8D5; // TODO: fix after new palette is released
+			border-radius: 5px;
+			min-height: 32px;
+			padding: 4px 10px;
+			margin-top: 0px;
+			margin-bottom: 0px;
+			font-size: 0.75rem;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			p {
+				margin: 0;
+			}
 		}
 
-		/* label { left: -14px; } */
-		.MuiInput-root svg { margin-top: 15px; }
+		// Drop-down inputs
+		${StyledFormControl} {
+			input {
+				padding: 0px 11px;
+			}
 
-		// Drop down icon for date selector
-		.MuiInputAdornment-root {
-			position: absolute;
-			cursor: pointer;
-			pointer-events: none;
-			right: 4px;
+			.MuiInput-root svg { margin-top: 15px; }
 
-			svg {
-				height: 20px;
+			// Drop down icon for date selector
+			.MuiInputAdornment-root {
+				position: absolute;
+				cursor: pointer;
+				pointer-events: none;
+				right: 4px;
+
+				svg {
+					height: 20px;
+				}
+			}
+		}
+
+		${ActionsLine} {
+			bottom: 4px;
+			right: 0;
+		}
+
+		${DescriptionImage} {
+			border-radius: 5px;
+		}
+
+		${DateFieldContainer} {
+			margin-top: 17px;
+			input {
+				cursor: pointer;
+				height: 24px;
+			}
+		}
+
+		${UpdateButtonsContainer} {
+			justify-content: left;
+			${StyledButton} {
+				margin: 0;
+			}
+
+			${ButtonContainer} {
+				min-height: 26px;
 			}
 		}
 	}
