@@ -88,15 +88,20 @@ export default css`
 
 	// Drop-down inputs
 	${StyledFormControl} {
+		input {
+			padding: 0px 11px;
+		}
+
 		/* label { left: -14px; } */
-		.MuiInput-root svg { margin-top: 16px; }
+		.MuiInput-root svg { margin-top: 15px; }
 
 		// Drop down icon for date selector
 		.MuiInputAdornment-root {
 			position: absolute;
 			cursor: pointer;
 			pointer-events: none;
-			right: 8px;
+			right: 4px;
+
 			svg {
 				height: 20px;
 			}
@@ -112,6 +117,7 @@ export default css`
 		input {
 			cursor: pointer;
 			height: 24px;
+			color: ${({ theme }) => theme.palette.secondary.main};
 		}
 	}
 
