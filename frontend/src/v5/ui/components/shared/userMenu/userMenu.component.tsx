@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router';
+
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
@@ -27,7 +27,6 @@ import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { IUser } from '@/v5/store/users/users.redux';
 import { Avatar } from '@controls/avatar';
 import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import {
 	AvatarContainer,
 	AvatarSection,
@@ -42,7 +41,6 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {
-	const { teamspace } = useParams<DashboardParams>();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
 
@@ -78,7 +76,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 				<ActionMenuSection>
 					<ActionMenuItemLink
 						Icon={TeamspacesIcon}
-						to={`${baseUrl}/${teamspace}`}
+						to={baseUrl}
 					>
 						<FormattedMessage
 							id="userMenu.teamspaces"
