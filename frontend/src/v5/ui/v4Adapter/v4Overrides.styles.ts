@@ -21,15 +21,18 @@ import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/com
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
-import issueSequences from './overrides/sequences.overrides';
-import issueProperties from './overrides/cards/issues/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
+import bim from './overrides/bim.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
+
+import issueSequences from './overrides/cards/issues/sequences.overrides';
+import issueProperties from './overrides/cards/issues/properties.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
 import measurements from './overrides/cards/measurements.overrides';
+import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 
 export const V4OverridesContainer = styled.div`
@@ -49,14 +52,17 @@ export const V4OverridesContainer = styled.div`
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
-
+	
 	${previewItem}
 	${previewDetails}
 	${previewComments}
 
+	${bim}
 	${issueShapes}
-	${measurements}
+	${issueProperties}
+	${tree}
 	${views}
+	${measurements}
 
 	${issueSequences}
 	${issueProperties}
