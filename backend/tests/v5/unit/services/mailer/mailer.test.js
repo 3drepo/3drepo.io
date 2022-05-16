@@ -64,7 +64,6 @@ const testSendEmail = () => {
 			delete config.mail.smtpConfig;
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.smtpConfig is not set');
-			config.mail.generateCredentials = true;
 			Mailer.reset();
 		});
 
