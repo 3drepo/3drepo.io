@@ -83,7 +83,7 @@ export const BulletPointTitle = styled.div`
 export const BulletPointBody = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-bottom: 10px;
-	line-height: 1.4rem;
+	line-height: 1.3rem;
 `;
 
 export const BookADemoButton = styled(Button).attrs({
