@@ -78,8 +78,6 @@ export const theme = createTheme(
 					},
 				},
 				MuiSelect: {
-					components: {
-					},
 					styleOverrides: {
 						select: {
 							lineHeight: '22px',
