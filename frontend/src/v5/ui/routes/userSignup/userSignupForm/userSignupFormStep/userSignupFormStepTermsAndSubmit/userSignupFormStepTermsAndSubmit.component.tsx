@@ -80,7 +80,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		control,
 		getValues,
 		formState,
-		formState: { errors, isValid: formIsValid },
+		formState: { isValid: formIsValid },
 	} = useForm<ITermsAndSubmitFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(UserSignupSchemaTermsAndSubmit),

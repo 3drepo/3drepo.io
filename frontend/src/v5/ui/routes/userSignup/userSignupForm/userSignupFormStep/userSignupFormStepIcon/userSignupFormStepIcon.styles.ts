@@ -36,7 +36,7 @@ export const StepIconContainer = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-    font-weight: 700;
+	font-weight: 700;
 
 	& > * {
 		color: ${({ theme }) => theme.palette.primary.contrast};
@@ -49,8 +49,8 @@ export const CompletedStepIcon = styled(CheckIcon)`
 
 export const ErrorStepIcon = styled(ErrorIcon)`
 	${stepIconStyle}
-	
-    padding: 7px;
+
+	padding: 7px;
 	overflow: visible;
 	background-color: ${({ theme }) => theme.palette.error.main};
 	& path {
