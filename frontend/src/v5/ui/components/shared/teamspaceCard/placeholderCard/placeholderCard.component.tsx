@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { StyledCard } from '../teamspaceCard.styles';
+import { ImagePlaceholder, ListItem, TextPlaceholder } from './placeholderCard.styles';
 
-const selectCurrentUserDomain = (state) => (state.currentUser2);
+interface IAddTeamspaceCard {
+	variant?: 'primary' | 'secondary',
+}
 
-export const selectCurrentUser = createSelector(
-	selectCurrentUserDomain, (state) => state.currentUser || {},
-);
-
-export const selectUsername: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.username || '',
-);
-
-export const selectFirstName: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.firstName || '',
+export const PlaceholderCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+	<ListItem>
+		<StyledCard $variant={variant}>
+			<ImagePlaceholder />
+			<TextPlaceholder />
+			<TextPlaceholder width="50%" />
+		</StyledCard>
+	</ListItem>
 );

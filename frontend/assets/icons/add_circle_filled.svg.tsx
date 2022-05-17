@@ -14,26 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link, useRouteMatch } from 'react-router-dom';
-import { DashboardListItem } from '@components/dashboard/dashboardList';
-import {
-	DashboardListItemRow,
-	DashboardListItemText,
-} from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { discardSlash } from '@/v5/services/routing/routing';
 
-export const TeamspaceListItem = ({ name }): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardSlash(url);
-	return (
-		<DashboardListItem>
-			<Link to={`${url}/${name}`}>
-				<DashboardListItemRow>
-					<DashboardListItemText>
-						{name}
-					</DashboardListItemText>
-				</DashboardListItemRow>
-			</Link>
-		</DashboardListItem>
-	);
+type IProps = {
+	fillColour?: string;
+	className?: string;
 };
+
+export default ({ fillColour, className }: IProps) => (
+	<svg width="33" height="32" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<circle cx="16.6336" cy="15.8616" r="15.8616" fill="currentColor" />
+		<path d="M16.6337 9.33063V22.3931" stroke={fillColour} strokeWidth="2" />
+		<path d="M16.6337 9.33063V22.3931" stroke={fillColour} strokeWidth="2" />
+		<path d="M23.1649 15.8619L10.1024 15.8619" stroke={fillColour} strokeWidth="2" />
+		<path d="M23.1649 15.8619L10.1024 15.8619" stroke={fillColour} strokeWidth="2" />
+	</svg>
+);
