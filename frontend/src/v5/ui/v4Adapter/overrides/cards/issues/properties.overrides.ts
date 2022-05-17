@@ -88,11 +88,6 @@ export default css`
 			}
 		}
 
-		/* // Drop-down inputs
-		${StyledFormControl} {
-			label { left: -14px; }
-			.MuiInput-root svg { margin-top: 23px; } */
-
 		// Drop-down inputs
 		${StyledFormControl} {
 			.MuiInput-root svg { margin-top: 16px; }

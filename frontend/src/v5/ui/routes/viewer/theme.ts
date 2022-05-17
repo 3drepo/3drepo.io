@@ -31,6 +31,8 @@ export const theme = createTheme(
 						root: {
 							'& input': {
 								padding: '0px 8px',
+								height: 34,
+								lineHeight: 34,
 							},
 						},
 					},
