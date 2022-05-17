@@ -18,6 +18,7 @@
 import { createTheme } from '@mui/material/styles';
 import { COLOR, theme as oldTheme } from '@/v5/ui/themes/theme';
 import { StyledItemText, StyledListItem, CopyText } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { Item } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
 import _ from 'lodash';
 
@@ -93,9 +94,14 @@ export const theme = createTheme(
 						select: {
 							lineHeight: '22px',
 							height: '24px',
-							padding: '0 15px',
+							padding: '0 10px',
 							marginTop: '18px',
 							left: '-14px',
+							color: `${COLOR.SECONDARY_MAIN} !important`,
+
+							'& ~ svg': {
+								right: 10,
+							},
 						},
 					},
 				},
@@ -216,6 +222,12 @@ export const theme = createTheme(
 								'&:hover': {
 									backgroundColor: '#f0f5ff', // TODO: fix after new palette is released
 								},
+							},
+							// dropdown menu items
+							[`& ${Item}${Item}`]: {
+								height: 40,
+								color: COLOR.SECONDARY_MAIN,
+								fontSize: '0.75rem',
 							},
 						},
 					},
