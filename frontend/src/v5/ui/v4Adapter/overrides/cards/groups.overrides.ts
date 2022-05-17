@@ -16,7 +16,7 @@
  */
 
 import { GroupActions, GroupListItem } from '@/v4/routes/viewerGui/components/groups/groups.styles';
-import { Container as GroupDetails, Actions as BottomLeftButtons } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
+import { Container as GroupDetails, Actions as BottomLeftButtons, Description, StyledTextField, StyledFormControl } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import {
 	Container as PreviewListItemContainer,
 	Content as PreviewListItemContent,
@@ -27,8 +27,8 @@ import {
 import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
-import { CollapsableContent, NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
-import { Container as FiltersContainer, ChipsContainer, InputLabel, SelectedCriteria, FormContainer, ButtonContainer, FormControl } from '@/v4/routes/components/criteriaField/criteriaField.styles';
+import { CollapsableContent, NotCollapsableContent, ToggleButtonContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Container as TextFieldContainer, FieldWrapper, StyledLinkableField } from '@/v4/routes/components/textField/textField.styles';
 
 const previewGrouItem = css`
 	${PreviewListItemContainer} {
@@ -95,6 +95,81 @@ const previewGrouItem = css`
 
 const expandedGroupItem = css`
 	${GroupDetails} {
+		.MuiAccordionDetails-root {
+			background-color: ${({ theme }) => theme.palette.primary.constrast};
+			${CollapsableContent} {
+				padding: 10px;
+				label {
+					font-size: 10px;
+				}
+				${TextFieldContainer} {
+					/* TODO - fix after new palette is released */
+					border: 1px solid #C1C8D5;
+					border-radius: 5px;
+					background-color: ${({ theme }) => theme.palette.primary.constrast};
+					label {
+						transform: scale(1);
+						left: 1px;
+						top: -18px;
+					}
+
+					.MuiFormControl-root {
+						margin-top: 0;
+					}
+					
+					.MuiInputBase-root {
+						padding: 0;
+						& > textarea {
+							min-height: 2rem;
+							padding: 5px 10px;
+						}
+						fieldset {
+							border: none;
+						}
+
+					}
+					${FieldWrapper} {
+						height: 24px;
+						:after {
+							border: none;
+						}
+						${StyledLinkableField} {
+							margin: 0 12px;
+							line-height: 24px;
+						}
+					}
+				}
+				${StyledFormControl} {
+					fieldset {
+						/* TODO - fix after new palette is released */
+						border-color: #C1C8D5;
+					}
+					.MuiSelect-select {
+						margin-top: 0;
+						height: 26px;
+						color: ${({ theme }) => theme.palette.secondary.main};
+						font-size: 14px;
+						~ svg {
+							margin-top: 0;
+						}
+					}
+					label {
+						top: -16px;
+						transform: none;
+						font-size: 10px;
+					}
+				}
+				${Description} {
+					margin-top: 30px;
+				}
+				${StyledTextField} {
+					margin: 0 10px 0 0;
+				}
+			}
+		}
+		${ToggleButtonContainer} {
+			background-color: ${({ theme }) => theme.palette.primary.constrast};
+		}
 		${NotCollapsableContent} {
 			padding: 15px 0 0;
 			${FiltersContainer} {
