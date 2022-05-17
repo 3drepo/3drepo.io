@@ -48,7 +48,7 @@ const connectClient = () => new Promise((resolve, reject) => {
 const startServer = async (onNewSocket) => {
 	const server = http.createServer();
 	server.listen(port, ip);
-	const { middleware, deinitStore } = await session;
+	const { middleware } = await session;
 	const { broadcast, close: destroySocketIO } = RealTime.createApp(server, middleware, SESSION_HEADER, onNewSocket);
 
 	return {
@@ -56,7 +56,6 @@ const startServer = async (onNewSocket) => {
 		close: async () => {
 			await destroySocketIO();
 			await new Promise((resolve) => server.close(resolve));
-			return deinitStore();
 		} };
 };
 
