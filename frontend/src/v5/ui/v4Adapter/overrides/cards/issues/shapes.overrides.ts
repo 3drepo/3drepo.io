@@ -121,6 +121,8 @@ export const measurementsStying = css`
 		${MeasurementValue} {
 			font-size: 12px;
 			color: ${({ theme }) => theme.palette.secondary.main};
+			justify-content: flex-end;
+			line-height: 15px;
 		}
 
 		.MuiFormControl-root {
