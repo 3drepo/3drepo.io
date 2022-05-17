@@ -19,10 +19,10 @@ import { css } from 'styled-components';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 import { ButtonWrapper } from '@/v4/routes/viewerGui/components/panelButton/panelButton.styles';
 import { LeftPanels, LeftPanelsButtons, RightPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
+import { InputContainer } from '@/v4/routes/components/filterPanel/filterPanel.styles';
 
 // all the buttons on the left hand side of the viewer
 export default css`
-
 	${LeftPanelsButtons} {
 		width: 68px;
 		margin-top: 10px;
@@ -39,9 +39,17 @@ export default css`
 	${LeftPanels},
 	${RightPanels} {
 		margin-top: 8px;
+		
+		& .MuiPaper-root {
+			border-radius: 10px;
+		}
 
 		@media (min-width: 1520px) {
 			height: calc(100% - 38px);
+		}
+
+		${InputContainer} .react-autosuggest__container input {
+			height: 50px;
 		}
 	}
 
