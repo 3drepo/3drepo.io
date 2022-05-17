@@ -16,11 +16,15 @@
  */
 
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
-import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { StyledFormControl, Content as SequenceContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
 
 // The 4D tab
 export default css`
+	${SequenceContent} {
+		margin-top: 5px;
+	}
+
 	${StyledFormControl} {
 		margin-top: 6px;
 		label {
