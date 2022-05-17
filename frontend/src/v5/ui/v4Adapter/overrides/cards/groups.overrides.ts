@@ -111,6 +111,18 @@ const previewGroupItem = css`
 `;
 
 const expandedGroupItem = css`
+	.MuiChip-root {
+		&:hover, 
+		&:active {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			box-shadow: none;
+		}
+
+		.MuiChip-deleteIcon:hover {
+			color: ${({ theme }) => theme.palette.base.light};
+		}
+	}
+
 	${GroupDetails} {
 		${PreviewDetailsContainer} {
 			/* TODO - fix after new palette is released */
@@ -203,6 +215,8 @@ const expandedGroupItem = css`
 			padding: 15px 0 0;
 			${FiltersContainer} {
 				border: none;
+				background-color: #F7F8FA; // TODO - fix after new palette is released
+
 				${InputLabel} {
 					padding: 0 15px;
 				}
