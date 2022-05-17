@@ -95,6 +95,18 @@ const previewGroupItem = css`
 `;
 
 const expandedGroupItem = css`
+	.MuiChip-root {
+		&:hover, 
+		&:active {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			box-shadow: none;
+		}
+
+		.MuiChip-deleteIcon:hover {
+			color: ${({ theme }) => theme.palette.base.light};
+		}
+	}
+
 	${GroupDetails} {
 		${PreviewDetailsContainer} {
 			/* TODO - fix after new palette is released */
