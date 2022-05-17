@@ -124,3 +124,11 @@ export const CopyButton = styled(ContainedButton)`
 		margin-left: 8px;
 	}
 `;
+
+export const ExpandAction = styled.span<{ top?: boolean }>`
+	font-size: 11px;
+	cursor: pointer;
+	display: block;
+	text-align: center;
+	margin-top: ${({ top }) => top ? '5px' : 0};
+`;
