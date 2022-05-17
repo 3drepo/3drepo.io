@@ -120,6 +120,14 @@ export const theme = createTheme(
 						rounded: {
 							borderRadius: 6,
 						},
+						root: {
+							'.react-autosuggest__suggestions-list': {
+								margin: 0,
+								'.react-autosuggest__suggestion': {
+									height: '34px',
+								},
+							},
+						},
 					},
 				},
 				MuiAvatar: {
