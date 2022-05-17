@@ -20,6 +20,7 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
@@ -29,7 +30,6 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
-import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
