@@ -194,6 +194,8 @@ const expandedGroupItem = css`
 			padding: 15px 0 0;
 			${FiltersContainer} {
 				border: none;
+				background-color: #F7F8FA; // TODO - fix after new palette is released
+
 				${InputLabel} {
 					padding: 0 15px;
 				}
