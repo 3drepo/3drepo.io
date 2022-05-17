@@ -14,19 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
+import { DashboardLayout } from '@components/dashboard/dashboardLayout';
+import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
 
-export const Container = styled.div`
-	height: 100%;
-    display: flex;
-    flex-direction: column;
-`;
-
-export const Content = styled.section`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
-	flex-grow: 1;
-	/* using inset box-shadow because ScrollArea gives an absolute position to the component */
-	box-shadow: inset 0 6px 16px -16px;
+export const DashboardViewerLayout = styled(DashboardLayout)`
+	${AppBarContainer} {
+		opacity: .95;
+		position: absolute;
+	}
 `;

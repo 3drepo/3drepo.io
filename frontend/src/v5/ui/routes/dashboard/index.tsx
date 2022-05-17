@@ -29,6 +29,7 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -73,9 +74,9 @@ export const MainRoute = () => {
 					</DashboardLayout>
 				</Route>
 				<Route path={VIEWER_ROUTE}>
-					<DashboardLayout>
+					<DashboardViewerLayout>
 						<Viewer />
-					</DashboardLayout>
+					</DashboardViewerLayout>
 				</Route>
 
 				<Route path="*">
