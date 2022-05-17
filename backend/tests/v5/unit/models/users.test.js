@@ -425,7 +425,7 @@ const testDeleteApiKey = () => {
 const testGetAvatar = () => {
 	describe('Get users avatar', () => {
 		test('should get users avatar if user has a valid avatar', async () => {
-			const user = { customData: { avatar: 'validAvatar' } };
+			const user = { customData: { avatar: { data: { buffer: 'validAvatar' } } } };
 			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
 			const res = await User.getAvatar('user1');
 			expect(fn.mock.calls.length).toBe(1);
@@ -443,7 +443,7 @@ const testGetAvatar = () => {
 		test('should return error if user does not have a valid avatar', async () => {
 			const user = { customData: { firstname: 'Nick' } };
 			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
-			await expect(User.getAvatar('user1')).rejects.toEqual(templates.userDoesNotHaveAvatar);
+			await expect(User.getAvatar('user1')).rejects.toEqual(templates.avatarNotFound);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
 		});

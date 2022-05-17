@@ -16,9 +16,9 @@
  */
 
 import { INITIAL_STATE, federationsReducer, FederationsActions, IFederationsState } from '@/v5/store/federations/federations.redux';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { times } from 'lodash';
 import { federationMockFactory,  prepareMockSettingsReply } from './federations.fixtures';
-import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
 
 const EMPTY_SETTINGS = {
 	surveyPoint: undefined,
