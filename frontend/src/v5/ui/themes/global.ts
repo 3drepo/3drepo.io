@@ -40,14 +40,14 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	a {
+		color: currentColor;
+		
 		&:link {
 			text-decoration: none;
-			color:inherit;
 		}
 
 		&:visited {
 			text-decoration: none;
-			color:inherit;
 		}
 		&:hover {
 			text-decoration: none;
