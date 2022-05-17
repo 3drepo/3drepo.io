@@ -16,10 +16,7 @@
  */
 
 import axios from 'axios';
-import { push } from 'connected-react-router';
-
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
-import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 
@@ -51,7 +48,6 @@ axios.interceptors.response.use(
 				case 403:
 					// eslint-disable-next-line no-param-reassign
 					error.handled = true;
-					dispatch(push('/'));
 					break;
 				default:
 					break;
