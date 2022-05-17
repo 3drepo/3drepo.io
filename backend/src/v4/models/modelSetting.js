@@ -448,9 +448,13 @@ ModelSetting.updatePermissions = async function (account, model, permissions = [
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const {findByUserName, teamspaceMemberCheck} = require("./user");
-
+	if (!setting.permissions) {
+		setting.permissions = [];
+	}
+	
 	permissions = _.uniq(permissions, "user");
+
+	const {findByUserName, teamspaceMemberCheck} = require("./user");
 	const updatedSetting = await findByUserName(account).then(dbUser => {
 		const promises = [];
 
