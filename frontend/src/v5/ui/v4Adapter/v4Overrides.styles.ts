@@ -31,6 +31,7 @@ import avatarPopover from './overrides/avatarPopover.overrides';
 import issueSequences from './overrides/cards/issues/sequences.overrides';
 import issueProperties from './overrides/cards/issues/properties.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
+import issueAttachments from './overrides/cards/issues/attachments.overrides';
 import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 
@@ -60,6 +61,7 @@ export const V4OverridesContainer = styled.div`
 	${previewDetails}
 	${previewComments}
 
+	${issueAttachments}
 	${bim}
 	${issueShapes}
 	${issueProperties}
@@ -68,6 +70,8 @@ export const V4OverridesContainer = styled.div`
 
 	${issueSequences}
 	${issueProperties}
+	
+	${views}
 
 	${RevisionsSwitchContainer} {
 		display: none;
