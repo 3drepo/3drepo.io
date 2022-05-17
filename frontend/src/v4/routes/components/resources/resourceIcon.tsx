@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import {
+	DocumentIcon,
+	LinkIcon,
+	PhotoIcon,
+	ResourceIconContainer,
+} from './resources.styles';
 
-import styled from 'styled-components';
+export const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	flex: 1;
-	max-width: calc(100% - 200px);
-	margin-left: 5px;
-	
-	&:last-child {
-		justify-content: flex-end;
-		min-width: 152px;
-	}
-`;
+export const ResourceIcon = ({ type }) => (
+	<ResourceIconContainer>
+		{(type === 'http')
+			? (<LinkIcon />)
+			: (imageExtensions.indexOf(type) >= 0)
+				? (<PhotoIcon />)
+				: (<DocumentIcon />)}
+	</ResourceIconContainer>
+);

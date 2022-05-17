@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { css } from 'styled-components';
+import { DialogTitle } from '@/v4/routes/components/dialogContainer/components/dialog/dialog.styles';
 
-import styled from 'styled-components';
+export default css`
+	display: contents;
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	flex: 1;
-	max-width: calc(100% - 200px);
-	margin-left: 5px;
-	
-	&:last-child {
-		justify-content: flex-end;
-		min-width: 152px;
+	${DialogTitle} {
+		background: ${({ theme }) => theme.palette.gradient.secondary};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		height: 74px;
+		width: 100%;
+		box-sizing: border-box;
+		align-items: center;
+		display: flex;
+		padding: 0 35px;
+
+		button {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			width: 40px;
+			height: 40px;
+		}
+
+		.MuiDialogContent-root {
+			padding: 0;
+		}
 	}
 `;

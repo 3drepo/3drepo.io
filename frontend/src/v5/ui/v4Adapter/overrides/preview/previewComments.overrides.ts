@@ -24,6 +24,7 @@ import { Collapsable, NotCollapsableContent, ToggleButtonContainer as Collapsabl
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 import { Container as TabContainer } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { TabContent, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export default css`
 	${Collapsable} {
@@ -31,8 +32,6 @@ export default css`
 		padding: 0;
 
 		${Tabs} {
-			padding: 0 16px;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
 			width: unset;
 		}
 
@@ -44,6 +43,11 @@ export default css`
 		${TabContent} {
 			background-color: inherit;
 			padding: 0 16px;
+
+			${EmptyStateInfo} {
+				margin-left: 0;
+				margin-right: 0;
+			}
 		}
 	}
 

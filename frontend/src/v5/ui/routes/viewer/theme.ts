@@ -18,6 +18,7 @@
 import { createTheme } from '@mui/material/styles';
 import { COLOR, theme as oldTheme } from '@/v5/ui/themes/theme';
 import { StyledItemText, StyledListItem, CopyText } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { Item } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
 import _ from 'lodash';
 
@@ -31,6 +32,8 @@ export const theme = createTheme(
 						root: {
 							'& input': {
 								padding: '0px 8px',
+								height: 34,
+								lineHeight: 34,
 							},
 						},
 					},
@@ -54,6 +57,12 @@ export const theme = createTheme(
 				MuiInputBase: {
 					styleOverrides: {
 						root: {
+							'&.Mui-focused fieldset': {
+								borderWidth: '1px !important',
+							},
+							'& input': {
+								padding: '0px 12px !important',
+							},
 							'& svg': {
 								color: COLOR.SECONDARY_MAIN,
 								'& path': {
@@ -73,6 +82,10 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							margin: 0,
+							'& .MuiInputBase-root input': {
+								lineHeight: 22,
+								height: 24,
+							},
 						},
 					},
 				},
@@ -81,9 +94,14 @@ export const theme = createTheme(
 						select: {
 							lineHeight: '22px',
 							height: '24px',
-							padding: '0 15px',
+							padding: '0 10px',
 							marginTop: '18px',
 							left: '-14px',
+							color: `${COLOR.SECONDARY_MAIN} !important`,
+
+							'& ~ svg': {
+								right: 10,
+							},
 						},
 					},
 				},
@@ -119,8 +137,15 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							minHeight: 'unset',
+							background: COLOR.PRIMARY_MAIN_CONTRAST,
+							paddingLeft: 0,
+							paddingRight: 0,
 							'.MuiTabs-indicator': {
 								backgroundColor: COLOR.PRIMARY_MAIN,
+							},
+							'.MuiTabs-flexContainer': {
+								padding: '0 14px',
+								width: 'fit-content',
 							},
 						},
 					},
@@ -133,7 +158,7 @@ export const theme = createTheme(
 							textTransform: 'unset',
 							margin: 0,
 							marginRight: 15,
-							paddingTop: 0,
+							padding: '15px 0',
 							fontWeight: 400,
 							color: COLOR.SECONDARY_MAIN,
 						},
@@ -214,11 +239,33 @@ export const theme = createTheme(
 									backgroundColor: '#f0f5ff', // TODO: fix after new palette is released
 								},
 							},
+							// dropdown menu items
+							[`& ${Item}${Item}`]: {
+								height: 40,
+								color: COLOR.SECONDARY_MAIN,
+								fontSize: '0.75rem',
+							},
 						},
 					},
 				},
 				MuiDialog: {
 					styleOverrides: {
+						paper: {
+							maxWidth: 'unset !important',
+							minWidth: 'unset !important',
+							'& .MuiDialogTitle-root': {
+								padding: '14px 0 !important',
+								minWidth: 'fit-content',
+								'& .MuiIconButton-root': {
+									position: 'absolute',
+									right: 0,
+									top: -2,
+									'& svg': {
+										color: '#000000', // TODO fix when new palette is released
+									},
+								},
+							},
+						},
 						container: {
 							'.MuiPaper-root .MuiDialogActions-root .MuiButton-root': {
 								backgroundColor: COLOR.PRIMARY_MAIN,

@@ -19,7 +19,6 @@ import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -33,7 +32,6 @@ import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { DashedContainer } from './reportedItems.styles';
 
 interface IProps {
 	className?: string;

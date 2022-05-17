@@ -16,7 +16,7 @@
  */
 
 import { GroupActions, GroupListItem } from '@/v4/routes/viewerGui/components/groups/groups.styles';
-import { Container as GroupDetails, Actions as BottomLeftButtons, Description, StyledTextField, StyledFormControl } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
+import { Container as GroupDetails, Actions as BottomLeftButtons, Description as DetailsDescription, StyledTextField, StyledFormControl } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import {
 	Container as PreviewListItemContainer,
 	Content as PreviewListItemContent,
@@ -159,7 +159,7 @@ const expandedGroupItem = css`
 						font-size: 10px;
 					}
 				}
-				${Description} {
+				${DetailsDescription} {
 					margin-top: 30px;
 				}
 				${StyledTextField} {

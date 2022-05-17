@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
+import { V4DialogsOverridesContainer } from './v4DialogsOverrides.styles';
 
-import styled from 'styled-components';
-
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	flex: 1;
-	max-width: calc(100% - 200px);
-	margin-left: 5px;
-	
-	&:last-child {
-		justify-content: flex-end;
-		min-width: 152px;
-	}
-`;
+export const V4DialogsAdapter = ({ children }) => (
+	<ThemeProvider theme={theme}>
+		<MuiThemeProvider theme={theme}>
+			<V4DialogsOverridesContainer id="v4DialogsOverrides">
+				{children}
+			</V4DialogsOverridesContainer>
+		</MuiThemeProvider>
+	</ThemeProvider>
+);
