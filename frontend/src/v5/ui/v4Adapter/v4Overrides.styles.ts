@@ -61,7 +61,6 @@ export const V4OverridesContainer = styled.div`
 	${issueAttachments}
 	${bim}
 	${issueShapes}
-	${issueProperties}
 	${tree}
 	${views}
 	${measurements}
