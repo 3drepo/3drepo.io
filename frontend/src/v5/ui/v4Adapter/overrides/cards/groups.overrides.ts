@@ -46,6 +46,7 @@ import { Container as FiltersContainer,
 	FormControl,
 } from '@/v4/routes/components/criteriaField/criteriaField.styles';
 import { Container as TextFieldContainer, FieldWrapper, StyledLinkableField } from '@/v4/routes/components/textField/textField.styles';
+import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 
 const previewGroupItem = css`
 	${PreviewListItemContainer} {
@@ -161,6 +162,7 @@ const expandedGroupItem = css`
 						}
 
 					}
+
 					${FieldWrapper} {
 						height: 24px;
 						-webkit-text-fill-color: none;
@@ -238,13 +240,30 @@ const expandedGroupItem = css`
 					border-top: 1px solid #E0E5F0;
 					padding: 12px 15px;
 
+					.MuiButton-contained {
+						${labelButtonPrimaryStyles}
+
+						&.Mui-disabled {
+							color: ${({ theme }) => theme.palette.primary.contrast};
+							background-color: ${({ theme }) => theme.palette.base.lightest};
+						}
+
+						margin: -12px 0 0 0;
+					}
+
 					${FormControl} {
 						margin: 0 0 11px;
+
+						&:last-of-type {
+							margin-bottom: 0;
+						}
+
 						label {
 							transform: none;
 							font-size: 10px;
 							top: -2px;
 						}
+
 						.MuiInputBase-input {
 							height: 24px;
 							color: ${({ theme }) => theme.palette.secondary.main};
