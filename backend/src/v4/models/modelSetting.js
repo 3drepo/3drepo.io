@@ -437,32 +437,51 @@ ModelSetting.updateMultiplePermissions = async function(account, modelIds, updat
 	});
 };
 
-ModelSetting.updatePermissions = async function(account, model, permissions = []) {
+ModelSetting.updatePermissions = async function (account, model, permissions = []) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
 
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	permissions.forEach((permissionUpdate) => {
-		if (!setting.permissions) {
-			setting.permissions = [];
-		}
+	if (!Array.isArray(permissions)) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
 
-		const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
+	const {findByUserName, teamspaceMemberCheck} = require("./user");
 
-		if (-1 !== userIndex) {
-			if ("" !== permissionUpdate.permission) {
-				setting.permissions[userIndex].permission = permissionUpdate.permission;
-			} else {
-				setting.permissions.splice(userIndex, 1);
+	permissions = _.uniq(permissions, "user");
+	const updatedSetting = await findByUserName(account).then(dbUser => {
+		const promises = [];
+
+		permissions.forEach(permission => {
+			if (!utils.isString(permission.user) || !utils.isString(permission.permission)) {
+				throw responseCodes.INVALID_ARGUMENTS;
 			}
-		} else if ("" !== permissionUpdate.permission) {
-			setting.permissions.push(permissionUpdate);
-		}
-	});
 
-	const updatedSetting = await ModelSetting.changePermissions(account, model, setting.permissions);
+			if (permission.permission && !PermissionTemplates.findById(dbUser, permission.permission)) {
+				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
+			}
+
+			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
+				const userIndex = setting.permissions.findIndex(x => x.user === permission.user);
+
+				if (-1 !== userIndex) {
+					if ("" !== permission.permission) {
+						setting.permissions[userIndex].permission = permission.permission;
+					} else {
+						setting.permissions.splice(userIndex, 1);
+					}
+				} else if ("" !== permission.permission) {
+					setting.permissions.push(permission);
+				}
+			}));
+		});
+
+		return Promise.all(promises).then(() => {
+			return ModelSetting.updateModelSetting(account, model, { permissions: setting.permissions });
+		});
+	});
 
 	return { "status": updatedSetting.status };
 };
