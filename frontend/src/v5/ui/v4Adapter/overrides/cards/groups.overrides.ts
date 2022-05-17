@@ -16,7 +16,12 @@
  */
 
 import { GroupActions, GroupListItem } from '@/v4/routes/viewerGui/components/groups/groups.styles';
-import { Container as GroupDetails, Actions as BottomLeftButtons, Description as DetailsDescription, StyledTextField, StyledFormControl } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
+import { Container as GroupDetails,
+	Actions as BottomLeftButtons,
+	Description as DetailsDescription,
+	StyledTextField,
+	StyledFormControl,
+} from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import {
 	Container as PreviewListItemContainer,
 	Content as PreviewListItemContent,
@@ -27,8 +32,19 @@ import {
 import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
-import { Container as PreviewDetailsContainer, CollapsableContent, NotCollapsableContent, ToggleButtonContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
-import { Container as FiltersContainer, ChipsContainer, InputLabel, SelectedCriteria, FormContainer, ButtonContainer, FormControl, SelectFieldValue } from '@/v4/routes/components/criteriaField/criteriaField.styles';
+import { Container as PreviewDetailsContainer,
+	CollapsableContent,
+	NotCollapsableContent,
+	ToggleButtonContainer,
+} from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Container as FiltersContainer,
+	ChipsContainer,
+	InputLabel,
+	SelectedCriteria,
+	FormContainer,
+	ButtonContainer,
+	FormControl,
+} from '@/v4/routes/components/criteriaField/criteriaField.styles';
 import { Container as TextFieldContainer, FieldWrapper, StyledLinkableField } from '@/v4/routes/components/textField/textField.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 
@@ -155,8 +171,9 @@ const expandedGroupItem = css`
 							border: none;
 						}
 						${StyledLinkableField} {
-							margin: 0 12px;
+							margin: 0 10px;
 							line-height: 24px;
+							font-size: 12px;
 						}
 					}
 				}
@@ -182,6 +199,10 @@ const expandedGroupItem = css`
 				}
 				${DetailsDescription} {
 					margin-top: 30px;
+					background-color: ${({ theme }) => theme.palette.primary.contrast};
+					> div {
+						height: 42px !important;
+					}
 				}
 				${StyledTextField} {
 					margin: 0 10px 0 0;
@@ -245,6 +266,7 @@ const expandedGroupItem = css`
 
 						.MuiInputBase-input {
 							height: 24px;
+							color: ${({ theme }) => theme.palette.secondary.main};
 						}
 						&.operation {
 							margin-top: -16px;
@@ -260,11 +282,6 @@ const expandedGroupItem = css`
 									}
 								}
 							}
-						}
-						${SelectFieldValue} {
-							opacity: 1;
-							/* TODO - fix after new palette is released */
-							color: #C1C8D5;
 						}
 					}
 				}
