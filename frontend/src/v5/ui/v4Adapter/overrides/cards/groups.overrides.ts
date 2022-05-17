@@ -141,8 +141,9 @@ const expandedGroupItem = css`
 							border: none;
 						}
 						${StyledLinkableField} {
-							margin: 0 12px;
+							margin: 0 10px;
 							line-height: 24px;
+							font-size: 12px;
 						}
 					}
 				}
@@ -168,6 +169,10 @@ const expandedGroupItem = css`
 				}
 				${DetailsDescription} {
 					margin-top: 30px;
+					background-color: ${({ theme }) => theme.palette.primary.contrast};
+					> div {
+						height: 42px !important;
+					}
 				}
 				${StyledTextField} {
 					margin: 0 10px 0 0;
