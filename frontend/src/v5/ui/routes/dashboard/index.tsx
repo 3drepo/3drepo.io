@@ -20,6 +20,7 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
@@ -73,9 +74,9 @@ export const MainRoute = () => {
 					</DashboardLayout>
 				</Route>
 				<Route path={VIEWER_ROUTE}>
-					<DashboardLayout>
+					<DashboardViewerLayout>
 						<Viewer />
-					</DashboardLayout>
+					</DashboardViewerLayout>
 				</Route>
 
 				<Route path="*">

@@ -26,6 +26,7 @@ export default css`
 	${LeftPanelsButtons} {
 		width: 68px;
 		margin-top: 10px;
+		padding-top: 72px;
 
 		${ButtonWrapper} {
 			margin-bottom: 0;
@@ -39,6 +40,8 @@ export default css`
 	${LeftPanels},
 	${RightPanels} {
 		margin-top: 8px;
+		padding-top: 72px;
+		box-sizing: border-box;
 		
 		& .MuiPaper-root {
 			border-radius: 10px;
