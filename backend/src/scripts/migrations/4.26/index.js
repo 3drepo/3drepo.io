@@ -16,9 +16,11 @@
  */
 
 const addAdminJob = require('./addAdminJob');
+const addAndAssignDefaultRole = require('./addAndAssignDefaultRole');
 
 const scripts = [
 	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
+	{ script: addAndAssignDefaultRole, desc: 'Add Default role and assign it to all users' },
 ];
 
 module.exports = scripts;

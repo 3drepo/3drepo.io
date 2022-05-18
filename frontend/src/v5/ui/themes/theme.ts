@@ -22,6 +22,7 @@ import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
@@ -62,6 +63,7 @@ export const COLOR = {
 };
 
 export const FONT_WEIGHT = {
+	SLIM: 300,
 	REGULAR: 400,
 	MEDIUM: 500,
 	BOLD: 600,
@@ -74,16 +76,16 @@ export const GRADIENT = {
 };
 
 export const SHADOW = {
-	LEVEL_1: '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)',
-	LEVEL_2: '0px 2px 2px rgba(0, 0, 0, 0.14), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 1px 5px rgba(0, 0, 0, 0.2)',
-	LEVEL_3: '0px 3px 4px rgba(0, 0, 0, 0.14), 0px 3px 3px rgba(0, 0, 0, 0.12), 0px 1px 8px rgba(0, 0, 0, 0.2)',
-	LEVEL_4: '0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2)',
-	LEVEL_5: '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2)',
-	LEVEL_6: '0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2)',
-	LEVEL_7: '0px 9px 12px rgba(0, 0, 0, 0.14), 0px 3px 16px rgba(0, 0, 0, 0.12), 0px 5px 6px rgba(0, 0, 0, 0.2)',
-	LEVEL_8: '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)',
-	LEVEL_9: '0px 16px 24px rgba(0, 0, 0, 0.14), 0px 6px 30px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.2)',
-	LEVEL_10: '0px 24px 38px rgba(0, 0, 0, 0.14), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 11px 15px rgba(0, 0, 0, 0.2)',
+	LEVEL_1: '0px 1px 1px rgba(0, 0, 0, 0.14)',
+	LEVEL_2: '0px 1px 5px rgba(0, 0, 0, 0.2), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.14)',
+	LEVEL_3: '0px 1px 10px rgba(23, 43, 77, 0.15)',
+	LEVEL_4: '0px 2px 4px rgba(0, 0, 0, 0.2), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 4px 5px rgba(0, 0, 0, 0.14)',
+	LEVEL_5: '0px 6px 10px rgba(0, 0, 0, 0.14)',
+	LEVEL_6: '0px 5px 5px rgba(0, 0, 0, 0.2), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.14)',
+	LEVEL_7: '0px 5px 6px rgba(0, 0, 0, 0.2), 0px 3px 16px rgba(0, 0, 0, 0.12), 0px 9px 12px rgba(0, 0, 0, 0.14)',
+	LEVEL_8: '0px 7px 8px rgba(0, 0, 0, 0.2), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 12px 17px rgba(0, 0, 0, 0.14)',
+	LEVEL_9: '0px 8px 10px rgba(0, 0, 0, 0.2), 0px 6px 30px rgba(0, 0, 0, 0.12), 0px 16px 24px rgba(0, 0, 0, 0.14)',
+	LEVEL_10: '0px 11px 15px rgba(0, 0, 0, 0.2), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 24px 38px rgba(0, 0, 0, 0.14)',
 };
 
 const typography: TypographyOptions = {
@@ -255,6 +257,11 @@ export const theme = createTheme({
 							color: COLOR.TERTIARY_MAIN,
 						},
 					},
+					'.Mui-error': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderWidth: 1,
+						},
+					},
 				},
 			},
 		},
@@ -343,6 +350,98 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiAutocomplete: {
+			defaultProps: {
+				clearIcon: createElement(ClearIcon),
+				popupIcon: createElement(ChevronIcon),
+				openText: '',
+				closeText: '',
+				clearText: '',
+				handleHomeEndKeys: true,
+			},
+			styleOverrides: {
+				root: {
+					height: '31px',
+					'.MuiFormControl-root .MuiInputBase-root': {
+						'&.MuiAutocomplete-inputRoot ': {
+							padding: '0 0 0 10px',
+							height: '31px',
+							lineHeight: '31px',
+						},
+					},
+					'&.Mui-focused .MuiAutocomplete-inputRoot .MuiOutlinedInput-notchedOutline': {
+						borderWidth: 1,
+					},
+				},
+				input: {
+					height: '100%',
+					padding: 0,
+				},
+				inputRoot: {
+					'&.Mui-disabled': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+						'.MuiAutocomplete-endAdornment': {
+							display: 'none',
+						},
+					},
+				},
+				endAdornment: {
+					position: 'static',
+					height: '100%',
+					top: 'unset',
+					display: 'flex',
+					alignItems: 'center',
+					margin: '0 10px',
+					'button:hover': {
+						backgroundColor: 'unset',
+					},
+				},
+				popupIndicator: {
+					width: '20px',
+					height: '20px',
+					margin: '8px 0px',
+				},
+				clearIndicator: {
+					width: '20px',
+					height: '20px',
+					margin: '0 5px 0 0',
+					padding: '2px',
+				},
+				listbox: {
+					'.MuiAutocomplete-option': {
+						height: 'auto',
+						alignItems: 'baseline',
+						margin: 'auto 0',
+						display: 'flex',
+						padding: '6px 12px',
+						wordWrap: 'break-word',
+						boxSizing: 'border-box',
+					},
+				},
+			},
+		},
+		MuiLinearProgress: {
+			defaultProps: {
+				color: 'primary',
+				variant: 'determinate',
+			},
+			styleOverrides: {
+				root: {
+					borderRadius: '5px',
+					height: '18px',
+					margin: 'auto 10px',
+				},
+				barColorPrimary: {
+					backgroundColor: COLOR.TERTIARY_MAIN,
+				},
+				colorPrimary: {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+				bar1Determinate: {
+					transition: 'none',
+				},
+			},
+		},
 		MuiBackdrop: {
 			styleOverrides: {
 				root: {
@@ -353,6 +452,16 @@ export const theme = createTheme({
 		MuiPaper: {
 			defaultProps: {
 				elevation: 8,
+			},
+		},
+		MuiCard: {
+			styleOverrides: {
+				root: {
+					padding: '12px',
+					borderRadius: '5px',
+					boxShadow: 'none',
+					boxSizing: 'border-box',
+				},
 			},
 		},
 		MuiDialog: {
@@ -367,6 +476,12 @@ export const theme = createTheme({
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
+				},
+				paperFullWidth: {
+					width: 'calc(100% - 100px)',
+				},
+				paperScrollPaper: {
+					maxHeight: '100vh',
 				},
 			},
 		},
@@ -498,6 +613,9 @@ export const theme = createTheme({
 						height: 17,
 						width: 'auto',
 					},
+					'&:active': {
+						boxShadow: 'none',
+					},
 				},
 				extended: {
 					height: null,
@@ -522,7 +640,6 @@ export const theme = createTheme({
 						overflow: 'hidden',
 					},
 					'& > a': {
-						color: COLOR.PRIMARY_MAIN_CONTRAST,
 						...typography.h3,
 					},
 					'& > button > span > span': {
@@ -543,7 +660,6 @@ export const theme = createTheme({
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
-					padidng: 0,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					'& input': {
 						padding: '0px 15px',
@@ -585,6 +701,14 @@ export const theme = createTheme({
 						},
 						'& path': {
 							fill: COLOR.ERROR_MAIN,
+						},
+					},
+				},
+				adornedStart: {
+					'&$error': {
+						paddingLeft: '6px',
+						'& $input': {
+							paddingLeft: '0px',
 						},
 					},
 				},
@@ -635,6 +759,10 @@ export const theme = createTheme({
 					'&:not(.Mui-error).Mui-focused': {
 						color: COLOR.TERTIARY_MAIN,
 					},
+
+					'&.Mui-disabled.MuiInputLabel-asterisk': {
+						display: 'none',
+					},
 				},
 				formControl: {
 					top: '18px',
@@ -650,6 +778,22 @@ export const theme = createTheme({
 				root: {
 					width: '100%',
 					boxSizing: 'border-box',
+				},
+			},
+		},
+		MuiFormControlLabel: {
+			styleOverrides: {
+				label: {
+					color: COLOR.BASE_MAIN,
+				},
+			},
+		},
+		MuiFormHelperText: {
+			styleOverrides: {
+				contained: {
+					position: 'absolute',
+					bottom: '-16px',
+					margin: 0,
 				},
 			},
 		},
@@ -671,6 +815,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					transition: 'none',
+					color: 'inherit',
 					padding: 12,
 				},
 			},

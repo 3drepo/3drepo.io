@@ -17,11 +17,12 @@
 
 import { AxiosResponse } from 'axios';
 import {
+	ContainerBackendSettings,
 	ContainerStats,
 	MinimumContainer,
 	NewContainer,
 } from '@/v5/store/containers/containers.types';
-import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId } from '@/v5/store/store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId, View } from '@/v5/store/store.types';
 import api from './default';
 
 export const addFavourites = (
@@ -57,6 +58,33 @@ export const fetchContainerStats = async ({
 	return data;
 };
 
+export const fetchContainerViews = async ({
+	teamspace,
+	projectId,
+	containerId,
+}: TeamspaceProjectAndContainerId): Promise<FetchContainerViewsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/views`);
+	return data;
+};
+
+export const fetchContainerSettings = async ({
+	teamspace,
+	projectId,
+	containerId,
+}: TeamspaceProjectAndContainerId): Promise<ContainerBackendSettings> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`);
+	return data;
+};
+
+export const updateContainerSettings = async ({
+	teamspace,
+	projectId,
+	containerId,
+	settings,
+}: UpdateContainerSettingsParams): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`, settings)
+);
+
 export const createContainer = async ({
 	teamspace,
 	projectId,
@@ -76,5 +104,7 @@ export const deleteContainer = (
  * Types
 */
 type CreateContainerParams = TeamspaceAndProjectId & { newContainer: NewContainer };
+type UpdateContainerSettingsParams = TeamspaceProjectAndContainerId & { settings: ContainerBackendSettings };
 
 export type FetchContainersResponse = { containers: Array<MinimumContainer> };
+export type FetchContainerViewsResponse = { views: View[] };

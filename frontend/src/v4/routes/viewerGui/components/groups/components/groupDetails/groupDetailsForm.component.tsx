@@ -59,7 +59,6 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 	}
 
 	public handleFieldChange = (onChange, form) => (event) => {
-		event.persist();
 		onChange(event);
 		this.props.handleChange(event);
 	}

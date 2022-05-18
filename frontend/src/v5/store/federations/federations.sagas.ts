@@ -16,19 +16,22 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteFederationAction, FederationsActions,
-	FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction,
-	FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction,
-	UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
 import {
-	FederationStats,
-} from '@/v5/store/federations/federations.types';
-import {
-	prepareFederationsData,
-	prepareFederationSettingsForFrontend,
-	prepareFederationSettingsForBackend,
-} from '@/v5/store/federations/federations.helpers';
+	AddFavouriteAction,
+	DeleteFederationAction,
+	FederationsActions,
+	FederationsTypes,
+	FetchFederationsAction,
+	FetchFederationSettingsAction,
+	FetchFederationStatsAction,
+	FetchFederationViewsAction,
+	RemoveFavouriteAction,
+	UpdateFederationContainersAction,
+	UpdateFederationSettingsAction,
+} from '@/v5/store/federations/federations.redux';
+import { FederationStats } from '@/v5/store/federations/federations.types';
+import { prepareFederationsData, prepareFederationSettingsForBackend, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
