@@ -615,7 +615,7 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5N
 
 /**
  * @api {post} /:teamspace/models/permissions Update multiple models permissions
- * @apiName updateMultiplePermissions
+ * @apiName batchUpdateModelPermissions
  * @apiGroup Model
  * @apiDeprecated use now (#Model:batchUpdateModelPermissions)
  *
@@ -722,7 +722,7 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5N
  *    }
  * ]
  */
-router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
+router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, batchUpdatePermissions);
 
 /**
  * @api {patch} /:teamspace/models/permissions Batch update model permissions
@@ -2123,15 +2123,6 @@ function batchUpdatePermissions(req, res, next) {
 	});
 }
 
-function updateMultiplePermissions(req, res, next) {
-	const modelsIds = req.body.map(({model}) => model);
-
-	return ModelSetting.updateMultiplePermissions(req.params.account, modelsIds, res.body).then(permissions => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
 
 function getSingleModelPermissions(req, res, next) {
 	const { account, model } = req.params;

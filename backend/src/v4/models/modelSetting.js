@@ -77,6 +77,18 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	}
 };
 
+const checkUserHasPermissionTemplate = (dbUser, permission) => {
+	if (permission.permission && !PermissionTemplates.findById(dbUser, permission.permission)) {		
+		throw responseCodes.PERM_NOT_FOUND;
+	}
+};
+
+const checkPermissionIsValid = (permission) => {
+	if (!utils.isString(permission.user) || !utils.isString(permission.permission)) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+};
+
 ModelSetting.changePermissions = async function(account, model, permissions) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
 
@@ -96,14 +108,9 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		const promises = [];
 
 		permissions.forEach(permission => {
-			if (!utils.isString(permission.user) || !utils.isString(permission.permission)) {
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-
-			if (!PermissionTemplates.findById(dbUser, permission.permission)) {
-				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
-			}
-
+			checkPermissionIsValid(permission);
+			checkUserHasPermissionTemplate(dbUser, permission);
+			
 			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
 
@@ -413,58 +420,48 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
-ModelSetting.updateMultiplePermissions = async function(account, modelIds, updatedData) {
-	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : modelIds}});
+ModelSetting.updatePermissions = async function(account, model, permissions = []) {
+	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
-	if (!modelsList.length) {
-		throw responseCodes.MODEL_INFO_NOT_FOUND;
+	if (!Array.isArray(permissions)) {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const modelsPromises = modelsList.map((model) => {
-		const newModelPermissions = updatedData.find((modelPermissions) => modelPermissions.model === model._id);
-		return ModelSetting.changePermissions(account, model._id, newModelPermissions.permissions || {});
-	});
-
-	const models = await Promise.all(modelsPromises);
-	const populatedPermissionsPromises = models.map(({permissions}) => {
-		return ModelSetting.populateUsers(account, permissions);
-	});
-	const populatedPermissions = await Promise.all(populatedPermissionsPromises);
-
-	return populatedPermissions.map((permissions, index) => {
-		const {name, federate, _id: model, subModels} =  models[index] || {};
-		return {name, federate, model, permissions, subModels};
-	});
-};
-
-ModelSetting.updatePermissions = async function(account, model, permissions = []) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
-
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	permissions.forEach((permissionUpdate) => {
-		if (!setting.permissions) {
-			setting.permissions = [];
-		}
+	permissions = _.uniq(permissions, "user");
+	if (!setting.permissions) {
+		setting.permissions = [];
+	}
 
-		const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
+	const promises = [];
+	const dbUser = await findByUserName(account);
+	permissions.forEach(permission => {
+		checkPermissionIsValid(permission);
+		checkUserHasPermissionTemplate(dbUser, permission);
 
-		if (-1 !== userIndex) {
-			if ("" !== permissionUpdate.permission) {
-				setting.permissions[userIndex].permission = permissionUpdate.permission;
-			} else {
-				setting.permissions.splice(userIndex, 1);
+		promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {		
+			const index = setting.permissions.findIndex(x => x.user === permission.user);
+			const action = {};
+			if (index !== -1 ) {
+				if (permission.permission) {		
+					setting.permissions[index].permission = permission.permission;
+					action.$set = { permissions: setting.permissions };					
+				} else {
+					action.$pull = { permissions: setting.permissions[index] };					
+				}
+			} else if (permission.permission) {
+				action.$push = { permissions: permission };
 			}
-		} else if ("" !== permissionUpdate.permission) {
-			setting.permissions.push(permissionUpdate);
-		}
-	});
+			db.updateOne(account, MODELS_COLL, { _id: model }, action);
+		}));
+	})
 
-	const updatedSetting = await ModelSetting.changePermissions(account, model, setting.permissions);
-
-	return { "status": updatedSetting.status };
+	await Promise.all(promises);
+	return { status: setting.status };
 };
 
 ModelSetting.getDefaultLegendId = async (account, model) => {
