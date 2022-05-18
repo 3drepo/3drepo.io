@@ -79,8 +79,8 @@ const modelSettings = [
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			subModels: [{ model: modelWithRevId }],
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),

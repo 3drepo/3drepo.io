@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { difference, intersection } = require('lodash');
+const { updateCustomMetadata } = require('../../../../models/metadata');
 
-const ArrayHelper = {};
+const Metadata = { };
 
-// Returns the elements of the second array that are not included in the first
-ArrayHelper.getArrayDifference = (firstArray, secondArray) => difference(secondArray, firstArray);
+Metadata.updateCustomMetadata = updateCustomMetadata;
 
-ArrayHelper.getCommonElements = intersection;
-
-module.exports = ArrayHelper;
+module.exports = Metadata;
