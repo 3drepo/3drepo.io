@@ -106,6 +106,66 @@ describe("Sharing/Unsharing a model", function () {
 				.expect(200, done);
 		});
 
+		it("should succeed and the viewer is able to see the model even if there is an invalid permission in the model (removed afterwards)", function(done) {
+			const invalidPermissionUser = "invalidUser";
+			const permissions = [
+				{ user: username_viewer, permission: "viewer"}
+			];
+			async.series([
+				function share(done) {
+					agent.patch(`/${username}/${model}/permissions`)
+						.send(permissions)
+						.expect(200, done);
+				},
+				function logout(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+				},
+				function loginAsViewer(done) {
+					agent.post("/login")
+						.send({ username: username_viewer, password: password_viewer })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_viewer);
+							done(err);
+						});
+				},
+				function checkSharedModelInList(done) {
+					agent.get(`/${username_viewer}.json`)
+						.expect(200, function(err, res) {
+							expect(res.body).to.have.property("accounts").that.is.an("array");
+							const account = res.body.accounts.find(a => a.account === username);
+							expect(account).to.have.property("models").that.is.an("array");
+							const modelObj = account.models.find(_model => _model.model === model);
+							expect(modelObj).to.have.property("model", model);
+							expect(modelObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
+
+							done(err);
+						});
+				},
+				function ableToViewModel(done) {
+					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+						.expect(200, done);
+				}, 
+				function share(done) {
+					agent.patch(`/${username}/${model}/permissions`)
+						.send([{ user: invalidPermissionUser, permission: "" }])
+						.expect(200, done);
+				},
+				function(done) {
+					agent.post("/login")
+						.send({ username, password })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("should succeed and the viewer is able to see the model", function(done) {
 			const permissions = [
 				{ user: username_viewer, permission: "viewer"}

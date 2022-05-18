@@ -2123,7 +2123,6 @@ function batchUpdatePermissions(req, res, next) {
 	});
 }
 
-
 function getSingleModelPermissions(req, res, next) {
 	const { account, model } = req.params;
 

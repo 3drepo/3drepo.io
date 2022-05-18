@@ -78,7 +78,7 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 };
 
 const checkUserHasPermissionTemplate = (dbUser, permission) => {
-	if (permission.permission && !PermissionTemplates.findById(dbUser, permission.permission)) {		
+	if (permission.permission && !PermissionTemplates.findById(dbUser, permission.permission)) {
 		throw responseCodes.PERM_NOT_FOUND;
 	}
 };
@@ -110,7 +110,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		permissions.forEach(permission => {
 			checkPermissionIsValid(permission);
 			checkUserHasPermissionTemplate(dbUser, permission);
-			
+
 			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
 
@@ -443,22 +443,22 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		checkPermissionIsValid(permission);
 		checkUserHasPermissionTemplate(dbUser, permission);
 
-		promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {		
+		promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 			const index = setting.permissions.findIndex(x => x.user === permission.user);
 			const action = {};
-			if (index !== -1 ) {
-				if (permission.permission) {		
+			if (index !== -1) {
+				if (permission.permission) {
 					setting.permissions[index].permission = permission.permission;
-					action.$set = { permissions: setting.permissions };					
+					action.$set = { permissions: setting.permissions };
 				} else {
-					action.$pull = { permissions: setting.permissions[index] };					
+					action.$pull = { permissions: setting.permissions[index] };
 				}
 			} else if (permission.permission) {
 				action.$push = { permissions: permission };
 			}
 			db.updateOne(account, MODELS_COLL, { _id: model }, action);
 		}));
-	})
+	});
 
 	await Promise.all(promises);
 	return { status: setting.status };
