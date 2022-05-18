@@ -18,6 +18,7 @@ import { FunctionComponent } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -39,7 +40,6 @@ import {
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 import { RisksIcon } from '../riskIcon/riskIcon.component';
-import { isV5 } from '@/v4/helpers/isV5';
 
 interface IProps {
 	risk: any;
