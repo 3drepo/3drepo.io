@@ -41,7 +41,7 @@ const removeGridFSBackup = async (teamspace, col, filename) => {
 
 const processCollection = async (teamspace, collection) => {
 	const ownerCol = collection.slice(0, -(refExt.length));
-	const refEntries = await find(teamspace, collection, { type: 'fs' });
+	const refEntries = await find(teamspace, collection, { type: 'fs' }, {link : 1});
 	await Promise.all(refEntries.map(async ({ _id, link }) => {
 		try {
 			await access(Path.join(fs.path, link), constants.R_OK);
