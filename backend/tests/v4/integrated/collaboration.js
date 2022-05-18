@@ -149,12 +149,15 @@ describe("Sharing/Unsharing a model", function () {
 				function ableToViewModel(done) {
 					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 						.expect(200, done);
-				}, 
-				function share(done) {
-					agent.patch(`/${username}/${model}/permissions`)
-						.send([{ user: invalidPermissionUser, permission: "" }])
-						.expect(200, done);
-				},
+				}, 		
+				function logout(done) {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_viewer);
+							done(err);
+						});
+				},		
 				function(done) {
 					agent.post("/login")
 						.send({ username, password })
@@ -162,7 +165,12 @@ describe("Sharing/Unsharing a model", function () {
 							expect(res.body.username).to.equal(username);
 							done(err);
 						});
-				}
+				},
+				function share(done) {
+					agent.patch(`/${username}/${model}/permissions`)
+						.send([{ user: invalidPermissionUser, permission: "" }])
+						.expect(200, done);
+				},
 			], done);
 		});
 
