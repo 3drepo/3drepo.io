@@ -120,6 +120,14 @@ export const theme = createTheme(
 						rounded: {
 							borderRadius: 6,
 						},
+						root: {
+							'.react-autosuggest__suggestions-list': {
+								margin: 0,
+								'.react-autosuggest__suggestion': {
+									height: '34px',
+								},
+							},
+						},
 					},
 				},
 				MuiAvatar: {
@@ -161,6 +169,22 @@ export const theme = createTheme(
 							padding: '15px 0',
 							fontWeight: 400,
 							color: COLOR.SECONDARY_MAIN,
+						},
+					},
+				},
+				MuiChip: {
+					styleOverrides: {
+						root: {
+							backgroundColor: COLOR.TERTIARY_LIGHTEST,
+							color: COLOR.SECONDARY_MAIN,
+							borderRadius: 5,
+							fontWeight: 600,
+							margin: '3px 4px 3px 0',
+						},
+						deleteIcon: {
+							color: 'inherit',
+							height: 15,
+							width: 15,
 						},
 					},
 				},

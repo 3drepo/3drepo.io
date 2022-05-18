@@ -167,7 +167,7 @@ class NewCreaterionFormComponent extends PureComponent<IProps, IState> {
 					)} />
 				</FormControl>
 
-				<FormControl>
+				<FormControl className="operation">
 					<InputLabel shrink>Operation</InputLabel>
 					<Field name="operator" render={({ field }) => (
 						<SelectField
