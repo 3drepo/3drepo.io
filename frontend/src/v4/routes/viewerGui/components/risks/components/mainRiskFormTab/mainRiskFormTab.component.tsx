@@ -39,6 +39,7 @@ import {
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 import { RisksIcon } from '../riskIcon/riskIcon.component';
+import { isV5 } from '@/v4/helpers/isV5';
 
 interface IProps {
 	risk: any;
@@ -84,6 +85,12 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNewRisk}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
+						{...(isV5() && ({
+							placeholder: 'Type a description',
+							disableShowDefaultUnderline: true,
+							className: 'description',
+							}))
+						}
 					/>
 				)} />
 			</Container>
