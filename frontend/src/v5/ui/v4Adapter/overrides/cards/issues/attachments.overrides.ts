@@ -38,6 +38,7 @@ export default css`
 					a {
 						text-decoration: underline;
 						text-underline-offset: 2px;
+						color: inherit;
 					}
 
 					svg {
