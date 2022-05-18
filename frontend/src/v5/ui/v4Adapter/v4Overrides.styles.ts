@@ -55,11 +55,11 @@ export const V4OverridesContainer = styled.div`
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
-	
+
 	${previewItem}
 	${previewDetails}
 	${previewComments}
-	
+
 	${colorPicker}
 
 	${issueAttachments}
@@ -67,14 +67,13 @@ export const V4OverridesContainer = styled.div`
 	${issueShapes}
 
 	${groups}
-	${issueProperties}
 	${tree}
 	${views}
 	${measurements}
 
 	${issueSequences}
 	${issueProperties}
-	
+
 	${views}
 
 	${RevisionsSwitchContainer} {
