@@ -16,7 +16,7 @@
  */
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { Route, useHistory } from 'react-router-dom';
+import { Route, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { LOGIN_PATH, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
@@ -87,18 +87,18 @@ interface RouteProps {
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
-	let alreadyRun: boolean = false;
+	const { pathname } = useLocation();
+	AuthActionsDispatchers.setReturnUrl(pathname);
 
 	useEffect(() => {
-		AuthActionsDispatchers.authenticate();
-		alreadyRun = true;
-	}, []);
-
-	useEffect(() => {
-		if (!isAuthenticated && alreadyRun) {
+		if (isAuthenticated === false) {
 			history.push(LOGIN_PATH);
 		}
 	}, [isAuthenticated]);
+
+	if (!isAuthenticated) {
+		return (<></>);
+	}
 
 	return children;
 };
