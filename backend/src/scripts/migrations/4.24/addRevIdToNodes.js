@@ -18,18 +18,29 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { find, updateMany } = require(`${v5Path}/handler/db`);
+const { find, findOne, updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = async (teamspace, model) => {
-	const revs = await find(teamspace, `${model}.history`, { current: { $exists: true } }, { current: 1 });
-	const proms = revs.map(({ _id, current = [] }) => (current.length ? updateMany(
+const processRevision = async (teamspace, model, revId) => {
+	const { current } = await findOne(teamspace, `${model}.history`, { _id: revId }, { current: 1 });
+	// eslint-disable-next-line no-await-in-loop
+	await updateMany(
 		teamspace,
 		`${model}.scene`,
-		{ _id: { $in: current } },
-		{ $set: { rev_id: _id } },
-	) : Promise.resolve()));
-	return Promise.all(proms);
+		{ _id: { $in: current }, rev_id: { $exists: false } },
+		{ $set: { rev_id: revId } },
+	);
+};
+
+const processModel = async (teamspace, model) => {
+	const revs = await find(teamspace, `${model}.history`, { current: { $exists: true } }, { _id: 1 });
+	for (let i = 0; i < revs.length; ++i) {
+		const { _id } = revs[i];
+		// eslint-disable-next-line no-await-in-loop
+		await processRevision(teamspace, model, _id);
+	}
+
+	await updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
 };
 
 const processTeamspace = async (teamspace) => {
@@ -39,14 +50,13 @@ const processTeamspace = async (teamspace) => {
 		logger.logInfo(`\t\t\t${model}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processModel(teamspace, model);
-		// eslint-disable-next-line no-await-in-loop
 	}
 };
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
+		logger.logInfo(`\t\t-[TEAMSPACE]${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspaces[i]);
 	}
