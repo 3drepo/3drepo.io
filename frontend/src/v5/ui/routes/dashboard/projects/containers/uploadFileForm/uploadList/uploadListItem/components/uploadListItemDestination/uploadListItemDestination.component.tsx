@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { Control, useFormContext } from 'react-hook-form';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Autocomplete, createFilterOptions } from '@mui/material';
 import { TextInput } from './uploadListItemDestination.styles';
@@ -54,6 +55,9 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	const [value, setValue] = useState<DestinationOption>({ ...emptyOption, containerName: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(true);
 	const containers = ContainersHooksSelectors.selectContainers();
+	const processingContainers = containers
+		.filter((container) => !canUploadToBackend(container.status))
+		.map((container) => container.name);
 	const [newOrExisting, setNewOrExisting] = useState(() => {
 		if (value.containerName) {
 			return containers.find((c) => c.name === value.containerName) ? 'existing' : 'new';
@@ -61,11 +65,11 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 		return 'unset';
 	});
 
-	const [containersInUse, setContainersInUse] = useState([]);
+	const [containersInUse, setContainersInUse] = useState(processingContainers);
 	const { getValues } = useFormContext();
 	const forceUpdate = React.useCallback(() => {
-		const values = getValues().uploads;
-		setContainersInUse(values.map((val) => val.containerName));
+		const containersInModal = getValues().uploads.map((val) => val.containerName);
+		setContainersInUse([...processingContainers, ...containersInModal]);
 	}, []);
 
 	return (
