@@ -21,7 +21,6 @@ import StepLabelBase from '@mui/material/StepLabel';
 import { Content } from '../userSignup.styles';
 
 export const Container = styled.div`
-	/* min-height: 100vh; */
 	flex: 1;
 	display: flex;
 	flex-direction: column;

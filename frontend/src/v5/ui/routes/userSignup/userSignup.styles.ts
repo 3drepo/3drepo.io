@@ -20,6 +20,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import DefaultLogoBase from '@assets/icons/colored_logo.svg';
 import { Display } from '@/v5/ui/themes/media';
 import { Link } from 'react-router-dom';
+import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 
 export const Container = styled.div`
 	display: flex;
@@ -30,7 +31,7 @@ export const Container = styled.div`
 `;
 
 export const Background = styled.div`
-	height: 100vh;
+	height: 100%;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -64,7 +65,7 @@ const CustomLogo = styled.img.attrs({
 `;
 
 export const LoginLink = styled(Link).attrs({
-	to: '/v5/login',
+	to: LOGIN_PATH,
 })`
 	width: fit-content;
 `;
