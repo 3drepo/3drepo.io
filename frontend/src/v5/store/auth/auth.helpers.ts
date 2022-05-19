@@ -20,9 +20,4 @@ export const usernameAlreadyExists = (error: string): boolean => error.toLowerCa
 
 export const emailAlreadyExists = (error: string): boolean => error.toLowerCase().includes('email already exists');
 
-export const getRegistrationErrorMessage = (error: any) => {
-	const { data } = error.response;
-	if (data.message) return data.message;
-	const [, message] = data.split(/<\/?pre>/);
-	return message;
-};
+export const getRegistrationErrorMessage = (error: any) => error.response.data.message;

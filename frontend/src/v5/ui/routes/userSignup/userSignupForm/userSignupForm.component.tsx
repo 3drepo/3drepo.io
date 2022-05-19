@@ -52,13 +52,13 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [unexpectedError, setUnexpectedError] = useState('');
+	const [hasUnexpectedError, setHasUnexpectedError] = useState(false);
 	const [erroredStep, setErroredStep] = useState<number>();
 
 	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
 
 	const addCompletedStep = (stepIndex: number) => {
-		if (stepIndex === LAST_STEP && unexpectedError) return;
+		if (stepIndex === LAST_STEP && hasUnexpectedError) return;
 		completedSteps.add(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
 	};
@@ -68,8 +68,8 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		setCompletedSteps(new Set(completedSteps));
 	};
 
-	const updateUnexpectedError = (error: string) => {
-		setUnexpectedError(error);
+	const updateUnexpectedError = () => {
+		setHasUnexpectedError(true);
 		removeCompletedStep(LAST_STEP);
 	};
 
@@ -96,7 +96,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const moveToNextStep = () => moveToStep(activeStep + 1);
 
 	const handleInvalidArgumentsError = (errorMessage: string) => {
-		setUnexpectedError('');
+		setHasUnexpectedError(false);
 		if (usernameAlreadyExists(errorMessage)) {
 			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
 		} else if (emailAlreadyExists(errorMessage)) {
@@ -121,7 +121,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			if (isInvalidArguments(error)) {
 				handleInvalidArgumentsError(errorMessage);
 			} else {
-				updateUnexpectedError(errorMessage);
+				updateUnexpectedError();
 			}
 		}
 	};
@@ -199,7 +199,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
-							unexpectedError={unexpectedError}
+							hasUnexpectedError={hasUnexpectedError}
 							isActiveStep={activeStep === LAST_STEP}
 						/>
 					</UserSignupFormStep>

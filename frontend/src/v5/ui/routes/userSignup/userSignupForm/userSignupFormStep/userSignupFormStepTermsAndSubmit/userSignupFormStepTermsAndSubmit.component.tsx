@@ -51,7 +51,7 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	unexpectedError: string;
+	hasUnexpectedError: boolean;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
 };
@@ -61,7 +61,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	unexpectedError,
+	hasUnexpectedError,
 	fields,
 	isActiveStep,
 }: UserSignupFormStepTermsAndSubmitProps) => {
@@ -129,7 +129,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		}
 	}, [formState]);
 
-	useEffect(() => setSubmitButtonIsPending(false), [unexpectedError]);
+	useEffect(() => setSubmitButtonIsPending(false), [hasUnexpectedError]);
 
 	return (
 		<>
@@ -209,14 +209,13 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			{ unexpectedError && (
+			{ hasUnexpectedError && (
 				<ErrorContainer>
 					<ErrorIcon />
 					<ErrorMessage>
 						<FormattedMessage
 							id="userSignup.form.error.unexpected"
-							defaultMessage="An unexpected error has occurred: &quot;{unexpectedError}&quot;. Please try again later."
-							values={{ unexpectedError }}
+							defaultMessage="An unexpected error has occurred. Please try again later."
 						/>
 						<Gap />
 						<FormattedMessage
@@ -239,7 +238,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			<CreateAccountButton
 				isPending={submitButtonIsPending}
 				startIcon={<SignupIcon />}
-				disabled={!formIsValid || !fields.captcha || !!unexpectedError}
+				disabled={!formIsValid || !fields.captcha || hasUnexpectedError}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage
