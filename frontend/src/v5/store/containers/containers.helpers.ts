@@ -37,7 +37,7 @@ export const canUploadToBackend = (status?: UploadStatuses) => {
 		UploadStatuses.FAILED,
 	];
 
-	return !status || !statusesForUpload.includes(status);
+	return !status || statusesForUpload.includes(status);
 };
 
 export const prepareSingleContainerData = (
