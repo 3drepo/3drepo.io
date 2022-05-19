@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 
-const MetaRules = require(`${src}/models/meta.rules`);
+const MetaRules = require(`${src}/models/metadata.rules`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testToQuery = () => {
@@ -154,6 +154,6 @@ const testToQuery = () => {
 	});
 };
 
-describe('models/meta.rules', () => {
+describe('models/metadata.rules', () => {
 	testToQuery();
 });

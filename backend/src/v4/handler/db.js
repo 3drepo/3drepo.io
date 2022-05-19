@@ -319,16 +319,15 @@
 		});
 	};
 
-	Handler.getSessionStore = (session) => {
-		const MongoDBStore = require("connect-mongodb-session")(session);
-		const prom = new Promise((resolve, reject) => {
-			const store = new MongoDBStore({
-				uri: getURL(),
-				databaseName:"admin",
-				collection: "sessions"
-			}, (err) => err ? reject(err) : resolve(store));
+	Handler.getSessionStore = () => {
+		const MongoStore = require("connect-mongo");
+		const sessionStore = MongoStore.create({
+			clientPromise: connect(),
+			dbName: "admin",
+			collectionName: "sessions",
+			stringify: false
 		});
-		return prom;
+		return Promise.resolve(sessionStore);
 	};
 
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
@@ -371,7 +370,7 @@
 
 	Handler.createUser = async function (username, password, customData, roles = []) {
 		const [adminDB] = await Promise.all([
-			this.getAuthDB(),
+			Handler.getAuthDB(),
 			ensureDefaultRoleExists()
 		]);
 
