@@ -56,6 +56,11 @@ export const Link = styled(LinkBase).attrs({
 	target: '_blank',
 })`
 	text-underline-offset: 1.4px;
+	
+	&& {
+		text-decoration: underline;
+	}
+
 	&, &:active, &:visited, &:hover {
 		color: currentColor;
 	}
