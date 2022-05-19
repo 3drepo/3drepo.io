@@ -73,6 +73,8 @@ export const ContainerListItem = ({
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
 
+	const hasRevisions = container.revisionsCount > 0;
+
 	return (
 		<DashboardListItem
 			selected={isSelected}
@@ -88,15 +90,19 @@ export const ContainerListItem = ({
 							name={container.latestRevision}
 							status={container.status}
 							error={container.errorResponse}
-							hasRevisions={container.revisionsCount > 0}
+							hasRevisions={hasRevisions}
 						/>
 					)}
 					selected={isSelected}
 					tooltipTitle={
-						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
+						hasRevisions ? (
+							<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
+						) : (
+							<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
+						)
 					}
 				>
-					<Link to={viewerRoute(teamspace, project, container)}>
+					<Link to={hasRevisions ? viewerRoute(teamspace, project, container) : '#'}>
 						<Highlight search={filterQuery}>
 							{container.name}
 						</Highlight>
