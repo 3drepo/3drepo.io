@@ -866,6 +866,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('DeselectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
+	public static setStreamingModelPriority(modelNamespace: string, priority: number){
+		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({modelNamespace, priority}));
+	}
+
 	/**
 	 * Add a Risk pin
 	 * @category Pins
