@@ -19,7 +19,7 @@ const { difference, intersection } = require('lodash');
 
 const ArrayHelper = {};
 
-// Returns the elements of the second arrary that are not included in the first
+// Returns the elements of the second array that are not included in the first
 ArrayHelper.getArrayDifference = (firstArray, secondArray) => difference(secondArray, firstArray);
 
 ArrayHelper.getCommonElements = intersection;
