@@ -33,6 +33,7 @@ export default css`
 			color: ${({ theme }) => theme.palette.secondary.main};
 			background-color: transparent;
 			padding: 0 7px;
+			margin: 0;
 			font-size: 10px;
 			height: 24px;
 
@@ -51,8 +52,7 @@ export default css`
 			margin: 0;
 			display: flex;
 			align-items: start;
-			min-height: 84px;
-			padding: 0 16px;
+			min-height: unset;
 
 			${Grid} {
 
@@ -126,7 +126,7 @@ export default css`
 			// user + status + clone button
 			${Details} {
 				${StyledButton} {
-					margin: 0 5px 0 0;
+					margin-right: 5px;
 				}
 			}
 

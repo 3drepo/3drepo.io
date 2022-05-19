@@ -16,7 +16,6 @@
  */
 
 import { css } from 'styled-components';
-import { LeftPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
 import { TitleIcon, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/panel/panel.styles';
 import {
@@ -27,10 +26,6 @@ import {
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export default css`
-	${LeftPanels} .MuiPaper-root {
-		border-radius: 10px;
-	}
-
 	${Title} {
 		color: ${({ theme }) => theme.palette.secondary.main};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -98,15 +93,7 @@ export default css`
 		}
 
 		.MuiChip-root {
-			border-radius: 5px;
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			color: ${({ theme }) => theme.palette.secondary.main};
-			font-weight: 600;
 			margin: 3px 4px 3px 0;
-
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
 		}
 	}
 

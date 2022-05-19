@@ -14,26 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link, useRouteMatch } from 'react-router-dom';
-import { DashboardListItem } from '@components/dashboard/dashboardList';
-import {
-	DashboardListItemRow,
-	DashboardListItemText,
-} from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { discardSlash } from '@/v5/services/routing/routing';
+import styled from 'styled-components';
+import { DashboardLayout } from '@components/dashboard/dashboardLayout';
+import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
 
-export const TeamspaceListItem = ({ name }): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardSlash(url);
-	return (
-		<DashboardListItem>
-			<Link to={`${url}/${name}`}>
-				<DashboardListItemRow>
-					<DashboardListItemText>
-						{name}
-					</DashboardListItemText>
-				</DashboardListItemRow>
-			</Link>
-		</DashboardListItem>
-	);
-};
+export const DashboardViewerLayout = styled(DashboardLayout)`
+	${AppBarContainer} {
+		opacity: .95;
+		position: absolute;
+	}
+`;
