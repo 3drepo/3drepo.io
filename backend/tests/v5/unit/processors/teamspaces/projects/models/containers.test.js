@@ -22,8 +22,8 @@ const db = require(`${src}/handler/db`);
 const fs = require('fs/promises');
 const path = require('path');
 
-jest.mock('../../../../../../../src/v5/models/projects');
-const ProjectsModel = require(`${src}/models/projects`);
+jest.mock('../../../../../../../src/v5/models/projectSettings');
+const ProjectsModel = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
@@ -35,6 +35,13 @@ const Views = require(`${src}/models/views`);
 jest.mock('../../../../../../../src/v5/models/views');
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
+const FileRefs = require(`${src}/models/fileRefs`);
+jest.mock('../../../../../../../src/v5/models/fileRefs', () => ({
+	...jest.requireActual('../../../../../../../src/v5/models/fileRefs'),
+	downloadFiles: jest.fn(),
+	fetchFileStream: jest.fn().mockImplementation(() => ({ readStream: 'some stream' })),
+}));
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const newContainerId = 'newContainerId';
@@ -135,10 +142,12 @@ const container2Rev = {
 	timestamp: 1630606846000,
 };
 
+const revWithFileId = ServiceHelper.generateUUIDString();
+const filename = `${revWithFileId}${ServiceHelper.generateUUIDString()}.ifc`;
 const model1Revisions = [
-	{ _id: 1, author: 'user1', timestamp: new Date() },
-	{ _id: 2, author: 'user1', timestamp: new Date() },
-	{ _id: 3, author: 'user1', timestamp: new Date(), void: true },
+	{ _id: revWithFileId, author: 'user1', timestamp: new Date(), rFile: [filename] },
+	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date() },
+	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
@@ -171,6 +180,11 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 });
 
 const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
+
+const getRevisionByIdOrTagMock = Revisions.getRevisionByIdOrTag.mockImplementation((teamspace,
+	container, revision) => model1Revisions.find((rev) => rev._id === revision));
+
+FileRefs.downloadFiles.mockImplementation(() => {});
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
@@ -414,6 +428,25 @@ const testGetSettings = () => {
 	});
 };
 
+const formatFilename = (name) => name.substr(36).replace(/_([^_]*)$/, '.$1');
+
+const testDownloadRevisionFiles = () => {
+	describe('Download revision files', () => {
+		test('should throw error if revision has no file', async () => {
+			await expect(Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[1]._id))
+				.rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should download files if revision has file', async () => {
+			const res = await Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[0]._id);
+			expect(getRevisionByIdOrTagMock.mock.calls.length).toBe(1);
+			expect(getRevisionByIdOrTagMock.mock.calls[0][2]).toEqual(model1Revisions[0]._id);
+			expect(getRevisionByIdOrTagMock.mock.calls[0][3]).toStrictEqual({ rFile: 1 });
+			expect(res).toEqual({ readStream: 'some stream', filename: formatFilename(model1Revisions[0].rFile[0]) });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -424,4 +457,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testGetRevisions();
 	testNewRevision();
 	testGetSettings();
+	testDownloadRevisionFiles();
 });

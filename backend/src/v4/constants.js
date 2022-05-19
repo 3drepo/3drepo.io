@@ -464,6 +464,7 @@
 		"termsAndConditions",
 		"false",
 		"admin",
+		"local",
 		"root",
 		"notifications",
 		"loginRecords"

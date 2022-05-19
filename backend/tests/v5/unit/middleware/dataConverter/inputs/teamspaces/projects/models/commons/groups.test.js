@@ -94,7 +94,7 @@ const testValidateGroupsImportData = () => {
 	};
 
 	const rangeRule = {
-		field: 'abc',
+		field: 'abcd',
 		operator: 'IN_RANGE',
 		values: [2, 4, 5, 7],
 	};
@@ -105,25 +105,25 @@ const testValidateGroupsImportData = () => {
 	};
 
 	const badExistRule = {
-		field: 'abc',
+		field: 'abcdef',
 		operator: 'IS_EMPTY',
 		values: [2, 4, 3],
 	};
 
 	const badRangeRule = {
-		field: 'abc',
+		field: 'abc1',
 		operator: 'IN_RANGE',
 		values: [2, 4, 3],
 	};
 
 	const badRule = {
-		field: 'abc',
+		field: 'abc2',
 		operator: 'EQUALS',
 		values: ['a', 'b'],
 	};
 
 	const wrongTypedRule = {
-		field: 'abc',
+		field: 'abc3',
 		operator: 'EQUALS',
 		values: ['2', '4'],
 	};
@@ -147,6 +147,7 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [wrongTypedRule] }] } }, false, 'rule with wrong typed parameters'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [existRule, numberRule] }] } }, false, 'two rules with the same key'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
 		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],
 	])('Validate Groups import data', (data, shouldPass, desc) => {

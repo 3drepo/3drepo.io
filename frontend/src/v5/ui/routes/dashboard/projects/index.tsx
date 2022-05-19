@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 
@@ -24,7 +24,8 @@ import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { Federations } from './federations';
 import { Containers } from './containers';
-import { UsersPermissions } from './userPermissions/userPermissions.component';
+import { UserPermissions } from './userPermissions/userPermissions.component';
+import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
 import { Content } from './projects.styles';
 
 export const ProjectContent = () => {
@@ -51,8 +52,11 @@ export const ProjectContent = () => {
 				<Route exact path={`${path}/t/settings`}>
 					Project settings
 				</Route>
-				<Route exact path={`${path}/t/users_permissions`}>
-					<UsersPermissions />
+				<Route exact path={`${path}/t/project_permissions`}>
+					<ProjectPermissions />
+				</Route>
+				<Route exact path={`${path}/t/user_permissions`}>
+					<UserPermissions />
 				</Route>
 				<Route path="*">
 					<Redirect to={NOT_FOUND_ROUTE_PATH} />

@@ -18,7 +18,9 @@
 "use strict";
 
 const responseCodes = require("../../response_codes.js");
-const utils = require("../../utils");
+const { v5Path } = require("../../../interop");
+const { toQuery } =  require(`${v5Path}/models/meta.rules`);
+const { schema: rulesSchema} =  require(`${v5Path}/middleware/dataConverter/schemas/components/rules`);
 
 const ruleOperators = {
 	"IS_EMPTY":	0,
@@ -83,83 +85,10 @@ RuleHelper.checkRulesValidity = (rules) => {
 	return valid;
 };
 
-RuleHelper.buildQueryFromRule = (rule) => {
-	const clauses = [];
-	let expression = {};
+RuleHelper.buildQueryFromRule = toQuery;
+RuleHelper.positiveRulesToQueries = (rulesRaw) => {
+	const rules = rulesSchema.cast(rulesRaw);
 
-	if (RuleHelper.isValidRule(rule)) {
-		const fieldName = "metadata." + rule.field;
-		const operatorPerClause =  ruleOperators[rule.operator];
-		const clausesCount = rule.values && rule.values.length > 0 && operatorPerClause > 0 ?
-			rule.values.length / operatorPerClause :
-			1;
-
-		for (let i = 0; i < clausesCount; i++) {
-			let operation;
-
-			switch (rule.operator) {
-				case "IS_NOT_EMPTY":
-					operation = { $exists: true };
-					break;
-				case "IS":
-					operation = rule.values[i];
-					break;
-				case "CONTAINS":
-					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
-					break;
-				case "REGEX":
-					operation = { $regex: new RegExp(rule.values[i]) };
-					break;
-				case "EQUALS":
-					operation = { $eq: Number(rule.values[i]) };
-					break;
-				case "GT":
-					operation = { $gt: Number(rule.values[i]) };
-					break;
-				case "GTE":
-					operation = { $gte: Number(rule.values[i]) };
-					break;
-				case "LT":
-					operation = { $lt: Number(rule.values[i]) };
-					break;
-				case "LTE":
-					operation = { $lte: Number(rule.values[i]) };
-					break;
-				case "IN_RANGE":
-					{
-						const rangeVal1 = Number(rule.values[i * operatorPerClause]);
-						const rangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
-						const rangeLowerOp = {};
-						rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
-						const rangeUpperOp = {};
-						rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
-
-						operation = undefined;
-						clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
-					}
-					break;
-			}
-
-			if (operation) {
-				const clause = {};
-				clause[fieldName] = operation;
-				clauses.push(clause);
-			}
-		}
-	} else {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	if (clauses.length > 1) {
-		expression = { $or: clauses };
-	} else if (clauses.length === 1) {
-		expression = clauses[0];
-	}
-
-	return expression;
-};
-
-RuleHelper.positiveRulesToQueries = (rules) => {
 	const posRules = rules.filter(r=> !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
 
 	// Except IS_EMPTY every neg rule needs that the field exists
@@ -173,7 +102,8 @@ RuleHelper.positiveRulesToQueries = (rules) => {
 	return posRules;
 };
 
-RuleHelper.negativeRulesToQueries = (rules) => {
+RuleHelper.negativeRulesToQueries = (rulesRaw) => {
+	const rules = rulesSchema.cast(rulesRaw);
 	return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
 		const negRule = {
 			field,

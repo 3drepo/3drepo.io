@@ -16,7 +16,6 @@
  */
 
 import { FormTextFieldProps } from '@controls/formTextField/formTextField.component';
-import React from 'react';
 import { UnitTextField } from './formTextFieldUnit.styles';
 
 type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {

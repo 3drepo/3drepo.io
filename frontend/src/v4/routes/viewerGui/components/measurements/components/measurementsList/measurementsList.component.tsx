@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useState } from 'react';
 
 import MoreIcon from '@material-ui/icons/ChevronRight';
 import LessIcon from '@material-ui/icons/ExpandMore';
@@ -47,7 +47,7 @@ export const MeasurementsList = ({
 	measurements, units, measureType, removeMeasurement,
 	setMeasurementColor, setMeasurementName, colors, ...props
 }: IProps) => {
-	const [expanded, setExpanded] = React.useState(true);
+	const [expanded, setExpanded] = useState(true);
 
 	const handleOnClick = () => setExpanded(!expanded);
 

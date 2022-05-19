@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode, PureComponent, useRef, useEffect, useState } from 'react';
 
 import { ListItemProps } from '@material-ui/core/ListItem';
 import { Check } from '@material-ui/icons';
@@ -57,10 +57,10 @@ export interface ISubMenuProps extends ListItemProps {
 }
 
 export const SubMenu = (props: ISubMenuProps) => {
-	const [top, setTop] = React.useState(0);
-	const wrapperRef = React.useRef<HTMLDivElement>(null);
+	const [top, setTop] = useState(0);
+	const wrapperRef = useRef<HTMLDivElement>(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const rect = wrapperRef.current.getBoundingClientRect();
 
 		if (rect.top !== top) {
@@ -102,7 +102,7 @@ interface IState {
 	activeItem: any;
 }
 
-export class FoldableMenu extends React.PureComponent<IProps, IState> {
+export class FoldableMenu extends PureComponent<IProps, IState> {
 	public state = {
 		activeItem: null,
 	};

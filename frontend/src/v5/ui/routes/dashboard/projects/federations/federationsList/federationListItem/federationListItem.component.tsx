@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
@@ -35,8 +35,15 @@ import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/
 import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
+const MODALS = {
+	share: 'share',
+	editFederation: 'editFederation',
+	federationSettings: 'federationSettings',
+	none: 'none',
+};
 interface IFederationListItem {
 	index: number;
 	federation: IFederation;
@@ -53,9 +60,8 @@ export const FederationListItem = ({
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
-	const [shareModalOpen, setShareModalOpen] = useState(false);
-
-	const [federationSettingsOpen, setFederationSettingsOpen] = useState(false);
+	const [openModal, setOpenModal] = useState(MODALS.none);
+	const closeModal = () => setOpenModal(MODALS.none);
 
 	return (
 		<>
@@ -68,7 +74,6 @@ export const FederationListItem = ({
 							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 						}
 						subtitle={federation.desc}
-
 						minWidth={90}
 					>
 						<Highlight search={filterQuery}>
@@ -123,7 +128,7 @@ export const FederationListItem = ({
 						<FormattedMessage
 							id="federations.list.item.containers"
 							defaultMessage="{count} containers"
-							values={{ count: federation.containers }}
+							values={{ count: federation.containers.length }}
 						/>
 					</DashboardListItemButton>
 					<DashboardListItemText width={188}>
@@ -157,24 +162,30 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
 							federation={federation}
-							openShareModal={() => setShareModalOpen(true)}
-							openFederationSettings={() => setFederationSettingsOpen(true)}
+							openShareModal={() => setOpenModal(MODALS.share)}
+							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
+							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
 				<ShareModal
-					openState={shareModalOpen}
-					onClickClose={() => setShareModalOpen(false)}
+					openState={openModal === MODALS.share}
+					onClickClose={closeModal}
 					title={formatMessage({
 						id: 'ShareModal.federation.title',
 						defaultMessage: 'Share Federation URL',
 					})}
 					containerOrFederation={federation}
 				/>
-				<FederationSettingsForm
-					open={federationSettingsOpen}
+				<EditFederationModal
+					openState={openModal === MODALS.editFederation}
 					federation={federation}
-					onClose={() => setFederationSettingsOpen(false)}
+					onClickClose={closeModal}
+				/>
+				<FederationSettingsForm
+					open={openModal === MODALS.federationSettings}
+					federation={federation}
+					onClose={closeModal}
 				/>
 			</DashboardListItem>
 		</>

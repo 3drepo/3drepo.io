@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent, SyntheticEvent } from 'react';
 import Badge from '@material-ui/core/Badge';
 import Drawer from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
@@ -22,7 +23,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import Close from '@material-ui/icons/Close';
 import MoreVert from '@material-ui/icons/MoreVert';
-import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
@@ -70,7 +70,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 	</IconButton>
 );
 
-export class Notifications extends React.PureComponent<IProps, any> {
+export class Notifications extends PureComponent<IProps, any> {
 	public state = {
 		open: false,
 		menuElement: null
@@ -133,19 +133,19 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		this.props.setDrawerPanelState(!this.props.drawerOpened);
 	}
 
-	public toggleMenu = (e: React.SyntheticEvent) => {
+	public toggleMenu = (e: SyntheticEvent) => {
 		this.setState({ menuElement: this.state.menuElement ? null : e.currentTarget });
 		return false;
 	}
 
-	public markAllNotifications = (read) => (e: React.SyntheticEvent) => {
+	public markAllNotifications = (read) => (e: SyntheticEvent) => {
 		this.toggleMenu(e);
 		this.props.notifications.forEach((notification) => {
 			this.props.sendUpdateAllNotificationsRead(read);
 		});
 	}
 
-	public deleteAllNotifications = (e: React.SyntheticEvent) => {
+	public deleteAllNotifications = (e: SyntheticEvent) => {
 		this.toggleMenu(e);
 		this.props.confirmSendDeleteAllNotifications();
 	}

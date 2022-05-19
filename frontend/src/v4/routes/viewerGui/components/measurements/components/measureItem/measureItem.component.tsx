@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useRef } from 'react';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import RemoveIcon from '@material-ui/icons/Close';
@@ -101,7 +101,7 @@ const unChopGlAlpha = (color) => [...color.slice(0, 3), 1];
 export const MeasureItem = ({
 	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
 }: IProps) => {
-	const textFieldRef = React.useRef(null);
+	const textFieldRef = useRef(null);
 
 	const handleRemoveMeasurement = () => {
 		removeMeasurement(uuid);

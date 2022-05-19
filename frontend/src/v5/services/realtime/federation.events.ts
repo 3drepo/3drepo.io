@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,18 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable implicit-arrow-linebreak */
 
-import styled from 'styled-components';
-import { Select } from '@material-ui/core';
+import { IFederation } from '@/v5/store/federations/federations.types';
+import { FederationsActionsDispatchers } from '../actionsDispatchers/federationsActions.dispatchers';
+import { subscribeToRoomEvent } from './realtime.service';
 
-export const SelectInput = styled(Select)`
-	svg {
-		position: absolute;
-		pointer-events: none;
-		right: 14px;
-		margin-top: 40px;
-		path { 
-			fill: ${({ theme }) => theme.palette.base.main}
-		}
-	}
-`;
+type FederationUpdatedPayload = Partial<IFederation>;
+
+export const enableRealtimeFederationUpdates = (teamspace, project) =>
+	subscribeToRoomEvent({ teamspace, project }, 'federationUpdate',
+		(federation: FederationUpdatedPayload) =>
+			FederationsActionsDispatchers.updateFederationSuccess(project, federation._id, federation));

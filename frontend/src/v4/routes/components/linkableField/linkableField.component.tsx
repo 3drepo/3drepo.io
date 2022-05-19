@@ -14,18 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { ReactChild, FC, forwardRef, Ref } from 'react';
 import Linkify from 'react-linkify';
 
 interface IProps {
-	children?: React.ReactChild;
+	children?: ReactChild;
 	className?: string;
 	style?: any;
 }
 
-export const LinkableField: React.FC<IProps> = React.forwardRef(
-	({ style, className, children }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+export const LinkableField: FC<IProps> = forwardRef(
+	({ style, className, children }: IProps, ref: Ref<HTMLSpanElement>) => (
 		<span style={style} ref={ref} className={className}>
 			<Linkify properties={{target: '_blank', rel: 'noopener noreferrer'}}>{children}</Linkify>
 		</span>

@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { ReactNode, SyntheticEvent } from 'react';
+import { ReactNode, SyntheticEvent } from 'react';
 import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { MenuItem } from './ellipsisMenuItem.styles';
 
 type EllipsisMenuItemProps = {
 	title: ReactNode;
-	to?: string;
+	to?: any;
 	key?: string;
 	onClick?: (event: SyntheticEvent) => void;
 };

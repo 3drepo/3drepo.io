@@ -24,8 +24,7 @@ export interface IFederation {
 	isFavourite: boolean;
 	code: string;
 	status: string;
-	subModels: string[];
-	containers: number;
+	containers: string[];
 	issues: number;
 	risks: number;
 	category: string;
@@ -83,7 +82,7 @@ export type FavouritePayload = FetchFederationsPayload & {
 export type FetchFederationStatsResponse = {
 	code: string;
 	status: string;
-	subModels: string[];
+	containers: string[];
 	tickets: {
 		issues: number;
 		risks: number;
@@ -140,16 +139,15 @@ export type FetchFederationSettingsSuccessPayload = {
 	settings: FederationSettings;
 };
 
-// TODO rename updatedSettings to settings
 export type UpdateFederationSettingsPayload = FetchFederationsPayload & {
 	federationId: string;
-	updatedSettings: FederationSettings;
+	settings: FederationSettings;
 };
 
 export type UpdateFederationSettingsSuccessPayload = {
 	projectId: string;
 	federationId: string;
-	updatedSettings: FederationSettings;
+	settings: FederationSettings;
 };
 
 export type DeleteFederationPayload = FetchFederationsPayload & {
@@ -161,6 +159,19 @@ export type DeleteFederationSuccessPayload = {
 	federationId: string;
 };
 
+export interface UpdateFederationContainersPayload {
+	teamspace: string;
+	projectId: string;
+	federationId: string;
+	containers: string[];
+}
+
+export interface UpdateFederationContainersSuccessPayload {
+	projectId: string;
+	federationId: string;
+	containers: string[];
+}
+
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
@@ -168,6 +179,8 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & { proj
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
+export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & UpdateFederationContainersPayload;
+export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & UpdateFederationContainersSuccessPayload;
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & FetchFederationViewsPayload;
 export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & FetchFederationViewsSuccessPayload;
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & FetchFederationSettingsPayload;
@@ -176,6 +189,7 @@ export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'
 export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & UpdateFederationSettingsSuccessPayload;
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & DeleteFederationPayload;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & DeleteFederationSuccessPayload;
+export type UpdateFederationSuccessAction = Action<'UPDATE_FEDERATION'> & {projectId: string, federationId: string, updatedFederation: IFederation};
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -209,13 +223,29 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		updatedSettings: FederationSettings,
+		settings: FederationSettings,
 	) => UpdateFederationSettingsAction;
 	updateFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		updatedSettings: FederationSettings,
+		settings: FederationSettings,
 	) => UpdateFederationSettingsSuccessAction;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
+	updateFederationContainers: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+		containers: string[]
+	) => UpdateFederationContainersAction;
+	updateFederationContainersSuccess: (
+		projectId: string,
+		federationId: string,
+		containers: string[],
+	) => UpdateFederationContainersActionSuccess;
+	updateFederationSuccess: (
+		projectId: string,
+		federationId: string,
+		updatedFederation: Partial<IFederation>
+	) => UpdateFederationSuccessAction;
 }

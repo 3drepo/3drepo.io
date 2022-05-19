@@ -15,16 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import ChevronIcon from '@assets/icons/chevron.svg';
-import { SelectProps } from '@material-ui/core';
-import { SelectInput } from './select.styles';
-
-export const SelectBase = ({ children, ...props }: SelectProps, ref: React.Ref<HTMLButtonElement>) => (
-	<SelectInput IconComponent={ChevronIcon} ref={ref} {...props}>
-		{children}
-	</SelectInput>
-);
-
-export const Select = React.forwardRef(SelectBase);
+export { ActionMenu } from './actionMenu.component';
+export { ActionMenuItem } from './actionMenuItem/actionMenuItem.component';
+export { ActionMenuItemLink } from './actionMenuItemLink/actionMenuItemLink.component';
+export { ActionMenuSection, ActionMenuTriggerButton } from './actionMenu.styles';

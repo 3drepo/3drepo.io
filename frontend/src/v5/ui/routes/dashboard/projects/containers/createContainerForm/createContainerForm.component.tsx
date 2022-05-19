@@ -14,14 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, MenuItem, InputLabel } from '@material-ui/core';
-import { Select } from '@controls/select';
+import { TextField, MenuItem, InputLabel, Select } from '@material-ui/core';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
@@ -86,7 +84,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		close();
 	};
 
-	React.useEffect(() => { reset(); }, [!open]);
+	useEffect(() => { reset(); }, [!open]);
 
 	return (
 		<FormModal

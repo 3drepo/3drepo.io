@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import { Tooltip } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -23,7 +23,6 @@ import RemoveIcon from '@material-ui/icons/Remove';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-import * as React from 'react';
 
 import {
 	SELECTION_STATES,
@@ -75,7 +74,7 @@ const ParentOfVisibleIcon = () => <ParentOfVisible><VisibilityIcon color="inheri
 const VisibleIcon = () => <VisibilityIcon color="primary" />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
-export class TreeNode extends React.PureComponent<IProps, any> {
+export class TreeNode extends PureComponent<IProps, any> {
 	get node() {
 		return this.props.data;
 	}
