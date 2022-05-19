@@ -250,13 +250,9 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 };
 
 // Ensure the index exists at init
-db.indexExists("admin", "invitations", { "teamSpaces.teamspace": 1 }).then((exists) => {
-	if(!exists) {
-		db.createIndex("admin", "invitations", { "teamSpaces.teamspace": 1 })
-			.catch((err)=> {
-				systemLogger.logError("failed to create index for invitations", err);
-			});
-	}
-});
+getCollection().then((coll) => coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true }))
+	.catch((err)=> {
+		systemLogger.logError("failed to create index for invitations", err);
+	});
 
 module.exports = invitations;
