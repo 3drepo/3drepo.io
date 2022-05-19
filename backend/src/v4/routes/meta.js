@@ -453,7 +453,8 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
+		const keyFilters = req.query.filter ? req.query.filter.split(',') : [];
+		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev, keyFilters)
 			.then(stream => {
 				const headers = {
 					"Content-Type" : "application/json"

@@ -75,12 +75,32 @@ Scene.findNodesByType = async function (account, model, branch, revision, type, 
 	return findNodes(account, model, branch, revision, query, projection);
 };
 
+Scene.findMetadataNodesByFields = async function (account, model, branch, revision, fieldNames, projection = {}) {
+	const history = await History.getHistory(account, model, branch, revision);
+	const query = { $match: { rev_id: history._id, type: 'meta' } };
+	projection = { $project: {...projection, metadata: 1, parents: 1 } };
+
+	if (fieldNames.length) {
+		query.$match['metadata.key'] = { $in: fieldNames };
+		projection.$project.metadata = {
+			$filter: {
+				input: '$metadata',
+				as: 'metadata',
+				cond: { $in: ['$$metadata.key', fieldNames] }
+			}
+		};
+	}
+
+	const data = await db.aggregate(account, getSceneCollectionName(model), [query, projection]);
+	return cleanAll(data);
+};
+
 Scene.getGridfsFileStream = async function (account, model, filename) {
 	return await ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
 };
 
 Scene.getNodeById = async function (account, model, id, projection = {}) {
-	return clean(await db.findOne(account, getSceneCollectionName(model), {_id: id}, projection));
+	return clean(await db.findOne(account, getSceneCollectionName(model), { _id: id }, projection));
 };
 
 Scene.getParentMatrix = async function (account, model, parent, revisionIds) {

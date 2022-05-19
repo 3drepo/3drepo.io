@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const { findModelSettingById } = require("./modelSetting");
 const { getSubModels } = require("./ref");
-const { findNodesByField, getNodeById, findNodesByType } = require("./scene");
+const { findNodesByField, getNodeById, findNodesByType, findMetadataNodesByFields } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -321,10 +321,10 @@ Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 	return Meta.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
 };
 
-const _getAllMetadata = async (account, model, branch, rev, stream) => {
+const _getAllMetadata = async (account, model, branch, rev, keyFilters, stream) => {
 	const subModelPromise = getSubModels(account, model, branch, rev);
 
-	const data = await findNodesByType(account, model, branch, rev, "meta", undefined, {_id: 1, parents: 1, metadata: 1});
+	const data = await findMetadataNodesByFields(account, model, branch, rev, keyFilters, {_id: 1, parents: 1, metadata: 1});
 
 	stream.write("{\"data\":");
 	stream.write(JSON.stringify(cleanAll(data)));
@@ -360,12 +360,12 @@ const _getAllMetadata = async (account, model, branch, rev, stream) => {
 	stream.end();
 };
 
-Meta.getAllMetadata = async (account, model, branch, rev) => {
+Meta.getAllMetadata = async (account, model, branch, rev, keyFilters) => {
 	// Check revision exists
 	await History.getHistory(account, model, branch, rev);
 	const stream = Stream.PassThrough();
 	try {
-		_getAllMetadata(account, model, branch, rev, stream);
+		_getAllMetadata(account, model, branch, rev, keyFilters, stream);
 	} catch(err) {
 		stream.emit("error", err);
 		stream.end();
