@@ -354,7 +354,7 @@ const testDeleteContainer = () => {
 			const teamspace = 'teamspace';
 			await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
 
-			expect(fnList.mock.calls.length).toBe(2);
+			expect(fnList.mock.calls.length).toBe(1);
 			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
 
 			expect(fnDrop.mock.calls.length).toBe(2);
