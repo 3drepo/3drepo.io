@@ -167,7 +167,7 @@ export const theme = createTheme(
 							margin: 0,
 							marginRight: 15,
 							padding: '15px 0',
-							fontWeight: 400,
+							fontWeight: 500,
 							color: COLOR.SECONDARY_MAIN,
 						},
 					},
