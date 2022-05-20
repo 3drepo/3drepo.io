@@ -15,30 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const UserConstants = {};
-UserConstants.USERNAME_BLACKLIST = [
-	'payment',
-	'test',
-	'config',
-	'os',
-	'info',
-	'contact',
-	'cookies',
-	'password-change',
-	'password-forgot',
-	'pricing',
-	'privacy',
-	'register-request',
-	'register-verify',
-	'signUp',
-	'termsAndConditions',
-	'false',
-	'admin',
-	'local',
-	'root',
-	'notifications',
-	'loginRecord',
-	'sessions',
-];
-
-module.exports = UserConstants;
+/* istanbul ignore file */
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+module.exports = require(`${v4Path}/handler/fs`);
