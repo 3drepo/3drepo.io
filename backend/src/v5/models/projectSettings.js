@@ -94,4 +94,13 @@ Projects.updateProject = async (teamspace, projectId, updatedProject) => {
 	}
 };
 
+Projects.removeUserFromAllProjects = async (teamspace, user) => {
+	await db.updateMany(
+		teamspace,
+		COL_NAME,
+		{ 'permissions.user': user },
+		{ $pull: { permissions: { user } } },
+	);
+};
+
 module.exports = Projects;

@@ -145,4 +145,8 @@ Teamspace.createTeamspaceSettings = async (teamspace) => {
 	await db.insertOne(teamspace, 'teamspace', settings);
 };
 
+Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
+	await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+};
+
 module.exports = Teamspace;
