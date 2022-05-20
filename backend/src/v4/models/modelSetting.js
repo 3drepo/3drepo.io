@@ -457,9 +457,6 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 
 	permissions = _.uniq(permissions, "user");
-	if (!setting.permissions) {
-		setting.permissions = [];
-	}
 
 	const promises = [];
 	const dbUser = await findByUserName(account);
@@ -469,22 +466,20 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 
 		promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 			const index = setting.permissions.findIndex(x => x.user === permission.user);
-			const action = {};
 			if (index !== -1) {
 				if (permission.permission) {
 					setting.permissions[index].permission = permission.permission;
-					action.$set = { permissions: setting.permissions };
 				} else {
-					action.$pull = { permissions: setting.permissions[index] };
+					setting.permissions.splice(index, 1);
 				}
 			} else if (permission.permission) {
-				action.$push = { permissions: permission };
+				setting.permissions.push(permission);
 			}
-			db.updateOne(account, MODELS_COLL, { _id: model }, action);
 		}));
 	});
 
 	await Promise.all(promises);
+	await db.updateOne(account, MODELS_COLL, { _id: model }, { $set: { permissions: setting.permissions } });
 	return { status: setting.status };
 };
 
