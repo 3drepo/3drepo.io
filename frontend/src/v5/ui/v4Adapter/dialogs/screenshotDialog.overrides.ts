@@ -77,6 +77,21 @@ const Toolbar = css`
 				}
 			}
 		}
+
+		// eraser icon 
+		.secondary {
+			color: ${({ theme }) => theme.palette.secondary.main};
+		}
+
+		.primary {
+			color: ${({ theme }) => theme.palette.primary.main};
+		}
+
+		& > :not(:last-child):not(.Mui-disabled) {
+			.MuiIconButton-root:hover {
+				background-color: transparent;
+			}
+		}
 	}
 `;
 
