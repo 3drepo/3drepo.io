@@ -15,36 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ExternalServices = require('../handler/externalServices');
 const db = require('../handler/db');
-const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
-const getRefEntry = async (account, collection, id) => {
-	const entry = await db.findOne(account, collection, { _id: id });
+FileRefs.getRefEntry = async (teamspace, collection, id) => {
+	const entry = await db.findOne(teamspace, collectionName(collection), { _id: id });
 
 	if (!entry) {
 		throw templates.fileNotFound;
 	}
 
 	return entry;
-};
-
-FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
-	const collection = `${model}.${extension}`;
-	const entry = await getRefEntry(teamspace, collection, fileName);
-	try {
-		const stream = await ExternalServices.getFileStream(teamspace, collection, entry.type, entry.link);
-		return { readStream: stream, size: entry.size };
-	} catch {
-		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, 'gridfs', fileName);
-		return { readStream: stream, size: entry.size };
-	}
 };
 
 FileRefs.getTotalSize = async (teamspace, collection) => {

@@ -20,8 +20,8 @@ const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
-jest.mock('../../../../src/v5/models/fileRefs');
-const fileRefs = require(`${src}/models/fileRefs`);
+jest.mock('../../../../src/v5/models/FileRefs');
+const FileRefs = require(`${src}/models/FileRefs`);
 
 jest.mock('../../../../src/v5/handler/fs');
 const FSHandler = require(`${src}/handler/fs`);
@@ -49,7 +49,7 @@ const testRemoveAllFilesFromModel = () => {
 			expect(db.listCollections).toHaveBeenCalledTimes(1);
 			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
 
-			expect(fileRefs.getAllRemovableEntriesByType).not.toHaveBeenCalled();
+			expect(FileRefs.getAllRemovableEntriesByType).not.toHaveBeenCalled();
 		});
 
 		test('Should do the relevant calls to remove files', async () => {
@@ -79,7 +79,7 @@ const testRemoveAllFilesFromModel = () => {
 				},
 			];
 
-			fileRefs.getAllRemovableEntriesByType
+			FileRefs.getAllRemovableEntriesByType
 				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data : [{ _id: 'fs', links: [] }]));
 
 			const teamspace = generateRandomString();
@@ -89,9 +89,9 @@ const testRemoveAllFilesFromModel = () => {
 			expect(db.listCollections).toHaveBeenCalledTimes(1);
 			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
 
-			expect(fileRefs.getAllRemovableEntriesByType).toHaveBeenCalledTimes(2);
-			expect(fileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
-			expect(fileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(2, teamspace, refCol2);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenCalledTimes(2);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(2, teamspace, refCol2);
 
 			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
 			expect(FSHandler.removeFiles).toHaveBeenCalledWith(refCol1Data[0].links);
@@ -109,7 +109,7 @@ const testRemoveAllFilesFromModel = () => {
 				refCol1,
 			].map((name) => ({ name })));
 
-			fileRefs.getAllRemovableEntriesByType
+			FileRefs.getAllRemovableEntriesByType
 				.mockResolvedValueOnce([{ _id: 'aaafs', links: [generateRandomString()] }]);
 
 			const teamspace = generateRandomString();
@@ -120,12 +120,56 @@ const testRemoveAllFilesFromModel = () => {
 			expect(db.listCollections).toHaveBeenCalledTimes(1);
 			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
 
-			expect(fileRefs.getAllRemovableEntriesByType).toHaveBeenCalledTimes(1);
-			expect(fileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
+		});
+	});
+};
+
+const testGetFileAsStream = () => {
+	describe('Get file as stream', () => {
+		test('should throw error if the revision has no entry', async () => {
+			FileRefs.getRefEntry.mockRejectedValueOnce(templates.fileNotFound);
+			await expect(FilesManager.getFileAsStream(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('return throw an error if the storage type is unrecognised', async () => {
+			const fileEntry = { type: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			await expect(FilesManager.getFileAsStream(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should return a stream of the reference is found', async () => {
+			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+			const readStream = { [generateRandomString()]: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const fileName = generateRandomString();
+
+			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
+				.resolves.toEqual({ readStream, size: fileEntry.size });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
 		});
 	});
 };
 
 describe('services/filesManager', () => {
 	testRemoveAllFilesFromModel();
+	testGetFileAsStream();
 });

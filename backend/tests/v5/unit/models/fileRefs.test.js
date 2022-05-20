@@ -100,35 +100,30 @@ const testGetAllRemovableEntriesByType = () => {
 	});
 };
 
-const testFetchFileStream = () => {
-	describe('Fetch file stream', () => {
-		test('should throw error if the revision has no entry', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename')).rejects.toEqual(templates.fileNotFound);
+const testGetRefEntry = () => {
+	describe('get ref entry by id', () => {
+		test('should return the entry if found', async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateRandomString();
+
+			const output = { [generateRandomString()]: generateRandomString() };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(output);
+
+			await expect(FileRefs.getRefEntry(teamspace, collection, id)).resolves.toEqual(output);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id });
 		});
 
-		test('should download the revision files using grid fs if entry has invalid type', async () => {
-			const fileEntry = { size: '12345', type: unrecognisedType };
-			const expectedData = { readStream: undefined, size: '12345' };
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
-			const res = await FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename');
-			expect(res).toEqual(expectedData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
-			expect(fn.mock.calls[0][2]).toEqual({ _id: 'filename' });
-		});
+		test(`should throw with ${templates.fileNotFound} if the ref is not found`, async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateRandomString();
 
-		test('should download the revision files using grid fs if entry has valid type', async () => {
-			const fileEntry = { size: '12345', type: 'valid type' };
-			const expectedData = { readStream: undefined, size: '12345' };
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
-			const res = await FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename');
-			expect(res).toEqual(expectedData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
-			expect(fn.mock.calls[0][2]).toEqual({ _id: 'filename' });
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce();
+
+			await expect(FileRefs.getRefEntry(teamspace, collection, id)).rejects.toEqual(templates.fileNotFound);
 		});
 	});
 };
@@ -136,5 +131,5 @@ const testFetchFileStream = () => {
 describe('models/fileRefs', () => {
 	testGetTotalSize();
 	testGetAllRemovableEntriesByType();
-	testFetchFileStream();
+	testGetRefEntry();
 });

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getAllRemovableEntriesByType, getRefEntry } = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
-const { getAllRemovableEntriesByType } = require('../models/fileRefs');
 const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
@@ -64,4 +64,21 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 	return Promise.all(refCols.map(({ name }) => removeAllFilesInCol(teamspace, name)));
 };
 
+FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
+	const { type, link, size } = await getRefEntry(teamspace, collection, fileName);
+
+	let readStream;
+	switch (type) {
+	case 'fs':
+		readStream = await FSHandler.getFileStream(link);
+		break;
+	case 'gridfs':
+		readStream = await GridFSHandler.getFileStream(teamspace, collection, link);
+		break;
+	default:
+		logger.logError(`Unrecognised external service: ${type}`);
+		throw templates.fileNotFound;
+	}
+	return { readStream, size };
+};
 module.exports = FilesManager;
