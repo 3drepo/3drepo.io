@@ -24,15 +24,12 @@ const { templates } = require('../utils/responseCodes');
 
 const FilesManager = {};
 
-const removeFiles = (storageType, links, extras = {}) => {
+const removeFiles = (teamspace, collection, storageType, links) => {
 	switch (storageType) {
 	case 'fs':
 		return FSHandler.removeFiles(links);
 	case 'gridfs':
-	{
-		const { teamspace, collection } = extras;
 		return GridFSHandler.removeFiles(teamspace, collection, links);
-	}
 	default:
 		logger.logError(`Unrecognised external service: ${storageType}`);
 		return Promise.reject(templates.fileNotFound);
@@ -45,7 +42,7 @@ const removeAllFilesInCol = async (teamspace, collection) => {
 	const deletePromises = refsByType.map(
 		({ _id, links }) => {
 			if (_id && links?.length) {
-				return removeFiles(_id, links, { teamspace, collection });
+				return removeFiles(teamspace, collection, _id, links);
 			}
 			return Promise.resolve();
 		},

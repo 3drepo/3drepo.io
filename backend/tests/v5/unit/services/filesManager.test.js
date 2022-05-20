@@ -166,6 +166,26 @@ const testGetFileAsStream = () => {
 			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
 			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
 		});
+
+		test('should return a stream of the reference is found (gridFs)', async () => {
+			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
+			const readStream = { [generateRandomString()]: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			GridFSHandler.getFileStream.mockResolvedValueOnce(readStream);
+
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const fileName = generateRandomString();
+
+			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
+				.resolves.toEqual({ readStream, size: fileEntry.size });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+		});
 	});
 };
 
