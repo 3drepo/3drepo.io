@@ -86,15 +86,17 @@ interface RouteProps {
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
-	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
+	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+
 	const { pathname } = useLocation();
 	AuthActionsDispatchers.setReturnUrl(pathname);
 
 	useEffect(() => {
-		if (isAuthenticated === false) {
+		if (!isAuthenticated && authenticationFetched) {
 			history.push(LOGIN_PATH);
 		}
-	}, [isAuthenticated]);
+	}, [isAuthenticated, authenticationFetched]);
 
 	if (!isAuthenticated) {
 		return (<></>);

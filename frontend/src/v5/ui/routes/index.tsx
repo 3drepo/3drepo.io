@@ -30,11 +30,15 @@ import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
-	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
+	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
 
 	useEffect(() => {
-		AuthActionsDispatchers.authenticate();
-	}, []);
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
+		}
+	}, [authenticationFetched]);
+
 	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
