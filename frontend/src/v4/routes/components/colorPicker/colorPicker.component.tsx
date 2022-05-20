@@ -22,6 +22,8 @@ import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import { identity } from 'lodash';
 import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
 import { isV5 } from '@/v4/helpers/isV5';
+import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
 import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
 import {
@@ -46,8 +48,6 @@ import {
 	StyledButton,
 	StyledIconButton
 } from './colorPicker.styles';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
 const COLORS = {
 	RED: 'rgba(255,0,0,1)',
