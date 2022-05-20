@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { OptionsDivider, ToolsContainer } from '@/v4/routes/components/screenshotDialog/components/tools/tools.styles';
+import {
+	OptionsDivider,
+	ToolsContainer,
+	IconButton,
+} from '@/v4/routes/components/screenshotDialog/components/tools/tools.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { Container as AddShapeContainer } from '@/v4/routes/components/buttonMenu/buttonMenu.styles';
+import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
 const Toolbar = css`
 	${ToolsContainer} {
@@ -78,6 +84,21 @@ const Toolbar = css`
 			}
 		}
 
+		// add shape icon and chevron icon
+		${AddShapeContainer} {
+			${IconButton} {
+				margin-right: 0;
+				padding-right: 0;
+			}
+
+			${SmallIconButtonStyled} {
+				padding-left: 0;
+				margin-left: 8px;
+				border-radius: 0;
+				overflow: hidden;
+			}
+		}
+
 		// eraser icon 
 		.secondary {
 			color: ${({ theme }) => theme.palette.secondary.main};
@@ -87,10 +108,16 @@ const Toolbar = css`
 			color: ${({ theme }) => theme.palette.primary.main};
 		}
 
+		// remove bg circle around icons
 		& > :not(:last-child):not(.Mui-disabled) {
 			.MuiIconButton-root:hover {
 				background-color: transparent;
 			}
+		}
+
+		.MuiIconButton-sizeMedium {
+			padding: 10px;
+			margin: 5px;
 		}
 	}
 `;
