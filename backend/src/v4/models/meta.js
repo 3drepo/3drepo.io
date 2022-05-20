@@ -324,7 +324,7 @@ Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 const _getAllMetadata = async (account, model, branch, rev, keyFilters, stream) => {
 	const subModelPromise = getSubModels(account, model, branch, rev);
 
-	const data = await findMetadataNodesByFields(account, model, branch, rev, keyFilters, {_id: 1, parents: 1, metadata: 1});
+	const data = await findMetadataNodesByFields(account, model, branch, rev, keyFilters);
 
 	stream.write("{\"data\":");
 	stream.write(JSON.stringify(cleanAll(data)));

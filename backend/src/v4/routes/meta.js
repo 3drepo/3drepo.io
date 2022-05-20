@@ -453,7 +453,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		const keyFilters = req.query.filter ? req.query.filter.split(',') : [];
+		const keyFilters = req.query.filter ? req.query.filter.split(",") : [];
 		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev, keyFilters)
 			.then(stream => {
 				const headers = {

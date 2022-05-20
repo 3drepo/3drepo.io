@@ -45,20 +45,20 @@ function getSceneCollectionName(model) {
 }
 
 async function getNodeBySharedId(account, model, shared_id, revisionIds, projection = {}) {
-	return await db.findOne(account, getSceneCollectionName(model), {shared_id, rev_id :{$in: revisionIds}}, projection);
+	return await db.findOne(account, getSceneCollectionName(model), { shared_id, rev_id: { $in: revisionIds } }, projection);
 }
 
 async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
 	const history = await History.getHistory(account, model, branch, revision);
 
-	return cleanAll(await db.find(account, getSceneCollectionName(model), { rev_id: history._id, ...query}, projection));
+	return cleanAll(await db.find(account, getSceneCollectionName(model), { rev_id: history._id, ...query }, projection));
 }
 
 const Scene = {};
 
 Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
-	const query = {"metadata.key": fieldName};
-	const proj = {parents: 1, metadata: {$elemMatch: {key: fieldName}}, ...projection};
+	const query = { "metadata.key": fieldName };
+	const proj = { parents: 1, metadata: { $elemMatch: { key: fieldName } }, ...projection };
 
 	return findNodes(account, model, branch, revision, query, proj);
 };
@@ -77,20 +77,14 @@ Scene.findNodesByType = async function (account, model, branch, revision, type, 
 
 Scene.findMetadataNodesByFields = async function (account, model, branch, revision, fieldNames, projection = {}) {
 	const history = await History.getHistory(account, model, branch, revision);
-	const query = { $match: { rev_id: history._id, type: 'meta' } };
-	projection = { $project: {...projection, metadata: 1, parents: 1 } };
+	const query = { $match: { rev_id: history._id, type: "meta" } };
+	projection = { $project: { ...projection, metadata: 1, parents: 1 } };
 
 	if (fieldNames.length) {
-		query.$match['metadata.key'] = { $in: fieldNames };
-		projection.$project.metadata = {
-			$filter: {
-				input: '$metadata',
-				as: 'metadata',
-				cond: { $in: ['$$metadata.key', fieldNames] }
-			}
-		};
+		query.$match["metadata.key"] = { $in: fieldNames };
+		projection.$project.metadata = { $filter: { input: "$metadata", as: "metadata", cond: { $in: ["$$metadata.key", fieldNames] } } };
 	}
-	
+
 	return cleanAll(await db.aggregate(account, getSceneCollectionName(model), [query, projection]));
 };
 
