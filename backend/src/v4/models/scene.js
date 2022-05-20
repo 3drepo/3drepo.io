@@ -90,9 +90,8 @@ Scene.findMetadataNodesByFields = async function (account, model, branch, revisi
 			}
 		};
 	}
-
-	const data = await db.aggregate(account, getSceneCollectionName(model), [query, projection]);
-	return cleanAll(data);
+	
+	return cleanAll(await db.aggregate(account, getSceneCollectionName(model), [query, projection]));
 };
 
 Scene.getGridfsFileStream = async function (account, model, filename) {
