@@ -75,7 +75,7 @@ Scene.findNodesByType = async function (account, model, branch, revision, type, 
 	return findNodes(account, model, branch, revision, query, projection);
 };
 
-Scene.findMetadataNodesByFields = async function (account, model, branch, revision, fieldNames, projection = {}) {
+Scene.findMetadataNodesByFields = async function (account, model, branch, revision, fieldNames = [], projection = {}) {
 	const history = await History.getHistory(account, model, branch, revision);
 	const query = { $match: { rev_id: history._id, type: "meta" } };
 	projection = { $project: { ...projection, metadata: 1, parents: 1 } };

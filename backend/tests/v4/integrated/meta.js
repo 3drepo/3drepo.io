@@ -260,7 +260,6 @@ describe("Metadata", function () {
 			"metadata": {
 				"IFC Type": "IfcBuildingElementProxy",
 				"IFC GUID": "0WHuICC7qTG8oNFZ9AvcS0",	
-				"extra" : "1ejijo"			
 			},
 			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
 		};
