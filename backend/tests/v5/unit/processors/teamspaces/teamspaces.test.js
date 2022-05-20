@@ -34,6 +34,12 @@ const TeamspacesModel = require(`${src}/models/teamspaces`);
 jest.mock('../../../../../src/v5/models/roles');
 const RolesModel = require(`${src}/models/roles`);
 
+jest.mock('../../../../../src/v5/models/projectSettings');
+const ProjectSettings = require(`${src}/models/projectSettings`);
+
+jest.mock('../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
+
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
 
@@ -128,8 +134,32 @@ const testInitTeamspace = () => {
 	});
 };
 
+const testRemoveTeamspaceMember = () => {
+	describe('Remove user from teamspace', () => {
+		test('should all possible permissions then remove the user from the teamspace', async () => {
+			const user = generateRandomString();
+			const teamspace = generateRandomString();
+
+			await expect(Teamspaces.removeTeamspaceMember(teamspace, user)).resolves.toBeUndefined();
+
+			expect(ModelSettings.removeUserFromAllModels).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.removeUserFromAllModels).toHaveBeenCalledWith(teamspace, user);
+
+			expect(ProjectSettings.removeUserFromAllProjects).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.removeUserFromAllProjects).toHaveBeenCalledWith(teamspace, user);
+
+			expect(TeamspacesModel.removeUserFromAdminPrivilege).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.removeUserFromAdminPrivilege).toHaveBeenCalledWith(teamspace, user);
+
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(1);
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
+	testRemoveTeamspaceMember();
 });

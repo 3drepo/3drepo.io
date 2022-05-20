@@ -394,6 +394,19 @@ const testCreateTeamspaceSettings = () => {
 	});
 };
 
+const testRemoveUserFromAdminPrivileges = () => {
+	describe('Remove user from admin privileges', () => {
+		test('Should trigger a query to remove user from admin permissions array', async () => {
+			const teamspace = generateRandomString();
+			const user = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			await expect(Teamspace.removeUserFromAdminPrivilege(teamspace, user)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+		});
+	});
+};
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
@@ -405,4 +418,5 @@ describe('models/teamspaces', () => {
 	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
+	testRemoveUserFromAdminPrivileges();
 });
