@@ -21,7 +21,11 @@ import { IAuthState } from './auth.redux';
 const selectAuthDomain = (state): IAuthState => state.auth2;
 
 export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated,
+	selectAuthDomain, (state) => !!state.isAuthenticated,
+);
+
+export const selectAuthenticationFetched = createSelector(
+	selectAuthDomain, (state) => !(state.isAuthenticated === null),
 );
 
 export const selectIsPending = createSelector(
