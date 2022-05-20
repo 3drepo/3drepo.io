@@ -16,27 +16,57 @@
  */
 
 const { v5Path } = require('../../../interop');
+
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { updateMany } = require(`${v5Path}/handler/db`);
+const { find, updateOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = (teamspace, model) => updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
+const processModel = async (teamspace, model) => {
+	const meshes = await find(teamspace, `${model}.scene`, { type: 'mesh' }, { shared_id: 1 });
+	const stashDB = `${model}.stash.3drepo`;
+	const superMeshesProm = find(teamspace, stashDB, { type: 'mesh' }, { m_map: 1 });
+
+	const meshToSharedId = {};
+	// eslint-disable-next-line camelcase
+	meshes.forEach(({ _id, shared_id }) => {
+		// eslint-disable-next-line camelcase
+		meshToSharedId[UUIDToString(_id)] = shared_id;
+	});
+
+	const superMeshes = await superMeshesProm;
+
+	// eslint-disable-next-line camelcase
+	const proms = superMeshes.map(({ _id, m_map }) => {
+		if (m_map.length && !m_map[0].shared_id) {
+			const updatedMmap = m_map.map((entry) => ({
+				...entry,
+				shared_id: meshToSharedId[UUIDToString(entry.map_id)],
+			}));
+
+			return updateOne(teamspace, stashDB, { _id }, { $set: { m_map: updatedMmap } });
+		}
+		return Promise.resolve();
+	});
+	return Promise.all(proms);
+};
 
 const processTeamspace = async (teamspace) => {
-	const histories = await getCollectionsEndsWith(teamspace, '.history');
-	for (let i = 0; i < histories.length; ++i) {
-		const model = histories[i].name.slice(0, -('.history'.length));
+	const scenes = await getCollectionsEndsWith(teamspace, '.scene');
+	for (const { name: scene } of scenes) {
+		const model = scene.slice(0, -('.scene'.length));
 		logger.logInfo(`\t\t\t${model}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processModel(teamspace, model);
+		// eslint-disable-next-line no-await-in-loop
 	}
 };
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-[TEAMSPACE]${teamspaces[i]}`);
+		logger.logInfo(`\t\t-${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspaces[i]);
 	}
