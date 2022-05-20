@@ -24,7 +24,7 @@ import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styl
 import { Container as AddShapeContainer } from '@/v4/routes/components/buttonMenu/buttonMenu.styles';
 import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
-const Toolbar = css`
+export default css`
 	${ToolsContainer} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border-radius: 10px;
@@ -87,8 +87,8 @@ const Toolbar = css`
 		// add shape icon and chevron icon
 		${AddShapeContainer} {
 			${IconButton} {
-				margin-right: 0;
-				padding-right: 0;
+				margin: 5px 0 5px 5px;
+				padding: 8px 0 8px 8px;
 			}
 
 			${SmallIconButtonStyled} {
@@ -120,9 +120,4 @@ const Toolbar = css`
 			margin: 5px;
 		}
 	}
-`;
-
-// used in the attach resources modal styling file
-export default css`
-	${Toolbar}
 `;
