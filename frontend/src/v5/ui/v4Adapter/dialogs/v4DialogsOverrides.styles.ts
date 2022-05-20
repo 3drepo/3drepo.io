@@ -17,8 +17,10 @@
 import styled from 'styled-components';
 import generalDialogStyles from './generalDialogStyling.overrides';
 import attachResourcesDialog from './attachResourcesDialog.overrides';
+import colorPickerDialog from './colorPickerDialog.overrides';
 
 export const V4DialogsOverridesContainer = styled.div`
 	${generalDialogStyles}
 	${attachResourcesDialog}
+	${colorPickerDialog}
 `;
