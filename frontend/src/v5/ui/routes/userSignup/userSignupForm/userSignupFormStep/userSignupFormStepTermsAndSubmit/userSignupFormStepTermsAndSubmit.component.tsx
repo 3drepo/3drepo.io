@@ -141,7 +141,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 						label={(
 							<CheckboxMessage>
 								<FormattedMessage
-									id="userSignup.form.terms.termsAndContitions"
+									id="userSignup.form.terms.termsAndConditions"
 									defaultMessage={`
 										I agree to the {termsAndConditions} and I have
 										read the {privacyPolicy} and the {cookiesPolicy}.
