@@ -95,8 +95,7 @@ const establishRoutes = () => {
 	 *     tags: [Projects]
 	 *     operationId: getProjectList
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
@@ -143,8 +142,7 @@ const establishRoutes = () => {
 	 *     tags: [Projects]
 	 *     operationId: createProject
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
@@ -186,15 +184,13 @@ const establishRoutes = () => {
 	 *     tags: [Projects]
 	 *     operationId: deleteProject
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Id of the project
 	 *         in: path
 	 *         required: true
@@ -217,15 +213,13 @@ const establishRoutes = () => {
 	 *     tags: [Projects]
 	 *     operationId: updateProject
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Id of the project
 	 *         in: path
 	 *         required: true
@@ -258,15 +252,13 @@ const establishRoutes = () => {
 	 *     tags: [Projects]
 	 *     operationId: getProjectSettings
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Id of the project
 	 *         in: path
 	 *         required: true
