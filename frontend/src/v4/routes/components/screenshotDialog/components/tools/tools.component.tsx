@@ -45,7 +45,7 @@ import {
 	SHAPES_MENU,
 	TEXT_SIZES
 } from './tools.helpers';
-import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer, Sizes, MenuItem } from './tools.styles';
+import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer, MenuItem } from './tools.styles';
 
 const ACTIVE_COLOR = isV5() ? 'primary' : 'secondary';
 const PRIMARY_COLOR = isV5() ? 'secondary' : 'primary';
