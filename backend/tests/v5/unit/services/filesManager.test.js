@@ -20,8 +20,8 @@ const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
-jest.mock('../../../../src/v5/models/FileRefs');
-const FileRefs = require(`${src}/models/FileRefs`);
+jest.mock('../../../../src/v5/models/fileRefs');
+const FileRefs = require(`${src}/models/fileRefs`);
 
 jest.mock('../../../../src/v5/handler/fs');
 const FSHandler = require(`${src}/handler/fs`);
