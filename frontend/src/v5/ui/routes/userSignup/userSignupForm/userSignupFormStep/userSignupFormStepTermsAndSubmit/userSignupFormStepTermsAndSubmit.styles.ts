@@ -60,10 +60,6 @@ export const Link = styled(LinkBase).attrs({
 	&& {
 		text-decoration: underline;
 	}
-
-	&, &:active, &:visited, &:hover {
-		color: currentColor;
-	}
 `;
 
 export const ErrorContainer = styled.div`
