@@ -143,43 +143,14 @@ export const UserSignupFormStepTermsAndSubmit = ({
 								<FormattedMessage
 									id="userSignup.form.terms.termsAndConditions"
 									defaultMessage={`
-										I agree to the {termsAndConditions} and I have
-										read the {privacyPolicy} and the {cookiesPolicy}.
+										I agree to the <termsLink>Terms & Conditions</termsLink> and I have
+										read the <privacyLink>Privacy Policy</privacyLink> and the 
+										<cookiesLink>Cookies Policy</cookiesLink>.
 									`}
 									values={{
-										termsAndConditions: (
-											<Link
-												to="/terms"
-												target="_blank"
-											>
-												<FormattedMessage
-													id="userSignup.form.terms.termsAndConditions.link"
-													defaultMessage="Terms & Conditions"
-												/>
-											</Link>
-										),
-										privacyPolicy: (
-											<Link
-												to="/privacy"
-												target="_blank"
-											>
-												<FormattedMessage
-													id="userSignup.form.terms.privacyPolicy.link"
-													defaultMessage="Privacy Policy"
-												/>
-											</Link>
-										),
-										cookiesPolicy: (
-											<Link
-												to="/cookies"
-												target="_blank"
-											>
-												<FormattedMessage
-													id="userSignup.form.terms.cookiesPolicy.link"
-													defaultMessage="Cookies Policy"
-												/>
-											</Link>
-										),
+										termsLink: (label) => <Link to="/terms" target="_blank">{label}</Link>,
+										privacyLink: (label) => <Link to="/privacy" target="_blank">{label}</Link>,
+										cookiesLink: (label) => <Link to="/cookies" target="_blank">{label}</Link>,
 									}}
 								/>
 							</CheckboxMessage>
