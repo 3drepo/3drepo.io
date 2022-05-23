@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Action } from 'redux';
-
 export interface INewUser {
 	username: string;
 	email: string;
@@ -27,14 +25,4 @@ export interface INewUser {
 	countryCode: string;
 	captcha: string;
 	mailListAgreed: boolean;
-}
-export type RegisterPayload = INewUser;
-export type RegisterResponse = INewUser;
-export type RegisterSuccessPayload = RegisterResponse;
-
-export type RegisterAction = Action<'REGISTER_USER'> & RegisterPayload;
-export type RegisterSuccessAction = Action<'REGISTER_USER_SUCCESS'> & RegisterSuccessPayload;
-
-export interface IAuthActionCreators {
-	register: (username: string, data: any) => RegisterAction;
 }
