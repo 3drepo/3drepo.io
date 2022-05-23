@@ -19,12 +19,48 @@ import {
 	OptionsDivider,
 	ToolsContainer,
 	IconButton,
+	MenuItem,
 } from '@/v4/routes/components/screenshotDialog/components/tools/tools.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { Container as AddShapeContainer } from '@/v4/routes/components/buttonMenu/buttonMenu.styles';
 import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
+import { MenuList } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 export default css`
+	// brush and text sizes drop-down
+	${MenuItem}${MenuItem} { 
+		padding: 4px 20px 4px 0;
+		height: 34px;
+		
+		&:not(:hover) {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+
+		button {
+			&:hover {
+				background-color: transparent;
+			}
+
+			span {
+				svg {
+					font-size: 15px !important;
+				}
+
+				span {
+					font-size: 12px;
+					font-weight: 400;
+					width: 10px;
+					display: flex;
+					justify-content: flex-start;
+				}
+			}
+		}
+
+		span {
+			color: ${({ theme }) => theme.palette.secondary.main};
+		}
+	}
+
 	${ToolsContainer} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border-radius: 10px;
@@ -38,18 +74,34 @@ export default css`
 		// color picker
 		${ColorSelect} {
 			width: max-content;
+			background-color: transparent;
 
 			button {
 				margin: 0;
+
+				svg {
+					margin-left: -11px;
+				}
+			}
+
+			.MuiGrid-item:first-of-type {
+				width: 18px;
+				height: 18px;
 			}
 		}
 
 		// brush and text size selector
 		[class*=MuiSelect-root] {
-			margin: 0 0 0 12px;
+			margin: 0 0 0 6px;
 			width: 62px;
 			justify-content: center;
 			align-items: center;
+			
+			// brush/text icon
+			button svg {
+				font-size: 19px !important;
+				padding-left: 12px;
+			}
 
 			.MuiSelect-select {
 				margin: 0;
@@ -118,6 +170,18 @@ export default css`
 		.MuiIconButton-sizeMedium {
 			padding: 10px;
 			margin: 5px;
+		}
+	}
+
+	// Add shape menu
+	${MenuList} {
+		span {
+			color: ${({ theme }) => theme.palette.secondary.main};
+
+			&:hover {
+				background-color: transparent;
+				color: ${({ theme }) => theme.palette.primary.main};
+			}
 		}
 	}
 `;

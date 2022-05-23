@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, Divider, IconButton as IconButtonComponent } from '@mui/material';
+import { Button, Divider, IconButton as IconButtonComponent, MenuItem as MenuItemBase } from '@mui/material';
 import IconBadge from '@mui/material/Badge';
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
@@ -108,3 +108,5 @@ export const Badge = styled(IconBadge)`
 		font-weight: bold;
 	}
 `;
+
+export const MenuItem = styled(MenuItemBase)``;

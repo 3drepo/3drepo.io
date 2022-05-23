@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { MenuItem, Select, Tooltip } from '@mui/material';
+import { Select, Tooltip } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -45,7 +45,7 @@ import {
 	SHAPES_MENU,
 	TEXT_SIZES
 } from './tools.helpers';
-import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer } from './tools.styles';
+import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer, Sizes, MenuItem } from './tools.styles';
 
 const ACTIVE_COLOR = isV5() ? 'primary' : 'secondary';
 const PRIMARY_COLOR = isV5() ? 'secondary' : 'primary';
