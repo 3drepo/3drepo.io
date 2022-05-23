@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
+import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
 import { Background, Container, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 interface IAuthTemplate {
 	footer?: JSX.Element;
@@ -28,27 +29,15 @@ interface IAuthTemplate {
 export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element => {
 	const { url } = useRouteMatch();
 	if (AuthHooksSelectors.selectIsAuthenticated()) {
-		return (<Redirect to={{ pathname: '/v5/dashboard', state: { referrer: url } }} />);
+		return (<Redirect to={{ pathname: DASHBOARD_ROUTE, state: { referrer: url } }} />);
 	}
 
-	const getSubdomain = () => {
-		const host = window.location.hostname;
-		if (host.indexOf('.') < 0) return '';
-		return host.split('.')[0];
-	};
-
-	const customLogin = ClientConfig.customLogins[getSubdomain()];
-	const topLogoSrc = customLogin?.topLogo || 'assets/images/3drepo-logo-white.png';
-	const backgroundSrc = customLogin?.backgroundImage;
+	const backgroundSrc = clientConfigService.getCustomBackgroundImagePath();
 
 	return (
-		<Background backgroundSrc={backgroundSrc}>
+		<Background>
 			{!backgroundSrc && <BackgroundOverlay />}
-			<Logo
-				draggable="false"
-				src={topLogoSrc}
-				alt={formatMessage({ id: 'auth.logo.alt', defaultMessage: 'Logo' })}
-			/>
+			<Logo />
 			<Container>
 				{children}
 			</Container>

@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { clientConfigService } from '@/v4/services/clientConfig';
-import DefaultLogoBase from '@assets/icons/colored_logo.svg';
+import styled from 'styled-components';
+import { BlueLogo, customBackgroundPath } from '@components/authTemplate/authTemplate.styles';
+import { Background as BackgroundBase} from '@components/authTemplate/authTemplate.styles';
 import { Display } from '@/v5/ui/themes/media';
-import { Link } from 'react-router-dom';
-import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 
 export const Container = styled.div`
 	display: flex;
@@ -28,19 +26,6 @@ export const Container = styled.div`
 	justify-content: stretch;
 	width: 100%;
 	min-height: 100vh;
-`;
-
-export const Background = styled.div`
-	height: 100%;
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	${clientConfigService.getCustomBackgroundImagePath() && `
-		background: url('${clientConfigService.getCustomBackgroundImagePath()}') 0% 0% / cover no-repeat;
-	`};
 `;
 
 export const UserSignupMain = styled.div`
@@ -52,52 +37,16 @@ export const UserSignupMain = styled.div`
 	height: fit-content;
 `;
 
-const DefaultLogo = styled(DefaultLogoBase)`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	width: 100px;
-`;
-
-const CustomLogo = styled.img.attrs({
-	src: clientConfigService.getCustomLogoPath(),
-	alt: '3D Repo',
-})`
-	width: 100px;
-`;
-
-export const LoginLink = styled(Link).attrs({
-	to: LOGIN_PATH,
-})`
-	width: fit-content;
-`;
-
-export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo;
-
-export const BlueLogo = styled(Logo)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
 export const LogoHeightBalancer = styled(BlueLogo)`
-	color: transparent;
-`;
-
-export const LogoContainer = styled(LoginLink)`
-	margin-bottom: 100px;
+	visibility: hidden;
 	display: none;
+	margin-bottom: 100px;
 
 	@media (max-width: ${Display.Tablet}px) {
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
 	}
 `;
 
-export const Content = css`
-	margin: 28px;
-	width: 454px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 6px;
-	box-sizing: border-box;
-	/* TODO - fix after new design will be released */
-	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
+export const Background = styled(BackgroundBase)`
+	${({ theme }) => !customBackgroundPath && `background: ${theme.palette.tertiary.lightest};`}
 `;

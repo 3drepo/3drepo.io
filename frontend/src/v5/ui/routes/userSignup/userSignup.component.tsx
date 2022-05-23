@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useState } from 'react';
+import { LogoContainer, BlueLogo } from '@components/authTemplate/authTemplate.styles';
 import { UserSignupSidebar } from './userSignupSidebar/userSignupSidebar.component';
 import { UserSignupForm } from './userSignupForm/userSignupForm.component';
 import {
 	Container,
 	UserSignupMain,
-	LogoContainer,
 	LogoHeightBalancer,
-	BlueLogo,
 	Background,
 } from './userSignup.styles';
 import { UserSignupWelcome, UserSignupWelcomeProps } from './userSignupWelcome/userSignupWelcome.component';
@@ -49,9 +48,7 @@ export const UserSignup = () => {
 					) : (
 						<UserSignupForm completeRegistration={completeRegistration} />
 					)}
-					<LogoContainer>
-						<LogoHeightBalancer />
-					</LogoContainer>
+					<LogoHeightBalancer />
 				</UserSignupMain>
 			</Background>
 		</Container>

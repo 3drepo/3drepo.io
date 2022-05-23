@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import StepperBase from '@mui/material/Stepper';
 import StepLabelBase from '@mui/material/StepLabel';
-import { Content } from '../userSignup.styles';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const Container = styled.div`
 	flex: 1;
@@ -40,7 +40,13 @@ export const Underlined = styled.div`
 `;
 
 export const Stepper = styled(StepperBase)`
-	${Content}
+	margin: 28px;
+	width: 454px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border-radius: 6px;
+	box-sizing: border-box;
+	/* TODO - fix after new design will be released */
+	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`

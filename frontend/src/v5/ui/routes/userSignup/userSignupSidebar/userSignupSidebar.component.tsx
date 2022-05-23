@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { LoginLink, Logo } from '../userSignup.styles';
+import { LoginLink, Logo } from '@components/authTemplate/authTemplate.styles';
 import {
 	Container,
 	BulletPoint,

@@ -15,42 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from 'styled-components';
 import LoginBackground from '@assets/images/login_background.svg';
+import DefaultLogoBase from '@assets/icons/colored_logo.svg';
 import { Typography } from '@controls/typography';
-import styled, { css } from 'styled-components';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { Link } from 'react-router-dom';
+import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
+import { Display } from '@/v5/ui/themes/media';
 
-export const BackgroundOverlay = styled(LoginBackground)`
-	width: 1585px;
-	height: 1040px;
-	max-width: 100vw;
-	max-height: 100vh;
-	position: absolute;
-	z-index: 0;
-	margin: auto;
-	left: 0;
-	right: 0;
-	overflow: hidden;
-`;
-
-export const Background = styled.div<{ backgroundSrc?: string }>`
-	display: flex;
-	height: 100%;
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
-	${({ backgroundSrc }) => backgroundSrc && css`background-image: url("${backgroundSrc}");`}
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: cover;
-`;
-
-export const Logo = styled.img`
-	max-height: 100px;
-	max-width: 100px;
-	padding: 28px;
-	z-index: 1;
-`;
+const customLogoPath = clientConfigService.getCustomLogoPath();
+export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
 
 export const Container = styled.div`
 	width: 408px;
@@ -73,5 +48,74 @@ export const Footer = styled(Typography).attrs({
 	a {
 		text-decoration: none;
 		color: inherit;
+	}
+`;
+
+export const BackgroundOverlay = styled(LoginBackground)`
+	width: 1585px;
+	height: 1040px;
+	margin: auto;
+	max-width: 100vw;
+	max-height: 100vh;
+	align-items: center;
+	position: absolute;
+	z-index: 0;
+	left: 0;
+	right: 0;
+	overflow: hidden;
+`;
+
+export const Background = styled.div`
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-image: ${({ theme }) => customBackgroundPath ?
+		`url('${customBackgroundPath}')`
+		: theme.palette.gradient.secondary
+	};
+`;
+
+const DefaultLogo = styled(DefaultLogoBase)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	width: 100px;
+`;
+
+const CustomLogo = styled.img.attrs({
+	src: customLogoPath,
+	alt: '3D Repo',
+})`
+	width: 100px;
+`;
+
+export const Logo = styled(customLogoPath ? CustomLogo : DefaultLogo)`
+	margin-bottom: 28px;
+`;
+
+export const BlueLogo = styled(Logo)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const LoginLink = styled(Link).attrs({
+	to: LOGIN_PATH,
+})`
+	width: fit-content;
+`;
+
+export const LogoContainer = styled(LoginLink)`
+	margin-bottom: 72px;
+	display: none;
+
+	@media (max-width: ${Display.Tablet}px) {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 	}
 `;

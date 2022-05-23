@@ -16,7 +16,7 @@
  */
 import styled from 'styled-components';
 import { AuthTemplate as AuthTemplateBase } from '@components/authTemplate';
-import { Link } from 'react-router-dom';
+import { LoginLink } from '@components/authTemplate/authTemplate.styles';
 
 export const AuthTemplate = styled(AuthTemplateBase)`
 	font-family: ${({ theme }) => theme.typography.fontFamily};
@@ -34,14 +34,11 @@ export const Message = styled.div`
 	margin-top: 25px;
 `;
 
-export const BackToLoginContainer = styled.div`
-	margin: 35px 0 10px;
+export const BackToLogin = styled(LoginLink)`
+	display: block;
+	margin: 35px auto 10px;
 	text-align: center;
-`;
-
-export const BackToLogin = styled(Link).attrs({
-	to: './login',
-})`
-	${({ theme }) => theme.typography.link};
-	color: ${({ theme }) => theme.palette.primary.main};
+	&& {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
 `;

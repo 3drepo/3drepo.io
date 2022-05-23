@@ -44,7 +44,7 @@ export const MainTitle = styled.div`
 	${({ theme }) => theme.typography.h2};
 	font-weight: lighter;
 	letter-spacing: 0.03rem;
-	margin: 36px 0 22px;
+	margin: 8px 0 22px;
 `;
 
 export const BulletPoint = styled.div`
