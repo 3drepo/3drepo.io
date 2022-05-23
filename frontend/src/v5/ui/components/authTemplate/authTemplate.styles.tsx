@@ -28,7 +28,7 @@ const customLogoPath = clientConfigService.getCustomLogoPath();
 export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
 
 export const Container = styled.div`
-	width: 408px;
+	min-width: 408px;
 	border-radius: 20px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	padding: 58px 64px 38px;

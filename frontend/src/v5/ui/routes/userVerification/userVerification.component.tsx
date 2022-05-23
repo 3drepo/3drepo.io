@@ -19,9 +19,10 @@ import { useLocation } from 'react-router-dom';
 import { verifyUser } from '@/v5/services/api/signup';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { AuthTemplate, Title, Message, BackToLogin, BackToLoginContainer } from './userVerification.styles';
+import { AuthTemplate, Title, Message, BackToLogin } from './userVerification.styles';
 
 export const UserVerification = () => {
+	const [title, setTitle] = useState('');
 	const [message, setMessage] = useState('');
 	const { search } = useLocation();
 	const searchQuery = new URLSearchParams(search);
@@ -31,8 +32,12 @@ export const UserVerification = () => {
 		const username = searchQuery.get('username');
 
 		if (!token || !username) {
+			setTitle(formatMessage({
+				id: 'userVerification.alreadyVerified.title',
+				defaultMessage: ' Registration could not be completed'
+			}));
 			setMessage(formatMessage({
-				id: 'userVerification.missingParameter',
+				id: 'userVerification.missingParameter.message',
 				defaultMessage: 'Can\'t verify: Token and/or Username not provided.',
 			}));
 			return;
@@ -40,21 +45,33 @@ export const UserVerification = () => {
 		
 		verifyUser(token, username)
 			.then(() => {
+				setTitle(formatMessage({
+					id: 'userVerification.success.title',
+					defaultMessage: 'Registration complete'
+				}));
 				setMessage(formatMessage({
-					id: 'userVerification.success',
+					id: 'userVerification.success.message',
 					defaultMessage: 'Your account has been verified. You can now login.',
 				}));
 			})
 			.catch((e) => {
 				const errorMessage = e.response?.data?.message; 
 				if (errorMessage === 'Already verified') {
+					setTitle(formatMessage({
+						id: 'userVerification.alreadyVerified.title',
+						defaultMessage: 'Registration complete'
+					}));
 					setMessage(formatMessage({
-						id: 'userVerification.alreadyVerified',
+						id: 'userVerification.alreadyVerified.message',
 						defaultMessage: 'Account already verified.',
 					}));
 				} else if (errorMessage === 'Token is invalid or expired') {
+					setTitle(formatMessage({
+						id: 'userVerification.tokenInvalid.title',
+						defaultMessage: ' Registration could not be completed'
+					}));
 					setMessage(formatMessage({
-						id: 'userVerification.tokenInvalid',
+						id: 'userVerification.tokenInvalid.message',
 						defaultMessage: 'Token is invalid or expired.',
 					}));
 				}
@@ -64,22 +81,17 @@ export const UserVerification = () => {
 	return (
 		<AuthTemplate>
 			<Title>
-				<FormattedMessage
-					id="userVerification.title"
-					defaultMessage="Registration complete"
-				/>
+				{title}
 			</Title>
 			<Message>
 				{message}
 			</Message>
-			<BackToLoginContainer>
-				<BackToLogin>
-					<FormattedMessage
-						id="userVerification.backToLogin"
-						defaultMessage="Back to login"
-					/>
-				</BackToLogin>
-			</BackToLoginContainer>
+			<BackToLogin>
+				<FormattedMessage
+					id="userVerification.backToLogin"
+					defaultMessage="Back to login"
+				/>
+			</BackToLogin>
 		</AuthTemplate>
 	);
 };
