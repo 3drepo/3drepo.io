@@ -274,7 +274,7 @@ export const theme = createTheme(
 								},
 							},
 						},
-						container: {
+						root: {
 							'.MuiPaper-root .MuiDialogActions-root .MuiButton-root': {
 								backgroundColor: COLOR.PRIMARY_MAIN,
 								color: COLOR.PRIMARY_MAIN_CONTRAST,

@@ -38,6 +38,8 @@ import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 
+import dialogs from './dialogs/v4DialogsOverrides.styles';
+
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -75,6 +77,8 @@ export const V4OverridesContainer = styled.div`
 	${issueProperties}
 
 	${views}
+
+	${dialogs}
 
 	${RevisionsSwitchContainer} {
 		display: none;

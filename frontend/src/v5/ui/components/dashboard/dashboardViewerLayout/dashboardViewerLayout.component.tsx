@@ -14,30 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { css } from 'styled-components';
-import { DialogTitle } from '@/v4/routes/components/dialogContainer/components/dialog/dialog.styles';
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { DashboardLayout } from './dashboardViewerLayout.styles';
+import { theme } from '@/v5/ui/routes/viewer/theme';
 
-export default css`
-	${DialogTitle} {
-		background: ${({ theme }) => theme.palette.gradient.secondary};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		height: 74px;
-		width: 100%;
-		box-sizing: border-box;
-		align-items: center;
-		display: flex;
-		padding: 0 35px;
-
-		button {
-			position: absolute;
-			top: 10px;
-			right: 10px;
-			width: 40px;
-			height: 40px;
-		}
-
-		.MuiDialogContent-root {
-			padding: 0;
-		}
-	}
-`;
+export const DashboardViewerLayout = ({ children }) => (
+	<ThemeProvider theme={theme}>
+		<MuiThemeProvider theme={theme}>
+			<DashboardLayout>
+				{children}
+			</DashboardLayout>
+		</MuiThemeProvider>
+	</ThemeProvider>
+);

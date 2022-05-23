@@ -22,8 +22,6 @@ import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import { identity } from 'lodash';
 import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
 import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
 import {
@@ -510,47 +508,45 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 					onEnter: this.onPanelOpen,
 				}}
 			>
-				<ConditionalV5Wrapper v5Wrapper={V4DialogsAdapter}>
-					{(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
-					<Grid
-						container
-						direction="row"
-						alignItems="center"
-						justifyContent="space-between"
-					>
-						<ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
-						<ColorSlider onChange={this.setBaseColor} />
+				{(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
+				<Grid
+					container
+					direction="row"
+					alignItems="center"
+					justifyContent="space-between"
+				>
+					<ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
+					<ColorSlider onChange={this.setBaseColor} />
+				</Grid>
+				<Grid
+					container
+					direction="row"
+					justifyContent="flex-start"
+					alignItems="center"
+				>
+					<Grid item>
+						<ColorSample color={selectedColor} />
 					</Grid>
-					<Grid
-						container
-						direction="row"
-						justifyContent="flex-start"
-						alignItems="center"
-					>
-						<Grid item>
-							<ColorSample color={selectedColor} />
-						</Grid>
-						<Grid item>
-							<FormControl className='colorPicker'>
-								<SelectedHash
-									value={hashInput.replace('#', '')}
-									onChange={this.handleHashInputChange}
-									withOpacity={opacitySliderVisibility}
-									startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
-								/>
-							</FormControl>
-						</Grid>
+					<Grid item>
+						<FormControl className='colorPicker'>
+							<SelectedHash
+								value={hashInput.replace('#', '')}
+								onChange={this.handleHashInputChange}
+								withOpacity={opacitySliderVisibility}
+								startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
+							/>
+						</FormControl>
 					</Grid>
-					{opacityEnabled &&
-						<OpacityControl
-							opacity={opacity}
-							onOpacityChanged={this.setOpacity}
-							sliderVisible={opacitySliderVisibility}
-							onSliderVisibilityChanged={this.setOpacityVisibility}
-						/>
-					}
-					{!disableButtons && this.renderFooter()}
-				</ConditionalV5Wrapper>
+				</Grid>
+				{opacityEnabled &&
+					<OpacityControl
+						opacity={opacity}
+						onOpacityChanged={this.setOpacity}
+						sliderVisible={opacitySliderVisibility}
+						onSliderVisibilityChanged={this.setOpacityVisibility}
+					/>
+				}
+				{!disableButtons && this.renderFooter()}
 			</Panel>
 		</>;
 	}

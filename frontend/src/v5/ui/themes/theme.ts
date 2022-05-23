@@ -333,6 +333,12 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiPopover: {
+			defaultProps: {
+				// This is necessary for overriding styles of v4 dialogs
+				container: () => document.getElementById('v4Overrides'),
+			},
+		},
 		MuiTooltip: {
 			defaultProps: {
 				PopperProps: {
@@ -467,6 +473,10 @@ export const theme = createTheme({
 			},
 		},
 		MuiDialog: {
+			defaultProps: {
+				// This is necessary for overriding styles of v4 dialogs
+				container: () => document.getElementById('v4Overrides'),
+			},
 			styleOverrides: {
 				paper: {
 					borderRadius: 10,
