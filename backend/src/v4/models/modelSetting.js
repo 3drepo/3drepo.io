@@ -457,25 +457,23 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 
 	permissions = _.uniq(permissions, "user");
-
-	const promises = [];
 	const dbUser = await findByUserName(account);
-	permissions.forEach(permission => {
+
+	const promises = permissions.map(async (permission) => {
 		checkPermissionIsValid(permission);
 		checkUserHasPermissionTemplate(dbUser, permission);
 
-		promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
-			const index = setting.permissions.findIndex(x => x.user === permission.user);
-			if (index !== -1) {
-				if (permission.permission) {
-					setting.permissions[index].permission = permission.permission;
-				} else {
-					setting.permissions.splice(index, 1);
-				}
-			} else if (permission.permission) {
-				setting.permissions.push(permission);
+		await teamspaceMemberCheck(permission.user, dbUser.user);
+		const index = setting.permissions.findIndex(x => x.user === permission.user);
+		if (index !== -1) {
+			if (permission.permission) {
+				setting.permissions[index].permission = permission.permission;
+			} else {
+				setting.permissions.splice(index, 1);
 			}
-		}));
+		} else if (permission.permission) {
+			setting.permissions.push(permission);
+		}
 	});
 
 	await Promise.all(promises);
