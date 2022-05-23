@@ -22,35 +22,43 @@ import { formatMessage } from '@/v5/services/intl';
 import { AuthTemplate, Title, Message, BackToLogin, BackToLoginContainer } from './userVerification.styles';
 
 export const UserVerification = () => {
-	const [errorMessage, setErrorMessage] = useState('');
+	const [message, setMessage] = useState('');
 	const { search } = useLocation();
 	const searchQuery = new URLSearchParams(search);
 
 	useEffect(() => {
 		const token = searchQuery.get('token');
 		const username = searchQuery.get('username');
+
 		if (!token || !username) {
-			setErrorMessage(formatMessage({
+			setMessage(formatMessage({
 				id: 'userVerification.missingParameter',
 				defaultMessage: 'Can\'t verify: Token and/or Username not provided.',
 			}));
 			return;
 		}
-		try {
-			verifyUser(token, username);
-		} catch (e) {
-			if (e.code === 'ALREADY_VERIFIED') {
-				setErrorMessage(formatMessage({
-					id: 'userVerification.alreadyVerified',
-					defaultMessage: 'Account already verified.',
+		
+		verifyUser(token, username)
+			.then(() => {
+				setMessage(formatMessage({
+					id: 'userVerification.success',
+					defaultMessage: 'Your account has been verified. You can now login.',
 				}));
-			} else if (e.code === 'TOKEN_INVALID') {
-				setErrorMessage(formatMessage({
-					id: 'userVerification.tokenInvalid',
-					defaultMessage: 'Token is invalid or expired.',
-				}));
-			}
-		}
+			})
+			.catch((e) => {
+				const errorMessage = e.response?.data?.message; 
+				if (errorMessage === 'Already verified') {
+					setMessage(formatMessage({
+						id: 'userVerification.alreadyVerified',
+						defaultMessage: 'Account already verified.',
+					}));
+				} else if (errorMessage === 'Token is invalid or expired') {
+					setMessage(formatMessage({
+						id: 'userVerification.tokenInvalid',
+						defaultMessage: 'Token is invalid or expired.',
+					}));
+				}
+			});
 	}, []);
 
 	return (
@@ -62,12 +70,7 @@ export const UserVerification = () => {
 				/>
 			</Title>
 			<Message>
-				{errorMessage || (
-					<FormattedMessage
-						id="userVerification.success"
-						defaultMessage="Your account has been verified. You can now login."
-					/>
-				)}
+				{message}
 			</Message>
 			<BackToLoginContainer>
 				<BackToLogin>
