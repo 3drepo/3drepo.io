@@ -19,7 +19,7 @@ import * as FederationsSaga from '@/v5/store/federations/federations.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { before, omit, pick, times } from 'lodash';
+import { omit, times } from 'lodash';
 import {
 	federationMockFactory,
 	prepareMockRawSettingsReply,
