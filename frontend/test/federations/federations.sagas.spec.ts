@@ -63,7 +63,7 @@ describe('Federations: sagas', () => {
 		};
 		const newFederationContainers = ['containerIdOne', 'containerIdTwo'];
 
-		it('should successfuly create a new federation', async () => {
+		it('should successfully create a new federation', async () => {
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
 				.reply(200, { _id: federationId });
@@ -74,7 +74,7 @@ describe('Federations: sagas', () => {
 				.put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, newFederationContainers))
 				.silentRun();
 		});
-		it('should successfuly create a new federation with no containers', async () => {
+		it('should successfully create a new federation with no containers', async () => {
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
 				.reply(200, { _id: federationId });

@@ -18,6 +18,7 @@ import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
 import { DialogProps } from '@mui/material/Dialog';
+import { FormattedMessage } from 'react-intl';
 import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
@@ -91,10 +92,10 @@ export const FormModal = (props: IFormModal) => {
 				{showButtons && (
 					<FormDialogActions>
 						<Button autoFocus onClick={onClickCancel || onClickClose} variant="outlined" color="secondary" size="medium">
-							{cancelLabel || 'Cancel'}
+							{cancelLabel || <FormattedMessage id="formDialog.actions.cancel" defaultMessage="Cancel" />}
 						</Button>
 						<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
-							{confirmLabel || 'OK'}
+							{confirmLabel || <FormattedMessage id="formDialog.actions.ok" defaultMessage="OK" />}
 						</Button>
 					</FormDialogActions>
 				)}
