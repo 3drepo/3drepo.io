@@ -18,8 +18,8 @@
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
-import { Background, Container, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { Background, Container, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
 
 interface IAuthTemplate {
 	footer?: JSX.Element;
