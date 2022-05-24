@@ -89,8 +89,9 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
 
-	const { pathname } = useLocation();
-	AuthActionsDispatchers.setReturnUrl(pathname);
+	const location = useLocation();
+
+	AuthActionsDispatchers.setReturnUrl(location);
 
 	useEffect(() => {
 		if (!isAuthenticated && authenticationFetched) {

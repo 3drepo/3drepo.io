@@ -30,7 +30,7 @@ export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
 
 	if (AuthHooksSelectors.selectIsAuthenticated()) {
-		return (<Redirect to={{ pathname: returnUrl, state: { referrer: url } }} />);
+		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
 	}
 
 	const getSubdomain = () => {

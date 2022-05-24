@@ -37,5 +37,5 @@ export const selectLoginError = createSelector(
 );
 
 export const selectReturnUrl = createSelector(
-	selectAuthDomain, (state) => state.returnUrl || DASHBOARD_ROUTE,
+	selectAuthDomain, (state) => state.returnUrl || ({ pathname: DASHBOARD_ROUTE }),
 );

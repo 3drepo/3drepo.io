@@ -68,7 +68,11 @@ export interface IAuthState {
 	isAuthenticated: boolean;
 	isPending: boolean;
 	errorMessage: string;
-	returnUrl: string;
+	returnUrl: {
+		pathname: string,
+		search?: string,
+		hash?: string
+	}
 }
 
 export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
@@ -85,5 +89,5 @@ export interface IAuthActionCreators {
 	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
 	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
 	sessionExpired: () => void;
-	setReturnUrl: (url: string) => SetReturnUrlAction;
+	setReturnUrl: (url: IAuthState['returnUrl']) => SetReturnUrlAction;
 }
