@@ -106,7 +106,7 @@ describe("Sharing/Unsharing a model", function () {
 				.expect(200, done);
 		});
 
-		it("should succeed and the viewer is able to see the model", function(done) {
+		it("should succeed and the viewer is able to see the model (with invalid permission present on the model)", function(done) {
 			const permissions = [
 				{ user: username_viewer, permission: "viewer"}
 			];

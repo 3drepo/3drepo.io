@@ -44,26 +44,43 @@ const testSendEmail = () => {
 		const mailerConfig = { ...config.mail };
 
 		beforeEach(() => {
-			config.mail = mailerConfig;
+			config.mail = { ...mailerConfig };
 		});
 
 		test('should fail if config.mail.sender is not set', async () => {
 			Mailer.reset();
-			const { sender } = config.mail;
 			config.mail.sender = undefined;
 
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.sender is not set');
-			config.mail.sender = sender;
 			Mailer.reset();
 		});
 
 		test('should fail if config.mail.smtpConfig is not set and config.mail.generateCredentials is false', async () => {
 			Mailer.reset();
 			config.mail.generateCredentials = false;
+			delete config.mail.smtpConfig;
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.smtpConfig is not set');
+			Mailer.reset();
+		});
+
+		test('should pass if config.mail.smtpConfig is not set and config.mail.generateCredentials is true', async () => {
+			Mailer.reset();
 			config.mail.generateCredentials = true;
+			delete config.mail.smtpConfig;
+			await Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: recipient,
+				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				html: await BaseTemplate.html({
+					...data,
+					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+				}),
+				attachments,
+			});
 			Mailer.reset();
 		});
 

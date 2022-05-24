@@ -19,7 +19,7 @@ import * as FederationsSaga from '@/v5/store/federations/federations.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { omit, pick, times } from 'lodash';
+import { omit, times } from 'lodash';
 import {
 	federationMockFactory,
 	prepareMockRawSettingsReply,
@@ -42,6 +42,17 @@ describe('Federations: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'projectId';
 	const federationId = 'federationId';
+
+	beforeAll(() => {
+		// Silence console.log here becouse faker throws an irrelevant warning
+		jest.spyOn(console, 'log').mockImplementation(jest.fn());
+		jest.spyOn(console, 'debug').mockImplementation(jest.fn());
+	})
+
+	afterAll(() => {
+		jest.spyOn(console, 'log').mockRestore();
+		jest.spyOn(console, 'debug').mockRestore();
+	})
 
 	describe('createFederation', () => {
 		const newFederation = {
@@ -180,7 +191,6 @@ describe('Federations: sagas', () => {
 				.put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, mockContainers))
 				.silentRun();
 		})
-	
 
 		it('should fetch federation views', async () => {
 			mockFederations.forEach((federation) => {
@@ -250,7 +260,7 @@ describe('Federations: sagas', () => {
 				federationId,
 				mockSettings,
 			))
-			.silentRun();	
+			.silentRun();
 		})
 	})
 

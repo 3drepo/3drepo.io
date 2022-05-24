@@ -151,8 +151,10 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
+	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
 
+ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
@@ -200,11 +202,12 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 	return {
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		permissions,
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
 			...(isFederation ? { federate: true } : {}),
-			...properties },
+			...properties,
+			permissions,
+		},
 	};
 };
 
