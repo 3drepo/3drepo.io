@@ -40,4 +40,9 @@ export default css`
 			padding: 0;
 		}
 	}
+
+	.MuiDialogContent-root {
+		padding: 0px;
+		overflow-x: hidden;
+	}
 `;
