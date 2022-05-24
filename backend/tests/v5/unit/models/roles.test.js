@@ -39,6 +39,21 @@ const testCreateTeamspaceRole = () => {
 	});
 };
 
+const testRemoveTeamspaceRole = () => {
+	describe('Remove teamspace role', () => {
+		test('should remove the teamspace role', async () => {
+			const teamspace = generateRandomString();
+			const expectedCommand = {
+				dropRole: TEAM_MEMBER,
+			};
+			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			await Roles.removeTeamspaceRole(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, expectedCommand);
+		});
+	});
+};
+
 const testGrantTeamspaceRoleToUser = () => {
 	describe('Grant teamspace role to user', () => {
 		test('should assign a teamspace role to the user', async () => {
@@ -77,6 +92,7 @@ const testRevokeTeamspaceRoleFromUser = () => {
 
 describe('models/roles', () => {
 	testCreateTeamspaceRole();
+	testRemoveTeamspaceRole();
 	testGrantTeamspaceRoleToUser();
 	testRevokeTeamspaceRoleFromUser();
 });

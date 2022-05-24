@@ -179,10 +179,13 @@ const testDeleteFromFavourites = () => {
 	const determineAction = (teamspace, favToRm) => {
 		const results = _.cloneDeep(favouritesData.starredModels);
 		if (results[teamspace]) {
-			const newArr = results[teamspace].filter((id) => !favToRm.includes(id));
+			if (favToRm?.length) {
+				const newArr = results[teamspace].filter((id) => !favToRm.includes(id));
 
-			return newArr.length ? { $set: { 'customData.starredModels': results } }
-				: { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+				return newArr.length ? { $set: { 'customData.starredModels': results } }
+					: { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+			}
+			return { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 		}
 
 		return undefined;
@@ -202,6 +205,14 @@ const testDeleteFromFavourites = () => {
 			const arr = ['d'];
 			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBe(undefined);
 			checkResults(fn, teamspace, arr);
+		});
+
+		test('Should remove all favourite containers from a teamspace if an array is not provided', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: favouritesData });
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			const teamspace = 'teamspace2';
+			await expect(User.deleteFavourites('xxx', teamspace)).resolves.toBe(undefined);
+			checkResults(fn, teamspace);
 		});
 
 		test('Should remove some favourite containers from teamspace', async () => {
