@@ -77,7 +77,7 @@ export default css`
 		}
 
 		// brush and text size selector
-		[class*=MuiSelect-root] {
+		.MuiInputBase-colorPrimary {
 			margin: 0 0 0 6px;
 			width: 62px;
 			justify-content: center;
