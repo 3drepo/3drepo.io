@@ -44,14 +44,20 @@ const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+			federate: true,
+		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+			federate: true,
+		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),

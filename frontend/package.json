@@ -16,7 +16,7 @@
 		"wdm": "yarn run wdm:update && yarn run wdm:start",
 		"wdm:start": "webdriver-manager start --standalone",
 		"wdm:update": "webdriver-manager update --standalone",
-		"test": "cross-env NODE_ENV=test yarn jest --runInBand --silent",
+		"test": "cross-env NODE_ENV=test yarn jest --runInBand --testTimeout=500",
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
 		"lint:ts": "eslint . --rulesdir internals/eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
