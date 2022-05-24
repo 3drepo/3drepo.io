@@ -17,11 +17,14 @@
 import { ThemeProvider } from 'styled-components';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
+import { V4DialogsOverridesContainer } from './v4DialogsOverrides.styles';
 
 export const V4DialogsAdapter = ({ children }) => (
 	<ThemeProvider theme={theme}>
 		<MuiThemeProvider theme={theme}>
-			{children}
+			<V4DialogsOverridesContainer id="v4DialogsOverrides">
+				{children}
+			</V4DialogsOverridesContainer>
 		</MuiThemeProvider>
 	</ThemeProvider>
 );

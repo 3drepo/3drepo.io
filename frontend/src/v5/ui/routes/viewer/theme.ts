@@ -130,6 +130,11 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiPopover: {
+					defaultProps: {
+						container: () => document.getElementById('v4DialogsOverrides'),
+					},
+				},
 				MuiAvatar: {
 					styleOverrides: {
 						root: {
@@ -257,6 +262,9 @@ export const theme = createTheme(
 					},
 				},
 				MuiDialog: {
+					defaultProps: {
+						container: () => document.getElementById('v4DialogsOverrides'),
+					},
 					styleOverrides: {
 						paper: {
 							maxWidth: 'unset !important',
