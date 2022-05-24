@@ -34,7 +34,7 @@ export const UserVerification = () => {
 		if (!token || !username) {
 			setTitle(formatMessage({
 				id: 'userVerification.alreadyVerified.title',
-				defaultMessage: ' Registration could not be completed'
+				defaultMessage: ' Registration could not be completed',
 			}));
 			setMessage(formatMessage({
 				id: 'userVerification.missingParameter.message',
@@ -42,12 +42,12 @@ export const UserVerification = () => {
 			}));
 			return;
 		}
-		
+
 		verifyUser(token, username)
 			.then(() => {
 				setTitle(formatMessage({
 					id: 'userVerification.success.title',
-					defaultMessage: 'Registration complete'
+					defaultMessage: 'Registration complete',
 				}));
 				setMessage(formatMessage({
 					id: 'userVerification.success.message',
@@ -55,11 +55,11 @@ export const UserVerification = () => {
 				}));
 			})
 			.catch((e) => {
-				const errorMessage = e.response?.data?.message; 
+				const errorMessage = e.response?.data?.message;
 				if (errorMessage === 'Already verified') {
 					setTitle(formatMessage({
 						id: 'userVerification.alreadyVerified.title',
-						defaultMessage: 'Registration complete'
+						defaultMessage: 'Registration complete',
 					}));
 					setMessage(formatMessage({
 						id: 'userVerification.alreadyVerified.message',
@@ -68,7 +68,7 @@ export const UserVerification = () => {
 				} else if (errorMessage === 'Token is invalid or expired') {
 					setTitle(formatMessage({
 						id: 'userVerification.tokenInvalid.title',
-						defaultMessage: ' Registration could not be completed'
+						defaultMessage: ' Registration could not be completed',
 					}));
 					setMessage(formatMessage({
 						id: 'userVerification.tokenInvalid.message',
