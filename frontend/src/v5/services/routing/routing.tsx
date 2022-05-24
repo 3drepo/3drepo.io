@@ -94,7 +94,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 
 	useEffect(() => {
 		if (!isAuthenticated && authenticationFetched) {
-			history.push(LOGIN_PATH);
+			history.replace(LOGIN_PATH);
 		}
 	}, [isAuthenticated, authenticationFetched]);
 
