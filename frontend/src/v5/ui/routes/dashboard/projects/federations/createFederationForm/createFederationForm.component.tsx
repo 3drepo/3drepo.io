@@ -32,7 +32,7 @@ import { prepareNewFederation } from '@/v5/store/federations/federations.helpers
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
 import { HalfWidth } from './createFederationForm.styles';
-import { EditFederationModal } from '../editFederationModal/editFederationModal.component';
+import { EditFederation } from '../editFederationModal/editFederation';
 
 interface ICreateFederation {
 	open: boolean;
@@ -58,7 +58,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	});
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [modalPhase, setModalPhase] = useState('settings');
-	const [containers, setContainers] = useState([]);
+	const [includedContainers, setIncludedContainers] = useState([]);
 
 	const closeAndReset = (): void => {
 		onClickClose();
@@ -81,7 +81,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	};
 
 	const onClickSubmit = (newFederation: NewFederation): void => {
-		FederationsActionsDispatchers.createFederation(teamspace, project, newFederation, containers);
+		FederationsActionsDispatchers.createFederation(teamspace, project, newFederation, includedContainers);
 		onClickClose();
 		setModalPhase('settings');
 	};
@@ -153,11 +153,10 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 					/>
 				</>
 			) : (
-				<EditFederationModal
+				<EditFederation
 					federation={prepareNewFederation(getValues())}
-					isNewFederation
-					onContainersChange={(includedContainers: IContainer[]) => setContainers(
-						includedContainers.map((container) => container._id),
+					onContainersChange={(containers: IContainer[]) => setIncludedContainers(
+						containers.map((container) => container._id),
 					)}
 				/>
 			)}
