@@ -74,20 +74,6 @@ export default css`
 		// color picker
 		${ColorSelect} {
 			width: max-content;
-			background-color: transparent;
-
-			button {
-				margin: 0;
-
-				svg {
-					margin-left: -11px;
-				}
-			}
-
-			.MuiGrid-item:first-of-type {
-				width: 18px;
-				height: 18px;
-			}
 		}
 
 		// brush and text size selector
@@ -152,12 +138,23 @@ export default css`
 		}
 
 		// eraser icon 
-		.secondary {
-			color: ${({ theme }) => theme.palette.secondary.main};
-		}
+		[aria-label="Erase"] {
+			span {
+				width: 20px;
+    			height: 20px;
 
-		.primary {
-			color: ${({ theme }) => theme.palette.primary.main};
+				svg {
+					width: 100%;
+				}
+			}
+
+			.secondary {
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+	
+			.primary {
+				color: ${({ theme }) => theme.palette.primary.main};
+			}
 		}
 
 		// remove bg circle around icons
