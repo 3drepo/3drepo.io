@@ -269,18 +269,6 @@ export const theme = createTheme(
 						paper: {
 							maxWidth: 'unset !important',
 							minWidth: 'unset !important',
-							'& .MuiDialogTitle-root': {
-								padding: '14px 0 !important',
-								minWidth: 'fit-content',
-								'& .MuiIconButton-root': {
-									position: 'absolute',
-									right: 0,
-									top: -2,
-									'& svg': {
-										color: '#000000', // TODO fix when new palette is released
-									},
-								},
-							},
 						},
 						root: {
 							'.MuiPaper-root .MuiDialogActions-root .MuiButton-root': {
