@@ -76,8 +76,8 @@ export const Background = styled.div`
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
-	background-image: ${({ theme }) => customBackgroundPath ?
-		`url('${customBackgroundPath}')`
+	background-image: ${({ theme }) => customBackgroundPath
+		? `url('${customBackgroundPath}')`
 		: theme.palette.gradient.secondary
 	};
 `;
