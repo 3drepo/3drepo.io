@@ -16,8 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { BlueLogo, customBackgroundPath } from '@components/authTemplate/authTemplate.styles';
-import { Background as BackgroundBase} from '@components/authTemplate/authTemplate.styles';
+import { BlueLogo, customBackgroundPath, Background as BackgroundBase } from '@components/authTemplate/authTemplate.styles';
 import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
