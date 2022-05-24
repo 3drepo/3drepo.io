@@ -20,6 +20,7 @@ import {
 	ToolsContainer,
 	IconButton,
 	MenuItem,
+	Select,
 } from '@/v4/routes/components/screenshotDialog/components/tools/tools.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { Container as AddShapeContainer } from '@/v4/routes/components/buttonMenu/buttonMenu.styles';
@@ -77,7 +78,7 @@ export default css`
 		}
 
 		// brush and text size selector
-		.MuiInputBase-colorPrimary {
+		${Select} {
 			margin: 0 0 0 6px;
 			width: 62px;
 			justify-content: center;
@@ -98,7 +99,6 @@ export default css`
 
 				& ~ fieldset {
 					border: none;
-					/* padding-right: 15px; */
 				}
 
 				// little size icon (XS, S, M, etc.)
@@ -116,7 +116,6 @@ export default css`
 
 				button {
 					margin: 0;
-					/* padding-left: 5px; */
 					padding: 0;
 				}
 			}
