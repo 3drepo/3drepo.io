@@ -312,6 +312,12 @@ export const theme = createTheme({
 			styleOverrides: {
 				colorPrimary: {
 					color: COLOR.BASE_LIGHTEST,
+					'svg': {
+						borderRadius: 3,
+						'& > rect': {
+							stroke: COLOR.BASE_LIGHT,
+						},
+					},
 				},
 			},
 		},

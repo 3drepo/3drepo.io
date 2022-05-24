@@ -94,6 +94,10 @@ export const Gap = styled.div`
 `;
 
 export const FormCheckbox = styled(FormCheckboxBase)`
+	span {
+		margin: 0;
+	}
+	
 	svg {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
