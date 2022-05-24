@@ -38,6 +38,7 @@ const fieldTypes = {
 	"createdAt": "[object Number]",
 	"creator_role": "[object String]",
 	"desc": "[object String]",
+	"due_date": "[object Number]",
 	"element": "[object String]",
 	"likelihood": "[object Number]",
 	"location_desc": "[object String]",
@@ -72,7 +73,8 @@ const riskSchema = yup.object().shape({
 });
 
 const ownerPrivilegeAttributes = [
-	"desc"
+	"desc",
+	"due_date"
 ];
 
 const LEVELS = {
