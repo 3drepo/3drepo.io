@@ -17,7 +17,7 @@
 import styled from 'styled-components';
 import EmailIconBase from '@assets/icons/twoToned/email-two_toned.svg';
 import { Link as LinkBase } from 'react-router-dom';
-import { Content } from '../userSignup.styles';
+import { MainContentStyling } from '../userSignupForm/userSignupForm.styles';
 
 export const Body = styled.div`
 	display: flex;
@@ -27,7 +27,7 @@ export const Body = styled.div`
 	text-align: center;
 	box-sizing: border-box;
 	padding: 45px 60px;
-	${Content}
+	${MainContentStyling}
 `;
 
 export const EmailIcon = styled(EmailIconBase)`
