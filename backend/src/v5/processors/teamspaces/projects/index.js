@@ -45,11 +45,8 @@ Projects.createProject = (teamspace, name) => createProject(teamspace, name);
 Projects.deleteProject = async (teamspace, projectId) => {
 	const project = await getProjectById(teamspace, projectId, { models: 1 });
 
-	const promises = [];
+	await Promise.all(project.models.map((model) => removeModelData(teamspace, model)));
 
-	project.models.map((model) => promises.push(removeModelData(teamspace, model)));
-
-	await Promise.all(promises);
 	await deleteProject(teamspace, projectId);
 };
 

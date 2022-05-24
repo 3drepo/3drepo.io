@@ -21,21 +21,31 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getMembersInfo } = require(`${v5Path}/models/teamspaces`);
-const { revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
+const { deleteFavourites } = require(`${v5Path}/models/users`);
+const { removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
 const { getTeamspaceListByUser, removeTeamspaceMember } = require(`${v5Path}/processors/teamspaces/teamspaces`);
 const { dropDatabase, dropCollection, dropUser } = require(`${v5Path}/handler/db`);
 
 const removeAllUsersFromTS = async (teamspace) => {
 	const members = await getMembersInfo(teamspace);
-	return Promise.all(
-		members.map(({ user }) => ((user !== teamspace)
-			? revokeTeamspaceRoleFromUser(teamspace, user) : Promise.resolve())),
+	await Promise.all(
+		members.map(async ({ user }) => {
+			if (user !== teamspace) {
+				await Promise.all([
+					revokeTeamspaceRoleFromUser(teamspace, user),
+					deleteFavourites(user, teamspace),
+				]);
+			}
+		}),
 	);
 };
 
 const removeTeamspace = async (teamspace) => {
 	await removeAllUsersFromTS(teamspace);
-	await dropDatabase(teamspace);
+	await Promise.all([
+		dropDatabase(teamspace),
+		removeTeamspaceRole(teamspace),
+	]);
 };
 
 const removeUserFromAllTeamspaces = async (user) => {
@@ -59,10 +69,9 @@ const run = async (users) => {
 	for (const user of userArr) {
 		logger.logInfo(`-${user}`);
 		// eslint-disable-next-line no-await-in-loop
-		await Promise.all([
-			removeUser(user),
-			removeTeamspace(user),
-		]);
+		await removeTeamspace(user);
+		// eslint-disable-next-line no-await-in-loop
+		await removeUser(user);
 	}
 };
 

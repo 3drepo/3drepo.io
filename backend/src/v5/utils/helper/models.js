@@ -18,6 +18,7 @@
 const db = require('../../handler/db');
 const { deleteModel } = require('../../models/modelSettings');
 const { removeAllFilesFromModel } = require('../../models/fileRefs');
+const { templates } = require('../responseCodes');
 
 const ModelHelper = {};
 
@@ -36,7 +37,7 @@ ModelHelper.removeModelData = async (teamspace, model) => {
 
 	return Promise.all([
 		removeModelCollections(teamspace, model),
-		deleteModel(teamspace, model),
+		deleteModel(teamspace, model).catch((err) => { if (err.code !== templates.modelNotFound.code) throw err; }),
 	]);
 };
 
