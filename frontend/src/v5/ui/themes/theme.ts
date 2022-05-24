@@ -779,6 +779,18 @@ export const theme = createTheme({
 					width: '100%',
 					boxSizing: 'border-box',
 				},
+				'& .MuiSelect-selectMenu': {
+					height: 35,
+				},
+				'& svg': {
+					right: 14,
+					marginTop: 40,
+					position: 'absolute',
+					pointerEvents: 'none',
+					'& path': {
+						fill: COLOR.BASE_MAIN,
+					},
+				},
 			},
 		},
 		MuiFormControlLabel: {

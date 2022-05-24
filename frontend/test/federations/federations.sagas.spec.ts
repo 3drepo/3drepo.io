@@ -148,6 +148,7 @@ describe('Federations: sagas', () => {
 				.put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, mockContainers))
 				.silentRun();
 		})
+	
 
 		it('should fetch federation views', async () => {
 			mockFederations.forEach((federation) => {
@@ -217,7 +218,7 @@ describe('Federations: sagas', () => {
 				federationId,
 				mockSettings,
 			))
-			.silentRun();
+			.silentRun();	
 		})
 	})
 
