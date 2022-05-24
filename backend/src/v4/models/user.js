@@ -136,7 +136,7 @@ const handleAuthenticateFail = async function (user, username) {
 const User = {};
 
 User.getTeamspaceSpaceUsed = async function (dbName) {
-	const settings = await db.find(dbName, "setting", {}, {_id: 1});
+	const settings = await db.find(dbName, "settings", {}, {_id: 1});
 
 	const spacePerModel = await Promise.all(settings.map(async (setting) =>
 		await FileRef.getTotalModelFileSize(dbName, setting._id))
