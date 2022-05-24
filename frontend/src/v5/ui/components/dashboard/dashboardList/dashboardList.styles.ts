@@ -50,25 +50,25 @@ export const Divider = styled(DividerComponent)`
 `;
 
 export const DashboardListButton = styled(Button).attrs({
-	variant: 'outlined',
-	color: 'primary',
+	variant: 'contained',
+	color: 'secondary',
 })`
 	${({ theme }) => theme.typography.h3}
+	/* TODO - fix when new palette is released */
+	background-color: #E8EEF8;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	:hover, :focus {
+		/* TODO - fix when new palette is released */
+		background-color: #E8EEF8;
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
 	width: 100%;
 	margin: 0;
-	border: 0;
 	height: 80px;
+	margin-top: 18px;
 
 	svg {
 		width: 34px;
 		height: 34px;
 	}
-`;
-
-export const DashedButtonContainer = styled(DashedContainer).attrs(({ theme }) => ({
-	strokeColor: theme.palette.primary.main,
-	zeroPadding: true,
-}))<{ strokeColor: string }>`
-	margin-top: 18px;
-	background-color: transparent;
 `;
