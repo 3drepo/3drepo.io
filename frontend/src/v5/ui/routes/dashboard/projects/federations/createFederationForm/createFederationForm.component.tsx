@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
-import { FederationCreationSchema } from '@/v5/validation/federations';
+import { FederationSettingsSchema } from '@/v5/validation/schemes';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
@@ -42,6 +42,11 @@ interface ICreateFederation {
 const defaultValues = {
 	name: '',
 	unit: 'mm',
+	latitude: 0,
+	longitude: 0,
+	x: 0,
+	y: 0,
+	z: 0,
 };
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
@@ -54,7 +59,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	} = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
-		resolver: yupResolver(FederationCreationSchema),
+		resolver: yupResolver(FederationSettingsSchema),
 	});
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [modalPhase, setModalPhase] = useState('settings');
