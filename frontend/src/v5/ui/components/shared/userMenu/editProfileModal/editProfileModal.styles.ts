@@ -19,7 +19,6 @@ import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
 import TabPanelBase from '@mui/lab/TabPanel';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 
 export const FormModal = styled(FormModalBase)`
 	.MuiDialogContent-root {
