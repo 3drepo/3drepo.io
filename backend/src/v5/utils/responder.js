@@ -123,33 +123,4 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 	});
 };
 
-Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize) => {
-	const headers = {
-		'Content-Length': fileSize,
-		'Content-Disposition': `attachment;filename=${fileName}`,
-	};
-
-	let response = createResponseCode(resCode);
-
-	readStream.on('error', (error) => {
-		response = createResponseCode(error);
-		logger.logInfo(genResponseLogging(response.code, fileSize, req));
-		res.status(response.status);
-		res.end();
-	});
-
-	readStream.once('data', () => {
-		res.writeHead(response.status, headers);
-	});
-
-	readStream.on('data', (data) => {
-		res.write(data);
-	});
-
-	readStream.on('end', () => {
-		res.end();
-		logger.logInfo(genResponseLogging(response.code, fileSize, req));
-	});
-};
-
 module.exports = Responder;
