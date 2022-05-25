@@ -327,10 +327,10 @@ Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 	return Meta.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
 };
 
-const _getAllMetadata = async (account, model, branch, rev, keyFilters, stream) => {
+const _getAllMetadata = async (account, model, branch, rev, fieldNames, stream) => {
 	const subModelPromise = getSubModels(account, model, branch, rev);
 
-	const data = await findMetadataNodesByFields(account, model, branch, rev, keyFilters);
+	const data = await findMetadataNodesByFields(account, model, branch, rev, fieldNames);
 
 	stream.write("{\"data\":");
 	stream.write(JSON.stringify(cleanAll(data)));
@@ -342,8 +342,7 @@ const _getAllMetadata = async (account, model, branch, rev, keyFilters, stream) 
 			try {
 				const {account: subModelTS, model: subModelId, branch: subModelBranch, revision: subModelRev} = refs[i];
 
-				const subModelData = await findNodesByType(subModelTS, subModelId, subModelBranch, subModelRev,
-					"meta", undefined, {_id: 1, parents: 1, metadata: 1});
+				const subModelData = await findMetadataNodesByFields(subModelTS, subModelId, subModelBranch, subModelRev, fieldNames);
 				const result =
 					{
 						data: cleanAll(subModelData),
@@ -366,12 +365,12 @@ const _getAllMetadata = async (account, model, branch, rev, keyFilters, stream) 
 	stream.end();
 };
 
-Meta.getAllMetadata = async (account, model, branch, rev, keyFilters) => {
+Meta.getAllMetadata = async (account, model, branch, rev, fieldNames) => {
 	// Check revision exists
 	await History.getHistory(account, model, branch, rev);
 	const stream = Stream.PassThrough();
 	try {
-		_getAllMetadata(account, model, branch, rev, keyFilters, stream);
+		_getAllMetadata(account, model, branch, rev, fieldNames, stream);
 	} catch(err) {
 		stream.emit("error", err);
 		stream.end();
