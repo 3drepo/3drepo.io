@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router';
+
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useState } from 'react';
@@ -43,7 +43,6 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {
-	const { teamspace } = useParams();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
 
@@ -68,6 +67,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								largeIcon
 							/>
 							<UserFullName>{user.firstName} {user.lastName}</UserFullName>
+							{/* TODO - check user.user or user.username  */}
 							<UserUserName>{user.username}</UserUserName>
 							<ActionMenuItem>
 								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
@@ -80,9 +80,10 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 						</AvatarSection>
 					</ActionMenuSection>
 					<ActionMenuSection>
+						{/* TODO - check the /${teamspace} */}
 						<ActionMenuItemLink
 							Icon={TeamspacesIcon}
-							to={`${baseUrl}/${teamspace}`}
+							to={baseUrl}
 						>
 							<FormattedMessage
 								id="userMenu.teamspaces"
@@ -128,8 +129,8 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 						<ActionMenuItem>
 							<SignOutButton onClick={onClickSignOut}>
 								<FormattedMessage
-									id="userMenu.signOut"
-									defaultMessage="Sign out"
+									id="userMenu.logOut"
+									defaultMessage="Log out"
 								/>
 							</SignOutButton>
 						</ActionMenuItem>

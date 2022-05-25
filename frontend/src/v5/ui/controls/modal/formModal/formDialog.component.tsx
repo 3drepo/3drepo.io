@@ -27,12 +27,14 @@ import {
 	FormDialogContent,
 	FormDialogActions,
 	RemoveWhiteCorners,
+	Subtitle,
 } from './formDialog.styles';
 
 interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
 	onSubmit?: (event) => void;
 	title?: string;
+	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
 	isValid?: boolean;
@@ -41,52 +43,59 @@ interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormE
 	zeroMargin?: boolean;
 }
 
-export const FormModal = ({
-	onSubmit = () => {},
-	onClickClose,
-	title,
-	confirmLabel,
-	open,
-	children,
-	className,
-	isValid = true,
-	showButtons = true,
-	maxWidth = false,
-	zeroMargin = false,
-	...formProps
-}: IFormModal) => (
-	<Dialog
-		onClose={onClickClose}
-		open={open}
-		PaperComponent={RemoveWhiteCorners}
-		className={className}
-		maxWidth={maxWidth}
-		fullWidth={!!maxWidth}
-	>
-		<Form {...formProps}>
-			<Header>
-				<Title>
-					{title}
-				</Title>
-				<CloseButton aria-label="Close dialog" onClick={onClickClose}>
-					<CloseIcon />
-				</CloseButton>
-			</Header>
-			<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
-				<FormDialogContent zeroMargin={zeroMargin}>
-					{children}
-				</FormDialogContent>
-			</ScrollArea>
-			{showButtons && (
-				<FormDialogActions>
-					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
-						Cancel
-					</Button>
-					<Button disabled={!isValid} onClick={onSubmit} type="submit" variant="contained" color="primary" size="medium">
-						{confirmLabel || 'OK'}
-					</Button>
-				</FormDialogActions>
-			)}
-		</Form>
-	</Dialog>
-);
+export const FormModal = (props: IFormModal) => {
+	const {
+		onSubmit = () => {},
+		onClickClose,
+		title,
+		subtitle,
+		confirmLabel,
+		open,
+		children,
+		className,
+		isValid = true,
+		showButtons = true,
+		maxWidth = false,
+		zeroMargin = false,
+		...formProps
+	} = props;
+	return (
+		<Dialog
+			onClose={onClickClose}
+			open={open}
+			PaperComponent={RemoveWhiteCorners}
+			className={className}
+			maxWidth={maxWidth}
+			fullWidth={!!maxWidth}
+		>
+			<Form {...formProps}>
+				<Header>
+					<div>
+						<Title>
+							{title}
+						</Title>
+						{subtitle && <Subtitle>{subtitle}</Subtitle>}
+					</div>
+					<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+						<CloseIcon />
+					</CloseButton>
+				</Header>
+				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
+					<FormDialogContent $zeromargin={zeroMargin}>
+						{children}
+					</FormDialogContent>
+				</ScrollArea>
+				{showButtons && (
+					<FormDialogActions>
+						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
+							Cancel
+						</Button>
+						<Button disabled={!isValid} onClick={onSubmit} type="submit" variant="contained" color="primary" size="medium">
+							{confirmLabel || 'OK'}
+						</Button>
+					</FormDialogActions>
+				)}
+			</Form>
+		</Dialog>
+	);
+};

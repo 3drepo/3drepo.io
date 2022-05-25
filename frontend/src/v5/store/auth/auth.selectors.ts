@@ -14,18 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { createSelector } from 'reselect';
+import { IAuthState } from './auth.redux';
 
-const selectAuthDomain = (state) => state.auth2;
+const selectAuthDomain = (state): IAuthState => state.auth2;
 
 export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state): boolean => state.isAuthenticated,
+	selectAuthDomain, (state) => !!state.isAuthenticated,
+);
+
+export const selectAuthenticationFetched = createSelector(
+	selectAuthDomain, (state) => !(state.isAuthenticated === null),
 );
 
 export const selectIsPending = createSelector(
-	selectAuthDomain, (state): boolean => state.isPending,
+	selectAuthDomain, (state) => state.isPending,
 );
 
 export const selectLoginError = createSelector(
-	selectAuthDomain, (state): string => state.errorMessage,
+	selectAuthDomain, (state) => state.errorMessage,
+);
+
+export const selectReturnUrl = createSelector(
+	selectAuthDomain, (state) => state.returnUrl || ({ pathname: DASHBOARD_ROUTE }),
 );

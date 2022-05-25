@@ -16,52 +16,10 @@
  */
 
 import axios from 'axios';
-import { push } from 'connected-react-router';
-
-import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 
 axios.defaults.withCredentials = true;
 
-axios.interceptors.response.use(
-	(response) => response,
-	(error) => {
-		try {
-			const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
-
-			switch (error.response.status) {
-				case 401:
-					if (error.response.data) {
-						const notLogin = error.response.data.place !== 'GET /v5/login';
-						const unauthorized = invalidMessages.includes(error.response.data.message);
-
-						const sessionHasExpired = unauthorized && notLogin;
-
-						if (sessionHasExpired) {
-							AuthActionsDispatchers.sessionExpired();
-						} else {
-							throw error.response;
-						}
-						// eslint-disable-next-line no-param-reassign
-						error.handled = true;
-					}
-					break;
-				case 403:
-					// eslint-disable-next-line no-param-reassign
-					error.handled = true;
-					dispatch(push('/'));
-					break;
-				default:
-					break;
-			}
-
-			return Promise.reject(error);
-		} catch (e) {
-			return Promise.reject(error);
-		}
-	},
-);
 export const generateV5ApiUrl = (url: string, requestMethod: string): string => encodeURI(clientConfigService.apiUrl(requestMethod, `v5/${url}`));
 
 const getRequest = (url, ...options) => {

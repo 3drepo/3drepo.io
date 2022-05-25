@@ -57,21 +57,20 @@ queue.purgeQueues = async () => {
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = async (userCredentials, tsList = [], customData = {}) => {
+db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
+	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false) => {
+db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
-			{ permissions: breaking ? undefined : permissions }),
+			{ permissions: breaking ? undefined : permissions, ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
 	]);
 };
@@ -152,6 +151,10 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
+db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
+	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
+
+ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
@@ -199,11 +202,12 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 	return {
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		permissions,
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
 			...(isFederation ? { federate: true } : {}),
-			...properties },
+			...properties,
+			permissions,
+		},
 	};
 };
 

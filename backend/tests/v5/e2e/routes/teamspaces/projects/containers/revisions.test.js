@@ -45,8 +45,10 @@ const models = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: ServiceHelper.generateRandomModelProperties(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),

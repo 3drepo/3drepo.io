@@ -38,11 +38,10 @@ export const IconStyles = css`
 
 export const ViewpointItem = styled(MenuItem)<{ active?: boolean }>`
 	&& {
-		height: 80px;
 		padding: 8px;
 		background-color: ${({ active }) => active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
-		box-sizing: content-box;
+		box-sizing: border-box;
 	}
 ` as any;
 

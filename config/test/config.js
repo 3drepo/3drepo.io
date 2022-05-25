@@ -92,6 +92,17 @@ module.exports = {
 		levels: 2
 	},
 	defaultStorage: "fs",
+	mail: {
+		smtpConfig: {
+		    host: 'smtp.ethereal.email',
+		    port: 587,
+    		auth: {
+	    	    user: 'sasha.schamberger88@ethereal.email',
+	    	    pass: 'Q1HWezrpk1SH9XyC5S'
+		    }
+		},
+		sender: '"3D Repo" <dummyEmail@3drepo.org>'
+	},
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24

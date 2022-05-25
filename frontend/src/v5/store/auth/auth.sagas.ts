@@ -86,13 +86,13 @@ function* logout() {
 		yield API.Auth.logout();
 		yield put({ type: 'RESET_APP' });
 	} catch (error) {
-		if (error.response.status !== 401) {
+		if (error.response?.status !== 401) {
 			yield put(DialogsActions.open('alert', {
 				currentActions: formatMessage({ id: 'auth.logout.error', defaultMessage: 'trying to log out' }),
 				error,
 			}));
+			yield put({ type: 'RESET_APP' });
 		}
-		yield put({ type: 'RESET_APP' });
 	}
 	yield put(AuthActions.setAuthenticationStatus(false));
 	yield put(AuthActions.setPendingStatus(false));

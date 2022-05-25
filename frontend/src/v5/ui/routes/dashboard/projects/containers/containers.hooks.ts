@@ -20,9 +20,10 @@ import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const useContainersData = () => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 
 	const containers = ContainersHooksSelectors.selectContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();

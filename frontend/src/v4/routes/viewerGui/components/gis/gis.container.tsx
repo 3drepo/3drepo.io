@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { selectUrlParams } from '@/v4/modules/router/router.selectors';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
@@ -29,7 +30,8 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	mapsProviders: selectMaps,
 	visibleLayers: selectGisLayers,
-	hasGISCoordinates: selectHasGISCoordinates
+	hasGISCoordinates: selectHasGISCoordinates,
+	urlParams: selectUrlParams
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

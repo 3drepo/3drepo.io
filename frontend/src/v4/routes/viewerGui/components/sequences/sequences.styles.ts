@@ -188,7 +188,7 @@ export const StepInput = styled(Input).attrs({
 		margin-left: 2px;
 		outline: none;
 		color: ${COLOR.BLACK_60};
-		padding-bottom: 4px;
+		padding-bottom: 5px;
 		text-align: right;
 	}
 `;
