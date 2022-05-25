@@ -67,7 +67,6 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								largeIcon
 							/>
 							<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-							{/* TODO - check user.user or user.username  */}
 							<UserUserName>{user.username}</UserUserName>
 							<ActionMenuItem>
 								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
@@ -80,7 +79,6 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 						</AvatarSection>
 					</ActionMenuSection>
 					<ActionMenuSection>
-						{/* TODO - check the /${teamspace} */}
 						<ActionMenuItemLink
 							Icon={TeamspacesIcon}
 							to={baseUrl}

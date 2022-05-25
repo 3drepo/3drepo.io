@@ -19,8 +19,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { TabContext } from '@mui/lab';
+import { ScrollArea } from '@controls/scrollArea';
 import { defaults, pick } from 'lodash';
-import { FormModal, TabList, Tab, TabPanel, ScrollArea } from './editProfileModal.styles';
+import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
@@ -98,26 +99,24 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			isValid={submitFunction}
 		>
 			<TabContext value={activeTab}>
-				<TabList
-					onChange={onTabChange}
-					textColor="primary"
-					indicatorColor="primary"
-				>
+				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary" >
 					<Tab value="personal" label={TAB_LABELS.personal} />
 					<Tab value="password" label={TAB_LABELS.password} />
 					<Tab value="integrations" label={TAB_LABELS.integrations} />
 				</TabList>
 				<TabPanel value="personal" zeroSidePadding>
 					<ScrollArea>
-						<EditProfilePersonalTab
-							setSubmitFunction={setSubmitFunction}
-							fields={personalFields}
-							alreadyExistingEmails={alreadyExistingEmails}
-							updatePersonalFields={updatePersonalFields}
-							user={user}
-							newAvatarFile={newAvatarFile}
-							setNewAvatarFile={setNewAvatarFile}
-						/>
+						<ScrollAreaPadding>
+							<EditProfilePersonalTab
+								setSubmitFunction={setSubmitFunction}
+								fields={personalFields}
+								alreadyExistingEmails={alreadyExistingEmails}
+								updatePersonalFields={updatePersonalFields}
+								user={user}
+								newAvatarFile={newAvatarFile}
+								setNewAvatarFile={setNewAvatarFile}
+							/>
+						</ScrollAreaPadding>
 					</ScrollArea>
 				</TabPanel>
 				<TabPanel value="password">

@@ -25,6 +25,8 @@ export const FormModal = styled(FormModalBase)`
 	.MuiDialogContent-root {
 		padding: 0;
 		margin-bottom: 0;
+		min-width: 522px;
+		width: 522px;
 	}
 `;
 
@@ -42,13 +44,10 @@ export const TabList = styled(TabListBase)`
 
 export const TabPanel = styled(TabPanelBase)<{ zeroSidePadding?: boolean }>`
 	padding: 30px ${({ zeroSidePadding }) => (zeroSidePadding ? 0 : 58)}px;
-	width: ${({ zeroSidePadding }) => (zeroSidePadding ? 406 : 522)}px;
 	height: 554px;
-	margin: auto;
-    overflow-x: hidden;
     box-sizing: border-box;
 `;
 
-export const ScrollArea = styled(ScrollAreaBase)`
-	width: auto;
+export const ScrollAreaPadding = styled.div`
+	padding: 0 58px;
 `;
