@@ -40,6 +40,7 @@ export const EditProfileIntegrationsTab = () => {
 				)}
 				value={key}
 				hideValue
+				disabled={!key}
 			/>
 			<ButtonsContainer>
 				<Button variant="outlined" color="primary" onClick={generateApiKey}>
