@@ -28,8 +28,10 @@ interface IAuthTemplate {
 
 export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element => {
 	const { url } = useRouteMatch();
+	const returnUrl = AuthHooksSelectors.selectReturnUrl();
+
 	if (AuthHooksSelectors.selectIsAuthenticated()) {
-		return (<Redirect to={{ pathname: DASHBOARD_ROUTE, state: { referrer: url } }} />);
+		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
 	}
 
 	const backgroundSrc = clientConfigService.getCustomBackgroundImagePath();
