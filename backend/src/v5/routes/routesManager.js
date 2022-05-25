@@ -24,6 +24,7 @@ const FederationGroupsRoutes = require('./teamspaces/projects/federations/groups
 const FederationRevisionRoutes = require('./teamspaces/projects/federations/revisions');
 const FederationRoutes = require('./teamspaces/projects/federations/federations');
 const FederationViewsRoutes = require('./teamspaces/projects/federations/views');
+const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const UserRoutes = require('./users');
@@ -40,6 +41,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/groups', ContainerGroupsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/views', ContainerViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/revisions', ContainerRevisionRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', FederationRoutes);

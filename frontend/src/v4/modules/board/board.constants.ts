@@ -83,6 +83,11 @@ export const RISK_FILTER_PROPS = {
 	creator_role: {
 		value: 'creator_role',
 		name: 'Created By'
+	},
+	due_date: {
+		value: 'due_date',
+		name: 'Due date',
+		notDefinedLabel: 'No due date'
 	}
 };
 
