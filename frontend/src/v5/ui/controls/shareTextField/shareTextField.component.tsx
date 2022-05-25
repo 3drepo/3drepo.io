@@ -46,7 +46,7 @@ type IShareTextField = {
 
 const IS_COPYING_DURATION_MS = 3000;
 
-export const ShareTextField = ({ label, value, className, hideValue, disabled=false }: IShareTextField) => {
+export const ShareTextField = ({ label, value, className, hideValue, disabled = false }: IShareTextField) => {
 	let isCopiedTimer;
 	const [isCopying, setIsCopying] = useState(true);
 
@@ -77,7 +77,7 @@ export const ShareTextField = ({ label, value, className, hideValue, disabled=fa
 					{...(hideValue ? { type: 'password' } : {})}
 					InputProps={{
 						readOnly: true,
-						endAdornment: 
+						endAdornment:
 							disabled ? null : (
 								<InputAdornment position="end">
 									{isCopying
