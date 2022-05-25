@@ -55,7 +55,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 		control,
 		getValues,
 		reset,
-		formState: { errors, isValid, isSubmitSuccessful },
+		formState: { errors, isValid },
 	} = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
@@ -72,23 +72,18 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	};
 
 	useEffect(() => {
-		if (isSubmitSuccessful && (modalPhase === 'settings')) closeAndReset();
+		if (!open) closeAndReset();
 	}, [open, reset]);
 
 	const onClickBack = (): void => {
 		setModalPhase('settings');
 	};
 
-	const onClickContinue = (): void => {
-		if (modalPhase === 'settings') {
-			setModalPhase('edit');
-		}
-	};
+	const onClickContinue = (): void => setModalPhase('edit');
 
 	const onClickSubmit = (newFederation: NewFederation): void => {
 		FederationsActionsDispatchers.createFederation(teamspace, project, newFederation, includedContainers);
-		onClickClose();
-		setModalPhase('settings');
+		closeAndReset();
 	};
 
 	const SettingsModalProps = {
