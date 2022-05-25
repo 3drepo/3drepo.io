@@ -52,6 +52,10 @@ export const EditProfileButton = styled(Link)`
 	text-align: center;
 	${({ theme }) => theme.typography.link};
 	text-underline-offset: 2px;
+	
+	&:hover {
+		text-decoration: underline;
+	}
 `;
 
 export const SignOutButton = styled(Button).attrs({
