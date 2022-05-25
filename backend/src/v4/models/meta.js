@@ -82,7 +82,7 @@ Meta.getMetadataById = async (account, model, id) => {
 	return clean(metadata);
 };
 
-Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
+Meta.getAllMetadataByRules = async (account, model, branch, rev, fieldNames = [], rules) => {
 	// Get the revision object to find all relevant IDs
 	const history = await  History.getHistory(account, model, branch, rev);
 
@@ -92,7 +92,7 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 	// Check for submodel references
 	await getSubModels(account, model, branch, rev, (subTS, subModel, subBranch, subRev) => {
 		getMeta.push(
-			Meta.getAllMetadataByRules(subTS, subModel, subBranch, subRev, rules)
+			Meta.getAllMetadataByRules(subTS, subModel, subBranch, subRev, fieldNames, rules)
 				.then(({data}) => {
 					return {
 						data,
@@ -108,20 +108,26 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 
 	const subMeta = await Promise.all(getMeta);
 
+	const query = { $match: {rev_id: history._id, type: "meta"} };
+	const projection = { $project: { metadata: 1, parents: 1 } };
+
+	if (fieldNames.length) {
+		query.$match["metadata.key"] = { $in: fieldNames };
+		projection.$project.metadata = { $filter: { input: "$metadata", as: "metadata", cond: { $in: ["$$metadata.key", fieldNames] } } };
+	}
 	const positiveQueries = positiveRulesToQueries(rules);
 	const negativeQueries = negativeRulesToQueries(rules);
 
 	let allRulesResults = null;
 
 	if (positiveQueries.length !== 0) {
-		const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {rev_id: history._id, type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+		const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, { $match: { ...query.$match, ...ruleQuery }}, projection)));
 		allRulesResults = intersection(eachPosRuleResults);
 	} else {
-		const rootQuery =  {rev_id: history._id, "type": "meta" };
-		allRulesResults = (await getMetadataRuleQueryResults(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
+		allRulesResults = (await getMetadataRuleQueryResults(account, model, query, projection));
 	}
 
-	const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {rev_id: history._id, type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+	const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, { $match: { ...query.$match, ...ruleQuery }}, projection)));
 	allRulesResults = difference(allRulesResults, eachNegRuleResults);
 
 	if (allRulesResults) {
@@ -426,8 +432,8 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 		.reduce((acc, val) => acc.concat(val), []);
 };
 
-const findObjectsByQuery = (account, model, query, project = { ...ifcGuidProjection, parents: 1 }) => {
-	return db.find(account, getSceneCollectionName(model), query, project);
+const findObjectsByQuery = (account, model, query, projection = { ...ifcGuidProjection, parents: 1 }) => {
+	return db.aggregate(account, getSceneCollectionName(model), [query, projection])
 };
 
 /**

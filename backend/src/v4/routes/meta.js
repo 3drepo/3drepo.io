@@ -453,8 +453,8 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		const keyFilters = req.query.filter ? req.query.filter.split(",") : [];
-		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev, keyFilters)
+		const fieldNames = req.query.filter ? req.query.filter.split(",") : [];
+		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev, fieldNames)
 			.then(stream => {
 				const headers = {
 					"Content-Type" : "application/json"
@@ -478,11 +478,15 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
+		let promise;
 		const showMeshIds = (req.query.meshids) ? JSON.parse(req.query.meshids) : false;
 
-		const promise = showMeshIds ?
-			Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules) :
-			Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
+		if(showMeshIds){
+			promise = Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
+		} else{	
+			const fieldNames = req.query.filter ? req.query.filter.split(",") : [];
+			promise = Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, fieldNames, rules);
+		}
 
 		promise.then(obj => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
