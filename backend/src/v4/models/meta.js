@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const { findModelSettingById } = require("./modelSetting");
 const { getSubModels } = require("./ref");
-const { findNodesByField, getNodeById, findNodesByType, findMetadataNodesByFields } = require("./scene");
+const { findNodesByField, getNodeById, findMetadataNodesByFields } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -432,7 +432,7 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 };
 
 const findObjectsByQuery = (account, model, query, projection = { ...ifcGuidProjection, parents: 1 }) => {
-	return db.aggregate(account, getSceneCollectionName(model), [query, projection])
+	return db.aggregate(account, getSceneCollectionName(model), [query, projection]);
 };
 
 /**

@@ -449,13 +449,13 @@
 	const extractNameFiltersFromUrl = (url) => {
 		let fieldNames = [];
 
-		const filterString = url.split('filter=')[1];
-		if(filterString){
-			fieldNames = filterString.split(',').map(name => decodeURIComponent(name));
+		const filterString = url.split("filter=")[1];
+		if(filterString) {
+			fieldNames = filterString.split(",").map(name => decodeURIComponent(name));
 		}
 
 		return fieldNames;
-	}
+	};
 
 	function getAllMetadata(req, res, next) {
 		let branch;
@@ -492,9 +492,9 @@
 		let promise;
 		const showMeshIds = (req.query.meshids) ? JSON.parse(req.query.meshids) : false;
 
-		if(showMeshIds){
+		if(showMeshIds) {
 			promise = Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
-		} else{	
+		} else{
 			const fieldNames = extractNameFiltersFromUrl(req.originalUrl);
 			promise = Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, fieldNames, rules);
 		}

@@ -178,7 +178,8 @@ describe("Metadata", function () {
 				"RenovationStatus": "New",
 				"SpecificationType": "n/a",
 				"Floor": "GF Ground Floor",
-				"Renovation Status": "New"
+				"Renovation Status": "New",
+				"Meta With, Comma": "Value",
 			},
 			"parents": [ "916375ad-148a-4eda-a5a9-2b8aa25713ad" ]
 		};
@@ -197,12 +198,14 @@ describe("Metadata", function () {
 			"_id": "007a7b30-b29d-44c8-b571-e2b1cc1a095c",
 			"metadata": {
 				"IFC Type": "IfcBuildingElementProxy",
-				"IFC GUID": "0B97aBkeAuHeytNaMZaPJH",				
+				"IFC GUID": "0B97aBkeAuHeytNaMZaPJH",
+				"Meta With, Comma": "Value",				
 			},
 			"parents": [ "916375ad-148a-4eda-a5a9-2b8aa25713ad" ]
 		};
 
-		agent.get(`/${username}/${model}/revision/master/head/meta/all.json?filter=IFC%20Type,IFC%20GUID`)
+		const filterString = 'filter=IFC%20Type,IFC%20GUID,Meta%20With%2C%20Comma';
+		agent.get(`/${username}/${model}/revision/master/head/meta/all.json?${filterString}`)
 			.expect(200, function(err, res) {
 				expect(res.body.data).to.exist;
 				expect(res.body.data.length).to.equal(675);
@@ -240,7 +243,8 @@ describe("Metadata", function () {
 				"RenovationStatus": "New",
 				"SpecificationType": "n/a",
 				"Floor": "Datum / Site Model",
-				"Renovation Status": "New"
+				"Renovation Status": "New",
+				"Meta With, Comma": "Value",
 			},
 			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
 		};
@@ -260,11 +264,12 @@ describe("Metadata", function () {
 			"metadata": {
 				"IFC Type": "IfcBuildingElementProxy",
 				"IFC GUID": "0WHuICC7qTG8oNFZ9AvcS0",	
+				"Meta With, Comma": "Value",
 			},
 			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
 		};
-
-		agent.get(`/${username}/${model}/revision/myTag/meta/all.json?filter=IFC%20Type,IFC%20GUID`)
+		const filterString = 'filter=IFC%20Type,IFC%20GUID,Meta%20With%2C%20Comma';
+		agent.get(`/${username}/${model}/revision/myTag/meta/all.json?${filterString}`)
 			.expect(200, function(err, res) {
 				expect(res.body.data).to.exist;
 				expect(res.body.data.length).to.equal(675);
@@ -426,7 +431,8 @@ describe("Metadata", function () {
 			"Uniclass2 - En",
 			"Uniclass2 - Sp",
 			"WallCovering",
-			"WarrantyStartDate"
+			"WarrantyStartDate",
+			"Meta With, Comma"
 		];
 
 		agent.get(`/${username}/${model}/meta/keys`)
