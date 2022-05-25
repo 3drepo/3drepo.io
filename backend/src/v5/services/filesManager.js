@@ -53,12 +53,16 @@ const removeAllFilesInCol = async (teamspace, collection) => {
 
 FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 	const collList = await listCollections(teamspace);
-	const refCols = collList.filter(({ name }) => {
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
-		return !!res?.length;
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const regex = new RegExp(`^${model}.*\\.ref$`);
+	const removeProms = collList.map(async ({ name }) => {
+		const isModelRefCol = !!name.match(regex)?.length;
+		if (isModelRefCol) {
+			await removeAllFilesInCol(teamspace, name);
+		}
 	});
-	return Promise.all(refCols.map(({ name }) => removeAllFilesInCol(teamspace, name)));
+
+	await Promise.all(removeProms);
 };
 
 FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {

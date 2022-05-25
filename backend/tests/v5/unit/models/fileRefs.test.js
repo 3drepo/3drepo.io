@@ -75,7 +75,7 @@ const testGetAllRemovableEntriesByType = () => {
 	describe('Get all removable entries by type', () => {
 		const refCol = generateRandomString();
 
-		test('should remove files from collection', async () => {
+		test('should return all removable file entries from collection', async () => {
 			const teamspace = generateRandomString();
 
 			const aggRes = [{ _id: generateRandomString(), links: [generateRandomString()] }];

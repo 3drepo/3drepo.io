@@ -100,7 +100,7 @@ const testRemoveAllFilesFromModel = () => {
 			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, refCol1, refCol1Data[1].links);
 		});
 
-		test('Should error if the type of storage is unknown', async () => {
+		test('Should throw error if the type of storage is unknown', async () => {
 			const model = generateRandomString();
 
 			const refCol1 = `${model}.${generateRandomString()}.ref`;
@@ -137,7 +137,7 @@ const testGetFileAsStream = () => {
 			)).rejects.toEqual(templates.fileNotFound);
 		});
 
-		test('return throw an error if the storage type is unrecognised', async () => {
+		test('should throw error if the storage type is unrecognised', async () => {
 			const fileEntry = { type: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
 			await expect(FilesManager.getFileAsStream(
@@ -147,7 +147,7 @@ const testGetFileAsStream = () => {
 			)).rejects.toEqual(templates.fileNotFound);
 		});
 
-		test('should return a stream of the reference is found', async () => {
+		test('should return a stream if the reference is found', async () => {
 			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
