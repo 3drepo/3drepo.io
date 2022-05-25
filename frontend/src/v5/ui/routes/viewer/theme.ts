@@ -256,6 +256,15 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiListItemButton: {
+					styleOverrides: {
+						root: {
+							'>*': {
+								color: `${COLOR.BASE_MAIN} !important`,
+							},
+						},
+					},
+				},
 				MuiDialog: {
 					styleOverrides: {
 						paper: {
