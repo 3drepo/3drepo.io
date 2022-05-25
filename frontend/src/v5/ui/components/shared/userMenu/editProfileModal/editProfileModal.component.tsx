@@ -99,7 +99,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			isValid={submitFunction}
 		>
 			<TabContext value={activeTab}>
-				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary" >
+				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
 					<Tab value="personal" label={TAB_LABELS.personal} />
 					<Tab value="password" label={TAB_LABELS.password} />
 					<Tab value="integrations" label={TAB_LABELS.integrations} />
