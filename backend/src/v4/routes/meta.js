@@ -446,6 +446,17 @@
 			});
 	}
 
+	const extractNameFiltersFromUrl = (url) => {
+		let fieldNames = [];
+
+		const filterString = url.split('filter=')[1];
+		if(filterString){
+			fieldNames = filterString.split(',').map(name => decodeURIComponent(name));
+		}
+
+		return fieldNames;
+	}
+
 	function getAllMetadata(req, res, next) {
 		let branch;
 
@@ -453,7 +464,7 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		const fieldNames = req.query.filter ? req.query.filter.split(",") : [];
+		const fieldNames = extractNameFiltersFromUrl(req.originalUrl);
 		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev, fieldNames)
 			.then(stream => {
 				const headers = {
@@ -484,7 +495,7 @@
 		if(showMeshIds){
 			promise = Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
 		} else{	
-			const fieldNames = req.query.filter ? req.query.filter.split(",") : [];
+			const fieldNames = extractNameFiltersFromUrl(req.originalUrl);
 			promise = Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, fieldNames, rules);
 		}
 
