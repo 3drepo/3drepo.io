@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel.component';
+import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel';
 
 export const { Types: BimTypes, Creators: BimActions } = createActions({
 	fetchMetadata: ['teamspace', 'model', 'metadataId'],
