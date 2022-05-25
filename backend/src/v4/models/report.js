@@ -52,6 +52,7 @@ attributes[ReportType.RISKS] = [
 	{ label: "Risk Factor", field: "risk_factor"},
 	{ label: "Construction Scope", field: "scope"},
 	{ label: "Location", field: "location_desc"},
+	{label: "Due Date", field: "due_date", isDate: true},
 	{ label: "Treatment", field: "mitigation_desc"},
 	{ label: "Treatment Details", field: "mitigation_detail"},
 	{ label: "Treatment Stage", field: "mitigation_stage"},
@@ -165,7 +166,7 @@ class ReportGenerator {
 						if(field.mapping) {
 							attri.value = field.mapping[value];
 						} else if (field.isDate) {
-							attri.value = formatDate(entry[value], false);
+							attri.value = formatDate(value, false);
 						} else {
 							attri.value =  Array.isArray(entry[field.field]) ?
 								entry[field.field].join(", ") : entry[field.field];
