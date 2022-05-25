@@ -58,6 +58,7 @@ ResponseCodes.templates = {
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
 	metadataNotFound: { message: 'Metadata not found.', status: 404 },
+	revisionProcessed: { message: 'A revision is already being processed.', status: 401 },
 
 	// File upload related error
 	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },
