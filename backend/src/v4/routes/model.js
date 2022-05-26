@@ -396,6 +396,10 @@ router.get("/:model/revision/master/head/assetsMeta", middlewares.hasReadAccessT
 
 router.get("/:model/revision/:rev/assetsMeta", middlewares.hasReadAccessToModel, getAssetsMeta);
 
+// FIXME: write api docs
+router.get("/:model/revision/master/head/supermeshes.json.mpc", middlewares.hasReadAccessToModel, getAllJsonMpcs);
+router.get("/:model/revision/:rev/supermeshes.json.mpc", middlewares.hasReadAccessToModel, getAllJsonMpcs);
+
 /**
  * @api {get} /:teamspace/:model/:uid.json.mpc Get JSON Mpc
  * @apiName getJsonMpc
@@ -2261,6 +2265,19 @@ function getJsonMpc(req, res, next) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getAllJsonMpcs(req, res, next) {
+	const {account, model, rev} = req.params;
+	const username = req.session.user.username;
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
+
+	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, username).then(({readStream}) => {
+		// FIXME: Caching?
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 

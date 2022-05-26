@@ -19,6 +19,7 @@
 
 const FileRef = require("./fileRef");
 const History = require("./history");
+const DB = require("../handler/db");
 const utils = require("../utils");
 const { getRefNodes } = require("./ref");
 const C = require("../constants");
@@ -167,6 +168,87 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 JSONAssets.getSuperMeshMapping = function(account, model, id) {
 	const name = `${id}.json.mpc`;
 	return FileRef.getJSONFile(account, model, name);
+};
+
+const addSuperMeshMappingsToStream = async (account, model, jsonFiles, outStream) => {
+	const regex = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[^/]*$/;
+	outStream.write(`{"model":"${model}","supermeshes":[`);
+	for(let i = 0; i < jsonFiles.length; ++i) {
+		const fileName = jsonFiles[i];
+		const regexRes = fileName.match(regex);
+		const id = regexRes[1];
+		const file = await FileRef.getJSONFileStream(account, model, regexRes[0]);
+		if(file) {
+			outStream.write(`{"id":"${id}","data":`);
+			const { readStream } = file;
+
+			await new Promise((resolve) => {
+				readStream.on("data", d => outStream.write(d));
+				readStream.on("end", ()=> resolve());
+				readStream.on("error", err => outStream.emit("error", err));
+			});
+
+			outStream.write(`}${i !== jsonFiles.length - 1 ? "," : "" }`);
+		}
+	}
+	outStream.write("]}");
+
+};
+
+const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
+
+	for(let i = 0; i < modelsToProcess.length; ++i) {
+		const entry = modelsToProcess[i];
+		if(entry) {
+			const assetList = await DB.findOne(
+				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
+			if(assetList) {
+				await addSuperMeshMappingsToStream(entry.account, entry.model, assetList.jsonFiles, outStream);
+			}
+
+			if(i !== modelsToProcess.length - 1) {
+				outStream.write(",");
+			}
+		}
+	}
+};
+
+JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
+	let modelsToProcess;
+
+	const subModelRefs = await getRefNodes(account, model, branch, rev);
+
+	const isFed = subModelRefs.length;
+
+	if(isFed) {
+		const getSubModelInfoProms = subModelRefs.map(async ({owner, project}) => {
+			const revNode = await History.findLatest(owner, project, {_id: 1});
+			if(revNode) {
+				return {account: owner, model: project, rev: revNode._id};
+			}
+		});
+		modelsToProcess = await Promise.all(getSubModelInfoProms);
+	} else {
+		const history = await History.getHistory(account, model, branch, rev);
+		modelsToProcess = [{account, model, rev: history._id}];
+	}
+
+	const outStream = Stream.PassThrough();
+
+	if(isFed) {
+		outStream.write("{\"submodels\":[");
+	}
+	getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
+		// NOTE: this is using a .then because we do not want to wait on this promise - we want to
+		// return the stream handler to the client before we start streaming data.
+		if(isFed) {
+			outStream.write("]}");
+		}
+		outStream.end();
+	}).catch((err) => outStream.emit("error", err));
+
+	return { readStream: outStream, isFed};
+
 };
 
 JSONAssets.getTree = async function(account, model, branch, rev) {
