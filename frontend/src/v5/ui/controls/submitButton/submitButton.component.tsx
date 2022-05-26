@@ -22,11 +22,12 @@ export const SubmitButton = ({
 	variant = 'contained',
 	color = 'primary',
 	children,
+	fullWidth = true,
 	...props
 }: IButton): JSX.Element => (
 	<Button
 		type="submit"
-		fullWidth
+		fullWidth={fullWidth}
 		variant={variant}
 		color={color}
 		{...props}

@@ -28,6 +28,7 @@ import {
 	FormDialogActions,
 	RemoveWhiteCorners,
 	Subtitle,
+	SubmitButton,
 } from './formDialog.styles';
 
 interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
@@ -41,6 +42,7 @@ interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormE
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
 	zeroMargin?: boolean;
+	isSubmitting?: boolean;
 }
 
 export const FormModal = (props: IFormModal) => {
@@ -57,6 +59,7 @@ export const FormModal = (props: IFormModal) => {
 		showButtons = true,
 		maxWidth = false,
 		zeroMargin = false,
+		isSubmitting = false,
 		...formProps
 	} = props;
 	return (
@@ -90,9 +93,17 @@ export const FormModal = (props: IFormModal) => {
 						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
 							Cancel
 						</Button>
-						<Button disabled={!isValid} onClick={onSubmit} type="submit" variant="contained" color="primary" size="medium">
+						<SubmitButton
+							disabled={!isValid}
+							onClick={onSubmit}
+							variant="contained"
+							color="primary"
+							size="medium"
+							isPending={isSubmitting}
+							fullWidth={false}
+						>
 							{confirmLabel || 'OK'}
-						</Button>
+						</SubmitButton>
 					</FormDialogActions>
 				)}
 			</Form>
