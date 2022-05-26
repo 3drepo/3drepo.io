@@ -29,9 +29,12 @@ export const selectUsername: (state) => string = createSelector(
 	selectCurrentUser, (state) => state.username || '',
 );
 
-// TODO - check this merge conflicts (Errors and ApiKey are mine, firstname is from staging)
 export const selectErrors: (state) => UpdateUserErrors = createSelector(
 	selectCurrentUser, (state) => pick(state, 'personalError', 'avatarError', 'passwordError'),
+);
+
+export const selectIsPending: (state) => boolean = createSelector(
+	selectCurrentUser, (state) => !!(state.isPending || state.avatarIsUploading),
 );
 
 export const selectApiKey: (state) => string = createSelector(

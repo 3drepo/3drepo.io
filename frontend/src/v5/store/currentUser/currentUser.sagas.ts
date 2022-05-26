@@ -63,7 +63,7 @@ export function* updateUser({ userData }: UpdateUserAction) {
 }
 
 export function* updateUserAvatar({ avatarFile }: UpdateUserAvatarAction) {
-	yield put(CurrentUserActions.setIsPending(true));
+	yield put(CurrentUserActions.setAvatarIsUploading(true));
 	try {
 		const formData = new FormData();
 		formData.append('file', avatarFile);
@@ -74,7 +74,7 @@ export function* updateUserAvatar({ avatarFile }: UpdateUserAvatarAction) {
 		const message = error.response?.data.message;
 		yield put(CurrentUserActions.updateUserAvatarFailure(message));
 	}
-	yield put(CurrentUserActions.setIsPending(false));
+	yield put(CurrentUserActions.setAvatarIsUploading(false));
 }
 
 export function* updateUserPassword({ passwordData }: UpdateUserPasswordAction) {

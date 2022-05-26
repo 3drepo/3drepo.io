@@ -34,6 +34,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updateUserPasswordFailure: ['passwordError'],
 	resetErrors: [],
 	setIsPending: ['isPending'],
+	setAvatarIsUploading: ['avatarIsUploading'],
 	generateApiKey: [],
 	deleteApiKey: [],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
@@ -106,9 +107,20 @@ export const resetErrors = (state = INITIAL_STATE): ICurrentUserState => ({
 	},
 });
 
-export const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
+export const setIsPending = (state = INITIAL_STATE, { isPending }) => ({
 	...state,
-	isPending: pendingState,
+	currentUser: {
+		...state.currentUser,
+		isPending,
+	},
+});
+
+export const setAvatarIsUploading = (state = INITIAL_STATE, { avatarIsUploading }) => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		avatarIsUploading,
+	},
 });
 
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
@@ -121,6 +133,7 @@ export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE
 	[CurrentUserTypes.UPDATE_USER_PASSWORD_FAILURE]: updateUserPasswordFailure,
 	[CurrentUserTypes.RESET_ERRORS]: resetErrors,
 	[CurrentUserTypes.SET_IS_PENDING]: setIsPending,
+	[CurrentUserTypes.SET_AVATAR_IS_UPLOADING]: setAvatarIsUploading,
 });
 
 /**
@@ -143,7 +156,8 @@ export type UpdateUserPasswordAction = Action<'UPDATE_USER_PASSWORD'> & { passwo
 export type UpdateUserPasswordSuccessAction = Action<'UPDATE_USER_PASSWORD_SUCCESS'>;
 export type UpdateUserPasswordFailureAction = Action<'UPDATE_USER_PASSWORD_FAILURE'> & { passwordError: string };
 export type ResetErrorsActions = Action<'RESET_ERRORS'>;
-export type SetIsPendingAction = Action<'SET_IS_PENDING'>;
+export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { isPending: boolean };
+export type SetAvatarIsUploadingAction = Action<'SET_AVATAR_IS_UPLOADING'> & { avatarIsUploading: boolean };
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
@@ -159,6 +173,7 @@ export interface ICurrentUserActionCreators {
 	updateUserPasswordFailure: (passwordError: string) => UpdateUserPasswordFailureAction;
 	resetErrors: () => ResetErrorsActions;
 	setIsPending: (isPending: boolean) => SetIsPendingAction;
+	setAvatarIsUploading: (avatarIsUploading: boolean) => SetAvatarIsUploadingAction;
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;
 }
