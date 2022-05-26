@@ -32,6 +32,7 @@ const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
 const config = require("../config");
 const {v5Path} = require("../../interop");
+const { checkModelStatus } = require("../../v5/middleware/dataConverter/inputs/teamspaces/projects/models/containers");
 const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
 const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
@@ -1716,7 +1717,8 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
  *
  */
-router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
+router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData,
+	validateNewModelRevisionData, checkModelStatus, uploadModel);
 
 /**
  * @api {get} /:teamspace/:model/download/latest Download model

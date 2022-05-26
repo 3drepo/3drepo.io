@@ -16,8 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { getModelById, getModelByQuery } = require('../../../../../../models/modelSettings');
 const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
-const { getModelByQuery, getModelById } = require('../../../../../../models/modelSettings');
 const { respond } = require('../../../../../../utils/responder');
 const { validateNewRevisionData } = require('./commons/revisions');
 
@@ -42,11 +42,11 @@ Containers.canDeleteContainer = async (req, res, next) => {
 
 Containers.checkModelStatus = async (req, res, next) => {
 	try {
-		const { teamspace , container} = req.params;
-		const model = await getModelById(teamspace, container, { _id: 0, status: 1 });
-			
-		if (model.status === 'queued' || model.status === 'processing') {
-			throw templates.revisionProcessed;			
+		const { teamspace, container } = req.params;
+		const { status } = await getModelById(teamspace, container, { _id: 0, status: 1 });
+
+		if (status === 'queued' || status === 'processing') {
+			throw templates.revisionProcessed;
 		} else {
 			next();
 		}

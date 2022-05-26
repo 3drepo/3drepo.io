@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { checkModelStatus, validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
@@ -22,7 +23,6 @@ const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateNewRevisionData, checkModelStatus } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = (req, res, next) => {
@@ -208,7 +208,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.post('', hasWriteAccessToContainer, checkModelStatus, validateNewRevisionData, newRevision);
+	router.post('', hasWriteAccessToContainer, validateNewRevisionData, checkModelStatus, newRevision);
 
 	/**
 	 * @openapi

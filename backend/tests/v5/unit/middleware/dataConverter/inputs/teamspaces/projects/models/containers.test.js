@@ -20,6 +20,7 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const { generateRandomString } = require('../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);
@@ -128,7 +129,42 @@ const testValidateNewRevisionData = () => {
 	});
 };
 
+const testCheckModelStatus = () => {
+	describe('Check model status', () => {
+		test(`should respond with ${templates.invalidArguments.code} if a model revision is being processed`, async () => {
+			ModelSettings.getModelById.mockImplementationOnce(() => ({ status: 'processing' }));
+			const mockCB = jest.fn();
+			await Containers.checkModelStatus({ params: { teamspace: generateRandomString(),
+				container: generateRandomString() } }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			expect(Responder.respond.mock.results[0].value.message).toEqual(templates.revisionProcessed.message);
+		});
+
+		test(`should respond with ${templates.invalidArguments.code} if a model revision is queued`, async () => {
+			ModelSettings.getModelById.mockImplementationOnce(() => ({ status: 'queued' }));
+			const mockCB = jest.fn();
+			await Containers.checkModelStatus({ params: { teamspace: generateRandomString(),
+				container: generateRandomString() } }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			expect(Responder.respond.mock.results[0].value.message).toEqual(templates.revisionProcessed.message);
+		});
+
+		test('should call next() if a model revision returns ok status', async () => {
+			ModelSettings.getModelById.mockImplementationOnce(() => ({ status: 'ok' }));
+			const mockCB = jest.fn();
+			await Containers.checkModelStatus({ params: { teamspace: generateRandomString(),
+				container: generateRandomString() } }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/containers', () => {
 	testCanDeleteContainer();
 	testValidateNewRevisionData();
+	testCheckModelStatus();
 });
