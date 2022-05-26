@@ -15,14 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { isNil } from 'lodash';
 import { createSelector } from 'reselect';
 
-const selectCurrentUserDomain = (state) => ({...state.currentUser});
+const selectCurrentUserDomain = (state) => ({...state.currentUser, ...(isV5() && state.currentUser2)});
 
-export const selectCurrentTeamspace = createSelector(
+const selectCurrentTeampspaceV5 = createSelector(
+	// @ts-ignore
+	(state) => state.teamspaces2,
+	(state) => state.currentTeamspace
+);
+
+const selectCurrentTeamspaceV4 = createSelector(
 	selectCurrentUserDomain, (state) => state.currentTeamspace
 );
+
+export const selectCurrentTeamspace = isV5() ? selectCurrentTeampspaceV5 : selectCurrentTeamspaceV4;
 
 export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {}

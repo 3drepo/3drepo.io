@@ -26,9 +26,21 @@ import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetai
 import { EmptyStateInfo } from '../components.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {
-	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer,
-	ResourcesList, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, UploadSizeLabel,
+	ActionContainer,
+	IconButton,
+	QuoteIcon,
+	ResourcesContainer,
+	ResourcesList,
+	ResourceItemContainer,
+	ResourceItemRightColumn,
+	ResourceLabel,
+	ResourceLink,
+	UploadSizeLabel,
+	Size,
+	ResourceItemLeftColumn,
 } from './resources.styles';
+import { RemoveButton } from './removeButton.component';
+import { ResourceIcon } from './resourceIcon';
 
 interface IResource {
 	_id: string;
@@ -52,37 +64,23 @@ interface IState {
 	value: any;
 }
 
-export const RemoveButton = (props) => (
-	<IconButton {...props} aria-label="Toggle menu" aria-haspopup="true" size="large">
-		<RemoveIcon />
-	</IconButton>
-);
-
 export const QuoteButton = (props) => (
 	<IconButton {...props} aria-label="Quote resource" size="large">
 		<QuoteIcon />
 	</IconButton>
 );
 
-const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
-
-const ResourceIcon = ({type}) =>
-	(type === 'http') ?
-		(<LinkIcon />) :
-	(imageExtensions.indexOf(type) >= 0) ?
-		(<PhotoIcon />) :
-		(<DocumentIcon />)
-;
-
 const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit, onClickQuote}) => {
 	return (
 		<ResourceItemContainer>
-			<ResourceIcon type={type} />
-			<ResourceLink href={link} target="_blank" rel="noopener">
-				{name}
-			</ResourceLink>
+			<ResourceItemLeftColumn>
+				<ResourceIcon type={type} />
+				<ResourceLink href={link} target="_blank" rel="noopener">
+					{name}
+				</ResourceLink>
+			</ResourceItemLeftColumn>
 			<ResourceItemRightColumn>
-				{size}
+				{size && <Size>{size}</Size>}
 				<ActionContainer>
 					{canEdit &&
 					<>

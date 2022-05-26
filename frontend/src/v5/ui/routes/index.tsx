@@ -16,8 +16,6 @@
  */
 
 import { useEffect } from 'react';
-import { isNull } from 'lodash';
-import { useHistory } from 'react-router-dom';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
@@ -30,23 +28,20 @@ import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
-import { LOGIN_PATH, PASSWORD_CHANGE_PATH } from './routes.constants';
 
 export const Root = () => {
-	const history = useHistory();
-	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
-	const { location: { pathname } } = history;
+	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
 
 	useEffect(() => {
-		AuthActionsDispatchers.authenticate();
-	}, []);
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
+		}
+	}, [authenticationFetched]);
+
 	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
-		}
-
-		if (!isNull(isAuthenticated) && !isAuthenticated && pathname !== PASSWORD_CHANGE_PATH) {
-			history.push(LOGIN_PATH);
 		}
 	}, [isAuthenticated]);
 

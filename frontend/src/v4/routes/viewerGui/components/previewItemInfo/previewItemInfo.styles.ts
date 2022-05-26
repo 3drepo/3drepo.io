@@ -65,6 +65,10 @@ export const Details = styled.div<{ panelType: string }>`
 	height: 21px;
 `;
 
+export const UserAndModelDetails = styled.div`
+	display: contents;
+`;
+
 export const Icon = styled.div`
 	font-size: 17px;
 	display: flex;
