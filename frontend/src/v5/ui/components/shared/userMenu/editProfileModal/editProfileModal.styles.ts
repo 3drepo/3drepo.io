@@ -41,8 +41,8 @@ export const TabList = styled(TabListBase)`
 	padding-left: 17px;
 `;
 
-export const TabPanel = styled(TabPanelBase)<{ zeroSidePadding?: boolean }>`
-	padding: 30px ${({ zeroSidePadding }) => (zeroSidePadding ? 0 : 58)}px;
+export const TabPanel = styled(TabPanelBase)<{ $zeroSidePadding?: boolean }>`
+	padding: 30px ${({ $zeroSidePadding }) => ($zeroSidePadding ? 0 : 58)}px;
 	height: 554px;
     box-sizing: border-box;
 `;
