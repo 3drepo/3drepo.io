@@ -18,7 +18,7 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { EditProfileUpdatePersonalSchema } from '@/v5/validation/schemes';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
@@ -26,9 +26,11 @@ import { MenuItem } from '@mui/material';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
-import { isMatch } from 'lodash';
+import { defaults, isMatch } from 'lodash';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { pick } from 'lodash';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -38,6 +40,11 @@ export interface IUpdatePersonalInputs {
 	countryCode: string;
 }
 
+export const getUserPersonalValues = (user: IUser): IUpdatePersonalInputs => pick(
+	defaults(user, { company: '', countryCode: 'GB' }),
+	['firstName', 'lastName', 'email', 'company', 'countryCode'],
+);
+
 type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
 	fields: IUpdatePersonalInputs,
@@ -46,6 +53,7 @@ type EditProfilePersonalTabProps = {
 	setNewAvatarFile: (file: File | null) => void,
 	alreadyExistingEmails: string[],
 	user: IUser,
+	isSubmitting: boolean,
 };
 
 export const EditProfilePersonalTab = ({
@@ -56,14 +64,15 @@ export const EditProfilePersonalTab = ({
 	setNewAvatarFile,
 	alreadyExistingEmails,
 	user,
+	isSubmitting,
 }: EditProfilePersonalTabProps) => {
-	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
 		trigger,
 		handleSubmit,
+		reset,
 		control,
-		formState: { errors, isValid: formIsValid },
+		formState: { errors, isValid: formIsValid, isSubmitted },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		reValidateMode: 'onChange',
@@ -71,30 +80,49 @@ export const EditProfilePersonalTab = ({
 		defaultValues: fields,
 	});
 
+	const { personalError } = CurrentUserHooksSelectors.selectErrors();
+
 	const onSubmit = () => {
 		try {
 			CurrentUserActionsDispatchers.updateUser(getValues());
-			setSubmitWasSuccessful(true);
 			if (newAvatarFile) {
 				CurrentUserActionsDispatchers.updateUserAvatar(newAvatarFile);
-				setNewAvatarFile(null);
 			}
 		} catch (error) {
-			if (alreadyExistingEmails.length) trigger('email');
 			// TODO handle error using sagas
+			if (alreadyExistingEmails.length) trigger('email');
 		}
 	};
 
 	const fieldsAreDirty = () => !isMatch(user, getValues());
 
+	const submissionWasSuccessful = () => !isSubmitting && isSubmitted && !personalError;
+
+	// enable submission only if form is valid and fields are dirty
 	useEffect(() => {
 		const shouldEnableSubmit = formIsValid && (fieldsAreDirty() || newAvatarFile);
 		setSubmitFunction(shouldEnableSubmit ? handleSubmit(onSubmit) : null);
 	}, [formIsValid, newAvatarFile, fieldsAreDirty()]);
 
+	// update form values when user is updated
+	useEffect(() => {
+		if (submissionWasSuccessful()) {
+			if (fieldsAreDirty()) {
+				updatePersonalFields(getValues());
+			}
+			if (newAvatarFile) {
+				setNewAvatarFile(null);
+			}
+			reset(getUserPersonalValues(user));
+		}
+	}, [isSubmitting, fieldsAreDirty()])
+
+	// save fields on tab change
 	useEffect(() => () => {
 		updatePersonalFields(getValues());
 	}, []);
+
+	useEffect(() => console.log(newAvatarFile), [newAvatarFile]);
 
 	return (
 		<>
@@ -158,7 +186,7 @@ export const EditProfilePersonalTab = ({
 					</MenuItem>
 				))}
 			</FormSelect>
-			{submitWasSuccessful && !fieldsAreDirty() && (
+			{submissionWasSuccessful() && !fieldsAreDirty() && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updateProfile.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>

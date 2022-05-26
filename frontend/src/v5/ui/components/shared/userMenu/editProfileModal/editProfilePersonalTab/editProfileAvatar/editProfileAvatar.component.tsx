@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useState } from 'react';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
@@ -50,7 +49,6 @@ export const EditProfileAvatar = ({
 
 	const addImage = (event) => {
 		if (!event.target.files.length) return;
-		CurrentUserActionsDispatchers.resetErrors();
 		const file = event.target.files[0];
 		if (!fileIsTooBig(file)) {
 			setAvatarTooBigError('');

@@ -20,16 +20,16 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { TabContext } from '@mui/lab';
 import { ScrollArea } from '@controls/scrollArea';
-import { defaults, pick } from 'lodash';
 import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProfileModal.styles';
-import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
+import { EditProfilePersonalTab, getUserPersonalValues, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 
 const CONFIRM_LABELS = {
-	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.updateProfile' }),
-	password: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.updatePassword' }),
-	integrations: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.updateIntegrations' }),
+	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
+	password: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.tab.confirmButton.updatePassword' }),
+	integrations: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateIntegrations' }),
 };
 
 const TAB_LABELS = {
@@ -53,6 +53,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const updatePersonalFields = (fields: Partial<IUpdatePersonalInputs>) => {
 		setPersonalFields({ ...personalFields, ...fields });
 	};
+
 	// password tab
 	const [passwordFields, setPasswordFields] = useState<IUpdatePasswordInputs>(null);
 
@@ -65,8 +66,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const [submitFunction, setSubmitFunctionWithCallback] = useState(null);
 	const setSubmitFunction = (callback) => setSubmitFunctionWithCallback(() => callback);
 
+	const isSubmitting = CurrentUserHooksSelectors.selectIsPending();
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
-
 	const onClickClose = () => {
 		CurrentUserActionsDispatchers.resetErrors();
 		onClose();
@@ -76,18 +77,17 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		if (open) {
 			setActiveTab('personal');
 			setNewAvatarFile(null);
-			setPersonalFields(pick(
-				defaults(user, { company: '', countryCode: 'GB' }),
-				['firstName', 'lastName', 'email', 'company', 'countryCode'],
-			));
 			setAlreadyExistingEmails([]);
 			setPasswordFields({
 				oldPassword: '',
 				newPassword: '',
 				confirmPassword: '',
 			});
+			setPersonalFields(getUserPersonalValues(user));
 		}
 	}, [open]);
+
+	useEffect(() => setPersonalFields(getUserPersonalValues(user)), [user]);
 
 	useEffect(() => { CurrentUserActionsDispatchers.resetErrors(); }, [activeTab, open]);
 
@@ -102,7 +102,9 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			onClickClose={onClickClose}
 			confirmLabel={CONFIRM_LABELS[activeTab]}
 			onSubmit={submitFunction}
-			isValid={submitFunction}
+			isValid={submitFunction || isSubmitting}
+			isSubmitting={isSubmitting}
+			isPasswordTab={activeTab === 'password'}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
@@ -110,7 +112,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<Tab value="password" label={TAB_LABELS.password} />
 					<Tab value="integrations" label={TAB_LABELS.integrations} />
 				</TabList>
-				<TabPanel value="personal" zeroSidePadding>
+				<TabPanel value="personal" $zeroSidePadding>
 					<ScrollArea>
 						<ScrollAreaPadding>
 							<EditProfilePersonalTab
@@ -121,6 +123,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 								user={user}
 								newAvatarFile={newAvatarFile}
 								setNewAvatarFile={setNewAvatarFile}
+								isSubmitting={isSubmitting}
 							/>
 						</ScrollAreaPadding>
 					</ScrollArea>

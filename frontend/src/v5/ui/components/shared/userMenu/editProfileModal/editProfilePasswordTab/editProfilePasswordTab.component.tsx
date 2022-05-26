@@ -22,9 +22,10 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -43,49 +44,40 @@ export const EditProfilePasswordTab = ({
 	setSubmitFunction,
 	updatePasswordFields,
 }: EditProfilePasswordTabProps) => {
-	const [passwordWasIncorrect, setPasswordWasIncorrect] = useState(false);
-	const [submitWasSuccessful, setSubmitWasSuccesful] = useState(false);
+	const { passwordError } = CurrentUserHooksSelectors.selectErrors();
+	const isPending = CurrentUserHooksSelectors.selectIsPending();
+
+	const [formSubmittedSuccessfully, setFormSubmittedSuccessfully] = useState(false);
+	const [lastAttemptedPassword, setLastAttemptedPassword] = useState('');
+
 	const {
-		formState: { errors, isValid: formIsValid },
+		formState: { errors, isValid: formIsValid, isSubmitted },
 		control,
 		trigger,
-		reset,
 		watch,
 		getValues,
+		setValue,
+		setError,
 		handleSubmit,
 	} = useForm<IUpdatePasswordInputs>({
 		mode: 'onChange',
 		resolver: yupResolver(EditProfileUpdatePasswordSchema),
-		context: { passwordWasIncorrect },
+		context: { passwordError },
 		defaultValues: fields,
 	});
 
 	const oldPassword = watch('oldPassword');
+	const newPassword = watch('newPassword');
 
-	const onSubmit = () => {
-		try {
-			const userData = omit(getValues(), ['confirmPassword']);
-			CurrentUserActionsDispatchers.updateUser(userData);
-			setSubmitWasSuccesful(true);
-		} catch (error) {
-			setPasswordWasIncorrect(true);
-			// TODO handle error
-		}
-		reset();
+	const resetNewPasswords = () => {
+		setValue('newPassword', '');
+		setValue('confirmPassword', '');
 	};
 
-	useEffect(() => {
-		if (passwordWasIncorrect) {
-			trigger('oldPassword');
-			if (oldPassword) {
-				setPasswordWasIncorrect(false);
-			}
-		}
-	}, [oldPassword]);
-
-	useEffect(() => {
-		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
-	}, [formIsValid]);
+	const resetAllValues = () => {
+		resetNewPasswords();
+		setValue('oldPassword', '');
+	};
 
 	useEffect(() => () => {
 		const newFields = getValues();
@@ -93,6 +85,46 @@ export const EditProfilePasswordTab = ({
 			updatePasswordFields(newFields);
 		}
 	}, []);
+
+	useEffect(() => {
+		if (passwordError) {
+			setFormSubmittedSuccessfully(false);
+			setLastAttemptedPassword(oldPassword);
+			trigger('oldPassword');
+			resetNewPasswords();
+		} else if(formSubmittedSuccessfully) {
+			setFormSubmittedSuccessfully(true);
+			resetAllValues();
+		}
+	}, [passwordError]);
+
+	// re-trigger validation on confirmPassword when newPassword changes
+	useEffect(() => {
+		if (newPassword) {
+			trigger('confirmPassword');
+		}
+	}, [newPassword]);
+
+	// re-trigger validation on newPassword when oldPassword changes
+	useEffect(() => {
+		if (oldPassword && oldPassword === newPassword) {
+			trigger('newPassword');
+		}
+	}, [oldPassword]);
+
+	const onSubmit = () => {
+		setFormSubmittedSuccessfully(false);
+		const passwordData = { oldPassword, newPassword };
+		CurrentUserActionsDispatchers.updateUserPassword(passwordData);
+	};
+
+	useEffect(() => {
+		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
+	}, [formIsValid]);
+
+	useEffect(() => {
+		resetNewPasswords();
+	}, [isSubmitted]);
 
 	return (
 		<>
@@ -129,7 +161,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			{submitWasSuccessful && (
+			{!passwordError && formSubmittedSuccessfully && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
 				</SuccessMessage>
