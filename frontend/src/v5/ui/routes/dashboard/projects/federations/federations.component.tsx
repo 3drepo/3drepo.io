@@ -110,6 +110,7 @@ export const Federations = (): JSX.Element => {
 									startIcon={<AddCircleIcon />}
 									variant="contained"
 									color="primary"
+									onClick={() => setCreateFedOpen(true)}
 								>
 									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
 								</Button>
