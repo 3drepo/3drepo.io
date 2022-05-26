@@ -25,7 +25,6 @@ const Ref = {};
 
 Ref.getRefNodes = async (account, model, branch, revision, projection) => {
 	const settings = await findModelSettingById(account, model);
-
 	if (settings.federate) {
 		return findNodesByType(account, model, branch, revision, "ref", undefined, projection);
 	}
