@@ -57,6 +57,7 @@ ResponseCodes.templates = {
 	containerIsSubModel: { message: 'Container is a submodel.', status: 400 },
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
+	metadataNotFound: { message: 'Metadata not found.', status: 404 },
 
 	// File upload related error
 	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },
