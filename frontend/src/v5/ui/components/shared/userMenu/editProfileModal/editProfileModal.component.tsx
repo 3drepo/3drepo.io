@@ -67,19 +67,25 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 
+	const onClickClose = () => {
+		CurrentUserActionsDispatchers.resetErrors();
+		onClose();
+	};
+
 	useEffect(() => {
 		if (open) {
 			setActiveTab('personal');
+			setNewAvatarFile(null);
+			setPersonalFields(pick(
+				defaults(user, { company: '', countryCode: 'GB' }),
+				['firstName', 'lastName', 'email', 'company', 'countryCode'],
+			));
 			setAlreadyExistingEmails([]);
 			setPasswordFields({
 				oldPassword: '',
 				newPassword: '',
 				confirmPassword: '',
 			});
-			setPersonalFields(pick(
-				defaults(user, { company: '', countryCode: 'GB' }),
-				['firstName', 'lastName', 'email', 'company', 'countryCode'],
-			));
 		}
 	}, [open]);
 
@@ -93,7 +99,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				{ firstName: user.firstName },
 			)}
 			zeroMargin
-			onClickClose={onClose}
+			onClickClose={onClickClose}
 			confirmLabel={CONFIRM_LABELS[activeTab]}
 			onSubmit={submitFunction}
 			isValid={submitFunction}

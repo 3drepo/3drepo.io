@@ -26,22 +26,9 @@ import { MenuItem } from '@mui/material';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { isMatch } from 'lodash';
-import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-import {
-	Header,
-	ProfilePicture,
-	Username,
-	UserInfo,
-	FullName,
-	AddImageButton,
-	AddImageInputLabel,
-	AddImageHiddenInput,
-	UserIcon,
-} from './editProfilePersonalTab.styles';
+import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -70,7 +57,6 @@ export const EditProfilePersonalTab = ({
 	alreadyExistingEmails,
 	user,
 }: EditProfilePersonalTabProps) => {
-	const [avatarTooBigError, setAvatarTooBigError] = useState('');
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
@@ -84,7 +70,6 @@ export const EditProfilePersonalTab = ({
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
 		defaultValues: fields,
 	});
-	const { avatarError } = CurrentUserHooksSelectors.selectErrors();
 
 	const onSubmit = () => {
 		try {
@@ -92,32 +77,12 @@ export const EditProfilePersonalTab = ({
 			setSubmitWasSuccessful(true);
 			if (newAvatarFile) {
 				CurrentUserActionsDispatchers.updateUserAvatar(newAvatarFile);
-				setNewAvatarFile(null);
 			}
 		} catch (error) {
 			if (alreadyExistingEmails.length) trigger('email');
-			// TODO handle error
+			// TODO handle error using sagas
 		}
 	};
-
-	const addImage = (event) => {
-		if (!event.target.files.length) return;
-		setAvatarTooBigError('');
-		CurrentUserActionsDispatchers.resetErrors();
-		const file = event.target.files[0];
-		if (!fileIsTooBig(file)) {
-			setNewAvatarFile(file);
-		} else {
-			setAvatarTooBigError(formatMessage({
-				id: 'editProfile.avatar.error.size',
-				defaultMessage: 'Image cannot exceed 1 MB.',
-			}));
-		}
-	};
-
-	const getAvatarUrl = () => (newAvatarFile ? URL.createObjectURL(newAvatarFile) : user.avatarUrl);
-
-	const avatarIsAvailable = () => newAvatarFile || user.hasAvatar;
 
 	const fieldsAreDirty = () => !isMatch(user, getValues());
 
@@ -132,33 +97,11 @@ export const EditProfilePersonalTab = ({
 
 	return (
 		<>
-			<Header>
-				<ProfilePicture>
-					{avatarIsAvailable() ? (
-						<img src={getAvatarUrl()} alt="avatar" />
-					) : (
-						<UserIcon />
-					)}
-				</ProfilePicture>
-				<UserInfo>
-					<Username>{user.username}</Username>
-					<FullName>{user.firstName} {user.lastName}</FullName>
-					<AddImageButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
-						<AddImageInputLabel>
-							{avatarIsAvailable() ? (
-								<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
-							) : (
-								<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
-							)}
-							<AddImageHiddenInput onChange={addImage} />
-						</AddImageInputLabel>
-					</AddImageButton>
-					{(avatarTooBigError || avatarError) && (
-						<ErrorMessage>{avatarTooBigError || avatarError}</ErrorMessage>
-					)}
-				</UserInfo>
-			</Header>
-
+			<EditProfileAvatar
+				user={user}
+				newAvatarFile={newAvatarFile}
+				setNewAvatarFile={setNewAvatarFile}
+			/>
 			<FormTextField
 				name="firstName"
 				control={control}
