@@ -72,7 +72,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			setActiveTab('personal');
 			setAlreadyExistingEmails([]);
 			setPasswordFields({
-				currentPassword: '',
+				oldPassword: '',
 				newPassword: '',
 				confirmPassword: '',
 			});

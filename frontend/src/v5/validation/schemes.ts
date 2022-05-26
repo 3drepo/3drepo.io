@@ -102,7 +102,7 @@ const SettingsSchema = Yup.object().shape({
 });
 
 export const EditProfileUpdatePasswordSchema = Yup.object().shape({
-	currentPassword: Yup.string()
+	oldPassword: Yup.string()
 		.when('$passwordWasIncorrect', (passwordWasIncorrect, schema) => (
 			passwordWasIncorrect
 				? schema.min(1,
@@ -112,7 +112,7 @@ export const EditProfileUpdatePasswordSchema = Yup.object().shape({
 					}))
 				: schema.min(1,
 					formatMessage({
-						id: 'federations.password.error.empty',
+						id: 'editProfile.password.error.empty',
 						defaultMessage: 'Current password is a required field',
 					}))
 		)),
@@ -134,7 +134,7 @@ export const EditProfileUpdatePasswordSchema = Yup.object().shape({
 				defaultMessage: 'Password is limited to 128 characters',
 			}))
 		.differentThan(
-			Yup.ref('currentPassword'),
+			Yup.ref('oldPassword'),
 			formatMessage({
 				id: 'editProfile.password.error.max',
 				defaultMessage: 'New password should be different than old password',

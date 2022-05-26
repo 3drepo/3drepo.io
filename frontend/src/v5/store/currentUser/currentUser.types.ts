@@ -30,6 +30,6 @@ export interface ICurrentUser {
 }
 
 export type UpdateUser = Partial<Omit<ICurrentUser, 'avatarUrl' | 'hasAvatar' | 'username'> & {
-	currentPassword: string;
+	oldPassword: string;
 	newPassword: string;
 }>;

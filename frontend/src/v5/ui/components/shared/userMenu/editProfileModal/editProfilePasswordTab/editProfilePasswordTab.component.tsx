@@ -27,7 +27,7 @@ import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
 export interface IUpdatePasswordInputs {
-	currentPassword: string;
+	oldPassword: string;
 	newPassword: string;
 	confirmPassword: string;
 }
@@ -60,7 +60,7 @@ export const EditProfilePasswordTab = ({
 		defaultValues: fields,
 	});
 
-	const currentPassword = watch('currentPassword');
+	const oldPassword = watch('oldPassword');
 
 	const onSubmit = () => {
 		try {
@@ -76,12 +76,12 @@ export const EditProfilePasswordTab = ({
 
 	useEffect(() => {
 		if (passwordWasIncorrect) {
-			trigger('currentPassword');
-			if (currentPassword) {
+			trigger('oldPassword');
+			if (oldPassword) {
 				setPasswordWasIncorrect(false);
 			}
 		}
-	}, [currentPassword]);
+	}, [oldPassword]);
 
 	useEffect(() => {
 		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
@@ -98,13 +98,13 @@ export const EditProfilePasswordTab = ({
 		<>
 			<FormTextField
 				control={control}
-				name="currentPassword"
+				name="oldPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.currentPassword',
+					id: 'editProfile.updatePassword.oldPassword',
 					defaultMessage: 'Current Password',
 				})}
 				type="password"
-				formError={errors.currentPassword}
+				formError={errors.oldPassword}
 				required
 			/>
 			<FormTextField
