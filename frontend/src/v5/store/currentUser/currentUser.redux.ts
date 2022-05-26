@@ -18,16 +18,19 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser, UpdateUser } from './currentUser.types';
+import { ICurrentUser, UpdatePersonal, UpdateUserPassword } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: [],
 	fetchUserSuccess: ['userData'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
+	updateUserFailure: ['personalError'],
 	updateUserAvatar: ['avatarFile'],
 	updateUserAvatarSuccess: ['avatarUrl'],
 	updateUserAvatarFailure: ['avatarError'],
+	updateUserPassword: ['passwordData'],
+	updateUserPasswordSuccess: [],
 	updateUserPasswordFailure: ['passwordError'],
 	resetErrors: [],
 	setIsPending: ['isPending'],
@@ -52,11 +55,20 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
+export const updateUserFailure = (state = INITIAL_STATE, { personalError }): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		...personalError,
+	},
+});
+
 export const updateUserAvatarSuccess = (state = INITIAL_STATE, { avatarUrl }): ICurrentUserState => ({
 	...state,
 	currentUser: {
 		...state.currentUser,
 		avatarUrl,
+		avatarError: null,
 	},
 });
 
@@ -76,12 +88,21 @@ export const updateUserPasswordFailure = (state = INITIAL_STATE, { passwordError
 	},
 });
 
+export const updateUserPasswordSuccess = (state = INITIAL_STATE): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		passwordError: null,
+	},
+});
+
 export const resetErrors = (state = INITIAL_STATE): ICurrentUserState => ({
 	...state,
 	currentUser: {
 		...state.currentUser,
 		avatarError: null,
 		passwordError: null,
+		personalError: null,
 	},
 });
 
@@ -93,8 +114,10 @@ export const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
+	[CurrentUserTypes.UPDATE_USER_FAILURE]: updateUserFailure,
 	[CurrentUserTypes.UPDATE_USER_AVATAR_SUCCESS]: updateUserAvatarSuccess,
 	[CurrentUserTypes.UPDATE_USER_AVATAR_FAILURE]: updateUserAvatarFailure,
+	[CurrentUserTypes.UPDATE_USER_PASSWORD_SUCCESS]: updateUserPasswordSuccess,
 	[CurrentUserTypes.UPDATE_USER_PASSWORD_FAILURE]: updateUserPasswordFailure,
 	[CurrentUserTypes.RESET_ERRORS]: resetErrors,
 	[CurrentUserTypes.SET_IS_PENDING]: setIsPending,
@@ -110,11 +133,14 @@ export interface ICurrentUserState {
 
 export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
-export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdateUser };
-export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
+export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdatePersonal };
+export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdatePersonal };
+export type UpdateUserFailureAction = Action<'UPDATE_USER_FAILURE'> & { error: string };
 export type UpdateUserAvatarAction = Action<'UPDATE_USER_AVATAR'> & { avatarFile: File };
 export type UpdateUserAvatarSuccessAction = Action<'UPDATE_USER_AVATAR_SUCCESS'> & { avatarUrl: string };
 export type UpdateUserAvatarFailureAction = Action<'UPDATE_USER_AVATAR_FAILURE'> & { avatarError: string };
+export type UpdateUserPasswordAction = Action<'UPDATE_USER_PASSWORD'> & { passwordData: UpdateUserPassword };
+export type UpdateUserPasswordSuccessAction = Action<'UPDATE_USER_PASSWORD_SUCCESS'>;
 export type UpdateUserPasswordFailureAction = Action<'UPDATE_USER_PASSWORD_FAILURE'> & { passwordError: string };
 export type ResetErrorsActions = Action<'RESET_ERRORS'>;
 export type SetIsPendingAction = Action<'SET_IS_PENDING'>;
@@ -122,11 +148,14 @@ export type SetIsPendingAction = Action<'SET_IS_PENDING'>;
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
-	updateUser: (userData: UpdateUser) => UpdateUserAction;
-	updateUserSuccess: (userData: UpdateUser) => UpdateUserSuccessAction;
+	updateUser: (userData: UpdatePersonal) => UpdateUserAction;
+	updateUserSuccess: (userData: UpdatePersonal) => UpdateUserSuccessAction;
+	updateUserFailure: (personalError: string) => UpdateUserFailureAction;
 	updateUserAvatar: (avatarFile: File) => UpdateUserAvatarAction;
 	updateUserAvatarSuccess: (avatarUrl: string) => UpdateUserAvatarSuccessAction;
 	updateUserAvatarFailure: (avatarError: string) => UpdateUserAvatarFailureAction;
+	updateUserPassword: (passwordData: UpdateUserPassword) => UpdateUserPasswordAction;
+	updateUserPasswordSuccess: () => UpdateUserPasswordSuccessAction;
 	updateUserPasswordFailure: (passwordError: string) => UpdateUserPasswordFailureAction;
 	resetErrors: () => ResetErrorsActions;
 	setIsPending: (isPending: boolean) => SetIsPendingAction;

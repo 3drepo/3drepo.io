@@ -17,6 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { pick } from 'lodash';
+import { UpdateUserErrors } from './currentUser.types';
 
 const selectCurrentUserDomain = (state) => (state.currentUser2);
 
@@ -29,8 +30,8 @@ export const selectUsername: (state) => string = createSelector(
 );
 
 // TODO - check this merge conflicts (Errors and ApiKey are mine, firstname is from staging)
-export const selectErrors: (state) => { avatarError?: string, passwordError?: string } = createSelector(
-	selectCurrentUser, (state) => pick(state, 'avatarError', 'passwordError'),
+export const selectErrors: (state) => UpdateUserErrors = createSelector(
+	selectCurrentUser, (state) => pick(state, 'personalError', 'avatarError', 'passwordError'),
 );
 
 export const selectApiKey: (state) => string = createSelector(

@@ -14,8 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ export type UpdateUserErrors = {
+	avatarError?: string,
+	personalError?: string,
+	passwordError?: string,
+};
 
-export interface ICurrentUser {
+export type ICurrentUser = UpdateUserErrors & {
 	username: string,
 	firstName?: string,
 	lastName?: string,
@@ -25,11 +30,13 @@ export interface ICurrentUser {
 	company?: string,
 	countryCode?: string,
 	avatarUrl?: string,
-	avatarError?: string,
-	passwordError?: string,
 }
 
-export type UpdateUser = Partial<Omit<ICurrentUser, 'avatarUrl' | 'hasAvatar' | 'username'> & {
+export type UpdatePersonal = Partial<Omit<ICurrentUser, 'avatarUrl' | 'hasAvatar' | 'username'>>;
+
+export type UpdateUserPassword = {
 	oldPassword: string;
 	newPassword: string;
-}>;
+};
+
+export type UpdateUser = UpdatePersonal | UpdateUserPassword;

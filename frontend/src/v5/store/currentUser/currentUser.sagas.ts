@@ -21,7 +21,13 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { CurrentUserActions, CurrentUserTypes, UpdateUserAction, UpdateUserAvatarAction } from './currentUser.redux';
+import {
+	CurrentUserActions,
+	CurrentUserTypes,
+	UpdateUserAction,
+	UpdateUserAvatarAction,
+	UpdateUserPasswordAction,
+} from './currentUser.redux';
 
 export function* fetchUser() {
 	try {
@@ -71,14 +77,16 @@ export function* updateUserAvatar({ avatarFile }: UpdateUserAvatarAction) {
 	yield put(CurrentUserActions.setIsPending(false));
 }
 
-export function* updateUserPassword({ userData }: UpdateUserAction) {
+export function* updateUserPassword({ passwordData }: UpdateUserPasswordAction) {
 	yield put(CurrentUserActions.setIsPending(true));
 	try {
-		yield API.CurrentUser.updateUser(userData);
+		yield API.CurrentUser.updateUser(passwordData);
+		yield put(CurrentUserActions.updateUserPasswordSuccess());
 	} catch (error) {
 		const message = error.response?.data.message;
 		yield put(CurrentUserActions.updateUserPasswordFailure(message));
 	}
+	yield put(CurrentUserActions.setIsPending(false));
 }
 
 export function* generateApiKey() {
@@ -118,7 +126,7 @@ export function* deleteApiKey() {
 export default function* AuthSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.UPDATE_USER, updateUser);
-	// yield takeLatest(CurrentUserTypes.UPDATE_USER_PASSWORD, updateUserPassword);
+	yield takeLatest(CurrentUserTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(CurrentUserTypes.UPDATE_USER_AVATAR, updateUserAvatar);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
 	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
