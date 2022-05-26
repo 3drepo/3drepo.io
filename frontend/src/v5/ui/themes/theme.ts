@@ -272,6 +272,11 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					width: '100%',
+					'& :not(.colorPicker)': {
+						input: {
+							padding: '0px 14px',
+						},
+					},
 				},
 				underline: {
 					[`&:before,
@@ -279,9 +284,6 @@ export const theme = createTheme({
 					  &:hover:not(.Mui-disabled):before`]: {
 						borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
 					},
-				},
-				input: {
-					padding: '0px 14px',
 				},
 				formControl: {
 					'label + &': {
@@ -467,11 +469,7 @@ export const theme = createTheme({
 		MuiDialog: {
 			styleOverrides: {
 				paper: {
-					minWidth: '30%',
 					borderRadius: 10,
-				},
-				paperWidthFalse: {
-					maxWidth: 633,
 				},
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',

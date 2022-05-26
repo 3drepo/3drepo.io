@@ -14,18 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { isV5 } from '@/v4/helpers/isV5';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
 import { MarkdownMessage } from '../markdownMessage/markdownMessage.component';
 
-export const Container = styled.div`
+export const Container = styled.div<{ self?: boolean }>`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
 	position: relative;
+	${({ self }) => self && isV5() && 'flex-direction: row-reverse;'}
 `;
 
 export const Comment = styled(MarkdownMessage)`
@@ -38,23 +39,27 @@ export const Comment = styled(MarkdownMessage)`
 	}
 `;
 
+// TODO - fix after new palette is released
 const regularCommentStyles = css`
-	background-color: ${COLOR.WHITE};
+	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE};
+	${isV5() && 'margin-right: 0 !important;'}
 
 	${Comment} {
 		color: ${COLOR.BLACK_60};
 	}
 `;
 
+// TODO - fix after new palette is released
 const selfCommentStyles = css`
-	background-color: ${COLOR.LIGHT_GREY_BLUE};
+	background-color: ${isV5() ? '#f5f8fa' : COLOR.WHITE};
+	${isV5() && 'margin-left: 0 !important;'}
 `;
 
-export const CommentContainer = styled.div`
+export const CommentContainer = styled.div<{self?: boolean}>`
 	width: 100%;
 	margin-left: 10px;
 	margin-right: 32px;
 	padding: 8px 14px;
 	border-radius: 10px;
-	${({ self }: { self: boolean; }) => self ? selfCommentStyles : regularCommentStyles};
+	${({ self }) => self ? selfCommentStyles : regularCommentStyles};
 `;

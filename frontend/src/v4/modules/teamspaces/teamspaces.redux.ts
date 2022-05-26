@@ -17,7 +17,7 @@
 
 import { omit, values } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel';
 import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.contants';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
