@@ -29,4 +29,5 @@ export const CardList = styled.ul`
 	flex-wrap: wrap;
 	width: clamp(40px, 85vw, 798px);
 	margin-bottom: auto;
+	margin-top: 115px;
 `;

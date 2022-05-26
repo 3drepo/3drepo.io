@@ -19,17 +19,32 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentU
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
+import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { HomeContent, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
+	const [isVisible, setIsVisible] = useState(true);
+	const welcomeRef = useRef();
+
+	useEffect(() => {
+		if (welcomeRef.current) {
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => setIsVisible(entry.isIntersecting));
+			});
+			observer.observe(welcomeRef.current);
+			return () => observer.unobserve(welcomeRef.current);
+		}
+		return null;
+	}, []);
+
 	return (
 		<>
 			<AppBar />
 			<ScrollBar>
 				<HomeContent>
-					<WelcomeMessage>
+					<WelcomeMessage ref={welcomeRef} visible={isVisible}>
 						{
 							firstName ? (
 								<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
