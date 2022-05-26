@@ -24,10 +24,10 @@ import SaveIcon from '@mui/icons-material/Save';
 import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import CopyIcon from '@mui/icons-material/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	ActionsLine,
 	Container,
@@ -39,6 +39,7 @@ import {
 	StyledLinkableField,
 	StyledMarkdownField,
 	StyledTextField,
+	ExpandAction,
 } from './textField.styles';
 
 interface IProps extends StandardTextFieldProps {
@@ -310,6 +311,7 @@ export class TextField extends PureComponent<IProps, IState> {
 			mutable,
 			disableShowDefaultUnderline,
 			enableMarkdown,
+			placeholder,
 		} = this.props;
 		const { initialValue } = this.state;
 		const shouldRenderActions = mutable && this.isEditMode;
@@ -330,8 +332,12 @@ export class TextField extends PureComponent<IProps, IState> {
 						<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 							<FieldLabel shrink>{this.props.label}</FieldLabel>
 							{enableMarkdown &&
-							<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
-								{this.fieldValue}
+							<StyledMarkdownField
+								ref={this.markdownFieldRef}
+								$isPlaceholder={!this.fieldValue && isV5()}
+								{...this.additionalProps()}
+							>
+								{isV5() ? (this.fieldValue || placeholder) : this.fieldValue }
 							</StyledMarkdownField>
 							}
 							{!enableMarkdown &&

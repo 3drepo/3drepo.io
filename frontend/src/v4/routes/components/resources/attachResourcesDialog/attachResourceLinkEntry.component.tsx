@@ -21,7 +21,7 @@ import {
 	FieldsRow,
 	StyledFormControl
 } from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { RemoveButton } from '../resources.component';
+import { RemoveButton } from '../removeButton.component';
 import { ResourceListLinkItem } from './attachResourcesDialog.styles';
 
 export const LinkEntry = ({onClickRemove, index }) => {
