@@ -77,6 +77,7 @@ export const EditProfilePersonalTab = ({
 			setSubmitWasSuccessful(true);
 			if (newAvatarFile) {
 				CurrentUserActionsDispatchers.updateUserAvatar(newAvatarFile);
+				setNewAvatarFile(null);
 			}
 		} catch (error) {
 			if (alreadyExistingEmails.length) trigger('email');
@@ -157,7 +158,7 @@ export const EditProfilePersonalTab = ({
 					</MenuItem>
 				))}
 			</FormSelect>
-			{submitWasSuccessful && (
+			{submitWasSuccessful && !fieldsAreDirty() && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updateProfile.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
