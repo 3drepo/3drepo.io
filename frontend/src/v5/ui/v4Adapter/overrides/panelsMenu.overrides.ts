@@ -31,6 +31,36 @@ export default css`
 		${ButtonWrapper} {
 			margin-bottom: 0;
 		}
+
+		${StyledIconButton} {
+			margin-right: -4px;
+
+			&, &:hover {
+				background-color: ${({ theme }) => theme.palette.primary.contrast};
+			}
+
+			svg path,
+			svg circle {
+				fill: ${({ theme }) => theme.palette.secondary.main};
+			}
+
+			&:hover {
+				svg path,
+				svg circle {
+					fill: ${({ theme }) => theme.palette.primary.main};
+				}
+			}
+
+			&[active="1"] {
+				background-color: ${({ theme }) => theme.palette.secondary.main};
+
+				svg path,
+				svg circle {
+					fill: ${({ theme }) => theme.palette.primary.main};
+					color: ${({ theme }) => theme.palette.primary.main};
+				}
+			}
+		}
 	}
 
 	${LeftPanels} {
@@ -53,36 +83,6 @@ export default css`
 
 		${InputContainer} .react-autosuggest__container input {
 			height: 50px;
-		}
-	}
-
-	${StyledIconButton} {
-		margin-right: -4px;
-
-		&, &:hover {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-		}
-
-		svg path,
-		svg circle {
-			fill: ${({ theme }) => theme.palette.secondary.main};
-		}
-
-		&:hover {
-			svg path,
-			svg circle {
-				fill: ${({ theme }) => theme.palette.primary.main};
-			}
-		}
-
-		&[active="1"] {
-			background-color: ${({ theme }) => theme.palette.secondary.main};
-
-			svg path,
-			svg circle {
-				fill: ${({ theme }) => theme.palette.primary.main};
-				color: ${({ theme }) => theme.palette.primary.main};
-			}
 		}
 	}
 `;
