@@ -14,32 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Checkbox, FormControlLabel, FormControlLabelProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
 
-export type FormCheckboxProps = FormControlLabelProps & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
-};
+import styled from 'styled-components';
 
-export const FormCheckbox = ({
-	name,
-	label,
-	control,
-	...otherProps
-}: FormCheckboxProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormControlLabel
-				{...field}
-				control={<Checkbox />}
-				label={label}
-				checked={field.value}
-				{...otherProps}
-			/>
-		)}
-	/>
-);
+import { Button } from '@controls/button';
+
+export const NextStepButton = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	width: fit-content;
+	font-weight: 300;
+	margin: 20px 0 0;
+	float: right;
+`;

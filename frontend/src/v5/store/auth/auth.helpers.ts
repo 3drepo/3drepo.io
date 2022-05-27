@@ -14,32 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Checkbox, FormControlLabel, FormControlLabelProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
+export const isInvalidArguments = (error: any): boolean => error.response.data.code === 'INVALID_ARGUMENTS';
 
-export type FormCheckboxProps = FormControlLabelProps & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
-};
+export const usernameAlreadyExists = (error: string): boolean => error.toLowerCase().includes('username already exists');
 
-export const FormCheckbox = ({
-	name,
-	label,
-	control,
-	...otherProps
-}: FormCheckboxProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormControlLabel
-				{...field}
-				control={<Checkbox />}
-				label={label}
-				checked={field.value}
-				{...otherProps}
-			/>
-		)}
-	/>
-);
+export const emailAlreadyExists = (error: string): boolean => error.toLowerCase().includes('email already exists');
+
+export const getRegistrationErrorMessage = (error: any) => error.response.data.message;
