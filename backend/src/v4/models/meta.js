@@ -179,6 +179,15 @@ Meta.getMetadataFields = async (account, model) => {
 
 const ifcGuidQuery = (ids) => ({"metadata": {$elemMatch:{key: "IFC GUID", value:{ $in: ids }} }});
 const ifcGuidProjection = { "metadata": {$elemMatch:{key: "IFC GUID"} }};
+const ifcGuidProjectionFilter = {
+	metadata: {
+	   $filter: {
+		input: "$metadata",
+		as: "metadata",
+		cond: { $eq: ["$$metadata.key", "IFC GUID"] }
+	   }
+	}
+};
 
 Meta.getIfcGuids = async (account, model) => {
 	return db.find(account, getSceneCollectionName(model), { type: "meta" }, ifcGuidProjection);
@@ -431,7 +440,7 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 		.reduce((acc, val) => acc.concat(val), []);
 };
 
-const findObjectsByQuery = (account, model, query, projection = { ...ifcGuidProjection, parents: 1 }) => {
+const findObjectsByQuery = (account, model, query, projection = { $project: {...ifcGuidProjectionFilter, parents: 1 }}) => {
 	return db.aggregate(account, getSceneCollectionName(model), [query, projection]);
 };
 
@@ -461,7 +470,7 @@ const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, ne
 		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery)));
 		allRulesResults = intersection(eachPosRuleResults);
 	} else {
-		const rootQuery =  { rev_id: history._id, "parents": {$exists: false} };
+		const rootQuery =  { $match: { rev_id: history._id, "parents": {$exists: false} } };
 		const rootId = (await findObjectsByQuery(account, model, rootQuery))[0]._id;
 		allRulesResults = idToMeshesDict[utils.uuidToString(rootId)];
 	}
