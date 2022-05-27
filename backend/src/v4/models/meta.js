@@ -181,11 +181,11 @@ const ifcGuidQuery = (ids) => ({"metadata": {$elemMatch:{key: "IFC GUID", value:
 const ifcGuidProjection = { "metadata": {$elemMatch:{key: "IFC GUID"} }};
 const ifcGuidProjectionFilter = {
 	metadata: {
-	   $filter: {
-		input: "$metadata",
-		as: "metadata",
-		cond: { $eq: ["$$metadata.key", "IFC GUID"] }
-	   }
+		$filter: {
+			input: "$metadata",
+			as: "metadata",
+			cond: { $eq: ["$$metadata.key", "IFC GUID"] }
+		}
 	}
 };
 
