@@ -16,8 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
-const { getModelById, getModelByQuery } = require('../../../../../../models/modelSettings');
 const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
+const { getModelByQuery } = require('../../../../../../models/modelSettings');
 const { respond } = require('../../../../../../utils/responder');
 const { validateNewRevisionData } = require('./commons/revisions');
 
@@ -32,21 +32,6 @@ Containers.canDeleteContainer = async (req, res, next) => {
 		const fed = await getModelByQuery(teamspace, { 'subModels.model': container }, { _id: 1, name: 1 }).catch(() => {});
 		if (fed) {
 			respond(req, res, createResponseCode(templates.containerIsSubModel, `Container is an active sub model of ${fed.name}(${fed._id})`));
-		} else {
-			next();
-		}
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
-
-Containers.checkModelStatus = async (req, res, next) => {
-	try {
-		const { teamspace, container } = req.params;
-		const { status } = await getModelById(teamspace, container, { _id: 0, status: 1 });
-
-		if (status === 'queued' || status === 'processing') {
-			throw templates.revisionProcessed;
 		} else {
 			next();
 		}
