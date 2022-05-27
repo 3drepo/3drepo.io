@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.23.2",
+	"version": "4.25.0",
 	"description": "The frontend for 3drepo.io",
 	"main": "index.js",
 	"directories": {
@@ -151,6 +151,7 @@
 		"cross-env": "7.0.2",
 		"css-loader": "6.6.0",
 		"cssnano": "5.1.7",
+		"dpdm": "3.9.0",
 		"eslint": "7.29.0",
 		"eslint-config-airbnb-typescript": "12.0.0",
 		"eslint-plugin-import": "2.22.0",
@@ -191,6 +192,8 @@
 		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.4.2",
 		"react": "17.0.0",
 		"react-dom": "17.0.0",
-		"lodash": "4.17.21"
+		"lodash": "4.17.21",
+		"@types/react": "17.0.39",
+		"@types/react-dom": "17.0.11"
 	}
 }
