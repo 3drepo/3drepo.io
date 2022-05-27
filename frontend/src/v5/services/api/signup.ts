@@ -14,32 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Checkbox, FormControlLabel, FormControlLabelProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
 
-export type FormCheckboxProps = FormControlLabelProps & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
-};
+import { INewUser } from '@/v5/store/auth/auth.types';
+import api from './default';
 
-export const FormCheckbox = ({
-	name,
-	label,
-	control,
-	...otherProps
-}: FormCheckboxProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormControlLabel
-				{...field}
-				control={<Checkbox />}
-				label={label}
-				checked={field.value}
-				{...otherProps}
-			/>
-		)}
-	/>
-);
+export const registerNewUser = (data: INewUser): Promise<any> => api.post('user', data);
+
+export const verifyUser = (token: string, username: string) => api.post('user/verify', { username, token });

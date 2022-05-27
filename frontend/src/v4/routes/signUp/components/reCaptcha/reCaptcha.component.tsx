@@ -62,11 +62,11 @@ export class ReCaptcha extends PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<ReCAPTCHA
-						onBlur={onBlur}
-						sitekey={sitekey}
-						onChange={this.onReCaptchaChange}
-						ref={this.reCaptchaRef}
-					/>
+					onBlur={onBlur}
+					sitekey={sitekey}
+					onChange={this.onReCaptchaChange}
+					ref={this.reCaptchaRef}
+				/>
 			</Container>
 		);
 	}
