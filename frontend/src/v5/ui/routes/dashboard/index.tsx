@@ -17,9 +17,10 @@
 
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { discardSlash } from '@/v5/services/routing/routing';
+import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
@@ -48,10 +49,10 @@ export const MainRoute = () => {
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
 				</Route>
-				<Route exact path={`${path}/dashboard/`}>
+				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
-				</Route>
-				<Route path={`${path}/dashboard/:teamspace/:project?`}>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project?`}>
 					<DashboardLayout>
 						<Route path={`${path}/dashboard/:teamspace/`}>
 							<TeamspaceContent />
@@ -71,18 +72,17 @@ export const MainRoute = () => {
 							</Route>
 						</Switch>
 					</DashboardLayout>
-				</Route>
-				<Route path={VIEWER_ROUTE}>
-					<DashboardLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={VIEWER_ROUTE}>
+					<DashboardViewerLayout>
 						<Viewer />
-					</DashboardLayout>
-				</Route>
-
-				<Route path="*">
+					</DashboardViewerLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path="*">
 					<DashboardLayout>
 						<NotFound />
 					</DashboardLayout>
-				</Route>
+				</AuthenticatedRoute>
 			</Switch>
 		</>
 	);

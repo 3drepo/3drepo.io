@@ -27,8 +27,10 @@ interface IAuthPage {
 
 export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 	const { url } = useRouteMatch();
+	const returnUrl = AuthHooksSelectors.selectReturnUrl();
+
 	if (AuthHooksSelectors.selectIsAuthenticated()) {
-		return (<Redirect to={{ pathname: '/v5/dashboard', state: { referrer: url } }} />);
+		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
 	}
 
 	const getSubdomain = () => {
