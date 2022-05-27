@@ -53,9 +53,6 @@ describe('Uploading a model', () => {
 	const password = 'Str0ngPassword!';
 	const email = 'test3drepo_upload@mailinator.com';
 	const models = [{ name: 'model1'}, { name: 'model2' }, {name: 'model3'}];	
-	const model1 = models[0];
-	const model2 = models[1];
-	const model3 = models[2];
 	const desc = 'desc';
 	const type = 'type';
 	const unit = 'meter';
@@ -112,7 +109,7 @@ describe('Uploading a model', () => {
 
 	describe('without quota', () => {
 		it('should return error (no subscriptions)', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'no_quota')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(401, (err, res) => {
@@ -136,7 +133,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('should return error (has a subscription but ran out of space)', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'no_space')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(401, (err, res) => {
@@ -161,7 +158,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('should succeed', async () => {
-			await agent.post(`/${username}/${model1.id}/upload`)
+			await agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'with_quota')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(200);
@@ -189,7 +186,7 @@ describe('Uploading a model', () => {
 		});
 		*/
 		it('should succeed (uppercase extension)', (done) => {
-			agent.post(`/${username}/${model2.id}/upload`)
+			agent.post(`/${username}/${models[1].id}/upload`)
 				.field('tag', 'uppercase_ext')
 				.attach('file', `${__dirname}/../statics/3dmodels/upper.OBJ`)
 				.expect(200, (err, res) => {
@@ -198,7 +195,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('but without tag should fail', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(400, (err, res) => {
 					expect(res.body.code).to.equal(templates.invalidArguments.code);
@@ -207,7 +204,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('but with invalid tag should fail', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'bad tag!')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(400, (err, res) => {
@@ -217,7 +214,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('but empty file size should fail', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'empty_file')
 				.attach('file', `${__dirname}/../statics/3dmodels/empty.ifc`)
 				.expect(400, (err, res) => {
@@ -227,7 +224,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('but unaccepted extension should failed', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'unsupported_ext')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy.abc`)
 				.expect(400, (err, res) => {
@@ -237,7 +234,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('but no extension should failed', (done) => {
-			agent.post(`/${username}/${model1.id}/upload`)
+			agent.post(`/${username}/${models[0].id}/upload`)
 				.field('tag', 'no_ext')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy`)
 				.expect(400, (err, res) => {
@@ -247,7 +244,7 @@ describe('Uploading a model', () => {
 		});
 
 		it('but file size exceeded fixed single file size limit should fail', (done) => {
-			agent.post(`/${username}/${model3.id}/upload`)
+			agent.post(`/${username}/${models[2].id}/upload`)
 				.field('tag', 'too_big')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy.ifc`)
 				.expect(400, (err, res) => {
@@ -275,7 +272,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('without filename should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({ tag: 'no_filename' })
 					.expect(400, (err, res) => {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -284,7 +281,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('without tag should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({ filename: 'no_tag.ifc' })
 					.expect(400, (err, res) => {
 						expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
@@ -293,7 +290,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('with invalid tag should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({
 						filename: 'file.ifc',
 						tag: 'bad tag!',
@@ -317,7 +314,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('with no file extension should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({
 						filename: 'cubes',
 						tag: 'id1',
@@ -329,7 +326,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('with unsupported file should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({
 						filename: 'cubes.pdf',
 						tag: 'id1',
@@ -341,7 +338,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('without description should succeed', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({
 						filename: 'cubes.obj',
 						tag: 'id1',
@@ -353,7 +350,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('should succeed', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking`)
 					.send({
 						filename: 'cubes.obj',
 						tag: 'id2',
@@ -378,7 +375,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('with invalid correlation ID should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/invalidCorID`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/invalidCorID`)
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', 6425218)
 					.expect(404, (err, res) => {
@@ -388,7 +385,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('without transfer mode header should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('x-ms-content-length', 6425218)
 					.expect(400, (err, res) => {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -397,7 +394,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('should fail if transfer mode not chunked', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('x-ms-transfer-mode', 'normal')
 					.set('x-ms-content-length', 6425218)
 					.expect(400, (err, res) => {
@@ -407,7 +404,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('without content length header should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('x-ms-transfer-mode', 'chunked')
 					.expect(400, (err, res) => {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -416,7 +413,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('with NaN content length header should fail', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', '100MB')
 					.expect(400, (err, res) => {
@@ -426,7 +423,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('should succeed', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', 6425218)
 					.expect(200, (err, res) => {
@@ -437,7 +434,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('should succeed if string is number', (done) => {
-				agent.post(`/${username}/${model1.id}/upload/ms-chunking/${corID2}`)
+				agent.post(`/${username}/${models[0].id}/upload/ms-chunking/${corID2}`)
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', '6425218')
 					.expect(200, (err, res) => {
@@ -450,7 +447,7 @@ describe('Uploading a model', () => {
 
 		describe('Upload model chunk', () => {
 			it('with invalid correlation ID should fail', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/invalidCorID`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/invalidCorID`)
 					.set('Content-Range', 'bytes 0-2999999/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
@@ -462,7 +459,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('without content-range header should fail', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
 					.attach('file', `${__dirname}/../statics/3dmodels/chunk0.obj`)
@@ -473,7 +470,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('content-range header not in bytes should fail', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Range', 'kilobytes 0-2999999/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
@@ -485,7 +482,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('content-range header not separated by space should fail', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Range', 'bytes=0-2999999/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
@@ -497,7 +494,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('chunk too large should fail', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Range', 'bytes 0-52428799/52428800')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=52428800')
@@ -509,7 +506,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('should succeed', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Range', 'bytes 0-2999999/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
@@ -522,7 +519,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('with other valid correlation IDs should succeed', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID2}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID2}`)
 					.set('Content-Range', 'bytes 0-2999999/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
@@ -535,7 +532,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('second chunk should succeed', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Range', 'bytes 3000000-5999999/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=3000000')
@@ -549,7 +546,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('final chunk should succeed', (done) => {
-				agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID1}`)
+				agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID1}`)
 					.set('Content-Range', 'bytes 6000000-6425217/6425218')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', 'bytes=425218')
@@ -564,7 +561,7 @@ describe('Uploading a model', () => {
 			it('file larger than expected should fail', (done) => {
 				async.series([
 					function (done) {
-						agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID2}`)
+						agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID2}`)
 							.set('Content-Range', 'bytes 3000000-5999999/6425218')
 							.set('Content-Type', 'application/octet-stream')
 							.set('Content-Length', 'bytes=3000000')
@@ -577,7 +574,7 @@ describe('Uploading a model', () => {
 							});
 					},
 					function (done) {
-						agent.patch(`/${username}/${model1.id}/upload/ms-chunking/${corID2}`)
+						agent.patch(`/${username}/${models[0].id}/upload/ms-chunking/${corID2}`)
 							.set('Content-Range', 'bytes 6000000-6425217/6425218')
 							.set('Content-Type', 'application/octet-stream')
 							.set('Content-Length', 'bytes=425218')
