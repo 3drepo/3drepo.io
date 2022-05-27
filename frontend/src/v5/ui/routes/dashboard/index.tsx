@@ -30,6 +30,8 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { UserSignup } from '../userSignup/userSignup.component';
+import { UserVerification } from '../userVerification/userVerification.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -42,6 +44,12 @@ export const MainRoute = () => {
 			<Switch>
 				<Route exact path={`${path}/login`}>
 					<Login />
+				</Route>
+				<Route exact path={`${path}/signup`}>
+					<UserSignup />
+				</Route>
+				<Route exact path={`${path}/register-verify`}>
+					<UserVerification />
 				</Route>
 				<Route exact path={`${path}/password-forgot`}>
 					<PasswordForgot />
