@@ -16,6 +16,7 @@
  */
 
 import { ScrollArea } from '@controls/scrollArea';
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
 export const ScrollBar = styled(ScrollArea).attrs({
@@ -33,11 +34,12 @@ export const HomeContent = styled.div`
 	align-items: center;
 `;
 
-export const WelcomeMessage = styled.div<{ visible: boolean; }>`
+export const WelcomeMessage = styled(Typography).attrs({
+	variant: 'h1',
+})<{ visible: boolean; }>`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	text-align: center;
 	transition: opacity 0.2s ease-out;
 	opacity: ${({ visible }) => (visible ? 1 : 0)};
 	transform: translateY(75px);
-	${({ theme }) => theme.typography.h1}
 `;

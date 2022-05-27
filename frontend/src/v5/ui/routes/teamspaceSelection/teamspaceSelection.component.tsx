@@ -44,15 +44,17 @@ export const TeamspaceSelection = (): JSX.Element => {
 			<AppBar />
 			<ScrollBar>
 				<HomeContent>
-					<WelcomeMessage ref={welcomeRef} visible={isVisible}>
-						{
-							firstName ? (
-								<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
-							) : (
-								<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
-							)
-						}
-					</WelcomeMessage>
+					<div ref={welcomeRef}>
+						<WelcomeMessage visible={isVisible}>
+							{
+								firstName ? (
+									<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
+								) : (
+									<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
+								)
+							}
+						</WelcomeMessage>
+					</div>
 					<TeamspaceList />
 				</HomeContent>
 			</ScrollBar>
