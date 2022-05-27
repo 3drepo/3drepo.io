@@ -14,32 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Checkbox, FormControlLabel, FormControlLabelProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
+import {
+	ErrorStepIcon,
+	CompletedStepIcon,
+	StepIconContainer,
+} from './userSignupFormStepIcon.styles';
 
-export type FormCheckboxProps = FormControlLabelProps & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
+type UserSignupFormStepIconProps = {
+	error?: boolean;
+	stepIndex: number;
+	completed: boolean;
 };
 
-export const FormCheckbox = ({
-	name,
-	label,
-	control,
-	...otherProps
-}: FormCheckboxProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormControlLabel
-				{...field}
-				control={<Checkbox />}
-				label={label}
-				checked={field.value}
-				{...otherProps}
-			/>
-		)}
-	/>
+export const UserSignupFormStepIcon = ({ error = false, stepIndex, completed }: UserSignupFormStepIconProps) => (
+	<StepIconContainer>
+		{ error && <ErrorStepIcon /> }
+		{ completed && <CompletedStepIcon /> }
+		{ !error && !completed && <span>{stepIndex + 1}</span> }
+	</StepIconContainer>
 );
