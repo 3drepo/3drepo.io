@@ -17,7 +17,7 @@
 
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { discardSlash } from '@/v5/services/routing/routing';
+import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
@@ -30,6 +30,8 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { UserSignup } from '../userSignup/userSignup.component';
+import { UserVerification } from '../userVerification/userVerification.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -43,16 +45,22 @@ export const MainRoute = () => {
 				<Route exact path={`${path}/login`}>
 					<Login />
 				</Route>
+				<Route exact path={`${path}/signup`}>
+					<UserSignup />
+				</Route>
+				<Route exact path={`${path}/register-verify`}>
+					<UserVerification />
+				</Route>
 				<Route exact path={`${path}/password-forgot`}>
 					<PasswordForgot />
 				</Route>
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
 				</Route>
-				<Route exact path={`${path}/dashboard/`}>
+				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
-				</Route>
-				<Route path={`${path}/dashboard/:teamspace/:project?`}>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project?`}>
 					<DashboardLayout>
 						<Route path={`${path}/dashboard/:teamspace/`}>
 							<TeamspaceContent />
@@ -72,18 +80,17 @@ export const MainRoute = () => {
 							</Route>
 						</Switch>
 					</DashboardLayout>
-				</Route>
-				<Route path={VIEWER_ROUTE}>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>
 						<Viewer />
 					</DashboardViewerLayout>
-				</Route>
-
-				<Route path="*">
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path="*">
 					<DashboardLayout>
 						<NotFound />
 					</DashboardLayout>
-				</Route>
+				</AuthenticatedRoute>
 			</Switch>
 		</>
 	);
