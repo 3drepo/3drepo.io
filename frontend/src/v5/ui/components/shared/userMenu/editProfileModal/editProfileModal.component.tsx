@@ -22,7 +22,7 @@ import { TabContext } from '@mui/lab';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProfileModal.styles';
 import { EditProfilePersonalTab, getUserPersonalValues, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
 const CONFIRM_LABELS = {
@@ -77,16 +77,10 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			setActiveTab('personal');
 			setNewAvatarFile(null);
 			setAlreadyExistingEmails([]);
-			setPasswordFields({
-				oldPassword: '',
-				newPassword: '',
-				confirmPassword: '',
-			});
+			setPasswordFields(EMPTY_PASSWORDS);
 			setPersonalFields(getUserPersonalValues(user));
 		}
 	}, [open]);
-
-	useEffect(() => setPersonalFields(getUserPersonalValues(user)), [user]);
 
 	useEffect(() => { CurrentUserActionsDispatchers.resetErrors(); }, [activeTab, open]);
 

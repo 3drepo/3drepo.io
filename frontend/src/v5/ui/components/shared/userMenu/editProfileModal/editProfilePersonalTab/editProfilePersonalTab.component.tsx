@@ -26,7 +26,7 @@ import { MenuItem } from '@mui/material';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
-import { defaults } from 'lodash';
+import { defaults, isMatch } from 'lodash';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
@@ -72,7 +72,7 @@ export const EditProfilePersonalTab = ({
 		handleSubmit,
 		reset,
 		control,
-		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful, isDirty },
+		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		reValidateMode: 'onChange',
@@ -98,18 +98,19 @@ export const EditProfilePersonalTab = ({
 		}
 	};
 
-	const uploadWasSuccessful = () => !formIsUploading && !personalError;
+	const uploadWasSuccessful = !formIsUploading && !personalError;
+	const fieldsAreDirty = !isMatch(user, getValues());
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && (isDirty || newAvatarFile);
+		const shouldEnableSubmit = formIsValid && (fieldsAreDirty || newAvatarFile);
 		setSubmitFunction(shouldEnableSubmit ? handleSubmit(onSubmit) : null);
-	}, [formIsValid, newAvatarFile, isDirty]);
+	}, [formIsValid, newAvatarFile, fieldsAreDirty]);
 
 	// update form values when user is updated
 	useEffect(() => {
-		if (uploadWasSuccessful() && isSubmitSuccessful) {
-			if (isDirty) {
+		if (uploadWasSuccessful && isSubmitSuccessful) {
+			if (fieldsAreDirty) {
 				updatePersonalFields(getValues());
 			}
 			if (newAvatarFile) {
@@ -186,7 +187,7 @@ export const EditProfilePersonalTab = ({
 					</MenuItem>
 				))}
 			</FormSelect>
-			{isSubmitted && uploadWasSuccessful() && (
+			{isSubmitted && uploadWasSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updateProfile.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
