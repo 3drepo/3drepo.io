@@ -16,10 +16,10 @@
  */
 
 import { css } from 'styled-components';
-import { ColorSelect, Dot, OpacityVisibilityCheckbox, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
 export default css`
-	// color picker
+	// color picker button
 	${ColorSelect} {
 		width: unset;
 		padding-left: 8px;
@@ -38,11 +38,5 @@ export default css`
 				background-color: transparent;
 			}
 		}
-	}
-
-	// TODO modal
-	${OpacityVisibilityCheckbox} {
-		margin-left: -8px;
-		margin-right: 0;
 	}
 `;

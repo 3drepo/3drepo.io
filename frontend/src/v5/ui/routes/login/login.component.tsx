@@ -23,7 +23,7 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/auth';
-import { AuthPage } from '@components/authPage';
+import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import ErrorIcon from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
@@ -51,7 +51,7 @@ export const Login = () => {
 	};
 
 	return (
-		<AuthPage
+		<AuthTemplate
 			footer={(
 				<Link to="/releaseNotes">
 					<FormattedMessage id="auth.login.versionFooter" defaultMessage="Version: {version}" values={{ version: APP_VERSION }} />
@@ -92,6 +92,6 @@ export const Login = () => {
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</SubmitButton>
 			</form>
-		</AuthPage>
+		</AuthTemplate>
 	);
 };
