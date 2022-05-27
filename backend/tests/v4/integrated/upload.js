@@ -87,7 +87,7 @@ describe('Uploading a model', () => {
 					});
 				},
 				function (done) {
-					for(const i = 0; i < models.length; i++){
+					for(let i = 0; i < models.length; i++){
 					agent.post(`/${username}/model`)
 						.send({ type, desc, unit, modelName: models[i].name, project })
 						.expect(200, (err, res) => {
