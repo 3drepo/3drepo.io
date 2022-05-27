@@ -19,4 +19,4 @@ import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authAct
 import { SocketEvents, subscribeToSocketEvent } from './realtime.service';
 
 export const enableKickedOutEvent = () => subscribeToSocketEvent(SocketEvents.LOGGED_OUT,
-	() => AuthActionsDispatchers.logout());
+	() => AuthActionsDispatchers.kickedOut());

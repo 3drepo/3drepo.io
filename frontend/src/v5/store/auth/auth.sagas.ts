@@ -98,8 +98,19 @@ function* logout() {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
+function* kickedOut() {
+	yield put({ type: 'RESET_APP' });
+	yield put(DialogsActions.open('warning', {
+		message: formatMessage({
+			id: 'auth.logout.kickedOut',
+			defaultMessage: 'You have been logged out because your account has signed in elsewhere',
+		}),
+	}));
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
+	yield takeLatest(AuthTypes.KICKED_OUT, kickedOut);
 }
