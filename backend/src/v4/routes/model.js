@@ -2273,9 +2273,9 @@ function getAllJsonMpcs(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, username).then(({readStream}) => {
-		// FIXME: Caching?
-		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream);
+	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, username).then(({readStream, isFed}) => {
+		const headers = getHeaders(rev && !isFed);
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
