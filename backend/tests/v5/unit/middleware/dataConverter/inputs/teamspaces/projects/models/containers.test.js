@@ -48,10 +48,10 @@ ModelSettings.getModelByQuery.mockImplementation((teamspace, query) => (query['s
 	: Promise.resolve({ _id: 1, name: 'abc' })));
 
 ModelSettings.getModelById.mockImplementation((teamspace, container) => {
-	if(container === queuedStatusContainer){
-		return { status: 'queued'};
+	if (container === queuedStatusContainer) {
+		return { status: 'queued' };
 	}
-	return { status: 'ok'};
+	return { status: 'ok' };
 });
 
 const testCanDeleteContainer = () => {
@@ -123,9 +123,9 @@ const testValidateNewRevisionData = () => {
 		['Request with invalid type timezone should fail', 'ts', container, { tag: 'drflgdf', timezone: 123 }, false, false, false, templates.invalidArguments],
 		['Request with null timezone should pass', 'ts', container, { tag: 'drflgdf', timezone: null }],
 		['Request with container that has queued status', 'ts', queuedStatusContainer, standardBody, false, false, false, templates.invalidArguments],
-	])('Check new revision data', (desc, ts, container, bodyContent, badFile, noFile, emptyFile, error) => {
+	])('Check new revision data', (desc, ts, cont, bodyContent, badFile, noFile, emptyFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
-			const req = createRequestWithFile(ts, container, bodyContent, badFile, noFile, emptyFile);
+			const req = createRequestWithFile(ts, cont, bodyContent, badFile, noFile, emptyFile);
 			const mockCB = jest.fn(() => {});
 			await Containers.validateNewRevisionData(req, {}, mockCB);
 			if (error) {
