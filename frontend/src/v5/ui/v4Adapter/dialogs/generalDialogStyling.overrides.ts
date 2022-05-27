@@ -18,8 +18,6 @@ import { css } from 'styled-components';
 import { DialogTitle } from '@/v4/routes/components/dialogContainer/components/dialog/dialog.styles';
 
 export default css`
-	display: contents;
-
 	${DialogTitle} {
 		background: ${({ theme }) => theme.palette.gradient.secondary};
 		color: ${({ theme }) => theme.palette.primary.contrast};
@@ -41,5 +39,10 @@ export default css`
 		.MuiDialogContent-root {
 			padding: 0;
 		}
+	}
+
+	.MuiDialogContent-root {
+		padding: 0px;
+		overflow-x: hidden;
 	}
 `;

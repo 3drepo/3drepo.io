@@ -16,27 +16,18 @@
  */
 
 import { css } from 'styled-components';
-import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { OpacityVisibilityCheckbox, SelectedHash } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
 export default css`
-	// color picker button
-	${ColorSelect} {
-		width: unset;
-		padding-left: 8px;
-		border-radius: 5px;
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${SelectedHash} input {
+		width: fit-content;
+		margin-left: -13px;
+		padding-right: 0 !important;
+	}
 
-		${Dot} {
-			width: 13px;
-			height: 13px;
-		}
-
-		${StyledIconButton} {
-			margin: 0;
-
-			&:hover {
-				background-color: transparent;
-			}
-		}
+	// TODO modal
+	${OpacityVisibilityCheckbox} {
+		margin-left: -8px;
+		margin-right: 0;
 	}
 `;

@@ -14,29 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
+import { DashboardLayout } from './dashboardViewerLayout.styles';
 
-import { css } from 'styled-components';
-import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
-
-export default css`
-	// color picker button
-	${ColorSelect} {
-		width: unset;
-		padding-left: 8px;
-		border-radius: 5px;
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-
-		${Dot} {
-			width: 13px;
-			height: 13px;
-		}
-
-		${StyledIconButton} {
-			margin: 0;
-
-			&:hover {
-				background-color: transparent;
-			}
-		}
-	}
-`;
+export const DashboardViewerLayout = ({ children }) => (
+	<ThemeProvider theme={theme}>
+		<MuiThemeProvider theme={theme}>
+			<DashboardLayout>
+				{children}
+			</DashboardLayout>
+		</MuiThemeProvider>
+	</ThemeProvider>
+);
