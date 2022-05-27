@@ -26,7 +26,7 @@ import { MenuItem } from '@mui/material';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
-import { defaults, isMatch } from 'lodash';
+import { defaults } from 'lodash';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
@@ -47,24 +47,24 @@ export const getUserPersonalValues = (user: IUser): IUpdatePersonalInputs => pic
 
 type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
+	setIsSubmitting: (isSubmitting: boolean) => void,
 	fields: IUpdatePersonalInputs,
 	updatePersonalFields: (values: Partial<IUpdatePersonalInputs>) => void,
 	newAvatarFile: File | null,
 	setNewAvatarFile: (file: File | null) => void,
 	alreadyExistingEmails: string[],
 	user: IUser,
-	isSubmitting: boolean,
 };
 
 export const EditProfilePersonalTab = ({
 	setSubmitFunction,
+	setIsSubmitting,
 	fields,
 	updatePersonalFields,
 	newAvatarFile,
 	setNewAvatarFile,
 	alreadyExistingEmails,
 	user,
-	isSubmitting,
 }: EditProfilePersonalTabProps) => {
 	const {
 		getValues,
@@ -72,15 +72,19 @@ export const EditProfilePersonalTab = ({
 		handleSubmit,
 		reset,
 		control,
-		formState: { errors, isValid: formIsValid, isSubmitted },
+		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful, isDirty },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		reValidateMode: 'onChange',
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
 		defaultValues: fields,
 	});
-
 	const { personalError } = CurrentUserHooksSelectors.selectErrors();
+	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUploading();
+
+	useEffect(() => {
+		setIsSubmitting(formIsUploading);
+	}, [formIsUploading]);
 
 	const onSubmit = () => {
 		try {
@@ -94,35 +98,31 @@ export const EditProfilePersonalTab = ({
 		}
 	};
 
-	const fieldsAreDirty = () => !isMatch(user, getValues());
+	const uploadWasSuccessful = () => !formIsUploading && !personalError;
 
-	const submissionWasSuccessful = () => !isSubmitting && isSubmitted && !personalError;
-
-	// enable submission only if form is valid and fields are dirty
+	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && (fieldsAreDirty() || newAvatarFile);
+		const shouldEnableSubmit = formIsValid && (isDirty || newAvatarFile);
 		setSubmitFunction(shouldEnableSubmit ? handleSubmit(onSubmit) : null);
-	}, [formIsValid, newAvatarFile, fieldsAreDirty()]);
+	}, [formIsValid, newAvatarFile, isDirty]);
 
 	// update form values when user is updated
 	useEffect(() => {
-		if (submissionWasSuccessful()) {
-			if (fieldsAreDirty()) {
+		if (uploadWasSuccessful() && isSubmitSuccessful) {
+			if (isDirty) {
 				updatePersonalFields(getValues());
 			}
 			if (newAvatarFile) {
 				setNewAvatarFile(null);
 			}
-			reset(getUserPersonalValues(user));
+			reset(getUserPersonalValues(user), { keepIsSubmitted: true });
 		}
-	}, [isSubmitting, fieldsAreDirty()])
+	}, [formIsUploading]);
 
 	// save fields on tab change
 	useEffect(() => () => {
 		updatePersonalFields(getValues());
 	}, []);
-
-	useEffect(() => console.log(newAvatarFile), [newAvatarFile]);
 
 	return (
 		<>
@@ -186,7 +186,7 @@ export const EditProfilePersonalTab = ({
 					</MenuItem>
 				))}
 			</FormSelect>
-			{submissionWasSuccessful() && !fieldsAreDirty() && (
+			{isSubmitted && uploadWasSuccessful() && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updateProfile.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>

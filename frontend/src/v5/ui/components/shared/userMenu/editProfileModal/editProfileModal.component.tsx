@@ -24,7 +24,6 @@ import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProf
 import { EditProfilePersonalTab, getUserPersonalValues, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 
 const CONFIRM_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
@@ -63,10 +62,10 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 
 	// all tabs
 	const [activeTab, setActiveTab] = useState(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitFunction, setSubmitFunctionWithCallback] = useState(null);
 	const setSubmitFunction = (callback) => setSubmitFunctionWithCallback(() => callback);
 
-	const isSubmitting = CurrentUserHooksSelectors.selectIsPending();
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 	const onClickClose = () => {
 		CurrentUserActionsDispatchers.resetErrors();
@@ -104,7 +103,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			onSubmit={submitFunction}
 			isValid={submitFunction || isSubmitting}
 			isSubmitting={isSubmitting}
-			isPasswordTab={activeTab === 'password'}
+			$isPasswordTab={activeTab === 'password'}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
@@ -116,6 +115,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<ScrollArea>
 						<ScrollAreaPadding>
 							<EditProfilePersonalTab
+								setIsSubmitting={setIsSubmitting}
 								setSubmitFunction={setSubmitFunction}
 								fields={personalFields}
 								alreadyExistingEmails={alreadyExistingEmails}
@@ -123,13 +123,13 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 								user={user}
 								newAvatarFile={newAvatarFile}
 								setNewAvatarFile={setNewAvatarFile}
-								isSubmitting={isSubmitting}
 							/>
 						</ScrollAreaPadding>
 					</ScrollArea>
 				</TabPanel>
 				<TabPanel value="password">
 					<EditProfilePasswordTab
+						setIsSubmitting={setIsSubmitting}
 						setSubmitFunction={setSubmitFunction}
 						fields={passwordFields}
 						updatePasswordFields={updatePasswordFields}
