@@ -20,11 +20,72 @@ import { formatMessage } from '@/v5/services/intl';
 import { getPasswordStrength } from '@/v4/services/validation';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 
+// common validation fields
 const numberField = Yup.number().typeError(formatMessage({
 	id: 'settings.surveyPoint.error.number',
 	defaultMessage: 'Must be a decimal number or integer',
 }));
 
+const password = Yup.string()
+	.required(
+		formatMessage({
+			id: 'validation.password.error.required',
+			defaultMessage: 'Password is a required field',
+		}),
+	)
+	.min(8,
+		formatMessage({
+			id: 'validation.password.error.min',
+			defaultMessage: 'Password must be at least 8 characters',
+		}))
+	.max(128,
+		formatMessage({
+			id: 'validation.password.error.max',
+			defaultMessage: 'Password is limited to 128 characters',
+		}))
+	.test(
+		'checkPasswordStrength',
+		'Password is too weak',
+		async (password) => await getPasswordStrength(password) >= 2,
+	);
+
+const firstName = Yup.string()
+	.min(2, formatMessage({
+		id: 'validation.firstName.error.min',
+		defaultMessage: 'First name must be at least 2 characters',
+	}))
+	.max(50, formatMessage({
+		id: 'validation.firstName.error.max',
+		defaultMessage: 'First name is limited to 50 characters',
+	}))
+	.required(formatMessage({
+		id: 'validation.firstName.error.required',
+		defaultMessage: 'First name is a required field',
+	}));
+
+const lastName = Yup.string()
+	.min(2, formatMessage({
+		id: 'validation.lastName.error.min',
+		defaultMessage: 'Last name must be at least 2 characters',
+	}))
+	.max(50, formatMessage({
+		id: 'validation.lastName.error.max',
+		defaultMessage: 'Last name is limited to 50 characters',
+	}))
+	.required(formatMessage({
+		id: 'validation.lastName.error.required',
+		defaultMessage: 'Last name is a required field',
+	}));
+
+const countryCode = Yup.string()
+	.required(
+		formatMessage({
+			id: 'validation.countryCode.error.required',
+			defaultMessage: 'Country is a required field',
+		}),
+	);
+
+// Schemas
 const SettingsSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2,
@@ -116,30 +177,7 @@ export const EditProfileUpdatePasswordSchema = Yup.object().shape({
 						defaultMessage: 'Current password is a required field',
 					}))
 		)),
-	newPassword: Yup.string()
-		.required(
-			formatMessage({
-				id: 'editProfile.password.error.required',
-				defaultMessage: 'Password is a required field',
-			}),
-		)
-		.min(8,
-			formatMessage({
-				id: 'editProfile.password.error.min',
-				defaultMessage: 'Password must be at least 8 characters',
-			}))
-		.max(128,
-			formatMessage({
-				id: 'editProfile.password.error.max',
-				defaultMessage: 'Password is limited to 128 characters',
-			}))
-		.differentThan(
-			Yup.ref('oldPassword'),
-			formatMessage({
-				id: 'editProfile.password.error.max',
-				defaultMessage: 'New password should be different than old password',
-			}),
-		)
+	newPassword: password
 		.test(
 			'checkPasswordStrength',
 			formatMessage({
@@ -165,32 +203,8 @@ export const EditProfileUpdatePasswordSchema = Yup.object().shape({
 });
 
 export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({
-	firstName: Yup.string()
-		.min(2, formatMessage({
-			id: 'editProfile.firstName.error.min',
-			defaultMessage: 'First name must be at least 2 characters',
-		}))
-		.max(50, formatMessage({
-			id: 'editProfile.firstName.error.max',
-			defaultMessage: 'First name is limited to 50 characters',
-		}))
-		.required(formatMessage({
-			id: 'editProfile.firstName.error.required',
-			defaultMessage: 'First name is a required field',
-		})),
-	lastName: Yup.string()
-		.min(2, formatMessage({
-			id: 'editProfile.lastName.error.min',
-			defaultMessage: 'Last name must be at least 2 characters',
-		}))
-		.max(50, formatMessage({
-			id: 'editProfile.lastName.error.max',
-			defaultMessage: 'Last name is limited to 50 characters',
-		}))
-		.required(formatMessage({
-			id: 'editProfile.lastName.error.required',
-			defaultMessage: 'Last name is a required field',
-		})),
+	firstName,
+	lastName,
 	email: Yup.string().email()
 		.required(
 			formatMessage({
@@ -213,15 +227,8 @@ export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] 
 				defaultMessage: 'Company is a required field',
 			}),
 		),
-	countryCode: Yup.string()
-		.required(
-			formatMessage({
-				id: 'editProfile.countryCode.error.required',
-				defaultMessage: 'Country is a required field',
-			}),
-		),
+	countryCode,
 });
-
 export const UserSignupSchemaAccount = (
 	alreadyExistingUsernames: string[] = [],
 	alreadyExistingEmails: string[] = [],
@@ -270,28 +277,7 @@ export const UserSignupSchemaAccount = (
 			}),
 			(email) => !alreadyExistingEmails.includes(email),
 		),
-	password: Yup.string()
-		.required(
-			formatMessage({
-				id: 'userRegistration.password.error.required',
-				defaultMessage: 'Password is a required field',
-			}),
-		)
-		.min(8,
-			formatMessage({
-				id: 'userRegistration.password.error.min',
-				defaultMessage: 'Password must be at least 8 characters',
-			}))
-		.max(128,
-			formatMessage({
-				id: 'userRegistration.password.error.max',
-				defaultMessage: 'Password is limited to 128 characters',
-			}))
-		.test(
-			'checkPasswordStrength',
-			'Password is too weak',
-			async (password) => await getPasswordStrength(password) >= 2,
-		),
+	password,
 	confirmPassword: Yup.string()
 		.required(
 			formatMessage({
@@ -309,39 +295,9 @@ export const UserSignupSchemaAccount = (
 });
 
 export const UserSignupSchemaPersonal = Yup.object().shape({
-	firstName: Yup.string()
-		.min(2, formatMessage({
-			id: 'userRegistration.firstName.error.min',
-			defaultMessage: 'First name must be at least 2 characters',
-		}))
-		.max(50, formatMessage({
-			id: 'userRegistration.firstName.error.max',
-			defaultMessage: 'First name is limited to 50 characters',
-		}))
-		.required(formatMessage({
-			id: 'userRegistration.firstName.error.required',
-			defaultMessage: 'First name is a required field',
-		})),
-	lastName: Yup.string()
-		.min(2, formatMessage({
-			id: 'userRegistration.lastName.error.min',
-			defaultMessage: 'Last name must be at least 2 characters',
-		}))
-		.max(50, formatMessage({
-			id: 'userRegistration.lastName.error.max',
-			defaultMessage: 'Last name is limited to 50 characters',
-		}))
-		.required(formatMessage({
-			id: 'userRegistration.lastName.error.required',
-			defaultMessage: 'Last name is a required field',
-		})),
-	countryCode: Yup.string()
-		.required(
-			formatMessage({
-				id: 'userRegistration.countryCode.error.required',
-				defaultMessage: 'Country is a required field',
-			}),
-		),
+	firstName,
+	lastName,
+	countryCode,
 });
 
 export const UserSignupSchemaTermsAndSubmit = Yup.object().shape({
