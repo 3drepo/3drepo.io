@@ -314,7 +314,7 @@ describe('Uploading a model', () => {
 			});
 
 			it('duplicate tag should fail', (done) => {
-				agent.post(`/${username}/${model}/upload/ms-chunking`)
+				agent.post(`/${username}/${model1.id}/upload/ms-chunking`)
 					.send({
 						filename: 'file.ifc',
 						tag: 'tag_exists',
