@@ -41,7 +41,6 @@ declare module '@mui/material/styles/createPalette' {
 		lightest?: CSSProperties['color'],
 		darkest?: CSSProperties['color'],
 		contrast?: CSSProperties['color'],
-		accent?: CSSProperties['color'],
 	}
 
 	interface Palette {
