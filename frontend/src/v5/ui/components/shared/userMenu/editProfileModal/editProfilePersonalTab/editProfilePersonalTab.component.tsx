@@ -29,8 +29,8 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { defaults, isMatch, pick } from 'lodash';
-import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -68,6 +68,9 @@ export const EditProfilePersonalTab = ({
 	setAlreadyExistingEmails,
 	user,
 }: EditProfilePersonalTabProps) => {
+	const personalError = CurrentUserHooksSelectors.selectPersonalError();
+	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
+
 	const {
 		getValues,
 		trigger,
@@ -81,12 +84,8 @@ export const EditProfilePersonalTab = ({
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
 		defaultValues: fields,
 	});
-	const personalError = CurrentUserHooksSelectors.selectPersonalError();
-	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 
-	useEffect(() => {
-		setIsSubmitting(formIsUploading);
-	}, [formIsUploading]);
+	setIsSubmitting(formIsUploading);
 
 	const onSubmit = () => {
 		CurrentUserActionsDispatchers.updatePersonalData({
@@ -123,13 +122,13 @@ export const EditProfilePersonalTab = ({
 		if (personalError && personalError.message === 'Email already exists') {
 			setAlreadyExistingEmails([...alreadyExistingEmails, getValues().email]);
 		}
-	}, [personalError])
+	}, [personalError]);
 
 	useEffect(() => {
 		if (alreadyExistingEmails.length) {
 			trigger('email');
 		}
-	}, [alreadyExistingEmails])
+	}, [alreadyExistingEmails]);
 
 	// save fields on tab change
 	useEffect(() => () => {
@@ -203,7 +202,7 @@ export const EditProfilePersonalTab = ({
 					<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
 			)}
-			{!isUnexpectedError() && <UnexpectedError gapTop />}
+			{isUnexpectedError() && <UnexpectedError gapTop />}
 		</>
 	);
 };
