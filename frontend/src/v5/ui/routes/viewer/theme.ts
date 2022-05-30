@@ -261,6 +261,15 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiListItemButton: {
+					styleOverrides: {
+						root: {
+							'>*': {
+								color: `${COLOR.BASE_MAIN} !important`,
+							},
+						},
+					},
+				},
 				MuiDialog: {
 					defaultProps: {
 						container: () => document.getElementById('v4DialogsOverrides'),

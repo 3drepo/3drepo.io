@@ -35,7 +35,7 @@ export default css`
 		${StyledIconButton} {
 			svg path,
 			svg circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
+				fill: unset;
 			}
 		}
 		/* stylelint-disable-next-line */
