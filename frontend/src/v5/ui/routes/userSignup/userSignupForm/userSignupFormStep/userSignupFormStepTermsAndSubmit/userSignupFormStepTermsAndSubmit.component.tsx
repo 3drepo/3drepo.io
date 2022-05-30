@@ -24,6 +24,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
+import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -32,7 +33,6 @@ import {
 	FormCheckbox,
 	Link,
 } from './userSignupFormStepTermsAndSubmit.styles';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 
 export interface ITermsAndSubmitFormInput {
 	termsAgreed: boolean;
