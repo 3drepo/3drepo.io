@@ -85,6 +85,22 @@ const countryCode = Yup.string()
 		}),
 	);
 
+const email = (alreadyExistingEmails) => Yup.string().email()
+	.required(
+		formatMessage({
+			id: 'validation.email.error.required',
+			defaultMessage: 'Email is a required field',
+		}),
+	)
+	.test(
+		'alreadyExistingEmails',
+		formatMessage({
+			id: 'validation.email.alreadyExisting',
+			defaultMessage: 'This email is already taken',
+		}),
+		(email) => !alreadyExistingEmails.includes(email),
+	);
+
 // Schemas
 const SettingsSchema = Yup.object().shape({
 	name: Yup.string()
@@ -205,21 +221,7 @@ export const EditProfileUpdatePasswordSchema = Yup.object().shape({
 export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({
 	firstName,
 	lastName,
-	email: Yup.string().email()
-		.required(
-			formatMessage({
-				id: 'editProfile.email.error.required',
-				defaultMessage: 'Email is a required field',
-			}),
-		)
-		.test(
-			'alreadyExistingEmails',
-			formatMessage({
-				id: 'editProfile.email.alreadyExisting',
-				defaultMessage: 'This email is already taken',
-			}),
-			(email) => !alreadyExistingEmails.includes(email),
-		),
+	email: email(alreadyExistingEmails),
 	company: Yup.string()
 		.required(
 			formatMessage({
@@ -262,21 +264,7 @@ export const UserSignupSchemaAccount = (
 			}),
 			(username) => !alreadyExistingUsernames.includes(username),
 		),
-	email: Yup.string().email()
-		.required(
-			formatMessage({
-				id: 'userRegistration.email.error.required',
-				defaultMessage: 'Email is a required field',
-			}),
-		)
-		.test(
-			'alreadyExistingEmails',
-			formatMessage({
-				id: 'userRegistration.email.alreadyExisting',
-				defaultMessage: 'This email is already taken',
-			}),
-			(email) => !alreadyExistingEmails.includes(email),
-		),
+	email: email(alreadyExistingEmails),
 	password,
 	confirmPassword: Yup.string()
 		.required(
