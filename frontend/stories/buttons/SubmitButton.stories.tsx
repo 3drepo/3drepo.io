@@ -21,12 +21,14 @@ import LoginIcon from '@assets/icons/login.svg';
 import EmailIcon from '@assets/icons/email.svg';
 import LockIcon from '@assets/icons/lock.svg';
 import AddIcon from '@assets/icons/add_circle.svg';
+import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 
 const Icons = {
 	loginIcon: <LoginIcon />,
 	emailIcon: <EmailIcon />,
 	lockIcon: <LockIcon />,
 	addIcon: <AddIcon />,
+	signupIcon: <SignupIcon />,
 	none: <></>,
 };
 
@@ -44,13 +46,16 @@ export default {
 		 * The color of the component. It supports those theme colors that make sense for this component.
 		 */
 		color: {
-			options: ['inherit',
-				'primary', 'secondary',
+			options: [
+				'inherit',
+				'primary',
+				'secondary',
 				'success',
 				'error',
 				'info',
 				'warning',
-				'text'],
+				'text',
+			],
 			control: { type: 'select' },
 		},
 		isPending: {
@@ -69,6 +74,7 @@ export default {
 					emailIcon: 'Email',
 					lockIcon: 'Lock',
 					addIcon: 'Add Circle',
+					signupIcon: 'Signup',
 					none: 'None',
 				},
 			},
