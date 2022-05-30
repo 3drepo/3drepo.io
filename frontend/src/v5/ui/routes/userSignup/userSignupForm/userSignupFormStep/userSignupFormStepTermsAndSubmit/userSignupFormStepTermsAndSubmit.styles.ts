@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import ErrorIconBase from '@assets/icons/warning_small.svg';
 import { FormCheckbox as FormCheckboxBase } from '@controls/formCheckbox/formCheckbox.component';
 
 export const CreateAccountButton = styled(SubmitButton)`
