@@ -49,7 +49,7 @@ const password = Yup.string()
 			id: 'validation.password.error.tooWeak',
 			defaultMessage: 'Password is too weak',
 		}),
-		async (password) => await getPasswordStrength(password) >= 2,
+		async (passwordValue) => await getPasswordStrength(passwordValue) >= 2,
 	);
 
 const firstName = Yup.string()
@@ -101,7 +101,7 @@ const email = (alreadyExistingEmails) => Yup.string().email()
 			id: 'validation.email.alreadyExisting',
 			defaultMessage: 'This email is already taken',
 		}),
-		(email) => !alreadyExistingEmails.includes(email),
+		(emailValue) => !alreadyExistingEmails.includes(emailValue),
 	);
 
 // Schemas
