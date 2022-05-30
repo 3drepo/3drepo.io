@@ -37,11 +37,6 @@ const AttachResourcesContainer = css`
 		position: relative;
 	}
 
-	.MuiDialogContent-root {
-		padding: 0px;
-		overflow-x: hidden;
-	}
-
 	${DialogTabs} {
 		padding-left: 10px;
 		box-shadow: 0px 1px 10px rgba(23, 43, 77, 0.15);

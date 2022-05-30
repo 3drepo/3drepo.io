@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
+import { DashboardLayout as DashboardLayoutBase } from '@components/dashboard/dashboardLayout';
 
-export const DashboardViewerLayout = styled(DashboardLayout)`
+export const DashboardLayout = styled(DashboardLayoutBase)`
 	${AppBarContainer} {
 		opacity: .95;
 		position: absolute;
