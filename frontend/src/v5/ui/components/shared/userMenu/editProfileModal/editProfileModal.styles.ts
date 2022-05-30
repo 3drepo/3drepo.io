@@ -30,7 +30,7 @@ export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
 	}
 
 	${SubmitButton} {
-		width: ${({ $isPasswordTab }) => $isPasswordTab ? 132 : 112}px;
+		width: ${({ $isPasswordTab }) => ($isPasswordTab ? 132 : 112)}px;
 	}
 `;
 
