@@ -29,9 +29,8 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { defaults, isMatch, pick } from 'lodash';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
-import { Gap, Link } from './editProfilePersonalTab.styles';
+import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -204,32 +203,7 @@ export const EditProfilePersonalTab = ({
 					<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
 			)}
-			{isUnexpectedError() && (
-				<>
-					<Gap />
-					<ErrorMessage>
-						<FormattedMessage
-							id="editProfile.form.error.unexpected"
-							defaultMessage="An unexpected error has occurred. Please try again later."
-						/>
-						<Gap />
-						<FormattedMessage
-							id="editProfile.form.error.unexpected.contactSupport"
-							defaultMessage="If the error persists, please {contactSupport}."
-							values={{
-								contactSupport: (
-									<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-										<FormattedMessage
-											id="editProfile.form.error.contactSupport"
-											defaultMessage="contact the support"
-										/>
-									</Link>
-								),
-							}}
-						/>
-					</ErrorMessage>
-				</>
-			)}
+			{isUnexpectedError() && <UnexpectedError gapTop />}
 		</>
 	);
 };
