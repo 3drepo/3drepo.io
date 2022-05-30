@@ -14,23 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { EditProfileUpdatePersonalSchema } from '@/v5/validation/schemes';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { formatMessage } from '@/v5/services/intl';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { MenuItem } from '@mui/material';
-import { clientConfigService } from '@/v4/services/clientConfig';
-import { IUser } from '@/v5/store/users/users.redux';
-import { FormattedMessage } from 'react-intl';
-import { defaults, isMatch } from 'lodash';
-import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { pick } from 'lodash';
+import { formatMessage } from '@/v5/services/intl';
+import { IUser } from '@/v5/store/users/users.redux';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { SuccessMessage } from '@controls/successMessage/successMessage.component';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { MenuItem } from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { defaults, isMatch, pick } from 'lodash';
+import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
+import { Gap, Link } from './editProfilePersonalTab.styles';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -49,10 +50,11 @@ type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
 	fields: IUpdatePersonalInputs,
-	updatePersonalFields: (values: Partial<IUpdatePersonalInputs>) => void,
+	setPersonalFields: (values: IUpdatePersonalInputs) => void,
 	newAvatarFile: File | null,
 	setNewAvatarFile: (file: File | null) => void,
 	alreadyExistingEmails: string[],
+	setAlreadyExistingEmails: (emails: string[]) => void,
 	user: IUser,
 };
 
@@ -60,10 +62,11 @@ export const EditProfilePersonalTab = ({
 	setSubmitFunction,
 	setIsSubmitting,
 	fields,
-	updatePersonalFields,
+	setPersonalFields,
 	newAvatarFile,
 	setNewAvatarFile,
 	alreadyExistingEmails,
+	setAlreadyExistingEmails,
 	user,
 }: EditProfilePersonalTabProps) => {
 	const {
@@ -79,8 +82,8 @@ export const EditProfilePersonalTab = ({
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
 		defaultValues: fields,
 	});
-	const { personalError } = CurrentUserHooksSelectors.selectErrors();
-	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUploading();
+	const personalError = CurrentUserHooksSelectors.selectPersonalError();
+	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 
 	useEffect(() => {
 		setIsSubmitting(formIsUploading);
@@ -88,15 +91,17 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmit = () => {
 		try {
-			CurrentUserActionsDispatchers.updateUser(getValues());
-			if (newAvatarFile) {
-				CurrentUserActionsDispatchers.updateUserAvatar(newAvatarFile);
-			}
+			CurrentUserActionsDispatchers.updatePersonalData({
+				...getValues(),
+				avatarFile: newAvatarFile,
+			});
 		} catch (error) {
 			// TODO handle error using sagas
 			if (alreadyExistingEmails.length) trigger('email');
 		}
 	};
+
+	const isUnexpectedError = () => personalError && personalError.type === 'unexpected';
 
 	const uploadWasSuccessful = !formIsUploading && !personalError;
 	const fieldsAreDirty = !isMatch(user, getValues());
@@ -111,7 +116,7 @@ export const EditProfilePersonalTab = ({
 	useEffect(() => {
 		if (uploadWasSuccessful && isSubmitSuccessful) {
 			if (fieldsAreDirty) {
-				updatePersonalFields(getValues());
+				setPersonalFields(getValues());
 			}
 			if (newAvatarFile) {
 				setNewAvatarFile(null);
@@ -120,9 +125,21 @@ export const EditProfilePersonalTab = ({
 		}
 	}, [formIsUploading]);
 
+	useEffect(() => {
+		if (personalError && personalError.message === 'Email already exists') {
+			setAlreadyExistingEmails([...alreadyExistingEmails, getValues().email]);
+		}
+	}, [personalError])
+
+	useEffect(() => {
+		if (alreadyExistingEmails.length) {
+			trigger('email');
+		}
+	}, [alreadyExistingEmails])
+
 	// save fields on tab change
 	useEffect(() => () => {
-		updatePersonalFields(getValues());
+		setPersonalFields(getValues());
 	}, []);
 
 	return (
@@ -136,7 +153,7 @@ export const EditProfilePersonalTab = ({
 				name="firstName"
 				control={control}
 				label={formatMessage({
-					id: 'editProfile.updateProfile.firstName',
+					id: 'editProfile.form.firstName',
 					defaultMessage: 'First Name',
 				})}
 				required
@@ -146,7 +163,7 @@ export const EditProfilePersonalTab = ({
 				name="lastName"
 				control={control}
 				label={formatMessage({
-					id: 'editProfile.updateProfile.lastName',
+					id: 'editProfile.form.lastName',
 					defaultMessage: 'Last Name',
 				})}
 				required
@@ -156,7 +173,7 @@ export const EditProfilePersonalTab = ({
 				name="email"
 				control={control}
 				label={formatMessage({
-					id: 'editProfile.updateProfile.email',
+					id: 'editProfile.form.email',
 					defaultMessage: 'Email',
 				})}
 				required
@@ -166,7 +183,7 @@ export const EditProfilePersonalTab = ({
 				name="company"
 				control={control}
 				label={formatMessage({
-					id: 'editProfile.updateProfile.company',
+					id: 'editProfile.form.company',
 					defaultMessage: 'Company',
 				})}
 				required
@@ -189,8 +206,34 @@ export const EditProfilePersonalTab = ({
 			</FormSelect>
 			{isSubmitted && uploadWasSuccessful && (
 				<SuccessMessage>
-					<FormattedMessage id="editProfile.updateProfile.success" defaultMessage="Your profile has been changed successfully." />
+					<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
+			)}
+			{isUnexpectedError() && (
+				<>
+					<Gap />
+					<ErrorMessage>
+						<FormattedMessage
+							id="editProfile.form.error.unexpected"
+							defaultMessage="An unexpected error has occurred. Please try again later."
+						/>
+						<Gap />
+						<FormattedMessage
+							id="editProfile.form.error.unexpected.contactSupport"
+							defaultMessage="If the error persists, please {contactSupport}."
+							values={{
+								contactSupport: (
+									<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
+										<FormattedMessage
+											id="editProfile.form.error.contactSupport"
+											defaultMessage="contact the support"
+										/>
+									</Link>
+								),
+							}}
+						/>
+					</ErrorMessage>
+				</>
 			)}
 		</>
 	);
