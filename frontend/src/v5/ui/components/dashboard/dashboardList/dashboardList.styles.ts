@@ -54,13 +54,11 @@ export const DashboardListButton = styled(Button).attrs({
 	color: 'secondary',
 })`
 	${({ theme }) => theme.typography.h3}
-	/* TODO - fix when new palette is released */
-	background-color: #E8EEF8;
-	color: ${({ theme }) => theme.palette.secondary.main};
+	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	color: ${({ theme }) => theme.palette.primary.main};
 	:hover, :focus {
-		/* TODO - fix when new palette is released */
-		background-color: #E8EEF8;
-		color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+		color: ${({ theme }) => theme.palette.primary.dark};
 	}
 	width: 100%;
 	margin: 0;
