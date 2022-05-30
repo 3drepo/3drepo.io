@@ -19,13 +19,18 @@ import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
 import TabPanelBase from '@mui/lab/TabPanel';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
+import { SubmitButton } from '@controls/modal/formModal/formDialog.styles';
 
-export const FormModal = styled(FormModalBase)`
+export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
 	.MuiDialogContent-root {
 		padding: 0;
 		margin-bottom: 0;
 		min-width: 522px;
 		width: 522px;
+	}
+
+	${SubmitButton} {
+		width: ${({ $isPasswordTab }) => $isPasswordTab ? 132 : 112}px;
 	}
 `;
 
