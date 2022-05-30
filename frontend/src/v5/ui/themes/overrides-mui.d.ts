@@ -38,6 +38,7 @@ interface IShadow {
 declare module '@mui/material/styles/createPalette' {
 	interface SimplePaletteColorOptions {
 		mid?: CSSProperties['color'],
+		lighter?: CSSProperties['color'],
 		lightest?: CSSProperties['color'],
 		darkest?: CSSProperties['color'],
 		contrast?: CSSProperties['color'],
