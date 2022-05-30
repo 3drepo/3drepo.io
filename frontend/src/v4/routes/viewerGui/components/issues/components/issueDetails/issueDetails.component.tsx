@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { createRef, PureComponent, Fragment } from 'react';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
@@ -131,7 +132,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 				icon={Copy}
 				onClick={() => this.props.cloneIssue(this.props.dialogId)}
 			>
-				Clone
+				{isV5() ? 'Clone issue' : 'Clone'}
 			</ContainedButton>
 		))(!this.isNewIssue && !hasViewerPermissions);
 	}

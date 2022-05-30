@@ -25,7 +25,7 @@ import Pins from '@mui/icons-material/PinDrop';
 import Print from '@mui/icons-material/Print';
 import SyncProblem from '@mui/icons-material/SyncProblem';
 
-import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 import { COLOR, PIN_COLORS } from '../styles';
 

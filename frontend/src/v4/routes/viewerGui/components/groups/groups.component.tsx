@@ -52,7 +52,7 @@ import { PanelBarActions } from '../panelBarActions';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { GroupDetails } from './components/groupDetails';
-import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon } from './groups.styles';
+import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon, GroupActions } from './groups.styles';
 
 interface IProps {
 	viewer: any;
@@ -391,7 +391,7 @@ export class Groups extends PureComponent<IProps> {
 	}
 
 	public renderGroupActions = (group) => () => (
-		<>
+		<GroupActions>
 			<TooltipButton
 				label="Toggle Colour Override"
 				action={this.handleColorOverride(group)}
@@ -404,7 +404,7 @@ export class Groups extends PureComponent<IProps> {
 				Icon={Visibility}
 				disabled={!this.props.isModelLoaded}
 			/>
-		</>
+		</GroupActions>
 	)
 
 	public renderTintIcon = (group) => () => (

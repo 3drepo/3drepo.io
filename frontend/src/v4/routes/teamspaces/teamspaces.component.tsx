@@ -35,7 +35,8 @@ import {
 	StyledItemText,
 	StyledListItem
 } from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { FilterPanel, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../components/filterPanel/filterPanel';
+import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
 import { MenuButton as MenuButtonComponent } from '../components/menuButton/menuButton.component';
 import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';

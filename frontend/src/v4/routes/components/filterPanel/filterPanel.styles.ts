@@ -20,7 +20,8 @@ import IconButton from '@mui/material/IconButton';
 import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
@@ -48,6 +49,8 @@ export const Container = styled.div<IContainer>`
 	overflow: hidden;
 	height: ${(props) => props.filtersOpen ? '45px' : 'auto'};
 	flex: none;
+	
+	${(props) => isV5() && props.filtersOpen && 'height: 57px;'}
 `;
 
 export const SelectedFilters = styled.div<ISelectedFilters>`
@@ -58,6 +61,20 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 	min-height: ${(props) => props.empty ? '0' : '45px'};
 	position: relative;
 	max-height: 240px;
+
+	${({ theme, empty, filtersOpen}) => isV5() && `
+		${!empty && `
+			border-bottom: solid 1px ${theme.palette.base.lightest};
+			padding: 9px 40px 9px 15px;
+			min-height: 38px;
+		`}
+
+		${!empty && filtersOpen && `
+			& .MuiChip-root {
+				margin-bottom: 11px !important;
+			}
+		`}
+	`}
 `;
 
 export const InputContainer = styled.div<IInputContainer>`

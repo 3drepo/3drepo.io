@@ -40,14 +40,14 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	a {
+		color: currentColor;
+		
 		&:link {
 			text-decoration: none;
-			color:inherit;
 		}
 
 		&:visited {
 			text-decoration: none;
-			color:inherit;
 		}
 		&:hover {
 			text-decoration: none;
@@ -57,11 +57,10 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	#viewer #unityViewer {
-		position : absolute;
+		position: absolute;
 		height: 100% !important;
 		width: 100% !important;
 		overflow: hidden;
-		margin-top: 72px;
 		background: ${COLOR.TRANSPARENT} !important;
 	}
 
