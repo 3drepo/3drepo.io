@@ -19,7 +19,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
 import {
 	Header,
@@ -45,7 +44,6 @@ export const EditProfileAvatar = ({
 	user,
 }: EditProfilePersonalTabProps) => {
 	const [avatarTooBigError, setAvatarTooBigError] = useState('');
-	const { avatarError } = CurrentUserHooksSelectors.selectErrors();
 
 	const addImage = (event) => {
 		if (!event.target.files.length) return;
@@ -86,8 +84,8 @@ export const EditProfileAvatar = ({
 						<AddImageHiddenInput onChange={addImage} />
 					</AddImageInputLabel>
 				</AddImageButton>
-				{(avatarTooBigError || avatarError) && (
-					<ErrorMessage>{avatarTooBigError || avatarError}</ErrorMessage>
+				{(avatarTooBigError) && (
+					<ErrorMessage>{avatarTooBigError}</ErrorMessage>
 				)}
 			</UserInfo>
 		</Header>
