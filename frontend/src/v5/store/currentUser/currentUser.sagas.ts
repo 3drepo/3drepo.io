@@ -54,9 +54,9 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 		const avatarUrl = URL.createObjectURL(avatarFile);
 		const personalData = { avatarUrl, ...restOfPersonalData };
 		yield put(CurrentUserActions.updateUserSuccess(personalData));
-		yield put(CurrentUserActions.setPersonalError({ personalError: '' }));
+		yield put(CurrentUserActions.setPersonalError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setPersonalError({ personalError: error?.response?.data }));
+		yield put(CurrentUserActions.setPersonalError(error?.response?.data));
 	}
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
@@ -65,9 +65,9 @@ export function* updatePassword({ passwordData }: UpdatePasswordAction) {
 	yield put(CurrentUserActions.setPasswordIsUpdating(true));
 	try {
 		yield API.CurrentUser.updateUser(passwordData);
-		yield put(CurrentUserActions.setPersonalError({ passwordError: '' }));
+		yield put(CurrentUserActions.setPersonalError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setPersonalError({ passwordError: error?.response?.data }));
+		yield put(CurrentUserActions.setPersonalError(error?.response?.data));
 	}
 	yield put(CurrentUserActions.setPasswordIsUpdating(false));
 }
