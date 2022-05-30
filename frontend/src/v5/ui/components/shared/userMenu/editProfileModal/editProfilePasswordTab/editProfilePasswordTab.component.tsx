@@ -22,7 +22,6 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { isEqual } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
@@ -33,31 +32,37 @@ export interface IUpdatePasswordInputs {
 	confirmPassword: string;
 }
 
+export const EMPTY_PASSWORDS = {
+	oldPassword: '',
+	newPassword: '',
+	confirmPassword: '',
+};
+
 type EditProfilePasswordTabProps = {
 	fields: IUpdatePasswordInputs;
+	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
 	updatePasswordFields: (values: Partial<IUpdatePasswordInputs>) => void;
 };
 
 export const EditProfilePasswordTab = ({
 	fields,
+	setIsSubmitting,
 	setSubmitFunction,
 	updatePasswordFields,
 }: EditProfilePasswordTabProps) => {
-	const { passwordError } = CurrentUserHooksSelectors.selectErrors();
-	const isPending = CurrentUserHooksSelectors.selectIsPending();
+	const passwordError = CurrentUserHooksSelectors.selectPasswordError();
+	const formIsUploading = CurrentUserHooksSelectors.selectPasswordIsUpdating();
 
 	const [formSubmittedSuccessfully, setFormSubmittedSuccessfully] = useState(false);
-	const [lastAttemptedPassword, setLastAttemptedPassword] = useState('');
 
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitted },
+		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
 		control,
 		trigger,
+		reset,
 		watch,
 		getValues,
-		setValue,
-		setError,
 		handleSubmit,
 	} = useForm<IUpdatePasswordInputs>({
 		mode: 'onChange',
@@ -69,45 +74,24 @@ export const EditProfilePasswordTab = ({
 	const oldPassword = watch('oldPassword');
 	const newPassword = watch('newPassword');
 
-	const resetNewPasswords = () => {
-		setValue('newPassword', '');
-		setValue('confirmPassword', '');
-	};
-
-	const resetAllValues = () => {
-		resetNewPasswords();
-		setValue('oldPassword', '');
-	};
-
-	useEffect(() => () => {
-		const newFields = getValues();
-		if (!isEqual(newFields, fields)) {
-			updatePasswordFields(newFields);
-		}
-	}, []);
-
 	useEffect(() => {
 		if (passwordError) {
-			setFormSubmittedSuccessfully(false);
-			setLastAttemptedPassword(oldPassword);
 			trigger('oldPassword');
-			resetNewPasswords();
 		} else if(formSubmittedSuccessfully) {
 			setFormSubmittedSuccessfully(true);
-			resetAllValues();
 		}
 	}, [passwordError]);
 
 	// re-trigger validation on confirmPassword when newPassword changes
 	useEffect(() => {
-		if (newPassword) {
+		if (newPassword && !errors.newPassword) {
 			trigger('confirmPassword');
 		}
 	}, [newPassword]);
 
 	// re-trigger validation on newPassword when oldPassword changes
 	useEffect(() => {
-		if (oldPassword && oldPassword === newPassword) {
+		if (oldPassword && oldPassword === newPassword && !errors.oldPassword) {
 			trigger('newPassword');
 		}
 	}, [oldPassword]);
@@ -115,16 +99,25 @@ export const EditProfilePasswordTab = ({
 	const onSubmit = () => {
 		setFormSubmittedSuccessfully(false);
 		const passwordData = { oldPassword, newPassword };
-		CurrentUserActionsDispatchers.updateUserPassword(passwordData);
+		CurrentUserActionsDispatchers.updatePassword(passwordData);
 	};
+
+	const uploadWasSuccessful = () => !formIsUploading && !passwordError;
 
 	useEffect(() => {
 		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
 	}, [formIsValid]);
 
 	useEffect(() => {
-		resetNewPasswords();
-	}, [isSubmitted]);
+		if (isSubmitSuccessful && uploadWasSuccessful()) {
+			reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
+		}
+	}, [formIsUploading]);
+
+	// save fields on tab change
+	useEffect(() => () => {
+		updatePasswordFields(getValues());
+	}, []);
 
 	return (
 		<>
@@ -161,7 +154,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			{!passwordError && formSubmittedSuccessfully && (
+			{isSubmitted && uploadWasSuccessful() && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
 				</SuccessMessage>
