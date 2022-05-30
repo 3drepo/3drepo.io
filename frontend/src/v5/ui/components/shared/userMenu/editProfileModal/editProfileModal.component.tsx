@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
@@ -67,6 +68,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		onClose();
 	};
 
+	const dispatch = useDispatch();
+
 	useEffect(() => {
 		if (open) {
 			setActiveTab('personal');
@@ -74,13 +77,12 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			setAlreadyExistingEmails([]);
 			setPasswordFields(EMPTY_PASSWORDS);
 			setPersonalFields(getUserPersonalValues(user));
+		} else {
+			dispatch(CurrentUserActions.setPersonalError(''));
+			dispatch(CurrentUserActions.setPasswordError(''));
+			dispatch(CurrentUserActions.setApiKeyError(''));
 		}
 	}, [open]);
-
-	useEffect(() => {
-		CurrentUserActions.setPersonalError('');
-		CurrentUserActions.setPasswordError('');
-	}, [activeTab, open]);
 
 	return (
 		<FormModal
