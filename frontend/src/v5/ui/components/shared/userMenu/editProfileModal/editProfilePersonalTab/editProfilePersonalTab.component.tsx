@@ -203,7 +203,7 @@ export const EditProfilePersonalTab = ({
 					<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
 			)}
-			{isUnexpectedError() && <UnexpectedError gapTop />}
+			{!isUnexpectedError() && <UnexpectedError gapTop />}
 		</>
 	);
 };
