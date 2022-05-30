@@ -56,6 +56,8 @@ export const EditProfilePasswordTab = ({
 
 	const [formSubmittedSuccessfully, setFormSubmittedSuccessfully] = useState(false);
 
+	const incorrectPassword = passwordError.message === 'Incorrect password';
+
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
 		control,
@@ -66,8 +68,7 @@ export const EditProfilePasswordTab = ({
 		handleSubmit,
 	} = useForm<IUpdatePasswordInputs>({
 		mode: 'onChange',
-		resolver: yupResolver(EditProfileUpdatePasswordSchema),
-		context: { passwordError },
+		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: fields,
 	});
 
@@ -85,7 +86,7 @@ export const EditProfilePasswordTab = ({
 	const uploadWasSuccessful = !formIsUploading && !passwordError;
 
 	useEffect(() => {
-		if (passwordError) {
+		if (incorrectPassword) {
 			trigger('oldPassword');
 		} else if (formSubmittedSuccessfully) {
 			setFormSubmittedSuccessfully(true);

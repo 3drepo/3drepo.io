@@ -67,9 +67,9 @@ export function* updatePassword({ passwordData }: UpdatePasswordAction) {
 	yield put(CurrentUserActions.setPasswordIsUpdating(true));
 	try {
 		yield API.CurrentUser.updateUser(passwordData);
-		yield put(CurrentUserActions.setPersonalError(''));
+		yield put(CurrentUserActions.setPasswordError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setPersonalError(error?.response?.data));
+		yield put(CurrentUserActions.setPasswordError(error?.response?.data));
 	}
 	yield put(CurrentUserActions.setPasswordIsUpdating(false));
 }

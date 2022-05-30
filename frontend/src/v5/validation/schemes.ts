@@ -45,7 +45,10 @@ const password = Yup.string()
 		}))
 	.test(
 		'checkPasswordStrength',
-		'Password is too weak',
+		formatMessage({
+			id: 'validation.password.error.tooWeak',
+			defaultMessage: 'Password is too weak',
+		}),
 		async (password) => await getPasswordStrength(password) >= 2,
 	);
 
@@ -178,30 +181,22 @@ const SettingsSchema = Yup.object().shape({
 	z: numberField.required(),
 });
 
-export const EditProfileUpdatePasswordSchema = Yup.object().shape({
+export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object().shape({
 	oldPassword: Yup.string()
-		.when('$passwordWasIncorrect', (passwordWasIncorrect, schema) => (
-			passwordWasIncorrect
-				? schema.min(1,
-					formatMessage({
-						id: 'editProfile.password.error.incorrectPassword',
-						defaultMessage: 'Your existing password was incorrect. Please try again',
-					}))
-				: schema.min(1,
-					formatMessage({
-						id: 'editProfile.password.error.empty',
-						defaultMessage: 'Current password is a required field',
-					}))
-		)),
-	newPassword: password
-		.test(
-			'checkPasswordStrength',
+		.min(1,
 			formatMessage({
-				id: 'editProfile.password.error.tooWeak',
-				defaultMessage: 'Password is too weak',
+				id: 'editProfile.password.error.empty',
+				defaultMessage: 'Current password is a required field',
+			}))
+		.test(
+			'incorrectPassword',
+			formatMessage({
+				id: 'editProfile.password.error.incorrectPassword',
+				defaultMessage: 'Your existing password was incorrect. Please try again',
 			}),
-			async (password) => await getPasswordStrength(password) >= 2,
+			() => !incorrectPassword,
 		),
+	newPassword: password,
 	confirmPassword: Yup.string()
 		.required(
 			formatMessage({
@@ -231,6 +226,7 @@ export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] 
 		),
 	countryCode,
 });
+
 export const UserSignupSchemaAccount = (
 	alreadyExistingUsernames: string[] = [],
 	alreadyExistingEmails: string[] = [],
