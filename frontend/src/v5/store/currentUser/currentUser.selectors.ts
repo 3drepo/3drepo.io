@@ -51,7 +51,11 @@ export const selectPasswordIsUpdating: (state) => boolean = createSelector(
 
 // api key
 export const selectApiKey: (state) => string = createSelector(
-	selectCurrentUserDomain, (state) => state.apiKey || '',
+	selectCurrentUser, (state) => state.apiKey || '',
+);
+
+export const selectApiKeyError: (state) => any = createSelector(
+	selectCurrentUserDomain, (state) => state.apiKeyError,
 );
 
 export const selectApiKeyIsUpdating: (state) => boolean = createSelector(
