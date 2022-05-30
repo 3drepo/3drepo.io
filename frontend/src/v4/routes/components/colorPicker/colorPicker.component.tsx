@@ -500,55 +500,54 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 					colorSelectRef={this.colorSelectRef}
 				/>
             </>
-
-            <Panel
-                open={open}
-                anchorEl={this.colorSelectRef.current as HTMLElement}
-                onClose={this.handleClose}
+			<Panel
+				open={open}
+				anchorEl={this.colorSelectRef.current as HTMLElement}
+				onClose={this.handleClose}
 				TransitionProps={{
 					onEnter: this.onPanelOpen,
 				}}
-            >
-                {(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
-                <Grid
-                    container
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                >
-                    <ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
-                    <ColorSlider onChange={this.setBaseColor} />
-                </Grid>
-                <Grid
-                    container
-                    direction="row"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                >
-                    <Grid item>
-                        <ColorSample color={selectedColor} />
-                    </Grid>
-                    <Grid item>
-                        <FormControl className='colorPicker'>
-                            <SelectedHash
-                                value={hashInput.replace('#', '')}
-                                onChange={this.handleHashInputChange}
-                                withOpacity={opacitySliderVisibility}
-                                startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
-                            />
-                        </FormControl>
-                    </Grid>
-                </Grid>
-                {opacityEnabled &&
-                    <OpacityControl
-                        opacity={opacity}
-                        onOpacityChanged={this.setOpacity}
-                        sliderVisible={opacitySliderVisibility}
-                        onSliderVisibilityChanged={this.setOpacityVisibility}
-                    />
-                }
-                {!disableButtons && this.renderFooter()}
-            </Panel>
-        </>;
+			>
+				{(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
+				<Grid
+					container
+					direction="row"
+					alignItems="center"
+					justifyContent="space-between"
+				>
+					<ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
+					<ColorSlider onChange={this.setBaseColor} />
+				</Grid>
+				<Grid
+					container
+					direction="row"
+					justifyContent="flex-start"
+					alignItems="center"
+				>
+					<Grid item>
+						<ColorSample color={selectedColor} />
+					</Grid>
+					<Grid item>
+						<FormControl className='colorPicker'>
+							<SelectedHash
+								value={hashInput.replace('#', '')}
+								onChange={this.handleHashInputChange}
+								withOpacity={opacitySliderVisibility}
+								startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
+							/>
+						</FormControl>
+					</Grid>
+				</Grid>
+				{opacityEnabled &&
+					<OpacityControl
+						opacity={opacity}
+						onOpacityChanged={this.setOpacity}
+						sliderVisible={opacitySliderVisibility}
+						onSliderVisibilityChanged={this.setOpacityVisibility}
+					/>
+				}
+				{!disableButtons && this.renderFooter()}
+			</Panel>
+		</>;
 	}
 }

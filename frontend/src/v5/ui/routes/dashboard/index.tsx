@@ -20,7 +20,7 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
-import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
@@ -30,6 +30,8 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { UserSignup } from '../userSignup/userSignup.component';
+import { UserVerification } from '../userVerification/userVerification.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -42,6 +44,12 @@ export const MainRoute = () => {
 			<Switch>
 				<Route exact path={`${path}/login`}>
 					<Login />
+				</Route>
+				<Route exact path={`${path}/signup`}>
+					<UserSignup />
+				</Route>
+				<Route exact path={`${path}/register-verify`}>
+					<UserVerification />
 				</Route>
 				<Route exact path={`${path}/password-forgot`}>
 					<PasswordForgot />
