@@ -27,18 +27,18 @@ export const UnexpectedError = ({ gapTop }: UnexpectedErrorProps) => (
 		{gapTop && <Gap />}
 		<ErrorMessage>
 			<FormattedMessage
-				id="editProfile.form.error.unexpected"
+				id="form.unexpectedError.mainMessage"
 				defaultMessage="An unexpected error has occurred. Please try again later."
 			/>
 			<Gap />
 			<FormattedMessage
-				id="editProfile.form.error.unexpected.contactSupport"
+				id="form.unexpectedError.contactSupport.message"
 				defaultMessage="If the error persists, please {contactSupport}."
 				values={{
 					contactSupport: (
 						<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
 							<FormattedMessage
-								id="editProfile.form.error.contactSupport"
+								id="form.unexpectedError.contactSupport.link"
 								defaultMessage="contact the support"
 							/>
 						</Link>
