@@ -109,6 +109,7 @@ export const EditFederationContainersListItem = ({
 				<RevisionDetails
 					containerId={container._id}
 					revisionsCount={container.revisionsCount}
+					status={container.status}
 				/>
 			)}
 		</DashboardListItem>
