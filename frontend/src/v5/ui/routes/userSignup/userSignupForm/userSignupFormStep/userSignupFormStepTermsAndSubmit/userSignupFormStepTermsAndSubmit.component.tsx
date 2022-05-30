@@ -29,13 +29,10 @@ import {
 	CheckboxContainer,
 	CheckboxMessage,
 	TermsContainer,
-	ErrorContainer,
-	ErrorMessage,
 	FormCheckbox,
-	ErrorIcon,
 	Link,
-	Gap,
 } from './userSignupFormStepTermsAndSubmit.styles';
+import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 
 export interface ITermsAndSubmitFormInput {
 	termsAgreed: boolean;
@@ -180,32 +177,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			{ hasUnexpectedError && (
-				<ErrorContainer>
-					<ErrorIcon />
-					<ErrorMessage>
-						<FormattedMessage
-							id="userSignup.form.error.unexpected"
-							defaultMessage="An unexpected error has occurred. Please try again later."
-						/>
-						<Gap />
-						<FormattedMessage
-							id="userSignup.form.error.unexpected.contactSupport"
-							defaultMessage="If the error persists, please {contactSupport}."
-							values={{
-								contactSupport: (
-									<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-										<FormattedMessage
-											id="userSignup.form.error.contactSupport"
-											defaultMessage="contact the support"
-										/>
-									</Link>
-								),
-							}}
-						/>
-					</ErrorMessage>
-				</ErrorContainer>
-			)}
+			{ hasUnexpectedError && <UnexpectedError />}
 			<CreateAccountButton
 				isPending={submitButtonIsPending}
 				startIcon={<SignupIcon />}
