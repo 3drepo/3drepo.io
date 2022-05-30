@@ -19,8 +19,10 @@ import { css } from 'styled-components';
 import { TitleIcon, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/panel/panel.styles';
 import {
+	ButtonContainer,
 	Container as FilterPanelContainer,
 	FiltersButton,
+	Placeholder,
 	PlaceholderText,
 } from '@/v4/routes/components/filterPanel/filterPanel.styles';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
@@ -84,7 +86,17 @@ export default css`
 			border-top: 0;
 		}
 
-		${PlaceholderText} {
+		${Placeholder} {
+			.MuiSvgIcon-root {
+				height: 0.8em;
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+			${PlaceholderText} {
+				font-size: 13px;
+				color: ${({ theme }) => theme.palette.base.main};
+			}
+		}
+		${ButtonContainer} {
 			color: ${({ theme }) => theme.palette.base.main};
 		}
 		
