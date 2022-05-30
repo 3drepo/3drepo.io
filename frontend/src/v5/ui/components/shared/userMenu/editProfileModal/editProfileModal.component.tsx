@@ -17,7 +17,7 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
+import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { TabContext } from '@mui/lab';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProfileModal.styles';
@@ -49,10 +49,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const [newAvatarFile, setNewAvatarFile] = useState(null);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 
-	const updatePersonalFields = (fields: Partial<IUpdatePersonalInputs>) => {
-		setPersonalFields({ ...personalFields, ...fields });
-	};
-
 	// password tab
 	const [passwordFields, setPasswordFields] = useState<IUpdatePasswordInputs>(null);
 
@@ -68,7 +64,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 	const onClickClose = () => {
-		CurrentUserActionsDispatchers.resetErrors();
 		onClose();
 	};
 
@@ -82,7 +77,10 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		}
 	}, [open]);
 
-	useEffect(() => { CurrentUserActionsDispatchers.resetErrors(); }, [activeTab, open]);
+	useEffect(() => {
+		CurrentUserActions.setPersonalError('');
+		CurrentUserActions.setPasswordError('');
+	}, [activeTab, open]);
 
 	return (
 		<FormModal
@@ -112,11 +110,12 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 								setIsSubmitting={setIsSubmitting}
 								setSubmitFunction={setSubmitFunction}
 								fields={personalFields}
-								alreadyExistingEmails={alreadyExistingEmails}
-								updatePersonalFields={updatePersonalFields}
+								setPersonalFields={setPersonalFields}
 								user={user}
 								newAvatarFile={newAvatarFile}
 								setNewAvatarFile={setNewAvatarFile}
+								alreadyExistingEmails={alreadyExistingEmails}
+								setAlreadyExistingEmails={setAlreadyExistingEmails}
 							/>
 						</ScrollAreaPadding>
 					</ScrollArea>
