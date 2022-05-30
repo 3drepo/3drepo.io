@@ -33,7 +33,7 @@ export const selectFirstName: (state) => string = createSelector(
 
 // personal data
 export const selectPersonalError: (state) => any = createSelector(
-	selectCurrentUser, (state) => state.personalError,
+	selectCurrentUserDomain, (state) => state.personalError,
 );
 
 export const selectPersonalDataIsUpdating: (state) => boolean = createSelector(
@@ -42,7 +42,7 @@ export const selectPersonalDataIsUpdating: (state) => boolean = createSelector(
 
 // password
 export const selectPasswordError: (state) => any = createSelector(
-	selectCurrentUser, (state) => state.passwordError,
+	selectCurrentUserDomain, (state) => state.passwordError,
 );
 
 export const selectPasswordIsUpdating: (state) => boolean = createSelector(
@@ -51,7 +51,7 @@ export const selectPasswordIsUpdating: (state) => boolean = createSelector(
 
 // api key
 export const selectApiKey: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.apiKey || '',
+	selectCurrentUserDomain, (state) => state.apiKey || '',
 );
 
 export const selectApiKeyIsUpdating: (state) => boolean = createSelector(
