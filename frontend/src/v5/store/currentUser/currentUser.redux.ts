@@ -29,17 +29,15 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updatePersonalData: ['personalData'],
 	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
 	setPersonalError: ['personalError'],
-
 	// password
 	updatePassword: ['passwordData'],
-	setPasswordError: ['passwordError'],
 	setPasswordIsUpdating: ['passwordIsUpdating'],
-
+	setPasswordError: ['passwordError'],
 	// api key
 	generateApiKey: [],
 	deleteApiKey: [],
-	setApiKeyError: ['apiKeyError'],
 	setApiKeyIsUpdating: ['apiKeyIsUpdating'],
+	setApiKeyError: ['apiKeyError'],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
@@ -59,14 +57,21 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
+// personal
+export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataIsUpdating }): ICurrentUserState => ({
+	...state,
+	personalDataIsUpdating,
+});
+
 export const setPersonalError = (state = INITIAL_STATE, { personalError }): ICurrentUserState => ({
 	...state,
 	personalError,
 });
 
-export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataIsUpdating }): ICurrentUserState => ({
+// password
+export const setPasswordIsUpdating = (state = INITIAL_STATE, { passwordIsUpdating }): ICurrentUserState => ({
 	...state,
-	personalDataIsUpdating,
+	passwordIsUpdating,
 });
 
 export const setPasswordError = (state = INITIAL_STATE, { passwordError }): ICurrentUserState => ({
@@ -74,9 +79,10 @@ export const setPasswordError = (state = INITIAL_STATE, { passwordError }): ICur
 	passwordError,
 });
 
-export const setPasswordIsUpdating = (state = INITIAL_STATE, { passwordIsUpdating }): ICurrentUserState => ({
+// api key
+export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
 	...state,
-	passwordIsUpdating,
+	apiKeyIsUpdating,
 });
 
 export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrentUserState => ({
@@ -84,20 +90,18 @@ export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrent
 	apiKeyError,
 });
 
-export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
-	...state,
-	apiKeyIsUpdating,
-});
-
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
-	[CurrentUserTypes.SET_PERSONAL_ERROR]: setPersonalError,
+	// personal
 	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
-	[CurrentUserTypes.SET_PASSWORD_ERROR]: setPasswordError,
+	[CurrentUserTypes.SET_PERSONAL_ERROR]: setPersonalError,
+	//password
 	[CurrentUserTypes.SET_PASSWORD_IS_UPDATING]: setPasswordIsUpdating,
-	[CurrentUserTypes.SET_API_KEY_ERROR]: setApiKeyError,
+	[CurrentUserTypes.SET_PASSWORD_ERROR]: setPasswordError,
+	// api key
 	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
+	[CurrentUserTypes.SET_API_KEY_ERROR]: setApiKeyError,
 });
 
 /**
@@ -110,8 +114,8 @@ export interface ICurrentUserState {
 	personalError?: any,
 	passwordIsUpdating?: boolean,
 	passwordError?: any,
-	apiKeyError?: any,
 	apiKeyIsUpdating?: boolean,
+	apiKeyError?: any,
 }
 
 export type FetchUserAction = Action<'FETCH_USER'>;
@@ -122,12 +126,12 @@ export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { person
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 export type SetPersonalErrorAction = Action<'SET_PERSONAL_ERROR'> & { personalError: any };
 // password
-export type SetPasswordIsUpdatingAction = Action<'SET_PASSWORD_IS_UPDATING'> & { passwordIsUpdating: boolean };
 export type UpdatePasswordAction = Action<'UPDATE_PASSWORD'> & { passwordData: UpdatePassword };
+export type SetPasswordIsUpdatingAction = Action<'SET_PASSWORD_IS_UPDATING'> & { passwordIsUpdating: boolean };
 export type SetPasswordErrorAction = Action<'SET_PASSWORD_ERROR'> & { passwordError: any };
 // api key
-export type setApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
-export type setApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
+export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
+export type SetApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
@@ -139,11 +143,11 @@ export interface ICurrentUserActionCreators {
 	setPersonalError: (personalError: any) => SetPersonalErrorAction;
 	// password
 	updatePassword: (passwordData: UpdatePassword) => UpdatePasswordAction;
-	setPasswordError: (passwordError: any) => SetPasswordErrorAction;
 	setPasswordIsUpdating: (passwordIsUpdating: boolean) => SetPasswordIsUpdatingAction;
+	setPasswordError: (passwordError: any) => SetPasswordErrorAction;
 	// api key
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;
-	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => setApiKeyIsUpdatingAction;
-	setApiKeyError: (apiKeyError: any) => setApiKeyErrorAction;
+	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => SetApiKeyIsUpdatingAction;
+	setApiKeyError: (apiKeyError: any) => SetApiKeyErrorAction;
 }
