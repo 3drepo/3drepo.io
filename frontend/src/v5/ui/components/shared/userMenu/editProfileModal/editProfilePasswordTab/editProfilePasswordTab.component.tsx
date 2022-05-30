@@ -71,6 +71,9 @@ export const EditProfilePasswordTab = ({
 		defaultValues: fields,
 	});
 
+	const oldPassword = watch('oldPassword');
+	const newPassword = watch('newPassword');
+
 	setIsSubmitting(formIsUploading);
 
 	const onSubmit = () => {
@@ -81,13 +84,10 @@ export const EditProfilePasswordTab = ({
 
 	const uploadWasSuccessful = !formIsUploading && !passwordError;
 
-	const oldPassword = watch('oldPassword');
-	const newPassword = watch('newPassword');
-
 	useEffect(() => {
 		if (passwordError) {
 			trigger('oldPassword');
-		} else if(formSubmittedSuccessfully) {
+		} else if (formSubmittedSuccessfully) {
 			setFormSubmittedSuccessfully(true);
 		}
 	}, [passwordError]);
