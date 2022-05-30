@@ -21,7 +21,7 @@ import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { HomeContent, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
+import { FadeMessageTrigger, HomeContent, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
@@ -44,7 +44,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 			<AppBar />
 			<ScrollBar>
 				<HomeContent>
-					<div ref={welcomeRef}>
+					<FadeMessageTrigger ref={welcomeRef}>
 						<WelcomeMessage visible={isVisible}>
 							{
 								firstName ? (
@@ -54,7 +54,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 								)
 							}
 						</WelcomeMessage>
-					</div>
+					</FadeMessageTrigger>
 					<TeamspaceList />
 				</HomeContent>
 			</ScrollBar>
