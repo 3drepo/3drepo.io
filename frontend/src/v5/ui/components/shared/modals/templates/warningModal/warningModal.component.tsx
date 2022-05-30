@@ -21,17 +21,15 @@ import { Container, Actions } from '@/v5/ui/components/shared/modals/modals.styl
 
 interface IWarningModal {
 	message: string;
+	title: string;
 	onClickClose: () =>void;
 }
 
-export const WarningModal = ({ message, onClickClose }: IWarningModal) => (
+export const WarningModal = ({ title, message, onClickClose }: IWarningModal) => (
 	<Container>
 		<WarningIcon />
 		<DialogTitle>
-			<FormattedMessage
-				id="warningModal.header"
-				defaultMessage="Warning!"
-			/>
+			{ title }
 		</DialogTitle>
 		<DialogContent>
 			<DialogContentText>

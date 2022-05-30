@@ -101,9 +101,13 @@ function* logout() {
 function* kickedOut() {
 	yield put({ type: 'RESET_APP' });
 	yield put(DialogsActions.open('warning', {
+		title: formatMessage({
+			id: 'auth.logout.kickedOutTitle',
+			defaultMessage: 'You\' ve been logged out',
+		}),
 		message: formatMessage({
-			id: 'auth.logout.kickedOut',
-			defaultMessage: 'You have been logged out because your account has signed in elsewhere',
+			id: 'auth.logout.kickedOutMessage',
+			defaultMessage: 'Your account is being used in a different browser',
 		}),
 	}));
 }
