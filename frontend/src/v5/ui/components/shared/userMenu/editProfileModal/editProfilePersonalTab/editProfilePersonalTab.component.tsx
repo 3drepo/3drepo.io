@@ -90,15 +90,10 @@ export const EditProfilePersonalTab = ({
 	}, [formIsUploading]);
 
 	const onSubmit = () => {
-		try {
-			CurrentUserActionsDispatchers.updatePersonalData({
-				...getValues(),
-				avatarFile: newAvatarFile,
-			});
-		} catch (error) {
-			// TODO handle error using sagas
-			if (alreadyExistingEmails.length) trigger('email');
-		}
+		CurrentUserActionsDispatchers.updatePersonalData({
+			...getValues(),
+			avatarFile: newAvatarFile,
+		});
 	};
 
 	const isUnexpectedError = () => personalError && personalError.type === 'unexpected';
