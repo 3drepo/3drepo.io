@@ -19,20 +19,15 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { NewFederationSettingsSchema } from '@/v5/validation/schemes';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { MenuItem } from '@mui/material';
-import { useForm } from 'react-hook-form';
-import { FormattedMessage } from 'react-intl';
-import { CONTAINER_UNITS, IContainer } from '@/v5/store/containers/containers.types';
+import { FormProvider, useForm } from 'react-hook-form';
+import { IContainer } from '@/v5/store/containers/containers.types';
 import { NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
-import { HalfWidth } from './createFederationForm.styles';
 import { EditFederation } from '../editFederationModal/editFederation';
+import { CreateFederationFormSettings } from './createFederationSettings';
 
 interface ICreateFederation {
 	open: boolean;
@@ -45,17 +40,18 @@ const defaultValues = {
 };
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
-	const {
-		handleSubmit,
-		control,
-		getValues,
-		reset,
-		formState: { errors, isValid },
-	} = useForm<NewFederation>({
+	const methods = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(NewFederationSettingsSchema),
 	});
+	const {
+		handleSubmit,
+		getValues,
+		reset,
+		formState: { isValid },
+	} = methods;
+
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [includedContainers, setIncludedContainers] = useState([]);
@@ -103,50 +99,9 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
 		>
 			{modalPhase === 'settings' ? (
-				<>
-					<SectionTitle>
-						<FormattedMessage
-							id="createFederation.form.informationTitle"
-							defaultMessage="Federation information"
-						/>
-					</SectionTitle>
-					<FormTextField
-						name="name"
-						control={control}
-						label={formatMessage({ id: 'createFederation.form.name', defaultMessage: 'Name' })}
-						required
-						formError={errors.name}
-					/>
-					<FormTextField
-						name="desc"
-						control={control}
-						label={formatMessage({ id: 'createFederation.form.desc', defaultMessage: 'Description' })}
-						formError={errors.desc}
-					/>
-					<HalfWidth>
-						<FormSelect
-							required
-							name="unit"
-							label={formatMessage({
-								id: 'createFederation.form.unit',
-								defaultMessage: 'Units',
-							})}
-							control={control}
-						>
-							{CONTAINER_UNITS.map(({ name, value }) => (
-								<MenuItem key={value} value={value}>
-									{name}
-								</MenuItem>
-							))}
-						</FormSelect>
-					</HalfWidth>
-					<FormTextField
-						name="code"
-						control={control}
-						label={formatMessage({ id: 'createFederation.form.code', defaultMessage: 'Code' })}
-						formError={errors.code}
-					/>
-				</>
+				<FormProvider {...methods}>
+					<CreateFederationFormSettings />
+				</FormProvider>
 			) : (
 				<EditFederation
 					federation={prepareNewFederation(getValues())}
