@@ -19,8 +19,8 @@ import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
-import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
 export const EditProfileIntegrationsTab = () => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
