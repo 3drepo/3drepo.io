@@ -18,7 +18,7 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser, UpdateUser, UpdatePassword, UpdatePersonalData } from './currentUser.types';
+import { ICurrentUser, UpdateUser, UpdatePassword, UpdatePersonalData, UpdateUserSuccess } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: [],
@@ -133,7 +133,7 @@ export type SetApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
-	updateUserSuccess: (userData: UpdateUser) => UpdateUserSuccessAction;
+	updateUserSuccess: (userData: UpdateUserSuccess) => UpdateUserSuccessAction;
 	// personal
 	updatePersonalData: (personalData: UpdatePersonalData) => UpdatePersonalDataAction;
 	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;

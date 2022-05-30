@@ -48,12 +48,14 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
 	try {
 		yield API.CurrentUser.updateUser(restOfPersonalData);
-		const formData = new FormData();
-		formData.append('file', avatarFile);
-		yield API.CurrentUser.updateUserAvatar(formData);
-		const avatarUrl = URL.createObjectURL(avatarFile);
-		const personalData = { avatarUrl, ...restOfPersonalData };
-		yield put(CurrentUserActions.updateUserSuccess(personalData));
+		if (avatarFile) {
+			const formData = new FormData();
+			formData.append('file', avatarFile);
+			yield API.CurrentUser.updateUserAvatar(formData);
+			const avatarUrl = URL.createObjectURL(avatarFile);
+			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl }));
+		}
+		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
 		yield put(CurrentUserActions.setPersonalError(''));
 	} catch (error) {
 		yield put(CurrentUserActions.setPersonalError(error?.response?.data));
