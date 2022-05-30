@@ -15,15 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const Container = styled.div`
-	display: flex;
-	padding-right: 10px;
-	align-items: center;
-`;
+import styled, { css } from 'styled-components';
 
 export const Label = styled.span`
 	white-space: nowrap;
 	margin-right: 4px;
+`;
+
+export const Container = styled.div<{ disabled?: boolean }>`
+	display: flex;
+	padding-right: 10px;
+	align-items: center;
+	${({ theme, disabled }) => disabled && (css`
+		${Label} {
+			color: ${theme.palette.base.light};
+		}
+	`)}
 `;
