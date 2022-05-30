@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -39,7 +39,7 @@ export const WarningModal = ({ message, onClickClose }: IWarningModal) => (
 			</DialogContentText>
 		</DialogContent>
 		<Actions>
-			<Button autoFocus variant="contained" color="primary" onClick={() => onClickClose()}>
+			<Button autoFocus variant="contained" color="primary" onClick={onClickClose}>
 				<FormattedMessage
 					id="alertModal.action.ok"
 					defaultMessage="Ok, close window"

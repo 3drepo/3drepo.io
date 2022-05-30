@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 
@@ -27,7 +28,7 @@ export const INITIAL_STATE: IDialogState = {
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	open: ['modalType', 'props'],
 	close: ['dialogId'],
-}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionsCreators>; Creators: IDialogsActionsCreators };
+}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
 export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {
 	const dialog = {
@@ -53,9 +54,9 @@ export const dialogsReducer = createReducer(INITIAL_STATE, {
 /**
  * Types
  */
-export interface IDialogsActionsCreators {
-	open: (type?: string, props?: any) => any;
-	close: (id: string) => any;
+interface IDialogsActionCreators {
+	open: <T>(type?: string, props?: T) => Action<'OPEN'> & { modalType: string, props: T };
+	close: (id: string) => Action<'CLOSE'> & { dialogId: string };
 }
 
 export interface IDialogConfig {
