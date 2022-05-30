@@ -23,7 +23,6 @@ import { ICurrentUser, UpdateUser, UpdatePassword, UpdatePersonalData, UpdateUse
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: [],
 	fetchUserSuccess: ['userData'],
-
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
 	// personal
@@ -128,7 +127,7 @@ export type UpdatePasswordAction = Action<'UPDATE_PASSWORD'> & { passwordData: U
 export type SetPasswordErrorAction = Action<'SET_PASSWORD_ERROR'> & { passwordError: any };
 // api key
 export type setApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
-export type SetApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
+export type setApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
@@ -146,5 +145,5 @@ export interface ICurrentUserActionCreators {
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;
 	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => setApiKeyIsUpdatingAction;
-	setApiKeyError: (apiKeyError: any) => SetApiKeyErrorAction;
+	setApiKeyError: (apiKeyError: any) => setApiKeyErrorAction;
 }
