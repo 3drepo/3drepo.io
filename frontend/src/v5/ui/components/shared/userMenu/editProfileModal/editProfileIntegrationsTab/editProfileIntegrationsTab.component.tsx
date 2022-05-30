@@ -20,9 +20,11 @@ import { FormattedMessage } from 'react-intl';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
+import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 
 export const EditProfileIntegrationsTab = () => {
-	const key = CurrentUserHooksSelectors.selectApiKey();
+	const apiKey = CurrentUserHooksSelectors.selectApiKey();
+	const error = CurrentUserHooksSelectors.selectApiKeyError();
 
 	const generateApiKey = () => CurrentUserActionsDispatchers.generateApiKey();
 	const deleteApiKey = () => CurrentUserActionsDispatchers.deleteApiKey();
@@ -38,9 +40,9 @@ export const EditProfileIntegrationsTab = () => {
 						/>
 					</ShareTextFieldLabel>
 				)}
-				value={key}
+				value={apiKey}
 				hideValue
-				disabled={!key}
+				disabled={!apiKey}
 			/>
 			<ButtonsContainer>
 				<Button variant="outlined" color="primary" onClick={generateApiKey}>
@@ -49,13 +51,14 @@ export const EditProfileIntegrationsTab = () => {
 						defaultMessage="Generate"
 					/>
 				</Button>
-				<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!key}>
+				<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!apiKey}>
 					<FormattedMessage
 						id="editProfile.deleteApiKey"
 						defaultMessage="Delete"
 					/>
 				</Button>
 			</ButtonsContainer>
+			{error && <UnexpectedError gapTop />}
 		</>
 	);
 };
