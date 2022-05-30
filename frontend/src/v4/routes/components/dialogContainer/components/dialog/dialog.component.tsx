@@ -134,13 +134,13 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 	};
 
 	return (
-        <DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
-			<ConditionalV5Wrapper v5Wrapper={V4DialogsAdapter}>
-				<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
-				{renderContent(content && !DialogTemplate)}
-				{renderTemplate(!!DialogTemplate)}
-				{renderActions(content && onCancel && !props.config.onConfirm)}
-			</ConditionalV5Wrapper>
-		</DialogBase>
+		<ConditionalV5Wrapper v5Wrapper={V4DialogsAdapter}>
+			<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
+					<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
+					{renderContent(content && !DialogTemplate)}
+					{renderTemplate(!!DialogTemplate)}
+					{renderActions(content && onCancel && !props.config.onConfirm)}
+			</DialogBase>
+		</ConditionalV5Wrapper>
     );
 });

@@ -130,6 +130,11 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiPopover: {
+					defaultProps: {
+						container: () => document.getElementById('v4DialogsOverrides'),
+					},
+				},
 				MuiAvatar: {
 					styleOverrides: {
 						root: {
@@ -256,25 +261,25 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiListItemButton: {
+					styleOverrides: {
+						root: {
+							'>*': {
+								color: `${COLOR.BASE_MAIN} !important`,
+							},
+						},
+					},
+				},
 				MuiDialog: {
+					defaultProps: {
+						container: () => document.getElementById('v4DialogsOverrides'),
+					},
 					styleOverrides: {
 						paper: {
 							maxWidth: 'unset !important',
 							minWidth: 'unset !important',
-							'& .MuiDialogTitle-root': {
-								padding: '14px 0 !important',
-								minWidth: 'fit-content',
-								'& .MuiIconButton-root': {
-									position: 'absolute',
-									right: 0,
-									top: -2,
-									'& svg': {
-										color: '#000000', // TODO fix when new palette is released
-									},
-								},
-							},
 						},
-						container: {
+						root: {
 							'.MuiPaper-root .MuiDialogActions-root .MuiButton-root': {
 								backgroundColor: COLOR.PRIMARY_MAIN,
 								color: COLOR.PRIMARY_MAIN_CONTRAST,
