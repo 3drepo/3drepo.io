@@ -106,14 +106,12 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				name="desc"
 				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
 				formError={errors.desc}
-				required
 			/>
 			<FormTextField
 				control={control}
 				name="code"
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
 				formError={errors.code}
-				required
 			/>
 		</FormModal>
 	);
