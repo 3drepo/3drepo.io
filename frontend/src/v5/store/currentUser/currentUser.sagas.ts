@@ -24,9 +24,8 @@ import { DialogsActions } from '../dialogs/dialogs.redux';
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
-	UpdateUserAction,
-	UpdateUserAvatarAction,
-	UpdateUserPasswordAction,
+	UpdatePersonalDataAction,
+	UpdatePasswordAction,
 } from './currentUser.redux';
 
 export function* fetchUser() {
@@ -45,89 +44,60 @@ export function* fetchUser() {
 	}
 }
 
-export function* updateUser({ userData }: UpdateUserAction) {
-	yield put(CurrentUserActions.setIsPending(true));
+export function* updatePersonalData({ personalData: { avatarFile, ...restOfPersonalData } }: UpdatePersonalDataAction) {
+	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
 	try {
-		yield API.CurrentUser.updateUser(userData);
-		yield put(CurrentUserActions.updateUserSuccess(userData));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'currentUser.updateUser.error',
-				defaultMessage: 'trying to update current user details',
-			}),
-			error,
-		}));
-	}
-	yield put(CurrentUserActions.setIsPending(false));
-}
-
-export function* updateUserAvatar({ avatarFile }: UpdateUserAvatarAction) {
-	yield put(CurrentUserActions.setAvatarIsUploading(true));
-	try {
+		yield API.CurrentUser.updateUser(restOfPersonalData);
 		const formData = new FormData();
 		formData.append('file', avatarFile);
 		yield API.CurrentUser.updateUserAvatar(formData);
 		const avatarUrl = URL.createObjectURL(avatarFile);
-		yield put(CurrentUserActions.updateUserAvatarSuccess(avatarUrl));
+		const personalData = { avatarUrl, ...restOfPersonalData };
+		yield put(CurrentUserActions.updateUserSuccess(personalData));
+		yield put(CurrentUserActions.setPersonalError({ personalError: '' }));
 	} catch (error) {
-		const message = error.response?.data.message;
-		yield put(CurrentUserActions.updateUserAvatarFailure(message));
+		yield put(CurrentUserActions.setPersonalError({ personalError: error?.response?.data }));
 	}
-	yield put(CurrentUserActions.setAvatarIsUploading(false));
+	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
 
-export function* updateUserPassword({ passwordData }: UpdateUserPasswordAction) {
-	yield put(CurrentUserActions.setIsPending(true));
+export function* updatePassword({ passwordData }: UpdatePasswordAction) {
+	yield put(CurrentUserActions.setPasswordIsUpdating(true));
 	try {
 		yield API.CurrentUser.updateUser(passwordData);
-		yield put(CurrentUserActions.updateUserPasswordSuccess());
+		yield put(CurrentUserActions.setPersonalError({ passwordError: '' }));
 	} catch (error) {
-		const message = error.response?.data.message;
-		yield put(CurrentUserActions.updateUserPasswordFailure(message));
+		yield put(CurrentUserActions.setPersonalError({ passwordError: error?.response?.data }));
 	}
-	yield put(CurrentUserActions.setIsPending(false));
+	yield put(CurrentUserActions.setPasswordIsUpdating(false));
 }
 
 export function* generateApiKey() {
-	yield put(CurrentUserActions.setIsPending(true));
+	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		const apiKey = yield API.CurrentUser.generateApiKey();
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'currentUser.generateApiKey.error',
-				defaultMessage: 'trying to generate API key',
-			}),
-			error,
-		}));
+		yield put(CurrentUserActions.setApiKeyError(error));
 	}
-	yield put(CurrentUserActions.setIsPending(false));
+	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
 export function* deleteApiKey() {
-	yield put(CurrentUserActions.setIsPending(true));
+	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		yield API.CurrentUser.deleteApiKey();
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'currentUser.deleteApiKey.error',
-				defaultMessage: 'trying to delete API key',
-			}),
-			error,
-		}));
+		yield put(CurrentUserActions.setApiKeyError(error));
 	}
-	yield put(CurrentUserActions.setIsPending(false));
+	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
 export default function* AuthSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
-	yield takeLatest(CurrentUserTypes.UPDATE_USER, updateUser);
-	yield takeLatest(CurrentUserTypes.UPDATE_USER_PASSWORD, updateUserPassword);
-	yield takeLatest(CurrentUserTypes.UPDATE_USER_AVATAR, updateUserAvatar);
+	yield takeLatest(CurrentUserTypes.UPDATE_PERSONAL_DATA, updatePersonalData);
+	yield takeLatest(CurrentUserTypes.UPDATE_PASSWORD, updatePassword);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
 	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

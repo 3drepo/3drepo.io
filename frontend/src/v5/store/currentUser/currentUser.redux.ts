@@ -18,25 +18,29 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser, UpdatePersonal, UpdateUserPassword } from './currentUser.types';
+import { ICurrentUser, UpdateUser, UpdatePassword, UpdatePersonalData } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: [],
 	fetchUserSuccess: ['userData'],
+
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
-	updateUserFailure: ['personalError'],
-	updateUserAvatar: ['avatarFile'],
-	updateUserAvatarSuccess: ['avatarUrl'],
-	updateUserAvatarFailure: ['avatarError'],
-	updateUserPassword: ['passwordData'],
-	updateUserPasswordSuccess: [],
-	updateUserPasswordFailure: ['passwordError'],
-	resetErrors: [],
-	setIsPending: ['isPending'],
-	setAvatarIsUploading: ['avatarIsUploading'],
+	// personal
+	updatePersonalData: ['personalData'],
+	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
+	setPersonalError: ['personalError'],
+
+	// password
+	updatePassword: ['passwordData'],
+	setPasswordError: ['passwordError'],
+	setPasswordIsUpdating: ['passwordIsUpdating'],
+
+	// api key
 	generateApiKey: [],
 	deleteApiKey: [],
+	setApiKeyError: ['apiKeyError'],
+	setApiKeyIsUpdating: ['apiKeyIsUpdating'],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
@@ -56,84 +60,45 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
-export const updateUserFailure = (state = INITIAL_STATE, { personalError }): ICurrentUserState => ({
+export const setPersonalError = (state = INITIAL_STATE, { personalError }): ICurrentUserState => ({
 	...state,
-	currentUser: {
-		...state.currentUser,
-		...personalError,
-	},
+	personalError,
 });
 
-export const updateUserAvatarSuccess = (state = INITIAL_STATE, { avatarUrl }): ICurrentUserState => ({
+export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataIsUpdating }): ICurrentUserState => ({
 	...state,
-	currentUser: {
-		...state.currentUser,
-		avatarUrl,
-		avatarError: null,
-	},
+	personalDataIsUpdating,
 });
 
-export const updateUserAvatarFailure = (state = INITIAL_STATE, { avatarError }): ICurrentUserState => ({
+export const setPasswordError = (state = INITIAL_STATE, { passwordError }): ICurrentUserState => ({
 	...state,
-	currentUser: {
-		...state.currentUser,
-		avatarError,
-	},
+	passwordError,
 });
 
-export const updateUserPasswordFailure = (state = INITIAL_STATE, { passwordError }): ICurrentUserState => ({
+export const setPasswordIsUpdating = (state = INITIAL_STATE, { passwordIsUpdating }): ICurrentUserState => ({
 	...state,
-	currentUser: {
-		...state.currentUser,
-		passwordError,
-	},
+	passwordIsUpdating,
 });
 
-export const updateUserPasswordSuccess = (state = INITIAL_STATE): ICurrentUserState => ({
+export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrentUserState => ({
 	...state,
-	currentUser: {
-		...state.currentUser,
-		passwordError: null,
-	},
+	apiKeyError,
 });
 
-export const resetErrors = (state = INITIAL_STATE): ICurrentUserState => ({
+export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
 	...state,
-	currentUser: {
-		...state.currentUser,
-		avatarError: null,
-		passwordError: null,
-		personalError: null,
-	},
-});
-
-export const setIsPending = (state = INITIAL_STATE, { isPending }) => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		isPending,
-	},
-});
-
-export const setAvatarIsUploading = (state = INITIAL_STATE, { avatarIsUploading }) => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		avatarIsUploading,
-	},
+	apiKeyIsUpdating,
 });
 
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
-	[CurrentUserTypes.UPDATE_USER_FAILURE]: updateUserFailure,
-	[CurrentUserTypes.UPDATE_USER_AVATAR_SUCCESS]: updateUserAvatarSuccess,
-	[CurrentUserTypes.UPDATE_USER_AVATAR_FAILURE]: updateUserAvatarFailure,
-	[CurrentUserTypes.UPDATE_USER_PASSWORD_SUCCESS]: updateUserPasswordSuccess,
-	[CurrentUserTypes.UPDATE_USER_PASSWORD_FAILURE]: updateUserPasswordFailure,
-	[CurrentUserTypes.RESET_ERRORS]: resetErrors,
-	[CurrentUserTypes.SET_IS_PENDING]: setIsPending,
-	[CurrentUserTypes.SET_AVATAR_IS_UPLOADING]: setAvatarIsUploading,
+	[CurrentUserTypes.SET_PERSONAL_ERROR]: setPersonalError,
+	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
+	[CurrentUserTypes.SET_PASSWORD_ERROR]: setPasswordError,
+	[CurrentUserTypes.SET_PASSWORD_IS_UPDATING]: setPasswordIsUpdating,
+	[CurrentUserTypes.SET_API_KEY_ERROR]: setApiKeyError,
+	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
 });
 
 /**
@@ -142,38 +107,44 @@ export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE
 
 export interface ICurrentUserState {
 	currentUser: ICurrentUser;
+	personalDataIsUpdating?: boolean,
+	personalError?: any,
+	passwordIsUpdating?: boolean,
+	passwordError?: any,
+	apiKeyError?: any,
+	apiKeyIsUpdating?: boolean,
 }
 
 export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
-export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdatePersonal };
-export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdatePersonal };
-export type UpdateUserFailureAction = Action<'UPDATE_USER_FAILURE'> & { error: string };
-export type UpdateUserAvatarAction = Action<'UPDATE_USER_AVATAR'> & { avatarFile: File };
-export type UpdateUserAvatarSuccessAction = Action<'UPDATE_USER_AVATAR_SUCCESS'> & { avatarUrl: string };
-export type UpdateUserAvatarFailureAction = Action<'UPDATE_USER_AVATAR_FAILURE'> & { avatarError: string };
-export type UpdateUserPasswordAction = Action<'UPDATE_USER_PASSWORD'> & { passwordData: UpdateUserPassword };
-export type UpdateUserPasswordSuccessAction = Action<'UPDATE_USER_PASSWORD_SUCCESS'>;
-export type UpdateUserPasswordFailureAction = Action<'UPDATE_USER_PASSWORD_FAILURE'> & { passwordError: string };
-export type ResetErrorsActions = Action<'RESET_ERRORS'>;
-export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { isPending: boolean };
-export type SetAvatarIsUploadingAction = Action<'SET_AVATAR_IS_UPLOADING'> & { avatarIsUploading: boolean };
+export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
+// personal
+export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData };
+export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
+export type SetPersonalErrorAction = Action<'SET_PERSONAL_ERROR'> & { personalError: any };
+// password
+export type SetPasswordIsUpdatingAction = Action<'SET_PASSWORD_IS_UPDATING'> & { passwordIsUpdating: boolean };
+export type UpdatePasswordAction = Action<'UPDATE_PASSWORD'> & { passwordData: UpdatePassword };
+export type SetPasswordErrorAction = Action<'SET_PASSWORD_ERROR'> & { passwordError: any };
+// api key
+export type setApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
+export type SetApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
-	updateUser: (userData: UpdatePersonal) => UpdateUserAction;
-	updateUserSuccess: (userData: UpdatePersonal) => UpdateUserSuccessAction;
-	updateUserFailure: (personalError: string) => UpdateUserFailureAction;
-	updateUserAvatar: (avatarFile: File) => UpdateUserAvatarAction;
-	updateUserAvatarSuccess: (avatarUrl: string) => UpdateUserAvatarSuccessAction;
-	updateUserAvatarFailure: (avatarError: string) => UpdateUserAvatarFailureAction;
-	updateUserPassword: (passwordData: UpdateUserPassword) => UpdateUserPasswordAction;
-	updateUserPasswordSuccess: () => UpdateUserPasswordSuccessAction;
-	updateUserPasswordFailure: (passwordError: string) => UpdateUserPasswordFailureAction;
-	resetErrors: () => ResetErrorsActions;
-	setIsPending: (isPending: boolean) => SetIsPendingAction;
-	setAvatarIsUploading: (avatarIsUploading: boolean) => SetAvatarIsUploadingAction;
+	updateUserSuccess: (userData: UpdateUser) => UpdateUserSuccessAction;
+	// personal
+	updatePersonalData: (personalData: UpdatePersonalData) => UpdatePersonalDataAction;
+	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
+	setPersonalError: (personalError: any) => SetPersonalErrorAction;
+	// password
+	updatePassword: (passwordData: UpdatePassword) => UpdatePasswordAction;
+	setPasswordError: (passwordError: any) => SetPasswordErrorAction;
+	setPasswordIsUpdating: (passwordIsUpdating: boolean) => SetPasswordIsUpdatingAction;
+	// api key
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;
+	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => setApiKeyIsUpdatingAction;
+	setApiKeyError: (apiKeyError: any) => SetApiKeyErrorAction;
 }

@@ -16,8 +16,6 @@
  */
 
 import { createSelector } from 'reselect';
-import { pick } from 'lodash';
-import { UpdateUserErrors } from './currentUser.types';
 
 const selectCurrentUserDomain = (state) => (state.currentUser2);
 
@@ -29,18 +27,33 @@ export const selectUsername: (state) => string = createSelector(
 	selectCurrentUser, (state) => state.username || '',
 );
 
-export const selectErrors: (state) => UpdateUserErrors = createSelector(
-	selectCurrentUser, (state) => pick(state, 'personalError', 'avatarError', 'passwordError'),
+export const selectFirstName: (state) => string = createSelector(
+	selectCurrentUser, (state) => state.firstName || '',
 );
 
-export const selectIsPending: (state) => boolean = createSelector(
-	selectCurrentUser, (state) => !!(state.isPending || state.avatarIsUploading),
+// personal data
+export const selectPersonalError: (state) => any = createSelector(
+	selectCurrentUser, (state) => state.personalError,
 );
 
+export const selectPersonalDataIsUpdating: (state) => boolean = createSelector(
+	selectCurrentUser, (state) => !!(state.personalDataIsUpdating),
+);
+
+// password
+export const selectPasswordError: (state) => any = createSelector(
+	selectCurrentUser, (state) => state.passwordError,
+);
+
+export const selectPasswordIsUpdating: (state) => boolean = createSelector(
+	selectCurrentUser, (state) => !!(state.passwordIsUpdating),
+);
+
+// api key
 export const selectApiKey: (state) => string = createSelector(
 	selectCurrentUser, (state) => state.apiKey || '',
 );
 
-export const selectFirstName: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.firstName || '',
+export const selectApiKeyIsUpdating: (state) => boolean = createSelector(
+	selectCurrentUser, (state) => !!(state.apiKeyIsUpdating),
 );
