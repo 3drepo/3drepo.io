@@ -71,6 +71,16 @@ export const EditProfilePasswordTab = ({
 		defaultValues: fields,
 	});
 
+	setIsSubmitting(formIsUploading);
+
+	const onSubmit = () => {
+		setFormSubmittedSuccessfully(false);
+		const passwordData = { oldPassword, newPassword };
+		CurrentUserActionsDispatchers.updatePassword(passwordData);
+	};
+
+	const uploadWasSuccessful = !formIsUploading && !passwordError;
+
 	const oldPassword = watch('oldPassword');
 	const newPassword = watch('newPassword');
 
@@ -96,20 +106,12 @@ export const EditProfilePasswordTab = ({
 		}
 	}, [oldPassword]);
 
-	const onSubmit = () => {
-		setFormSubmittedSuccessfully(false);
-		const passwordData = { oldPassword, newPassword };
-		CurrentUserActionsDispatchers.updatePassword(passwordData);
-	};
-
-	const uploadWasSuccessful = () => !formIsUploading && !passwordError;
-
 	useEffect(() => {
 		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
 	}, [formIsValid]);
 
 	useEffect(() => {
-		if (isSubmitSuccessful && uploadWasSuccessful()) {
+		if (isSubmitSuccessful && uploadWasSuccessful) {
 			reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 		}
 	}, [formIsUploading]);
@@ -154,7 +156,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			{isSubmitted && uploadWasSuccessful() && (
+			{isSubmitted && uploadWasSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
 				</SuccessMessage>
