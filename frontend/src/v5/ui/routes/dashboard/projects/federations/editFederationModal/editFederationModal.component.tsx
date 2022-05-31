@@ -77,9 +77,7 @@ export const EditFederationModal = ({
 		>
 			<EditFederation
 				federation={federation}
-				onContainersChange={(containers: IContainer[]) => setIncludedContainers(
-					containers,
-				)}
+				onContainersChange={setIncludedContainers}
 			/>
 		</FormModal>
 	);

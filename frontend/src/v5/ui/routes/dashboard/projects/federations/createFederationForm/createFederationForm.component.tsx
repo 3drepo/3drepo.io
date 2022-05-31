@@ -22,7 +22,6 @@ import { NewFederationSettingsSchema } from '@/v5/validation/schemes';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
@@ -73,7 +72,12 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const onClickContinue = (): void => setModalPhase('edit');
 
 	const onClickSubmit = (newFederation: NewFederation): void => {
-		FederationsActionsDispatchers.createFederation(teamspace, project, newFederation, includedContainers);
+		FederationsActionsDispatchers.createFederation(
+			teamspace,
+			project,
+			newFederation,
+			includedContainers.map((container) => container._id),
+		);
 		closeAndReset();
 	};
 
@@ -105,9 +109,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			) : (
 				<EditFederation
 					federation={prepareNewFederation(getValues())}
-					onContainersChange={(containers: IContainer[]) => setIncludedContainers(
-						containers.map((container) => container._id),
-					)}
+					onContainersChange={setIncludedContainers}
 				/>
 			)}
 		</FormModal>
