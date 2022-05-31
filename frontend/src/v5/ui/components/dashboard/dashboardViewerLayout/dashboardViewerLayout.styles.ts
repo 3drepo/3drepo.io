@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
+import { DashboardLayout as DashboardLayoutBase } from '@components/dashboard/dashboardLayout';
 
-import { AlertModal } from './alertModal/alertModal.component';
-import { DeleteModal } from './deleteModal/deleteModal.component';
-import { WarningModal } from './warningModal/warningModal.component';
-
-export const MODAL_TEMPLATES = {
-	alert: AlertModal,
-	warning: WarningModal,
-	delete: DeleteModal,
-};
+export const DashboardLayout = styled(DashboardLayoutBase)`
+	${AppBarContainer} {
+		opacity: .95;
+		position: absolute;
+	}
+`;
