@@ -20,6 +20,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
+import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Autocomplete, createFilterOptions } from '@mui/material';
 import { DestinationInput } from './uploadListItemDestination.styles';
@@ -137,6 +138,10 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					/>
 				))}
 			ListboxComponent={(listboxProps) => <OptionsBox {...listboxProps} />}
+			noOptionsText={formatMessage({
+				id: 'uploads.destination.noOptions',
+				defaultMessage: 'The project has no containers. Start typing to create one.',
+			})}
 			className={className}
 			disabled={disabled}
 		/>
