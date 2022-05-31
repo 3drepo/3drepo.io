@@ -24,10 +24,11 @@ import { Container, Label } from './latestRevision.styles';
 
 interface ILatestRevision extends IRevisionStatus {
 	hasRevisions: boolean;
+	className?: string;
 }
 
-export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
-	<Container>
+export const LatestRevision = ({ hasRevisions, status, className, ...props }: ILatestRevision): JSX.Element => (
+	<Container className={className}>
 		{hasRevisions || status !== UploadStatuses.OK ? (
 			<>
 				<Label>

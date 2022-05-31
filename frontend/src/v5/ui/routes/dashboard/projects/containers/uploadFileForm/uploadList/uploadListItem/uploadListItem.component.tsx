@@ -20,7 +20,7 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
+import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
 import { filesizeTooLarge, ListItemSchema } from '@/v5/validation/containers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
@@ -84,15 +84,23 @@ export const UploadListItem = ({
 				errorMessage={errors.file?.message}
 			/>
 			<Destination
-				control={control}
 				disabled={isUploading}
 				errorMessage={errors.containerName?.message}
 				defaultValue={defaultValues.containerName}
-				onChange={(vals: DestinationOption) => {
-					Object.keys(vals).forEach((key: keyof DestinationOption) => {
-						if (key === 'latestRevision') return;
-						setValue(key, vals[key]);
-						updateValue(key);
+				onChange={(value: IContainer) => {
+					const conversion = {
+						containerId: value._id,
+						containerName: value.name,
+						containerCode: value.code,
+						containerType: value.type,
+						containerUnit: value.unit,
+						containerDesc: value.desc,
+					};
+					Object.keys(conversion).forEach((key: any) => {
+						if (conversion[key] || key === 'containerName') {
+							setValue(key, conversion[key]);
+							updateValue(key);
+						}
 					});
 					trigger('containerName');
 				}}
