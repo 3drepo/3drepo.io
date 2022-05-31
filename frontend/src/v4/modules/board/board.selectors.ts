@@ -173,6 +173,7 @@ export const selectLanes = createSelector(
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
 			[RISK_FILTER_PROPS.creator_role.value]: jobsValues,
 			[RISK_FILTER_PROPS.assigned_roles.value]: jobsValues,
+			[RISK_FILTER_PROPS.due_date.value]: datesValues,
 		};
 
 		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;

@@ -15,55 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ExternalServices = require('../handler/externalServices');
 const db = require('../handler/db');
-const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
-const getRefEntry = async (account, collection, id) => {
-	const entry = await db.findOne(account, collection, { _id: id });
+FileRefs.getRefEntry = async (teamspace, collection, id) => {
+	const entry = await db.findOne(teamspace, collectionName(collection), { _id: id });
 
 	if (!entry) {
 		throw templates.fileNotFound;
 	}
 
 	return entry;
-};
-
-const removeAllFiles = async (teamspace, collection) => {
-	const pipeline = [
-		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
-		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
-	];
-	const results = await db.aggregate(teamspace, collection, pipeline);
-
-	const deletePromises = results.map(
-		({ _id, links }) => {
-			if (_id && links?.length) {
-				return ExternalServices.removeFiles(teamspace, collection, _id, links);
-			}
-			return Promise.resolve();
-		},
-	);
-
-	return Promise.all(deletePromises);
-};
-
-FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
-	const collection = `${model}.${extension}`;
-	const entry = await getRefEntry(teamspace, collection, fileName);
-	try {
-		const stream = await ExternalServices.getFileStream(teamspace, collection, entry.type, entry.link);
-		return { readStream: stream, size: entry.size };
-	} catch {
-		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, 'gridfs', fileName);
-		return { readStream: stream, size: entry.size };
-	}
 };
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
@@ -77,14 +43,13 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 	return res.length > 0 ? res[0].total : 0;
 };
 
-FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
-	const collList = await db.listCollections(teamspace);
-	const refCols = collList.filter(({ name }) => {
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
-		return !!res?.length;
-	});
-	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
+FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
+	const pipeline = [
+		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
+		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+	];
+
+	return db.aggregate(teamspace, collection, pipeline);
 };
 
 module.exports = FileRefs;

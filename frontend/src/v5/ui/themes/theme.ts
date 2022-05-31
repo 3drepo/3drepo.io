@@ -272,6 +272,11 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					width: '100%',
+					'& :not(.colorPicker)': {
+						input: {
+							padding: '0px 14px',
+						},
+					},
 				},
 				underline: {
 					[`&:before,
@@ -279,9 +284,6 @@ export const theme = createTheme({
 					  &:hover:not(.Mui-disabled):before`]: {
 						borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
 					},
-				},
-				input: {
-					padding: '0px 14px',
 				},
 				formControl: {
 					'label + &': {
@@ -312,6 +314,12 @@ export const theme = createTheme({
 			styleOverrides: {
 				colorPrimary: {
 					color: COLOR.BASE_LIGHTEST,
+					'& svg': {
+						borderRadius: 3,
+						'& > rect': {
+							stroke: COLOR.BASE_LIGHT,
+						},
+					},
 				},
 			},
 		},
@@ -329,6 +337,12 @@ export const theme = createTheme({
 				colorPrimary: {
 					color: COLOR.PRIMARY_MAIN,
 				},
+			},
+		},
+		MuiPopover: {
+			defaultProps: {
+				// This is necessary for overriding styles of v4 dialogs
+				container: () => document.getElementById('v4Overrides'),
 			},
 		},
 		MuiTooltip: {
@@ -465,13 +479,13 @@ export const theme = createTheme({
 			},
 		},
 		MuiDialog: {
+			defaultProps: {
+				// This is necessary for overriding styles of v4 dialogs
+				container: () => document.getElementById('v4Overrides'),
+			},
 			styleOverrides: {
 				paper: {
-					minWidth: '30%',
 					borderRadius: 10,
-				},
-				paperWidthFalse: {
-					maxWidth: 633,
 				},
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
@@ -595,6 +609,70 @@ export const theme = createTheme({
 				padding: {
 					paddingTop: 8,
 					paddingBottom: 8,
+				},
+			},
+		},
+		MuiStepper: {
+			styleOverrides: {
+				root: {
+					padding: 0,
+					borderRadius: 10,
+					boxShadow: '0 1px 1px rgb(0 0 0 / 14%)',
+					'&, &.MuiStepLabel-root, & .MuiStepLabel-label': {
+						color: COLOR.SECONDARY_MAIN, // active step
+					},
+					'& .Mui-disabled': {
+						'&.MuiStepLabel-root, & .MuiStepLabel-label': {
+							color: COLOR.BASE_LIGHTEST,
+						},
+					},
+					'& .Mui-completed': {
+						'.MuiStepLabel-vertical, .MuiStepLabel-label': {
+							color: COLOR.PRIMARY_MAIN,
+						},
+					},
+					'&& .Mui-error': {
+						color: COLOR.ERROR_MAIN,
+					},
+					'& .MuiStepLabel': {
+						'&-label': {
+							fontWeight: FONT_WEIGHT.BOLD,
+							textTransform: 'none',
+							fontSize: '.8rem',
+							letterSpacing: 0,
+						},
+					},
+
+					'& > *': {
+						padding: '20px 24px',
+						borderBottom: `1px solid ${COLOR.TERTIARY_LIGHTEST}`,
+						'&:last-child': {
+							borderBottom: 'none',
+						},
+					},
+					'& .MuiStepConnector-root': {
+						display: 'none',
+					},
+					'& .MuiStepContent-root': {
+						padding: 0,
+						margin: 0,
+						border: 0,
+					},
+				},
+			},
+		},
+		MuiStepIcon: {
+			styleOverrides: {
+				root: {
+					'& .MuiStepIcon-text': {
+						fill: COLOR.PRIMARY_MAIN_CONTRAST,
+					},
+					'&.MuiStepIcon-active': {
+						color: COLOR.SECONDARY_MAIN,
+					},
+					'&.MuiStepIcon-completed': {
+						color: COLOR.PRIMARY_MAIN,
+					},
 				},
 			},
 		},

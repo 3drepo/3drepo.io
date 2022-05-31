@@ -17,7 +17,7 @@
 
 import { map, merge } from 'lodash';
 import { IMetaRecordList } from '../modules/bim/bim.redux';
-import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 
 export const prepareMetadata = (metadata: IMetaRecordList) => {
 	return map(metadata, (value, key) => {

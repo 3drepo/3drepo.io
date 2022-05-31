@@ -86,20 +86,35 @@ function* logout() {
 		yield API.Auth.logout();
 		yield put({ type: 'RESET_APP' });
 	} catch (error) {
-		if (error.response.status !== 401) {
+		if (error.response?.status !== 401) {
 			yield put(DialogsActions.open('alert', {
 				currentActions: formatMessage({ id: 'auth.logout.error', defaultMessage: 'trying to log out' }),
 				error,
 			}));
+			yield put({ type: 'RESET_APP' });
 		}
-		yield put({ type: 'RESET_APP' });
 	}
 	yield put(AuthActions.setAuthenticationStatus(false));
 	yield put(AuthActions.setPendingStatus(false));
+}
+
+function* kickedOut() {
+	yield put({ type: 'RESET_APP' });
+	yield put(DialogsActions.open('warning', {
+		title: formatMessage({
+			id: 'auth.logout.kickedOutTitle',
+			defaultMessage: 'You\' ve been logged out',
+		}),
+		message: formatMessage({
+			id: 'auth.logout.kickedOutMessage',
+			defaultMessage: 'Your account is being used in a different browser',
+		}),
+	}));
 }
 
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
+	yield takeLatest(AuthTypes.KICKED_OUT, kickedOut);
 }
