@@ -66,7 +66,7 @@ ExternalServices.storeFile = (account, collection, data) => {
 
 	switch(type) {
 		case "fs":
-			return FSHandler.storeFile(data);
+			return ExternalServices.storeFileInFS(data);
 		case "gridfs":
 			return GridFSHandler.storeFile(account, collection, data);
 		case "alluxio":
@@ -76,6 +76,8 @@ ExternalServices.storeFile = (account, collection, data) => {
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
+
+ExternalServices.storeFileInFS = (data) => FSHandler.storeFile(data);
 
 ExternalServices.removeFiles = (account, collection, type, keys) => {
 	switch(type) {
