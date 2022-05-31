@@ -91,13 +91,17 @@ describe('Uploading a model', () => {
 					.expect(200, (err, res) => {
 						model1.id = res.body.model;
 						done(err);
-					});	
+					});				
+				},
+				function (done) {
 					agent.post(`/${username}/model`)
 					.send({ type, desc, unit, modelName: model2.name, project })
 					.expect(200, (err, res) => {
 						model2.id = res.body.model;
 						done(err);
-					});	
+					});				
+				},
+				function (done) {
 					agent.post(`/${username}/model`)
 					.send({ type, desc, unit, modelName: model3.name, project })
 					.expect(200, (err, res) => {
