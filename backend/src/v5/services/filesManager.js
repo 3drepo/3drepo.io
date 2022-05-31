@@ -21,6 +21,7 @@ const GridFSHandler = require('../handler/gridfs');
 const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
+const FileRefs = require('../models/fileRefs');
 
 const FilesManager = {};
 
@@ -82,4 +83,22 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	}
 	return { readStream, size };
 };
+
+FilesManager.storeFile = async (teamspace, collection, fileName, storageType, data) => {
+	const type = storageType ?? getDefaultStorageType();
+	
+	switch(type) {
+		case "fs":
+			await FSHandler.storeFile(data);
+			await FileRefs.insertRef(teamspace, collection, fileName);
+		case "gridfs":
+			await GridFSHandler.storeFile(teamspace, collection, data);
+			await FileRefs.insertRef(teamspace, collection, fileName);	
+		default:
+			logger.logError(`Unrecognised external service: ${type}`);
+			throw templates.fileNotFound;
+	}
+};
+
+
 module.exports = FilesManager;
