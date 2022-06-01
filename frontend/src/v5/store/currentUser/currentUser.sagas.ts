@@ -21,11 +21,11 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
+
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
 	UpdatePersonalDataAction,
-	UpdatePasswordAction,
 } from './currentUser.redux';
 
 export function* fetchUser() {
@@ -51,7 +51,7 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 		if (avatarFile) {
 			const formData = new FormData();
 			formData.append('file', avatarFile);
-			yield API.CurrentUser.updateUserAvatar(formData);
+			yield API.CurrentUser.updateAvatar(formData);
 			const avatarUrl = URL.createObjectURL(avatarFile);
 			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl }));
 		}
@@ -63,24 +63,14 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
 
-export function* updatePassword({ passwordData }: UpdatePasswordAction) {
-	yield put(CurrentUserActions.setPasswordIsUpdating(true));
-	try {
-		yield API.CurrentUser.updateUser(passwordData);
-		yield put(CurrentUserActions.setPasswordError(''));
-	} catch (error) {
-		yield put(CurrentUserActions.setPasswordError(error?.response?.data));
-	}
-	yield put(CurrentUserActions.setPasswordIsUpdating(false));
-}
-
 export function* generateApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		const apiKey = yield API.CurrentUser.generateApiKey();
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
+		yield put(CurrentUserActions.setApiKeyError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setApiKeyError(error));
+		yield put(CurrentUserActions.setApiKeyError(error?.response?.data));
 	}
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
@@ -90,8 +80,9 @@ export function* deleteApiKey() {
 	try {
 		yield API.CurrentUser.deleteApiKey();
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
+		yield put(CurrentUserActions.setApiKeyError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setApiKeyError(error));
+		yield put(CurrentUserActions.setApiKeyError(error?.response?.data));
 	}
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
@@ -99,7 +90,6 @@ export function* deleteApiKey() {
 export default function* AuthSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.UPDATE_PERSONAL_DATA, updatePersonalData);
-	yield takeLatest(CurrentUserTypes.UPDATE_PASSWORD, updatePassword);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
 	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

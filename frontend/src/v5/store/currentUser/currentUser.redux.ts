@@ -18,7 +18,7 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser, UpdateUser, UpdatePassword, UpdatePersonalData, UpdateUserSuccess } from './currentUser.types';
+import { ICurrentUser, UpdateUser, UpdatePersonalData, UpdateUserSuccess } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: [],
@@ -29,10 +29,6 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updatePersonalData: ['personalData'],
 	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
 	setPersonalError: ['personalError'],
-	// password
-	updatePassword: ['passwordData'],
-	setPasswordIsUpdating: ['passwordIsUpdating'],
-	setPasswordError: ['passwordError'],
 	// api key
 	generateApiKey: [],
 	deleteApiKey: [],
@@ -68,17 +64,6 @@ export const setPersonalError = (state = INITIAL_STATE, { personalError }): ICur
 	personalError,
 });
 
-// password
-export const setPasswordIsUpdating = (state = INITIAL_STATE, { passwordIsUpdating }): ICurrentUserState => ({
-	...state,
-	passwordIsUpdating,
-});
-
-export const setPasswordError = (state = INITIAL_STATE, { passwordError }): ICurrentUserState => ({
-	...state,
-	passwordError,
-});
-
 // api key
 export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
 	...state,
@@ -96,9 +81,6 @@ export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE
 	// personal
 	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
 	[CurrentUserTypes.SET_PERSONAL_ERROR]: setPersonalError,
-	//password
-	[CurrentUserTypes.SET_PASSWORD_IS_UPDATING]: setPasswordIsUpdating,
-	[CurrentUserTypes.SET_PASSWORD_ERROR]: setPasswordError,
 	// api key
 	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
 	[CurrentUserTypes.SET_API_KEY_ERROR]: setApiKeyError,
@@ -125,10 +107,6 @@ export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData
 export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData };
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 export type SetPersonalErrorAction = Action<'SET_PERSONAL_ERROR'> & { personalError: any };
-// password
-export type UpdatePasswordAction = Action<'UPDATE_PASSWORD'> & { passwordData: UpdatePassword };
-export type SetPasswordIsUpdatingAction = Action<'SET_PASSWORD_IS_UPDATING'> & { passwordIsUpdating: boolean };
-export type SetPasswordErrorAction = Action<'SET_PASSWORD_ERROR'> & { passwordError: any };
 // api key
 export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 export type SetApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
@@ -141,10 +119,6 @@ export interface ICurrentUserActionCreators {
 	updatePersonalData: (personalData: UpdatePersonalData) => UpdatePersonalDataAction;
 	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
 	setPersonalError: (personalError: any) => SetPersonalErrorAction;
-	// password
-	updatePassword: (passwordData: UpdatePassword) => UpdatePasswordAction;
-	setPasswordIsUpdating: (passwordIsUpdating: boolean) => SetPasswordIsUpdatingAction;
-	setPasswordError: (passwordError: any) => SetPasswordErrorAction;
 	// api key
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;
