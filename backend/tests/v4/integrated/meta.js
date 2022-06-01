@@ -434,8 +434,7 @@ describe("Metadata", function () {
 			"Uniclass2 - En",
 			"Uniclass2 - Sp",
 			"WallCovering",
-			"WarrantyStartDate",
-			"Meta With, Comma"
+			"WarrantyStartDate"
 		];
 
 		agent.get(`/${username}/${model}/meta/keys`)
