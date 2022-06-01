@@ -52,6 +52,7 @@ type IFederationsList = {
 	},
 	hasFederations: boolean;
 	showBottomButton?: boolean;
+	onClickCreate: () => void;
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
 };
@@ -63,6 +64,7 @@ export const FederationsList = ({
 	titleTooltips,
 	filterQuery,
 	onFilterQueryChange,
+	onClickCreate,
 	showBottomButton = false,
 	hasFederations,
 }: IFederationsList): JSX.Element => {
@@ -101,6 +103,7 @@ export const FederationsList = ({
 							startIcon={<AddCircleIcon />}
 							variant="contained"
 							color="primary"
+							onClick={onClickCreate}
 						>
 							<FormattedMessage id="federations.newFederation" defaultMessage="New Federation" />
 						</Button>
@@ -149,10 +152,7 @@ export const FederationsList = ({
 				{showBottomButton && !isListPending && hasFederations && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add federation');
-						}}
+						onClick={onClickCreate}
 					>
 						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
 					</DashboardListButton>

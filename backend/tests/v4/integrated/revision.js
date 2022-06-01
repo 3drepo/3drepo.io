@@ -39,6 +39,8 @@ describe("Revision", function () {
 	const username = "rev";
 	const password = "123456";
 	const model = "monkeys";
+	const queuedModel = "queuedModel";
+	const processingModel = "processingModel";
 	const testTag = "logo";
 	const testRevId = "7349c6eb-4009-4a4a-af66-701a496dbe2e";
 
@@ -236,10 +238,7 @@ describe("Revision", function () {
 
 	});
 
-
-
 	it("upload with invalid tag name should fail", function(done) {
-
 		agent.post(`/${username}/${model}/upload`)
 			.field("tag", "a!b")
 			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
@@ -247,7 +246,26 @@ describe("Revision", function () {
 				expect(res.body.code).to.equal(templates.invalidArguments.code);
 				done(err);
 			});
+	});
 
+	it("upload while model state is queued should fail", function(done) {
+		agent.post(`/${username}/${queuedModel}/upload`)
+			.field("tag", "abc")
+			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
+			.expect(400, function(err, res) {
+				expect(res.body.code).to.equal(templates.invalidArguments.code);
+				done(err);
+			});
+	});
+
+	it("upload while model state is processing should fail", function(done) {
+		agent.post(`/${username}/${processingModel}/upload`)
+			.field("tag", "abc")
+			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
+			.expect(400, function(err, res) {
+				expect(res.body.code).to.equal(templates.invalidArguments.code);
+				done(err);
+			});
 	});
 
 	it("update revision", async () => {

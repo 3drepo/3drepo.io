@@ -156,6 +156,7 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 			{
 				...container,
 				revisionsCount: 0,
+				status: UploadStatuses.OK,
 			},
 		],
 	},

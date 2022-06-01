@@ -29,6 +29,7 @@ const user = ServiceHelper.generateUserCredentials();
 const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
+const container2 = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ isFederation: true });
 
 let agent;
@@ -43,6 +44,12 @@ const setupData = async () => {
 		),
 		ServiceHelper.db.createModel(
 			teamspace,
+			container2._id,
+			container2.name,
+			container2.properties,
+		),
+		ServiceHelper.db.createModel(
+			teamspace,
 			federation._id,
 			federation.name,
 			federation.properties,
@@ -50,7 +57,8 @@ const setupData = async () => {
 	]);
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id]),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name,
+			[container._id, container2._id, federation._id]),
 	]);
 };
 
@@ -65,7 +73,7 @@ const noEventExpected = (socket, event, fn) => new Promise((resolve, reject) => 
 
 const modelUploadTest = () => {
 	describe('Model uploads', () => {
-		const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions`;
+		const route = (ts = teamspace, proj = project.id, cont = container._id) => `/v5/teamspaces/${ts}/projects/${proj}/containers/${cont}/revisions`;
 		const fedRoute = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/revisions`;
 		test(`should receive a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
@@ -74,7 +82,7 @@ const modelUploadTest = () => {
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
-			await agent.post(`${route}?key=${user.apiKey}`)
+			await agent.post(`${route()}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
 				.field('tag', ServiceHelper.generateRandomString())
 				.attach('file', objModel)
@@ -125,7 +133,7 @@ const modelUploadTest = () => {
 
 			await expect(leavePromise).resolves.toBeUndefined();
 
-			await agent.post(`${route}?key=${user.apiKey}`)
+			await agent.post(`${route(teamspace, project.id, container2._id)}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
 				.field('tag', ServiceHelper.generateRandomString())
 				.attach('file', objModel)
