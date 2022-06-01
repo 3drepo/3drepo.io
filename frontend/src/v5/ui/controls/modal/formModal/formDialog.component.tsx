@@ -18,6 +18,7 @@ import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
 import { DialogProps } from '@mui/material/Dialog';
+import { FormattedMessage } from 'react-intl';
 import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
@@ -31,13 +32,15 @@ import {
 	SubmitButton,
 } from './formDialog.styles';
 
-interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
+export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
 	onSubmit?: (event) => void;
+	onClickCancel?: () => void;
 	title?: string;
 	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
+	cancelLabel?: string;
 	isValid?: boolean;
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
@@ -50,9 +53,11 @@ export const FormModal = (props: IFormModal) => {
 	const {
 		onSubmit = () => {},
 		onClickClose,
+		onClickCancel,
 		title,
 		subtitle,
 		confirmLabel,
+		cancelLabel,
 		open,
 		children,
 		className,
@@ -67,7 +72,7 @@ export const FormModal = (props: IFormModal) => {
 
 	const handleClose = () => {
 		if (disableClosing) return;
-		onClickClose();
+		(onClickCancel || onClickClose)();
 	};
 
 	return (
@@ -99,7 +104,7 @@ export const FormModal = (props: IFormModal) => {
 				{showButtons && (
 					<FormDialogActions>
 						<Button autoFocus onClick={handleClose} variant="outlined" color="secondary" size="medium" disabled={isSubmitting}>
-							Cancel
+							{cancelLabel || <FormattedMessage id="formDialog.actions.cancel" defaultMessage="Cancel" />}
 						</Button>
 						<SubmitButton
 							disabled={!isValid}
@@ -110,7 +115,7 @@ export const FormModal = (props: IFormModal) => {
 							isPending={isSubmitting}
 							fullWidth={false}
 						>
-							{confirmLabel || 'OK'}
+							{confirmLabel || <FormattedMessage id="formDialog.actions.ok" defaultMessage="OK" />}
 						</SubmitButton>
 					</FormDialogActions>
 				)}

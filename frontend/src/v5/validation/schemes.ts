@@ -103,9 +103,8 @@ const email = (alreadyExistingEmails) => Yup.string().email()
 		}),
 		(emailValue) => !alreadyExistingEmails.includes(emailValue),
 	);
-
 // Schemas
-const SettingsSchema = Yup.object().shape({
+const BaseSettingsSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2,
 			formatMessage({
@@ -159,11 +158,14 @@ const SettingsSchema = Yup.object().shape({
 						defaultMessage: 'Code can only consist of letters and numbers',
 					}))
 	)),
+});
+
+const AdvancedSettingsSchema = BaseSettingsSchema.shape({
 	defaultView: Yup.string()
 		.nullable()
 		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
-	latitude: numberField.required(),
-	longitude: numberField.required(),
+	latitude: numberField.required().default(0),
+	longitude: numberField.required().default(0),
 	angleFromNorth: numberField
 		.min(0,
 			formatMessage({
@@ -176,9 +178,9 @@ const SettingsSchema = Yup.object().shape({
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
 		.transform((value) => value ?? 0),
-	x: numberField.required(),
-	y: numberField.required(),
-	z: numberField.required(),
+	x: numberField.required().default(0),
+	y: numberField.required().default(0),
+	z: numberField.required().default(0),
 });
 
 export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object().shape({
@@ -288,5 +290,6 @@ export const UserSignupSchemaTermsAndSubmit = Yup.object().shape({
 	termsAgreed: Yup.boolean().oneOf([true]),
 });
 
-export const FederationSettingsSchema = SettingsSchema;
-export const ContainerSettingsSchema = SettingsSchema.shape({ type: Yup.string() });
+export const NewFederationSettingsSchema = BaseSettingsSchema;
+export const FederationSettingsSchema = AdvancedSettingsSchema;
+export const ContainerSettingsSchema = AdvancedSettingsSchema.shape({ type: Yup.string() });

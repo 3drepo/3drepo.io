@@ -43,9 +43,7 @@ export const Container = styled.div`
 export const Padding = styled.div`
 	margin: ${MODAL_PADDING}px;
 	padding-bottom: 0;
-	width: 100%;
 	box-sizing: border-box;
-	padding-right: ${MODAL_PADDING * 2}px;
 `;
 
 export const DropZone = styled(DragAndDrop)`
