@@ -24,8 +24,8 @@ const ModelHelper = require(`${src}/utils/helper/models`);
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
-jest.mock('../../../../../src/v5/models/fileRefs');
-const FileRefs = require(`${src}/models/fileRefs`);
+jest.mock('../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../../src/v5/handler/db');
 const DB = require(`${src}/handler/db`);
@@ -35,7 +35,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const testRemoveModelData = () => {
 	describe('Remove model data', () => {
 		test(`should not return with error if deleteModel failed with ${templates.modelNotFound.code}`, async () => {
-			FileRefs.removeAllFilesFromModel.mockResolvedValueOnce();
+			FilesManager.removeAllFilesFromModel.mockResolvedValueOnce();
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.modelNotFound);
 
@@ -44,8 +44,8 @@ const testRemoveModelData = () => {
 
 			await ModelHelper.removeModelData(teamspace, model);
 
-			expect(FileRefs.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
-			expect(FileRefs.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
+			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, model);
@@ -61,7 +61,7 @@ const testRemoveModelData = () => {
 		});
 
 		test(`should throw error if deleteModel threw an error that was not ${templates.modelNotFound.code}`, async () => {
-			FileRefs.removeAllFilesFromModel.mockResolvedValueOnce();
+			FilesManager.removeAllFilesFromModel.mockResolvedValueOnce();
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.unknown);
 
