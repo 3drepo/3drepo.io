@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AlertModal } from './alertModal/alertModal.component';
-import { DeleteModal } from './deleteModal/deleteModal.component';
-import { WarningModal } from './warningModal/warningModal.component';
+import { css } from 'styled-components';
+import { OpacityVisibilityCheckbox, SelectedHash } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
-export const MODAL_TEMPLATES = {
-	alert: AlertModal,
-	warning: WarningModal,
-	delete: DeleteModal,
-};
+export default css`
+	${SelectedHash} input {
+		width: fit-content;
+		margin-left: -13px;
+		padding-right: 0 !important;
+	}
+
+	// TODO modal
+	${OpacityVisibilityCheckbox} {
+		margin-left: -8px;
+		margin-right: 0;
+	}
+`;

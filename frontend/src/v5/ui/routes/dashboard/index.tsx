@@ -20,7 +20,7 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
-import { DashboardViewerLayout } from '@components/dashboard/dashboardLayout/dashboardViewerLayout.styles';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
