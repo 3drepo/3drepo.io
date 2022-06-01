@@ -35,13 +35,11 @@ interface IUpdatePasswordInputs {
 }
 
 type EditProfilePasswordTabProps = {
-	fields: IUpdatePasswordInputs;
 	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
 };
 
 export const EditProfilePasswordTab = ({
-	fields,
 	setIsSubmitting,
 	setSubmitFunction,
 }: EditProfilePasswordTabProps) => {
@@ -50,21 +48,20 @@ export const EditProfilePasswordTab = ({
 		newPassword: '',
 		confirmPassword: '',
 	};
-	const [unexpectedError, setUnexpectedError] = useState<any>(null);
+	const [unexpectedError, setUnexpectedError] = useState(false);
+	const [incorrectPassword, setIncorrectPassword] = useState(false);
 
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful },
 		control,
 		trigger,
 		reset,
-		setError,
 		watch,
 		handleSubmit,
 	} = useForm<IUpdatePasswordInputs>({
 		mode: 'onChange',
-		resolver: yupResolver(EditProfileUpdatePasswordSchema),
-		defaultValues: fields,
-		shouldUnregister: false,
+		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
+		defaultValues: EMPTY_PASSWORDS,
 	});
 	
 	setIsSubmitting(isSubmitting);
@@ -75,17 +72,12 @@ export const EditProfilePasswordTab = ({
 		try {
 			await API.CurrentUser.updateUser({ oldPassword, newPassword });
 			reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
-			setUnexpectedError(null);
+			setUnexpectedError(false);
+			setIncorrectPassword(false);
 		} catch (error) {
 			const errorData = error.response?.data;
 			if (errorData?.code === 'INCORRECT_PASSWORD') {
-				setError(
-					'oldPassword',
-					{ type: 'custom', message: formatMessage({
-						id: 'editProfile.password.error.incorrectPassword',
-						defaultMessage: 'Your existing password was incorrect. Please try again',
-					})},
-				);
+				setIncorrectPassword(true);
 			} else {
 				setUnexpectedError(true);
 			}
@@ -93,7 +85,7 @@ export const EditProfilePasswordTab = ({
 	};
 
 	useEffect(() => {
-		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
+		setSubmitFunction(() => formIsValid ? handleSubmit(onSubmit) : null);
 	}, [formIsValid]);
 
 	// re-trigger validation on confirmPassword when newPassword changes
