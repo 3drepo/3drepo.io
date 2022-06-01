@@ -73,7 +73,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			setActiveTab('personal');
 		} else {
 			dispatch(CurrentUserActions.setPersonalError(''));
-			dispatch(CurrentUserActions.setPasswordError(''));
 			dispatch(CurrentUserActions.setApiKeyError(''));
 		}
 	}, [open]);
