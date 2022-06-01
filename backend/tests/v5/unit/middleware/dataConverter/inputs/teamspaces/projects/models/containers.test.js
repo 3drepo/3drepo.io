@@ -20,6 +20,7 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const { generateRandomString } = require('../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);
@@ -40,10 +41,18 @@ const { templates } = require(`${src}/utils/responseCodes`);
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const subModelContainer = 'ImSub';
+const queuedStatusContainer = generateRandomString();
 
 ModelSettings.getModelByQuery.mockImplementation((teamspace, query) => (query['subModels.model'] !== subModelContainer
 	? Promise.reject(templates.modelNotFound)
 	: Promise.resolve({ _id: 1, name: 'abc' })));
+
+ModelSettings.getModelById.mockImplementation((teamspace, container) => {
+	if (container === queuedStatusContainer) {
+		return { status: 'queued' };
+	}
+	return { status: 'ok' };
+});
 
 const testCanDeleteContainer = () => {
 	describe.each([
@@ -67,7 +76,7 @@ const testCanDeleteContainer = () => {
 	});
 };
 
-const createRequestWithFile = (teamspace, { tag, desc, importAnim, timezone },
+const createRequestWithFile = (teamspace, container, { tag, desc, importAnim, timezone },
 	unsupportedFile = false, noFile = false, emptyFile = false) => {
 	const form = new FormData();
 	if (!noFile) {
@@ -89,7 +98,7 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim, timezone },
 	});
 
 	form.pipe(req);
-	req.params = { teamspace };
+	req.params = { teamspace, container };
 	return req;
 };
 
@@ -97,24 +106,26 @@ Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.rej
 RevisionsModel.isTagUnique.mockImplementation((teamspace, model, tag) => tag !== 'duplicate');
 
 const testValidateNewRevisionData = () => {
+	const container = generateRandomString();
 	const standardBody = { tag: '123', description: 'this is a model', importAnimations: false, timezone: 'Europe/Berlin' };
 	describe.each([
-		['Request with valid data', 'ts', standardBody],
-		['Request with unsupported model file', 'ts', standardBody, true, false, false, templates.unsupportedFileFormat],
-		['Request with insufficient quota', 'noQuota', standardBody, false, false, false, templates.quotaLimitExceeded],
-		['Request with no body should fail', 'ts', {}, false, false, false, templates.invalidArguments],
-		['Request with just tag should pass', 'ts', { tag: 'dkf_j-d' }, false, false, false],
-		['Request with wrong tag type should fail', 'ts', { tag: false }, false, false, false, templates.invalidArguments],
-		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1%2%3' }, false, false, false, templates.invalidArguments],
-		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, false, templates.invalidArguments],
-		['Request with an empty file should fail', 'ts', { tag: 'drflgdf' }, false, false, true, templates.invalidArguments],
-		['Request with duplicate tag should fail', 'ts', { tag: 'duplicate' }, false, false, false, templates.invalidArguments],
-		['Request with invalid timezone should fail', 'ts', { tag: 'drflgdf', timezone: 'abc' }, false, false, false, templates.invalidArguments],
-		['Request with invalid type timezone should fail', 'ts', { tag: 'drflgdf', timezone: 123 }, false, false, false, templates.invalidArguments],
-		['Request with null timezone should pass', 'ts', { tag: 'drflgdf', timezone: null }],
-	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, emptyFile, error) => {
+		['Request with valid data', 'ts', container, standardBody],
+		['Request with unsupported model file', 'ts', container, standardBody, true, false, false, templates.unsupportedFileFormat],
+		['Request with insufficient quota', 'noQuota', container, standardBody, false, false, false, templates.quotaLimitExceeded],
+		['Request with no body should fail', 'ts', container, {}, false, false, false, templates.invalidArguments],
+		['Request with just tag should pass', 'ts', container, { tag: 'dkf_j-d' }, false, false, false],
+		['Request with wrong tag type should fail', 'ts', container, { tag: false }, false, false, false, templates.invalidArguments],
+		['Request with tag that is not alphanumeric should fail', 'ts', container, { tag: '1%2%3' }, false, false, false, templates.invalidArguments],
+		['Request with no file should fail', 'ts', container, { tag: 'drflgdf' }, false, true, false, templates.invalidArguments],
+		['Request with an empty file should fail', 'ts', container, { tag: 'drflgdf' }, false, false, true, templates.invalidArguments],
+		['Request with duplicate tag should fail', 'ts', container, { tag: 'duplicate' }, false, false, false, templates.invalidArguments],
+		['Request with invalid timezone should fail', 'ts', container, { tag: 'drflgdf', timezone: 'abc' }, false, false, false, templates.invalidArguments],
+		['Request with invalid type timezone should fail', 'ts', container, { tag: 'drflgdf', timezone: 123 }, false, false, false, templates.invalidArguments],
+		['Request with null timezone should pass', 'ts', container, { tag: 'drflgdf', timezone: null }],
+		['Request with container that has queued status', 'ts', queuedStatusContainer, standardBody, false, false, false, templates.invalidArguments],
+	])('Check new revision data', (desc, ts, cont, bodyContent, badFile, noFile, emptyFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
-			const req = createRequestWithFile(ts, bodyContent, badFile, noFile, emptyFile);
+			const req = createRequestWithFile(ts, cont, bodyContent, badFile, noFile, emptyFile);
 			const mockCB = jest.fn(() => {});
 			await Containers.validateNewRevisionData(req, {}, mockCB);
 			if (error) {
