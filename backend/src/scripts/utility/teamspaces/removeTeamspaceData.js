@@ -49,8 +49,12 @@ const run = async (teamspaces) => {
 			removeAllUsersFromTS(teamspace),
 		];
 
-		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(opsProms);
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			await Promise.all(opsProms);
+		} catch (err) {
+			logger.logError(`Failed to remove data from ${teamspace}: ${err?.message}`);
+		}
 	}
 
 	logger.logInfo('done');
