@@ -46,7 +46,7 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	maxWidth?: DialogProps['maxWidth'];
 	zeroMargin?: boolean;
 	isSubmitting?: boolean;
-	disableClosing?: boolean; 
+	disableClosing?: boolean;
 }
 
 export const FormModal = (props: IFormModal) => {

@@ -26,11 +26,11 @@ const numberField = Yup.number().typeError(formatMessage({
 	defaultMessage: 'Must be a decimal number or integer',
 }));
 
-const password = (passwordName='Password') => Yup.string()
+const password = (passwordName = 'Password') => Yup.string()
 	.required(
 		formatMessage({
 			id: 'validation.password.error.required',
-			defaultMessage: `{passwordName} is a required field`,
+			defaultMessage: '{passwordName} is a required field',
 		}, { passwordName }),
 	)
 	.min(8,
@@ -222,13 +222,6 @@ export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object
 			}),
 			(value, testContext) => value === testContext.parent.newPassword,
 		),
-		// .oneOf(
-		// 	[Yup.ref('newPassword'), null],
-		// 	formatMessage({
-		// 		id: 'editProfile.confirmPassword.error.notMatch',
-		// 		defaultMessage: 'Password confirmation doesn\'t match the password',
-		// 	}),
-		// ),
 });
 
 export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({

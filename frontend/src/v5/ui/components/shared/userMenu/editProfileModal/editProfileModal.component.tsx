@@ -59,7 +59,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			default:
 				return null;
 		}
-	}
+	};
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 	const onClickClose = () => {
@@ -95,12 +95,12 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
-					<Tab value="personal" label={TAB_LABELS.personal} disabled={isSubmitting}/>
-					<Tab value="password" label={TAB_LABELS.password} disabled={isSubmitting}/>
-					<Tab value="integrations" label={TAB_LABELS.integrations} disabled={isSubmitting}/>
+					<Tab value="personal" label={TAB_LABELS.personal} disabled={isSubmitting} />
+					<Tab value="password" label={TAB_LABELS.password} disabled={isSubmitting} />
+					<Tab value="integrations" label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
 			</TabContext>
-			<TabPanel hidden={activeTab !== "personal"} $zeroSidePadding>
+			<TabPanel hidden={activeTab !== 'personal'} $zeroSidePadding>
 				<ScrollArea>
 					<ScrollAreaPadding>
 						<EditProfilePersonalTab
@@ -111,13 +111,13 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					</ScrollAreaPadding>
 				</ScrollArea>
 			</TabPanel>
-			<TabPanel hidden={activeTab !== "password"}>
+			<TabPanel hidden={activeTab !== 'password'}>
 				<EditProfilePasswordTab
 					setIsSubmitting={setIsSubmitting}
 					setSubmitFunction={setPasswordSubmitFunction}
 				/>
 			</TabPanel>
-			<TabPanel hidden={activeTab !== "integrations"}>
+			<TabPanel hidden={activeTab !== 'integrations'}>
 				<EditProfileIntegrationsTab />
 			</TabPanel>
 		</FormModal>

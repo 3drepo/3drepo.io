@@ -34,7 +34,7 @@ export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
 `;
 
 export const Tab = styled(TabBase)`
-    padding: 15px 0;
+	padding: 15px 0;
 	margin: 0 10px;
 	min-width: fit-content;
 `;
@@ -48,7 +48,7 @@ export const TabList = styled(TabListBase)`
 export const TabPanel = styled('div')<{ $zeroSidePadding?: boolean }>`
 	padding: 30px ${({ $zeroSidePadding }) => ($zeroSidePadding ? 0 : 58)}px;
 	height: 554px;
-    box-sizing: border-box;
+	box-sizing: border-box;
 `;
 
 export const ScrollAreaPadding = styled.div`
