@@ -53,7 +53,7 @@ const run = async (teamspaces) => {
 			// eslint-disable-next-line no-await-in-loop
 			await Promise.all(opsProms);
 		} catch (err) {
-			logger.logError(`Failed to remove data from ${teamspace}: ${err?.message}`);
+			logger.logError(`\tFailed to remove data from ${teamspace}: ${err?.message}`);
 		}
 	}
 
