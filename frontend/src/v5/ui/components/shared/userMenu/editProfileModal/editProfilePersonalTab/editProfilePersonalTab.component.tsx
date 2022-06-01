@@ -26,13 +26,13 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { defaults, isMatch, pick } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 
-export interface IUpdatePersonalInputs {
+interface IUpdatePersonalInputs {
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -40,36 +40,26 @@ export interface IUpdatePersonalInputs {
 	countryCode: string;
 }
 
-export const getUserPersonalValues = (user: IUser): IUpdatePersonalInputs => pick(
-	defaults(user, { company: '', countryCode: 'GB' }),
-	['firstName', 'lastName', 'email', 'company', 'countryCode'],
-);
-
 type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
-	fields: IUpdatePersonalInputs,
-	setPersonalFields: (values: IUpdatePersonalInputs) => void,
-	newAvatarFile: File | null,
-	setNewAvatarFile: (file: File | null) => void,
-	alreadyExistingEmails: string[],
-	setAlreadyExistingEmails: (emails: string[]) => void,
 	user: IUser,
 };
 
 export const EditProfilePersonalTab = ({
 	setSubmitFunction,
 	setIsSubmitting,
-	fields,
-	setPersonalFields,
-	newAvatarFile,
-	setNewAvatarFile,
-	alreadyExistingEmails,
-	setAlreadyExistingEmails,
 	user,
 }: EditProfilePersonalTabProps) => {
 	const personalError = CurrentUserHooksSelectors.selectPersonalError();
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
+	const [newAvatarFile, setNewAvatarFile] = useState(null);
+	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
+
+	const getUserPersonalValues = () => pick(
+		defaults(user, { company: '', countryCode: 'GB' }),
+		['firstName', 'lastName', 'email', 'company', 'countryCode'],
+	);
 
 	const {
 		getValues,
@@ -77,12 +67,12 @@ export const EditProfilePersonalTab = ({
 		handleSubmit,
 		reset,
 		control,
-		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
+		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful, isDirty },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		reValidateMode: 'onChange',
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
-		defaultValues: fields,
+		defaultValues: getUserPersonalValues(),
 	});
 
 	setIsSubmitting(formIsUploading);
@@ -94,27 +84,27 @@ export const EditProfilePersonalTab = ({
 		});
 	};
 
-	const isUnexpectedError = () => personalError && personalError.type === 'unexpected';
+	const isUnexpectedError = personalError && personalError.type === 'unexpected';
 
 	const uploadWasSuccessful = !formIsUploading && !personalError;
-	const fieldsAreDirty = !isMatch(user, getValues());
+	const fieldsAreDirty = () => {
+		const a = !isMatch(user, getValues());
+		return a;
+	}
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && (fieldsAreDirty || newAvatarFile);
-		setSubmitFunction(shouldEnableSubmit ? handleSubmit(onSubmit) : null);
-	}, [formIsValid, newAvatarFile, fieldsAreDirty]);
+		const shouldEnableSubmit = formIsValid && (fieldsAreDirty() || newAvatarFile);
+		setSubmitFunction(() => shouldEnableSubmit ? handleSubmit(onSubmit) : null);
+	}, [formIsValid, newAvatarFile, fieldsAreDirty()]);
 
 	// update form values when user is updated
 	useEffect(() => {
 		if (uploadWasSuccessful && isSubmitSuccessful) {
-			if (fieldsAreDirty) {
-				setPersonalFields(getValues());
-			}
 			if (newAvatarFile) {
 				setNewAvatarFile(null);
 			}
-			reset(getUserPersonalValues(user), { keepIsSubmitted: true });
+			reset(getUserPersonalValues(), { keepIsSubmitted: true });
 		}
 	}, [formIsUploading]);
 
@@ -129,11 +119,6 @@ export const EditProfilePersonalTab = ({
 			trigger('email');
 		}
 	}, [alreadyExistingEmails]);
-
-	// save fields on tab change
-	useEffect(() => () => {
-		setPersonalFields(getValues());
-	}, []);
 
 	return (
 		<>
@@ -202,7 +187,7 @@ export const EditProfilePersonalTab = ({
 					<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
 				</SuccessMessage>
 			)}
-			{isUnexpectedError() && <UnexpectedError gapTop />}
+			{isUnexpectedError && <UnexpectedError gapTop />}
 		</>
 	);
 };
