@@ -19,10 +19,18 @@ import {
 	FederationBackendSettings,
 	MinimumFederation,
 	FederationStats,
+	NewFederation,
 } from '@/v5/store/federations/federations.types';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, View } from '@/v5/store/store.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
+
+export const createFederation = async (
+	{ teamspace, projectId, newFederation }: CreateFederationParams,
+): Promise<CreateFederationResponse> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/federations`, newFederation);
+	return data._id;
+};
 
 export const addFavourites = (
 	{ teamspace, projectId, federationId }: TeamspaceProjectAndFederationId,
@@ -106,8 +114,10 @@ export const updateFederationContainers = async ({
 /**
  * Types
 */
+type CreateFederationParams = TeamspaceAndProjectId & { newFederation: NewFederation };
 type UpdateFederationContainersParams = TeamspaceProjectAndFederationId & { containers: string[] };
 type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & { settings: FederationBackendSettings };
 
+export type CreateFederationResponse = { _id: string };
 export type FetchFederationsResponse = { federations: Array<MinimumFederation> };
 export type FetchFederationViewsResponse = { views: View[] };

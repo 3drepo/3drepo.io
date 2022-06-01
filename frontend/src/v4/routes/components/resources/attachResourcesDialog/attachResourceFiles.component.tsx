@@ -45,36 +45,36 @@ export class AttachResourceFiles extends PureComponent<IProps, any> {
 	public render() {
 		const {files, validateQuota, validateUploadLimit, uploadLimit} = this.props;
 		return (
-					<FieldArray
-						name="files"
-						render={(arrayHelpers) => (
-						<div>
-						{(files && files.length > 0) && (
-							<ResourcesListScroller>
-								<ResourcesListContainer>
-									{files.map((file, index) =>
-										<FileEntry
-											key={index}
-											index={index}
-											entry={file}
-											onClickRemove={() => arrayHelpers.remove(index)}
-										/>
-										)
-									}
-								</ResourcesListContainer>
-							</ResourcesListScroller>
-						)}
-							<Field render={ ({ form }) => {
-									const errorMessage = !validateQuota(form.values.files) ?
-													'Quota exceeded! Try removing some files' :
-													!validateUploadLimit(form.values.files) ?
-													`File too large! Maximum attachment file size is ${filesize(uploadLimit, {fullform: true})}` : '';
+			<FieldArray
+				name="files"
+				render={(arrayHelpers) => (
+					<div>
+					{(files && files.length > 0) && (
+						<ResourcesListScroller>
+							<ResourcesListContainer>
+								{files.map((file, index) =>
+									<FileEntry
+										key={index}
+										index={index}
+										entry={file}
+										onClickRemove={() => arrayHelpers.remove(index)}
+									/>
+									)
+								}
+							</ResourcesListContainer>
+						</ResourcesListScroller>
+					)}
+						<Field render={ ({ form }) => {
+								const errorMessage = !validateQuota(form.values.files) ?
+												'Quota exceeded! Try removing some files' :
+												!validateUploadLimit(form.values.files) ?
+												`File too large! Maximum attachment file size is ${filesize(uploadLimit, {fullform: true})}` : '';
 
-									return (<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)} errorMessage={errorMessage} />);
-							}} />
-						</div>
+								return (<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)} errorMessage={errorMessage} />);
+						}} />
+					</div>
 				)}
-				/>
+			/>
 		);
 	}
 }

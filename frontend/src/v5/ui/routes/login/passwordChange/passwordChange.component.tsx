@@ -21,7 +21,7 @@ import * as queryString from 'query-string';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import * as API from '@/v5/services/api';
-import { AuthPage } from '@components/authPage';
+import { AuthTemplate } from '@components/authTemplate';
 import { PasswordChangeSchema } from '@/v5/validation/auth';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
@@ -54,7 +54,7 @@ export const PasswordChange = () => {
 	}, [isValid]);
 
 	return (
-		<AuthPage>
+		<AuthTemplate>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
 					<FormattedMessage id="auth.changePassword.heading" defaultMessage="Create a new password" />
@@ -95,6 +95,6 @@ export const PasswordChange = () => {
 				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
 				<ReturnLink />
 			</form>
-		</AuthPage>
+		</AuthTemplate>
 	);
 };

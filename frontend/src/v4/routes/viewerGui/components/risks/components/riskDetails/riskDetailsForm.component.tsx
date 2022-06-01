@@ -296,6 +296,7 @@ export const RiskDetailsForm = withFormik({
 			mitigation_type: risk.mitigation_type || '',
 			desc: risk.desc || '',
 			assigned_roles: get(risk, 'assigned_roles[0]', 'Unassigned'),
+			due_date: risk.due_date,
 			category: risk.category || '',
 			likelihood: risk.likelihood,
 			consequence: risk.consequence,
