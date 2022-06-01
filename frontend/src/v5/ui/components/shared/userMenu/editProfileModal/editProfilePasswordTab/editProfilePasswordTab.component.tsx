@@ -52,55 +52,58 @@ export const EditProfilePasswordTab = ({
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful },
+		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
 		trigger,
 		reset,
 		watch,
 		handleSubmit,
 	} = useForm<IUpdatePasswordInputs>({
-		mode: 'onChange',
 		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
 	});
-	
-	setIsSubmitting(isSubmitting);
+
 	const oldPassword = watch('oldPassword');
 	const newPassword = watch('newPassword');
+	const confirmPassword = watch('confirmPassword');
 
 	const onSubmit = async () => {
-		try {
-			await API.CurrentUser.updateUser({ oldPassword, newPassword });
-			reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
-			setUnexpectedError(false);
-			setIncorrectPassword(false);
-		} catch (error) {
-			const errorData = error.response?.data;
-			if (errorData?.code === 'INCORRECT_PASSWORD') {
-				setIncorrectPassword(true);
-			} else {
-				setUnexpectedError(true);
-			}
+		await API.CurrentUser.updateUser({ oldPassword, newPassword });
+		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
+		setIncorrectPassword(false);
+		setUnexpectedError(false);
+	};
+
+	const onSubmitError = (error) => {
+		const errorData = error.response?.data;
+		if (errorData?.code === 'INCORRECT_PASSWORD') {
+			setIncorrectPassword(true);
+			trigger('oldPassword');
+		} else {
+			setUnexpectedError(true);
 		}
 	};
 
+	useEffect(() => setIsSubmitting(isSubmitting), []);
+
 	useEffect(() => {
-		setSubmitFunction(() => formIsValid ? handleSubmit(onSubmit) : null);
+		setSubmitFunction(() => (formIsValid
+			? (event) => handleSubmit(onSubmit)(event).catch(onSubmitError)
+			: null
+		));
 	}, [formIsValid]);
 
-	// re-trigger validation on confirmPassword when newPassword changes
+	// re-trigger validation on oldPassword when incorrect
 	useEffect(() => {
-		if (newPassword && !errors.newPassword) {
-			trigger('confirmPassword');
-		}
-	}, [newPassword]);
-
-	// re-trigger validation on newPassword when oldPassword changes
-	useEffect(() => {
-		if (oldPassword && oldPassword === newPassword && !errors.oldPassword) {
-			trigger('newPassword');
+		if (incorrectPassword) {
+			setIncorrectPassword(false);
+			trigger('oldPassword');
 		}
 	}, [oldPassword]);
+
+	useEffect(() => {
+		trigger(Object.keys(touchedFields) as Array<keyof IUpdatePasswordInputs>);
+	}, [oldPassword, newPassword, confirmPassword]);
 
 	return (
 		<>
@@ -139,11 +142,11 @@ export const EditProfilePasswordTab = ({
 			/>
 			{unexpectedError && (
 				<>
-					<Gap $height='19px'/>
+					<Gap $height="19px" />
 					<UnexpectedError />
 				</>
 			)}
-			{isSubmitSuccessful && !unexpectedError && (
+			{isSubmitSuccessful && !unexpectedError && !incorrectPassword && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
 				</SuccessMessage>
