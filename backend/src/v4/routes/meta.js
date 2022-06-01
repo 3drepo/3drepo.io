@@ -449,9 +449,9 @@
 	const extractNameFiltersFromUrl = (url) => {
 		let fieldNames = [];
 
-		const filterString = url.split("filter=")[1];
+		const filterString = url.match("[?&]filter=([^&]+)");
 		if(filterString) {
-			fieldNames = filterString.split(",").map(name => decodeURIComponent(name));
+			fieldNames = filterString[1].split(",").map(name => decodeURIComponent(name));
 		}
 
 		return fieldNames;
