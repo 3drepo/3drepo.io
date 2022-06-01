@@ -43,6 +43,7 @@ interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormE
 	maxWidth?: DialogProps['maxWidth'];
 	zeroMargin?: boolean;
 	isSubmitting?: boolean;
+	disableClosing?: boolean; 
 }
 
 export const FormModal = (props: IFormModal) => {
@@ -60,11 +61,18 @@ export const FormModal = (props: IFormModal) => {
 		maxWidth = false,
 		zeroMargin = false,
 		isSubmitting = false,
+		disableClosing = false,
 		...formProps
 	} = props;
+
+	const handleClose = () => {
+		if (disableClosing) return;
+		onClickClose();
+	};
+
 	return (
 		<Dialog
-			onClose={onClickClose}
+			onClose={handleClose}
 			open={open}
 			PaperComponent={RemoveWhiteCorners}
 			className={className}
@@ -79,7 +87,7 @@ export const FormModal = (props: IFormModal) => {
 						</Title>
 						{subtitle && <Subtitle>{subtitle}</Subtitle>}
 					</div>
-					<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+					<CloseButton aria-label="Close dialog" onClick={handleClose} disabled={disableClosing}>
 						<CloseIcon />
 					</CloseButton>
 				</Header>
@@ -90,7 +98,7 @@ export const FormModal = (props: IFormModal) => {
 				</ScrollArea>
 				{showButtons && (
 					<FormDialogActions>
-						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
+						<Button autoFocus onClick={handleClose} variant="outlined" color="secondary" size="medium" disabled={isSubmitting}>
 							Cancel
 						</Button>
 						<SubmitButton

@@ -98,12 +98,13 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			isValid={submitFunction || isSubmitting}
 			isSubmitting={isSubmitting}
 			$isPasswordTab={activeTab === 'password'}
+			disableClosing={isSubmitting}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
-					<Tab value="personal" label={TAB_LABELS.personal} />
-					<Tab value="password" label={TAB_LABELS.password} />
-					<Tab value="integrations" label={TAB_LABELS.integrations} />
+					<Tab value="personal" label={TAB_LABELS.personal} disabled={isSubmitting}/>
+					<Tab value="password" label={TAB_LABELS.password} disabled={isSubmitting}/>
+					<Tab value="integrations" label={TAB_LABELS.integrations} disabled={isSubmitting}/>
 				</TabList>
 				<TabPanel value="personal" $zeroSidePadding>
 					<ScrollArea>
