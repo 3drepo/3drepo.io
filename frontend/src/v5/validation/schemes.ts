@@ -26,12 +26,12 @@ const numberField = Yup.number().typeError(formatMessage({
 	defaultMessage: 'Must be a decimal number or integer',
 }));
 
-const password = Yup.string()
+const password = (passwordName='Password') => Yup.string()
 	.required(
 		formatMessage({
 			id: 'validation.password.error.required',
-			defaultMessage: 'Password is a required field',
-		}),
+			defaultMessage: `{passwordName} is a required field`,
+		}, { passwordName }),
 	)
 	.min(8,
 		formatMessage({
@@ -198,7 +198,15 @@ export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object
 			}),
 			() => !incorrectPassword,
 		),
-	newPassword: password,
+	newPassword: password('New Password')
+		.test(
+			'newPasswordIsDifferent',
+			formatMessage({
+				id: 'editProfile.password.error.samePassword',
+				defaultMessage: 'New password must be different from the old one',
+			}),
+			(value, testContext) => value !== testContext.parent.oldPassword,
+		),
 	confirmPassword: Yup.string()
 		.required(
 			formatMessage({
@@ -206,13 +214,21 @@ export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object
 				defaultMessage: 'Confirm password is a required field',
 			}),
 		)
-		.oneOf(
-			[Yup.ref('newPassword'), null],
+		.test(
+			'passwordMatch',
 			formatMessage({
 				id: 'editProfile.confirmPassword.error.notMatch',
 				defaultMessage: 'Password confirmation doesn\'t match the password',
 			}),
+			(value, testContext) => value === testContext.parent.newPassword,
 		),
+		// .oneOf(
+		// 	[Yup.ref('newPassword'), null],
+		// 	formatMessage({
+		// 		id: 'editProfile.confirmPassword.error.notMatch',
+		// 		defaultMessage: 'Password confirmation doesn\'t match the password',
+		// 	}),
+		// ),
 });
 
 export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({
@@ -263,7 +279,7 @@ export const UserSignupSchemaAccount = (
 			(username) => !alreadyExistingUsernames.includes(username),
 		),
 	email: email(alreadyExistingEmails),
-	password,
+	password: password(),
 	confirmPassword: Yup.string()
 		.required(
 			formatMessage({
