@@ -23,7 +23,7 @@ import { TabContext } from '@mui/lab';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProfileModal.styles';
 import { EditProfilePersonalTab, getUserPersonalValues, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
 const CONFIRM_LABELS = {
@@ -50,13 +50,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const [newAvatarFile, setNewAvatarFile] = useState(null);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 
-	// password tab
-	const [passwordFields, setPasswordFields] = useState<IUpdatePasswordInputs>(null);
-
-	const updatePasswordFields = (fields: Partial<IUpdatePasswordInputs>) => {
-		setPasswordFields({ ...passwordFields, ...fields });
-	};
-
 	// all tabs
 	const [activeTab, setActiveTab] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,7 +68,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			setActiveTab('personal');
 			setNewAvatarFile(null);
 			setAlreadyExistingEmails([]);
-			setPasswordFields(EMPTY_PASSWORDS);
 			setPersonalFields(getUserPersonalValues(user));
 		} else {
 			dispatch(CurrentUserActions.setPersonalError(''));
@@ -106,35 +98,34 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<Tab value="password" label={TAB_LABELS.password} disabled={isSubmitting}/>
 					<Tab value="integrations" label={TAB_LABELS.integrations} disabled={isSubmitting}/>
 				</TabList>
-				<TabPanel value="personal" $zeroSidePadding>
-					<ScrollArea>
-						<ScrollAreaPadding>
-							<EditProfilePersonalTab
-								setIsSubmitting={setIsSubmitting}
-								setSubmitFunction={setSubmitFunction}
-								fields={personalFields}
-								setPersonalFields={setPersonalFields}
-								user={user}
-								newAvatarFile={newAvatarFile}
-								setNewAvatarFile={setNewAvatarFile}
-								alreadyExistingEmails={alreadyExistingEmails}
-								setAlreadyExistingEmails={setAlreadyExistingEmails}
-							/>
-						</ScrollAreaPadding>
-					</ScrollArea>
-				</TabPanel>
-				<TabPanel value="password">
-					<EditProfilePasswordTab
-						setIsSubmitting={setIsSubmitting}
-						setSubmitFunction={setSubmitFunction}
-						fields={passwordFields}
-						updatePasswordFields={updatePasswordFields}
-					/>
-				</TabPanel>
-				<TabPanel value="integrations">
-					<EditProfileIntegrationsTab />
-				</TabPanel>
+				{/* TabPanels used to be here */}
 			</TabContext>
+			<TabPanel hidden={activeTab !== "personal"} $zeroSidePadding>
+				<ScrollArea>
+					<ScrollAreaPadding>
+						<EditProfilePersonalTab
+							setIsSubmitting={setIsSubmitting}
+							setSubmitFunction={setSubmitFunction}
+							fields={personalFields}
+							setPersonalFields={setPersonalFields}
+							user={user}
+							newAvatarFile={newAvatarFile}
+							setNewAvatarFile={setNewAvatarFile}
+							alreadyExistingEmails={alreadyExistingEmails}
+							setAlreadyExistingEmails={setAlreadyExistingEmails}
+						/>
+					</ScrollAreaPadding>
+				</ScrollArea>
+			</TabPanel>
+			<TabPanel hidden={activeTab !== "password"}>
+				<EditProfilePasswordTab
+					setIsSubmitting={setIsSubmitting}
+					setSubmitFunction={setSubmitFunction}
+				/>
+			</TabPanel>
+			<TabPanel hidden={activeTab !== "integrations"}>
+				<EditProfileIntegrationsTab />
+			</TabPanel>
 		</FormModal>
 	);
 };

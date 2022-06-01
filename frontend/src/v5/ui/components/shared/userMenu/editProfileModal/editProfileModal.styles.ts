@@ -17,7 +17,6 @@
 import styled from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
-import TabPanelBase from '@mui/lab/TabPanel';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
 import { SubmitButton } from '@controls/modal/formModal/formDialog.styles';
 
@@ -46,7 +45,7 @@ export const TabList = styled(TabListBase)`
 	padding-left: 17px;
 `;
 
-export const TabPanel = styled(TabPanelBase)<{ $zeroSidePadding?: boolean }>`
+export const TabPanel = styled('div')<{ $zeroSidePadding?: boolean }>`
 	padding: 30px ${({ $zeroSidePadding }) => ($zeroSidePadding ? 0 : 58)}px;
 	height: 554px;
     box-sizing: border-box;
