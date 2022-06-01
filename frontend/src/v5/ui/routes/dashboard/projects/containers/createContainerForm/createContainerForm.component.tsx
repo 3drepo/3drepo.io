@@ -29,6 +29,11 @@ import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FlexContainer } from './createContainerForm.styles';
 
+interface ICreateContainer {
+	open: boolean;
+	onClickClose: () => void;
+}
+
 interface IFormInput {
 	name: string;
 	unit: string;
@@ -37,15 +42,15 @@ interface IFormInput {
 	type: string;
 }
 
-export const CreateContainerForm = ({ open, close }): JSX.Element => {
-	const { control, handleSubmit, formState, reset, formState: { errors } } = useForm<IFormInput>({
+export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
+	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
 	});
 	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body);
-		close();
+		onClickClose();
 	};
 
 	useEffect(() => {
@@ -56,7 +61,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		<FormModal
 			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			open={open}
-			onClickClose={close}
+			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}
 			isValid={formState.isValid}
