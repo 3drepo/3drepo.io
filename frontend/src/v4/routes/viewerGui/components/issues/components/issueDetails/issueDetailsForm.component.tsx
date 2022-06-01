@@ -22,13 +22,16 @@ import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	ATTACHMENTS_ISSUE_TAB,
 	ISSUE_PROPERTIES_TAB,
 	ISSUE_SEQUENCING_TAB,
+	V5_ISSUE_SEQUENCING_TAB,
 	ISSUE_SHAPES_TAB,
-	ISSUE_TABS,
+	ISSUE_TABS as V4_ISSUE_TABS,
+	V5_ISSUE_TABS,
 } from '../../../../../../constants/issues';
 import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
@@ -93,7 +96,9 @@ export const IssueSchema = Yup.object().shape({
 	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
+const ISSUE_TABS = isV5() ? V5_ISSUE_TABS : V4_ISSUE_TABS;
 class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
+
 	get isNewIssue() {
 		return !this.props.issue._id;
 	}
@@ -223,13 +228,13 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 					scrollButtons="auto"
 				>
 					<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
-					<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
+					<StyledTab label={ISSUE_TABS.SEQUENCING} value={isV5() ? V5_ISSUE_SEQUENCING_TAB : ISSUE_SEQUENCING_TAB} />
 					<StyledTab label={ISSUE_TABS.SHAPES} value={ISSUE_SHAPES_TAB} />
 					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
 				</StyledTabs>
 				<TabContent>
 					{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
-					{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
+					{this.showSequencingContent(activeTab === (isV5() ? V5_ISSUE_SEQUENCING_TAB : ISSUE_SEQUENCING_TAB))}
 					{this.showShapesContent(activeTab === ISSUE_SHAPES_TAB)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
 				</TabContent>

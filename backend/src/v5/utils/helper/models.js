@@ -17,7 +17,7 @@
 
 const db = require('../../handler/db');
 const { deleteModel } = require('../../models/modelSettings');
-const { removeAllFilesFromModel } = require('../../models/fileRefs');
+const { removeAllFilesFromModel } = require('../../services/filesManager');
 const { templates } = require('../responseCodes');
 
 const ModelHelper = {};

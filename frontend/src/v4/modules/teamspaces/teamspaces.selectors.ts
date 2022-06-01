@@ -19,7 +19,7 @@ import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { searchByFilters } from '../../helpers/searching';
-import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel';
 import {
 	LIST_ITEMS_TYPES, SORTING_BY_LAST_UPDATED, SORTING_BY_NAME,
 } from '../../routes/teamspaces/teamspaces.contants';
