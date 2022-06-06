@@ -127,6 +127,9 @@ export const theme = createTheme(
 									height: '34px',
 								},
 							},
+							'&.react-autosuggest__suggestions-container': {
+								boxShadow: 'none',
+							},
 						},
 					},
 				},
