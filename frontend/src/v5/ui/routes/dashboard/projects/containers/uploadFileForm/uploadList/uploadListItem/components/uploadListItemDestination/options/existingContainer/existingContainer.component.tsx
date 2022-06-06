@@ -16,6 +16,7 @@
  */
 
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { FormattedMessage } from 'react-intl';
 import { Container, ErrorText } from './existingContainer.styles';
 
@@ -28,7 +29,7 @@ interface IExistingContainer {
 export const ExistingContainer = ({ container, latestRevision, inUse, ...props }: IExistingContainer) => (
 	<Container {...props}>
 		{container.name}
-		<LastRevision
+		<LatestRevision
 			hasRevisions={!!container.revisionsCount}
 			name={container.name}
 			status={container.status}
