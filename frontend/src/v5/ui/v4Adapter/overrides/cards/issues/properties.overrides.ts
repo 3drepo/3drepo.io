@@ -127,17 +127,6 @@ export default css`
 				height: 24px;
 			}
 		}
-
-		${UpdateButtonsContainer} {
-			justify-content: left;
-			${StyledButton} {
-				margin: 0;
-			}
-
-			${ButtonContainer} {
-				min-height: 26px;
-			}
-		}
 	}
 
 	${DescriptionImage} img {
@@ -155,6 +144,7 @@ export default css`
 
 	${UpdateButtonsContainer} {
 		justify-content: left;
+		padding-top: 0 !important;
 		${StyledButton} {
 			margin: 0;
 		}

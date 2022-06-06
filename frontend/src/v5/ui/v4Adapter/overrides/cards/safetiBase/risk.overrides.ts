@@ -1,12 +1,17 @@
+import { css } from 'styled-components';
 import { Header } from '@/v4/routes/viewerGui/components/risks/components/levelOfRisk/levelOfRisk.styles';
 import { DateFieldContainer } from '@/v4/routes/viewerGui/components/risks/components/mainRiskFormTab/mainRiskFormTab.styles';
 import { DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 import { DescriptionStyles } from '../issues/properties.overrides';
 
 export default css`
 	${DescriptionStyles}
 	${DescriptionImage} img {
 		border-radius: 5px;
+	}
+	${UpdateButtonsContainer} {
+		margin-bottom: 5px;
 	}
 	${FieldsRow} {
 		.MuiFormControl-root {
@@ -20,7 +25,9 @@ export default css`
 			margin: 0;
 			color: ${({ theme }) => theme.palette.secondary.main};
 			~ svg {
-				margin-top: -2px
+				margin-top: -4px;
+				/* TODO: fix after new palette is released */
+				color: #C1C8D5;
 			}
 		}
 		input, fieldset {
