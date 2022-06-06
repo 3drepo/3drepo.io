@@ -100,6 +100,9 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				setDisableClearable(!(value.name || inputValue));
 				const isExisting = options.some((option: IContainer) => inputValue === option.name);
 				filtered = filtered.filter((x) => x.name !== value.name);
+				if (containersInUse.length === containers.length && !inputValue) {
+					filtered = [];
+				}
 				if (inputValue !== '' && !isExisting) {
 					filtered = [{
 						...emptyOption,
@@ -140,7 +143,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 			ListboxComponent={(listboxProps) => <OptionsBox {...listboxProps} />}
 			noOptionsText={formatMessage({
 				id: 'uploads.destination.noOptions',
-				defaultMessage: 'The project has no containers. Start typing to create one.',
+				defaultMessage: 'Start typing to create a new Container.',
 			})}
 			className={className}
 			disabled={disabled}
