@@ -67,31 +67,24 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
 					{
-						!canUploadToBackend(status)
-							&& (
+						canUploadToBackend(status) ? (
+							<>
 								<RevisionsListEmptyText>
-									<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+									<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
 								</RevisionsListEmptyText>
-							)
-					}
-
-					{
-						canUploadToBackend(status)
-							&& (
-								<>
-									<RevisionsListEmptyText>
-										<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-									</RevisionsListEmptyText>
-									<Button
-										startIcon={<ArrowUpCircleIcon />}
-										variant="contained"
-										color="primary"
-									>
-										<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
-									</Button>
-								</>
-							)
-
+								<Button
+									startIcon={<ArrowUpCircleIcon />}
+									variant="contained"
+									color="primary"
+								>
+									<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
+								</Button>
+							</>
+						) : (
+							<RevisionsListEmptyText>
+								<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+							</RevisionsListEmptyText>
+						)
 					}
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
