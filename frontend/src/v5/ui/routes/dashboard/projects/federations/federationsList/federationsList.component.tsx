@@ -36,7 +36,7 @@ import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federation
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
-import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -150,14 +150,12 @@ export const FederationsList = ({
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasFederations && (
-					<DashedButtonContainer>
-						<DashboardListButton
-							startIcon={<AddCircleIcon />}
-							onClick={onClickCreate}
-						>
-							<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
-						</DashboardListButton>
-					</DashedButtonContainer>
+					<DashboardListButton
+						startIcon={<AddCircleIcon />}
+						onClick={onClickCreate}
+					>
+						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
+					</DashboardListButton>
 				)}
 			</DashboardListCollapse>
 		</Container>
