@@ -38,7 +38,7 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
-import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
@@ -161,14 +161,12 @@ export const ContainersList = ({
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasContainers && (
-					<DashedButtonContainer>
-						<DashboardListButton
-							startIcon={<AddCircleIcon />}
-							onClick={onClickCreate}
-						>
-							<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
-						</DashboardListButton>
-					</DashedButtonContainer>
+					<DashboardListButton
+						startIcon={<AddCircleIcon />}
+						onClick={onClickCreate}
+					>
+						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
+					</DashboardListButton>
 				)}
 
 			</DashboardListCollapse>
