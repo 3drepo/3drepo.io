@@ -25,11 +25,9 @@ export interface ICurrentUser {
 	company?: string,
 	countryCode?: string,
 	avatarUrl?: string,
-}
-
-export interface ICurrentUserErrors {
+	personalDataIsUpdating?: boolean,
 	personalError?: any,
-	passwordError?: any,
+	apiKeyIsUpdating?: boolean,
 	apiKeyError?: any,
 }
 

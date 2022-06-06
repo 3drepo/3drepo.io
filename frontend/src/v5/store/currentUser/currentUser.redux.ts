@@ -56,23 +56,35 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 // personal
 export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataIsUpdating }): ICurrentUserState => ({
 	...state,
-	personalDataIsUpdating,
+	currentUser: {
+		...state.currentUser,
+		personalDataIsUpdating,
+	},
 });
 
 export const setPersonalError = (state = INITIAL_STATE, { personalError }): ICurrentUserState => ({
 	...state,
-	personalError,
+	currentUser: {
+		...state.currentUser,
+		personalError,
+	},
 });
 
 // api key
 export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
 	...state,
-	apiKeyIsUpdating,
+	currentUser: {
+		...state.currentUser,
+		apiKeyIsUpdating,
+	},
 });
 
 export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrentUserState => ({
 	...state,
-	apiKeyError,
+	currentUser: {
+		...state.currentUser,
+		apiKeyError,
+	},
 });
 
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
@@ -84,7 +96,7 @@ export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE
 	// api key
 	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
 	[CurrentUserTypes.SET_API_KEY_ERROR]: setApiKeyError,
-});
+}) as (state: ICurrentUserState, action: any) => ICurrentUserState;
 
 /**
  * Types
@@ -92,12 +104,6 @@ export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE
 
 export interface ICurrentUserState {
 	currentUser: ICurrentUser;
-	personalDataIsUpdating?: boolean,
-	personalError?: any,
-	passwordIsUpdating?: boolean,
-	passwordError?: any,
-	apiKeyIsUpdating?: boolean,
-	apiKeyError?: any,
 }
 
 export type FetchUserAction = Action<'FETCH_USER'>;
