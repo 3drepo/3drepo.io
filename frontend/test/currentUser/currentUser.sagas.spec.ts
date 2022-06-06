@@ -19,7 +19,17 @@ import * as CurrentUserSaga from '@/v5/store/currentUser/currentUser.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { currentUserMockFactory, generateFakeApiKey } from './currentUser.fixtures';
+import {
+	currentUserMockFactory,
+	generateFakeApiKey,
+	generateFakeAvatarFile,
+	generateFakeAvatarUrl,
+	generatePersonlData,
+} from './currentUser.fixtures';
+import { UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
+import { spyOnAxiosApiCallWithFile } from '../test.helpers';
+import api from '@/v5/services/api/default';
+
 
 describe('Current User: sagas', () => {
 	describe('fetchUser', () => {
@@ -37,7 +47,7 @@ describe('Current User: sagas', () => {
 						userData,
 					}
 				})
-				.silentRun();
+				.run();
 		})
 
 		it('should show error dialog when API call errors', async () => {
@@ -55,77 +65,121 @@ describe('Current User: sagas', () => {
 							currentActions: 'trying to fetch current user details',
 						},
 					}})
-				.silentRun();
+				.run();
 		})
 	})
 
-	describe('updateUser', () => {
-		const userData = currentUserMockFactory();
-		it('should update user data', async () => {
+	describe('updatePersonalData', () => {
+		const userData = generatePersonlData();
+		const avatarFile = generateFakeAvatarFile();
+		const avatarUrl = generateFakeAvatarUrl();
+		const personalData: UpdatePersonalData = { ...userData };
+		const personalDataWithAvatar: UpdatePersonalData = { ...userData, avatarFile };
+
+		it('should update user data (without avatar)', async () => {
 			mockServer
 				.put('/user')
-				.reply(200, userData);
+				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updateUser(userData))
-				.put(CurrentUserActions.setIsPending(true))
-				.put(CurrentUserActions.updateUserSuccess(userData))
-				.put(CurrentUserActions.setIsPending(false))
-				.silentRun();
+				.dispatch(CurrentUserActions.updatePersonalData(personalData))
+				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
+				.put(CurrentUserActions.setPersonalError(''))
+				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
+				.run();
 		})
 
-		it('should show error dialog when API call errors', async () => {
+		it('should update user data (including avatar)', async () => {
+			const spy = spyOnAxiosApiCallWithFile(api, 'put');
+			window.URL.createObjectURL = jest.fn().mockReturnValue(avatarUrl);
+
+			mockServer
+				.put('/user')
+				.reply(200, null)
+				.put('/user/avatar')
+				.reply(200, { avatarUrl });
+
+			await expectSaga(CurrentUserSaga.default)
+				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar))
+				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
+				.put(CurrentUserActions.updateUserSuccess({ avatarUrl }))
+				.put(CurrentUserActions.updateUserSuccess(userData))
+				.put(CurrentUserActions.setPersonalError(''))
+				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
+				.run();
+
+			spy.mockClear();
+		})
+
+		it('should update personal error when API call errors on updateUser', async () => {
 			mockServer
 				.put('/user')
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updateUser(userData))
-				.put(CurrentUserActions.setIsPending(true))
+				.dispatch(CurrentUserActions.updatePersonalData(userData))
+				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put.like({
 					action: {
-						type: 'MODALS/OPEN',
-						modalType: 'alert',
-						props: {
-							currentActions: 'trying to update current user details',
-						},
-					}})
-				.silentRun();
+						type: 'CURRENT_USER2/SET_PERSONAL_ERROR',
+					},
+				})
+				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
+				.run();
+		})
+
+		it('should update personal error when API call errors on updateAvatar', async () => {
+			mockServer
+				.put('/user')
+				.reply(200, 'this is the response')
+				.put('/user/avatar')
+				.reply(400, Error);
+
+			await expectSaga(CurrentUserSaga.default)
+				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}))
+				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
+				.put.like({
+					action: {
+						type: 'CURRENT_USER2/SET_PERSONAL_ERROR',
+					},
+				})
+				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
+				.run();
 		})
 	})
 
 	describe('generateApiKey', () => {
-		const apiKey = generateFakeApiKey();
 		it('should generate an API key and update user data', async () => {
+			const apiKey = generateFakeApiKey();
+
 			mockServer
 				.post('/user/key')
 				.reply(200, apiKey);
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.generateApiKey())
-				.put(CurrentUserActions.setIsPending(true))
+				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess(apiKey))
-				.put(CurrentUserActions.setIsPending(false))
-				.silentRun();
+				.put(CurrentUserActions.setApiKeyError(''))
+				.put(CurrentUserActions.setApiKeyIsUpdating(false))
+				.run();
 		})
 
-		it('should show error dialog when API call errors', async () => {
+		it('should set api key error when API call errors', async () => {
 			mockServer
 				.post('/user/key')
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.generateApiKey())
-				.put(CurrentUserActions.setIsPending(true))
+				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put.like({
 					action: {
-						type: 'MODALS/OPEN',
-						modalType: 'alert',
-						props: {
-							currentActions: 'trying to generate API key',
-						},
-					}})
-				.silentRun();
+						type: 'CURRENT_USER2/SET_API_KEY_ERROR',
+					},
+				})
+				.put(CurrentUserActions.setApiKeyIsUpdating(false))
+				.run();
 		})
 	})
 
@@ -133,33 +187,34 @@ describe('Current User: sagas', () => {
 		it('should delete an API key and update user data', async () => {
 			mockServer
 				.delete('/user/key')
-				.reply(200, '');
+				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.deleteApiKey())
-				.put(CurrentUserActions.setIsPending(true))
+				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ apiKey: null }))
-				.put(CurrentUserActions.setIsPending(false))
-				.silentRun();
+				.put(CurrentUserActions.setApiKeyError(''))
+				.put(CurrentUserActions.setApiKeyIsUpdating(false))
+				.run();
 		})
 
-		it('should show error dialog when API call errors', async () => {
+		it('should set api key error when API call errors', async () => {
+			const error = 'Error: Request failed with status code 400';
+
 			mockServer
 				.delete('/user/key')
-				.reply(400, Error);
+				.reply(400, error);
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.deleteApiKey())
-				.put(CurrentUserActions.setIsPending(true))
+				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put.like({
 					action: {
-						type: 'MODALS/OPEN',
-						modalType: 'alert',
-						props: {
-							currentActions: 'trying to delete API key',
-						},
-					}})
-				.silentRun();
+						type: 'CURRENT_USER2/SET_API_KEY_ERROR',
+					},
+				})
+				.put(CurrentUserActions.setApiKeyIsUpdating(false))
+				.run();
 		})
 	})
-})
+});
