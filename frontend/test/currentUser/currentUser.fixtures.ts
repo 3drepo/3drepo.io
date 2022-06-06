@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { ICurrentUser } from '../../src/v5/store/currentUser/currentUser.types';
+import { ICurrentUser, UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
 
 export const currentUserMockFactory = (overrides?: Partial<ICurrentUser>): ICurrentUser => ({
 	username:  faker.random.word(),
@@ -29,5 +29,17 @@ export const currentUserMockFactory = (overrides?: Partial<ICurrentUser>): ICurr
 	hasAvatar: faker.datatype.boolean(),
 	...overrides,
 });
+
+export const generatePersonlData = (): UpdatePersonalData => ({
+	firstName: faker.name.firstName(),
+	lastName: faker.name.lastName(),
+	email: faker.internet.email(),
+	company: faker.company.companyName(),
+	countryCode: faker.address.countryCode(),
+});
+
+export const generateFakeAvatarFile = (): File => new File([], 'avatar.png');
+
+export const generateFakeAvatarUrl = () => 'blob:https://stackoverflow.com/3044f1cf-d41b-4e6d-ae79-b995342e7000';
 
 export const generateFakeApiKey = () => ({ apiKey: faker.datatype.uuid() });
