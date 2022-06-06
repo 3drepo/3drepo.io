@@ -28,7 +28,7 @@ describe('Users: redux', () => {
 	const teamspace = 'teamspaceA';
 
 	const bob = {
-		user: 'bob',
+		username: 'bob',
 		firstName: 'Bob',
 		lastName: 'User',
 		company: 'Company A',
@@ -39,7 +39,7 @@ describe('Users: redux', () => {
 	}
 
 	const alice = {
-		user: 'alice',
+		username: 'alice',
 		firstName: 'Alice',
 		lastName: 'Member',
 		company: 'Company B',
