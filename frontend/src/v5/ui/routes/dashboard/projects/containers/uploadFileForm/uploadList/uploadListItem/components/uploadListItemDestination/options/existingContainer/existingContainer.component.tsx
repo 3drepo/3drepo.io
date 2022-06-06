@@ -17,7 +17,7 @@
 
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { FormattedMessage } from 'react-intl';
-import { Container, ErrorText, LastRevision } from './existingContainer.styles';
+import { Container, ErrorText } from './existingContainer.styles';
 
 interface IExistingContainer {
 	container: IContainer;
