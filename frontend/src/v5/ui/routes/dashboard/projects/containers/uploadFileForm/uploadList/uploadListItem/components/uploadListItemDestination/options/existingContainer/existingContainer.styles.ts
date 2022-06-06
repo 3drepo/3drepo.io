@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { Name as RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.styles';
 import styled from 'styled-components';
 
@@ -30,9 +29,6 @@ export const Container = styled.div`
 	&:hover, &:focus {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
-`;
-
-export const LastRevision = styled(LatestRevision)`
 	&, ${RevisionStatus} {
 		color: ${({ theme }) => theme.palette.base.main};
 	}

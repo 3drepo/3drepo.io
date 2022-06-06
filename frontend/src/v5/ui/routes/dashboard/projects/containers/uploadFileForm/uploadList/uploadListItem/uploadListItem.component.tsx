@@ -61,6 +61,23 @@ export const UploadListItem = ({
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
 
 	const updateValue = (name) => onChange(name, watch(name));
+	const onDestinationChange = (value: IContainer): void => {
+		const conversion = {
+			containerId: value._id,
+			containerName: value.name,
+			containerCode: value.code,
+			containerType: value.type,
+			containerUnit: value.unit,
+			containerDesc: value.desc,
+		};
+		Object.keys(conversion).forEach((key: any) => {
+			if (conversion[key] || key === 'containerName') {
+				setValue(key, conversion[key]);
+				updateValue(key);
+			}
+		});
+		trigger('containerName');
+	};
 
 	useEffect(() => {
 		trigger('revisionTag');
@@ -87,23 +104,7 @@ export const UploadListItem = ({
 				disabled={isUploading}
 				errorMessage={errors.containerName?.message}
 				defaultValue={defaultValues.containerName}
-				onChange={(value: IContainer) => {
-					const conversion = {
-						containerId: value._id,
-						containerName: value.name,
-						containerCode: value.code,
-						containerType: value.type,
-						containerUnit: value.unit,
-						containerDesc: value.desc,
-					};
-					Object.keys(conversion).forEach((key: any) => {
-						if (conversion[key] || key === 'containerName') {
-							setValue(key, conversion[key]);
-							updateValue(key);
-						}
-					});
-					trigger('containerName');
-				}}
+				onChange={onDestinationChange}
 			/>
 			<RevisionTag
 				control={control}
