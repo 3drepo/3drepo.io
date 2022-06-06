@@ -23,41 +23,32 @@ export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {},
 );
 
-export const selectUsername: (state) => string = createSelector(
+export const selectUsername = createSelector(
 	selectCurrentUser, (state) => state.username || '',
 );
 
-export const selectFirstName: (state) => string = createSelector(
+export const selectFirstName = createSelector(
 	selectCurrentUser, (state) => state.firstName || '',
 );
 
 // personal data
-export const selectPersonalError: (state) => any = createSelector(
-	selectCurrentUserDomain, (state) => state.personalError,
+export const selectPersonalError = createSelector(
+	selectCurrentUser, (state) => state.personalError,
 );
 
-export const selectPersonalDataIsUpdating: (state) => boolean = createSelector(
-	selectCurrentUserDomain, (state) => !!(state.personalDataIsUpdating),
-);
-
-// password
-export const selectPasswordError: (state) => any = createSelector(
-	selectCurrentUserDomain, (state) => state.passwordError,
-);
-
-export const selectPasswordIsUpdating: (state) => boolean = createSelector(
-	selectCurrentUserDomain, (state) => !!(state.passwordIsUpdating),
+export const selectPersonalDataIsUpdating = createSelector(
+	selectCurrentUser, (state) => !!(state.personalDataIsUpdating),
 );
 
 // api key
-export const selectApiKey: (state) => string = createSelector(
+export const selectApiKey = createSelector(
 	selectCurrentUser, (state) => state.apiKey || '',
 );
 
-export const selectApiKeyError: (state) => any = createSelector(
-	selectCurrentUserDomain, (state) => state.apiKeyError,
+export const selectApiKeyError = createSelector(
+	selectCurrentUser, (state) => state.apiKeyError,
 );
 
-export const selectApiKeyIsUpdating: (state) => boolean = createSelector(
-	selectCurrentUserDomain, (state) => !!(state.apiKeyIsUpdating),
+export const selectApiKeyIsUpdating = createSelector(
+	selectCurrentUser, (state) => !!(state.apiKeyIsUpdating),
 );
