@@ -113,6 +113,7 @@ export const SuggestionsList = styled(Popper)`
 		max-height: 250px;
 		overflow: auto;
 		padding-left: 0;
+		margin-top: 0;
 	}
 
 	.react-autosuggest__suggestion {
