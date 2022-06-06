@@ -32,6 +32,7 @@ import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 import { DashboardParams } from '../../../routes.constants';
+import { CreateFederationForm } from './createFederationForm';
 
 export const Federations = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -49,6 +50,7 @@ export const Federations = (): JSX.Element => {
 
 	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
+	const [createFedOpen, setCreateFedOpen] = useState(false);
 
 	return (
 		<>
@@ -61,6 +63,7 @@ export const Federations = (): JSX.Element => {
 						filterQuery={favouritesFilterQuery}
 						onFilterQueryChange={setFavouritesFilterQuery}
 						federations={filterFederations(favouriteFederations, favouritesFilterQuery)}
+						onClickCreate={() => setCreateFedOpen(true)}
 						title={(
 							<FormattedMessage
 								id="federations.favourites.collapseTitle"
@@ -86,6 +89,7 @@ export const Federations = (): JSX.Element => {
 						filterQuery={allFilterQuery}
 						onFilterQueryChange={setAllFilterQuery}
 						federations={filterFederations(federations, allFilterQuery)}
+						onClickCreate={() => setCreateFedOpen(true)}
 						title={(
 							<FormattedMessage
 								id="federations.all.collapseTitle"
@@ -106,6 +110,7 @@ export const Federations = (): JSX.Element => {
 									startIcon={<AddCircleIcon />}
 									variant="contained"
 									color="primary"
+									onClick={() => setCreateFedOpen(true)}
 								>
 									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
 								</Button>
@@ -114,6 +119,10 @@ export const Federations = (): JSX.Element => {
 					/>
 				</>
 			)}
+			<CreateFederationForm
+				open={createFedOpen}
+				onClickClose={() => setCreateFedOpen(false)}
+			/>
 		</>
 	);
 };
