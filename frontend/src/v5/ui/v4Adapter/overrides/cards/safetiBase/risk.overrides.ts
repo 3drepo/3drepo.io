@@ -1,9 +1,10 @@
 import { Header } from '@/v4/routes/viewerGui/components/risks/components/levelOfRisk/levelOfRisk.styles';
 import { DateFieldContainer } from '@/v4/routes/viewerGui/components/risks/components/mainRiskFormTab/mainRiskFormTab.styles';
 import { DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { css } from 'styled-components';
+import { DescriptionStyles } from '../issues/properties.overrides';
 
 export default css`
+	${DescriptionStyles}
 	${DescriptionImage} img {
 		border-radius: 5px;
 	}
