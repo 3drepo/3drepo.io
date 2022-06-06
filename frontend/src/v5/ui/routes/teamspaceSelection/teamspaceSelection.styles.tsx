@@ -27,19 +27,23 @@ export const ScrollBar = styled(ScrollArea).attrs({
 `;
 
 export const HomeContent = styled.div`
-	padding: 60px;
-	height: 100%;
+	padding-bottom: 150px;
 	box-sizing: border-box;
 	display: flex;
 	flex-flow: column;
 	align-items: center;
 `;
 
+export const FadeMessageTrigger = styled.div`
+	height: 1px;
+`;
+
 export const WelcomeMessage = styled(Typography).attrs({
 	variant: 'h1',
-})`
+})<{ visible: boolean; }>`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	text-align: center;
-	margin-bottom: 40px;
-	margin-top: auto;
+	transition: opacity 0.5s ease-out;
+	opacity: ${({ visible }) => (visible ? 1 : 0)};
+	transform: translateY(75px);
 `;
