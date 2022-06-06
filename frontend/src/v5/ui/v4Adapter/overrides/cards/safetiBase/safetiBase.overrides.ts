@@ -1,5 +1,6 @@
 import { StyledTab, StyledTabs, TabContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
+import safetiBaseRisk from './risk.overrides';
 
 export default css`
 	${StyledTabs} {
@@ -18,5 +19,6 @@ export default css`
 		/* TODO - fix after new palette is released */
 		background-color: #F7F8FA;
 		
+		${safetiBaseRisk}
 	}
 `;

@@ -51,6 +51,10 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							fontSize: '13px',
+							textTransform: 'lowercase',
+							':first-letter': {
+								textTransform: 'uppercase',
+							},
 						},
 					},
 				},
