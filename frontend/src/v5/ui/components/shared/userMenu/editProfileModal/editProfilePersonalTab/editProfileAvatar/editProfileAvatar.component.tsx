@@ -68,7 +68,7 @@ export const EditProfileAvatar = ({
 		<Header>
 			<ProfilePicture>
 				{avatarIsAvailable() ? (
-					<Avatar avatarUrl={getAvatarUrl()} user={user}/>
+					<Avatar avatarUrl={getAvatarUrl()} user={user} />
 				) : (
 					<UserIcon />
 				)}
@@ -76,7 +76,7 @@ export const EditProfileAvatar = ({
 			<UserInfo>
 				<Username>{user.username}</Username>
 				<FullName>
-					<TruncatableName>{user.firstName}</TruncatableName> 
+					<TruncatableName>{user.firstName}</TruncatableName>
 					<TruncatableName>{user.lastName}</TruncatableName>
 				</FullName>
 				<AddImageButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
