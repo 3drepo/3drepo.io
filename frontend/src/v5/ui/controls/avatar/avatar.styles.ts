@@ -37,8 +37,7 @@ export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabl
 					background-color: ${theme.palette.tertiary.main};
 				}
 			}
-		` : 'cursor: default;'
-		)}
+		` : 'cursor: default;')}
 
 		&:hover {
 			background-color: transparent;
