@@ -23,6 +23,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { generateRandomString } = require('../../helper/services');
 const { topicTypes } = require('../../../../src/v5/models/issues.constants');
+const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
 const { riskCategories } = require('../../../../src/v5/models/risks.constants');
 
 const testHasAccessToTeamspace = () => {
@@ -156,10 +157,29 @@ const testCreateTeamspaceSettings = () => {
 	});
 };
 
+const testGetAllUsersInTeamspace = () => {
+	describe('Get all users in teamspace', () => {
+		test('should get all users in a teamspace', async () => {
+			const teamspace = generateRandomString();
+			const users = [
+				{ id: generateRandomString(), user: generateRandomString() },
+				{ id: generateRandomString(), user: generateRandomString() },
+			];
+			const fn = jest.spyOn(db, 'find').mockImplementation(() => users);
+			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
+			expect(res).toEqual(users.map((u) => u.user));
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
+				{ _id: 0, user: 1 }, undefined);
+		});
+	});
+};
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
 	testGetSubscriptions();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
+	testGetAllUsersInTeamspace();
 });

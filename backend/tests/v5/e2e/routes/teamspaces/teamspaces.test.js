@@ -84,19 +84,20 @@ const setupData = async () => {
 			],
 		},
 	});
-	await ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name, [userWithLicenseUnlimitedCollabs.user], false, {
-		billing: {
-			subscriptions: [
-				{
-					discretionary: {
-						collaborators: 'unlimited',
-						data: licenseData,
-						expiryDate: Date.now() + 100000,
+	await ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
+		[userWithLicenseUnlimitedCollabs.user], false, {
+			billing: {
+				subscriptions: [
+					{
+						discretionary: {
+							collaborators: 'unlimited',
+							data: licenseData,
+							expiryDate: Date.now() + 100000,
+						},
 					},
-				},
-			],
-		},
-	});
+				],
+			},
+		});
 	await ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], false, {
 		billing: {
 			subscriptions: [
@@ -118,15 +119,15 @@ const setupData = async () => {
 		),
 		ServiceHelper.db.createUser(
 			userWithLicense,
-			[tsWithLicense.name]
+			[tsWithLicense.name],
 		),
 		ServiceHelper.db.createUser(
 			userWithLicenseUnlimitedCollabs,
-			[tsWithLicenseUnlimitedCollabs.name]
+			[tsWithLicenseUnlimitedCollabs.name],
 		),
 		ServiceHelper.db.createUser(
 			userWithExpiredLicense,
-			[tsWithExpiredLicense.name]
+			[tsWithExpiredLicense.name],
 		),
 		ServiceHelper.db.createUser(
 			testUser2,
@@ -184,7 +185,7 @@ const testGetTeamspaceMembers = () => {
 
 			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
 
-			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {				
+			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {
 				const { firstName, lastName, billing } = basicData;
 				const data = {
 					firstName,
@@ -253,25 +254,47 @@ const testGetQuotaInfo = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test(`should return ${templates.licenceExpired.code} if the user has an expired license`, async () => {			
+		test(`should return ${templates.licenceExpired.code} if the user has an expired license`, async () => {
 			const res = await agent.get(`${route(tsWithExpiredLicense.name)}/?key=${userWithExpiredLicense.apiKey}`).expect(templates.licenceExpired.status);
 			expect(res.body.code).toEqual(templates.licenceExpired.code);
 		});
-		
-		test(`should return quota if the user has a valid license`, async () => {			
+
+		test('should return quota if the user has a valid license', async () => {
 			const res = await agent.get(`${route()}/?key=${userWithLicense.apiKey}`)
-				.expect(templates.ok.status);			
-			const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited' ?
-				'unlimited' : config.subscriptions?.basic?.collaborators + userCollabs;
+				.expect(templates.ok.status);
+			const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited'
+				? 'unlimited' : config.subscriptions?.basic?.collaborators + userCollabs;
 			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
-			expect(res.body).toEqual( {collaboratorLimit, spaceLimit, spaceUsed: 0});
+			expect(res.body).toEqual(
+				{
+					data: {
+						used: 0,
+						available: spaceLimit,
+					},
+					seats: {
+						used: 1,
+						available: collaboratorLimit,
+					},
+				},
+			);
 		});
 
-		test(`should return quota if the user has a valid license and unlimited collaborators`, async () => {			
+		test('should return quota if the user has a valid license and unlimited collaborators', async () => {
 			const res = await agent.get(`${route(tsWithLicenseUnlimitedCollabs.name)}/?key=${userWithLicenseUnlimitedCollabs.apiKey}`)
-				.expect(templates.ok.status);			
+				.expect(templates.ok.status);
 			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
-			expect(res.body).toEqual( {collaboratorLimit: 'unlimited', spaceLimit, spaceUsed: 0});
+			expect(res.body).toEqual(
+				{
+					data: {
+						used: 0,
+						available: spaceLimit,
+					},
+					seats: {
+						used: 1,
+						available: 'unlimited',
+					},
+				},
+			);
 		});
 	});
 };

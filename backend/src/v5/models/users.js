@@ -267,5 +267,4 @@ User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { '
 User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
 	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
-
 module.exports = User;

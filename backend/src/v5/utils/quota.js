@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('./responseCodes');
+const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaces');
+const { getInvitationsByTeamspace } = require('../models/invitations');
 const DBHandler = require('../handler/db');
 const config = require('./config');
-const { getSubscriptions } = require('../models/teamspaces');
 const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
@@ -28,7 +29,7 @@ Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 	let collaboratorLimit = config.subscriptions?.basic?.collaborators ?? 0;
 	let hasExpiredQuota = false;
 
-	for(let i = 0; i< subs.length; i++){
+	for (let i = 0; i < subs.length; i++) {
 		const sub = subs[i];
 		Object.keys(sub).forEach((key) => {
 			// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
@@ -55,7 +56,7 @@ Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 	return { quota: inMegabytes ? quotaInBytes : quotaInBytes * 1024 * 1024, collaboratorLimit };
 };
 
-Quota.calculateSpaceUsed = async (teamspace, inMegabytes = false) => {
+Quota.getSpacedUsed = async (teamspace, inMegabytes = false) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
@@ -75,6 +76,13 @@ Quota.calculateSpaceUsed = async (teamspace, inMegabytes = false) => {
 	return inMegabytes ? totalSpace / (1024 * 1024) : totalSpace;
 };
 
+Quota.getCollaboratorsUsed = async (teamspace) => {
+	const teamspaceUsers = await getAllUsersInTeamspace(teamspace);
+	const teamspaceInvitations = await getInvitationsByTeamspace(teamspace);
+
+	return teamspaceUsers.length + teamspaceInvitations.length;
+};
+
 Quota.sufficientQuota = async (teamspace, size) => {
 	if (size > config.uploadSizeLimit) {
 		throw createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
@@ -82,7 +90,7 @@ Quota.sufficientQuota = async (teamspace, size) => {
 
 	const [quotaInfo, dataUsed] = await Promise.all([
 		Quota.getQuotaInfo(teamspace),
-		Quota.calculateSpaceUsed(teamspace),
+		Quota.getSpacedUsed(teamspace),
 	]);
 
 	if ((dataUsed + size) > quotaInfo.quota) {

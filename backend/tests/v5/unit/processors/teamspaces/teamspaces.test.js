@@ -16,6 +16,7 @@
  */
 
 const _ = require('lodash');
+
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
@@ -139,17 +140,30 @@ const testGetQuotaInfo = () => {
 				collaboratorLimit: generateRandomNumber(0),
 			};
 			const spaceUsed = generateRandomNumber(0);
+			const collabsUsed = generateRandomNumber(0);
 			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => quotaInfo);
-			const spaceUsedMock = Quota.calculateSpaceUsed.mockImplementationOnce(() => spaceUsed);
+			const spaceUsedMock = Quota.getSpacedUsed.mockImplementationOnce(() => spaceUsed);
+			const getCollaboratorsUsedMock = Quota.getCollaboratorsUsed.mockImplementationOnce(() => collabsUsed);
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
-			expect(res).toEqual({ spaceLimit: quotaInfo.quota,
-				collaboratorLimit: quotaInfo.collaboratorLimit,
-				spaceUsed });
+			expect(res).toEqual(
+				{
+					data: {
+						available: quotaInfo.quota,
+						used: spaceUsed,
+					},
+					seats: {
+						available: quotaInfo.collaboratorLimit,
+						used: collabsUsed,
+					},
+				},
+			);
 			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
 			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
 			expect(spaceUsedMock).toHaveBeenCalledTimes(1);
 			expect(spaceUsedMock).toHaveBeenCalledWith(teamspace, true);
+			expect(getCollaboratorsUsedMock).toHaveBeenCalledTimes(1);
+			expect(getCollaboratorsUsedMock).toHaveBeenCalledWith(teamspace);
 		});
 	});
 };

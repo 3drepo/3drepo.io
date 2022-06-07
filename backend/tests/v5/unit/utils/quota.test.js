@@ -31,28 +31,29 @@ const testGetQuotaInfo = () => {
 	const tsWithSomeUsage = 'withUsage';
 
 	const subsByTeamspace = {
-		[tsWithExpiredQuota]: {
+		[tsWithExpiredQuota]: [{
 			enterprise: {
 				data: 10, // 10MB
 				expiryDate: Date.now() - 10,
 				collaborators: 1,
 			},
-		},
-		[tsWithQuota]: {
+		}],
+
+		[tsWithQuota]: [{
 			enterprise: {
 				data: 6, // 6MB
 				expiryDate: Date.now() + 100000,
 				collaborators: 2,
 			},
-		},
-		[tsWithSomeUsage]: {
+		}],
+		[tsWithSomeUsage]: [{
 			enterprise: {
 				data: 1,
 				expiryDate: Date.now() + 100000,
 				collaborators: 3,
 			},
-		},
-		[tsWithMultipleLicense]: {
+		}],
+		[tsWithMultipleLicense]: [{
 			enterprise: {
 				data: 2,
 				expiryDate: Date.now() + 100000,
@@ -64,9 +65,9 @@ const testGetQuotaInfo = () => {
 				collaborators: 5,
 			},
 			paypal: {},
-		},
+		}],
 
-		[tsWithMultipleLicense2]: {
+		[tsWithMultipleLicense2]: [{
 			enterprise: {
 				data: 2,
 				expiryDate: Date.now() + 100000,
@@ -77,8 +78,7 @@ const testGetQuotaInfo = () => {
 				expiryDate: Date.now() - 100000,
 				collaborators: 7,
 			},
-		},
-
+		}],
 	};
 
 	jest.spyOn(db, 'findOne').mockImplementation((ts, col, { user }) => {
@@ -124,7 +124,7 @@ const testGetQuotaInfo = () => {
 	});
 };
 
-const testCalculateSpaceUsed = () => {
+const testGetSpacedUsed = () => {
 	describe('Calculate the spaced used', () => {
 		const teamspace = generateRandomString();
 		const expectedSize = 1048576;
@@ -137,14 +137,14 @@ const testCalculateSpaceUsed = () => {
 		const fn2 = jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: expectedSize }]));
 
 		test('should return spaced used in bytes', async () => {
-			const res = await Quota.calculateSpaceUsed(teamspace);
+			const res = await Quota.getSpacedUsed(teamspace);
 			expect(res).toEqual(expectedSize);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledTimes(1);
 		});
 
 		test('should return spaced used in megabytes', async () => {
-			const res = await Quota.calculateSpaceUsed(teamspace, true);
+			const res = await Quota.getSpacedUsed(teamspace, true);
 			expect(res).toEqual(1);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledTimes(1);
@@ -164,7 +164,7 @@ const testSufficientQuota = () => {
 
 		test('should return error if quota exceeds the limit', async () => {
 			jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({
-				customData: { billing: { subscriptions: [{ data: 1, collaborators: 2 }] } },
+				customData: { billing: { subscriptions: [{ enterprise: { data: 1, collaborators: 2 } }] } },
 			}));
 
 			jest.spyOn(db, 'listCollections').mockImplementationOnce(() => Promise.resolve([
@@ -196,8 +196,24 @@ const testSufficientQuota = () => {
 	});
 };
 
+const testGetCollaboratorsUsed = () => {
+	describe('Get collaborators used', () => {
+		test('should get the total collaborators used by the user', async () => {
+			jest.spyOn(db, 'find').mockImplementationOnce(() => [
+				{ user: generateRandomString() },
+				{ user: generateRandomString() },
+			]);
+
+			const teamspace = generateRandomString();
+			const res = await Quota.getCollaboratorsUsed(teamspace);
+			expect(res).toEqual(2);
+		});
+	});
+};
+
 describe('utils/quota', () => {
 	testGetQuotaInfo();
-	testCalculateSpaceUsed();
+	testGetSpacedUsed();
 	testSufficientQuota();
+	testGetCollaboratorsUsed();
 });

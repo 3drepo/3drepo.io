@@ -16,10 +16,10 @@
  */
 
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
-const { calculateSpaceUsed, getQuotaInfo } = require('../../utils/quota');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
+const { getCollaboratorsUsed, getQuotaInfo, getSpacedUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
@@ -70,9 +70,19 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 
 Teamspaces.getQuotaInfo = async (teamspace) => {
 	const quotaInfo = await getQuotaInfo(teamspace, true);
-	const spaceUsed = await calculateSpaceUsed(teamspace, true);
+	const spaceUsed = await getSpacedUsed(teamspace, true);
+	const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
 
-	return { spaceLimit: quotaInfo.quota, collaboratorLimit: quotaInfo.collaboratorLimit, spaceUsed };
+	return {
+		data: {
+			available: quotaInfo.quota,
+			used: spaceUsed,
+		},
+		seats: {
+			available: quotaInfo.collaboratorLimit,
+			used: collaboratorsUsed,
+		},
+	};
 };
 
 module.exports = Teamspaces;
