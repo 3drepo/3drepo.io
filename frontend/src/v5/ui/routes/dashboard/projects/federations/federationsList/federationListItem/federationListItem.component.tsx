@@ -124,10 +124,7 @@ export const FederationListItem = ({
 					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={Display.Tablet}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('handle containers button');
-						}}
+						onClick={() => setOpenModal(MODALS.editFederation)}
 						width={165}
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
