@@ -61,7 +61,7 @@ export const EditProfilePersonalTab = ({
 
 	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => transform(
 		personalValues,
-		(result, value, key) => (result[key] = value.trim()),
+		(result, value, key) => { result[key] = value.trim() },
 		{} as IUpdatePersonalInputs,
 	);
 
@@ -69,7 +69,7 @@ export const EditProfilePersonalTab = ({
 		pick(
 			defaults(user, { company: '', countryCode: 'GB' }),
 			['firstName', 'lastName', 'email', 'company', 'countryCode'],
-		)
+		),
 	);
 
 	const {

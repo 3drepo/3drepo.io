@@ -17,12 +17,12 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { TabContext } from '@mui/lab';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 
 const CONFIRM_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
