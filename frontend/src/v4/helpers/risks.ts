@@ -228,7 +228,7 @@
 	 const jobsList = [...jobs, UNASSIGNED_JOB];
 
 	 return {
-		 [RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(getRiskFilterValues(settings.category)),
+		 [RISK_FILTER_RELATED_FIELDS.CATEGORY]: getRiskFilterValues(settings.category),
 		 [RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
 		 [RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
 		 [RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),
