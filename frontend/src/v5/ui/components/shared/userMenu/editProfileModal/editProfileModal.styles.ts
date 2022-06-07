@@ -53,12 +53,8 @@ export const TabList = styled(TabListBase)`
 	padding-left: 17px;
 `;
 
-export const TabPanel = styled('div')<{ $zeroSidePadding?: boolean }>`
-	padding: 30px ${({ $zeroSidePadding }) => ($zeroSidePadding ? 0 : 58)}px;
+export const TabPanel = styled('div')<{ $zeroPadding?: boolean }>`
 	height: 554px;
 	box-sizing: border-box;
-`;
-
-export const ScrollAreaPadding = styled.div`
-	padding: 0 58px;
+	${({ $zeroPadding }) => !$zeroPadding && 'padding: 30px 58px'};
 `;

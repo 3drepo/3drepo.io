@@ -15,13 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
-import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { TabContext } from '@mui/lab';
-import { ScrollArea } from '@controls/scrollArea';
-import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding, TruncatableName } from './editProfileModal.styles';
+import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
@@ -98,15 +95,11 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				</TabList>
 			</TabContext>
 			<TabPanel hidden={activeTab !== 'personal'} $zeroPadding>
-				<ScrollArea>
-					<ScrollAreaPadding>
-						<EditProfilePersonalTab
-							setIsSubmitting={setIsSubmitting}
-							setSubmitFunction={setPersonalSubmitFunction}
-							user={user}
-						/>
-					</ScrollAreaPadding>
-				</ScrollArea>
+				<EditProfilePersonalTab
+					setIsSubmitting={setIsSubmitting}
+					setSubmitFunction={setPersonalSubmitFunction}
+					user={user}
+				/>
 			</TabPanel>
 			<TabPanel hidden={activeTab !== 'password'}>
 				<EditProfilePasswordTab

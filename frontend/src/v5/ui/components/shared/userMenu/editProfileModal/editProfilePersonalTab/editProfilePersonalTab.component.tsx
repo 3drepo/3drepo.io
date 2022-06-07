@@ -30,7 +30,9 @@ import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { defaults, pick, transform, isMatch } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { ScrollArea } from '@controls/scrollArea';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
+import { ScrollAreaPadding } from './editProfilePersonal.styles';
 
 interface IUpdatePersonalInputs {
 	firstName: string;
@@ -141,72 +143,74 @@ export const EditProfilePersonalTab = ({
 	useEffect(() => setIsSubmitting(formIsUploading));
 
 	return (
-		<>
-			<EditProfileAvatar
-				user={user}
-				newAvatarFile={newAvatarFile}
-				setNewAvatarFile={setNewAvatarFile}
-			/>
-			<FormTextField
-				name="firstName"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.firstName',
-					defaultMessage: 'First Name',
-				})}
-				required
-				formError={errors.firstName}
-			/>
-			<FormTextField
-				name="lastName"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.lastName',
-					defaultMessage: 'Last Name',
-				})}
-				required
-				formError={errors.lastName}
-			/>
-			<FormTextField
-				name="email"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.email',
-					defaultMessage: 'Email',
-				})}
-				required
-				formError={errors.email}
-			/>
-			<FormTextField
-				name="company"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.company',
-					defaultMessage: 'Company',
-				})}
-				formError={errors.company}
-			/>
-			<FormSelect
-				name="countryCode"
-				control={control}
-				label={formatMessage({
-					id: 'userSignup.form.countryCode',
-					defaultMessage: 'Country',
-				})}
-				required
-			>
-				{clientConfigService.countries.map((country) => (
-					<MenuItem key={country.code} value={country.code}>
-						{country.name}
-					</MenuItem>
-				))}
-			</FormSelect>
-			{isSubmitted && uploadWasSuccessful && (
-				<SuccessMessage>
-					<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
-				</SuccessMessage>
-			)}
-			{unexpectedError && <UnexpectedError gapTop />}
-		</>
+		<ScrollArea>
+			<ScrollAreaPadding>
+				<EditProfileAvatar
+					user={user}
+					newAvatarFile={newAvatarFile}
+					setNewAvatarFile={setNewAvatarFile}
+				/>
+				<FormTextField
+					name="firstName"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.firstName',
+						defaultMessage: 'First Name',
+					})}
+					required
+					formError={errors.firstName}
+				/>
+				<FormTextField
+					name="lastName"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.lastName',
+						defaultMessage: 'Last Name',
+					})}
+					required
+					formError={errors.lastName}
+				/>
+				<FormTextField
+					name="email"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.email',
+						defaultMessage: 'Email',
+					})}
+					required
+					formError={errors.email}
+				/>
+				<FormTextField
+					name="company"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.company',
+						defaultMessage: 'Company',
+					})}
+					formError={errors.company}
+				/>
+				<FormSelect
+					name="countryCode"
+					control={control}
+					label={formatMessage({
+						id: 'userSignup.form.countryCode',
+						defaultMessage: 'Country',
+					})}
+					required
+				>
+					{clientConfigService.countries.map((country) => (
+						<MenuItem key={country.code} value={country.code}>
+							{country.name}
+						</MenuItem>
+					))}
+				</FormSelect>
+				{isSubmitted && uploadWasSuccessful && (
+					<SuccessMessage>
+						<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
+					</SuccessMessage>
+				)}
+				{unexpectedError && <UnexpectedError gapTop />}
+			</ScrollAreaPadding>
+		</ScrollArea>
 	);
 };
