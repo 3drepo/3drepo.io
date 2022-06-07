@@ -28,7 +28,7 @@ import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { defaults, isEmpty, pick } from 'lodash';
+import { defaults, pick, transform, isMatch } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 
@@ -57,9 +57,17 @@ export const EditProfilePersonalTab = ({
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedError, setUnexpectedError] = useState(false);
 
-	const getUserPersonalValues = () => pick(
-		defaults(user, { company: '', countryCode: 'GB' }),
-		['firstName', 'lastName', 'email', 'company', 'countryCode'],
+	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => transform(
+		personalValues,
+		(result, value, key) => (result[key] = value.trim()),
+		{} as IUpdatePersonalInputs,
+	);
+
+	const getUserPersonalValues = () => trimPersonalValues(
+		pick(
+			defaults(user, { company: '', countryCode: 'GB' }),
+			['firstName', 'lastName', 'email', 'company', 'countryCode'],
+		)
 	);
 
 	const {
@@ -67,31 +75,39 @@ export const EditProfilePersonalTab = ({
 		trigger,
 		handleSubmit,
 		reset,
+		watch,
 		control,
-		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful, dirtyFields },
+		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
 		defaultValues: getUserPersonalValues(),
 	});
 
+	const firstName = watch('firstName');
+	const lastName = watch('lastName');
+	const company = watch('company');
+
+	const getTrimmedValues = () => trimPersonalValues(getValues());
+
 	const onSubmit = () => {
 		setUnexpectedError(false);
+		console.log(getTrimmedValues());
 		CurrentUserActionsDispatchers.updatePersonalData({
-			...getValues(),
+			...getTrimmedValues(),
 			avatarFile: newAvatarFile,
 		});
 	};
 
 	const uploadWasSuccessful = !formIsUploading && !personalError;
 
-	const fieldsAreDirty = !isEmpty(dirtyFields) || newAvatarFile;
+	const fieldsAreDirty = () => !isMatch(user, getTrimmedValues()) || newAvatarFile;
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && fieldsAreDirty;
+		const shouldEnableSubmit = formIsValid && fieldsAreDirty();
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
-	}, [formIsValid, newAvatarFile, fieldsAreDirty]);
+	}, [newAvatarFile, firstName, lastName, company]);
 
 	// update form values when user is updated
 	useEffect(() => {
