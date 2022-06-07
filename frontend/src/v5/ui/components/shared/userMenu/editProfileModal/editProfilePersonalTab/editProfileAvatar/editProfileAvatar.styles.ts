@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { Button } from '@controls/button';
 import UserIconBase from '@assets/icons/filled/user-filled.svg';
 import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -34,7 +35,8 @@ export const UserIcon = styled(UserIconBase)`
 `;
 
 export const ProfilePicture = styled.div`
-	width: 115px;
+	min-width: 115px;
+	max-width: 115px;
 	height: 115px;
 	border-radius: 50%;
 	background-color: ${({ theme }) => theme.palette.base.lightest};
@@ -45,8 +47,10 @@ export const ProfilePicture = styled.div`
 	overflow: hidden;
 
 	img {
-		width: 100%;
 		object-fit: contain;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 `;
 
@@ -55,6 +59,11 @@ export const UserInfo = styled.div`
 	flex-direction: column;
 	margin-left: 20px;
 `;
+
+export const TruncateName = styled(Truncate).attrs({
+	lines: 1,
+	width: 300,
+})``;
 
 export const Username = styled.div`
 	font-size: ${({ theme }) => theme.typography.h3};
