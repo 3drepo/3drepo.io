@@ -19,6 +19,7 @@ import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
 import { SubmitButton } from '@controls/modal/formModal/formDialog.styles';
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 
 export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
 	.MuiDialogContent-root {
@@ -31,6 +32,13 @@ export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
 	${SubmitButton} {
 		width: ${({ $isPasswordTab }) => ($isPasswordTab ? 132 : 112)}px;
 	}
+`;
+
+export const TruncatableName = styled(Truncate).attrs({
+	lines: 1,
+	width: 345,
+})`
+	display: inline-block;
 `;
 
 export const Tab = styled(TabBase)`

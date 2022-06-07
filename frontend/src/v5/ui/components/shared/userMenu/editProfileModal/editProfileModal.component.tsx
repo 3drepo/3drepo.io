@@ -21,7 +21,7 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { TabContext } from '@mui/lab';
 import { ScrollArea } from '@controls/scrollArea';
-import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding } from './editProfileModal.styles';
+import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
@@ -81,8 +81,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		<FormModal
 			open={open}
 			title={formatMessage(
-				{ defaultMessage: "{firstName}'s profile", id: 'editProfile.title' },
-				{ firstName: user.firstName },
+				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
+				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
 			zeroMargin
 			onClickClose={onClickClose}

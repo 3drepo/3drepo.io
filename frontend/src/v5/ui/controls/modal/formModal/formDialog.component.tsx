@@ -36,7 +36,7 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	onClickClose?: () => void;
 	onSubmit?: (event) => void;
 	onClickCancel?: () => void;
-	title?: string;
+	title?: any;
 	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
