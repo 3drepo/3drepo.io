@@ -53,6 +53,7 @@ const password = (passwordName = 'Password') => Yup.string()
 	);
 
 const firstName = Yup.string()
+	.transform((value) => value.trim(''))
 	.min(2, formatMessage({
 		id: 'validation.firstName.error.min',
 		defaultMessage: 'First name must be at least 2 characters',
@@ -67,6 +68,7 @@ const firstName = Yup.string()
 	}));
 
 const lastName = Yup.string()
+	.transform((value) => value.trim(''))
 	.min(2, formatMessage({
 		id: 'validation.lastName.error.min',
 		defaultMessage: 'Last name must be at least 2 characters',
@@ -103,6 +105,7 @@ const email = (alreadyExistingEmails) => Yup.string().email()
 		}),
 		(emailValue) => !alreadyExistingEmails.includes(emailValue),
 	);
+
 // Schemas
 const BaseSettingsSchema = Yup.object().shape({
 	name: Yup.string()
@@ -229,6 +232,7 @@ export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] 
 	lastName,
 	email: email(alreadyExistingEmails),
 	company: Yup.string()
+		.transform((value) => value.trim(''))
 		.required(
 			formatMessage({
 				id: 'editProfile.company.required',
