@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Button } from '@controls/button';
 import { Link } from '@mui/material';
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 
 export const AvatarContainer = styled.div`
 	&& {
@@ -33,6 +34,11 @@ export const AvatarSection = styled.div`
 	align-items: center;
 	margin-bottom: 11px;
 `;
+
+export const TruncatableName = styled(Truncate).attrs({
+	lines: 1,
+	width: 210,
+})``;
 
 export const UserFullName = styled.div`
 	${({ theme }) => theme.typography.h3};

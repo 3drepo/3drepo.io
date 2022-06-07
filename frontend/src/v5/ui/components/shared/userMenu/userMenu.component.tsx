@@ -35,6 +35,7 @@ import {
 	UserUserName,
 	SignOutButton,
 	EditProfileButton,
+	TruncatableName,
 } from './userMenu.styles';
 import { EditProfileModal } from './editProfileModal/editProfileModal.component';
 
@@ -63,7 +64,10 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								user={user}
 								largeIcon
 							/>
-							<UserFullName>{user.firstName} {user.lastName}</UserFullName>
+							<UserFullName>
+								<TruncatableName>{user.firstName}</TruncatableName>
+								<TruncatableName>{user.lastName}</TruncatableName>
+							</UserFullName>
 							<UserUserName>{user.username}</UserUserName>
 							<ActionMenuItem>
 								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
