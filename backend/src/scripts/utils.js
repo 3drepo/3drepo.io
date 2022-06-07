@@ -20,11 +20,27 @@ const { v5Path } = require('../interop');
 const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
 const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
 
+const Yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+
 const Utils = {};
+
+const { argv } = Yargs(hideBin(process.argv));
+
+const includeTS = argv.includeTS ? argv.includeTS.split(',') : [];
+const excludeTS = argv.excludeTS ? argv.excludeTS.split(',') : [];
+
+if (includeTS.length && excludeTS.length) throw new Error('Cannot declare both includeTS and excludeTS. Please only use one of the options');
+
+const ignoreTS = [...USERNAME_BLACKLIST, ...excludeTS];
 
 Utils.getTeamspaceList = async () => {
 	const dbList = await listDatabases();
-	return dbList.flatMap(({ name: db }) => (USERNAME_BLACKLIST.includes(db) ? [] : db));
+	return dbList.flatMap(({ name: db }) => {
+		const inIgnoreList = ignoreTS.includes(db);
+		const shouldInclude = (!includeTS.length) || includeTS.includes(db);
+		return inIgnoreList || !shouldInclude ? [] : db;
+	});
 };
 
 Utils.getCollectionsEndsWith = async (teamspace, str) => {
