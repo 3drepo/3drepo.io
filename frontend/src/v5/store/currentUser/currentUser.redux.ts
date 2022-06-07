@@ -25,6 +25,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	fetchUserSuccess: ['userData'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
+	resetErrors: [],
 	// personal
 	updatePersonalData: ['personalData'],
 	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
@@ -50,6 +51,15 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	currentUser: {
 		...state.currentUser,
 		...userData,
+	},
+});
+
+export const resetErrors = (state = INITIAL_STATE): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		personalError: null,
+		apiKeyError: null,
 	},
 });
 
@@ -87,9 +97,12 @@ export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrent
 	},
 });
 
+
+
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
+	[CurrentUserTypes.RESET_ERRORS]: resetErrors,
 	// personal
 	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
 	[CurrentUserTypes.SET_PERSONAL_ERROR]: setPersonalError,
@@ -109,6 +122,7 @@ export interface ICurrentUserState {
 export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
 export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
+export type ResetErrorsAction = Action<'RESET_ERRORS'>;
 // personal
 export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData };
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
@@ -121,6 +135,7 @@ export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
 	updateUserSuccess: (userData: UpdateUserSuccess) => UpdateUserSuccessAction;
+	resetErrors: () => ResetErrorsAction;
 	// personal
 	updatePersonalData: (personalData: UpdatePersonalData) => UpdatePersonalDataAction;
 	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;

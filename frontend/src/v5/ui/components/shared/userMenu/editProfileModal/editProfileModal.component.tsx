@@ -25,6 +25,7 @@ import { FormModal, TabList, Tab, TabPanel, ScrollAreaPadding, TruncatableName }
 import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+import { CurrentUserActionsDispatchers } from './../../../../../services/actionsDispatchers/currentUsersActions.dispatchers';
 
 const CONFIRM_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
@@ -66,15 +67,11 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		onClose();
 	};
 
-	const dispatch = useDispatch();
-
 	useEffect(() => {
 		if (open) {
 			setActiveTab('personal');
-		} else {
-			dispatch(CurrentUserActions.setPersonalError(''));
-			dispatch(CurrentUserActions.setApiKeyError(''));
 		}
+		CurrentUserActionsDispatchers.resetErrors();
 	}, [open]);
 
 	return (
@@ -100,7 +97,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<Tab value="integrations" label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
 			</TabContext>
-			<TabPanel hidden={activeTab !== 'personal'} $zeroSidePadding>
+			<TabPanel hidden={activeTab !== 'personal'} $zeroPadding>
 				<ScrollArea>
 					<ScrollAreaPadding>
 						<EditProfilePersonalTab
