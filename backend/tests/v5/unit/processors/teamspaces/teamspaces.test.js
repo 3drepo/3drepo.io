@@ -18,7 +18,7 @@
 const _ = require('lodash');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -36,6 +36,9 @@ const RolesModel = require(`${src}/models/roles`);
 
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
+
+jest.mock('../../../../../src/v5/utils/quota');
+const Quota = require(`${src}/utils/quota`);
 
 const invalidUsername = 'invalid';
 const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation((username) => {
@@ -128,8 +131,32 @@ const testInitTeamspace = () => {
 	});
 };
 
+const testGetQuotaInfo = () => {
+	describe('Get quota info', () => {
+		test('should return quota info', async () => {
+			const quotaInfo = {
+				quota: generateRandomNumber(),
+				collaboratorLimit: generateRandomNumber(0),
+			};
+			const spaceUsed = generateRandomNumber(0);
+			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => quotaInfo);
+			const spaceUsedMock = Quota.calculateSpaceUsed.mockImplementationOnce(() => spaceUsed);
+			const teamspace = generateRandomString();
+			const res = await Teamspaces.getQuotaInfo(teamspace);
+			expect(res).toEqual({ spaceLimit: quotaInfo.quota,
+				collaboratorLimit: quotaInfo.collaboratorLimit,
+				spaceUsed });
+			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
+			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
+			expect(spaceUsedMock).toHaveBeenCalledTimes(1);
+			expect(spaceUsedMock).toHaveBeenCalledWith(teamspace, true);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
+	testGetQuotaInfo();
 });

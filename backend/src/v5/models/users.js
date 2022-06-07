@@ -267,8 +267,5 @@ User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { '
 User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
 	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
-User.getQuotaInfo = async () => {
-	
-}
 
 module.exports = User;

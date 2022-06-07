@@ -17,7 +17,7 @@
 
 const Users = {};
 
-const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar, getQuotaInfo,
+const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
@@ -119,7 +119,5 @@ Users.generateResetPasswordToken = async (username) => {
 };
 
 Users.updatePassword = updatePassword;
-
-Users.getQuotaInfo = getQuotaInfo;
 
 module.exports = Users;

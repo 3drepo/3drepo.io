@@ -16,6 +16,7 @@
  */
 
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
+const { calculateSpaceUsed, getQuotaInfo } = require('../../utils/quota');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
@@ -65,6 +66,13 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 	return membersList.map(
 		(member) => (usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
 	);
+};
+
+Teamspaces.getQuotaInfo = async (teamspace) => {
+	const quotaInfo = await getQuotaInfo(teamspace, true);
+	const spaceUsed = await calculateSpaceUsed(teamspace, true);
+
+	return { spaceLimit: quotaInfo.quota, collaboratorLimit: quotaInfo.collaboratorLimit, spaceUsed };
 };
 
 module.exports = Teamspaces;

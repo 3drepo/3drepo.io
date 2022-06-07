@@ -27,6 +27,9 @@ let agent;
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
 const testUser2 = ServiceHelper.generateUserCredentials();
+const userWithLicense = ServiceHelper.generateUserCredentials();
+const userWithExpiredLicense = ServiceHelper.generateUserCredentials();
+
 const usersInFirstTeamspace = [
 	ServiceHelper.generateUserCredentials(),
 	ServiceHelper.generateUserCredentials(),
@@ -34,14 +37,15 @@ const usersInFirstTeamspace = [
 ];
 
 // This is the list of teamspaces the user has access to
-const testUserTSAccess = [
+const teamspaces = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
-
+const tsWithLicense = { name: ServiceHelper.generateRandomString() };
+const tsWithExpiredLicense = { name: ServiceHelper.generateRandomString() };
 const avatar = ServiceHelper.generateRandomString();
-const tsWithAvatar = testUserTSAccess[1].name;
+const tsWithAvatar = teamspaces[1].name;
 
 const jobToUsers = [
 	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
@@ -53,19 +57,54 @@ const jobToUsers = [
 const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
 
 const setupData = async () => {
-	await Promise.all(testUserTSAccess.map(
+	await Promise.all(teamspaces.map(
 		({ name, isAdmin }) => {
 			const perms = isAdmin ? [testUser.user] : [];
 			const customData = tsWithAvatar === name ? { avatar: { data: { buffer: avatar } } } : {};
 			return ServiceHelper.db.createTeamspace(name, perms, false, customData);
 		},
 	));
-
 	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
+
+	await ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], false, {
+		billing: {
+			subscriptions: [
+				{
+					discretionary: {
+						collaborators: 10,
+						data: 102410,
+						expiryDate: Date.now() + 100000,
+					},
+				},
+			],
+		},
+	});
+	await ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], false, {
+		billing: {
+			subscriptions: [
+				{
+					discretionary: {
+						collaborators: 10,
+						data: 102410,
+						expiryDate: Date.now() - 100000,
+					},
+				},
+			],
+		},
+	});
+
 	await Promise.all([
 		ServiceHelper.db.createUser(
 			testUser,
-			testUserTSAccess.map(({ name }) => name),
+			teamspaces.map(({ name }) => name),
+		),
+		ServiceHelper.db.createUser(
+			userWithLicense,
+			[tsWithLicense.name]
+		),
+		ServiceHelper.db.createUser(
+			userWithExpiredLicense,
+			[tsWithExpiredLicense.name]
 		),
 		ServiceHelper.db.createUser(
 			testUser2,
@@ -73,9 +112,9 @@ const setupData = async () => {
 		),
 		...usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
 			user,
-			[testUserTSAccess[0].name],
+			[teamspaces[0].name],
 		)),
-		ServiceHelper.db.createJobs(testUserTSAccess[0].name, jobToUsers),
+		ServiceHelper.db.createJobs(teamspaces[0].name, jobToUsers),
 	]);
 };
 
@@ -87,8 +126,8 @@ const testGetTeamspaceList = () => {
 		});
 		test('return a teamspace list if the user has a valid session', async () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body.teamspaces.length).toBe(testUserTSAccess.length);
-			expect(res.body.teamspaces).toEqual(expect.arrayContaining(testUserTSAccess));
+			expect(res.body.teamspaces.length).toBe(teamspaces.length);
+			expect(res.body.teamspaces).toEqual(expect.arrayContaining(teamspaces));
 		});
 
 		test('should safely catch error if there is an internal error', async () => {
@@ -100,7 +139,7 @@ const testGetTeamspaceList = () => {
 
 const testGetTeamspaceMembers = () => {
 	describe('Get teamspace members info', () => {
-		const route = (ts = testUserTSAccess[0].name) => `/v5/teamspaces/${ts}/members`;
+		const route = (ts = teamspaces[0].name) => `/v5/teamspaces/${ts}/members`;
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
@@ -123,7 +162,7 @@ const testGetTeamspaceMembers = () => {
 
 			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
 
-			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {
+			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {				
 				const { firstName, lastName, billing } = basicData;
 				const data = {
 					firstName,
@@ -138,7 +177,6 @@ const testGetTeamspaceMembers = () => {
 
 				return data;
 			});
-
 			expect(res.body.members.length).toBe(expectedData.length);
 			expect(res.body.members).toEqual(expect.arrayContaining(expectedData));
 		});
@@ -147,7 +185,7 @@ const testGetTeamspaceMembers = () => {
 
 const testGetAvatar = () => {
 	describe('Get teamspace avatar', () => {
-		const route = (ts = testUserTSAccess[0].name) => `/v5/teamspaces/${ts}/avatar`;
+		const route = (ts = teamspaces[0].name) => `/v5/teamspaces/${ts}/avatar`;
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
@@ -175,6 +213,36 @@ const testGetAvatar = () => {
 	});
 };
 
+const testGetQuotaInfo = () => {
+	describe('Get quota info', () => {
+		const route = (ts = tsWithLicense.name) => `/v5/teamspaces/${ts}/quota`;
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user does not have access to the teamspace', async () => {
+			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		// test('should fail if the user does not have admin access to the teamspace', async () => {
+		// 	const res = await agent.get(`${route(tsNonAdmin)}/?key=${testUser.apiKey}`).expect(templates.notAuthorized.status);
+		// 	expect(res.body.code).toEqual(templates.notAuthorized.code);
+		// });
+
+		test('should fail if the teamspace does not exist', async () => {
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${userWithLicense.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test(`should return ${templates.licenceExpired.code} if the user has an expired license`, async () => {			
+			const res = await agent.get(`${route(tsWithExpiredLicense.name)}/?key=${userWithExpiredLicense.apiKey}`).expect(templates.licenceExpired.status);
+			expect(res.body.code).toEqual(templates.licenceExpired.code);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -185,4 +253,5 @@ describe('E2E routes/teamspaces', () => {
 	testGetTeamspaceList();
 	testGetTeamspaceMembers();
 	testGetAvatar();
+	testGetQuotaInfo();
 });

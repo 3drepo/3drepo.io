@@ -22,31 +22,40 @@ const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
 
-const calculateQuota = async (teamspace) => {
+Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 	const subs = await getSubscriptions(teamspace);
 	let quotaSize = 0;
+	let collaboratorLimit = config.subscriptions?.basic?.collaborators ?? 0;
 	let hasExpiredQuota = false;
 
-	Object.keys(subs).forEach((key) => {
-		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
-		if (key !== 'paypal') {
-			const { expiryDate, data } = subs[key];
-
-			if (expiryDate && expiryDate < Date.now()) {
-				hasExpiredQuota = true;
-			} else {
-				quotaSize += data;
+	for(let i = 0; i< subs.length; i++){
+		const sub = subs[i];
+		Object.keys(sub).forEach((key) => {
+			// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
+			if (key !== 'paypal') {
+				const { expiryDate, data } = sub[key];
+				if (expiryDate && expiryDate < Date.now()) {
+					hasExpiredQuota = true;
+				} else {
+					quotaSize += data;
+					if (collaboratorLimit !== 'unlimited') {
+						const subCollaborators = subs[key].collaborators;
+						collaboratorLimit = subCollaborators === 'unlimited' ? 'unlimited' : collaboratorLimit + subCollaborators;
+					}
+				}
 			}
-		}
-	});
+		});
+	}
 
 	if (hasExpiredQuota && quotaSize === 0) throw templates.licenceExpired;
 
 	const basicQuota = config.subscriptions?.basic?.data;
-	return (quotaSize + basicQuota) * 1024 * 1024; // data in MB, returning in Bytes.
+	const quotaInBytes = (quotaSize + basicQuota);
+
+	return { quota: inMegabytes ? quotaInBytes : quotaInBytes * 1024 * 1024, collaboratorLimit };
 };
 
-const calculateSpaceUsed = async (teamspace) => {
+Quota.calculateSpaceUsed = async (teamspace, inMegabytes = false) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
@@ -62,8 +71,8 @@ const calculateSpaceUsed = async (teamspace) => {
 	});
 
 	const sizes = await Promise.all(promises);
-
-	return sizes.reduce((accum, val) => accum + val, 0);
+	const totalSpace = sizes.reduce((accum, val) => accum + val, 0);
+	return inMegabytes ? totalSpace / (1024 * 1024) : totalSpace;
 };
 
 Quota.sufficientQuota = async (teamspace, size) => {
@@ -71,12 +80,12 @@ Quota.sufficientQuota = async (teamspace, size) => {
 		throw createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
 	}
 
-	const [quotaTotal, dataUsed] = await Promise.all([
-		calculateQuota(teamspace),
-		calculateSpaceUsed(teamspace),
+	const [quotaInfo, dataUsed] = await Promise.all([
+		Quota.getQuotaInfo(teamspace),
+		Quota.calculateSpaceUsed(teamspace),
 	]);
 
-	if ((dataUsed + size) > quotaTotal) {
+	if ((dataUsed + size) > quotaInfo.quota) {
 		throw templates.quotaLimitExceeded;
 	}
 };

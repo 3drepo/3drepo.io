@@ -148,19 +148,6 @@ const verify = async (req, res) => {
 	}
 };
 
-const getQuotaInfo = async (req, res) => {
-	const user = getUserFromSession(req.session);
-	
-	try {
-		await Users.getQuotaInfo(user);
-		respond(req, res, templates.ok);
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
-};
-
-
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 

@@ -19,6 +19,7 @@ const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
+const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
@@ -49,6 +50,18 @@ const getAvatar = async (req, res) => {
 		respond(req, res, templates.ok, buffer);
 	} catch (err) {
 		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const getQuotaInfo = async (req, res) => {
+	const { teamspace } = req.params;
+
+	try {
+		const quotaInfo = await Teamspaces.getQuotaInfo(teamspace);
+		respond(req, res, templates.ok, quotaInfo);
+	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
@@ -173,6 +186,47 @@ const establishRoutes = () => {
 	*               format: binary
 	*/
 	router.get('/:teamspace/avatar', hasAccessToTeamspace, getAvatar);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/quota:
+	*   get:
+	*     description: Gets quota information about a user
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - teamspace:
+	*         name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getQuotaInfo
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Gets the quota information of the user
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 spaceLimit:
+	*                   type: number
+	*                   description: The number of bytes the user can use
+	*                   example: 1000000
+	*                 collaboratorLimit:
+	*                   type: number
+	*                   description: The number of collaborators a user can have
+	*                   example: johnPaul01
+	*                 spaceUsed:
+	*                   type: number
+	*                   description: The number of bytes the user is currently using
+	*                   example: 500000
+	*
+	*/
+	router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);
 
 	return router;
 };
