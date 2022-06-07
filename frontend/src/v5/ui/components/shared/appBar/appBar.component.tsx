@@ -33,9 +33,6 @@ export const AppBar = (): JSX.Element => {
 				<BreadcrumbsRouting />
 			</Items>
 			<Items>
-				<CircleButton variant="contrast" aria-label="intercom">
-					<IntercomIcon />
-				</CircleButton>
 				<CircleButton variant="contrast" aria-label="notifications">
 					<NotificationsIcon />
 				</CircleButton>
