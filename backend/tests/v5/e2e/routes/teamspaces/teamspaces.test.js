@@ -18,6 +18,8 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
+const { generateRandomNumber } = require('../../../helper/services');
+const config = require('../../../../../src/v5/utils/config');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -27,7 +29,9 @@ let agent;
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
 const testUser2 = ServiceHelper.generateUserCredentials();
+const userCollabs = generateRandomNumber(0);
 const userWithLicense = ServiceHelper.generateUserCredentials();
+const userWithLicenseUnlimitedCollabs = ServiceHelper.generateUserCredentials();
 const userWithExpiredLicense = ServiceHelper.generateUserCredentials();
 
 const usersInFirstTeamspace = [
@@ -42,7 +46,9 @@ const teamspaces = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
+const licenseData = generateRandomNumber(0);
 const tsWithLicense = { name: ServiceHelper.generateRandomString() };
+const tsWithLicenseUnlimitedCollabs = { name: ServiceHelper.generateRandomString() };
 const tsWithExpiredLicense = { name: ServiceHelper.generateRandomString() };
 const avatar = ServiceHelper.generateRandomString();
 const tsWithAvatar = teamspaces[1].name;
@@ -65,14 +71,26 @@ const setupData = async () => {
 		},
 	));
 	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
-
 	await ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], false, {
 		billing: {
 			subscriptions: [
 				{
 					discretionary: {
-						collaborators: 10,
-						data: 102410,
+						collaborators: userCollabs,
+						data: licenseData,
+						expiryDate: Date.now() + 100000,
+					},
+				},
+			],
+		},
+	});
+	await ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name, [userWithLicenseUnlimitedCollabs.user], false, {
+		billing: {
+			subscriptions: [
+				{
+					discretionary: {
+						collaborators: 'unlimited',
+						data: licenseData,
 						expiryDate: Date.now() + 100000,
 					},
 				},
@@ -84,8 +102,8 @@ const setupData = async () => {
 			subscriptions: [
 				{
 					discretionary: {
-						collaborators: 10,
-						data: 102410,
+						collaborators: 'unlimited',
+						data: licenseData,
 						expiryDate: Date.now() - 100000,
 					},
 				},
@@ -101,6 +119,10 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(
 			userWithLicense,
 			[tsWithLicense.name]
+		),
+		ServiceHelper.db.createUser(
+			userWithLicenseUnlimitedCollabs,
+			[tsWithLicenseUnlimitedCollabs.name]
 		),
 		ServiceHelper.db.createUser(
 			userWithExpiredLicense,
@@ -226,11 +248,6 @@ const testGetQuotaInfo = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		// test('should fail if the user does not have admin access to the teamspace', async () => {
-		// 	const res = await agent.get(`${route(tsNonAdmin)}/?key=${testUser.apiKey}`).expect(templates.notAuthorized.status);
-		// 	expect(res.body.code).toEqual(templates.notAuthorized.code);
-		// });
-
 		test('should fail if the teamspace does not exist', async () => {
 			const res = await agent.get(`${route('sldkfjdl')}/?key=${userWithLicense.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
@@ -239,6 +256,22 @@ const testGetQuotaInfo = () => {
 		test(`should return ${templates.licenceExpired.code} if the user has an expired license`, async () => {			
 			const res = await agent.get(`${route(tsWithExpiredLicense.name)}/?key=${userWithExpiredLicense.apiKey}`).expect(templates.licenceExpired.status);
 			expect(res.body.code).toEqual(templates.licenceExpired.code);
+		});
+		
+		test(`should return quota if the user has a valid license`, async () => {			
+			const res = await agent.get(`${route()}/?key=${userWithLicense.apiKey}`)
+				.expect(templates.ok.status);			
+			const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited' ?
+				'unlimited' : config.subscriptions?.basic?.collaborators + userCollabs;
+			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
+			expect(res.body).toEqual( {collaboratorLimit, spaceLimit, spaceUsed: 0});
+		});
+
+		test(`should return quota if the user has a valid license and unlimited collaborators`, async () => {			
+			const res = await agent.get(`${route(tsWithLicenseUnlimitedCollabs.name)}/?key=${userWithLicenseUnlimitedCollabs.apiKey}`)
+				.expect(templates.ok.status);			
+			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
+			expect(res.body).toEqual( {collaboratorLimit: 'unlimited', spaceLimit, spaceUsed: 0});
 		});
 	});
 };

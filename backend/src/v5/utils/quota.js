@@ -39,7 +39,7 @@ Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 				} else {
 					quotaSize += data;
 					if (collaboratorLimit !== 'unlimited') {
-						const subCollaborators = subs[key].collaborators;
+						const subCollaborators = sub[key].collaborators;
 						collaboratorLimit = subCollaborators === 'unlimited' ? 'unlimited' : collaboratorLimit + subCollaborators;
 					}
 				}
