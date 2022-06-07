@@ -14,13 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { SurveyPoint, View } from '../store.types';
+
 export interface IFederation {
 	_id: string;
 	desc?: string;
 	name: string;
 	role: string;
 	isFavourite: boolean;
-	code: string;
+	code?: string;
 	status: string;
 	containers: string[];
 	issues: number;
@@ -28,23 +31,25 @@ export interface IFederation {
 	category: string;
 	lastUpdated: Date;
 	hasStatsPending: boolean;
-	views?: FederationView[];
-	surveyPoint?: ISurveyPoint;
+	views?: View[];
+	surveyPoint?: SurveyPoint;
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
 }
 
-export interface ISurveyPoint {
-	latLong: [number, number];
-	position: [number, number, number];
-}
+export type NewFederation = {
+	name: string;
+	unit: string;
+	desc?: string;
+	code?: string;
+};
 
 export type FederationBackendSettings = {
 	_id?: string;
 	desc?: string;
 	name?: string;
-	surveyPoints?: ISurveyPoint[];
+	surveyPoints?: SurveyPoint[];
 	status?: string;
 	timestamp?: number;
 	type?: string;
@@ -60,19 +65,7 @@ export type FederationBackendSettings = {
 };
 
 export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'> & {
-	surveyPoint: ISurveyPoint;
-};
-
-export type FederationView = {
-	_id: string;
-	name: string;
-	hasThumbnail: boolean;
-};
-
-export const EMPTY_VIEW: FederationView = {
-	_id: ' ',
-	name: 'None',
-	hasThumbnail: false,
+	surveyPoint: SurveyPoint;
 };
 
 export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;

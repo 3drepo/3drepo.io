@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Dispatch, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@mui/material';
 import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
@@ -23,31 +23,27 @@ import { Title, Subtitle, Container } from './dashboardListItemTitle.styles';
 
 interface IDashboardListItemTitle extends IFixedOrGrowContainer {
 	subtitle: ReactNode;
-	onClick?: Dispatch<void>;
 	tooltipTitle?: ReactNode;
 	selected?: boolean;
+	disabled?: boolean;
 }
 
 export const DashboardListItemTitle = ({
 	children,
 	subtitle,
-	onClick,
 	selected = false,
 	tooltipTitle = '',
+	disabled = false,
 	...containerProps
 }: IDashboardListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer {...containerProps}>
 		<Container>
 			<Tooltip title={tooltipTitle}>
-				<Title
-					onClick={(event) => {
-						event.stopPropagation();
-						onClick(event);
-					}}
-					selected={selected}
-				>
-					{children}
-				</Title>
+				<span>
+					<Title selected={selected} disabled={disabled}>
+						{children}
+					</Title>
+				</span>
 			</Tooltip>
 			<Subtitle selected={selected}>{subtitle}</Subtitle>
 		</Container>

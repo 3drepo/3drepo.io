@@ -15,24 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AppBar as MuiAppBar } from '@mui/material';
-
 import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { UserMenu } from '../userMenu';
-import { Items } from './appBar.styles';
-import { Breadcrumbs } from '../breadcrumbs';
+import { Items, AppBarContainer } from './appBar.styles';
+import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	return (
-		<MuiAppBar position="static">
+		<AppBarContainer position="static">
 			<Items>
 				<LogoIcon />
-				<Breadcrumbs />
+				<BreadcrumbsRouting />
 			</Items>
 			<Items>
 				<CircleButton variant="contrast" aria-label="intercom">
@@ -43,6 +41,6 @@ export const AppBar = (): JSX.Element => {
 				</CircleButton>
 				<UserMenu user={user} />
 			</Items>
-		</MuiAppBar>
+		</AppBarContainer>
 	);
 };

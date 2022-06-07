@@ -18,6 +18,7 @@
 "use strict";
 (function() {
 	const config	  = require("../config.js");
+	const C = require("../constants");
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
@@ -313,16 +314,15 @@
 		});
 	};
 
-	Handler.getSessionStore = (session) => {
-		const MongoDBStore = require("connect-mongodb-session")(session);
-		const prom = new Promise((resolve, reject) => {
-			const store = new MongoDBStore({
-				uri: getURL(),
-				databaseName:"admin",
-				collection: "sessions"
-			}, (err) => err ? reject(err) : resolve(store));
+	Handler.getSessionStore = () => {
+		const MongoStore = require("connect-mongo");
+		const sessionStore = MongoStore.create({
+			clientPromise: connect(),
+			dbName: "admin",
+			collectionName: "sessions",
+			stringify: false
 		});
-		return prom;
+		return Promise.resolve(sessionStore);
 	};
 
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
@@ -342,9 +342,35 @@
 		return collection.countDocuments(query, options);
 	};
 
-	Handler.createUser = async function (username, password, customData) {
-		const adminDB = await this.getAuthDB();
-		await adminDB.addUser(username, password, { customData, roles: [] });
+	let defaultRoleProm;
+
+	const ensureDefaultRoleExists = async () => {
+		if(!defaultRoleProm) {
+
+			const createDefaultRole = async () => {
+
+				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_ROLE_OBJ.role}` });
+
+				// istanbul ignore next
+				if (!roleFound) {
+					const createRoleCmd = { createRole: C.DEFAULT_ROLE_OBJ.role, privileges: [], roles: [] };
+					await Handler.runCommand("admin", createRoleCmd);
+				}
+			};
+
+			defaultRoleProm = createDefaultRole();
+		}
+		return defaultRoleProm;
+	};
+
+	Handler.createUser = async function (username, password, customData, roles = []) {
+		const [adminDB] = await Promise.all([
+			Handler.getAuthDB(),
+			ensureDefaultRoleExists()
+		]);
+
+		roles.push(C.DEFAULT_ROLE_OBJ);
+		await adminDB.addUser(username, password, { customData, roles});
 	};
 
 	module.exports = Handler;

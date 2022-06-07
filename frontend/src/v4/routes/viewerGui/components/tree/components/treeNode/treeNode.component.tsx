@@ -16,6 +16,7 @@
  */
 import { PureComponent } from 'react';
 import { Tooltip } from '@mui/material';
+import { isV5 } from '@/v4/helpers/isV5';
 import AddIcon from '@mui/icons-material/Add';
 import UpIcon from '@mui/icons-material/KeyboardArrowUp';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -71,7 +72,7 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 );
 
 const ParentOfVisibleIcon = () => <ParentOfVisible><VisibilityIcon color="inherit" /></ParentOfVisible>;
-const VisibleIcon = () => <VisibilityIcon color="primary" />;
+const VisibleIcon = () => <VisibilityIcon color={isV5() ? 'secondary' : 'primary'} />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
 export class TreeNode extends PureComponent<IProps, any> {

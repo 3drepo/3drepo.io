@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.23.1",
+	"version": "4.25.0",
 	"description": "The frontend for 3drepo.io",
 	"main": "index.js",
 	"directories": {
@@ -16,7 +16,7 @@
 		"wdm": "yarn run wdm:update && yarn run wdm:start",
 		"wdm:start": "webdriver-manager start --standalone",
 		"wdm:update": "webdriver-manager update --standalone",
-		"test": "cross-env NODE_ENV=test yarn jest --runInBand --silent",
+		"test": "cross-env NODE_ENV=test yarn jest --runInBand --testTimeout=500",
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
 		"lint:ts": "eslint . --rulesdir internals/eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
@@ -151,6 +151,7 @@
 		"cross-env": "7.0.2",
 		"css-loader": "6.6.0",
 		"cssnano": "5.1.7",
+		"dpdm": "3.9.0",
 		"eslint": "7.29.0",
 		"eslint-config-airbnb-typescript": "12.0.0",
 		"eslint-plugin-import": "2.22.0",
@@ -191,6 +192,8 @@
 		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.4.2",
 		"react": "17.0.0",
 		"react-dom": "17.0.0",
-		"lodash": "4.17.21"
+		"lodash": "4.17.21",
+		"@types/react": "17.0.39",
+		"@types/react-dom": "17.0.11"
 	}
 }

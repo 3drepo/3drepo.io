@@ -28,8 +28,10 @@ import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
+import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
 
 export const Containers = (): JSX.Element => {
+	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
 		containers,
 		favouriteContainers,
@@ -41,6 +43,8 @@ export const Containers = (): JSX.Element => {
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
 	const [createContainerOpen, setCreateContainerOpen] = useState(false);
+
+	const onClickClose = () => setUploadModalOpen(false);
 
 	return (
 		<>
@@ -64,6 +68,7 @@ export const Containers = (): JSX.Element => {
 							visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 						}}
 						onClickCreate={() => setCreateContainerOpen(true)}
+						onClickUpload={() => setUploadModalOpen(true)}
 						emptyMessage={
 							favouritesFilterQuery && hasContainers.favourites ? (
 								<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
@@ -95,6 +100,7 @@ export const Containers = (): JSX.Element => {
 						}}
 						showBottomButton
 						onClickCreate={() => setCreateContainerOpen(true)}
+						onClickUpload={() => setUploadModalOpen(true)}
 						emptyMessage={
 							allFilterQuery && hasContainers.all ? (
 								<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
@@ -119,8 +125,9 @@ export const Containers = (): JSX.Element => {
 			)}
 			<CreateContainerForm
 				open={createContainerOpen}
-				close={() => setCreateContainerOpen(false)}
+				onClickClose={() => setCreateContainerOpen(false)}
 			/>
+			<UploadFileForm openState={uploadModalOpen} onClickClose={onClickClose} />
 		</>
 	);
 };

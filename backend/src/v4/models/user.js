@@ -137,7 +137,7 @@ const handleAuthenticateFail = async function (user, username) {
 const User = {};
 
 User.getTeamspaceSpaceUsed = async function (dbName) {
-	const settings = await db.find(dbName, "setting", {}, {_id: 1});
+	const settings = await db.find(dbName, "settings", {}, {_id: 1});
 
 	const spacePerModel = await Promise.all(settings.map(async (setting) =>
 		await FileRef.getTotalModelFileSize(dbName, setting._id))
@@ -431,8 +431,6 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 		User.checkEmailAvailableAndValid(customData.email)
 	]);
 
-	const adminDB = await db.getAuthDB();
-
 	const cleanedCustomData = {
 		createdAt: new Date(),
 		inactive: true
@@ -498,7 +496,7 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 	cleanedCustomData.billing = await UserBilling.changeBillingAddress(cleanedCustomData.billing || {}, billingInfo);
 
 	try {
-		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] });
+		await db.createUser(username, password, cleanedCustomData);
 	} catch(err) {
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}

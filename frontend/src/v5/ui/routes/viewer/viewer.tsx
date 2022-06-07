@@ -17,25 +17,21 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ViewerParams } from '../routes.constants';
-import { theme } from './theme';
+import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
+import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
 export const Viewer = () => {
-	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 	const v4Match = {
 		params: {
 			model: containerOrFederation,
 			teamspace,
-			revision: '',
+			revision,
 		} };
 
-	return (
-		<ThemeProvider theme={theme}>
-			<MuiThemeProvider theme={theme}>
-				<ViewerGui match={v4Match} />
-			</MuiThemeProvider>
-		</ThemeProvider>
-	);
+	useFederationsData();
+	useContainersData();
+
+	return <ViewerGui match={v4Match} />;
 };

@@ -25,7 +25,7 @@ import Pins from '@mui/icons-material/PinDrop';
 import Print from '@mui/icons-material/Print';
 import SyncProblem from '@mui/icons-material/SyncProblem';
 
-import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 import { COLOR, PIN_COLORS } from '../styles';
 
@@ -137,6 +137,7 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CATEGORY: 'category',
 	ELEMENT: 'element',
 	LOCATION: 'location_desc',
+	DUE_DATE: 'due_date',
 	RISK_CONSEQUENCE: 'consequence',
 	RISK_FACTOR: 'risk_factor',
 	ASSOCIATED_ACTIVITY: 'associated_activity',
@@ -247,7 +248,12 @@ export const RISK_FILTERS = [
 		label: 'Starting Date',
 		relatedField: RISK_FILTER_RELATED_FIELDS.START_DATETIME,
 		type: FILTER_TYPES.DATE
-	}
+	},
+	{
+		label: 'Due Date',
+		relatedField: RISK_FILTER_RELATED_FIELDS.DUE_DATE,
+		type: FILTER_TYPES.DATE
+	},
 ] as any;
 
 export const ACTIONS_TYPES = {

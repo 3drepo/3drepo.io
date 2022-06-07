@@ -23,9 +23,8 @@ import {
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
-	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
+import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
@@ -35,11 +34,14 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
-import { Link } from 'react-router-dom';
-import { useParams } from 'react-router';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { viewerRoute } from '@/v5/services/routing/routing';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
+import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
+
+const MODALS = {
+	share: 'share',
+	containerSettings: 'containerSettings',
+	none: 'none',
+};
 
 interface IContainerListItem {
 	index: number;
@@ -58,12 +60,11 @@ export const ContainerListItem = ({
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
-	const { teamspace } = useParams<DashboardParams>();
-
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
-	const [shareModalOpen, setShareModalOpen] = useState(false);
+	const [openModal, setOpenModal] = useState(MODALS.none);
+	const closeModal = () => setOpenModal(MODALS.none);
 
 	return (
 		<DashboardListItem
@@ -74,26 +75,11 @@ export const ContainerListItem = ({
 				selected={isSelected}
 				onClick={() => onSelectOrToggleItem(container._id)}
 			>
-				<DashboardListItemTitle
-					subtitle={(
-						<LatestRevision
-							name={container.latestRevision}
-							status={container.status}
-							error={container.errorResponse}
-							hasRevisions={container.revisionsCount > 0}
-						/>
-					)}
-					selected={isSelected}
-					tooltipTitle={
-						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-					}
-				>
-					<Link to={viewerRoute(teamspace, container)}>
-						<Highlight search={filterQuery}>
-							{container.name}
-						</Highlight>
-					</Link>
-				</DashboardListItemTitle>
+				<DashboardListItemContainerTitle
+					container={container}
+					isSelected={isSelected}
+					filterQuery={filterQuery}
+				/>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(container._id)}
 					width={186}
@@ -159,7 +145,8 @@ export const ContainerListItem = ({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={() => setShareModalOpen(true)}
+						openShareModal={() => setOpenModal(MODALS.share)}
+						openContainerSettings={() => setOpenModal(MODALS.containerSettings)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -171,13 +158,18 @@ export const ContainerListItem = ({
 				/>
 			)}
 			<ShareModal
-				openState={shareModalOpen}
-				onClickClose={() => setShareModalOpen(false)}
+				openState={openModal === MODALS.share}
+				onClickClose={closeModal}
 				title={formatMessage({
 					id: 'ShareModal.component.title',
 					defaultMessage: 'Share Container URL',
 				})}
 				containerOrFederation={container}
+			/>
+			<ContainerSettingsForm
+				open={openModal === MODALS.containerSettings}
+				container={container}
+				onClose={closeModal}
 			/>
 		</DashboardListItem>
 	);

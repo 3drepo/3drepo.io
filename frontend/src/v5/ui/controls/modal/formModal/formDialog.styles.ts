@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+
 import { Typography } from '@controls/typography';
 import { DialogActions, DialogContent, IconButton, Paper } from '@mui/material';
 
@@ -26,7 +27,7 @@ export const RemoveWhiteCorners = styled(Paper)`
 export const CloseButton = styled(IconButton)`
 	&& {
 		position: absolute;
-		top: 10px;
+		top: 8px;
 		right: 10px;
 
 		svg path {
@@ -39,35 +40,44 @@ export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
 	min-width: 520px;
+
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 15px; /* prevents white pixels in corners */
 `;
 
-export const Title = styled(Typography).attrs({
-	variant: 'h2',
-})`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	position: relative;
-	line-height: 74px;
-	user-select: none;
+export const Header = styled.div`
+	background: ${({ theme }) => theme.palette.gradient.secondary};
+	height: 74px;
+	width: 100%;
 	box-sizing: border-box;
+	align-items: center;
+	display: flex;
+	padding: 0 35px;
 `;
 
-export const FormDialogContent = styled(DialogContent)<{ zeroMargin?: boolean }>`
-	margin: ${({ zeroMargin }) => (zeroMargin ? '0' : '20px 34px 43px')};
+export const Title = styled(Typography).attrs({
+	variant: 'h2',
+	component: 'div',
+})`
+	text-align: left;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const Subtitle = styled(Typography).attrs({
+	variant: 'h5',
+	component: 'div',
+})`
+	text-align: left;
+	color: ${({ theme }) => theme.palette.secondary.lightest};
+`;
+
+export const FormDialogContent = styled(DialogContent)<{ $zeromargin?: boolean }>`
+	margin: ${({ $zeromargin }) => ($zeromargin ? '0' : '20px 34px 43px')};
 	display: block;
 	flex-flow: row wrap;
 `;
 
 export const FormDialogActions = styled(DialogActions)`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-`;
-
-export const Header = styled.div`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-	height: 74px;
-	align-content: center;
-	display: inline-flex;
-	padding: 0 27px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 `;

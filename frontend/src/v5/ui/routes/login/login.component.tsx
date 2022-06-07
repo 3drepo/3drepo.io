@@ -23,11 +23,13 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/auth';
-import { AuthPage } from '@components/authPage';
+import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import ErrorIcon from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { ErrorMessage, ForgotPasswordPrompt, Heading, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
+import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt } from './login.styles';
+import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
+import { PASSWORD_FORGOT_PATH, SIGN_UP_PATH } from '../routes.constants';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -49,7 +51,7 @@ export const Login = () => {
 	};
 
 	return (
-		<AuthPage
+		<AuthTemplate
 			footer={(
 				<Link to="/releaseNotes">
 					<FormattedMessage id="auth.login.versionFooter" defaultMessage="Version: {version}" values={{ version: APP_VERSION }} />
@@ -57,27 +59,17 @@ export const Login = () => {
 			)}
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<Heading>
+				<AuthHeading>
 					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
-				</Heading>
-				<UsernameField
-					control={control}
-					name="username"
-					label={formatMessage({
-						id: 'auth.login.usernameLabel',
-						defaultMessage: 'Username or email',
-					})}
-					autoComplete="login"
-				/>
+				</AuthHeading>
+				<UsernameField control={control} />
 				<PasswordField
 					control={control}
 					name="password"
 					label={formatMessage({
-						id: 'auth.login.passwordLabel',
+						id: 'auth.login.password',
 						defaultMessage: 'Password',
 					})}
-					autoComplete="current-password"
-					type="password"
 				/>
 				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
 				<OtherOptions>
@@ -86,12 +78,12 @@ export const Login = () => {
 							id="auth.login.signUp"
 							defaultMessage="Don't have an account? <Link>Sign up</Link>"
 							values={{
-								Link: (val:string) => <Link to="/sign-up">{val}</Link>,
+								Link: (val:string) => <Link to={SIGN_UP_PATH}>{val}</Link>,
 							}}
 						/>
 					</SignUpPrompt>
 					<ForgotPasswordPrompt>
-						<Link to="/password-forgot">
+						<Link to={PASSWORD_FORGOT_PATH}>
 							<FormattedMessage id="auth.login.forgotPassword" defaultMessage="Forgotten your password?" />
 						</Link>
 					</ForgotPasswordPrompt>
@@ -100,6 +92,6 @@ export const Login = () => {
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</SubmitButton>
 			</form>
-		</AuthPage>
+		</AuthTemplate>
 	);
 };

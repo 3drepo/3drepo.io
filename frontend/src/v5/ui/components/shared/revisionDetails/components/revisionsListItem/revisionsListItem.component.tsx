@@ -50,7 +50,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 	};
 
 	return (
-		<Container to={viewerRoute(teamspace, containerId, revision)}>
+		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
 			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
 				{formatDate(timestamp)}
 			</RevisionsListItemDate>

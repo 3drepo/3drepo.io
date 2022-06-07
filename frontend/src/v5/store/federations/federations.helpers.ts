@@ -16,21 +16,39 @@
  */
 
 import {
-	FederationBackendSettings,
 	FederationStats,
 	IFederation,
 	MinimumFederation,
+	FederationBackendSettings,
 	FederationSettings,
+	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import {
-	UploadStatuses,
-} from '@/v5/store/containers/containers.types';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
 export const filterFederations = (federations: IFederation[], filterQuery: string) => (
 	federations.filter((
 		{ name, code, category },
 	) => [name, code, category].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
+);
+
+export const prepareNewFederation = (
+	newFederation: NewFederation,
+	federationId?: string,
+): IFederation => (
+	{
+		...newFederation,
+		_id: federationId || '',
+		status: UploadStatuses.OK,
+		containers: [],
+		issues: 0,
+		risks: 0,
+		lastUpdated: new Date(),
+		category: '',
+		hasStatsPending: false,
+		role: '',
+		isFavourite: false,
+	}
 );
 
 export const prepareSingleFederationData = (
@@ -63,19 +81,15 @@ export const prepareFederationsData = (
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
-}: FederationBackendSettings): FederationSettings => (
-	{
-		surveyPoint: surveyPoints?.[0],
-		...otherProps,
-	}
-);
+}: FederationBackendSettings) => ({
+	surveyPoint: surveyPoints?.[0],
+	...otherProps,
+});
 
 export const prepareFederationSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: FederationSettings): FederationBackendSettings => (
-	{
-		surveyPoints: [surveyPoint],
-		...otherProps,
-	}
-);
+}: FederationSettings) => ({
+	surveyPoints: [surveyPoint],
+	...otherProps,
+});
