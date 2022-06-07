@@ -58,9 +58,9 @@ const firstName = Yup.string()
 		id: 'validation.firstName.error.min',
 		defaultMessage: 'First name must be at least 2 characters',
 	}))
-	.max(50, formatMessage({
+	.max(35, formatMessage({
 		id: 'validation.firstName.error.max',
-		defaultMessage: 'First name is limited to 50 characters',
+		defaultMessage: 'First name is limited to 35 characters',
 	}))
 	.required(formatMessage({
 		id: 'validation.firstName.error.required',
@@ -73,9 +73,9 @@ const lastName = Yup.string()
 		id: 'validation.lastName.error.min',
 		defaultMessage: 'Last name must be at least 2 characters',
 	}))
-	.max(50, formatMessage({
+	.max(35, formatMessage({
 		id: 'validation.lastName.error.max',
-		defaultMessage: 'Last name is limited to 50 characters',
+		defaultMessage: 'Last name is limited to 35 characters',
 	}))
 	.required(formatMessage({
 		id: 'validation.lastName.error.required',
@@ -231,14 +231,6 @@ export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] 
 	firstName,
 	lastName,
 	email: email(alreadyExistingEmails),
-	company: Yup.string()
-		.transform((value) => value.trim(''))
-		.required(
-			formatMessage({
-				id: 'editProfile.company.required',
-				defaultMessage: 'Company is a required field',
-			}),
-		),
 	countryCode,
 });
 

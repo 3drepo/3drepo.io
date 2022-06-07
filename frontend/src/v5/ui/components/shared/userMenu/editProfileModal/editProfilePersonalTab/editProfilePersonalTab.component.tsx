@@ -92,9 +92,12 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmit = () => {
 		setUnexpectedError(false);
-		console.log(getTrimmedValues());
+		const values = getTrimmedValues();
+		if (!values.company) {
+			delete values.company;
+		}
 		CurrentUserActionsDispatchers.updatePersonalData({
-			...getTrimmedValues(),
+			...values,
 			avatarFile: newAvatarFile,
 		});
 	};
@@ -181,7 +184,6 @@ export const EditProfilePersonalTab = ({
 					id: 'editProfile.form.company',
 					defaultMessage: 'Company',
 				})}
-				required
 				formError={errors.company}
 			/>
 			<FormSelect
