@@ -15,29 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledTab, StyledTabs, TabContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { SequenceDateActions, SequenceDateField } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
+import { Content as RiskDetails } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
-import safetiBaseRisk from './risk.overrides';
-import safetiBaseSequences from './sequences.overrides';
 
 export default css`
-	${StyledTabs} {
-		width: auto;
-		left: 0;
-		${StyledTab} {
-			font-size: 13px;
+	${RiskDetails} {
+		${SequenceDateField} .MuiInputBase-root {
+			margin: 0;
 		}
-	}
-	
-	.MuiTabScrollButton-root {
-		display: none;
-	}
-	${TabContent} {
-		padding: 0 15px;
-		/* TODO - fix after new palette is released */
-		background-color: #F7F8FA;
-		
-		${safetiBaseRisk}
-		${safetiBaseSequences}
+		${SequenceDateActions} {
+			bottom: -4px;
+		}
 	}
 `;
