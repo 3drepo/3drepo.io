@@ -31,6 +31,7 @@ import avatarPopover from './overrides/avatarPopover.overrides';
 import issueSequences from './overrides/cards/issues/sequences.overrides';
 import issueProperties from './overrides/cards/issues/properties.overrides';
 import issueShapes from './overrides/cards/issues/shapes.overrides';
+import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
 import groups from './overrides/cards/groups.overrides';
 import issueAttachments from './overrides/cards/issues/attachments.overrides';
@@ -62,17 +63,19 @@ export const V4OverridesContainer = styled.div`
 
 	${colorPicker}
 
-	${issueAttachments}
 	${bim}
-	${issueShapes}
-
+	
 	${groups}
 	${tree}
 	${views}
 	${measurements}
-
-	${issueSequences}
+	
 	${issueProperties}
+	${issueSequences}
+	${issueShapes}
+	${issueAttachments}
+
+	${safetiBase}
 
 	${views}
 

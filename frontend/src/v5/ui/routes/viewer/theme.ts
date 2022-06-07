@@ -51,6 +51,10 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							fontSize: '13px',
+							textTransform: 'lowercase',
+							':first-letter': {
+								textTransform: 'uppercase',
+							},
 						},
 					},
 				},
@@ -126,6 +130,9 @@ export const theme = createTheme(
 								'.react-autosuggest__suggestion': {
 									height: '34px',
 								},
+							},
+							'&.react-autosuggest__suggestions-container': {
+								boxShadow: 'none',
 							},
 						},
 					},
