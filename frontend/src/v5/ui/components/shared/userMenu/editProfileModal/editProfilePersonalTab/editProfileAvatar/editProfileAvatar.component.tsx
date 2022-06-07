@@ -30,7 +30,7 @@ import {
 	AddImageInputLabel,
 	AddImageHiddenInput,
 	UserIcon,
-	TruncateName,
+	TruncatableName,
 } from './editProfileAvatar.styles';
 
 type EditProfilePersonalTabProps = {
@@ -75,8 +75,8 @@ export const EditProfileAvatar = ({
 			<UserInfo>
 				<Username>{user.username}</Username>
 				<FullName>
-					<TruncateName>{user.firstName}</TruncateName> 
-					<TruncateName>{user.lastName}</TruncateName>
+					<TruncatableName>{user.firstName}</TruncatableName> 
+					<TruncatableName>{user.lastName}</TruncatableName>
 				</FullName>
 				<AddImageButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
 					<AddImageInputLabel>

@@ -60,7 +60,7 @@ export const UserInfo = styled.div`
 	margin-left: 20px;
 `;
 
-export const TruncateName = styled(Truncate).attrs({
+export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
 	width: 300,
 })``;
