@@ -19,6 +19,7 @@ import { Button } from '@controls/button';
 import UserIconBase from '@assets/icons/filled/user-filled.svg';
 import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { Avatar as AvatarBase } from '@controls/avatar';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -29,6 +30,10 @@ export const Header = styled.div`
 	flex-direction: row;
 	align-items: center;
 `;
+
+export const Avatar = styled(AvatarBase).attrs({
+	size: 115,
+})``;
 
 export const UserIcon = styled(UserIconBase)`
 	color: ${({ theme }) => theme.palette.primary.contrast};

@@ -18,10 +18,10 @@
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 
-export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $largeIcon?: boolean }>`
+export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $size?: number }>`
 	&& {
 		padding: 0;
-		margin: 0;
+		margin: 8px 7px;
 
 		${({ $isButton, theme }) => ($isButton ? `
 			cursor: pointer;
@@ -37,16 +37,19 @@ export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabl
 					background-color: ${theme.palette.tertiary.main};
 				}
 			}
-		` : `
-			cursor: default;
-		`)}
+		` : 'cursor: default;'
+		)}
+
+		&:hover {
+			background-color: transparent;
+		}
 	}
 
-	.MuiAvatar-circle {
+	.MuiAvatar-circular {
 		margin: 0;
-		${({ $largeIcon }) => `
-			height: ${$largeIcon ? '48px' : '38px'};
-			width: ${$largeIcon ? '48px' : '38px'};
+		${({ $size }) => `
+			height: ${$size || 38}px;
+			width: ${$size || 38}px;
 		`}
 	}
 

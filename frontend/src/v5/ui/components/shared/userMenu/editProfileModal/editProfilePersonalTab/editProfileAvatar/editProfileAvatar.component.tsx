@@ -31,6 +31,7 @@ import {
 	AddImageHiddenInput,
 	UserIcon,
 	TruncatableName,
+	Avatar,
 } from './editProfileAvatar.styles';
 
 type EditProfilePersonalTabProps = {
@@ -60,14 +61,14 @@ export const EditProfileAvatar = ({
 		}
 	};
 
-	const getAvatarUrl = () => (newAvatarFile ? URL.createObjectURL(newAvatarFile) : user.avatarUrl);
+	const getAvatarUrl = () => newAvatarFile && URL.createObjectURL(newAvatarFile);
 	const avatarIsAvailable = () => newAvatarFile || user.hasAvatar;
 
 	return (
 		<Header>
 			<ProfilePicture>
 				{avatarIsAvailable() ? (
-					<img src={getAvatarUrl()} alt="avatar" />
+					<Avatar avatarUrl={getAvatarUrl()} user={user}/>
 				) : (
 					<UserIcon />
 				)}
