@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { AddCircleIcon, Container, Message } from './newContainer.styles';
 
 interface INewContainer {
-	containerName?: string;
+	containerName: string;
 }
 
 export const NewContainer = ({ containerName, ...props }: INewContainer) => (
