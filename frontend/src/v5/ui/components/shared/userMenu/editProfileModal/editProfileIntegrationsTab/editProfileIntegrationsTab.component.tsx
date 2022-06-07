@@ -26,8 +26,7 @@ export const EditProfileIntegrationsTab = () => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
 	const error = CurrentUserHooksSelectors.selectApiKeyError();
 
-	const generateApiKey = () => CurrentUserActionsDispatchers.generateApiKey();
-	const deleteApiKey = () => CurrentUserActionsDispatchers.deleteApiKey();
+	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
 
 	return (
 		<>
