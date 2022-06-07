@@ -197,6 +197,7 @@ export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, 
 	[ContainersTypes.UPDATE_CONTAINER_SETTINGS_SUCCESS]: updateContainerSettingsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
+	[ContainersTypes.SET_CONTAINER_STATUS]: setContainerStatus,
 }) as (state: IContainersState, action: any) => IContainersState;
 
 /**
@@ -224,7 +225,7 @@ export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndPro
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
-export type SetContainerStatusAction = Action<'SET_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
+export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
 
 export interface IContainersActionCreators {
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
