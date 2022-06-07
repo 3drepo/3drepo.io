@@ -97,8 +97,6 @@ export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrent
 	},
 });
 
-
-
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
