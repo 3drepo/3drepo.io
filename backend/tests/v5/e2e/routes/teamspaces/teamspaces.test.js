@@ -86,18 +86,18 @@ const setupData = async () => {
 	});
 	await ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
 		[userWithLicenseUnlimitedCollabs.user], false, {
-			billing: {
-				subscriptions: [
-					{
-						discretionary: {
-							collaborators: 'unlimited',
-							data: licenseData,
-							expiryDate: Date.now() + 100000,
-						},
+		billing: {
+			subscriptions: [
+				{
+					discretionary: {
+						collaborators: 'unlimited',
+						data: licenseData,
+						expiryDate: Date.now() + 100000,
 					},
-				],
-			},
-		});
+				},
+			],
+		},
+	});
 	await ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], false, {
 		billing: {
 			subscriptions: [
@@ -255,8 +255,11 @@ const testGetQuotaInfo = () => {
 		});
 
 		test(`should return ${templates.licenceExpired.code} if the user has an expired license`, async () => {
-			const res = await agent.get(`${route(tsWithExpiredLicense.name)}/?key=${userWithExpiredLicense.apiKey}`).expect(templates.licenceExpired.status);
-			expect(res.body.code).toEqual(templates.licenceExpired.code);
+			const res = await agent.get(`${route(tsWithExpiredLicense.name)}/?key=${userWithExpiredLicense.apiKey}`);
+			expect(res.body).toEqual({
+				data: { used: 0, available: 0, },
+				seats: { used: 0, available: 0 },
+			});
 		});
 
 		test('should return quota if the user has a valid license', async () => {
@@ -267,14 +270,8 @@ const testGetQuotaInfo = () => {
 			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
 			expect(res.body).toEqual(
 				{
-					data: {
-						used: 0,
-						available: spaceLimit,
-					},
-					seats: {
-						used: 1,
-						available: collaboratorLimit,
-					},
+					data: { used: 0, available: spaceLimit, },
+					seats: { used: 1, available: collaboratorLimit, },
 				},
 			);
 		});
@@ -285,14 +282,8 @@ const testGetQuotaInfo = () => {
 			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
 			expect(res.body).toEqual(
 				{
-					data: {
-						used: 0,
-						available: spaceLimit,
-					},
-					seats: {
-						used: 1,
-						available: 'unlimited',
-					},
+					data: { used: 0, available: spaceLimit },
+					seats: { used: 1, available: 'unlimited' },
 				},
 			);
 		});
