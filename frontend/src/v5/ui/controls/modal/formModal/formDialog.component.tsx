@@ -107,7 +107,7 @@ export const FormModal = (props: IFormModal) => {
 							{cancelLabel || <FormattedMessage id="formDialog.actions.cancel" defaultMessage="Cancel" />}
 						</Button>
 						<SubmitButton
-							disabled={!isValid}
+							disabled={!isValid || isSubmitting}
 							onClick={onSubmit}
 							variant="contained"
 							color="primary"
