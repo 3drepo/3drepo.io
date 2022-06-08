@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
@@ -38,26 +37,29 @@ type EditProfilePersonalTabProps = {
 	newAvatarFile: File | null,
 	setNewAvatarFile: (file: File | null) => void,
 	user: IUser,
+	avatarError: string,
+	setAvatarError: (error: string) => void,
 };
 
 export const EditProfileAvatar = ({
 	newAvatarFile,
 	setNewAvatarFile,
 	user,
+	avatarError,
+	setAvatarError,
 }: EditProfilePersonalTabProps) => {
-	const [avatarTooBigError, setAvatarTooBigError] = useState('');
-
 	const addImage = (event) => {
 		if (!event.target.files.length) return;
 		const file = event.target.files[0];
-		if (!fileIsTooBig(file)) {
-			setAvatarTooBigError('');
-			setNewAvatarFile(file);
-		} else {
-			setAvatarTooBigError(formatMessage({
+
+		if (fileIsTooBig(file)) {
+			setAvatarError(formatMessage({
 				id: 'editProfile.avatar.error.size',
 				defaultMessage: 'Image cannot exceed 1 MB.',
 			}));
+		} else {
+			setAvatarError('');
+			setNewAvatarFile(file);
 		}
 	};
 
@@ -89,9 +91,7 @@ export const EditProfileAvatar = ({
 						<AddImageHiddenInput onChange={addImage} />
 					</AddImageInputLabel>
 				</AddImageButton>
-				{(avatarTooBigError) && (
-					<ErrorMessage>{avatarTooBigError}</ErrorMessage>
-				)}
+				{(avatarError) && <ErrorMessage>{avatarError}</ErrorMessage>}
 			</UserInfo>
 		</Header>
 	);

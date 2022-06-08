@@ -31,6 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import { defaults, pick, transform, isMatch } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
+import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollAreaPadding } from './editProfilePersonal.styles';
 
@@ -57,7 +58,9 @@ export const EditProfilePersonalTab = ({
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const [newAvatarFile, setNewAvatarFile] = useState(null);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
+	const [avatarError, setAvatarError] = useState('');
 	const [unexpectedError, setUnexpectedError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
 
 	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => transform(
 		personalValues,
@@ -78,7 +81,6 @@ export const EditProfilePersonalTab = ({
 		trigger,
 		handleSubmit,
 		reset,
-		watch,
 		control,
 		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
 	} = useForm<IUpdatePersonalInputs>({
@@ -87,20 +89,20 @@ export const EditProfilePersonalTab = ({
 		defaultValues: getUserPersonalValues(),
 	});
 
-	const firstName = watch('firstName');
-	const lastName = watch('lastName');
-	const company = watch('company');
+	const values = getValues();
 
-	const getTrimmedValues = () => trimPersonalValues(getValues());
+	const getTrimmedValues = () => trimPersonalValues(values);
 
 	const onSubmit = () => {
+		setErrorMessage('');
 		setUnexpectedError(false);
-		const values = getTrimmedValues();
-		if (!values.company) {
-			delete values.company;
+		setAvatarError('');
+		const trimmedValues = getTrimmedValues();
+		if (!trimmedValues.company) {
+			delete trimmedValues.company;
 		}
 		CurrentUserActionsDispatchers.updatePersonalData({
-			...values,
+			...trimmedValues,
 			avatarFile: newAvatarFile,
 		});
 	};
@@ -111,9 +113,9 @@ export const EditProfilePersonalTab = ({
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && fieldsAreDirty();
+		const shouldEnableSubmit = formIsValid && fieldsAreDirty() && !avatarError;
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
-	}, [newAvatarFile, firstName, lastName, company]);
+	}, [newAvatarFile, JSON.stringify(values), avatarError]);
 
 	// update form values when user is updated
 	useEffect(() => {
@@ -127,10 +129,25 @@ export const EditProfilePersonalTab = ({
 
 	useEffect(() => {
 		if (personalError) {
-			if (personalError?.message === 'Email already exists') {
-				setAlreadyExistingEmails([...alreadyExistingEmails, getValues().email]);
-			} else {
-				setUnexpectedError(true);
+			if (personalError.message === 'Network Error') {
+				setErrorMessage(formatMessage({
+					id: 'editProfile.networkError',
+					defaultMessage: 'Network Error',
+				}));
+				return;
+			}
+			switch (personalError?.code) {
+				case 'INVALID_ARGUMENTS':
+					setAlreadyExistingEmails([...alreadyExistingEmails, values.email]);
+					break;
+				case 'UNSUPPORTED_FILE_FORMAT':
+					setAvatarError(formatMessage({
+						id: 'editProfile.avatar.error.format',
+						defaultMessage: 'The file format is not supported',
+					}));
+					break;
+				default:
+					setUnexpectedError(true);
 			}
 		}
 	}, [personalError]);
@@ -150,6 +167,8 @@ export const EditProfilePersonalTab = ({
 					user={user}
 					newAvatarFile={newAvatarFile}
 					setNewAvatarFile={setNewAvatarFile}
+					avatarError={avatarError}
+					setAvatarError={setAvatarError}
 				/>
 				<FormTextField
 					name="firstName"
@@ -211,6 +230,7 @@ export const EditProfilePersonalTab = ({
 					</SuccessMessage>
 				)}
 				{unexpectedError && <UnexpectedError gapTop />}
+				{errorMessage && <ErrorMessage gapTop>{errorMessage}</ErrorMessage>}
 			</ScrollAreaPadding>
 		</ScrollArea>
 	);
