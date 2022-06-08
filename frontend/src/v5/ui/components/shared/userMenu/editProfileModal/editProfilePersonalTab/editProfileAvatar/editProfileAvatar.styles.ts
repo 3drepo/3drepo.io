@@ -50,13 +50,6 @@ export const ProfilePicture = styled.div`
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
-
-	img {
-		object-fit: contain;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
 `;
 
 export const UserInfo = styled.div`
