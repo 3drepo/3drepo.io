@@ -65,8 +65,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								size={48}
 							/>
 							<UserFullName>
-								<TruncatableName>{user.firstName}</TruncatableName>
-								<TruncatableName>{user.lastName}</TruncatableName>
+								<TruncatableName>{user.firstName}</TruncatableName> <TruncatableName>{user.lastName}</TruncatableName>
 							</UserFullName>
 							<UserUserName>{user.username}</UserUserName>
 							<ActionMenuItem>

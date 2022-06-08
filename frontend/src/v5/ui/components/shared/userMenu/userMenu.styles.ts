@@ -40,6 +40,7 @@ export const TruncatableName = styled(Truncate).attrs({
 	width: 210,
 })`
 	text-align: center;
+	display: inline-block;
 `;
 
 export const UserFullName = styled.div`
