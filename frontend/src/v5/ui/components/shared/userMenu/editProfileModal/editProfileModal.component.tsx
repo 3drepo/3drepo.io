@@ -60,9 +60,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	};
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
-	const onClickClose = () => {
-		onClose();
-	};
 
 	useEffect(() => {
 		if (open) {
@@ -79,7 +76,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
 			zeroMargin
-			onClickClose={onClickClose}
+			onClickClose={onClose}
 			confirmLabel={CONFIRM_LABELS[activeTab]}
 			onSubmit={getTabSubmitFunction()}
 			isValid={getTabSubmitFunction() || isSubmitting}
