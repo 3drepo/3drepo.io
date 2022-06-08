@@ -47,7 +47,7 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 					{
 						isPersonalTeamspace
 							? (
-								<MyTeamspaceImage user={user} isButton={false} />
+								<MyTeamspaceImage user={user} />
 							) : (
 								<OtherTeamspaceImage src={imgSrc} onError={onImageError} />
 							)

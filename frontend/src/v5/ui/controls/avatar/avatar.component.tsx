@@ -31,15 +31,17 @@ type AvatarProps = {
 	onClick?: (event: MouseEvent) => void;
 	user: IUser;
 	size?: number;
+	zeroMargin?: boolean;
 	isButton?: boolean;
 	// override the default avatar icon
 	avatarUrl?: string;
 };
 
-export const Avatar = ({ user, size, isButton, avatarUrl, ...props }: AvatarProps) => (
+export const Avatar = ({ user, size, isButton, avatarUrl, zeroMargin = false, ...props }: AvatarProps) => (
 	<StyledIconButton
 		$isButton={isButton}
 		$size={size}
+		$zeroMargin={zeroMargin}
 		{...props}
 	>
 		<AvatarIcon src={avatarUrl || (user.hasAvatar ? user.avatarUrl : null)}>
