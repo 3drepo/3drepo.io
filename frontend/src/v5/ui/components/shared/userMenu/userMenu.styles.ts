@@ -38,7 +38,9 @@ export const AvatarSection = styled.div`
 export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
 	width: 210,
-})``;
+})`
+	text-align: center;
+`;
 
 export const UserFullName = styled.div`
 	${({ theme }) => theme.typography.h3};
