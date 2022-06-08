@@ -24,7 +24,7 @@ import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/compon
 import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 
-export default css`
+export const DescriptionStyles = css`
 	.description {
 		margin: 14px 0;
 
@@ -33,7 +33,7 @@ export default css`
 		}
 
 		label {
-			font-size: 12px;
+			font-size: 10px;
 			transform: scale(1);
 			left: 1px;
 			top: -18px;
@@ -70,10 +70,6 @@ export default css`
 			top: 4px;
 			right: 0;
 		}
-	}
-
-	${PropertiesTabContent} {
-
 		${StyledMarkdownField} {
 			border: 1px solid #C1C8D5; // TODO: fix after new palette is released
 			border-radius: 5px;
@@ -87,7 +83,13 @@ export default css`
 				margin: 0;
 			}
 		}
+	}
+`;
 
+export default css`
+	${DescriptionStyles}
+
+	${PropertiesTabContent} {
 		// Drop-down inputs
 		${StyledFormControl} {
 			input {
@@ -125,17 +127,6 @@ export default css`
 				height: 24px;
 			}
 		}
-
-		${UpdateButtonsContainer} {
-			justify-content: left;
-			${StyledButton} {
-				margin: 0;
-			}
-
-			${ButtonContainer} {
-				min-height: 26px;
-			}
-		}
 	}
 
 	${DescriptionImage} img {
@@ -153,6 +144,7 @@ export default css`
 
 	${UpdateButtonsContainer} {
 		justify-content: left;
+		padding-top: 0 !important;
 		${StyledButton} {
 			margin: 0;
 		}

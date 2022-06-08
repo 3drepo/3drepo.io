@@ -15,25 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Name as RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.styles';
-import styled from 'styled-components';
+import { StyledTab, StyledTabs, TabContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { css } from 'styled-components';
+import safetiBaseRisk from './risk.overrides';
 
-export const Container = styled.div`
-	display: flex;
-	flex-direction: column;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	width: 100%;
-	align-items: baseline;
-	padding: 12px;
-
-	&:hover, &:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+export default css`
+	${StyledTabs} {
+		width: auto;
+		left: 0;
+		${StyledTab} {
+			font-size: 13px;
+		}
 	}
-	&, ${RevisionStatus} {
-		color: ${({ theme }) => theme.palette.base.main};
+	
+	.MuiTabScrollButton-root {
+		display: none;
 	}
-`;
-
-export const ErrorText = styled.div`
-	color: ${({ theme }) => theme.palette.error.main};
+	${TabContent} {
+		padding: 0 15px;
+		/* TODO - fix after new palette is released */
+		background-color: #F7F8FA;
+		
+		${safetiBaseRisk}
+	}
 `;

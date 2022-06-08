@@ -15,24 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { FormattedMessage } from 'react-intl';
-import { Container, LastRevision, ErrorText } from './existingContainer.styles';
+import { Container, ErrorText } from './existingContainer.styles';
 
 interface IExistingContainer {
-	containerName: string;
+	container: IContainer;
 	latestRevision: string;
 	inUse: boolean;
 }
 
-const noneText = <FormattedMessage id="uploads.destination.lastRevision.none" defaultMessage="None" />;
-
-export const ExistingContainer = ({ containerName, latestRevision, inUse, ...props }: IExistingContainer) => (
+export const ExistingContainer = ({ container, latestRevision, inUse, ...props }: IExistingContainer) => (
 	<Container {...props}>
-		{containerName}
-		<LastRevision>
-			<FormattedMessage id="uploads.destination.lastRevision" defaultMessage="Last revision: " />
-			{latestRevision || noneText}
-		</LastRevision>
+		{container.name}
+		<LatestRevision
+			hasRevisions={!!container.revisionsCount}
+			name={container.name}
+			status={container.status}
+		/>
 		<ErrorText hidden={!inUse}>
 			<FormattedMessage id="uploads.destination.containerInUse" defaultMessage="Already in use in another file upload" />
 		</ErrorText>
