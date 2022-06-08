@@ -134,6 +134,11 @@ export const theme = createTheme(
 							'&.react-autosuggest__suggestions-container': {
 								boxShadow: 'none',
 							},
+							'&.color-picker__panel': { // Colour picker modal
+								'.MuiInput-input': {
+									padding: '0 !important',
+								},
+							},
 						},
 					},
 				},
