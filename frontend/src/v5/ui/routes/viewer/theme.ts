@@ -135,8 +135,15 @@ export const theme = createTheme(
 								boxShadow: 'none',
 							},
 							'&.color-picker__panel': { // Colour picker modal
-								'.MuiInput-input': {
-									padding: '0 !important',
+								'.MuiInput-root': {
+									border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+									borderRadius: 5,
+									padding: '0 7px',
+									width: 'auto',
+									'.MuiInput-input': {
+										padding: '0 !important',
+										fontSize: 12,
+									},
 								},
 							},
 						},
