@@ -20,7 +20,7 @@ import TickIconBase from '@assets/icons/fat_tick.svg';
 export const PostSubmitSuccessfulMessage = styled.div`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.primary.main};
-	background-color: ${({ theme }) => theme.palette.primary.lightest}; // TODO - fix after new palette is created
+	background-color: ${({ theme }) => theme.palette.primary.lightest};
 	height: 45px;
 	box-sizing: border-box;
 	border: solid 1px currentColor;

@@ -22,7 +22,7 @@ import * as RevisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import api from '@/v5/services/api/default';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { mockCreateRevisionBody, revisionsMockFactory } from './revisions.fixtures';
+import { mockCreateRevisionBody } from './revisions.fixtures';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { spyOnAxiosApiCallWithFile } from '../test.helpers';
 
@@ -91,13 +91,6 @@ describe('Revisions: sagas', () => {
 		const uploadId = 'uploadId';
 		const mockBody = mockCreateRevisionBody();
 		const newContainerMockBody = {...mockBody, containerId: ''};
-
-		// const post = api.post;
-		// const spy = jest.spyOn(api, 'post').mockImplementation((url, body) => {
-		// 	// Transforms the formData to a string to avoid a problem with axios
-		// 	// in its node implementation.
-		// 	return post(url, body.toString());
-		// });
 		const spy = spyOnAxiosApiCallWithFile(api, 'post');
 
 		it('should create a revision on an existing container', async () => {
