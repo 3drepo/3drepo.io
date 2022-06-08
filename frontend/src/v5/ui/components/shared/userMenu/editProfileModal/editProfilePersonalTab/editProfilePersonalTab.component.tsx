@@ -61,7 +61,8 @@ export const EditProfilePersonalTab = ({
 
 	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => transform(
 		personalValues,
-		(result, value, key) => { result[key] = value.trim() },
+		// eslint-disable-next-line no-param-reassign
+		(result, value, key) => { result[key] = value.trim(); },
 		{} as IUpdatePersonalInputs,
 	);
 
