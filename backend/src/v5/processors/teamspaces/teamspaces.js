@@ -17,7 +17,7 @@
 
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
-const { createTeamspaceSettings, getMembersInfo, updateExpiry } = require('../../models/teamspaces');
+const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
 const { getCollaboratorsUsed, getQuotaInfo, getSpacedUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');

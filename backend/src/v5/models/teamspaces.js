@@ -80,18 +80,4 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 	return users.map(({ user }) => user);
 };
 
-Teamspace.updateExpiry = async (teamspace) => {
-	db.updateOne('admin', 'system.users', {user: teamspace}, {$set: 		
-		{
-		
-		'customData.billing.subscriptions':[{
-			discretionary: {
-				collaborators: 'unlimited',
-				expiryDate: Date.now() - 1000,
-				data: 10240
-			}
-		}] }
-	});
-};
-
 module.exports = Teamspace;
