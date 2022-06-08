@@ -16,35 +16,32 @@
  */
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { FormattedMessage } from 'react-intl';
-import { Gap, Link } from './unexpectedError.styles';
+import { Link, Gap } from './unexpectedError.styles';
 
 type UnexpectedErrorProps = {
 	gapTop?: boolean,
 };
 
 export const UnexpectedError = ({ gapTop }: UnexpectedErrorProps) => (
-	<>
-		{gapTop && <Gap />}
-		<ErrorMessage>
-			<FormattedMessage
-				id="form.unexpectedError.mainMessage"
-				defaultMessage="An unexpected error has occurred. Please try again later."
-			/>
-			<Gap />
-			<FormattedMessage
-				id="form.unexpectedError.contactSupport.message"
-				defaultMessage="If the error persists, please {contactSupport}."
-				values={{
-					contactSupport: (
-						<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-							<FormattedMessage
-								id="form.unexpectedError.contactSupport.link"
-								defaultMessage="contact the support"
-							/>
-						</Link>
-					),
-				}}
-			/>
-		</ErrorMessage>
-	</>
+	<ErrorMessage gapTop={gapTop}>
+		<FormattedMessage
+			id="form.unexpectedError.mainMessage"
+			defaultMessage="An unexpected error has occurred. Please try again later."
+		/>
+		<Gap />
+		<FormattedMessage
+			id="form.unexpectedError.contactSupport.message"
+			defaultMessage="If the error persists, please {contactSupport}."
+			values={{
+				contactSupport: (
+					<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
+						<FormattedMessage
+							id="form.unexpectedError.contactSupport.link"
+							defaultMessage="contact the support"
+						/>
+					</Link>
+				),
+			}}
+		/>
+	</ErrorMessage>
 );

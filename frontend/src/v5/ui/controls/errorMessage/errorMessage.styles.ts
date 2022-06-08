@@ -33,3 +33,7 @@ export const ErrorIcon = styled(ErrorIconBase)`
 export const Message = styled.div`
 	margin-left: 8px;
 `;
+
+export const Gap = styled.div`
+	height: 10px;
+`;

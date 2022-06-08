@@ -14,14 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Container, ErrorIcon, Message, Gap } from './errorMessage.styles';
 
-import { Container, ErrorIcon, Message } from './errorMessage.styles';
+type ErrorMessageProps = {
+	gapTop?: boolean,
+	children: any,
+};
 
-export const ErrorMessage = ({ children }) => (
-	<Container>
-		<ErrorIcon />
-		<Message>
-			{children}
-		</Message>
-	</Container>
+export const ErrorMessage = ({ children, gapTop }: ErrorMessageProps) => (
+	<>
+		{gapTop && <Gap />}
+		<Container>
+			<ErrorIcon />
+			<Message>
+				{children}
+			</Message>
+		</Container>
+	</>
 );
