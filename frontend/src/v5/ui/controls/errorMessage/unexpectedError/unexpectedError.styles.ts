@@ -17,10 +17,6 @@
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 
-export const Gap = styled.div`
-	height: 10px;
-`;
-
 export const Link = styled(LinkBase).attrs({
 	target: '_blank',
 })`

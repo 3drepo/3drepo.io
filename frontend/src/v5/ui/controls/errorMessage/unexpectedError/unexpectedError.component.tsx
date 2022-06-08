@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { Gap } from '@controls/gap';
 import { FormattedMessage } from 'react-intl';
-import { Link, Gap } from './unexpectedError.styles';
+import { Link } from './unexpectedError.styles';
 
 type UnexpectedErrorProps = {
 	gapTop?: boolean,
@@ -28,7 +29,7 @@ export const UnexpectedError = ({ gapTop }: UnexpectedErrorProps) => (
 			id="form.unexpectedError.mainMessage"
 			defaultMessage="An unexpected error has occurred. Please try again later."
 		/>
-		<Gap />
+		<Gap $height="10px" />
 		<FormattedMessage
 			id="form.unexpectedError.contactSupport.message"
 			defaultMessage="If the error persists, please {contactSupport}."
