@@ -40,8 +40,7 @@ export const UserIcon = styled(UserIconBase)`
 `;
 
 export const ProfilePicture = styled.div`
-	min-width: 115px;
-	max-width: 115px;
+	width: 115px;
 	height: 115px;
 	border-radius: 50%;
 	background-color: ${({ theme }) => theme.palette.base.lightest};
@@ -60,7 +59,7 @@ export const UserInfo = styled.div`
 
 export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
-	width: 300,
+	width: 280,
 })``;
 
 export const Username = styled.div`
