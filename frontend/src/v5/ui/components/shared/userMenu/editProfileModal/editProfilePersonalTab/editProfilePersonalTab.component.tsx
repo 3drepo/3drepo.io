@@ -115,7 +115,7 @@ export const EditProfilePersonalTab = ({
 	useEffect(() => {
 		const shouldEnableSubmit = formIsValid && fieldsAreDirty() && !avatarError;
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
-	}, [newAvatarFile, JSON.stringify(values), avatarError]);
+	}, [newAvatarFile, JSON.stringify(values), user, avatarError]);
 
 	// update form values when user is updated
 	useEffect(() => {
