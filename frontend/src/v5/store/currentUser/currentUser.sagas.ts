@@ -58,7 +58,7 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
 		yield put(CurrentUserActions.setPersonalError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setPersonalError(error?.response?.data));
+		yield put(CurrentUserActions.setPersonalError(error?.response?.data || error));
 	}
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
