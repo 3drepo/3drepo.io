@@ -17,7 +17,7 @@
 
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
-const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
+const { createTeamspaceSettings, getMembersInfo, updateExpiry } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
 const { getCollaboratorsUsed, getQuotaInfo, getSpacedUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
@@ -69,20 +69,19 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 };
 
 Teamspaces.getQuotaInfo = async (teamspace) => {
-	const quotaInfo = await getQuotaInfo(teamspace, true);
-	const spaceUsed = await getSpacedUsed(teamspace, true);
-	const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
+	try {
+		const quotaInfo = await getQuotaInfo(teamspace, true);
+		const spaceUsed = await getSpacedUsed(teamspace, true);
+		const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
 
-	return {
-		data: {
-			available: quotaInfo.quota,
-			used: spaceUsed,
-		},
-		seats: {
-			available: quotaInfo.collaboratorLimit,
-			used: collaboratorsUsed,
-		},
-	};
+		return {
+			data: { available: quotaInfo.quota, used: spaceUsed },
+			seats: { available: quotaInfo.collaboratorLimit, used: collaboratorsUsed },
+		};
+	} catch {
+		//exception is thrown if there is no valid subscription
+		return { data: { available: 0, used: 0, }, seats: { available: 0, used: 0 } };
+	}
 };
 
 module.exports = Teamspaces;
