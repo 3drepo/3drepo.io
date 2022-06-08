@@ -21,7 +21,7 @@ import { IconButton } from '@mui/material';
 export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $size?: number, $zeroMargin: boolean }>`
 	&& {
 		padding: 0;
-		margin: ${({ $zeroMargin }) => $zeroMargin ? 0 : '8px 7px'};
+		margin: ${({ $zeroMargin }) => ($zeroMargin ? 0 : '8px 7px')};
 
 		${({ $isButton, theme }) => ($isButton ? `
 			cursor: pointer;
