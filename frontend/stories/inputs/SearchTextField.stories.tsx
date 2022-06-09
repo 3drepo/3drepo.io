@@ -33,3 +33,10 @@ Default.args = {
 	label: 'Textfield label',
 	value: 'https://3drepo.com/',
 };
+
+export const HiddenValue = Template.bind({});
+HiddenValue.args = {
+	label: 'Textfield label',
+	value: 'https://3drepo.com/',
+	hideValue: true,
+};
