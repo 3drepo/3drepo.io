@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const fileIsTooBig = (file): boolean => {
-	const MAX_FILE_SIZE = 1024 * 1024; // 1MB
-	return file.size > MAX_FILE_SIZE;
-};
+import { clientConfigService } from '@/v4/services/clientConfig';
+
+export const fileIsTooBig = (file): boolean => (file.size > clientConfigService.avatarSizeLimit);

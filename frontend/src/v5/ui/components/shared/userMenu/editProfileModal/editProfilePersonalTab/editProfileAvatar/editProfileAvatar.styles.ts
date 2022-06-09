@@ -20,6 +20,7 @@ import UserIconBase from '@assets/icons/filled/user-filled.svg';
 import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -77,7 +78,7 @@ const ADD_IMAGE_ID = 'add-image';
 
 export const AddImageHiddenInput = styled.input.attrs({
 	type: 'file',
-	accept: '.gif,.jpg,.png',
+	accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
 	id: ADD_IMAGE_ID,
 })`
 	display: none;
