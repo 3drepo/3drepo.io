@@ -53,7 +53,7 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 			formData.append('file', avatarFile);
 			yield API.CurrentUser.updateAvatar(formData);
 			const avatarUrl = URL.createObjectURL(avatarFile);
-			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl }));
+			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }));
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
 		yield put(CurrentUserActions.setPersonalError(''));
