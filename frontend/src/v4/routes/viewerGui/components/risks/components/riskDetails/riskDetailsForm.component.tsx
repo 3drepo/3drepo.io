@@ -20,14 +20,21 @@ import { PureComponent } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
+import { isV5 } from '@/v4/helpers/isV5';
 import * as Yup from 'yup';
 
 import {
-	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, SHAPES_RISK_TYPE, TREATMENT_RISK_TYPE,
+	ATTACHMENTS_RISK_TYPE,
+	MAIN_RISK_TYPE,
+	RISK_TABS as V4_RISK_TABS,
+	V5_RISK_TABS,
+	SEQUENCING_RISK_TYPE,
+	SHAPES_RISK_TYPE,
+	TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
 import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { canChangeBasicProperty, canComment } from '../../../../../../helpers/risks';
+import { canComment } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
@@ -95,6 +102,7 @@ export const RiskSchema = Yup.object().shape({
 	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
+const RISK_TABS = isV5() ? V5_RISK_TABS : V4_RISK_TABS;
 class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 	get isNewRisk() {
 		return !this.props.risk._id;
