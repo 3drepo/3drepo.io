@@ -23,6 +23,9 @@ import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/heade
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
 import { Container, Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
@@ -49,10 +52,14 @@ export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.
 	return (
 		<Container className={className}>
 			<AppBar />
-			{project && !containerOrFederation && <ProjectHeader />}
-			<Content>
-				{children}
-			</Content>
+			<ThemeProvider theme={theme}>
+				<MuiThemeProvider theme={theme}>
+					{project && !containerOrFederation && <ProjectHeader />}
+					<Content>
+						{children}
+					</Content>
+				</MuiThemeProvider>
+			</ThemeProvider>
 		</Container>
 	);
 };

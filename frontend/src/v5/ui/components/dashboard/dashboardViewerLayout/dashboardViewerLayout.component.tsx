@@ -14,17 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ThemeProvider } from 'styled-components';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { theme } from '@/v5/ui/routes/viewer/theme';
 import { DashboardLayout } from './dashboardViewerLayout.styles';
 
 export const DashboardViewerLayout = ({ children }) => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<DashboardLayout>
-				{children}
-			</DashboardLayout>
-		</MuiThemeProvider>
-	</ThemeProvider>
+	<DashboardLayout>
+		{children}
+	</DashboardLayout>
 );
