@@ -16,9 +16,9 @@
  */
 import styled from 'styled-components';
 import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
-import { DashboardLayout as DashboardLayoutBase } from '@components/dashboard/dashboardLayout';
+import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 
-export const DashboardLayout = styled(DashboardLayoutBase)`
+export const DashboardViewerLayout = styled(DashboardLayout)`
 	${AppBarContainer} {
 		opacity: .95;
 		position: absolute;
