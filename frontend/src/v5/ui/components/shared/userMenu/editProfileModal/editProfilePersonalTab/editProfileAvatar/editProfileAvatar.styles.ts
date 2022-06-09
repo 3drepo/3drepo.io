@@ -59,7 +59,7 @@ export const UserInfo = styled.div`
 
 export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
-	width: 280,
+	width: 274,
 })``;
 
 export const Username = styled.div`
