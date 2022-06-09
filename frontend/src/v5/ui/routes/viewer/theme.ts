@@ -291,6 +291,9 @@ export const theme = createTheme(
 								backgroundColor: COLOR.PRIMARY_MAIN,
 								color: COLOR.PRIMARY_MAIN_CONTRAST,
 								textDecoration: 'none',
+								'&.Mui-disabled': {
+									backgroundColor: COLOR.BASE_LIGHTEST,
+								},
 								':hover': {
 									backgroundColor: COLOR.PRIMARY_DARK,
 								},
