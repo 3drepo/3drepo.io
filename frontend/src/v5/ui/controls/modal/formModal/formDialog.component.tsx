@@ -47,6 +47,7 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	zeroMargin?: boolean;
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
+	hideSubmitButton?: boolean;
 }
 
 export const FormModal = (props: IFormModal) => {
@@ -67,6 +68,7 @@ export const FormModal = (props: IFormModal) => {
 		zeroMargin = false,
 		isSubmitting = false,
 		disableClosing = false,
+		hideSubmitButton = false,
 		...formProps
 	} = props;
 
@@ -106,17 +108,19 @@ export const FormModal = (props: IFormModal) => {
 						<Button autoFocus onClick={handleClose} variant="outlined" color="secondary" size="medium" disabled={isSubmitting}>
 							{cancelLabel || <FormattedMessage id="formDialog.actions.cancel" defaultMessage="Cancel" />}
 						</Button>
-						<SubmitButton
-							disabled={!isValid || isSubmitting}
-							onClick={onSubmit}
-							variant="contained"
-							color="primary"
-							size="medium"
-							isPending={isSubmitting}
-							fullWidth={false}
-						>
-							{confirmLabel || <FormattedMessage id="formDialog.actions.ok" defaultMessage="OK" />}
-						</SubmitButton>
+						{!hideSubmitButton && (
+							<SubmitButton
+								disabled={!isValid || isSubmitting}
+								onClick={onSubmit}
+								variant="contained"
+								color="primary"
+								size="medium"
+								isPending={isSubmitting}
+								fullWidth={false}
+							>
+								{confirmLabel || <FormattedMessage id="formDialog.actions.ok" defaultMessage="OK" />}
+							</SubmitButton>
+						)}
 					</FormDialogActions>
 				)}
 			</Form>

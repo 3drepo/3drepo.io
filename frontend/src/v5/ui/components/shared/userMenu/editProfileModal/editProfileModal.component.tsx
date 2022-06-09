@@ -47,23 +47,31 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
+	const [hideSubmitButton, setHideSubmitButton] = useState(false);
+
+	const PERSONAL_TAB = 'personal';
+	const PASSWORD_TAB = 'password';
+	const INTEGRATIONS_TAB = 'integrations';
 
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
-			case 'personal':
+			case PERSONAL_TAB:
 				return personalSubmitFunction;
-			case 'password':
+			case PASSWORD_TAB:
 				return passwordSubmitFunction;
 			default:
 				return null;
 		}
 	};
 
-	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
+	const onTabChange = (_, selectedTab) => {
+		setActiveTab(selectedTab);
+		setHideSubmitButton(selectedTab === INTEGRATIONS_TAB);
+	};
 
 	useEffect(() => {
 		if (open) {
-			setActiveTab('personal');
+			setActiveTab(PERSONAL_TAB);
 		}
 		CurrentUserActionsDispatchers.resetErrors();
 	}, [open]);
@@ -81,30 +89,31 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			onSubmit={getTabSubmitFunction()}
 			isValid={getTabSubmitFunction() || isSubmitting}
 			isSubmitting={isSubmitting}
-			$isPasswordTab={activeTab === 'password'}
+			$isPasswordTab={activeTab === PASSWORD_TAB}
 			disableClosing={isSubmitting}
+			hideSubmitButton={hideSubmitButton}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
-					<Tab value="personal" label={TAB_LABELS.personal} disabled={isSubmitting} />
-					<Tab value="password" label={TAB_LABELS.password} disabled={isSubmitting} />
-					<Tab value="integrations" label={TAB_LABELS.integrations} disabled={isSubmitting} />
+					<Tab value={PERSONAL_TAB} label={TAB_LABELS.personal} disabled={isSubmitting} />
+					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting} />
+					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
 			</TabContext>
-			<TabPanel hidden={activeTab !== 'personal'} $zeroPadding>
+			<TabPanel hidden={activeTab !== PERSONAL_TAB} $zeroPadding>
 				<EditProfilePersonalTab
 					setIsSubmitting={setIsSubmitting}
 					setSubmitFunction={setPersonalSubmitFunction}
 					user={user}
 				/>
 			</TabPanel>
-			<TabPanel hidden={activeTab !== 'password'}>
+			<TabPanel hidden={activeTab !== PASSWORD_TAB}>
 				<EditProfilePasswordTab
 					setIsSubmitting={setIsSubmitting}
 					setSubmitFunction={setPasswordSubmitFunction}
 				/>
 			</TabPanel>
-			<TabPanel hidden={activeTab !== 'integrations'}>
+			<TabPanel hidden={activeTab !== INTEGRATIONS_TAB}>
 				<EditProfileIntegrationsTab />
 			</TabPanel>
 		</FormModal>
