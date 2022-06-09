@@ -22,6 +22,8 @@ const { DEFAULT_JOBS } = require('./jobs.constants');
 const db = require('../handler/db');
 
 const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
+const updateOne = (ts, query, action) => db.updateOne(ts, COL_NAME, query, action);
+const updateMany = (ts, query, action) => db.updateMany(ts, COL_NAME, query, action);
 
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
@@ -30,7 +32,11 @@ Jobs.addDefaultJobs = async (teamspace) => {
 };
 
 Jobs.assignUserToJob = async (teamspace, job, username) => {
-	await db.updateOne(teamspace, COL_NAME, { _id: job }, { $push: { users: username } });
+	await updateOne(teamspace, { _id: job }, { $push: { users: username } });
+};
+
+Jobs.removeUserFromJobs = async (teamspace, userToRemove) => {
+	await updateMany(teamspace, { }, { $pull: { users: userToRemove } });
 };
 
 module.exports = Jobs;

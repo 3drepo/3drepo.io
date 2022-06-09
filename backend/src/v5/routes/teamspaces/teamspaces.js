@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { canRemoveTeamMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
@@ -23,6 +24,7 @@ const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions')
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
+const { getUserFromSession } = require('../../utils/sessions');
 
 const getTeamspaceList = (req, res) => {
 	const user = req.session.user.username;
@@ -60,6 +62,18 @@ const getQuotaInfo = async (req, res) => {
 	try {
 		const quotaInfo = await Teamspaces.getQuotaInfo(teamspace);
 		respond(req, res, templates.ok, quotaInfo);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const removeTeamMember = async (req, res) => {
+	const { teamspace, username } = req.params;     
+
+	try {		
+		await Teamspaces.removeTeamMember(teamspace, username);
+		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -227,6 +241,8 @@ const establishRoutes = () => {
 	*
 	*/
 	router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);
+
+	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamMember, removeTeamMember);
 
 	return router;
 };

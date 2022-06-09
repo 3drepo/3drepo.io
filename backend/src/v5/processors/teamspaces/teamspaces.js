@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
-const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
-const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
+const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
+const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamSpaceRoleFromUser } = require('../../models/roles');
+const { createTeamspaceSettings, getMembersInfo, removeUserFromTeamspace } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
 const { getCollaboratorsUsed, getQuotaInfo, getSpacedUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
+const { removeUserFromModels } = require('../../models/modelSettings');
+const { removeUserFromProjects } = require('../../models/projectSettings');
 
 const Teamspaces = {};
 
@@ -82,6 +84,14 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 		//exception is thrown if there is no valid subscription
 		return { data: { available: 0, used: 0, }, seats: { available: 0, used: 0 } };
 	}
+};
+
+Teamspaces.removeTeamMember = async (teamspace, userToRemove) => {
+	await removeUserFromTeamspace(teamspace, userToRemove);
+	await removeUserFromModels(teamspace, userToRemove);
+	await removeUserFromProjects(teamspace, userToRemove);
+	await removeUserFromJobs(teamspace, userToRemove);
+	await revokeTeamSpaceRoleFromUser(teamspace, userToRemove);
 };
 
 module.exports = Teamspaces;

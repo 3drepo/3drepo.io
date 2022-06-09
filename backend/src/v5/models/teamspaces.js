@@ -26,6 +26,7 @@ const Teamspace = {};
 
 const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
+const updateOne = (query, action) => db.updateOne('admin', 'system.users', query, action);
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);
@@ -78,6 +79,12 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 	const users = await findMany(query, { _id: 0, user: 1 });
 
 	return users.map(({ user }) => user);
+};
+
+Teamspace.removeUserFromTeamspace = async (username, userToRemove) => {
+	const query = { 'user': username };
+	const action = { $pull: { 'customData.permissions': { user: userToRemove } } }
+	await updateOne(query, action);	
 };
 
 module.exports = Teamspace;
