@@ -36,7 +36,7 @@ export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
 
 export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
-	width: 345,
+	width: 430,
 })`
 	display: inline-block;
 `;
