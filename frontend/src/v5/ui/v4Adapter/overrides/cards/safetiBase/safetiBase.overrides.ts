@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import {
-	DashboardListItemTitle as DashboardListItemTitleComponent,
-} from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { StyledTab, StyledTabs, TabContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { css } from 'styled-components';
+import safetiBaseRisk from './risk.overrides';
 
-export const DashboardListItemTitle = styled(DashboardListItemTitleComponent)`
-	display: block;
+export default css`
+	${StyledTabs} {
+		width: auto;
+		left: 0;
+		${StyledTab} {
+			font-size: 13px;
+		}
+	}
+	
+	.MuiTabScrollButton-root {
+		display: none;
+	}
+	${TabContent} {
+		padding: 0 15px;
+		/* TODO - fix after new palette is released */
+		background-color: #F7F8FA;
+		
+		${safetiBaseRisk}
+	}
 `;

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
@@ -24,6 +23,7 @@ import InviteAFriendIcon from '@assets/icons/add_user.svg';
 import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
+import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { IUser } from '@/v5/store/users/users.redux';
 import { Avatar } from '@controls/avatar';
 import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
@@ -41,11 +41,7 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {
-	const { url } = useRouteMatch();
-	const baseUrl = url.split('/').slice(0, 3).join('/');
-
 	const onClickSignOut = () => AuthActionsDispatchers.logout();
-
 	return (
 		<AvatarContainer>
 			<ActionMenu>
@@ -76,7 +72,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 				<ActionMenuSection>
 					<ActionMenuItemLink
 						Icon={TeamspacesIcon}
-						to={baseUrl}
+						to={DASHBOARD_ROUTE}
 					>
 						<FormattedMessage
 							id="userMenu.teamspaces"
