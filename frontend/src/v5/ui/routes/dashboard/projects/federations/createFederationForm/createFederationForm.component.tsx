@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
-import { NewFederationSettingsSchema } from '@/v5/validation/schemes';
+import { NewFederationSettingsSchema } from '@/v5/validation/containerAndFerderationSchemes/federationSchemes';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';

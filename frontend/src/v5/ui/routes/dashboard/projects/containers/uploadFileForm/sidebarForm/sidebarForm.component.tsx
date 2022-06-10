@@ -22,7 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { SidebarSchema } from '@/v5/validation/containers';
+import { SidebarSchema } from '@/v5/validation/containerAndFerderationSchemes/containerSchemes';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
@@ -160,6 +160,7 @@ export const SidebarForm = ({
 						name="importAnimations"
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
+
 					<TimezoneSelect
 						control={control}
 						name="timezone"

@@ -17,7 +17,7 @@
 
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { ContainerSettingsSchema } from '@/v5/validation/schemes';
+import { ContainerSettingsSchema } from '@/v5/validation/containerAndFerderationSchemes/containerSchemes';
 import { SettingsForm } from '../../settingsForm/settingsForm.component';
 
 type ContainerSettingsFormProps = {

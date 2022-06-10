@@ -26,7 +26,8 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { Sidebar } from '@controls/sideBar';
 import { ScrollArea } from '@controls/scrollArea';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
-import { filesizeTooLarge, UploadsSchema } from '@/v5/validation/containers';
+import { filesizeTooLarge } from '@/v5/validation/containers';
+import { UploadsSchema } from '@/v5/validation/containerAndFerderationSchemes/containerSchemes';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';

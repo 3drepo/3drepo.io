@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EditProfileUpdatePasswordSchema } from '@/v5/validation/schemes';
+import { EditProfileUpdatePasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormTextField } from '@controls/formTextField/formTextField.component';

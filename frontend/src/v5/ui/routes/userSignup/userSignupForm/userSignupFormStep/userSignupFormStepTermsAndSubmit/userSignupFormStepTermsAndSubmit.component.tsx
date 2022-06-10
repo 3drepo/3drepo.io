@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
+import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';

@@ -14,13 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import filesize from 'filesize';
-import { formatMessage } from '../services/intl';
+import { AdvancedSettingsSchema, BaseSettingsSchema } from './settingsSchemes';
 
-export const filesizeTooLarge = (file: File): string => {
-	const { uploadSizeLimit } = ClientConfig;
-	return (file.size > uploadSizeLimit) && formatMessage({
-		id: 'validation.revisions.file.error.tooLarge',
-		defaultMessage: 'File exceeds size limit of {sizeLimit}',
-	}, { sizeLimit: filesize(uploadSizeLimit) });
-};
+export const NewFederationSettingsSchema = BaseSettingsSchema;
+export const FederationSettingsSchema = AdvancedSettingsSchema;
