@@ -49,7 +49,7 @@ export interface IUsersState {
 }
 
 export interface IUser {
-	username: string;
+	user: string;
 	firstName: string;
 	lastName: string;
 	countryCode?: string;

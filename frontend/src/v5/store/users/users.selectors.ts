@@ -29,5 +29,5 @@ export const selectUser = createSelector(
 	selectUsersByTeamspace,
 	(_, teamspace, userName) => userName,
 	(usersInTeamspace, userName): IUser | null => usersInTeamspace
-		.find((teamspaceUser) => teamspaceUser.username === userName),
+		.find((teamspaceUser) => teamspaceUser.user === userName),
 );
