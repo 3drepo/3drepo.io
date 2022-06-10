@@ -70,14 +70,3 @@ AvatarWithImage.args = {
 		avatarUrl: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
 	},
 } as Props;
-
-export const AvatarWithImageOverride = Template.bind({});
-AvatarWithImageOverride.args = {
-	user: {
-		firstName: 'Json',
-		lastName: 'Vorhees',
-		hasAvatar: true,
-		avatarUrl: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
-	},
-	avatarUrl: 'https://img.icons8.com/clouds/344/italy.png',
-} as Props;
