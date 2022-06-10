@@ -51,7 +51,7 @@ export const EditProfilePasswordTab = ({
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
+		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
 		control,
 		trigger,
 		reset,
@@ -67,10 +67,10 @@ export const EditProfilePasswordTab = ({
 	const confirmPassword = watch('confirmPassword');
 
 	const onSubmit = async () => {
-		await API.CurrentUser.updateUser({ oldPassword, newPassword });
-		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 		setIncorrectPassword(false);
 		setUnexpectedError(false);
+		await API.CurrentUser.updateUser({ oldPassword, newPassword });
+		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 	};
 
 	const onSubmitError = (error) => {
@@ -101,7 +101,7 @@ export const EditProfilePasswordTab = ({
 	}, [oldPassword]);
 
 	useEffect(() => {
-		trigger(Object.keys(touchedFields) as Array<keyof IUpdatePasswordInputs>);
+		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
 	}, [oldPassword, newPassword, confirmPassword]);
 
 	return (
