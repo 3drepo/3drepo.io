@@ -62,10 +62,11 @@ export const StyledCard = styled(Card)<{ $variant: string; }>`
 `;
 
 export const MyTeamspaceImage = styled(Avatar).attrs({
-	zeroMargin: true,
 	isButton: false,
 })`
 	width: 100%;
+	margin: 0;
+	
 	.MuiAvatar-root {
 		cursor: pointer;
 		border-radius: 0;

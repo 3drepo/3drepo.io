@@ -18,30 +18,28 @@
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 
-export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $size?: number, $zeroMargin: boolean }>`
-	&& {
-		padding: 0;
-		margin: ${({ $zeroMargin }) => ($zeroMargin ? 0 : '8px 7px')};
+export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $size?: number }>`
+	padding: 0;
+	margin: 8px 7px;
 
-		${({ $isButton, theme }) => ($isButton ? `
-			cursor: pointer;
-			
-			&:hover {
-				.MuiAvatar-root {
-					background-color: ${theme.palette.tertiary.mid};
-				}
-			}
-
-			&:active {
-				.MuiAvatar-root {
-					background-color: ${theme.palette.tertiary.main};
-				}
-			}
-		` : 'cursor: default;')}
-
+	${({ $isButton, theme }) => ($isButton ? `
+		cursor: pointer;
+		
 		&:hover {
-			background-color: transparent;
+			.MuiAvatar-root {
+				background-color: ${theme.palette.tertiary.mid};
+			}
 		}
+
+		&:active {
+			.MuiAvatar-root {
+				background-color: ${theme.palette.tertiary.main};
+			}
+		}
+	` : 'cursor: default;')}
+
+	&:hover {
+		background-color: transparent;
 	}
 
 	.MuiAvatar-circular {
@@ -54,7 +52,7 @@ export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabl
 
 	${({ disabled }) => disabled && css`
 		&& {
-		pointer-events: none;
+			pointer-events: none;
 			.MuiAvatar-root {
 				background-color: ${({ theme }) => theme.palette.secondary.mid};
 				color: ${({ theme }) => theme.palette.secondary.light};
