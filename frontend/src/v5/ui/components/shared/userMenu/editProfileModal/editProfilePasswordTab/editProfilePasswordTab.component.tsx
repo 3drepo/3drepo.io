@@ -26,7 +26,6 @@ import { SuccessMessage } from '@controls/successMessage/successMessage.componen
 
 import * as API from '@/v5/services/api';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { Gap } from '@controls/gap';
 
 interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -140,12 +139,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			{unexpectedError && (
-				<>
-					<Gap $height="19px" />
-					<UnexpectedError />
-				</>
-			)}
+			{unexpectedError && <UnexpectedError />}
 			{isSubmitSuccessful && !unexpectedError && !incorrectPassword && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />

@@ -24,6 +24,7 @@ export const Container = styled.div`
 	font-weight: 500;
 	justify-content: flex-start;
 	display: flex;
+	margin-top: 19px;
 `;
 
 export const ErrorIcon = styled(ErrorIconBase)`

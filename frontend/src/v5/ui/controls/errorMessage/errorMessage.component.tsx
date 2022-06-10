@@ -14,22 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Gap } from '@controls/gap';
 import { Container, ErrorIcon, Message } from './errorMessage.styles';
 
 type ErrorMessageProps = {
-	gapTop?: boolean,
 	children: any,
+	className?: string,
 };
 
-export const ErrorMessage = ({ children, gapTop }: ErrorMessageProps) => (
-	<>
-		{gapTop && <Gap $height="10px" />}
-		<Container>
-			<ErrorIcon />
-			<Message>
-				{children}
-			</Message>
-		</Container>
-	</>
+export const ErrorMessage = ({ children, className }: ErrorMessageProps) => (
+	<Container className={className}>
+		<ErrorIcon />
+		<Message>
+			{children}
+		</Message>
+	</Container>
 );

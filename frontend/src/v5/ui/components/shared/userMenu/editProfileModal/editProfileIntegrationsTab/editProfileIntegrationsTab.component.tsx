@@ -57,7 +57,7 @@ export const EditProfileIntegrationsTab = () => {
 					/>
 				</Button>
 			</ButtonsContainer>
-			{error && <UnexpectedError gapTop />}
+			{error && <UnexpectedError />}
 		</>
 	);
 };

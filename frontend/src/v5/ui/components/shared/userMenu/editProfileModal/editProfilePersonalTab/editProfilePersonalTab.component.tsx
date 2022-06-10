@@ -33,7 +33,7 @@ import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpect
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
-import { ScrollAreaPadding } from './editProfilePersonal.styles';
+import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
 
 interface IUpdatePersonalInputs {
 	firstName: string;
@@ -229,8 +229,8 @@ export const EditProfilePersonalTab = ({
 						<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
 					</SuccessMessage>
 				)}
-				{unexpectedError && <UnexpectedError gapTop />}
-				{errorMessage && <ErrorMessage gapTop>{errorMessage}</ErrorMessage>}
+				{unexpectedError && <UnexpectedError />}
+				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 			</ScrollAreaPadding>
 		</ScrollArea>
 	);
