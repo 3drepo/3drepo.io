@@ -110,7 +110,7 @@ export const FormModal = (props: IFormModal) => {
 						</Button>
 						{!hideSubmitButton && (
 							<SubmitButton
-								disabled={!isValid || isSubmitting}
+								disabled={!isValid}
 								onClick={onSubmit}
 								variant="contained"
 								color="primary"

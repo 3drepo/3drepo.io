@@ -23,6 +23,8 @@ export const SubmitButton = ({
 	color = 'primary',
 	children,
 	fullWidth = true,
+	disabled,
+	isPending,
 	...props
 }: IButton): JSX.Element => (
 	<Button
@@ -30,6 +32,8 @@ export const SubmitButton = ({
 		fullWidth={fullWidth}
 		variant={variant}
 		color={color}
+		disabled={disabled || isPending}
+		isPending={isPending}
 		{...props}
 	>
 		{children}

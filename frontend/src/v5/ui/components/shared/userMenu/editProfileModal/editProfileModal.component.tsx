@@ -31,8 +31,8 @@ const CONFIRM_LABELS = {
 };
 
 const TAB_LABELS = {
-	password: formatMessage({ defaultMessage: 'Password', id: 'editProfile.tab.title.password' }),
 	personal: formatMessage({ defaultMessage: 'Personal', id: 'editProfile.tab.title.personal' }),
+	password: formatMessage({ defaultMessage: 'Password', id: 'editProfile.tab.title.password' }),
 	integrations: formatMessage({ defaultMessage: 'Integrations', id: 'editProfile.tab.title.integrations' }),
 };
 
@@ -87,7 +87,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			onClickClose={onClose}
 			confirmLabel={CONFIRM_LABELS[activeTab]}
 			onSubmit={getTabSubmitFunction()}
-			isValid={getTabSubmitFunction() || isSubmitting}
+			isValid={getTabSubmitFunction()}
 			isSubmitting={isSubmitting}
 			$isPasswordTab={activeTab === PASSWORD_TAB}
 			disableClosing={isSubmitting}
