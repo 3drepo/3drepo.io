@@ -61,10 +61,10 @@ export const password = (passwordName = 'Password') => Yup.string()
 			id: 'validation.password.error.min',
 			defaultMessage: 'Password must be at least 8 characters',
 		}))
-	.max(128,
+	.max(65,
 		formatMessage({
 			id: 'validation.password.error.max',
-			defaultMessage: 'Password is limited to 128 characters',
+			defaultMessage: 'Password is limited to 65 characters',
 		}))
 	.test(
 		'checkPasswordStrength',
