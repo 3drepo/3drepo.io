@@ -17,8 +17,8 @@
 
 export interface ICurrentUser {
 	username: string,
-	firstName?: string,
-	lastName?: string,
+	firstName: string,
+	lastName: string,
 	email: string,
 	hasAvatar?: boolean,
 	apiKey?: string,

@@ -25,7 +25,7 @@ import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { IUser } from '@/v5/store/users/users.redux';
+import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { Avatar } from '@controls/avatar';
 import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
 import {
@@ -40,7 +40,7 @@ import {
 import { EditProfileModal } from './editProfileModal/editProfileModal.component';
 
 type UserMenuProps = {
-	user: IUser;
+	user: ICurrentUser;
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {

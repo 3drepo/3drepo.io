@@ -16,7 +16,7 @@
  */
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { IUser } from '@/v5/store/users/users.redux';
+import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { TabContext } from '@mui/lab';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
@@ -38,7 +38,7 @@ const TAB_LABELS = {
 
 type EditProfileModalProps = {
 	open: boolean;
-	user: IUser;
+	user: ICurrentUser;
 	onClose: () => void;
 };
 

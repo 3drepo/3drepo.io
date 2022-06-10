@@ -18,7 +18,7 @@ import { EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/edi
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { formatMessage } from '@/v5/services/intl';
-import { IUser } from '@/v5/store/users/users.redux';
+import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
@@ -46,7 +46,7 @@ interface IUpdatePersonalInputs {
 type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
-	user: IUser,
+	user: ICurrentUser,
 };
 
 export const EditProfilePersonalTab = ({

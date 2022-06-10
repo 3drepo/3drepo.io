@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { IUser } from '@/v5/store/users/users.redux';
+import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
@@ -36,7 +36,7 @@ import {
 type EditProfilePersonalTabProps = {
 	newAvatarFile: File | null,
 	setNewAvatarFile: (file: File | null) => void,
-	user: IUser,
+	user: ICurrentUser,
 	avatarError: string,
 	setAvatarError: (error: string) => void,
 };

@@ -38,7 +38,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
-	currentUser: { username: '', email: '' },
+	currentUser: { username: '', email: '', firstName: '', lastName: '' },
 };
 
 export const fetchUserSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
