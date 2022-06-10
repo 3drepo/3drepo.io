@@ -102,7 +102,7 @@ describe('Current User: sagas', () => {
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put(CurrentUserActions.updateUserSuccess({ avatarUrl }))
+				.put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }))
 				.put(CurrentUserActions.updateUserSuccess(userData))
 				.put(CurrentUserActions.setPersonalError(''))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
