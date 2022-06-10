@@ -26,6 +26,8 @@ import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authAct
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
+import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
+import { ModalsDispatcher } from '@components/shared/modals';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
@@ -45,6 +47,8 @@ export const Root = () => {
 		}
 	}, [isAuthenticated]);
 
+	useEffect(enableKickedOutEvent);
+
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
@@ -52,6 +56,7 @@ export const Root = () => {
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
 							<MainRoute />
+							<ModalsDispatcher />
 						</V4Adapter>
 					</IntlProvider>
 				</StylesProvider>

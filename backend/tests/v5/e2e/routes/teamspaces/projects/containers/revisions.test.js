@@ -60,6 +60,16 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
 	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(), status: 'queued' },
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(), status: 'processing' },
+	},
 ];
 
 const revisions = [
@@ -71,6 +81,8 @@ const revisions = [
 
 const modelWithRev = models[0];
 const federation = models[2];
+const queuedStatusModel = models[3];
+const processingStatusModel = models[4];
 const noFileRevision = revisions[1];
 const validRefTypeRevision = revisions[0];
 const voidRevision = revisions[2];
@@ -279,7 +291,7 @@ const testNewRevision = () => {
 		});
 
 		test('should succeed if correct parameters are sent and file has uppercase extension', async () => {
-			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+			await agent.post(`${route(teamspace, project.id, models[1]._id)}?key=${users.tsAdmin.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
 				.field('tag', '123')
 				.attach('file', objModelUppercaseExt)
@@ -296,6 +308,22 @@ const testNewRevision = () => {
 
 		test('should fail if the file is missing', async () => {
 			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', '123')
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the model status is queued', async () => {
+			const res = await agent.post(`${route(teamspace, project.id, queuedStatusModel._id)}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', '123')
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the model status is processing', async () => {
+			const res = await agent.post(`${route(teamspace, project.id, processingStatusModel._id)}?key=${users.tsAdmin.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
 				.field('tag', '123')
 				.expect(templates.invalidArguments.status);

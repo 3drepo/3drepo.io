@@ -30,6 +30,7 @@ import { prepareFederationsData } from '@/v5/store/federations/federations.helpe
 import { FederationStats, IFederation } from '@/v5/store/federations/federations.types';
 import { prepareMockContainers } from './federations.fixtures';
 import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { alertAction } from '../test.helpers';
 
 // TODO: review this
 // There is something weird as how the tests are setup
@@ -52,6 +53,48 @@ describe('Federations: sagas', () => {
 		jest.spyOn(console, 'log').mockRestore();
 		jest.spyOn(console, 'debug').mockRestore();
 	})
+
+	describe('createFederation', () => {
+		const newFederation = {
+			name: 'New Federation',
+			code: 'FED123',
+			desc: 'This is a test federation',
+			unit: 'cm',
+		};
+		const newFederationContainers = ['containerIdOne', 'containerIdTwo'];
+
+		it('should successfully create a new federation', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(200, { _id: federationId });
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation, newFederationContainers))
+				.put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId))
+				.put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, newFederationContainers))
+				.silentRun();
+		});
+		it('should successfully create a new federation with no containers', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(200, { _id: federationId });
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation))
+				.put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId))
+				.silentRun();
+		});
+		it('should call error dialog when create federation errors', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(400);
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation))
+				.put.like(alertAction('trying to create federation'))
+				.silentRun();
+		});
+	});
 
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint', async () => {

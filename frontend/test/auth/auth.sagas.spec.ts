@@ -27,7 +27,7 @@ describe('Auth: sagas', () => {
 	const password = 'Friday13';
 
 	describe('authenticate', () => {
-		it('should authenticate successfuly', async () => {
+		it('should authenticate successfully', async () => {
 			mockServer
 				.get('/login')
 				.reply(200);
@@ -57,7 +57,7 @@ describe('Auth: sagas', () => {
 	});
 
 	describe('login', () => {
-		it('should login successfuly', async () => {
+		it('should login successfully', async () => {
 			mockServer
 				.post('/login')
 				.reply(200);
@@ -88,7 +88,7 @@ describe('Auth: sagas', () => {
 	});
 
 	describe('logout', () => {
-		it('should logout successfuly', async () => {
+		it('should logout successfully', async () => {
 			mockServer
 				.post('/logout')
 				.reply(200);

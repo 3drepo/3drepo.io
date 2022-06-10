@@ -17,8 +17,7 @@
 
 import { ComponentType } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { DashboardListItemButton, DashboardListItemIcon, DashboardListItemText, DashboardListItemTitle } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
+import { DashboardListItemButton, DashboardListItemIcon, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
 import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
@@ -26,6 +25,7 @@ import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
+import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { DashboardListItemRow } from './editFederationContainersListItem.styles';
 
 type EditFederationContainersListItemProps = {
@@ -60,25 +60,13 @@ export const EditFederationContainersListItem = ({
 				<DashboardListItemIcon>
 					<Icon />
 				</DashboardListItemIcon>
-				<DashboardListItemTitle
+				<DashboardListItemContainerTitle
 					minWidth={116}
-					subtitle={(
-						<LatestRevision
-							name={container.latestRevision}
-							status={container.status}
-							error={container.errorResponse}
-							hasRevisions={container.revisionsCount > 0}
-						/>
-					)}
-					selected={isSelected}
-					tooltipTitle={
-						<FormattedMessage id="modal.editFederation.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-					}
-				>
-					<Highlight search={filterQuery}>
-						{container.name}
-					</Highlight>
-				</DashboardListItemTitle>
+					container={container}
+					isSelected={isSelected}
+					filterQuery={filterQuery}
+					openInNewTab
+				/>
 				<DashboardListItemButton
 					width={186}
 					onClick={() => onSelectOrToggleItem(container._id)}
@@ -121,6 +109,7 @@ export const EditFederationContainersListItem = ({
 				<RevisionDetails
 					containerId={container._id}
 					revisionsCount={container.revisionsCount}
+					status={container.status}
 				/>
 			)}
 		</DashboardListItem>

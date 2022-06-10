@@ -27,6 +27,7 @@ interface IRoomType {
 export enum SocketEvents {
 	CONNECT = 'connect',
 	DISCONNECT = 'disconnect',
+	LOGGED_OUT = 'loggedOut',
 }
 
 let socket:Socket = null;

@@ -28,6 +28,7 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	setAuthenticationStatus: ['status'],
 	sessionExpired: [],
 	setReturnUrl: ['url'],
+	kickedOut: [],
 }, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActionCreators>; Creators: IAuthActionCreators };
 
 export const INITIAL_STATE: IAuthState = {
@@ -90,4 +91,5 @@ export interface IAuthActionCreators {
 	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
 	sessionExpired: () => void;
 	setReturnUrl: (url: IAuthState['returnUrl']) => SetReturnUrlAction;
+	kickedOut: () => void;
 }

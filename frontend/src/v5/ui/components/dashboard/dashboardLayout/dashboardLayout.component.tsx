@@ -19,7 +19,6 @@ import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
-import { ModalsDispatcher } from '@components/shared/modals';
 import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
@@ -54,7 +53,6 @@ export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.
 			<Content>
 				{children}
 			</Content>
-			<ModalsDispatcher />
 		</Container>
 	);
 };
