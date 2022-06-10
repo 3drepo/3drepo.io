@@ -16,9 +16,9 @@
  */
 const { createResponseCode, templates } = require('./responseCodes');
 const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaces');
-const { getInvitationsByTeamspace } = require('../models/invitations');
 const DBHandler = require('../handler/db');
 const config = require('./config');
+const { getInvitationsByTeamspace } = require('../models/invitations');
 const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
@@ -31,6 +31,8 @@ Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 
 	for (let i = 0; i < subs.length; i++) {
 		const sub = subs[i];
+
+		// eslint-disable-next-line no-loop-func
 		Object.keys(sub).forEach((key) => {
 			// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
 			if (key !== 'paypal') {

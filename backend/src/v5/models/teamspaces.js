@@ -82,9 +82,9 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 };
 
 Teamspace.removeUserFromTeamspace = async (username, userToRemove) => {
-	const query = { 'user': username };
+	const query = { user: username };
 	const action = { $pull: { 'customData.permissions': { user: userToRemove } } };
-	await updateOne(query, action);	
+	await updateOne(query, action);
 };
 
 module.exports = Teamspace;

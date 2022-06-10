@@ -81,8 +81,8 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 			seats: { available: quotaInfo.collaboratorLimit, used: collaboratorsUsed },
 		};
 	} catch {
-		//exception is thrown if there is no valid subscription
-		return { data: { available: 0, used: 0, }, seats: { available: 0, used: 0 } };
+		// exception is thrown if there is no valid subscription
+		return { data: { available: 0, used: 0 }, seats: { available: 0, used: 0 } };
 	}
 };
 

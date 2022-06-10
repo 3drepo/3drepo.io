@@ -172,18 +172,13 @@ const testGetQuotaInfo = () => {
 			expect(getCollaboratorsUsedMock).toHaveBeenCalledWith(teamspace);
 		});
 
-		test('should return quota info with zero values if an exception is thrown', async () => {						
+		test('should return quota info with zero values if an exception is thrown', async () => {
 			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => {
 				throw templates.licenceExpired;
 			});
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
-			expect(res).toEqual(
-				{
-					data: {	available: 0, used: 0, },
-					seats: { available: 0, used: 0, },
-				},
-			);
+			expect(res).toEqual({ data: { available: 0, used: 0 }, seats: { available: 0, used: 0 } });
 			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
 			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
 		});
@@ -193,14 +188,19 @@ const testGetQuotaInfo = () => {
 const testRemoveTeamspaceMember = () => {
 	describe('Remove team member', () => {
 		test('should remove team member', async () => {
-			const removeUserFromTeamspaceMock = TeamspacesModel.removeUserFromTeamspace.mockImplementationOnce(() => {});
-			const removeUserFromModelsMock = ModelSettingsModel.removeUserFromModels.mockImplementationOnce(() => {});
-			const removeUserFromProjectsMock = ProjectSettingsModel.removeUserFromProjects.mockImplementationOnce(() => {});
-			const removeUserFromJobsMock = JobsModel.removeUserFromJobs.mockImplementationOnce(() => {});
-			const revokeTeamSpaceRoleFromUserMock = RolesModel.revokeTeamSpaceRoleFromUser.mockImplementationOnce(() => {});
+			const removeUserFromTeamspaceMock = TeamspacesModel.removeUserFromTeamspace
+				.mockImplementationOnce(() => {});
+			const removeUserFromModelsMock = ModelSettingsModel.removeUserFromModels
+				.mockImplementationOnce(() => {});
+			const removeUserFromProjectsMock = ProjectSettingsModel.removeUserFromProjects
+				.mockImplementationOnce(() => {});
+			const removeUserFromJobsMock = JobsModel.removeUserFromJobs
+				.mockImplementationOnce(() => {});
+			const revokeTeamSpaceRoleFromUserMock = RolesModel.revokeTeamSpaceRoleFromUser
+				.mockImplementationOnce(() => {});
 			const teamspace = generateRandomString();
 			const userToRemove = generateRandomString();
-			await Teamspaces.removeTeamspaceMember(teamspace, userToRemove);		
+			await Teamspaces.removeTeamspaceMember(teamspace, userToRemove);
 			expect(removeUserFromTeamspaceMock).toHaveBeenCalledTimes(1);
 			expect(removeUserFromTeamspaceMock).toHaveBeenCalledWith(teamspace, userToRemove);
 			expect(removeUserFromModelsMock).toHaveBeenCalledTimes(1);

@@ -97,7 +97,7 @@ Projects.updateProject = async (teamspace, projectId, updatedProject) => {
 
 Projects.removeUserFromProjects = async (teamspace, userToRemove) => {
 	const action = { $pull: { permissions: { user: userToRemove } } };
-	await updateManyProjects(teamspace, {}, action);	
+	await updateManyProjects(teamspace, {}, action);
 };
 
 module.exports = Projects;

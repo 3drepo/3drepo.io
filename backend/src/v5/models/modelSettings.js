@@ -216,8 +216,8 @@ Models.updateModelSettings = async (teamspace, project, model, data, sender) => 
 };
 
 Models.removeUserFromModels = async (teamspace, userToRemove) => {
-	const action = { $pull: { permissions: { user: userToRemove }} };
+	const action = { $pull: { permissions: { user: userToRemove } } };
 	await updateManyModels(teamspace, {}, action);
-}
+};
 
 module.exports = Models;

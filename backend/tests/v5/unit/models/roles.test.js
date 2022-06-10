@@ -64,7 +64,7 @@ const testRevokeTeamspaceRoleFromUser = () => {
 			const username = generateRandomString();
 			const expectedCommand = {
 				revokeRolesFromUser: username,
-				roles: [{role: TEAM_MEMBER, db: teamspace}]
+				roles: [{ role: TEAM_MEMBER, db: teamspace }],
 			};
 
 			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });

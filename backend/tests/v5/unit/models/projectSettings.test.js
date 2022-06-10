@@ -291,7 +291,7 @@ const testRemoveUserFromProjects = () => {
 			await Project.removeUserFromProjects(teamspace, userToRemove);
 
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', {}, { $pull: { permissions: { user: userToRemove }} });
+			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', {}, { $pull: { permissions: { user: userToRemove } } });
 		});
 	});
 };

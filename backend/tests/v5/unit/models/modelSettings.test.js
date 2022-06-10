@@ -574,7 +574,6 @@ const testUpdateModelSettings = () => {
 	});
 };
 
-
 const testRemoveUserFromModels = () => {
 	describe('Remove user from models', () => {
 		test('should remove user from models', async () => {
@@ -586,7 +585,7 @@ const testRemoveUserFromModels = () => {
 			await Model.removeUserFromModels(teamspace, userToRemove);
 
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', {}, { $pull: { permissions: { user: userToRemove }} });
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', {}, { $pull: { permissions: { user: userToRemove } } });
 		});
 	});
 };

@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
+const { canRemoveTeamspaceMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
 const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
-const { getUserFromSession } = require('../../utils/sessions');
 
 const getTeamspaceList = (req, res) => {
 	const user = req.session.user.username;
@@ -69,9 +68,9 @@ const getQuotaInfo = async (req, res) => {
 };
 
 const removeTeamspaceMember = async (req, res) => {
-	const { teamspace, username } = req.params;     
-	
-	try {		
+	const { teamspace, username } = req.params;
+
+	try {
 		await Teamspaces.removeTeamspaceMember(teamspace, username);
 		respond(req, res, templates.ok);
 	} catch (err) {

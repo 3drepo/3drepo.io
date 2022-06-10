@@ -59,15 +59,15 @@ queue.purgeQueues = async () => {
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
-	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));	
+	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {	
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));	
+db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
+	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
 			{ permissions: breaking ? undefined : permissions, ...customData }),

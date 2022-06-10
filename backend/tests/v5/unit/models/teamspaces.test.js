@@ -186,12 +186,11 @@ const testRemoveUserFromTeamspace = () => {
 			await Teamspace.removeUserFromTeamspace(username, userToRemove);
 
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username},
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
 				{ $pull: { 'customData.permissions': { user: userToRemove } } });
 		});
 	});
 };
-
 
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
