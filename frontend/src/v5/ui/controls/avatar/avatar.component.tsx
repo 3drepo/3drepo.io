@@ -18,8 +18,9 @@ import { MouseEvent } from 'react';
 import AvatarIcon from '@mui/material/Avatar';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { StyledIconButton } from './avatar.styles';
+import { IUser } from '@/v5/store/users/users.redux';
 
-const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser) => {
+const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser | IUser) => {
 	if (!(firstName || lastName)) return '';
 
 	return [firstName, lastName]
@@ -29,7 +30,7 @@ const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser) => {
 
 type AvatarProps = {
 	onClick?: (event: MouseEvent) => void;
-	user: ICurrentUser;
+	user: ICurrentUser | IUser;
 	size?: number;
 	isButton?: boolean;
 	// override the default avatar icon
