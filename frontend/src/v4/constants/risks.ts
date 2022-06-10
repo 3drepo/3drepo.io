@@ -69,6 +69,11 @@ export const RISK_TABS = {
 	ATTACHMENTS: 'Attachments',
 };
 
+export const V5_RISK_TABS = {
+	...RISK_TABS,
+	SEQUENCING: '4D',
+};
+
 export const RISK_LEVELS = {
 	UNMITIGATED: '',
 	PROPOSED: 'proposed',
