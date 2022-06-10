@@ -87,7 +87,7 @@ export const AddImageHiddenInput = styled.input.attrs({
 export const AddImageButton = styled(Button).attrs({
 	variant: 'outlined',
 })`
-	margin: 7px 0;
+	margin: 7px 0 0;
 	padding: 0;
 	width: fit-content;
 `;
