@@ -80,8 +80,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		<FormModal
 			open={open}
 			title={formatMessage(
-				{ id: 'editProfile.title', defaultMessage: '{firstName}' },
-				{ firstName: <TruncatableName ellipsis="...'s">{user.firstName}</TruncatableName> },
+				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
+				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
 			zeroMargin
 			onClickClose={onClose}
