@@ -33,18 +33,16 @@ type AvatarProps = {
 	user: ICurrentUser | IUser;
 	size?: number;
 	isButton?: boolean;
-	// override the default avatar icon
-	avatarUrl?: string;
 	className?: string;
 };
 
-export const Avatar = ({ user, size, isButton, avatarUrl, ...props }: AvatarProps) => (
+export const Avatar = ({ user, size, isButton, ...props }: AvatarProps) => (
 	<StyledIconButton
 		$isButton={isButton}
 		$size={size}
 		{...props}
 	>
-		<AvatarIcon src={avatarUrl || (user.hasAvatar ? user.avatarUrl : null)}>
+		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
 			{getUserNamesInitials(user)}
 		</AvatarIcon>
 	</StyledIconButton>

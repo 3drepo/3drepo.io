@@ -63,14 +63,22 @@ export const EditProfileAvatar = ({
 		}
 	};
 
-	const getAvatarUrl = () => newAvatarFile && URL.createObjectURL(newAvatarFile);
+	const getUserWithAvatar = () => {
+		if (!newAvatarFile) return user;
+		return {
+			...user,
+			hasAvatar: true,
+			avatarUrl: URL.createObjectURL(newAvatarFile),
+		};
+	};
+
 	const avatarIsAvailable = () => newAvatarFile || user.hasAvatar;
 
 	return (
 		<Header>
 			<ProfilePicture>
 				{avatarIsAvailable() ? (
-					<Avatar avatarUrl={getAvatarUrl()} user={user} />
+					<Avatar user={getUserWithAvatar()} />
 				) : (
 					<UserIcon />
 				)}
