@@ -17,8 +17,8 @@
 import { MouseEvent } from 'react';
 import AvatarIcon from '@mui/material/Avatar';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
-import { StyledIconButton } from './avatar.styles';
 import { IUser } from '@/v5/store/users/users.redux';
+import { StyledIconButton } from './avatar.styles';
 
 const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser | IUser) => {
 	if (!(firstName || lastName)) return '';
