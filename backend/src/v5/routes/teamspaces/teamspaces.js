@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamMember } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
@@ -68,11 +68,11 @@ const getQuotaInfo = async (req, res) => {
 	}
 };
 
-const removeTeamMember = async (req, res) => {
+const removeTeamspaceMember = async (req, res) => {
 	const { teamspace, username } = req.params;     
-
+	
 	try {		
-		await Teamspaces.removeTeamMember(teamspace, username);
+		await Teamspaces.removeTeamspaceMember(teamspace, username);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -242,7 +242,36 @@ const establishRoutes = () => {
 	*/
 	router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);
 
-	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamMember, removeTeamMember);
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/members/{username}:
+	*   delete:
+	*     description: Removes all permissions of a user from a teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - teamspace:
+	*         name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - username:
+	*         name: username
+	*         description: the username of the user to be removed
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: removeTeamspaceMember
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Removes all permissions of a user from a teamspace
+	*
+	*/
+	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, removeTeamspaceMember);
 
 	return router;
 };

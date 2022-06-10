@@ -32,6 +32,12 @@ const JobsModel = require(`${src}/models/jobs`);
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspacesModel = require(`${src}/models/teamspaces`);
 
+jest.mock('../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../src/v5/models/projectSettings');
+const ProjectSettingsModel = require(`${src}/models/projectSettings`);
+
 jest.mock('../../../../../src/v5/models/roles');
 const RolesModel = require(`${src}/models/roles`);
 
@@ -165,6 +171,47 @@ const testGetQuotaInfo = () => {
 			expect(getCollaboratorsUsedMock).toHaveBeenCalledTimes(1);
 			expect(getCollaboratorsUsedMock).toHaveBeenCalledWith(teamspace);
 		});
+
+		test('should return quota info with zero values if an exception is thrown', async () => {						
+			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => {
+				throw templates.licenceExpired;
+			});
+			const teamspace = generateRandomString();
+			const res = await Teamspaces.getQuotaInfo(teamspace);
+			expect(res).toEqual(
+				{
+					data: {	available: 0, used: 0, },
+					seats: { available: 0, used: 0, },
+				},
+			);
+			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
+			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
+		});
+	});
+};
+
+const testRemoveTeamspaceMember = () => {
+	describe('Remove team member', () => {
+		test('should remove team member', async () => {
+			const removeUserFromTeamspaceMock = TeamspacesModel.removeUserFromTeamspace.mockImplementationOnce(() => {});
+			const removeUserFromModelsMock = ModelSettingsModel.removeUserFromModels.mockImplementationOnce(() => {});
+			const removeUserFromProjectsMock = ProjectSettingsModel.removeUserFromProjects.mockImplementationOnce(() => {});
+			const removeUserFromJobsMock = JobsModel.removeUserFromJobs.mockImplementationOnce(() => {});
+			const revokeTeamSpaceRoleFromUserMock = RolesModel.revokeTeamSpaceRoleFromUser.mockImplementationOnce(() => {});
+			const teamspace = generateRandomString();
+			const userToRemove = generateRandomString();
+			await Teamspaces.removeTeamspaceMember(teamspace, userToRemove);		
+			expect(removeUserFromTeamspaceMock).toHaveBeenCalledTimes(1);
+			expect(removeUserFromTeamspaceMock).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(removeUserFromModelsMock).toHaveBeenCalledTimes(1);
+			expect(removeUserFromModelsMock).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(removeUserFromProjectsMock).toHaveBeenCalledTimes(1);
+			expect(removeUserFromProjectsMock).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(removeUserFromJobsMock).toHaveBeenCalledTimes(1);
+			expect(removeUserFromJobsMock).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(revokeTeamSpaceRoleFromUserMock).toHaveBeenCalledTimes(1);
+			expect(revokeTeamSpaceRoleFromUserMock).toHaveBeenCalledWith(teamspace, userToRemove);
+		});
 	});
 };
 
@@ -173,4 +220,5 @@ describe('processors/teamspaces', () => {
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
 	testGetQuotaInfo();
+	testRemoveTeamspaceMember();
 });

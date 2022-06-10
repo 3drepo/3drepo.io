@@ -280,6 +280,22 @@ const testGetProjectById = () => {
 	});
 };
 
+const testRemoveUserFromProjects = () => {
+	describe('Remove user from projects', () => {
+		test('should remove user from projects', async () => {
+			const fn = jest.spyOn(db, 'updateMany');
+
+			const teamspace = generateRandomString();
+			const userToRemove = generateRandomString();
+
+			await Project.removeUserFromProjects(teamspace, userToRemove);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', {}, { $pull: { permissions: { user: userToRemove }} });
+		});
+	});
+};
+
 describe('models/projectSettings', () => {
 	testProjectAdmins();
 	testGetProjectList();
@@ -292,4 +308,5 @@ describe('models/projectSettings', () => {
 	testUpdateProject();
 	testGetProjectByName();
 	testGetProjectById();
+	testRemoveUserFromProjects();
 });

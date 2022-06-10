@@ -18,21 +18,23 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
-const { generateRandomNumber } = require('../../../helper/services');
+const { generateRandomNumber, generateRandomModel, generateRandomProject } = require('../../../helper/services');
 const config = require('../../../../../src/v5/utils/config');
+const { TEAM_MEMBER } = require('../../../../../src/v5/models/roles.constants');
+const { TEAMSPACE_ADMIN } = require('../../../../../src/v5/utils/permissions/permissions.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
 
-// This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
 const testUser2 = ServiceHelper.generateUserCredentials();
 const userCollabs = generateRandomNumber(0);
 const userWithLicense = ServiceHelper.generateUserCredentials();
 const userWithLicenseUnlimitedCollabs = ServiceHelper.generateUserCredentials();
 const userWithExpiredLicense = ServiceHelper.generateUserCredentials();
+const userToRemoveFromTs = ServiceHelper.generateUserCredentials();
 
 const usersInFirstTeamspace = [
 	ServiceHelper.generateUserCredentials(),
@@ -46,18 +48,28 @@ const teamspaces = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
+
+//license related
 const licenseData = generateRandomNumber(0);
 const tsWithLicense = { name: ServiceHelper.generateRandomString() };
 const tsWithLicenseUnlimitedCollabs = { name: ServiceHelper.generateRandomString() };
 const tsWithExpiredLicense = { name: ServiceHelper.generateRandomString() };
+
+//avatar related
 const avatar = ServiceHelper.generateRandomString();
 const tsWithAvatar = teamspaces[1].name;
+
+//removing user from a teamspace
+const tsWithUserToRemove = { name: ServiceHelper.generateRandomString(), isAdmin: true };
 
 const jobToUsers = [
 	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
 	{ _id: 'jobB', users: [usersInFirstTeamspace[1]] },
 	{ _id: 'jobC', users: [] },
 ];
+
+const project = generateRandomProject();
+const model = generateRandomModel({ collaborators: [userToRemoveFromTs.user] });
 
 // This is the list of teamspaces the user has access to
 const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
@@ -112,10 +124,18 @@ const setupData = async () => {
 		},
 	});
 
+	await ServiceHelper.db.createTeamspace(tsWithUserToRemove.name, [], false, {
+		permissions: [
+			{ user: userToRemoveFromTs.user, permissions: TEAMSPACE_ADMIN },
+			{ user: testUser.user, permissions: TEAMSPACE_ADMIN },
+			{ user: testUser2.user, permissions: TEAM_MEMBER },
+		]
+	});
+
 	await Promise.all([
 		ServiceHelper.db.createUser(
 			testUser,
-			teamspaces.map(({ name }) => name),
+			[...teamspaces.map(({ name }) => name), tsWithUserToRemove.name],
 		),
 		ServiceHelper.db.createUser(
 			userWithLicense,
@@ -131,7 +151,11 @@ const setupData = async () => {
 		),
 		ServiceHelper.db.createUser(
 			testUser2,
-			[breakingTSAccess.name],
+			[breakingTSAccess.name, tsWithUserToRemove.name],
+		),
+		ServiceHelper.db.createUser(
+			userToRemoveFromTs,
+			[tsWithUserToRemove.name],
 		),
 		...usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
 			user,
@@ -139,6 +163,9 @@ const setupData = async () => {
 		)),
 		ServiceHelper.db.createJobs(teamspaces[0].name, jobToUsers),
 	]);
+
+	await ServiceHelper.db.createProject(tsWithUserToRemove.name, project.id, project.name, [], [userToRemoveFromTs.user]);
+	await ServiceHelper.db.createModel(tsWithUserToRemove.name, model._id, model.name, model.properties);
 };
 
 const testGetTeamspaceList = () => {
@@ -149,7 +176,7 @@ const testGetTeamspaceList = () => {
 		});
 		test('return a teamspace list if the user has a valid session', async () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body.teamspaces.length).toBe(teamspaces.length);
+			expect(res.body.teamspaces.length).toBe(teamspaces.concat([tsWithUserToRemove]).length);
 			expect(res.body.teamspaces).toEqual(expect.arrayContaining(teamspaces));
 		});
 
@@ -290,6 +317,55 @@ const testGetQuotaInfo = () => {
 	});
 };
 
+const testRemoveTeamspaceMember = () => {
+	describe('Remove teamspace member', () => {
+		const route = (ts = tsWithUserToRemove.name,
+			username = userToRemoveFromTs.user) => `/v5/teamspaces/${ts}/members/${username}`;
+
+		test('should fail without a valid session', async () => {
+			const res = await agent.delete(route()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user does not have access to the teamspace', async () => {
+			const res = await agent.delete(`${route()}/?key=${userWithLicense.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user does not have admin access to the teamspace', async () => {
+			const res = await agent.delete(`${route()}/?key=${testUser2.apiKey}`).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the teamspace does not exist', async () => {
+			const res = await agent.delete(`${route('sldkfjdl')}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the the user to remove is the owner of the teamspace', async () => {
+			const res = await agent.delete(`${route(tsWithUserToRemove.name, tsWithUserToRemove.name)}/?key=${testUser.apiKey}`).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+		
+		test('should remove user from the teamspace', async () => {
+			await agent.delete(`${route()}/?key=${testUser.apiKey}`).expect(templates.ok.status);
+			const tsMembersRes = await agent.get(`/v5/teamspaces/${tsWithUserToRemove.name}/members?key=${testUser.apiKey}`);
+			const removedUser = tsMembersRes.body.members.find((m) => m.user === userToRemoveFromTs.user);
+			expect(removedUser).toEqual(undefined);
+			const projectDataRes = await agent.get(`/${tsWithUserToRemove.name}/projects?key=${testUser.apiKey}`);
+			const projectPermissions = projectDataRes.body.find((p) => p._id === project.id).permissions;
+			const removedProjectPermission = projectPermissions.find((p) => p.user === userToRemoveFromTs.user);
+			expect(removedProjectPermission).toEqual(undefined);
+			const modelPermissionsRes = await agent.get(`/${tsWithUserToRemove.name}/${model._id}/permissions?key=${testUser.apiKey}`);		
+			const removedModelPermission = modelPermissionsRes.body.find((p) => p.user === userToRemoveFromTs.user);			
+			expect(removedModelPermission).toEqual(undefined);						
+		});
+
+	});
+};
+
+
+
 describe('E2E routes/teamspaces', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -301,4 +377,5 @@ describe('E2E routes/teamspaces', () => {
 	testGetTeamspaceMembers();
 	testGetAvatar();
 	testGetQuotaInfo();
+	testRemoveTeamspaceMember();
 });

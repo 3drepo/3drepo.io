@@ -86,7 +86,7 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 	}
 };
 
-Teamspaces.removeTeamMember = async (teamspace, userToRemove) => {
+Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
 	await removeUserFromTeamspace(teamspace, userToRemove);
 	await removeUserFromModels(teamspace, userToRemove);
 	await removeUserFromProjects(teamspace, userToRemove);

@@ -175,6 +175,24 @@ const testGetAllUsersInTeamspace = () => {
 	});
 };
 
+const testRemoveUserFromTeamspace = () => {
+	describe('Remove user from teamspace', () => {
+		test('should remove user from teamspace', async () => {
+			const fn = jest.spyOn(db, 'updateOne');
+
+			const username = generateRandomString();
+			const userToRemove = generateRandomString();
+
+			await Teamspace.removeUserFromTeamspace(username, userToRemove);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username},
+				{ $pull: { 'customData.permissions': { user: userToRemove } } });
+		});
+	});
+};
+
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
@@ -182,4 +200,5 @@ describe('models/teamspaces', () => {
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
+	testRemoveUserFromTeamspace();
 });
