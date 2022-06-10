@@ -71,7 +71,7 @@ export const Login = () => {
 						defaultMessage: 'Password',
 					})}
 				/>
-				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
+				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage
