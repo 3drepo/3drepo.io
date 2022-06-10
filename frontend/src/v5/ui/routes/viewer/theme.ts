@@ -141,9 +141,20 @@ export const theme = createTheme(
 									padding: '0 7px',
 									width: 'auto',
 									'.MuiInput-input': {
-										padding: '0 !important',
 										fontSize: 12,
+										marginLeft: -13,
+										paddingRight: '0 !important',
 									},
+									'.MuiInputAdornment-positionEnd': {
+										margin: '0 0 0 -30px',
+									},
+								},
+								'.MuiSlider-root': {
+									width: 145,
+									marginRight: 15,
+								},
+								'.MuiCheckbox-root': {
+									margin: '8px 8px 8px -8px',
 								},
 							},
 						},
