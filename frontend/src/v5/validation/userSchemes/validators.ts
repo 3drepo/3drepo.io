@@ -113,7 +113,13 @@ export const countryCode = Yup.string()
 		}),
 	);
 
-export const email = (alreadyExistingEmails) => Yup.string().email()
+export const email = (alreadyExistingEmails) => Yup.string()
+	.email(
+		formatMessage({
+			id: 'validation.email.error.invalid',
+			defaultMessage: 'Invalid email address',
+		}),
+	)
 	.required(
 		formatMessage({
 			id: 'validation.email.error.required',
