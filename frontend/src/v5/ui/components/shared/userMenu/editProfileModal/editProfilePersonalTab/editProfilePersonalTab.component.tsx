@@ -40,7 +40,7 @@ interface IUpdatePersonalInputs {
 	lastName: string;
 	email: string;
 	company?: string;
-	countryCode: string;
+	countryCode?: string;
 }
 
 type EditProfilePersonalTabProps = {
@@ -69,16 +69,15 @@ export const EditProfilePersonalTab = ({
 		{} as IUpdatePersonalInputs,
 	);
 
-	const getUserPersonalValues = () => {
+	const getDefaultPersonalValues = () => {
 		const values = trimPersonalValues(
 			pick(
-				defaults(user, { countryCode: 'GB' }),
+				user,
 				['firstName', 'lastName', 'email', 'company', 'countryCode'],
 			),
 		);
 		// company may be undefined, causing its value change not being detected
-		values.company = values.company || ' ';
-		return values;
+		return defaults(values, { countryCode: 'GB', company: '' });
 	};
 
 	const {
@@ -86,17 +85,16 @@ export const EditProfilePersonalTab = ({
 		trigger,
 		handleSubmit,
 		reset,
+		watch,
 		control,
 		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
-		defaultValues: getUserPersonalValues(),
+		defaultValues: getDefaultPersonalValues(),
 	});
 
-	const values = getValues();
-
-	const getTrimmedValues = () => trimPersonalValues(values);
+	const getTrimmedValues = () => trimPersonalValues(getValues());
 
 	const onSubmit = () => {
 		setErrorMessage('');
@@ -120,7 +118,7 @@ export const EditProfilePersonalTab = ({
 	useEffect(() => {
 		const shouldEnableSubmit = formIsValid && fieldsAreDirty() && !avatarError;
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
-	}, [newAvatarFile, JSON.stringify(values), user, avatarError, formIsValid]);
+	}, [newAvatarFile, JSON.stringify(watch()), user, avatarError, formIsValid]);
 
 	// update form values when user is updated
 	useEffect(() => {
@@ -128,7 +126,7 @@ export const EditProfilePersonalTab = ({
 			if (newAvatarFile) {
 				setNewAvatarFile(null);
 			}
-			reset(getUserPersonalValues(), { keepIsSubmitted: true });
+			reset(getDefaultPersonalValues(), { keepIsSubmitted: true });
 		}
 	}, [formIsUploading]);
 
@@ -143,7 +141,7 @@ export const EditProfilePersonalTab = ({
 			}
 			switch (personalError?.code) {
 				case 'INVALID_ARGUMENTS':
-					setAlreadyExistingEmails([...alreadyExistingEmails, values.email]);
+					setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
 					break;
 				case 'UNSUPPORTED_FILE_FORMAT':
 					setAvatarError(formatMessage({
