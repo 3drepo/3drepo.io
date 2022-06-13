@@ -26,7 +26,7 @@ const { getProjectList, deleteProject } = require(`${v5Path}/processors/teamspac
 
 const removeAllProjects = async (teamspace) => {
 	const projects = await getProjectList(teamspace, teamspace);
-	return projects.map(({ _id }) => deleteProject(teamspace, _id));
+	return Promise.all(projects.map(({ _id }) => deleteProject(teamspace, _id)));
 };
 
 const removeAllUsersFromTS = async (teamspace) => {
