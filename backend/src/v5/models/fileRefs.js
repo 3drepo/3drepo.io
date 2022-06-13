@@ -52,7 +52,7 @@ FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
 	return db.aggregate(teamspace, collection, pipeline);
 };
 
-FileRefs.insertRef = (teamspace, collection, user, name, refInfo) => {
+FileRefs.insertRef = async (teamspace, collection, user, name, refInfo) => {
 	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
 	await db.insertOne(teamspace, collection, ref);
 	return ref;

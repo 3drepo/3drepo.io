@@ -720,15 +720,12 @@ function getAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	// Update user info
-	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-		const avatarStream = User.getAvatarStream(user.customData.avatar);
+	User.getAvatarStream(req.params[C.REPO_REST_API_ACCOUNT]).then(avatarStream => {
 
 		if(!avatarStream) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 
-		return Promise.resolve(avatarStream);
-	}).then(avatarStream => {
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, avatarStream);
 	}).catch((err) => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -770,11 +767,7 @@ function uploadAvatar(req, res, next) {
 				}
 			}).then(async () => {
 				const username = req.params[C.REPO_REST_API_ACCOUNT];
-				const user = await User.findByUserName(username)
-				await User.removeAvatarFromFs(user.customData.avatar);
-				await User.removeAvatar(username);
-				const avatarLink = await User.storeAvatarInFs(req.file.buffer);
-				await User.updateAvatar(username, avatarLink);
+				await User.updateAvatar(username, req.file.buffer);
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
 			}).catch(error => {
 				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode : error, error.resCode ? error.resCode : error);

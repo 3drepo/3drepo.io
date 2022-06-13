@@ -23,6 +23,8 @@ const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
+const AVATARS_COL_NAME = "avatars";
+
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const ACTIVITIES_FILE_REF_EXT = ".activities.ref";
@@ -284,6 +286,24 @@ FileRef.storeUrlAsResource = async function(account, model, user, name, link, ex
 	const refInfo = {_id: utils.generateUUID({string: true}), link, type: "http", ...extraFields  };
 	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
+};
+
+FileRef.getAvatarStream = async function(username) {
+	const refEntry = await getRefEntry('admin', AVATARS_COL_NAME, username);
+	return ExternalServices.getFileStream('admin', AVATARS_COL_NAME, refEntry.type, refEntry.link);
+};
+
+FileRef.storeAvatarFile = async function(username, avatarBuffer) {
+	const refInfo = await ExternalServices.storeFile('admin', AVATARS_COL_NAME, avatarBuffer);
+	await db.insertOne('admin', AVATARS_COL_NAME, {...refInfo, _id: username});
+};
+
+FileRef.removeAvatarFile = async function(username) {
+	const avatarInfo = await db.findOne('admin', AVATARS_COL_NAME, { _id: username }, { link: 1, type: 1 });
+	if(avatarInfo){
+		await ExternalServices.removeFiles('admin', AVATARS_COL_NAME, avatarInfo.type, [avatarInfo.link]);
+		await db.deleteOne('admin', AVATARS_COL_NAME, { _id: username });		
+	}
 };
 
 module.exports = FileRef;

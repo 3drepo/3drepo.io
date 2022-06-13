@@ -590,9 +590,7 @@ User.verify = async function (username, token, options) {
 	}
 };
 
-User.getAvatarStream = function (avatarLink) {
-	return ExternalServices.getFileStream(undefined, undefined, 'fs', avatarLink);
-};
+User.getAvatarStream = FileRef.getAvatarStream;
 
 User.updateInfo = async function(username, updateObj) {
 	const updateableFields = new Set(["firstName", "lastName", "email"]);
@@ -1129,19 +1127,9 @@ User.findUserByBillingId = async function (billingAgreementId) {
 	return await findOne({ "customData.billing.billingAgreementId": billingAgreementId });
 };
 
-User.updateAvatar = async function(username, avatarLink) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.avatar" : avatarLink}});
-};
-
-User.storeAvatarInFs = async function(avatarBuffer) {
-	const avatarFsData = await ExternalServices.storeFileInFS(avatarBuffer);		
-	return avatarFsData.link;
-};
-
-User.removeAvatarFromFs = (avatarLink) => ExternalServices.removeFiles(undefined, undefined, 'fs', [avatarLink]);
-
-User.removeAvatar = async function(username) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$unset: { "customData.avatar" : 1}});
+User.updateAvatar = async function(username, avatarBuffer) {
+	await FileRef.removeAvatarFile(username);
+	await FileRef.storeAvatarFile(username, avatarBuffer);
 };
 
 User.updatePermissions = async function(username, updatedPermissions) {

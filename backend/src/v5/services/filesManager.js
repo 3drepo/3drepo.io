@@ -85,7 +85,7 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 };
 
 FilesManager.storeFile = async (teamspace, collection, fileName, storageType, data) => {
-	const type = storageType ?? getDefaultStorageType();
+	const type = getDefaultStorageType();
 	
 	switch(type) {
 		case "fs":
