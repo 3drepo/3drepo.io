@@ -28,7 +28,7 @@ import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { defaults, pick, transform, isMatch } from 'lodash';
+import { defaults, pick, transform, isMatch, pickBy } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
@@ -39,7 +39,7 @@ interface IUpdatePersonalInputs {
 	firstName: string;
 	lastName: string;
 	email: string;
-	company: string;
+	company?: string;
 	countryCode: string;
 }
 
@@ -69,12 +69,17 @@ export const EditProfilePersonalTab = ({
 		{} as IUpdatePersonalInputs,
 	);
 
-	const getUserPersonalValues = () => trimPersonalValues(
-		pick(
-			defaults(user, { company: '', countryCode: 'GB' }),
-			['firstName', 'lastName', 'email', 'company', 'countryCode'],
-		),
-	);
+	const getUserPersonalValues = () => {
+		const values = trimPersonalValues(
+			pick(
+				defaults(user, { countryCode: 'GB' }),
+				['firstName', 'lastName', 'email', 'company', 'countryCode'],
+			),
+		);
+		// company may be undefined, causing its value change not being detected
+		values.company = values.company || ' ';
+		return values;
+	};
 
 	const {
 		getValues,
@@ -109,7 +114,7 @@ export const EditProfilePersonalTab = ({
 
 	const uploadWasSuccessful = !formIsUploading && !personalError;
 
-	const fieldsAreDirty = () => !isMatch(user, getTrimmedValues()) || newAvatarFile;
+	const fieldsAreDirty = () => !isMatch(user, pickBy(getTrimmedValues())) || newAvatarFile;
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
