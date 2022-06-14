@@ -98,10 +98,11 @@ export const BreadcrumbsRouting = () => {
 
 			breadcrumbs.push({ options });
 		} else { // In the case that the user is viewing a container
-			options = containers.map(({ _id, name }) => ({
+			options = containers.map(({ _id, name, revisionsCount }) => ({
 				title: name,
 				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
 				selected: _id === federationOrContainerId,
+				disabled: !revisionsCount,
 			}));
 			breadcrumbs.push({ options });
 
