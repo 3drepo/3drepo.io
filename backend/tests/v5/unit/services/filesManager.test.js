@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
+const config = require('../../../../src/v5/utils/config');
 const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/db');
@@ -129,7 +130,7 @@ const testRemoveAllFilesFromModel = () => {
 const testGetFileAsStream = () => {
 	describe('Get file as stream', () => {
 		test('should throw error if the revision has no entry', async () => {
-			FileRefs.getRefEntry.mockRejectedValueOnce(templates.fileNotFound);
+			FileRefs.getRefEntry.mockResolvedValueOnce(undefined);
 			await expect(FilesManager.getFileAsStream(
 				generateRandomString(),
 				generateRandomString(),
@@ -189,7 +190,80 @@ const testGetFileAsStream = () => {
 	});
 };
 
+const testStoreFile = () => {
+	describe('Store file in fileshare', () => {
+		test('should throw error if the default type is not recognised', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'unrecognised storage type';
+
+			await expect(FilesManager.storeFile(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.fileNotFound);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should store file if default storage type is fs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'fs';
+
+			const refInfo = { _id: generateRandomString() };
+			FSHandler.storeFile.mockResolvedValueOnce(refInfo);
+			const data = generateRandomString();
+
+			await expect(FilesManager.storeFile(generateRandomString(),
+				generateRandomString(), data)).resolves.toEqual(refInfo);
+			expect(FSHandler.storeFile).toHaveBeenCalledTimes(1);
+			expect(FSHandler.storeFile).toHaveBeenCalledWith(data);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should store file if default storage type is null and fs is set', async () => {
+			const { defaultStorage } = config;
+			const { fs } = config;
+			config.defaultStorage = null;
+			config.fs = true;
+
+			const refInfo = { _id: generateRandomString() };
+			FSHandler.storeFile.mockResolvedValueOnce(refInfo);
+			const data = generateRandomString();
+
+			await expect(FilesManager.storeFile(generateRandomString(),
+				generateRandomString(), data)).resolves.toEqual(refInfo);
+			expect(FSHandler.storeFile).toHaveBeenCalledTimes(1);
+			expect(FSHandler.storeFile).toHaveBeenCalledWith(data);
+
+			config.defaultStorage = defaultStorage;
+			config.fs = fs;
+		});
+
+		test('should store file in gridfs if both default storage and fs are not set', async () => {
+			const { defaultStorage } = config;
+			const { fs } = config;
+			config.defaultStorage = null;
+			config.fs = null;
+
+			const refInfo = { _id: generateRandomString() };
+			GridFSHandler.storeFile.mockResolvedValueOnce(refInfo);
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const data = generateRandomString();
+
+			await expect(FilesManager.storeFile(teamspace, collection, data)).resolves.toEqual(refInfo);
+			expect(GridFSHandler.storeFile).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.storeFile).toHaveBeenCalledWith(teamspace, collection, data);
+
+			config.defaultStorage = defaultStorage;
+			config.fs = fs;
+		});
+	});
+};
+
 describe('services/filesManager', () => {
 	testRemoveAllFilesFromModel();
 	testGetFileAsStream();
+	testStoreFile();
 });

@@ -32,6 +32,7 @@ const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const ExternalServices = require('../../../src/v5/handler/externalServices');
+const FilesManager = require('../../../src/v5/services/filesManager');
 
 const db = {};
 const queue = {};
@@ -153,6 +154,14 @@ db.createLegends = (teamspace, modelId, legends) => {
 
 db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
 	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
+
+db.createAvatar = async (username, type, avatarData) => {
+	const { defaultStorage } = config;
+	config.defaultStorage = type;
+	const refInfo = await FilesManager.storeFile('admin', 'avatars', avatarData);
+	await DbHandler.insertOne('admin', 'avatars', { ...refInfo, _id: username });
+	config.defaultStorage = defaultStorage;
+};
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());

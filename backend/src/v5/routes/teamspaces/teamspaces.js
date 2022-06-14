@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { respond, writeStreamRespond } = require('../../utils/responder');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
-const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
-const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
 
@@ -43,10 +42,8 @@ const getTeamspaceMembers = (req, res) => {
 const getAvatar = async (req, res) => {
 	try {
 		const { teamspace } = req.params;
-		const buffer = await Teamspaces.getAvatar(teamspace);
-		const fileExt = await fileExtensionFromBuffer(buffer);
-		req.params.format = fileExt || 'png';
-		respond(req, res, templates.ok, buffer);
+		const avatarStream = await Teamspaces.getAvatarStream(teamspace);
+		writeStreamRespond(req, res, templates.ok, avatarStream.readStream, teamspace, avatarStream.size);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);

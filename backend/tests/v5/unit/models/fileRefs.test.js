@@ -16,7 +16,10 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateUUID } = require('../../helper/services');
+
+const FileRefs = require(`${src}/models/fileRefs`);
+const db = require(`${src}/handler/db`);
 
 const unrecognisedType = 'qwerrtyuui';
 
@@ -30,24 +33,9 @@ jest.mock('../../../../src/v5/handler/externalServices', () => ({
 	removeFiles: jest.fn(),
 }));
 
-const FileRefs = require(`${src}/models/fileRefs`);
-const db = require(`${src}/handler/db`);
-const { templates } = require(`${src}/utils/responseCodes`);
-
 const testGetTotalSize = () => {
 	describe('Get total size', () => {
 		test('should get the total size within the collection', async () => {
-			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, total: 15 }]);
-			const teamspace = 'someTS';
-			const collection = '123';
-			const res = await FileRefs.getTotalSize(teamspace, collection);
-			expect(res).toEqual(15);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual(`${collection}.ref`);
-		});
-
-		test('should get the total size within the collection with .ref already added', async () => {
 			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, total: 15 }]);
 			const teamspace = 'someTS';
 			const collection = '123.ref';
@@ -113,17 +101,42 @@ const testGetRefEntry = () => {
 			await expect(FileRefs.getRefEntry(teamspace, collection, id)).resolves.toEqual(output);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id });
+			expect(fn).toHaveBeenCalledWith(teamspace, collection, { _id: id });
 		});
+	});
+};
 
-		test(`should throw with ${templates.fileNotFound} if the ref is not found`, async () => {
+const testInsertRef = () => {
+	describe('get ref entry by id', () => {
+		test('should return the entry if found', async () => {
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
-			const id = generateRandomString();
+			const refInfo = {
+				_id: generateUUID(),
+				name: generateRandomString(),
+			};
 
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce();
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+			await expect(FileRefs.insertRef(teamspace, collection, refInfo)).resolves.toEqual(undefined);
 
-			await expect(FileRefs.getRefEntry(teamspace, collection, id)).rejects.toEqual(templates.fileNotFound);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, collection, refInfo);
+		});
+	});
+};
+
+const testRemoveRef = () => {
+	describe('get ref entry by id', () => {
+		test('should return the entry if found', async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateUUID();
+
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValueOnce(undefined);
+			await expect(FileRefs.removeRef(teamspace, collection, id)).resolves.toEqual(undefined);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, collection, { _id: id });
 		});
 	});
 };
@@ -132,4 +145,6 @@ describe('models/fileRefs', () => {
 	testGetTotalSize();
 	testGetAllRemovableEntriesByType();
 	testGetRefEntry();
+	testInsertRef();
+	testRemoveRef();
 });

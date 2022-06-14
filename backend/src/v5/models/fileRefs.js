@@ -19,7 +19,7 @@ const db = require('../handler/db');
 
 const FileRefs = {};
 
-FileRefs.getRefEntry = async (teamspace, collection, id) => db.findOne(teamspace, collection, { _id: id });
+FileRefs.getRefEntry = (teamspace, collection, id) => db.findOne(teamspace, collection, { _id: id });
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [

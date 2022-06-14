@@ -17,6 +17,7 @@
 
 const { v5Path } = require('../../../interop');
 const { storeAvatarFile } = require('../../../v4/models/fileRef');
+
 const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 

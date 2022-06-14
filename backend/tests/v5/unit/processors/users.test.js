@@ -17,14 +17,19 @@
 
 const { templates: emailTemplates } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
+const { AVATARS_COL_NAME } = require('../../../../src/v5/models/fileRefs.constants');
 const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+jest.mock('../../../../src/v5/models/fileRefs');
+const FileRefsModel = require(`${src}/models/fileRefs`);
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
+jest.mock('../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -85,12 +90,12 @@ const testLogin = () => {
 	});
 };
 
-const formatUser = (userProfile) => ({
+const formatUser = (userProfile, hasAvatar) => ({
 	username: userProfile.user,
 	firstName: userProfile.customData.firstName,
 	lastName: userProfile.customData.lastName,
 	email: userProfile.customData.email,
-	hasAvatar: !!userProfile.customData.avatar,
+	hasAvatar,
 	apiKey: userProfile.customData.apiKey,
 	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
@@ -104,14 +109,31 @@ const tesGetProfileByUsername = () => {
 				'customData.firstName': 1,
 				'customData.lastName': 1,
 				'customData.email': 1,
-				'customData.avatar': 1,
 				'customData.apiKey': 1,
 				'customData.billing.billingInfo.countryCode': 1,
 				'customData.billing.billingInfo.company': 1,
 			};
 
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user));
+			expect(res).toEqual(formatUser(user, false));
+			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+		});
+
+		test('should return user profile with avatar', async () => {
+			const projection = {
+				user: 1,
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.apiKey': 1,
+				'customData.billing.billingInfo.countryCode': 1,
+				'customData.billing.billingInfo.company': 1,
+			};
+
+			FileRefsModel.getRefEntry.mockImplementationOnce(() => true);
+			const res = await Users.getProfileByUsername(user.user);
+			expect(res).toEqual(formatUser(user, true));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
 			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
 		});
@@ -215,6 +237,65 @@ const testVerify = () => {
 	});
 };
 
+const testGetAvatarStream = () => {
+	describe('Get avatar stream', () => {
+		test('should get avatar stream', async () => {
+			const username = generateRandomString();
+			const stream = generateRandomString();
+			const getFileAsStreamMock = FilesManager.getFileAsStream.mockImplementationOnce(() => stream);
+			await Users.getAvatarStream(username);
+			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
+			expect(getFileAsStreamMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+		});
+	});
+};
+
+const testUploadAvatar = () => {
+	describe('Remove old avatar and upload a new one', () => {
+		test('should upload new avatar', async () => {
+			const newRef = { type: 'fs', link: generateRandomString() };
+			const getRefEntryMock = FileRefsModel.getRefEntry.mockResolvedValueOnce(undefined);
+			const storeFileMock = FilesManager.storeFile.mockImplementationOnce(() => ({ type: newRef.type,
+				link: newRef.link }));
+
+			const username = generateRandomString();
+			const avatarBuffer = generateRandomString();
+			await Users.uploadAvatar(username, avatarBuffer);
+			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
+			expect(getRefEntryMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(FileRefsModel.removeRef).toHaveBeenCalledTimes(0);
+			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(0);
+			expect(storeFileMock).toHaveBeenCalledTimes(1);
+			expect(storeFileMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, avatarBuffer);
+			expect(FileRefsModel.insertRef).toHaveBeenCalledTimes(1);
+			expect(FileRefsModel.insertRef).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, { ...newRef, _id: username });
+		});
+
+		test('should upload a new avatar and remove existing', async () => {
+			const existingRef = { type: 'fs', link: generateRandomString() };
+			const newRef = { type: 'fs', link: generateRandomString() };
+			const getRefEntryMock = FileRefsModel.getRefEntry.mockImplementationOnce(() => ({ type: existingRef.type,
+				link: existingRef.link }));
+			const storeFileMock = FilesManager.storeFile.mockImplementationOnce(() => ({ type: newRef.type,
+				link: newRef.link }));
+
+			const username = generateRandomString();
+			const avatarBuffer = generateRandomString();
+			await Users.uploadAvatar(username, avatarBuffer);
+			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
+			expect(getRefEntryMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(FileRefsModel.removeRef).toHaveBeenCalledTimes(1);
+			expect(FileRefsModel.removeRef).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
+			expect(storeFileMock).toHaveBeenCalledTimes(1);
+			expect(storeFileMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, avatarBuffer);
+			expect(FileRefsModel.insertRef).toHaveBeenCalledTimes(1);
+			expect(FileRefsModel.insertRef).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, { ...newRef, _id: username });
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
@@ -222,4 +303,6 @@ describe('processors/users', () => {
 	testGenerateResetPasswordToken();
 	testSignUp();
 	testVerify();
+	testGetAvatarStream();
+	testUploadAvatar();
 });

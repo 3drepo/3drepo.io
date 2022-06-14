@@ -18,14 +18,16 @@
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
+const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
+const { AVATARS_COL_NAME } = require('../../models/fileRefs.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
+const { getFileAsStream } = require('../../services/filesManager');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 
 const Teamspaces = {};
 
-Teamspaces.getAvatar = getAvatar;
+Teamspaces.getAvatarStream = (teamspace) => getFileAsStream('admin', AVATARS_COL_NAME, teamspace);
 
 Teamspaces.initTeamspace = async (username) => {
 	try {

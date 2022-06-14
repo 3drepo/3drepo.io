@@ -71,7 +71,7 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	const refEntry = await getRefEntry(teamspace, collection, fileName);
 
-	if(!refEntry){
+	if (!refEntry) {
 		throw templates.fileNotFound;
 	}
 
@@ -90,7 +90,7 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	return { readStream, size: refEntry.size };
 };
 
-FilesManager.storeFile = async (teamspace, collection, data) => {
+FilesManager.storeFile = (teamspace, collection, data) => {
 	const type = getDefaultStorageType();
 
 	switch (type) {

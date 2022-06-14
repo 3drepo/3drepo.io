@@ -19,17 +19,17 @@ const Users = {};
 
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
+const { getFileAsStream, removeFiles, storeFile } = require('../services/filesManager');
+const { getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
+const { AVATARS_COL_NAME } = require('../models/fileRefs.constants');
+const FileRefs = require('../models/fileRefs');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
-const { getFileAsStream, removeFiles, storeFile } = require('../services/filesManager');
-const { getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
-const { AVATARS_COL_NAME } = require('../models/fileRefs.constants');
-const FileRefs = require('../models/fileRefs');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
@@ -71,6 +71,7 @@ Users.getProfileByUsername = async (username) => {
 	});
 
 	const { customData } = user;
+
 	const hasAvatar = !!await FileRefs.getRefEntry('admin', AVATARS_COL_NAME, username);
 
 	return {
@@ -102,15 +103,15 @@ Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
 
-Users.getAvatarStream = async (username) => getFileAsStream('admin', AVATARS_COL_NAME, username);
+Users.getAvatarStream = (username) => getFileAsStream('admin', AVATARS_COL_NAME, username);
 
 Users.uploadAvatar = async (username, avatarBuffer) => {
 	const existingRef = await getRefEntry('admin', AVATARS_COL_NAME, username);
-	if(existingRef){
+	if (existingRef) {
 		await removeRef('admin', AVATARS_COL_NAME, username);
 		await removeFiles('admin', AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
 	}
-	
+
 	const refInfo = await storeFile('admin', AVATARS_COL_NAME, avatarBuffer);
 	await insertRef('admin', AVATARS_COL_NAME, { ...refInfo, _id: username });
 };

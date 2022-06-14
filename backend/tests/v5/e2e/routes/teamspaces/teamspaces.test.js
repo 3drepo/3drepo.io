@@ -32,6 +32,8 @@ const usersInFirstTeamspace = [
 	ServiceHelper.generateUserCredentials(),
 	ServiceHelper.generateUserCredentials(),
 ];
+const userWithFsAvatar = ServiceHelper.generateUserCredentials();
+const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 
 // This is the list of teamspaces the user has access to
 const testUserTSAccess = [
@@ -40,8 +42,10 @@ const testUserTSAccess = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
 
-const avatar = ServiceHelper.generateRandomString();
-const tsWithAvatar = testUserTSAccess[1].name;
+const fsAvatarData = ServiceHelper.generateRandomString();
+const gridFsAvatarData = ServiceHelper.generateRandomString();
+const tsWithFsAvatar = { name: ServiceHelper.generateRandomString() };
+const tsWithGridFsAvatar = { name: ServiceHelper.generateRandomString() };
 
 const jobToUsers = [
 	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
@@ -56,12 +60,15 @@ const setupData = async () => {
 	await Promise.all(testUserTSAccess.map(
 		({ name, isAdmin }) => {
 			const perms = isAdmin ? [testUser.user] : [];
-			const customData = tsWithAvatar === name ? { avatar: { data: { buffer: avatar } } } : {};
-			return ServiceHelper.db.createTeamspace(name, perms, false, customData);
+			return ServiceHelper.db.createTeamspace(name, perms, false);
 		},
 	));
 
 	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
+	await ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], false);
+	await ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], false);
+	await ServiceHelper.db.createAvatar(tsWithFsAvatar.name, 'fs', fsAvatarData);
+	await ServiceHelper.db.createAvatar(tsWithGridFsAvatar.name, 'gridfs', gridFsAvatarData);
 	await Promise.all([
 		ServiceHelper.db.createUser(
 			testUser,
@@ -75,6 +82,14 @@ const setupData = async () => {
 			user,
 			[testUserTSAccess[0].name],
 		)),
+		ServiceHelper.db.createUser(
+			userWithFsAvatar,
+			[tsWithFsAvatar.name],
+		),
+		ServiceHelper.db.createUser(
+			userWithGridFsAvatar,
+			[tsWithGridFsAvatar.name],
+		),
 		ServiceHelper.db.createJobs(testUserTSAccess[0].name, jobToUsers),
 	]);
 };
@@ -147,30 +162,35 @@ const testGetTeamspaceMembers = () => {
 
 const testGetAvatar = () => {
 	describe('Get teamspace avatar', () => {
-		const route = (ts = testUserTSAccess[0].name) => `/v5/teamspaces/${ts}/avatar`;
+		const route = (ts = tsWithFsAvatar.name) => `/v5/teamspaces/${ts}/avatar`;
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user does not have access to the teamspace', async () => {
-			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test(`should return ${templates.avatarNotFound.code} if the teamspace does not have an avatar`, async () => {
-			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.avatarNotFound.status);
-			expect(res.body.code).toEqual(templates.avatarNotFound.code);
+		test(`should return ${templates.fileNotFound.code} if the teamspace does not have an avatar`, async () => {
+			const res = await agent.get(`${route(testUserTSAccess[0].name)}/?key=${testUser.apiKey}`).expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 
-		test('should return avatar if the teamspace has one', async () => {
-			const res = await agent.get(`${route(tsWithAvatar)}/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.text).toEqual(avatar);
+		test('should return teamspace fs avatar', async () => {
+			const res = await agent.get(`${route()}/?key=${userWithFsAvatar.apiKey}`).expect(templates.ok.status);
+			expect(res.text).toEqual(fsAvatarData);
+		});
+
+		test('should return teamspace gridfs avatar', async () => {
+			const res = await agent.get(`${route(tsWithGridFsAvatar.name)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.ok.status);
+			expect(res.text).toEqual(gridFsAvatarData);
 		});
 	});
 };

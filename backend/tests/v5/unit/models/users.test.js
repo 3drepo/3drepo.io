@@ -422,45 +422,6 @@ const testDeleteApiKey = () => {
 	});
 };
 
-const testGetAvatar = () => {
-	describe('Get users avatar', () => {
-		test('should get users avatar if user has a valid avatar', async () => {
-			const user = { customData: { avatar: { data: { buffer: 'validAvatar' } } } };
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
-			const res = await User.getAvatar('user1');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
-			expect(res).toEqual('validAvatar');
-		});
-
-		test('should return error if user does not exist', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => undefined);
-			await expect(User.getAvatar('user1')).rejects.toEqual(templates.userNotFound);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
-		});
-
-		test('should return error if user does not have a valid avatar', async () => {
-			const user = { customData: { firstname: 'Nick' } };
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
-			await expect(User.getAvatar('user1')).rejects.toEqual(templates.avatarNotFound);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
-		});
-	});
-};
-
-const testUploadAvatar = () => {
-	describe('Upload user avatar', () => {
-		test('should upload users avatar', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await User.uploadAvatar('user1', 'validAvatar');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ $set: { 'customData.avatar': { data: 'validAvatar' } } });
-		});
-	});
-};
-
 const testUpdateResetPasswordToken = () => {
 	describe('Reset password token', () => {
 		test('should update user password', async () => {
@@ -603,8 +564,6 @@ describe('models/users', () => {
 	testUpdateProfile();
 	testGenerateApiKey();
 	testDeleteApiKey();
-	testGetAvatar();
-	testUploadAvatar();
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
