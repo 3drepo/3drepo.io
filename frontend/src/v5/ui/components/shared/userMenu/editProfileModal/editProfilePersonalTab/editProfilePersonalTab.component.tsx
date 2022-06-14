@@ -28,7 +28,7 @@ import { MenuItem } from '@mui/material';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { defaults, pick, transform, isMatch, pickBy, isEmpty } from 'lodash';
+import { defaults, pick, isMatch, pickBy, isEmpty } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
@@ -61,12 +61,13 @@ export const EditProfilePersonalTab = ({
 	const [unexpectedError, setUnexpectedError] = useState(false);
 	const [postSubmissionErrorMessage, setPostSubmissionErrorMessage] = useState('');
 
-	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => transform(
-		personalValues,
-		// @ts-ignore
-		(result, value, key) => { result[key] = value?.trim?.() || value; },
-		{} as IUpdatePersonalInputs,
-	);
+	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => {
+		const trimmedValues = {} as IUpdatePersonalInputs;
+		Object.entries((personalValues)).forEach(([key, value]) => {
+			trimmedValues[key] = value?.trim?.();
+		});
+		return trimmedValues;
+	};
 
 	const getDefaultPersonalValues = () => {
 		const values = trimPersonalValues(
