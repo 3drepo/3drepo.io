@@ -30,6 +30,14 @@ Roles.createTeamspaceRole = async (teamspace) => {
 	await db.runCommand(teamspace, createRoleCmd);
 };
 
+Roles.removeTeamspaceRole = async (teamspace) => {
+	const cmd = {
+		dropRole: TEAM_MEMBER,
+	};
+
+	await db.runCommand(teamspace, cmd);
+};
+
 Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
 	const grantRoleCmd = {
 		grantRolesToUser: username,
@@ -37,6 +45,15 @@ Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
 	};
 
 	return db.runCommand('admin', grantRoleCmd);
+};
+
+Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => {
+	const revokeRoleCmd = {
+		revokeRolesFromUser: username,
+		roles: [{ role: TEAM_MEMBER, db: teamspace }],
+	};
+
+	return db.runCommand('admin', revokeRoleCmd);
 };
 
 module.exports = Roles;
