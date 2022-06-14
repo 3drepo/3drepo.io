@@ -14,65 +14,49 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
+import { Controller, useFormContext } from 'react-hook-form';
 import {
 	Header,
 	ProfilePicture,
 	Username,
 	UserInfo,
 	FullName,
-	AddImageButton,
-	AddImageInputLabel,
-	AddImageHiddenInput,
+	AvatarButton,
+	AvatarInputLabel,
+	AvatarHiddenInput,
 	UserIcon,
 	TruncatableName,
 	Avatar,
 } from './editProfileAvatar.styles';
 
 type EditProfilePersonalTabProps = {
-	newAvatarFile: File | null,
-	setNewAvatarFile: (file: File | null) => void,
 	user: ICurrentUser,
-	avatarError: string,
-	setAvatarError: (error: string) => void,
 };
 
-export const EditProfileAvatar = ({
-	newAvatarFile,
-	setNewAvatarFile,
-	user,
-	avatarError,
-	setAvatarError,
-}: EditProfilePersonalTabProps) => {
-	const addImage = (event) => {
+export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
+	const { getValues, control, formState: { errors: formErrors } } = useFormContext();
+
+	const newAvatar = getValues('avatarFile');
+
+	const addImage = (event, { onChange: setAvatarFile }) => {
 		if (!event.target.files.length) return;
 		const file = event.target.files[0];
-
-		if (fileIsTooBig(file)) {
-			setAvatarError(formatMessage({
-				id: 'editProfile.avatar.error.size',
-				defaultMessage: 'Image cannot exceed 1 MB.',
-			}));
-		} else {
-			setAvatarError('');
-			setNewAvatarFile(file);
-		}
+		setAvatarFile(file);
 	};
 
 	const getUserWithAvatar = () => {
-		if (!newAvatarFile) return user;
+		if (!newAvatar) return user;
 		return {
 			...user,
 			hasAvatar: true,
-			avatarUrl: URL.createObjectURL(newAvatarFile),
+			avatarUrl: URL.createObjectURL(newAvatar),
 		};
 	};
 
-	const avatarIsAvailable = () => newAvatarFile || user.hasAvatar;
+	const avatarIsAvailable = () => newAvatar || user.hasAvatar;
 
 	return (
 		<Header>
@@ -89,17 +73,23 @@ export const EditProfileAvatar = ({
 					<TruncatableName>{user.firstName}</TruncatableName>
 					<TruncatableName>{user.lastName}</TruncatableName>
 				</FullName>
-				<AddImageButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
-					<AddImageInputLabel>
-						{avatarIsAvailable() ? (
-							<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
-						) : (
-							<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
-						)}
-						<AddImageHiddenInput onChange={addImage} />
-					</AddImageInputLabel>
-				</AddImageButton>
-				{(avatarError) && <ErrorMessage>{avatarError}</ErrorMessage>}
+				<Controller
+					name="avatarFile"
+					control={control}
+					render={({ field }) => (
+						<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
+						<AvatarInputLabel>
+							{avatarIsAvailable() ? (
+								<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
+							) : (
+								<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
+							)}
+							<AvatarHiddenInput onChange={(event) => addImage(event, field)} />
+						</AvatarInputLabel>
+					</AvatarButton>
+					)}
+				/>
+				{(formErrors.avatarFile) && <ErrorMessage>{formErrors.avatarFile.message}</ErrorMessage>}
 			</UserInfo>
 		</Header>
 	);

@@ -74,17 +74,17 @@ export const FullName = styled.div`
 	margin-top: 1px;
 `;
 
-const ADD_IMAGE_ID = 'add-image';
+const AVATAR_ID = 'avatar';
 
-export const AddImageHiddenInput = styled.input.attrs({
+export const AvatarHiddenInput = styled.input.attrs({
 	type: 'file',
 	accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
-	id: ADD_IMAGE_ID,
+	id: AVATAR_ID,
 })`
 	display: none;
 `;
 
-export const AddImageButton = styled(Button).attrs({
+export const AvatarButton = styled(Button).attrs({
 	variant: 'outlined',
 })`
 	margin: 7px 0 0;
@@ -92,8 +92,8 @@ export const AddImageButton = styled(Button).attrs({
 	width: fit-content;
 `;
 
-export const AddImageInputLabel = styled.label.attrs({
-	htmlFor: ADD_IMAGE_ID,
+export const AvatarInputLabel = styled.label.attrs({
+	htmlFor: AVATAR_ID,
 })`
 	padding: 10px 15px;
 	cursor: pointer;

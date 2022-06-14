@@ -17,13 +17,14 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { firstName, lastName, email, countryCode, password } from './validators';
+import { firstName, lastName, email, countryCode, password, avatarFile } from './validators';
 
 export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({
 	firstName,
 	lastName,
 	email: email(alreadyExistingEmails),
 	countryCode,
+	avatarFile,
 });
 
 export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object().shape({

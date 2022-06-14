@@ -31,7 +31,7 @@ export interface ICurrentUser {
 	apiKeyError?: any,
 }
 
-export type UpdatePersonalData = Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'> & {
+export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {
 	avatarFile?: File,
 };
 

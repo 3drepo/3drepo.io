@@ -18,6 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { getPasswordStrength } from '@/v4/services/validation';
+import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
 
 export const username = (alreadyExistingUsernames) => Yup.string()
 	.matches(/^[a-zA-Z][\w]{1,63}$/, formatMessage({
@@ -134,3 +135,13 @@ export const email = (alreadyExistingEmails) => Yup.string()
 		}),
 		(emailValue) => !alreadyExistingEmails.includes(emailValue),
 	);
+
+export const avatarFile = Yup.mixed()
+	.test('fileSize',
+		formatMessage({
+			id: 'validation.avatar.error.fileSize',
+			defaultMessage: 'Image cannot exceed 1 MB.',
+		}),
+		(file) => !fileIsTooBig(file),
+	);
+	

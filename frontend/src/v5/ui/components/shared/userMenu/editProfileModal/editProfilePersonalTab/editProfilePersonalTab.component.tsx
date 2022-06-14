@@ -25,10 +25,10 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { defaults, pick, transform, isMatch, pickBy } from 'lodash';
+import { defaults, pick, transform, isMatch, pickBy, isEmpty } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
@@ -41,6 +41,7 @@ interface IUpdatePersonalInputs {
 	email: string;
 	company?: string;
 	countryCode?: string;
+	avatarFile?: File;
 }
 
 type EditProfilePersonalTabProps = {
@@ -56,29 +57,29 @@ export const EditProfilePersonalTab = ({
 }: EditProfilePersonalTabProps) => {
 	const personalError = CurrentUserHooksSelectors.selectPersonalError();
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
-	const [newAvatarFile, setNewAvatarFile] = useState(null);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [avatarError, setAvatarError] = useState('');
 	const [unexpectedError, setUnexpectedError] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
+	const [postSubmissionErrorMessage, setPostSubmissionErrorMessage] = useState('');
 
 	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => transform(
 		personalValues,
-		// eslint-disable-next-line no-param-reassign
-		(result, value, key) => { result[key] = value?.trim(); },
+		// @ts-ignore
+		(result, value, key) => { result[key] = value?.trim?.() || value; },
 		{} as IUpdatePersonalInputs,
 	);
 
 	const getDefaultPersonalValues = () => {
 		const values = trimPersonalValues(
-			pick(
-				user,
-				['firstName', 'lastName', 'email', 'company', 'countryCode'],
-			),
+			pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		);
-		// company may be undefined, causing its value change not being detected
-		return defaults(values, { countryCode: 'GB', company: '' });
+		return defaults(values, { countryCode: 'GB', company: '', avatarFile: '' });
 	};
+
+	const formMethods = useForm<IUpdatePersonalInputs>({
+		mode: 'all',
+		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
+		defaultValues: getDefaultPersonalValues(),
+	});
 
 	const {
 		getValues,
@@ -86,46 +87,33 @@ export const EditProfilePersonalTab = ({
 		handleSubmit,
 		reset,
 		watch,
+		setError: setFormError,
 		control,
-		formState: { errors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
-	} = useForm<IUpdatePersonalInputs>({
-		mode: 'all',
-		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
-		defaultValues: getDefaultPersonalValues(),
-	});
+		formState: { errors: formErrors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
+	} = formMethods;
 
 	const getTrimmedValues = () => trimPersonalValues(getValues());
 
 	const onSubmit = () => {
-		setErrorMessage('');
+		setPostSubmissionErrorMessage('');
 		setUnexpectedError(false);
-		setAvatarError('');
-		const trimmedValues = getTrimmedValues();
-		if (!trimmedValues.company) {
-			delete trimmedValues.company;
-		}
-		CurrentUserActionsDispatchers.updatePersonalData({
-			...trimmedValues,
-			avatarFile: newAvatarFile,
-		});
+		const trimmedValues = pickBy(getTrimmedValues());
+		CurrentUserActionsDispatchers.updatePersonalData(trimmedValues);
 	};
 
 	const uploadWasSuccessful = !formIsUploading && !personalError;
 
-	const fieldsAreDirty = () => !isMatch(user, pickBy(getTrimmedValues())) || newAvatarFile;
+	const fieldsAreDirty = () => !isMatch(user, pickBy(getTrimmedValues()));
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && fieldsAreDirty() && !avatarError;
+		const shouldEnableSubmit = formIsValid && isEmpty(formErrors) && fieldsAreDirty();
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
-	}, [newAvatarFile, JSON.stringify(watch()), user, avatarError, formIsValid]);
+	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
 
 	// update form values when user is updated
 	useEffect(() => {
 		if (uploadWasSuccessful && isSubmitSuccessful) {
-			if (newAvatarFile) {
-				setNewAvatarFile(null);
-			}
 			reset(getDefaultPersonalValues(), { keepIsSubmitted: true });
 		}
 	}, [formIsUploading]);
@@ -133,7 +121,7 @@ export const EditProfilePersonalTab = ({
 	useEffect(() => {
 		if (personalError) {
 			if (personalError.message === 'Network Error') {
-				setErrorMessage(formatMessage({
+				setPostSubmissionErrorMessage(formatMessage({
 					id: 'editProfile.networkError',
 					defaultMessage: 'Network Error',
 				}));
@@ -144,10 +132,13 @@ export const EditProfilePersonalTab = ({
 					setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
 					break;
 				case 'UNSUPPORTED_FILE_FORMAT':
-					setAvatarError(formatMessage({
-						id: 'editProfile.avatar.error.format',
-						defaultMessage: 'The file format is not supported',
-					}));
+					setFormError('avatarFile', {
+						type: 'custom',
+						message: formatMessage({
+							id: 'editProfile.avatar.error.format',
+							defaultMessage: 'The file format is not supported',
+						}),
+					});
 					break;
 				default:
 					setUnexpectedError(true);
@@ -166,74 +157,75 @@ export const EditProfilePersonalTab = ({
 	return (
 		<ScrollArea>
 			<ScrollAreaPadding>
-				<EditProfileAvatar
-					user={user}
-					newAvatarFile={newAvatarFile}
-					setNewAvatarFile={setNewAvatarFile}
-					avatarError={avatarError}
-					setAvatarError={setAvatarError}
-				/>
-				<FormTextField
-					name="firstName"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.firstName',
-						defaultMessage: 'First Name',
-					})}
-					required
-					formError={errors.firstName}
-				/>
-				<FormTextField
-					name="lastName"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.lastName',
-						defaultMessage: 'Last Name',
-					})}
-					required
-					formError={errors.lastName}
-				/>
-				<FormTextField
-					name="email"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.email',
-						defaultMessage: 'Email',
-					})}
-					required
-					formError={errors.email}
-				/>
-				<FormTextField
-					name="company"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.company',
-						defaultMessage: 'Company',
-					})}
-					formError={errors.company}
-				/>
-				<FormSelect
-					name="countryCode"
-					control={control}
-					label={formatMessage({
-						id: 'userSignup.form.countryCode',
-						defaultMessage: 'Country',
-					})}
-					required
-				>
-					{clientConfigService.countries.map((country) => (
-						<MenuItem key={country.code} value={country.code}>
-							{country.name}
-						</MenuItem>
-					))}
-				</FormSelect>
-				{isSubmitted && uploadWasSuccessful && (
-					<SuccessMessage>
-						<FormattedMessage id="editProfile.form.success" defaultMessage="Your profile has been changed successfully." />
-					</SuccessMessage>
-				)}
-				{unexpectedError && <UnexpectedError />}
-				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+				<FormProvider {...formMethods}>
+					<EditProfileAvatar
+						user={user}
+					/>
+					<FormTextField
+						name="firstName"
+						control={control}
+						label={formatMessage({
+							id: 'editProfile.form.firstName',
+							defaultMessage: 'First Name',
+						})}
+						required
+						formError={formErrors.firstName}
+					/>
+					<FormTextField
+						name="lastName"
+						control={control}
+						label={formatMessage({
+							id: 'editProfile.form.lastName',
+							defaultMessage: 'Last Name',
+						})}
+						required
+						formError={formErrors.lastName}
+					/>
+					<FormTextField
+						name="email"
+						control={control}
+						label={formatMessage({
+							id: 'editProfile.form.email',
+							defaultMessage: 'Email',
+						})}
+						required
+						formError={formErrors.email}
+					/>
+					<FormTextField
+						name="company"
+						control={control}
+						label={formatMessage({
+							id: 'editProfile.form.company',
+							defaultMessage: 'Company',
+						})}
+						formError={formErrors.company}
+					/>
+					<FormSelect
+						name="countryCode"
+						control={control}
+						label={formatMessage({
+							id: 'userSignup.form.countryCode',
+							defaultMessage: 'Country',
+						})}
+						required
+					>
+						{clientConfigService.countries.map((country) => (
+							<MenuItem key={country.code} value={country.code}>
+								{country.name}
+							</MenuItem>
+						))}
+					</FormSelect>
+					{isSubmitted && uploadWasSuccessful && (
+						<SuccessMessage>
+							<FormattedMessage
+								id="editProfile.form.success"
+								defaultMessage="Your profile has been changed successfully."
+							/>
+						</SuccessMessage>
+					)}
+					{unexpectedError && <UnexpectedError />}
+					{postSubmissionErrorMessage && <ErrorMessage>{postSubmissionErrorMessage}</ErrorMessage>}
+				</FormProvider>
 			</ScrollAreaPadding>
 		</ScrollArea>
 	);
