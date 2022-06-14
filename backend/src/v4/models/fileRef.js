@@ -41,15 +41,13 @@ const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
 
 const extensionRe = /\.(\w+)$/;
 
-function getRefEntry(account, collection, fileName) {
-	return db.getCollection(account, collection).then((col) => {
-		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
-	});
-}
+const FileRef = {};
+
+FileRef.getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, {_id: id}, projection);
 
 function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	const collection =  model ? `${model}${ext}` : ext;
-	return getRefEntry(account, collection, fileName).then((entry) => {
+	return FileRef.getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
@@ -79,7 +77,7 @@ function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNa
 }
 
 function fetchFileStream(account, model, collection, fileName, useLegacyNameOnFallback = false) {
-	return getRefEntry(account, collection, fileName).then((entry) => {
+	return FileRef.getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
@@ -137,8 +135,6 @@ async function insertRef(account, collection, user, name, refInfo) {
 
 	return ref;
 }
-
-const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
@@ -289,20 +285,25 @@ FileRef.storeUrlAsResource = async function(account, model, user, name, link, ex
 };
 
 FileRef.getAvatarStream = async function(username) {
-	const refEntry = await getRefEntry('admin', AVATARS_COL_NAME, username);
-	return ExternalServices.getFileStream('admin', AVATARS_COL_NAME, refEntry.type, refEntry.link);
+	const refEntry = await FileRef.getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
+
+	if(!refEntry) {
+		throw ResponseCodes.NO_FILE_FOUND;
+	}
+
+	return ExternalServices.getFileStream("admin", AVATARS_COL_NAME, refEntry.type, refEntry.link);
 };
 
 FileRef.storeAvatarFile = async function(username, avatarBuffer) {
-	const refInfo = await ExternalServices.storeFile('admin', AVATARS_COL_NAME, avatarBuffer);
-	await db.insertOne('admin', AVATARS_COL_NAME, {...refInfo, _id: username});
+	const refInfo = await ExternalServices.storeFile("admin", AVATARS_COL_NAME, avatarBuffer);
+	await db.insertOne("admin", AVATARS_COL_NAME, {...refInfo, _id: username});
 };
 
 FileRef.removeAvatarFile = async function(username) {
-	const avatarInfo = await db.findOne('admin', AVATARS_COL_NAME, { _id: username }, { link: 1, type: 1 });
-	if(avatarInfo){
-		await ExternalServices.removeFiles('admin', AVATARS_COL_NAME, avatarInfo.type, [avatarInfo.link]);
-		await db.deleteOne('admin', AVATARS_COL_NAME, { _id: username });		
+	const avatarInfo = await FileRef.getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
+	if(avatarInfo) {
+		await ExternalServices.removeFiles("admin", AVATARS_COL_NAME, avatarInfo.type, [avatarInfo.link]);
+		await db.deleteOne("admin", AVATARS_COL_NAME, { _id: username });
 	}
 };
 

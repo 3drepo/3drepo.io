@@ -39,6 +39,7 @@ const httpsPost = require("../libs/httpsReq").post;
 const FileType = require("file-type");
 
 const multer = require("multer");
+const FileRef = require("../models/fileRef");
 
 /**
  * @api {post} /login Login
@@ -802,7 +803,8 @@ async function listUserInfo(req, res, next) {
 
 	const accounts = await User.listAccounts(user);
 
-	const {firstName, lastName, email, avatar, billing: { billingInfo }}  = user.customData;
+	const {firstName, lastName, email, billing: { billingInfo }}  = user.customData;
+	const hasAvatar = !!await FileRef.getRefEntry("admin", "avatars", user.user);
 
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 		accounts,
@@ -810,7 +812,7 @@ async function listUserInfo(req, res, next) {
 		lastName,
 		email,
 		billingInfo: billingInfo,
-		hasAvatar:  Boolean(avatar)
+		hasAvatar
 	});
 }
 

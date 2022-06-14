@@ -48,7 +48,6 @@ const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { assignUserToJob } = require("../../v5/models/jobs.js");
-const ExternalServices = require("../handler/externalServices.js");
 
 const COLL_NAME = "system.users";
 
@@ -210,18 +209,18 @@ User.getProfileByUsername = async function (username) {
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
 		"customData.email" : 1,
-		"customData.avatar" : 1,
 		"customData.apiKey" : 1
 	});
 
 	const customData =  user.customData;
+	const hasAvatar = !!await FileRef.getRefEntry("admin", "avatars", username);
 
 	return 	{
 		username: user.user,
 		firstName: customData.firstName,
 		lastName: customData.lastName,
 		email: customData.email,
-		hasAvatar: !!customData.avatar,
+		hasAvatar,
 		apiKey: customData.apiKey
 	};
 };
@@ -753,11 +752,12 @@ async function _createAccounts(roles, userName) {
 				// Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
+				const hasAvatar = !!await FileRef.getRefEntry("admin", "avatars", userName);
 				const account = {
 					account: user.user,
 					firstName: user.customData.firstName,
 					lastName: user.customData.lastName,
-					hasAvatar: !!user.customData.avatar,
+					hasAvatar,
 					projects: [],
 					models: [],
 					fedModels: [],
@@ -795,6 +795,7 @@ async function _createAccounts(roles, userName) {
 			// model permissions
 			const modelPromises = [];
 			const dbUserCache = {};
+			const hasAvatar = !!await FileRef.getRefEntry("admin", "avatars", user.user);
 			const models = await findModelSettings(user.user, query, projection);
 
 			models.forEach(model => {
@@ -804,7 +805,7 @@ async function _createAccounts(roles, userName) {
 						if (!account) {
 							const {_makeAccountObject} = require("./helper/model");
 							account = _makeAccountObject(user.user);
-							account.hasAvatar = !!user.customData.avatar;
+							account.hasAvatar = hasAvatar;
 							accounts.push(account);
 						}
 					}

@@ -16,21 +16,10 @@
  */
 
 const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
 
-const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
-
-FileRefs.getRefEntry = async (teamspace, collection, id) => {
-	const entry = await db.findOne(teamspace, collectionName(collection), { _id: id });
-
-	if (!entry) {
-		throw templates.fileNotFound;
-	}
-
-	return entry;
-};
+FileRefs.getRefEntry = async (teamspace, collection, id) => db.findOne(teamspace, collection, { _id: id });
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
@@ -38,7 +27,7 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 		{ $group: { _id: null, total: { $sum: '$size' } } },
 	];
 
-	const res = await db.aggregate(teamspace, collectionName(collection), pipelines);
+	const res = await db.aggregate(teamspace, collection, pipelines);
 
 	return res.length > 0 ? res[0].total : 0;
 };
@@ -52,10 +41,12 @@ FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
 	return db.aggregate(teamspace, collection, pipeline);
 };
 
-FileRefs.insertRef = async (teamspace, collection, user, name, refInfo) => {
-	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
-	await db.insertOne(teamspace, collection, ref);
-	return ref;
-}
+FileRefs.insertRef = async (teamspace, collection, refInfo) => {
+	await db.insertOne(teamspace, collection, refInfo);
+};
+
+FileRefs.removeRef = async (teamspace, collection, id) => {
+	await db.deleteOne(teamspace, collection, { _id: id });
+};
 
 module.exports = FileRefs;

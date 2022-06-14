@@ -21,9 +21,8 @@ const { validateAvatarFile, validateForgotPasswordData, validateLoginData, valid
 	validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
-const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
-const { respond } = require('../utils/responder');
+const { respond, writeStreamRespond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 
 const login = (req, res, next) => {
@@ -82,24 +81,23 @@ const deleteApiKey = (req, res) => {
 const getAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
-		const buffer = await Users.getAvatar(user);
-		const fileExt = await fileExtensionFromBuffer(buffer);
-		req.params.format = fileExt || 'png';
-		respond(req, res, templates.ok, buffer);
+		const avatarStream = await Users.getAvatarStream(user);
+		writeStreamRespond(req, res, templates.ok, avatarStream.readStream, user, avatarStream.size);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
 
-const uploadAvatar = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.uploadAvatar(user, req.file.buffer).then(() => {
+const uploadAvatar = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		await Users.uploadAvatar(user, req.file.buffer);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 const forgotPassword = async (req, res) => {

@@ -200,17 +200,6 @@ User.generateApiKey = async (username) => {
 
 User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
 
-User.getAvatar = async (username) => {
-	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
-	const avatar = user.customData?.avatar;
-
-	if (!avatar) {
-		throw templates.avatarNotFound;
-	}
-
-	return avatar.data.buffer;
-};
-
 User.addUser = async (newUserData) => {
 	const customData = {
 		createdAt: new Date(),

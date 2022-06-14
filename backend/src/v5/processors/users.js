@@ -17,8 +17,8 @@
 
 const Users = {};
 
-const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
+const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
+	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -26,6 +26,10 @@ const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
+const { getFileAsStream, removeFiles, storeFile } = require('../services/filesManager');
+const { getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
+const { AVATARS_COL_NAME } = require('../models/fileRefs.constants');
+const FileRefs = require('../models/fileRefs');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
@@ -61,20 +65,20 @@ Users.getProfileByUsername = async (username) => {
 		'customData.firstName': 1,
 		'customData.lastName': 1,
 		'customData.email': 1,
-		'customData.avatar': 1,
 		'customData.apiKey': 1,
 		'customData.billing.billingInfo.company': 1,
 		'customData.billing.billingInfo.countryCode': 1,
 	});
 
 	const { customData } = user;
+	const hasAvatar = !!await FileRefs.getRefEntry('admin', AVATARS_COL_NAME, username);
 
 	return {
 		username: user.user,
 		firstName: customData.firstName,
 		lastName: customData.lastName,
 		email: customData.email,
-		hasAvatar: !!customData.avatar,
+		hasAvatar,
 		apiKey: customData.apiKey,
 		company: customData.billing?.billingInfo?.company,
 		countryCode: customData.billing?.billingInfo?.countryCode,
@@ -98,9 +102,18 @@ Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
 
-Users.getAvatar = getAvatar;
+Users.getAvatarStream = async (username) => getFileAsStream('admin', AVATARS_COL_NAME, username);
 
-Users.uploadAvatar = uploadAvatar;
+Users.uploadAvatar = async (username, avatarBuffer) => {
+	const existingRef = await getRefEntry('admin', AVATARS_COL_NAME, username);
+	if(existingRef){
+		await removeRef('admin', AVATARS_COL_NAME, username);
+		await removeFiles('admin', AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
+	}
+	
+	const refInfo = await storeFile('admin', AVATARS_COL_NAME, avatarBuffer);
+	await insertRef('admin', AVATARS_COL_NAME, { ...refInfo, _id: username });
+};
 
 Users.generateResetPasswordToken = async (username) => {
 	const expiredAt = new Date();
