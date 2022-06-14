@@ -22,7 +22,7 @@ export default {
 	component: ErrorMessage,
 	argTypes: {
 		children: {
-			description: 'The text or componhat will display',
+			description: 'The text or component to display',
 			defaultValue: 'Error message\'s content',
 		},
 	},
