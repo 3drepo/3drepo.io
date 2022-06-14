@@ -17,15 +17,16 @@
 
 import { Controller } from 'react-hook-form';
 import { IButton as ButtonProps } from '@controls/button/button.component';
-import { InputProps } from '@mui/material';
 import { Label, Button, Input, ErrorMessage, Container } from './formFileInput.styles';
 
-export type FormFileInputProps = InputProps & {
+type FormFileInputProps = {
 	control: any,
-	formErrors: any,
+	formError: any,
+	label: string | JSX.Element,
 	name: string,
 	buttonProps: ButtonProps,
 	onChange: (event: Event, field: any) => void,
+	className?: string,
 };
 
 export const FormFileInput = ({
@@ -37,7 +38,7 @@ export const FormFileInput = ({
 	onChange,
 	className,
 	...otherProps
-}) => (
+}: FormFileInputProps) => (
 	<Container className={className}>
 		<Controller
 			name={name}
