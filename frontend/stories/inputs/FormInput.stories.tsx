@@ -35,7 +35,7 @@ export default {
 				options: [
 					'primary',
 					'secondary',
-					'error'
+					'error',
 				],
 				control: { type: 'select' },
 			},
@@ -43,8 +43,8 @@ export default {
 		formError: {
 			message: {
 				type: 'string',
-			}
-		}
+			},
+		},
 	},
 	component: FormFileInput,
 	parameters: { controls: { exclude: ['className'] } },
@@ -58,7 +58,7 @@ const Template: ComponentStory<typeof FormFileInput> = (args) => {
 		mode: 'onChange',
 	});
 	return <FormFileInput control={control} name="file" {...args} />;
-}
+};
 
 export const ContainedPrimaryButton = Template.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
