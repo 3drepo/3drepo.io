@@ -108,7 +108,7 @@ export const StyledTextField = styled(TextField)`
 	}
 
 	${ActionsLine} {
-		bottom: 8px;
+		bottom: 1px;
 	}
 
 	${MutableActionsLine} {
