@@ -46,7 +46,7 @@ const calculateQuota = async (teamspace) => {
 	return (quotaSize + basicQuota) * 1024 * 1024; // data in MB, returning in Bytes.
 };
 
-const calculateSpaceUsed = async (teamspace) => {
+Quota.calculateSpaceUsed = async (teamspace) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
@@ -73,7 +73,7 @@ Quota.sufficientQuota = async (teamspace, size) => {
 
 	const [quotaTotal, dataUsed] = await Promise.all([
 		calculateQuota(teamspace),
-		calculateSpaceUsed(teamspace),
+		Quota.calculateSpaceUsed(teamspace),
 	]);
 
 	if ((dataUsed + size) > quotaTotal) {

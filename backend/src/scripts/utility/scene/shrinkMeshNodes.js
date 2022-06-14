@@ -17,6 +17,8 @@
 
 const { v5Path } = require('../../../interop');
 
+const Path = require('path');
+
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
@@ -78,7 +80,6 @@ const processTeamspace = async (teamspace) => {
 		logger.logInfo(`\t\t\t${model}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processModel(teamspace, model);
-		// eslint-disable-next-line no-await-in-loop
 	}
 };
 
@@ -91,6 +92,18 @@ const run = async () => {
 	}
 };
 
-// module.exports = run;
+const genYargs = (yargs) => {
+	const commandName = Path.basename(__filename, Path.extname(__filename));
 
-run().then(process.exit);
+	return yargs.command(
+		commandName,
+		'Extract binary data from meshes and place them in gridfs',
+		{},
+		(argv) => run(argv._[1], argv._[2], argv._[3], argv.out),
+	);
+};
+
+module.exports = {
+	run,
+	genYargs,
+};

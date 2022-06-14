@@ -154,10 +154,15 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	const favourites = userProfile.customData.starredModels || {};
 
 	if (favourites[teamspace]) {
-		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
-		if (updatedFav.length) {
-			favourites[teamspace] = updatedFav;
-			await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+		if (favouritesToRemove?.length) {
+			const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
+			if (updatedFav.length) {
+				favourites[teamspace] = updatedFav;
+				await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+			} else {
+				const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+				await updateUser(username, action);
+			}
 		} else {
 			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 			await updateUser(username, action);
