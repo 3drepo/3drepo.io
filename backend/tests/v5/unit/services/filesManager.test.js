@@ -192,19 +192,6 @@ const testGetFileAsStream = () => {
 
 const testStoreFile = () => {
 	describe('Store file in fileshare', () => {
-		test('should throw error if the default type is not recognised', async () => {
-			const { defaultStorage } = config;
-			config.defaultStorage = 'unrecognised storage type';
-
-			await expect(FilesManager.storeFile(
-				generateRandomString(),
-				generateRandomString(),
-				generateRandomString(),
-			)).rejects.toEqual(templates.fileNotFound);
-
-			config.defaultStorage = defaultStorage;
-		});
-
 		test('should store file if default storage type is fs', async () => {
 			const { defaultStorage } = config;
 			config.defaultStorage = 'fs';
