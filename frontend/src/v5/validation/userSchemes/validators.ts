@@ -21,10 +21,7 @@ import { getPasswordStrength } from '@/v4/services/validation';
 import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
 
 export const username = (alreadyExistingUsernames) => Yup.string()
-	.matches(/^[a-zA-Z][\w]{1,63}$/, formatMessage({
-		id: 'user.username.error.characters',
-		defaultMessage: 'Username can only consist of letters, numbers and underscores',
-	}))
+	.transform((value) => value.trim(''))
 	.required(
 		formatMessage({
 			id: 'userSignupForm.username.error.required',
@@ -41,6 +38,10 @@ export const username = (alreadyExistingUsernames) => Yup.string()
 			id: 'userRegistration.username.error.max',
 			defaultMessage: 'Username is limited to 120 characters',
 		}))
+	.matches(/^[a-zA-Z][\w]{1,120}$/, formatMessage({
+		id: 'user.username.error.characters',
+		defaultMessage: 'Username can only consist of letters, numbers and underscores',
+	}))
 	.test(
 		'alreadyExistingUsernames',
 		formatMessage({
