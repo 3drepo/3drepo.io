@@ -15,18 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
-import { CentredContainer } from '@controls/centredContainer';
-import { LOGIN_PATH } from '../../routes.constants';
-import { ReturnLinkContainer } from './components.styles';
+import { MarginWrapper, PositionedWrapper } from './centredContainer.styles';
 
-export const ReturnLink = () => (
-	<ReturnLinkContainer>
-		<CentredContainer>
-			<Link to={LOGIN_PATH}>
-				<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
-			</Link>
-		</CentredContainer>
-	</ReturnLinkContainer>
+export type ICentredContainer = {
+	vertical?: boolean;
+	horizontal?: boolean;
+	className?: string;
+	children: any;
+};
+
+export const CentredContainer = ({
+	vertical = true,
+	horizontal = true,
+	className,
+	children,
+}: ICentredContainer): JSX.Element => (
+	<PositionedWrapper>
+		<MarginWrapper vertical={vertical} horizontal={horizontal} className={className}>
+			{children}
+		</MarginWrapper>
+	</PositionedWrapper>
 );
