@@ -16,17 +16,14 @@
  */
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { FormattedMessage } from 'react-intl';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import {
 	Header,
 	ProfilePicture,
 	Username,
 	UserInfo,
 	FullName,
-	AvatarButton,
-	AvatarInputLabel,
-	AvatarHiddenInput,
+	AvatarInput,
 	UserIcon,
 	TruncatableName,
 	Avatar,
@@ -73,23 +70,21 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 					<TruncatableName>{user.firstName}</TruncatableName>
 					<TruncatableName>{user.lastName}</TruncatableName>
 				</FullName>
-				<Controller
+				<AvatarInput
 					name="avatarFile"
 					control={control}
-					render={({ field }) => (
-						<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
-						<AvatarInputLabel>
-							{avatarIsAvailable() ? (
-								<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
-							) : (
-								<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
-							)}
-							<AvatarHiddenInput onChange={(event) => addImage(event, field)} />
-						</AvatarInputLabel>
-					</AvatarButton>
+					formError={formErrors.avatarFile}
+					label={avatarIsAvailable() ? (
+						<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
+					) : (
+						<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
 					)}
+					onChange={addImage}
+					buttonProps={{
+						color: avatarIsAvailable() ? 'secondary' : 'primary',
+						variant: 'outlined',
+					}}
 				/>
-				{(formErrors.avatarFile) && <ErrorMessage>{formErrors.avatarFile.message}</ErrorMessage>}
 			</UserInfo>
 		</Header>
 	);

@@ -137,11 +137,11 @@ export const email = (alreadyExistingEmails) => Yup.string()
 	);
 
 export const avatarFile = Yup.mixed()
-	.test('fileSize',
+	.test(
+		'fileSize',
 		formatMessage({
 			id: 'validation.avatar.error.fileSize',
 			defaultMessage: 'Image cannot exceed 1 MB.',
 		}),
 		(file) => !fileIsTooBig(file),
 	);
-	

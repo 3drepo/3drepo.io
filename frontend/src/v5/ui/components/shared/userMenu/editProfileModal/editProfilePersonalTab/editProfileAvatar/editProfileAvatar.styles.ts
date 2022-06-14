@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Button } from '@controls/button';
 import UserIconBase from '@assets/icons/filled/user-filled.svg';
 import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
+import { FormFileInput } from '@controls/formFileInput/formFileInput.component';
+import { Button as FormFileInputButton } from '@controls/formFileInput/formFileInput.styles';
 import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
@@ -74,27 +75,10 @@ export const FullName = styled.div`
 	margin-top: 1px;
 `;
 
-const AVATAR_ID = 'avatar';
-
-export const AvatarHiddenInput = styled.input.attrs({
-	type: 'file',
+export const AvatarInput = styled(FormFileInput).attrs({
 	accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
-	id: AVATAR_ID,
 })`
-	display: none;
-`;
-
-export const AvatarButton = styled(Button).attrs({
-	variant: 'outlined',
-})`
-	margin: 7px 0 0;
-	padding: 0;
-	width: fit-content;
-`;
-
-export const AvatarInputLabel = styled.label.attrs({
-	htmlFor: AVATAR_ID,
-})`
-	padding: 10px 15px;
-	cursor: pointer;
+	${FormFileInputButton} {
+		margin-top: 8px;
+	}
 `;
