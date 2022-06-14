@@ -18,7 +18,7 @@
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
+const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
 const { AVATARS_COL_NAME } = require('../../models/fileRefs.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { getFileAsStream } = require('../../services/filesManager');
