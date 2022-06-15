@@ -17,7 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { firstName, lastName, email, countryCode, password, username } from './validators';
+import { firstName, lastName, email, company, countryCode, password, username } from './validators';
 
 export const UserSignupSchemaAccount = (
 	alreadyExistingUsernames: string[] = [],
@@ -45,6 +45,7 @@ export const UserSignupSchemaAccount = (
 export const UserSignupSchemaPersonal = Yup.object().shape({
 	firstName,
 	lastName,
+	company,
 	countryCode,
 });
 

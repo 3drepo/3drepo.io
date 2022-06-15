@@ -107,6 +107,13 @@ export const lastName = Yup.string()
 		defaultMessage: 'Last name is a required field',
 	}));
 
+export const company = Yup.string()
+	.transform((value) => value.trim(''))
+	.max(120, formatMessage({
+		id: 'validation.company.error.max',
+		defaultMessage: 'Company is limited to 120 characters',
+	}));
+
 export const countryCode = Yup.string()
 	.required(
 		formatMessage({
