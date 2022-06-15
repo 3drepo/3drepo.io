@@ -44,10 +44,10 @@ export const EditProfileIntegrationsTab = () => {
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
 
-	const handleApiKeyCall = (action) => {
+	const handleApiKeyCall = (apiKeyActionDispatcher) => {
 		setError(null);
 		setUnexpectedError(false);
-		action(handleApiError);
+		apiKeyActionDispatcher(handleApiError);
 	};
 
 	return (
