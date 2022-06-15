@@ -44,7 +44,6 @@ export const MenuItem: typeof Link = styled(MenuItemComponent).attrs({
 				pointer-events: none;
 				color: ${({ theme }) => theme.palette.base.light};
 			}
-			opacity: 1;
 		`};
 
 		&:not(:last-child) {
