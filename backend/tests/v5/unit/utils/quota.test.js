@@ -31,29 +31,29 @@ const testGetQuotaInfo = () => {
 	const tsWithSomeUsage = 'withUsage';
 
 	const subsByTeamspace = {
-		[tsWithExpiredQuota]: [{
+		[tsWithExpiredQuota]: {
 			enterprise: {
 				data: 10, // 10MB
 				expiryDate: Date.now() - 10,
 				collaborators: 1,
 			},
-		}],
+		},
 
-		[tsWithQuota]: [{
+		[tsWithQuota]: {
 			enterprise: {
 				data: 6, // 6MB
 				expiryDate: Date.now() + 100000,
 				collaborators: 2,
 			},
-		}],
-		[tsWithSomeUsage]: [{
+		},
+		[tsWithSomeUsage]: {
 			enterprise: {
 				data: 1,
 				expiryDate: Date.now() + 100000,
 				collaborators: 3,
 			},
-		}],
-		[tsWithMultipleLicense]: [{
+		},
+		[tsWithMultipleLicense]: {
 			enterprise: {
 				data: 2,
 				expiryDate: Date.now() + 100000,
@@ -65,9 +65,9 @@ const testGetQuotaInfo = () => {
 				collaborators: 5,
 			},
 			paypal: {},
-		}],
+		},
 
-		[tsWithMultipleLicense2]: [{
+		[tsWithMultipleLicense2]: {
 			enterprise: {
 				data: 2,
 				expiryDate: Date.now() + 100000,
@@ -78,7 +78,7 @@ const testGetQuotaInfo = () => {
 				expiryDate: Date.now() - 100000,
 				collaborators: 7,
 			},
-		}],
+		},
 	};
 
 	jest.spyOn(db, 'findOne').mockImplementation((ts, col, { user }) => {
@@ -164,7 +164,7 @@ const testSufficientQuota = () => {
 
 		test('should return error if quota exceeds the limit', async () => {
 			jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({
-				customData: { billing: { subscriptions: [{ enterprise: { data: 1, collaborators: 2 } }] } },
+				customData: { billing: { subscriptions: { enterprise: { data: 1, collaborators: 2 } } } },
 			}));
 
 			jest.spyOn(db, 'listCollections').mockImplementationOnce(() => Promise.resolve([

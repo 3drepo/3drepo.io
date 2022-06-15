@@ -85,42 +85,37 @@ const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
 	await ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], false, {
 		billing: {
-			subscriptions: [
-				{
-					discretionary: {
-						collaborators: userCollabs,
-						data: licenseData,
-						expiryDate: Date.now() + 100000,
-					},
+			subscriptions: {
+				discretionary: {
+					collaborators: userCollabs,
+					data: licenseData,
+					expiryDate: Date.now() + 100000,
 				},
-			],
+			},
 		},
 	});
 	await ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
 		[userWithLicenseUnlimitedCollabs.user], false, {
 			billing: {
-				subscriptions: [
-					{
+				subscriptions: {
 						discretionary: {
 							collaborators: 'unlimited',
 							data: licenseData,
 							expiryDate: Date.now() + 100000,
 						},
-					},
-				],
+					},				
 			},
 		});
 	await ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], false, {
 		billing: {
-			subscriptions: [
-				{
+			subscriptions: {
 					discretionary: {
 						collaborators: 'unlimited',
 						data: licenseData,
 						expiryDate: Date.now() - 100000,
 					},
 				},
-			],
+			
 		},
 	});
 

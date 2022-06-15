@@ -29,26 +29,22 @@ Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 	let collaboratorLimit = config.subscriptions?.basic?.collaborators ?? 0;
 	let hasExpiredQuota = false;
 
-	for (let i = 0; i < subs.length; i++) {
-		const sub = subs[i];
-
-		// eslint-disable-next-line no-loop-func
-		Object.keys(sub).forEach((key) => {
-			// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
-			if (key !== 'paypal') {
-				const { expiryDate, data } = sub[key];
-				if (expiryDate && expiryDate < Date.now()) {
-					hasExpiredQuota = true;
-				} else {
-					quotaSize += data;
-					if (collaboratorLimit !== 'unlimited') {
-						const subCollaborators = sub[key].collaborators;
-						collaboratorLimit = subCollaborators === 'unlimited' ? 'unlimited' : collaboratorLimit + subCollaborators;
-					}
+	// eslint-disable-next-line no-loop-func
+	Object.keys(subs).forEach((key) => {
+		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
+		if (key !== 'paypal') {
+			const { expiryDate, data } = subs[key];
+			if (expiryDate && expiryDate < Date.now()) {
+				hasExpiredQuota = true;
+			} else {
+				quotaSize += data;
+				if (collaboratorLimit !== 'unlimited') {
+					const subCollaborators = subs[key].collaborators;
+					collaboratorLimit = subCollaborators === 'unlimited' ? 'unlimited' : collaboratorLimit + subCollaborators;
 				}
 			}
-		});
-	}
+		}
+	});
 
 	if (hasExpiredQuota && quotaSize === 0) throw templates.licenceExpired;
 
