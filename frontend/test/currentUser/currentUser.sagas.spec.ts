@@ -43,12 +43,6 @@ describe('Current User: sagas', () => {
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.fetchUser())
 				.dispatch(CurrentUserActions.fetchUserSuccess(userData))
-				// .put.like({ // Using like because avatarUrl uses a timestamp
-				// 	action: {
-				// 		type: 'CURRENT_USER2/FETCH_USER_SUCCESS',
-				// 		userData,
-				// 	}
-				// })
 				.run();
 		})
 
