@@ -94,10 +94,12 @@ const unsubscribeToEvent = (event, callback) => {
 
 export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callback) => {
 	joinRoom(roomType);
-	subscribeToEvent(event, callback);
+	const roomCallback = (roomEvent) => callback(roomEvent.data);
+
+	subscribeToEvent(event, roomCallback);
 
 	return () => {
-		unsubscribeToEvent(event, callback);
+		unsubscribeToEvent(event, roomCallback);
 		leaveRoom(roomType);
 	};
 };
