@@ -28,7 +28,7 @@ import { MenuItem } from '@mui/material';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { defaults, pick, pickBy, isEmpty } from 'lodash';
+import { defaults, pick, pickBy, isEmpty, isMatch } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
@@ -74,7 +74,7 @@ export const EditProfilePersonalTab = ({
 		const values = trimPersonalValues(
 			pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		);
-		return defaults(values, { countryCode: 'GB' });
+		return defaults(values, { countryCode: 'GB', avatarFile: '' });
 	};
 
 	const formMethods = useForm<IUpdatePersonalInputs>({
@@ -91,9 +91,10 @@ export const EditProfilePersonalTab = ({
 		watch,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isValid: formIsValid, isDirty, isSubmitted },
+		formState: { errors: formErrors, isValid: formIsValid, dirtyFields, isSubmitted },
 	} = formMethods;
-	const getTrimmedValues = () => trimPersonalValues(getValues());
+
+	const getTrimmedNonEmptyValues = () => pickBy(trimPersonalValues(getValues()));
 
 	const onSubmissionError = (apiError) => {
 		if (isNetworkError(apiError)) {
@@ -125,13 +126,18 @@ export const EditProfilePersonalTab = ({
 		setExpectedError('');
 		setUnexpectedError(false);
 		setSubmitWasSuccessful(false);
-		const trimmedValues = pickBy(getTrimmedValues());
-		CurrentUserActionsDispatchers.updatePersonalData(trimmedValues, onSubmissionError);
+		const values = getTrimmedNonEmptyValues();
+		CurrentUserActionsDispatchers.updatePersonalData(values, onSubmissionError);
 	};
 
-	// enable submission only if form is valid and fields are dirty (or avatar was changed)
+	const fieldsAreDirty = () => {
+		if (isEmpty(dirtyFields)) return false;
+		return !isMatch(user, getTrimmedNonEmptyValues());
+	};
+
+	// enable submission only if form is valid and fields are dirty
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && isEmpty(formErrors) && isDirty;
+		const shouldEnableSubmit = formIsValid && isEmpty(formErrors) && fieldsAreDirty();
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
 	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
 
@@ -143,7 +149,7 @@ export const EditProfilePersonalTab = ({
 			reset(getDefaultPersonalValues(), { keepIsSubmitted: true });
 			setSubmitWasSuccessful(true);
 		}
-	}, [JSON.stringify(getDefaultPersonalValues())]);
+	}, [JSON.stringify(getDefaultPersonalValues()), user.avatarUrl]);
 
 	return (
 		<ScrollArea>
