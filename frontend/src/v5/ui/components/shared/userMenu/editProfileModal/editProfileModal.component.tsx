@@ -23,6 +23,10 @@ import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePers
 import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
+const PERSONAL_TAB = 'personal';
+const PASSWORD_TAB = 'password';
+const INTEGRATIONS_TAB = 'integrations';
+
 const CONFIRM_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
 	password: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.tab.confirmButton.updatePassword' }),
@@ -42,16 +46,11 @@ type EditProfileModalProps = {
 };
 
 export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps) => {
-	const [activeTab, setActiveTab] = useState(null);
+	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
 	const [hideSubmitButton, setHideSubmitButton] = useState(false);
-
-	const PERSONAL_TAB = 'personal';
-	const PASSWORD_TAB = 'password';
-	const INTEGRATIONS_TAB = 'integrations';
-
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
 			case PERSONAL_TAB:
