@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { css } from 'styled-components';
-import { OpacityVisibilityCheckbox, SelectedHash } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+const TeamspaceConstants = {};
 
-export default css`
-	${SelectedHash} input {
-		width: fit-content;
-		margin-left: -13px;
-		padding-right: 0 !important;
-	}
+TeamspaceConstants.SUBSCRIPTION_TYPES = [
+	'enterprise',
+	'pilot',
+	'discretionary',
+	'internal',
+];
 
-	// TODO modal
-	${OpacityVisibilityCheckbox} {
-		margin-left: -8px;
-		margin-right: 0;
-	}
-`;
+TeamspaceConstants.ADD_ONS = {
+	VR: 'vrEnabled',
+	POWERBI: 'powerBIEnabled',
+	SRC: 'srcEnabled',
+	HERE: 'hereEnabled',
+};
+
+module.exports = TeamspaceConstants;

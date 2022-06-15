@@ -18,6 +18,7 @@
 import { css } from 'styled-components';
 import { TitleIcon, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/panel/panel.styles';
+import { Container as ViewerPanelEmptySpace } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import {
 	ButtonContainer,
 	Container as FilterPanelContainer,
@@ -109,7 +110,7 @@ export default css`
 		}
 	}
 
-	${ViewerPanelBody} {
+	${ViewerPanelBody}, ${ViewerPanelEmptySpace} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 

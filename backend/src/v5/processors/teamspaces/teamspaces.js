@@ -16,12 +16,15 @@
  */
 
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
-const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
-const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
+const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
+const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
+
+const { removeUserFromAllModels } = require('../../models/modelSettings');
+const { removeUserFromAllProjects } = require('../../models/projectSettings');
 
 const Teamspaces = {};
 
@@ -42,6 +45,16 @@ Teamspaces.initTeamspace = async (username) => {
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${username}`);
 	}
+};
+
+Teamspaces.removeTeamspaceMember = async (teamspace, user) => {
+	// Clean up all possible permissions
+	await Promise.all([
+		removeUserFromAllModels(teamspace, user),
+		removeUserFromAllProjects(teamspace, user),
+		removeUserFromAdminPrivilege(teamspace, user),
+	]);
+	await revokeTeamspaceRoleFromUser(teamspace, user);
 };
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
