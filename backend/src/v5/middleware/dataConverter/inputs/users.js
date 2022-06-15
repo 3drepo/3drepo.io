@@ -17,10 +17,13 @@
 
 const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
+const { AVATARS_COL_NAME } = require('../../../models/fileRefs.constants');
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const httpsPost = require('../../../utils/httpsReq').post;
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { getRefEntry } = require('../../../models/fileRefs');
+const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -265,5 +268,16 @@ Users.validateVerifyData = async (req, res, next) => {
 };
 
 Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
+
+Users.userHasAvatar = async (req, res, next) => {
+	const user = getUserFromSession(req.session);
+	const entryRef = await getRefEntry('admin', AVATARS_COL_NAME, user);
+
+	if (!entryRef) {
+		respond(req, res, createResponseCode(templates.avatarNotFound, templates.avatarNotFound.message));
+	} else {
+		await next();
+	}
+};
 
 module.exports = Users;

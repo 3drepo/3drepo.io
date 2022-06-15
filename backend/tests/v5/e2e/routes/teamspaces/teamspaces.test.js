@@ -178,9 +178,9 @@ const testGetAvatar = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test(`should return ${templates.fileNotFound.code} if the teamspace does not have an avatar`, async () => {
-			const res = await agent.get(`${route(testUserTSAccess[0].name)}/?key=${testUser.apiKey}`).expect(templates.fileNotFound.status);
-			expect(res.body.code).toEqual(templates.fileNotFound.code);
+		test(`should return ${templates.avatarNotFound.code} if the teamspace does not have an avatar`, async () => {
+			const res = await agent.get(`${route(testUserTSAccess[0].name)}/?key=${testUser.apiKey}`).expect(templates.avatarNotFound.status);
+			expect(res.body.code).toEqual(templates.avatarNotFound.code);
 		});
 
 		test('should return teamspace fs avatar', async () => {

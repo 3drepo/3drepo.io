@@ -288,7 +288,7 @@ FileRef.getAvatarStream = async function(username) {
 	const refEntry = await FileRef.getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
 
 	if(!refEntry) {
-		throw ResponseCodes.NO_FILE_FOUND;
+		throw ResponseCodes.USER_DOES_NOT_HAVE_AVATAR;
 	}
 
 	return ExternalServices.getFileStream("admin", AVATARS_COL_NAME, refEntry.type, refEntry.link);

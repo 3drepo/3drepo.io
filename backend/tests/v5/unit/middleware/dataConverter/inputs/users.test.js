@@ -27,6 +27,10 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
+jest.mock('../../../../../../src/v5/models/fileRefs');
+const FileRefsModel = require(`${src}/models/fileRefs`);
+
 const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 const MockExpressRequest = require('mock-express-request');
@@ -34,6 +38,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 const { generateRandomString } = require('../../../../helper/services');
+const { AVATARS_COL_NAME } = require('../../../../../../src/v5/models/fileRefs.constants');
 
 const config = require(`${src}/utils/config`);
 
@@ -343,6 +348,32 @@ const testVerifyData = () => {
 	});
 };
 
+const testUserHasAvatar = () => {
+	describe('Test if user has avatar', () => {
+		test(`should respond with ${templates.avatarNotFound.code} if no avatar is found`, async () => {
+			const username = generateRandomString();
+			const getRefEntryMock = FileRefsModel.getRefEntry.mockResolvedValueOnce(undefined);
+			const mockCB = jest.fn();
+			await Users.userHasAvatar({ session: { user: { username } } }, {}, mockCB);
+			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
+			expect(getRefEntryMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(mockCB).toHaveBeenCalledTimes(0);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.avatarNotFound.code);
+		});
+
+		test('should call next() if avatar is found', async () => {
+			const username = generateRandomString();
+			const getRefEntryMock = FileRefsModel.getRefEntry.mockResolvedValueOnce({ _id: generateRandomString() });
+			const mockCB = jest.fn();
+			await Users.userHasAvatar({ session: { user: { username } } }, {}, mockCB);
+			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
+			expect(getRefEntryMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 	testValidateUpdateData();
@@ -351,4 +382,5 @@ describe('middleware/dataConverter/inputs/users', () => {
 	testResetingPasswordData();
 	testValidateSignUpData();
 	testVerifyData();
+	testUserHasAvatar();
 });
