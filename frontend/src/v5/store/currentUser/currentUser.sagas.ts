@@ -61,7 +61,7 @@ export function* updatePersonalData({
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
 	} catch (error) {
-		onError(error);
+		onError?.(error);
 	}
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
