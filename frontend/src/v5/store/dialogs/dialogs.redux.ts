@@ -66,7 +66,7 @@ export interface IDialogsActionCreators {
 
 export interface IDialogConfig {
 	id: string;
-	modalType?: 'error' | 'info' | 'alert';
+	modalType?: 'delete' | 'warning' | 'alert' | 'info';
 	props: any;
 }
 
