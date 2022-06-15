@@ -175,7 +175,7 @@ const testGetAllUsersInTeamspace = () => {
 	});
 };
 
-const testRemoveUserFromTeamspace = () => {
+const testRemoveUserFromAdminPrivilege = () => {
 	describe('Remove user from teamspace', () => {
 		test('should remove user from teamspace', async () => {
 			const fn = jest.spyOn(db, 'updateOne');
@@ -183,7 +183,7 @@ const testRemoveUserFromTeamspace = () => {
 			const username = generateRandomString();
 			const userToRemove = generateRandomString();
 
-			await Teamspace.removeUserFromTeamspace(username, userToRemove);
+			await Teamspace.removeUserFromAdminPrivilege(username, userToRemove);
 
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
@@ -199,5 +199,5 @@ describe('models/teamspaces', () => {
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
-	testRemoveUserFromTeamspace();
+	testRemoveUserFromAdminPrivilege();
 });

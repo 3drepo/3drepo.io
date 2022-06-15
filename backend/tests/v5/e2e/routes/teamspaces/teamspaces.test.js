@@ -334,8 +334,8 @@ const testRemoveTeamspaceMember = () => {
 		});
 
 		test('should fail if the user does not have admin access to the teamspace', async () => {
-			const res = await agent.delete(`${route()}/?key=${testUser2.apiKey}`).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
+			const res = await agent.delete(`${route()}/?key=${testUser2.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail if the teamspace does not exist', async () => {
@@ -344,8 +344,8 @@ const testRemoveTeamspaceMember = () => {
 		});
 
 		test('should fail if the the user to remove is the owner of the teamspace', async () => {
-			const res = await agent.delete(`${route(tsWithUserToRemove.name, tsWithUserToRemove.name)}/?key=${testUser.apiKey}`).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
+			const res = await agent.delete(`${route(tsWithUserToRemove.name, tsWithUserToRemove.name)}/?key=${testUser.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should remove user from the teamspace', async () => {

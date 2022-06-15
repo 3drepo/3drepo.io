@@ -188,7 +188,7 @@ const testGetQuotaInfo = () => {
 const testRemoveTeamspaceMember = () => {
 	describe('Remove team member', () => {
 		test('should remove team member', async () => {
-			const removeUserFromTeamspaceMock = TeamspacesModel.removeUserFromTeamspace
+			const removeUserFromAdminPrivilegeMock = TeamspacesModel.removeUserFromAdminPrivilege
 				.mockImplementationOnce(() => {});
 			const removeUserFromModelsMock = ModelSettingsModel.removeUserFromModels
 				.mockImplementationOnce(() => {});
@@ -201,8 +201,8 @@ const testRemoveTeamspaceMember = () => {
 			const teamspace = generateRandomString();
 			const userToRemove = generateRandomString();
 			await Teamspaces.removeTeamspaceMember(teamspace, userToRemove);
-			expect(removeUserFromTeamspaceMock).toHaveBeenCalledTimes(1);
-			expect(removeUserFromTeamspaceMock).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(removeUserFromAdminPrivilegeMock).toHaveBeenCalledTimes(1);
+			expect(removeUserFromAdminPrivilegeMock).toHaveBeenCalledWith(teamspace, userToRemove);
 			expect(removeUserFromModelsMock).toHaveBeenCalledTimes(1);
 			expect(removeUserFromModelsMock).toHaveBeenCalledWith(teamspace, userToRemove);
 			expect(removeUserFromProjectsMock).toHaveBeenCalledTimes(1);
