@@ -26,6 +26,7 @@ import { SuccessMessage } from '@controls/successMessage/successMessage.componen
 
 import * as API from '@/v5/services/api';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 
 interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -48,6 +49,7 @@ export const EditProfilePasswordTab = ({
 		confirmPassword: '',
 	};
 	const [unexpectedError, setUnexpectedError] = useState(false);
+	const [expectedError, setExpectedError] = useState(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 
 	const {
@@ -69,11 +71,19 @@ export const EditProfilePasswordTab = ({
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
 		setUnexpectedError(false);
+		setExpectedError(null);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
 		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 	};
 
 	const onSubmitError = (error) => {
+		if (error.message === 'Network Error') {
+			setExpectedError(formatMessage({
+				id: 'editProfile.networkError',
+				defaultMessage: 'Network Error',
+			}));
+			return;
+		}
 		const errorData = error.response?.data;
 		if (errorData?.code === 'INCORRECT_PASSWORD') {
 			setIncorrectPassword(true);
@@ -82,6 +92,8 @@ export const EditProfilePasswordTab = ({
 			setUnexpectedError(true);
 		}
 	};
+
+	const hasPostSubmissionError = () => unexpectedError || incorrectPassword || expectedError;
 
 	useEffect(() => setIsSubmitting(isSubmitting), []);
 
@@ -140,7 +152,8 @@ export const EditProfilePasswordTab = ({
 				required
 			/>
 			{unexpectedError && <UnexpectedError />}
-			{isSubmitSuccessful && !unexpectedError && !incorrectPassword && (
+			{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
+			{isSubmitSuccessful && !hasPostSubmissionError() && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
 				</SuccessMessage>
