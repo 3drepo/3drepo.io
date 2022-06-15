@@ -31,6 +31,8 @@ export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
 export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {
+	const dialogAlreadyExists = state.dialogs.some((d) => d.props.currentActions === props.currentActions);
+	if (dialogAlreadyExists) return state;
 	const dialog = {
 		id: uuid(),
 		modalType,

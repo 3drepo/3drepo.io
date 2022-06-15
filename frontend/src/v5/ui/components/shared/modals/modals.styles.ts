@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
 
-export const Container = styled.div`
+export const ModalContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	min-width: 633px;
-	min-height: 295px;
-	padding-top: 43px;
+	padding: 43px 0;
 `;
 
-export const Actions = styled.div<{ bottomMargin?: boolean }>`
+export const Actions = styled.div`
 	display: flex;
-	${({ bottomMargin }) => bottomMargin && css`
-		margin-bottom: 25px;
-	`}
 `;
 
 export const Content = styled(DialogContent)`
@@ -43,7 +39,6 @@ export const Details = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	margin-top: 5px;
-	margin-bottom: 25px;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
