@@ -27,6 +27,7 @@ import { SuccessMessage } from '@controls/successMessage/successMessage.componen
 import * as API from '@/v5/services/api';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { isNetworkError, isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 
 interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -76,21 +77,20 @@ export const EditProfilePasswordTab = ({
 		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 	};
 
-	const onSubmitError = (error) => {
-		if (error.message === 'Network Error') {
+	const onSubmitError = (apiError) => {
+		if (isNetworkError(apiError)) {
 			setExpectedError(formatMessage({
 				id: 'editProfile.networkError',
 				defaultMessage: 'Network Error',
 			}));
 			return;
 		}
-		const errorData = error.response?.data;
-		if (errorData?.code === 'INCORRECT_PASSWORD') {
+		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
 			trigger('oldPassword');
-		} else {
-			setUnexpectedError(true);
+			return;
 		}
+		setUnexpectedError(true);
 	};
 
 	const hasPostSubmissionError = () => unexpectedError || incorrectPassword || expectedError;

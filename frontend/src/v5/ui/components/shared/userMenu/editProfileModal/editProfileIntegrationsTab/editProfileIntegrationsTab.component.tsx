@@ -23,6 +23,7 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { isNetworkError } from '@/v5/validation/errors.helpers';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
 export const EditProfileIntegrationsTab = () => {
@@ -31,7 +32,7 @@ export const EditProfileIntegrationsTab = () => {
 	const [unexpectedError, setUnexpectedError] = useState(false);
 
 	const handleApiError = (apiError) => {
-		if (apiError.message === 'Network Error') {
+		if (isNetworkError(apiError)) {
 			setError(formatMessage({
 				id: 'editProfile.networkError',
 				defaultMessage: 'Network Error',
