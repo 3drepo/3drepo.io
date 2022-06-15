@@ -244,7 +244,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /teamspaces/{teamspace}/members/{username}:
 	*   delete:
-	*     description: Removes all permissions of a user from a teamspace
+	*     description: Removes the user from the teamspace
 	*     tags: [Teamspaces]
 	*     parameters:
    	*       - name: teamspace
@@ -264,7 +264,7 @@ const establishRoutes = () => {
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Removes all permissions of a user from a teamspace
+	*         description: Removes the user from the teamspace
 	*
 	*/
 	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, removeTeamspaceMember);
