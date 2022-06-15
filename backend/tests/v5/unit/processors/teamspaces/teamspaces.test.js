@@ -177,8 +177,7 @@ const testGetQuotaInfo = () => {
 				throw templates.licenceExpired;
 			});
 			const teamspace = generateRandomString();
-			const res = await Teamspaces.getQuotaInfo(teamspace);
-			expect(res).toEqual({ data: { available: 0, used: 0 }, seats: { available: 0, used: 0 } });
+			await expect(Teamspaces.getQuotaInfo(teamspace)).rejects.toEqual(templates.licenceExpired);
 			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
 			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
 		});

@@ -71,19 +71,14 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 };
 
 Teamspaces.getQuotaInfo = async (teamspace) => {
-	try {
-		const quotaInfo = await getQuotaInfo(teamspace, true);
-		const spaceUsed = await getSpacedUsed(teamspace, true);
-		const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
+	const quotaInfo = await getQuotaInfo(teamspace, true);
+	const spaceUsed = await getSpacedUsed(teamspace, true);
+	const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
 
-		return {
-			data: { available: quotaInfo.quota, used: spaceUsed },
-			seats: { available: quotaInfo.collaboratorLimit, used: collaboratorsUsed },
-		};
-	} catch {
-		// exception is thrown if there is no valid subscription
-		return { data: { available: 0, used: 0 }, seats: { available: 0, used: 0 } };
-	}
+	return {
+		data: { available: quotaInfo.quota, used: spaceUsed },
+		seats: { available: quotaInfo.collaboratorLimit, used: collaboratorsUsed },
+	};
 };
 
 Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {

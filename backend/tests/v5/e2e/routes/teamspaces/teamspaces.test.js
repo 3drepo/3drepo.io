@@ -284,10 +284,7 @@ const testGetQuotaInfo = () => {
 
 		test(`should return ${templates.licenceExpired.code} if the user has an expired license`, async () => {
 			const res = await agent.get(`${route(tsWithExpiredLicense.name)}/?key=${userWithExpiredLicense.apiKey}`);
-			expect(res.body).toEqual({
-				data: { used: 0, available: 0 },
-				seats: { used: 0, available: 0 },
-			});
+			expect(res.body.code).toEqual(templates.licenceExpired.code);
 		});
 
 		test('should return quota if the user has a valid license', async () => {
