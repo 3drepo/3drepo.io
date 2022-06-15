@@ -32,6 +32,7 @@ import { defaults, pick, pickBy, isEmpty } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { emailAlreadyExists, isFileFormatUnsupported, isNetworkError } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
 
@@ -73,7 +74,7 @@ export const EditProfilePersonalTab = ({
 		const values = trimPersonalValues(
 			pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		);
-		return defaults(values, { countryCode: 'GB', company: '', avatarFile: '' });
+		return defaults(values, { countryCode: 'GB' });
 	};
 
 	const formMethods = useForm<IUpdatePersonalInputs>({
@@ -94,30 +95,30 @@ export const EditProfilePersonalTab = ({
 	} = formMethods;
 	const getTrimmedValues = () => trimPersonalValues(getValues());
 
-	const handleApiError = (apiError) => {
-		if (apiError.message === 'Network Error') {
+	const onSubmissionError = (apiError) => {
+		if (isNetworkError(apiError)) {
 			setExpectedError(formatMessage({
 				id: 'editProfile.networkError',
 				defaultMessage: 'Network Error',
 			}));
 			return;
 		}
-		switch (apiError?.response?.data?.code) {
-			case 'INVALID_ARGUMENTS':
-				setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
-				break;
-			case 'UNSUPPORTED_FILE_FORMAT':
-				setFormError('avatarFile', {
-					type: 'custom',
-					message: formatMessage({
-						id: 'editProfile.avatar.error.format',
-						defaultMessage: 'The file format is not supported',
-					}),
-				});
-				break;
-			default:
-				setUnexpectedError(true);
+		if (emailAlreadyExists(apiError)) {
+			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
+			trigger('email');
+			return;
 		}
+		if (isFileFormatUnsupported(apiError)) {
+			setFormError('avatarFile', {
+				type: 'custom',
+				message: formatMessage({
+					id: 'editProfile.avatar.error.format',
+					defaultMessage: 'The file format is not supported',
+				}),
+			});
+			return;
+		}
+		setUnexpectedError(true);
 	};
 
 	const onSubmit = () => {
@@ -125,7 +126,7 @@ export const EditProfilePersonalTab = ({
 		setUnexpectedError(false);
 		setSubmitWasSuccessful(false);
 		const trimmedValues = pickBy(getTrimmedValues());
-		CurrentUserActionsDispatchers.updatePersonalData(trimmedValues, handleApiError);
+		CurrentUserActionsDispatchers.updatePersonalData(trimmedValues, onSubmissionError);
 	};
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
@@ -134,27 +135,15 @@ export const EditProfilePersonalTab = ({
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
 	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
 
-	// update form values when user is updated
+	useEffect(() => setIsSubmitting(formIsUploading), []);
+
+	// handle successful submit
 	useEffect(() => {
-		if (
-			!formIsUploading
-			&& !unexpectedError
-			&& !expectedError
-			&& isSubmitted
-			&& !alreadyExistingEmails.includes(getValues().email)
-		) {
+		if (isSubmitted) {
 			reset(getDefaultPersonalValues(), { keepIsSubmitted: true });
 			setSubmitWasSuccessful(true);
 		}
-	}, [formIsUploading]);
-
-	useEffect(() => {
-		if (alreadyExistingEmails.length) {
-			trigger('email');
-		}
-	}, [alreadyExistingEmails]);
-
-	useEffect(() => setIsSubmitting(formIsUploading));
+	}, [JSON.stringify(getDefaultPersonalValues())]);
 
 	return (
 		<ScrollArea>
