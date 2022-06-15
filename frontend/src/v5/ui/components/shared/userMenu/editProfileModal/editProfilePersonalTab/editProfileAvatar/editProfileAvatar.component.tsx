@@ -16,17 +16,20 @@
  */
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { FormattedMessage } from 'react-intl';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import {
 	Header,
 	ProfilePicture,
 	Username,
 	UserInfo,
 	FullName,
-	AvatarInput,
 	UserIcon,
 	TruncatableName,
 	Avatar,
+	AvatarButton,
+	AvatarLabel,
+	AvatarInput,
+	ErrorMessage,
 } from './editProfileAvatar.styles';
 
 type EditProfilePersonalTabProps = {
@@ -34,15 +37,16 @@ type EditProfilePersonalTabProps = {
 };
 
 export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
-	const { getValues, control, formState: { errors: formErrors } } = useFormContext();
+	const { getValues, formState: { errors }, control } = useFormContext();
 
-	const newAvatar = getValues('avatarFile');
-
-	const addImage = (event, { onChange: setAvatarFile }) => {
+	const addImage = (event, field) => {
 		if (!event.target.files.length) return;
 		const file = event.target.files[0];
-		setAvatarFile(file);
+		field.onChange(file);
 	};
+
+	const error = errors.avatarFile;
+	const newAvatar = getValues('avatarFile');
 
 	const getUserWithAvatar = () => {
 		if (!newAvatar) return user;
@@ -70,21 +74,26 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 					<TruncatableName>{user.firstName}</TruncatableName>
 					<TruncatableName>{user.lastName}</TruncatableName>
 				</FullName>
-				<AvatarInput
+				<Controller
 					name="avatarFile"
 					control={control}
-					formError={formErrors.avatarFile}
-					label={avatarIsAvailable() ? (
-						<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
-					) : (
-						<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
+					render={({ field: { value, ...field } }) => (
+						<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
+							<AvatarLabel>
+								{avatarIsAvailable() ? (
+									<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
+								) : (
+									<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
+								)}
+								<AvatarInput
+									{...field}
+									onChange={(event) => addImage(event, field)}
+								/>
+							</AvatarLabel>
+						</AvatarButton>
 					)}
-					onChange={addImage}
-					buttonProps={{
-						color: avatarIsAvailable() ? 'secondary' : 'primary',
-						variant: 'outlined',
-					}}
 				/>
+				{error && <ErrorMessage>{error.message}</ErrorMessage>}
 			</UserInfo>
 		</Header>
 	);

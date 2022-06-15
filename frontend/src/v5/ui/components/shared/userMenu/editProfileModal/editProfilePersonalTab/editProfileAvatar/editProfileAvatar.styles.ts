@@ -19,9 +19,9 @@ import UserIconBase from '@assets/icons/filled/user-filled.svg';
 import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
-import { FormFileInput } from '@controls/formFileInput/formFileInput.component';
-import { Button as FormFileInputButton } from '@controls/formFileInput/formFileInput.styles';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { Button } from '@controls/button';
+import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -75,10 +75,31 @@ export const FullName = styled.div`
 	margin-top: 1px;
 `;
 
-export const AvatarInput = styled(FormFileInput).attrs({
-	accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
+export const AvatarButton = styled(Button).attrs({
+	variant: 'outlined',
 })`
-	${FormFileInputButton} {
-		margin-top: 8px;
-	}
+	padding: 0;
+	margin: 8px 0 0;
+	width: fit-content;
+`;
+
+const AVATAR_ID = 'avatar';
+
+export const AvatarLabel = styled.label.attrs({
+	htmlFor: AVATAR_ID,
+})`
+	cursor: pointer;
+	padding: 10px 15px;
+`;
+
+export const AvatarInput = styled.input.attrs({
+	type: 'file',
+	accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
+	id: AVATAR_ID,
+})`
+	display: none;
+`;
+
+export const ErrorMessage = styled(ErrorMessageBase)`
+	margin-top: 10px;
 `;
