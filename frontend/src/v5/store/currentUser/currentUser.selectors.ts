@@ -31,22 +31,12 @@ export const selectFirstName = createSelector(
 	selectCurrentUser, (state) => state.firstName || '',
 );
 
-// personal data
-export const selectPersonalError = createSelector(
-	selectCurrentUser, (state) => state.personalError,
-);
-
 export const selectPersonalDataIsUpdating = createSelector(
 	selectCurrentUser, (state) => !!(state.personalDataIsUpdating),
 );
 
-// api key
 export const selectApiKey = createSelector(
 	selectCurrentUser, (state) => state.apiKey || '',
-);
-
-export const selectApiKeyError = createSelector(
-	selectCurrentUser, (state) => state.apiKeyError,
 );
 
 export const selectApiKeyIsUpdating = createSelector(

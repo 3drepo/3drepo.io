@@ -18,7 +18,9 @@
 import * as CurrentUserSaga from '@/v5/store/currentUser/currentUser.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
-import { mockServer } from '../../internals/testing/mockServer';
+import { UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
+import api from '@/v5/services/api/default';
+import { noop } from 'lodash';
 import {
 	currentUserMockFactory,
 	generateFakeApiKey,
@@ -26,9 +28,8 @@ import {
 	generateFakeAvatarUrl,
 	generatePersonlData,
 } from './currentUser.fixtures';
-import { UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
 import { spyOnAxiosApiCallWithFile } from '../test.helpers';
-import api from '@/v5/services/api/default';
+import { mockServer } from '../../internals/testing/mockServer';
 
 
 describe('Current User: sagas', () => {
@@ -82,9 +83,8 @@ describe('Current User: sagas', () => {
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalData))
+				.dispatch(CurrentUserActions.updatePersonalData(personalData, noop))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put(CurrentUserActions.setPersonalError(''))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 		})
@@ -100,35 +100,29 @@ describe('Current User: sagas', () => {
 				.reply(200, { avatarUrl });
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar))
+				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, noop))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }))
 				.put(CurrentUserActions.updateUserSuccess(userData))
-				.put(CurrentUserActions.setPersonalError(''))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 
 			spy.mockClear();
 		})
 
-		it('should update personal error when API call errors on updateUser', async () => {
+		it('should call error callback when API call errors on updateUser', async () => {
 			mockServer
 				.put('/user')
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(userData))
+				.dispatch(CurrentUserActions.updatePersonalData(userData, noop))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put.like({
-					action: {
-						type: 'CURRENT_USER2/SET_PERSONAL_ERROR',
-					},
-				})
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 		})
 
-		it('should update personal error when API call errors on updateAvatar', async () => {
+		it('should call error callback when API call errors on updateAvatar', async () => {
 			mockServer
 				.put('/user')
 				.reply(200, 'this is the response')
@@ -136,13 +130,8 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}))
+				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, noop))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put.like({
-					action: {
-						type: 'CURRENT_USER2/SET_PERSONAL_ERROR',
-					},
-				})
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 		})
@@ -157,27 +146,21 @@ describe('Current User: sagas', () => {
 				.reply(200, apiKey);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey())
+				.dispatch(CurrentUserActions.generateApiKey(noop))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess(apiKey))
-				.put(CurrentUserActions.setApiKeyError(''))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
 		})
 
-		it('should set api key error when API call errors', async () => {
+		it('should call error callback when API call errors', async () => {
 			mockServer
 				.post('/user/key')
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey())
+				.dispatch(CurrentUserActions.generateApiKey(noop))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
-				.put.like({
-					action: {
-						type: 'CURRENT_USER2/SET_API_KEY_ERROR',
-					},
-				})
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
 		})
@@ -190,15 +173,14 @@ describe('Current User: sagas', () => {
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey())
+				.dispatch(CurrentUserActions.deleteApiKey(noop))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ apiKey: null }))
-				.put(CurrentUserActions.setApiKeyError(''))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
 		})
 
-		it('should set api key error when API call errors', async () => {
+		it('should call error callback when API call errors', async () => {
 			const error = 'Error: Request failed with status code 400';
 
 			mockServer
@@ -206,13 +188,8 @@ describe('Current User: sagas', () => {
 				.reply(400, error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey())
+				.dispatch(CurrentUserActions.deleteApiKey(noop))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
-				.put.like({
-					action: {
-						type: 'CURRENT_USER2/SET_API_KEY_ERROR',
-					},
-				})
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
 		})

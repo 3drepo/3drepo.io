@@ -26,9 +26,7 @@ export interface ICurrentUser {
 	countryCode?: string,
 	avatarUrl?: string,
 	personalDataIsUpdating?: boolean,
-	personalError?: any,
 	apiKeyIsUpdating?: boolean,
-	apiKeyError?: any,
 }
 
 export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {

@@ -30,24 +30,6 @@ describe('CurrentUser: redux', () => {
 	};
 
 	describe('personal data', () => {
-		it('should set error', () => {
-			const error = new Error('personal error');
-			const resultState: ICurrentUserState = currentUserReducer(
-				defaultState,
-				CurrentUserActions.setPersonalError(error)
-			);
-
-			expect(resultState.currentUser.personalError).toEqual(error);
-		});
-
-		it('should clear the error', () => {
-			const resultState: ICurrentUserState = currentUserReducer(
-				defaultState,
-				CurrentUserActions.setPersonalError(null)
-			);
-			expect(resultState.currentUser.personalError).toEqual(null);
-		});
-
 		it('should set updating to true', () => {
 			const resultState: ICurrentUserState = currentUserReducer(
 				defaultState,
@@ -68,23 +50,6 @@ describe('CurrentUser: redux', () => {
 	})
 
 	describe('api key data', () => {
-		it('should set error', () => {
-			const error = new Error('api key error');
-			const resultState: ICurrentUserState = currentUserReducer(
-				defaultState,
-				CurrentUserActions.setApiKeyError(error)
-			);
-
-			expect(resultState.currentUser.apiKeyError).toEqual(error);
-		});
-
-		it('should clear the error', () => {
-			const resultState: ICurrentUserState = currentUserReducer(
-				defaultState,
-				CurrentUserActions.setApiKeyError(null)
-			);
-			expect(resultState.currentUser.apiKeyError).toEqual(null);
-		});
 		it('should set updating to true', () => {
 			const resultState: ICurrentUserState = currentUserReducer(
 				defaultState,

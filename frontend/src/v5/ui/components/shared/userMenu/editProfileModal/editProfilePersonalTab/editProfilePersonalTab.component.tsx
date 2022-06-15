@@ -28,7 +28,7 @@ import { MenuItem } from '@mui/material';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { defaults, pick, isMatch, pickBy, isEmpty } from 'lodash';
+import { defaults, pick, pickBy, isEmpty } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
@@ -55,16 +55,16 @@ export const EditProfilePersonalTab = ({
 	setIsSubmitting,
 	user,
 }: EditProfilePersonalTabProps) => {
-	const personalError = CurrentUserHooksSelectors.selectPersonalError();
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedError, setUnexpectedError] = useState(false);
-	const [postSubmissionErrorMessage, setPostSubmissionErrorMessage] = useState('');
+	const [expectedError, setExpectedError] = useState(null);
+	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 
 	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => {
 		const trimmedValues = {} as IUpdatePersonalInputs;
 		Object.entries((personalValues)).forEach(([key, value]) => {
-			trimmedValues[key] = value?.trim?.();
+			trimmedValues[key] = value?.trim?.() ?? value;
 		});
 		return trimmedValues;
 	};
@@ -90,62 +90,63 @@ export const EditProfilePersonalTab = ({
 		watch,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isValid: formIsValid, isSubmitted, isSubmitSuccessful },
+		formState: { errors: formErrors, isValid: formIsValid, isDirty, isSubmitted },
 	} = formMethods;
-
 	const getTrimmedValues = () => trimPersonalValues(getValues());
 
-	const onSubmit = () => {
-		setPostSubmissionErrorMessage('');
-		setUnexpectedError(false);
-		const trimmedValues = pickBy(getTrimmedValues());
-		CurrentUserActionsDispatchers.updatePersonalData(trimmedValues);
+	const handleApiError = (apiError) => {
+		if (apiError.message === 'Network Error') {
+			setExpectedError(formatMessage({
+				id: 'editProfile.networkError',
+				defaultMessage: 'Network Error',
+			}));
+			return;
+		}
+		switch (apiError?.response?.data?.code) {
+			case 'INVALID_ARGUMENTS':
+				setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
+				break;
+			case 'UNSUPPORTED_FILE_FORMAT':
+				setFormError('avatarFile', {
+					type: 'custom',
+					message: formatMessage({
+						id: 'editProfile.avatar.error.format',
+						defaultMessage: 'The file format is not supported',
+					}),
+				});
+				break;
+			default:
+				setUnexpectedError(true);
+		}
 	};
 
-	const uploadWasSuccessful = !formIsUploading && !personalError;
-
-	const fieldsAreDirty = () => !isMatch(user, pickBy(getTrimmedValues()));
+	const onSubmit = () => {
+		setExpectedError('');
+		setUnexpectedError(false);
+		setSubmitWasSuccessful(false);
+		const trimmedValues = pickBy(getTrimmedValues());
+		CurrentUserActionsDispatchers.updatePersonalData(trimmedValues, handleApiError);
+	};
 
 	// enable submission only if form is valid and fields are dirty (or avatar was changed)
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && isEmpty(formErrors) && fieldsAreDirty();
+		const shouldEnableSubmit = formIsValid && isEmpty(formErrors) && isDirty;
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
 	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
 
 	// update form values when user is updated
 	useEffect(() => {
-		if (uploadWasSuccessful && isSubmitSuccessful) {
+		if (
+			!formIsUploading
+			&& !unexpectedError
+			&& !expectedError
+			&& isSubmitted
+			&& !alreadyExistingEmails.includes(getValues().email)
+		) {
 			reset(getDefaultPersonalValues(), { keepIsSubmitted: true });
+			setSubmitWasSuccessful(true);
 		}
 	}, [formIsUploading]);
-
-	useEffect(() => {
-		if (personalError) {
-			if (personalError.message === 'Network Error') {
-				setPostSubmissionErrorMessage(formatMessage({
-					id: 'editProfile.networkError',
-					defaultMessage: 'Network Error',
-				}));
-				return;
-			}
-			switch (personalError?.code) {
-				case 'INVALID_ARGUMENTS':
-					setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
-					break;
-				case 'UNSUPPORTED_FILE_FORMAT':
-					setFormError('avatarFile', {
-						type: 'custom',
-						message: formatMessage({
-							id: 'editProfile.avatar.error.format',
-							defaultMessage: 'The file format is not supported',
-						}),
-					});
-					break;
-				default:
-					setUnexpectedError(true);
-			}
-		}
-	}, [personalError]);
 
 	useEffect(() => {
 		if (alreadyExistingEmails.length) {
@@ -159,9 +160,7 @@ export const EditProfilePersonalTab = ({
 		<ScrollArea>
 			<ScrollAreaPadding>
 				<FormProvider {...formMethods}>
-					<EditProfileAvatar
-						user={user}
-					/>
+					<EditProfileAvatar user={user} />
 					<FormTextField
 						name="firstName"
 						control={control}
@@ -216,7 +215,7 @@ export const EditProfilePersonalTab = ({
 							</MenuItem>
 						))}
 					</FormSelect>
-					{isSubmitted && uploadWasSuccessful && (
+					{submitWasSuccessful && (
 						<SuccessMessage>
 							<FormattedMessage
 								id="editProfile.form.success"
@@ -225,7 +224,7 @@ export const EditProfilePersonalTab = ({
 						</SuccessMessage>
 					)}
 					{unexpectedError && <UnexpectedError />}
-					{postSubmissionErrorMessage && <ErrorMessage>{postSubmissionErrorMessage}</ErrorMessage>}
+					{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
 				</FormProvider>
 			</ScrollAreaPadding>
 		</ScrollArea>

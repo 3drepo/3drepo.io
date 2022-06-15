@@ -25,16 +25,11 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	fetchUserSuccess: ['userData'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
-	resetErrors: [],
-	// personal
-	updatePersonalData: ['personalData'],
+	updatePersonalData: ['personalData', 'onError'],
 	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
-	setPersonalError: ['personalError'],
-	// api key
-	generateApiKey: [],
-	deleteApiKey: [],
+	generateApiKey: ['onError'],
+	deleteApiKey: ['onError'],
 	setApiKeyIsUpdating: ['apiKeyIsUpdating'],
-	setApiKeyError: ['apiKeyError'],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
@@ -54,16 +49,6 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
-export const resetErrors = (state = INITIAL_STATE): ICurrentUserState => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		personalError: null,
-		apiKeyError: null,
-	},
-});
-
-// personal
 export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataIsUpdating }): ICurrentUserState => ({
 	...state,
 	currentUser: {
@@ -72,15 +57,6 @@ export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataI
 	},
 });
 
-export const setPersonalError = (state = INITIAL_STATE, { personalError }): ICurrentUserState => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		personalError,
-	},
-});
-
-// api key
 export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
 	...state,
 	currentUser: {
@@ -89,24 +65,11 @@ export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating })
 	},
 });
 
-export const setApiKeyError = (state = INITIAL_STATE, { apiKeyError }): ICurrentUserState => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		apiKeyError,
-	},
-});
-
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
-	[CurrentUserTypes.RESET_ERRORS]: resetErrors,
-	// personal
 	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
-	[CurrentUserTypes.SET_PERSONAL_ERROR]: setPersonalError,
-	// api key
 	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
-	[CurrentUserTypes.SET_API_KEY_ERROR]: setApiKeyError,
 }) as (state: ICurrentUserState, action: any) => ICurrentUserState;
 
 /**
@@ -120,27 +83,18 @@ export interface ICurrentUserState {
 export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
 export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
-export type ResetErrorsAction = Action<'RESET_ERRORS'>;
-// personal
-export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData };
+export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData, onError: (error: Error) => void };
+export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'> & { onError: (error: Error) => void };
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
-export type SetPersonalErrorAction = Action<'SET_PERSONAL_ERROR'> & { personalError: any };
-// api key
 export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
-export type SetApiKeyErrorAction = Action<'SET_API_KEY_ERROR'> & { apiKeyError: any };
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
 	updateUserSuccess: (userData: UpdateUserSuccess) => UpdateUserSuccessAction;
-	resetErrors: () => ResetErrorsAction;
-	// personal
-	updatePersonalData: (personalData: UpdatePersonalData) => UpdatePersonalDataAction;
+	updatePersonalData: (personalData: UpdatePersonalData, onError: (error) => void) => UpdatePersonalDataAction;
 	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
-	setPersonalError: (personalError: any) => SetPersonalErrorAction;
-	// api key
-	generateApiKey: () => UpdateUserSuccessAction;
-	deleteApiKey: () => UpdateUserSuccessAction;
+	generateApiKey: (onError: (error) => void) => UpdateApiKeyAction;
+	deleteApiKey: (onError: (error) => void) => UpdateApiKeyAction;
 	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => SetApiKeyIsUpdatingAction;
-	setApiKeyError: (apiKeyError: any) => SetApiKeyErrorAction;
 }

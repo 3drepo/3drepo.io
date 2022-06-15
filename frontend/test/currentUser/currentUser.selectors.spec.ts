@@ -20,10 +20,8 @@ import {
 	selectCurrentUser,
 	selectFirstName,
 	selectUsername,
-	selectPersonalError,
 	selectPersonalDataIsUpdating,
 	selectApiKey,
-	selectApiKeyError,
 	selectApiKeyIsUpdating,
 } from '@/v5/store/currentUser/currentUser.selectors';
 
@@ -32,9 +30,7 @@ const defaultState: ICurrentUserState = {
 	currentUser: {
 		...currentUserMockFactory({
 			personalDataIsUpdating: true,
-			personalError: new Error('Personal error'),
 			apiKeyIsUpdating: true,
-			apiKeyError: new Error('Api key error'),
 		}),
 	},
 }
@@ -61,20 +57,6 @@ describe('CurrentUser: selectors', () => {
 		})
 	})
 
-	describe('selectPersonalError', () => {
-		it('should return currentUser personalError', () => {
-			const selected = selectPersonalError.resultFunc(defaultState.currentUser);
-			expect(selected).toEqual(defaultState.currentUser.personalError);
-		})
-	})
-
-	describe('selectPersonalError', () => {
-		it('should return currentUser personalError', () => {
-			const selected = selectPersonalError.resultFunc(defaultState.currentUser);
-			expect(selected).toEqual(defaultState.currentUser.personalError);
-		})
-	})
-
 	describe('selectPersonalDataIsUpdating', () => {
 		it('should return currentUser personalDataIsUpdating', () => {
 			const selected = selectPersonalDataIsUpdating.resultFunc(defaultState.currentUser);
@@ -86,13 +68,6 @@ describe('CurrentUser: selectors', () => {
 		it('should return currentUser apiKey', () => {
 			const selected = selectApiKey.resultFunc(defaultState.currentUser);
 			expect(selected).toEqual(defaultState.currentUser.apiKey);
-		})
-	})
-
-	describe('selectApiKeyError', () => {
-		it('should return currentUser apiKeyError', () => {
-			const selected = selectApiKeyError.resultFunc(defaultState.currentUser);
-			expect(selected).toEqual(defaultState.currentUser.apiKeyError);
 		})
 	})
 

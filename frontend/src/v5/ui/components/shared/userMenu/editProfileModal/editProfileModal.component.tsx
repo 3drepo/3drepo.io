@@ -17,7 +17,6 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { TabContext } from '@mui/lab';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
@@ -73,7 +72,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		if (open) {
 			setActiveTab(PERSONAL_TAB);
 		}
-		CurrentUserActionsDispatchers.resetErrors();
 	}, [open]);
 
 	return (

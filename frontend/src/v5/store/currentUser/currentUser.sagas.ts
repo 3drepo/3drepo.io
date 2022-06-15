@@ -25,6 +25,7 @@ import { DialogsActions } from '../dialogs/dialogs.redux';
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
+	UpdateApiKeyAction,
 	UpdatePersonalDataAction,
 } from './currentUser.redux';
 
@@ -44,7 +45,10 @@ export function* fetchUser() {
 	}
 }
 
-export function* updatePersonalData({ personalData: { avatarFile, ...restOfPersonalData } }: UpdatePersonalDataAction) {
+export function* updatePersonalData({
+	personalData: { avatarFile, ...restOfPersonalData },
+	onError,
+}: UpdatePersonalDataAction) {
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
 	try {
 		yield API.CurrentUser.updateUser(restOfPersonalData);
@@ -56,33 +60,30 @@ export function* updatePersonalData({ personalData: { avatarFile, ...restOfPerso
 			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }));
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
-		yield put(CurrentUserActions.setPersonalError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setPersonalError(error?.response?.data || error));
+		onError(error);
 	}
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
 
-export function* generateApiKey() {
+export function* generateApiKey({ onError }: UpdateApiKeyAction) {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		const apiKey = yield API.CurrentUser.generateApiKey();
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
-		yield put(CurrentUserActions.setApiKeyError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setApiKeyError(error?.response?.data));
+		onError(error);
 	}
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
-export function* deleteApiKey() {
+export function* deleteApiKey({ onError }: UpdateApiKeyAction) {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		yield API.CurrentUser.deleteApiKey();
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
-		yield put(CurrentUserActions.setApiKeyError(''));
 	} catch (error) {
-		yield put(CurrentUserActions.setApiKeyError(error?.response?.data));
+		onError(error);
 	}
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
