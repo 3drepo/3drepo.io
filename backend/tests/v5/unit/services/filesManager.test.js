@@ -222,8 +222,7 @@ const testStoreFile = () => {
 		});
 
 		test('should store file if default storage type is null and fs is set', async () => {
-			const { defaultStorage } = config;
-			const { fs } = config;
+			const { defaultStorage, fs } = config;
 			config.defaultStorage = null;
 			config.fs = true;
 
@@ -241,8 +240,7 @@ const testStoreFile = () => {
 		});
 
 		test('should store file in gridfs if both default storage and fs are not set', async () => {
-			const { defaultStorage } = config;
-			const { fs } = config;
+			const { defaultStorage, fs } = config;
 			config.defaultStorage = null;
 			config.fs = null;
 

@@ -92,7 +92,6 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 
 FilesManager.storeFile = (teamspace, collection, data) => {
 	const type = getDefaultStorageType();
-
 	switch (type) {
 	case 'fs':
 		return FSHandler.storeFile(data);
@@ -100,7 +99,7 @@ FilesManager.storeFile = (teamspace, collection, data) => {
 		return GridFSHandler.storeFile(teamspace, collection, data);
 	default:
 		logger.logError(`Unrecognised external service: ${type}`);
-		throw templates.fileNotFound;
+		return Promise.reject(templates.fileNotFound);
 	}
 };
 

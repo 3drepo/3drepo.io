@@ -19,6 +19,7 @@ const _ = require('lodash');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
+const { AVATARS_COL_NAME } = require('../../../../../src/v5/models/fileRefs.constants');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -42,6 +43,9 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
+
+jest.mock('../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
 
 const invalidUsername = 'invalid';
 const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation((username) => {
@@ -157,9 +161,23 @@ const testRemoveTeamspaceMember = () => {
 	});
 };
 
+const testGetAvatarStream = () => {
+	describe('Get avatar stream', () => {
+		test('should get avatar stream', async () => {
+			const teamspace = generateRandomString();
+			const stream = generateRandomString();
+			const getFileAsStreamMock = FilesManager.getFileAsStream.mockImplementationOnce(() => stream);
+			await Teamspaces.getAvatarStream(teamspace);
+			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
+			expect(getFileAsStreamMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, teamspace);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
 	testRemoveTeamspaceMember();
+	testGetAvatarStream();
 });
