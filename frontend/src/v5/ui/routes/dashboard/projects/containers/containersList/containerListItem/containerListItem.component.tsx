@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import {
@@ -34,6 +34,9 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
 
@@ -60,9 +63,14 @@ export const ContainerListItem = ({
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
+	const { teamspace, project } = useParams<DashboardParams>();
+
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
+
+	useEffect(() => enableRealtimeContainerUpdateSettings(teamspace, project, container._id), [container._id]);
+
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
 

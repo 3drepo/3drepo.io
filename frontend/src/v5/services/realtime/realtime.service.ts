@@ -92,9 +92,22 @@ const unsubscribeToEvent = (event, callback) => {
 	socket.off(event, callback);
 };
 
+/**
+ * Subscribes to a room event and returns a function to unsubscribe
+ * @param roomType
+ * @param event
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callback) => {
 	joinRoom(roomType);
-	const roomCallback = (roomEvent) => callback(roomEvent.data);
+	const roomCallback = (roomEvent) => {
+		const { data, ...room } = roomEvent;
+
+		if (roomTypeToId(roomType) !== roomTypeToId(room)) return;
+
+		callback(data);
+	};
 
 	subscribeToEvent(event, roomCallback);
 
@@ -109,6 +122,12 @@ interface IDirectMessage {
 	data: any;
 }
 
+/**
+ * Subscribes to a direct message event and returns a function to unsubscribe
+ * @param event
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToDM = (event: string, callback) => {
 	const dmCallback = (message: IDirectMessage) => {
 		if (message.event !== event) return;
@@ -122,6 +141,12 @@ export const subscribeToDM = (event: string, callback) => {
 	};
 };
 
+/**
+ * Subscribes to a socket event and returns a function to unsubscribe
+ * @param socketEvent
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToSocketEvent = (socketEvent:SocketEvents, callback) => {
 	subscribeToEvent(socketEvent.toString(), callback);
 
