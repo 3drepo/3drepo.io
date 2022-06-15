@@ -33,12 +33,12 @@ export const username = (alreadyExistingUsernames) => Yup.string()
 			id: 'userRegistration.username.error.min',
 			defaultMessage: 'Username must be at least 2 characters',
 		}))
-	.max(120,
+	.max(65,
 		formatMessage({
 			id: 'userRegistration.username.error.max',
-			defaultMessage: 'Username is limited to 120 characters',
+			defaultMessage: 'Username is limited to 65 characters',
 		}))
-	.matches(/^[a-zA-Z][\w]{1,120}$/, formatMessage({
+	.matches(/^[a-zA-Z][\w]{1,65}$/, formatMessage({
 		id: 'user.username.error.characters',
 		defaultMessage: 'Username can only consist of letters, numbers and underscores',
 	}))
@@ -79,9 +79,9 @@ export const password = (passwordName = 'Password') => Yup.string()
 
 export const firstName = Yup.string()
 	.transform((value) => value.trim(''))
-	.min(2, formatMessage({
+	.min(1, formatMessage({
 		id: 'validation.firstName.error.min',
-		defaultMessage: 'First name must be at least 2 characters',
+		defaultMessage: 'First name must be at least 1 characters',
 	}))
 	.max(35, formatMessage({
 		id: 'validation.firstName.error.max',
@@ -94,9 +94,9 @@ export const firstName = Yup.string()
 
 export const lastName = Yup.string()
 	.transform((value) => value.trim(''))
-	.min(2, formatMessage({
+	.min(1, formatMessage({
 		id: 'validation.lastName.error.min',
-		defaultMessage: 'Last name must be at least 2 characters',
+		defaultMessage: 'Last name must be at least 1 characters',
 	}))
 	.max(35, formatMessage({
 		id: 'validation.lastName.error.max',
