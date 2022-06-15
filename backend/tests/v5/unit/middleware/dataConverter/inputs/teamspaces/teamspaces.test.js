@@ -21,8 +21,8 @@ const { src } = require('../../../../../helper/path');
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../src/v5/models/users');
-const UsersModel = require(`${src}/models/users`);
+jest.mock('../../../../../../../src/v5/models/teamspaces');
+const TeamspacesModel = require(`${src}/models/teamspaces`);
 
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions');
 const PermissionsUtils = require(`${src}/utils/permissions/permissions`);
@@ -36,13 +36,11 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 const adminUser = generateRandomString();
 const nonAdminUser = generateRandomString();
 const usernameToRemove = generateRandomString();
-const nonExistingUsernameToRemove = generateRandomString();
+const nonTsMemberUser = generateRandomString();
 const teamspace = generateRandomString();
 
-UsersModel.getUserByUsername.mockImplementation((username) => {
-	if (username === nonExistingUsernameToRemove) {
-		throw templates.userNotFound;
-	}
+TeamspacesModel.hasAccessToTeamspace.mockImplementation((teamspace, username) => {
+	return username !== nonTsMemberUser;
 });
 
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
@@ -53,14 +51,14 @@ const testCanRemoveTeamspaceMember = () => {
 			params: { teamspace, username: teamspace } }, false],
 		['Logged in user is not a teamspace admin', { session: { user: { username: nonAdminUser } },
 			params: { teamspace, username: adminUser } }, false],
-		['User to be removed does not exist', { session: { user: { username: adminUser } },
-			params: { teamspace, username: nonExistingUsernameToRemove } }, false],
+		['User to be removed is not member of the teamspace', { session: { user: { username: adminUser } },
+			params: { teamspace, username: nonTsMemberUser } }, false],
 		['Logged in user is not a teamspace admin but remmove themselves', { session: { user: { username: nonAdminUser } },
 			params: { teamspace, username: nonAdminUser } }, true],
 		['Logged in user is a teamspace admin', { session: { user: { username: adminUser } },
 			params: { teamspace, username: usernameToRemove } }, true],
 	])('Can remove team member', (desc, req, success) => {
-		test(`${desc} ${success ? 'should call next()' : 'should respond with invalidArguments'}`, async () => {
+		test(`${desc} ${success ? 'should call next()' : 'should respond with notAuthorized'}`, async () => {
 			const mockCB = jest.fn();
 			await Teamspaces.canRemoveTeamspaceMember(req, {}, mockCB);
 
@@ -69,7 +67,7 @@ const testCanRemoveTeamspaceMember = () => {
 			} else {
 				expect(mockCB.mock.calls.length).toBe(0);
 				expect(Responder.respond.mock.calls.length).toBe(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.notAuthorized.code);
 			}
 		});
 	});
