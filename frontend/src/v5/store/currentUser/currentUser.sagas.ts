@@ -21,7 +21,6 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
