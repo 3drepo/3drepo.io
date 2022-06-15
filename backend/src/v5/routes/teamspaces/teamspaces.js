@@ -207,8 +207,7 @@ const establishRoutes = () => {
 	*     description: Gets quota information about a user
 	*     tags: [Teamspaces]
 	*     parameters:
-   	*       - teamspace:
-	*         name: teamspace
+   	*       - name: teamspace
 	*         description: name of teamspace
 	*         in: path
 	*         required: true
@@ -248,15 +247,13 @@ const establishRoutes = () => {
 	*     description: Removes all permissions of a user from a teamspace
 	*     tags: [Teamspaces]
 	*     parameters:
-   	*       - teamspace:
-	*         name: teamspace
+   	*       - name: teamspace
 	*         description: name of teamspace
 	*         in: path
 	*         required: true
 	*         schema:
 	*           type: string
-	*       - username:
-	*         name: username
+	*       - name: username
 	*         description: the username of the user to be removed
 	*         in: path
 	*         required: true
