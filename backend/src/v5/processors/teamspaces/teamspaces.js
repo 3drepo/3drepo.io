@@ -76,8 +76,8 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 	const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
 
 	return {
-		data: { available: quotaInfo.quota, used: spaceUsed },
-		seats: { available: quotaInfo.collaboratorLimit, used: collaboratorsUsed },
+		data: { available: quotaInfo.data, used: spaceUsed },
+		seats: { available: quotaInfo.collaborators, used: collaboratorsUsed },
 	};
 };
 

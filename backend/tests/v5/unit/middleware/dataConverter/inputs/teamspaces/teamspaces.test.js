@@ -53,7 +53,7 @@ const testCanRemoveTeamspaceMember = () => {
 			params: { teamspace, username: adminUser } }, false],
 		['User to be removed is not member of the teamspace', { session: { user: { username: adminUser } },
 			params: { teamspace, username: nonTsMemberUser } }, false],
-		['Logged in user is not a teamspace admin but remmove themselves', { session: { user: { username: nonAdminUser } },
+		['Logged in user is not a teamspace admin but remove themselves', { session: { user: { username: nonAdminUser } },
 			params: { teamspace, username: nonAdminUser } }, true],
 		['Logged in user is a teamspace admin', { session: { user: { username: adminUser } },
 			params: { teamspace, username: usernameToRemove } }, true],
@@ -63,10 +63,10 @@ const testCanRemoveTeamspaceMember = () => {
 			await Teamspaces.canRemoveTeamspaceMember(req, {}, mockCB);
 
 			if (success) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.notAuthorized.code);
 			}
 		});

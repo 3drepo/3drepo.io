@@ -25,33 +25,32 @@ const Quota = {};
 
 Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 	const subs = await getSubscriptions(teamspace);
-	let quotaSize = 0;
-	let collaboratorLimit = config.subscriptions?.basic?.collaborators ?? 0;
+	let dataSize = 0;
+	let collaborators = config.subscriptions?.basic?.collaborators ?? 0;
 	let hasExpiredQuota = false;
 
 	// eslint-disable-next-line no-loop-func
 	Object.keys(subs).forEach((key) => {
 		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
 		if (key !== 'paypal') {
-			const { expiryDate, data } = subs[key];
+			const { expiryDate, data, collaborators: subCollaborators } = subs[key];
 			if (expiryDate && expiryDate < Date.now()) {
 				hasExpiredQuota = true;
 			} else {
-				quotaSize += data;
-				if (collaboratorLimit !== 'unlimited') {
-					const subCollaborators = subs[key].collaborators;
-					collaboratorLimit = subCollaborators === 'unlimited' ? 'unlimited' : collaboratorLimit + subCollaborators;
+				dataSize += data;
+				if (collaborators !== 'unlimited') {
+					collaborators = subCollaborators === 'unlimited' ? 'unlimited' : collaborators + subCollaborators;
 				}
 			}
 		}
 	});
 
-	if (hasExpiredQuota && quotaSize === 0) throw templates.licenceExpired;
+	if (hasExpiredQuota && dataSize === 0) throw templates.licenceExpired;
 
-	const basicQuota = config.subscriptions?.basic?.data;
-	const quotaInBytes = (quotaSize + basicQuota);
+	const basicData = config.subscriptions?.basic?.data;
+	const dataInBytes = (dataSize + basicData);
 
-	return { quota: inMegabytes ? quotaInBytes : quotaInBytes * 1024 * 1024, collaboratorLimit };
+	return { data: inMegabytes ? dataInBytes : dataInBytes * 1024 * 1024, collaborators };
 };
 
 Quota.getSpacedUsed = async (teamspace, inMegabytes = false) => {
@@ -75,8 +74,8 @@ Quota.getSpacedUsed = async (teamspace, inMegabytes = false) => {
 };
 
 Quota.getCollaboratorsUsed = async (teamspace) => {
-	const teamspaceUsers = await getAllUsersInTeamspace(teamspace);
-	const teamspaceInvitations = await getInvitationsByTeamspace(teamspace);
+	const teamspaceUsers = await getAllUsersInTeamspace(teamspace, { _id: 1 });
+	const teamspaceInvitations = await getInvitationsByTeamspace(teamspace, { _id: 1 });
 
 	return teamspaceUsers.length + teamspaceInvitations.length;
 };
@@ -91,7 +90,7 @@ Quota.sufficientQuota = async (teamspace, size) => {
 		Quota.getSpacedUsed(teamspace),
 	]);
 
-	if ((dataUsed + size) > quotaInfo.quota) {
+	if ((dataUsed + size) > quotaInfo.data) {
 		throw templates.quotaLimitExceeded;
 	}
 };

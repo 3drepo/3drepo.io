@@ -165,12 +165,12 @@ const testGetAllUsersInTeamspace = () => {
 				{ id: generateRandomString(), user: generateRandomString() },
 				{ id: generateRandomString(), user: generateRandomString() },
 			];
-			const fn = jest.spyOn(db, 'find').mockImplementation(() => users);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
 			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
 			expect(res).toEqual(users.map((u) => u.user));
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				{ _id: 0, user: 1 }, undefined);
+				{ }, undefined);
 		});
 	});
 };

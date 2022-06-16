@@ -94,13 +94,13 @@ const testGetQuotaInfo = () => {
 		['Teamspace with sufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5, 9, false],
 		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3, 'unlimited', false],
 		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 * 2, 3, false],
-	])('Return quota info', (desc, teamspace, size, collaboratorLimit, inMegabytes, error) => {
+	])('Return quota info', (desc, teamspace, size, collaborators, inMegabytes, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : 'should return quota info'}`, async () => {
 			const quotaInfoProm = Quota.getQuotaInfo(teamspace, inMegabytes);
 			if (error) {
 				await expect(quotaInfoProm).rejects.toHaveProperty('code', error.code);
 			} else {
-				await expect(quotaInfoProm).resolves.toStrictEqual({ quota: size, collaboratorLimit });
+				await expect(quotaInfoProm).resolves.toStrictEqual({ data: size, collaborators });
 			}
 		});
 	});
@@ -110,7 +110,7 @@ const testGetQuotaInfo = () => {
 			const initialCollaborators = config.subscriptions.basic.collaborators;
 			delete config.subscriptions.basic.collaborators;
 			const res = await Quota.getQuotaInfo(tsWithQuota);
-			expect(res).toEqual({ quota: 1024 * 1024 * 7, collaboratorLimit: 2 });
+			expect(res).toEqual({ data: 1024 * 1024 * 7, collaborators: 2 });
 			config.subscriptions.basic.collaborators = initialCollaborators;
 		});
 
@@ -118,7 +118,7 @@ const testGetQuotaInfo = () => {
 			const initialCollaborators = config.subscriptions.basic.collaborators;
 			config.subscriptions.basic.collaborators = 'unlimited';
 			const res = await Quota.getQuotaInfo(tsWithQuota);
-			expect(res).toEqual({ quota: 1024 * 1024 * 7, collaboratorLimit: 'unlimited' });
+			expect(res).toEqual({ data: 1024 * 1024 * 7, collaborators: 'unlimited' });
 			config.subscriptions.basic.collaborators = initialCollaborators;
 		});
 	});

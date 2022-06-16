@@ -33,8 +33,8 @@ const testGetInvitationsByTeamspace = () => {
 			const res = await Invitations.getInvitationsByTeamspace(teamspace);
 			expect(res).toEqual(invitations);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, undefined, undefined);
-		});
+			expect(fn).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, {}, undefined);
+		});		
 	});
 };
 

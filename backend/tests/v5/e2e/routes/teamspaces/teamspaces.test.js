@@ -193,12 +193,12 @@ const testGetTeamspaceMembers = () => {
 
 		test('should fail if the user does not have access to the teamspace', async () => {
 			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should return list of users with their jobs with valid access rights', async () => {
@@ -238,7 +238,7 @@ const testGetAvatar = () => {
 		});
 
 		test('should fail if the user does not have access to the teamspace', async () => {
-			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 

@@ -22,6 +22,6 @@ const COL_NAME = 'invitations';
 
 const findMany = (query, projection, sort) => db.find('admin', COL_NAME, query, projection, sort);
 
-Invitations.getInvitationsByTeamspace = (teamspace) => findMany({ 'teamSpaces.teamspace': teamspace });
+Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
 
 module.exports = Invitations;

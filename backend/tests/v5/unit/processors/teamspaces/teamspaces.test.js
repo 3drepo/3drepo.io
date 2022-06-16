@@ -142,34 +142,34 @@ const testGetQuotaInfo = () => {
 	describe('Get quota info', () => {
 		test('should return quota info', async () => {
 			const quotaInfo = {
-				quota: generateRandomNumber(),
-				collaboratorLimit: generateRandomNumber(0),
+				data: generateRandomNumber(),
+				collaborators: generateRandomNumber(0),
 			};
 			const spaceUsed = generateRandomNumber(0);
 			const collabsUsed = generateRandomNumber(0);
-			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => quotaInfo);
-			const spaceUsedMock = Quota.getSpacedUsed.mockImplementationOnce(() => spaceUsed);
-			const getCollaboratorsUsedMock = Quota.getCollaboratorsUsed.mockImplementationOnce(() => collabsUsed);
+			Quota.getQuotaInfo.mockResolvedValueOnce(quotaInfo);
+			Quota.getSpacedUsed.mockResolvedValueOnce(spaceUsed);
+			Quota.getCollaboratorsUsed.mockResolvedValueOnce(collabsUsed);
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
 			expect(res).toEqual(
 				{
 					data: {
-						available: quotaInfo.quota,
+						available: quotaInfo.data,
 						used: spaceUsed,
 					},
 					seats: {
-						available: quotaInfo.collaboratorLimit,
+						available: quotaInfo.collaborators,
 						used: collabsUsed,
 					},
 				},
 			);
-			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
-			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
-			expect(spaceUsedMock).toHaveBeenCalledTimes(1);
-			expect(spaceUsedMock).toHaveBeenCalledWith(teamspace, true);
-			expect(getCollaboratorsUsedMock).toHaveBeenCalledTimes(1);
-			expect(getCollaboratorsUsedMock).toHaveBeenCalledWith(teamspace);
+			expect(Quota.getQuotaInfo).toHaveBeenCalledTimes(1);
+			expect(Quota.getQuotaInfo).toHaveBeenCalledWith(teamspace, true);
+			expect(Quota.getSpacedUsed).toHaveBeenCalledTimes(1);
+			expect(Quota.getSpacedUsed).toHaveBeenCalledWith(teamspace, true);
+			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledTimes(1);
+			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledWith(teamspace);
 		});
 
 		test('should return quota info with zero values if an exception is thrown', async () => {
@@ -186,30 +186,20 @@ const testGetQuotaInfo = () => {
 
 const testRemoveTeamspaceMember = () => {
 	describe('Remove team member', () => {
-		test('should remove team member', async () => {
-			const removeUserFromAdminPrivilegeMock = TeamspacesModel.removeUserFromAdminPrivilege
-				.mockImplementationOnce(() => {});
-			const removeUserFromModelsMock = ModelSettingsModel.removeUserFromModels
-				.mockImplementationOnce(() => {});
-			const removeUserFromProjectsMock = ProjectSettingsModel.removeUserFromProjects
-				.mockImplementationOnce(() => {});
-			const removeUserFromJobsMock = JobsModel.removeUserFromJobs
-				.mockImplementationOnce(() => {});
-			const revokeTeamSpaceRoleFromUserMock = RolesModel.revokeTeamSpaceRoleFromUser
-				.mockImplementationOnce(() => {});
+		test('should remove team member', async () => {	
 			const teamspace = generateRandomString();
 			const userToRemove = generateRandomString();
 			await Teamspaces.removeTeamspaceMember(teamspace, userToRemove);
-			expect(removeUserFromAdminPrivilegeMock).toHaveBeenCalledTimes(1);
-			expect(removeUserFromAdminPrivilegeMock).toHaveBeenCalledWith(teamspace, userToRemove);
-			expect(removeUserFromModelsMock).toHaveBeenCalledTimes(1);
-			expect(removeUserFromModelsMock).toHaveBeenCalledWith(teamspace, userToRemove);
-			expect(removeUserFromProjectsMock).toHaveBeenCalledTimes(1);
-			expect(removeUserFromProjectsMock).toHaveBeenCalledWith(teamspace, userToRemove);
-			expect(removeUserFromJobsMock).toHaveBeenCalledTimes(1);
-			expect(removeUserFromJobsMock).toHaveBeenCalledWith(teamspace, userToRemove);
-			expect(revokeTeamSpaceRoleFromUserMock).toHaveBeenCalledTimes(1);
-			expect(revokeTeamSpaceRoleFromUserMock).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(TeamspacesModel.removeUserFromAdminPrivilege).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.removeUserFromAdminPrivilege).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(ModelSettingsModel.removeUserFromModels).toHaveBeenCalledTimes(1);
+			expect(ModelSettingsModel.removeUserFromModels).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(ProjectSettingsModel.removeUserFromProjects).toHaveBeenCalledTimes(1);
+			expect(ProjectSettingsModel.removeUserFromProjects).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(JobsModel.removeUserFromJobs).toHaveBeenCalledTimes(1);
+			expect(JobsModel.removeUserFromJobs).toHaveBeenCalledWith(teamspace, userToRemove);
+			expect(RolesModel.revokeTeamSpaceRoleFromUser).toHaveBeenCalledTimes(1);
+			expect(RolesModel.revokeTeamSpaceRoleFromUser).toHaveBeenCalledWith(teamspace, userToRemove);
 		});
 	});
 };
