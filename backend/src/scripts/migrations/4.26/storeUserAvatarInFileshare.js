@@ -16,24 +16,33 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { storeFile } = require('../../../v5/services/filesManager');
+const { uploadAvatar } = require('../../../v5/processors/users');
 
 const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const storeUserAvatarInFileshare = async (username, avatarBuffer) => {
 	await db.updateOne('admin', 'system.users', { user: username }, { $unset: { 'customData.avatar': 1 } });
-	await storeFile('admin', 'avatars', avatarBuffer);
+	await uploadAvatar(username, avatarBuffer);	
 };
 
-const run = async () => {
-	const usersWithAvatarsInDb = await db.find('admin', 'system.users', { 'customData.avatar': { $type: 'object' } },
+const processTeamspace = async (teamspace) => {	
+	const user = await db.find('admin', 'system.users', { user: teamspace, 'customData.avatar': { $type: 'object' } },
 		{ 'customData.avatar': 1, user: 1 });
 
-	await Promise.all(usersWithAvatarsInDb.map(async (user) => {
-		logger.logInfo(`\t\t-${user.user}`);
+	if(user){
 		await storeUserAvatarInFileshare(user.user, user.customData.avatar.data.buffer);
-	}));
+	}	
+};
+
+
+const run = async () => {
+	const teamspaces = await getTeamspaceList();
+	for (let i = 0; i < teamspaces.length; ++i) {
+		logger.logInfo(`\t\t-${teamspaces[i]}`);
+		// eslint-disable-next-line no-await-in-loop
+		await processTeamspace(teamspaces[i]);
+	}
 };
 
 module.exports = run;
