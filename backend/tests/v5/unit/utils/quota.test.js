@@ -140,7 +140,7 @@ const testGetSpacedUsed = () => {
 			expect(res).toEqual(expectedSize);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledTimes(1);
-		});	
+		});
 	});
 };
 

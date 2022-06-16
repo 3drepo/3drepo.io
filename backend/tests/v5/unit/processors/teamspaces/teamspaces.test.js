@@ -186,7 +186,7 @@ const testGetQuotaInfo = () => {
 
 const testRemoveTeamspaceMember = () => {
 	describe('Remove team member', () => {
-		test('should remove team member', async () => {	
+		test('should remove team member', async () => {
 			const teamspace = generateRandomString();
 			const userToRemove = generateRandomString();
 			await Teamspaces.removeTeamspaceMember(teamspace, userToRemove);

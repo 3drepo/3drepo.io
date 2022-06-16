@@ -39,9 +39,7 @@ const usernameToRemove = generateRandomString();
 const nonTsMemberUser = generateRandomString();
 const teamspace = generateRandomString();
 
-TeamspacesModel.hasAccessToTeamspace.mockImplementation((teamspace, username) => {
-	return username !== nonTsMemberUser;
-});
+TeamspacesModel.hasAccessToTeamspace.mockImplementation((ts, username) => username !== nonTsMemberUser);
 
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
 

@@ -34,7 +34,7 @@ const testGetInvitationsByTeamspace = () => {
 			expect(res).toEqual(invitations);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, {}, undefined);
-		});		
+		});
 	});
 };
 

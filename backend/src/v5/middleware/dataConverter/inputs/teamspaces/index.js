@@ -17,9 +17,9 @@
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getUserFromSession } = require('../../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../../models/teamspaces');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
-const { hasAccessToTeamspace } = require('../../../../models/teamspaces');
 
 const Teamspaces = {};
 
@@ -40,7 +40,7 @@ Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
 
 	// ensure the user to be removed has access to teamspace
 	const userIsTsMember = await hasAccessToTeamspace(teamspace, username);
-	if(!userIsTsMember){
+	if (!userIsTsMember) {
 		respond(req, res, createResponseCode(templates.notAuthorized,
 			'The user to be removed is not a member of the teamspace.'));
 		return;
