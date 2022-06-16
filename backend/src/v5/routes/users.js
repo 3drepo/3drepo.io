@@ -18,7 +18,7 @@
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
 const { respond, writeStreamRespond } = require('../utils/responder');
-const { userHasAvatar, validateAvatarFile, validateForgotPasswordData, validateLoginData,
+const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
 	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
@@ -385,7 +385,7 @@ const establishRoutes = () => {
 	*               type: string
 	*               format: binary
 	*/
-	router.get('/user/avatar', validSession, userHasAvatar, getAvatar);
+	router.get('/user/avatar', validSession, getAvatar);
 
 	/**
 	* @openapi

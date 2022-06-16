@@ -19,7 +19,6 @@ const { respond, writeStreamRespond } = require('../../utils/responder');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
-const { teamspaceHasAvatar } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
 
@@ -170,7 +169,7 @@ const establishRoutes = () => {
 	*               type: string
 	*               format: binary
 	*/
-	router.get('/:teamspace/avatar', hasAccessToTeamspace, teamspaceHasAvatar, getAvatar);
+	router.get('/:teamspace/avatar', hasAccessToTeamspace, getAvatar);
 
 	return router;
 };

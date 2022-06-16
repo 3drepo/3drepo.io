@@ -394,8 +394,8 @@ const testGetAvatar = () => {
 
 		test('should fail if the user has no avatar', async () => {
 			const res = await testSession.get(`/v5/user/avatar?key=${testUser.apiKey}`)
-				.expect(templates.avatarNotFound.status);
-			expect(res.body.code).toEqual(templates.avatarNotFound.code);
+				.expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 	});
 };

@@ -269,15 +269,4 @@ Users.validateVerifyData = async (req, res, next) => {
 
 Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
-Users.userHasAvatar = async (req, res, next) => {
-	const user = getUserFromSession(req.session);
-	const entryRef = await getRefEntry('admin', AVATARS_COL_NAME, user);
-
-	if (!entryRef) {
-		respond(req, res, createResponseCode(templates.avatarNotFound, templates.avatarNotFound.message));
-	} else {
-		await next();
-	}
-};
-
 module.exports = Users;
