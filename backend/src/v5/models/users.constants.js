@@ -23,6 +23,7 @@ UserConstants.USERNAME_BLACKLIST = [
 	'os',
 	'info',
 	'contact',
+	'config',
 	'cookies',
 	'password-change',
 	'password-forgot',
@@ -37,7 +38,7 @@ UserConstants.USERNAME_BLACKLIST = [
 	'local',
 	'root',
 	'notifications',
-	'loginRecord',
+	'loginRecords',
 	'sessions',
 ];
 

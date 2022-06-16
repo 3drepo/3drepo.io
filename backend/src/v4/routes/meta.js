@@ -446,6 +446,17 @@
 			});
 	}
 
+	const extractNameFiltersFromUrl = (url) => {
+		let fieldNames = [];
+
+		const filterString = url.match("[?&]filter=([^&]+)");
+		if(filterString) {
+			fieldNames = filterString[1].split(",").map(name => decodeURIComponent(name));
+		}
+
+		return fieldNames;
+	};
+
 	function getAllMetadata(req, res, next) {
 		let branch;
 
@@ -453,7 +464,8 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
+		const fieldNames = extractNameFiltersFromUrl(req.originalUrl);
+		Meta.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev, fieldNames)
 			.then(stream => {
 				const headers = {
 					"Content-Type" : "application/json"
@@ -477,11 +489,15 @@
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
+		let promise;
 		const showMeshIds = (req.query.meshids) ? JSON.parse(req.query.meshids) : false;
 
-		const promise = showMeshIds ?
-			Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules) :
-			Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
+		if(showMeshIds) {
+			promise = Meta.getMeshIdsByRules(req.params.account, req.params.model, branch, req.params.rev, rules);
+		} else{
+			const fieldNames = extractNameFiltersFromUrl(req.originalUrl);
+			promise = Meta.getAllMetadataByRules(req.params.account, req.params.model, branch, req.params.rev, fieldNames, rules);
+		}
 
 		promise.then(obj => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);

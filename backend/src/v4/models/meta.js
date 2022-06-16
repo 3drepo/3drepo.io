@@ -20,7 +20,7 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const { findModelSettingById } = require("./modelSetting");
 const { getSubModels } = require("./ref");
-const { findNodesByField, getNodeById, findNodesByType } = require("./scene");
+const { findNodesByField, getNodeById, findMetadataNodesByFields } = require("./scene");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
@@ -82,7 +82,7 @@ Meta.getMetadataById = async (account, model, id) => {
 	return clean(metadata);
 };
 
-Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
+Meta.getAllMetadataByRules = async (account, model, branch, rev, fieldNames = [], rules) => {
 	// Get the revision object to find all relevant IDs
 	const history = await  History.getHistory(account, model, branch, rev);
 
@@ -92,7 +92,7 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 	// Check for submodel references
 	await getSubModels(account, model, branch, rev, (subTS, subModel, subBranch, subRev) => {
 		getMeta.push(
-			Meta.getAllMetadataByRules(subTS, subModel, subBranch, subRev, rules)
+			Meta.getAllMetadataByRules(subTS, subModel, subBranch, subRev, fieldNames, rules)
 				.then(({data}) => {
 					return {
 						data,
@@ -108,20 +108,27 @@ Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
 
 	const subMeta = await Promise.all(getMeta);
 
+	const query = { rev_id: history._id, type: "meta" };
+	const projection = { $project: { metadata: 1, parents: 1 } };
+
+	if (fieldNames.length) {
+		query["metadata.key"] = { $in: fieldNames };
+		projection.$project.metadata = { $filter: { input: "$metadata", as: "metadata", cond: { $in: ["$$metadata.key", fieldNames] } } };
+	}
 	const positiveQueries = positiveRulesToQueries(rules);
 	const negativeQueries = negativeRulesToQueries(rules);
 
 	let allRulesResults = null;
 
 	if (positiveQueries.length !== 0) {
-		const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {rev_id: history._id, type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+		const eachPosRuleResults = await Promise.all(positiveQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model,
+			{ $match: { ...query, ...ruleQuery }}, projection)));
 		allRulesResults = intersection(eachPosRuleResults);
 	} else {
-		const rootQuery =  {rev_id: history._id, "type": "meta" };
-		allRulesResults = (await getMetadataRuleQueryResults(account, model, rootQuery, { "metadata": 1, "parents": 1 }));
+		allRulesResults = (await getMetadataRuleQueryResults(account, model, { $match: { ...query}}, projection));
 	}
 
-	const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, {rev_id: history._id, type:"meta", ...ruleQuery}, { "metadata": 1, "parents": 1 })));
+	const eachNegRuleResults = await Promise.all(negativeQueries.map(ruleQuery => getMetadataRuleQueryResults(account, model, { $match: { ...query, ...ruleQuery }}, projection)));
 	allRulesResults = difference(allRulesResults, eachNegRuleResults);
 
 	if (allRulesResults) {
@@ -173,6 +180,15 @@ Meta.getMetadataFields = async (account, model) => {
 
 const ifcGuidQuery = (ids) => ({"metadata": {$elemMatch:{key: "IFC GUID", value:{ $in: ids }} }});
 const ifcGuidProjection = { "metadata": {$elemMatch:{key: "IFC GUID"} }};
+const ifcGuidProjectionFilter = {
+	metadata: {
+		$filter: {
+			input: "$metadata",
+			as: "metadata",
+			cond: { $eq: ["$$metadata.key", "IFC GUID"] }
+		}
+	}
+};
 
 Meta.getIfcGuids = async (account, model) => {
 	return db.find(account, getSceneCollectionName(model), { type: "meta" }, ifcGuidProjection);
@@ -321,10 +337,10 @@ Meta.getAllIdsWith4DSequenceTag = async (account, model, branch, rev) => {
 	return Meta.getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
 };
 
-const _getAllMetadata = async (account, model, branch, rev, stream) => {
+const _getAllMetadata = async (account, model, branch, rev, fieldNames, stream) => {
 	const subModelPromise = getSubModels(account, model, branch, rev);
 
-	const data = await findNodesByType(account, model, branch, rev, "meta", undefined, {_id: 1, parents: 1, metadata: 1});
+	const data = await findMetadataNodesByFields(account, model, branch, rev, fieldNames);
 
 	stream.write("{\"data\":");
 	stream.write(JSON.stringify(cleanAll(data)));
@@ -336,8 +352,7 @@ const _getAllMetadata = async (account, model, branch, rev, stream) => {
 			try {
 				const {account: subModelTS, model: subModelId, branch: subModelBranch, revision: subModelRev} = refs[i];
 
-				const subModelData = await findNodesByType(subModelTS, subModelId, subModelBranch, subModelRev,
-					"meta", undefined, {_id: 1, parents: 1, metadata: 1});
+				const subModelData = await findMetadataNodesByFields(subModelTS, subModelId, subModelBranch, subModelRev, fieldNames);
 				const result =
 					{
 						data: cleanAll(subModelData),
@@ -360,12 +375,12 @@ const _getAllMetadata = async (account, model, branch, rev, stream) => {
 	stream.end();
 };
 
-Meta.getAllMetadata = async (account, model, branch, rev) => {
+Meta.getAllMetadata = async (account, model, branch, rev, fieldNames) => {
 	// Check revision exists
 	await History.getHistory(account, model, branch, rev);
 	const stream = Stream.PassThrough();
 	try {
-		_getAllMetadata(account, model, branch, rev, stream);
+		_getAllMetadata(account, model, branch, rev, fieldNames, stream);
 	} catch(err) {
 		stream.emit("error", err);
 		stream.end();
@@ -426,8 +441,8 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 		.reduce((acc, val) => acc.concat(val), []);
 };
 
-const findObjectsByQuery = (account, model, query, project = { ...ifcGuidProjection, parents: 1 }) => {
-	return db.find(account, getSceneCollectionName(model), query, project);
+const findObjectsByQuery = (account, model, query, projection = { $project: {...ifcGuidProjectionFilter, parents: 1 }}) => {
+	return db.aggregate(account, getSceneCollectionName(model), [query, projection]);
 };
 
 /**
@@ -456,7 +471,7 @@ const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, ne
 		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery)));
 		allRulesResults = intersection(eachPosRuleResults);
 	} else {
-		const rootQuery =  { rev_id: history._id, "parents": {$exists: false} };
+		const rootQuery =  { $match: { rev_id: history._id, "parents": {$exists: false} } };
 		const rootId = (await findObjectsByQuery(account, model, rootQuery))[0]._id;
 		allRulesResults = idToMeshesDict[utils.uuidToString(rootId)];
 	}

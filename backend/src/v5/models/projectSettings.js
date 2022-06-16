@@ -25,8 +25,7 @@ const { templates } = require('../utils/responseCodes');
 const COL_NAME = 'projects';
 const findProjects = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, COL_NAME, query, projection);
-const updateOneProject = (ts, query, action) => db.updateOne(ts, COL_NAME, query, action);
-const updateManyProjects = (ts, query, action) => db.updateMany(ts, COL_NAME, query, action);
+const updateOneProject = (ts, query, data) => db.updateOne(ts, COL_NAME, query, data);
 
 Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	ts,
@@ -95,9 +94,13 @@ Projects.updateProject = async (teamspace, projectId, updatedProject) => {
 	}
 };
 
-Projects.removeUserFromProjects = async (teamspace, userToRemove) => {
-	const action = { $pull: { permissions: { user: userToRemove } } };
-	await updateManyProjects(teamspace, {}, action);
+Projects.removeUserFromAllProjects = async (teamspace, user) => {
+	await db.updateMany(
+		teamspace,
+		COL_NAME,
+		{ 'permissions.user': user },
+		{ $pull: { permissions: { user } } },
+	);
 };
 
 module.exports = Projects;

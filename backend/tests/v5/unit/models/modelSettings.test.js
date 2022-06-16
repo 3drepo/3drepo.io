@@ -574,18 +574,18 @@ const testUpdateModelSettings = () => {
 	});
 };
 
-const testRemoveUserFromModels = () => {
-	describe('Remove user from models', () => {
-		test('should remove user from models', async () => {
-			const fn = jest.spyOn(db, 'updateMany');
-
+const testRemoveUserFromAllModels = () => {
+	describe('Remove user from all models', () => {
+		test('Should trigger a query to remove user from all models', async () => {
 			const teamspace = generateRandomString();
-			const userToRemove = generateRandomString();
+			const user = generateRandomString();
+			const fn = jest.spyOn(db, 'updateMany').mockResolvedValueOnce();
+			await expect(Model.removeUserFromAllModels(teamspace, user)).resolves.toBeUndefined();
 
-			await Model.removeUserFromModels(teamspace, userToRemove);
-
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', {}, { $pull: { permissions: { user: userToRemove } } });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings',
+				{ 'permissions.user': user },
+				{ $pull: { permissions: { user } } });
 		});
 	});
 };
@@ -602,5 +602,5 @@ describe('models/modelSettings', () => {
 	testUpdateModelStatus();
 	testNewRevisionProcessed();
 	testUpdateModelSettings();
-	testRemoveUserFromModels();
+	testRemoveUserFromAllModels();
 });

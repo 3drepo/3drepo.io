@@ -16,15 +16,16 @@
  */
 
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamSpaceRoleFromUser } = require('../../models/roles');
+const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
 const { getCollaboratorsUsed, getQuotaInfo, getSpacedUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
-const { removeUserFromModels } = require('../../models/modelSettings');
-const { removeUserFromProjects } = require('../../models/projectSettings');
+
+const { removeUserFromAllModels } = require('../../models/modelSettings');
+const { removeUserFromAllProjects } = require('../../models/projectSettings');
 
 const Teamspaces = {};
 

@@ -29,7 +29,6 @@ const findOneModel = (ts, query, projection) => db.findOne(ts, SETTINGS_COL, que
 const findModels = (ts, query, projection, sort) => db.find(ts, SETTINGS_COL, query, projection, sort);
 const insertOneModel = (ts, data) => db.insertOne(ts, SETTINGS_COL, data);
 const updateOneModel = (ts, query, action) => db.updateOne(ts, SETTINGS_COL, query, action);
-const updateManyModels = (ts, query, action) => db.updateMany(ts, SETTINGS_COL, query, action);
 const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUpdate(
 	ts, SETTINGS_COL, query, action, projection,
 );
@@ -215,9 +214,13 @@ Models.updateModelSettings = async (teamspace, project, model, data, sender) => 
 	}
 };
 
-Models.removeUserFromModels = async (teamspace, userToRemove) => {
-	const action = { $pull: { permissions: { user: userToRemove } } };
-	await updateManyModels(teamspace, {}, action);
+Models.removeUserFromAllModels = async (teamspace, user) => {
+	await db.updateMany(
+		teamspace,
+		SETTINGS_COL,
+		{ 'permissions.user': user },
+		{ $pull: { permissions: { user } } },
+	);
 };
 
 module.exports = Models;
