@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Container as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { ModalContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
 
 export const Container = styled(ContainerBase)`
 	min-width: 450px;

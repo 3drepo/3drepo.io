@@ -61,7 +61,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 				</DialogContentText>
 				{!!status && <Status>{errorStatus}</Status>}
 			</DialogContent>
-			<Actions bottomMargin={!details}>
+			<Actions>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
 					<FormattedMessage
 						id="alertModal.action.ok"

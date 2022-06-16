@@ -16,6 +16,6 @@
  */
 
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
-import { DialogsActions, IDialogsActionCreators } from '@/v5/store/Dialogs/Dialogs.redux';
+import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
 
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
