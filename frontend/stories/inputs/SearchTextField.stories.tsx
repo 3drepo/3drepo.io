@@ -20,6 +20,14 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Inputs/ShareTextField',
+	argTypes: {
+		hideValue: {
+			type: 'boolean',
+		},
+		disabled: {
+			type: 'boolean',
+		},
+	},
 	component: ShareTextField,
 	parameters: { controls: { exclude: ['className'] } },
 } as ComponentMeta<typeof ShareTextField>;
@@ -39,4 +47,11 @@ HiddenValue.args = {
 	label: 'Textfield label',
 	value: 'https://3drepo.com/',
 	hideValue: true,
+};
+
+export const DisabledValue = Template.bind({});
+DisabledValue.args = {
+	label: 'Textfield label',
+	value: 'https://3drepo.com/',
+	disabled: true,
 };
