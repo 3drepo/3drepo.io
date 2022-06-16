@@ -32,12 +32,6 @@ const JobsModel = require(`${src}/models/jobs`);
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspacesModel = require(`${src}/models/teamspaces`);
 
-jest.mock('../../../../../src/v5/models/modelSettings');
-const ModelSettingsModel = require(`${src}/models/modelSettings`);
-
-jest.mock('../../../../../src/v5/models/projectSettings');
-const ProjectSettingsModel = require(`${src}/models/projectSettings`);
-
 jest.mock('../../../../../src/v5/models/roles');
 const RolesModel = require(`${src}/models/roles`);
 

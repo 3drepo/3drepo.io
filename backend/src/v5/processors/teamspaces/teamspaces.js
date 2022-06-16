@@ -83,7 +83,7 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 };
 
 Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
-	await Promise.all([		
+	await Promise.all([
 		removeUserFromAllModels(teamspace, userToRemove),
 		removeUserFromAllProjects(teamspace, userToRemove),
 		removeUserFromAdminPrivilege(teamspace, userToRemove),
