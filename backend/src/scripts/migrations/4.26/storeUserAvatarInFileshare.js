@@ -17,6 +17,7 @@
 
 const { v5Path } = require('../../../interop');
 const { uploadAvatar } = require('../../../v5/processors/users');
+const { getTeamspaceList } = require('../../utils');
 
 const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
@@ -27,7 +28,7 @@ const storeUserAvatarInFileshare = async (username, avatarBuffer) => {
 };
 
 const processTeamspace = async (teamspace) => {	
-	const user = await db.find('admin', 'system.users', { user: teamspace, 'customData.avatar': { $type: 'object' } },
+	const user = await db.findOne('admin', 'system.users', { user: teamspace, 'customData.avatar': { $type: 'object' } },
 		{ 'customData.avatar': 1, user: 1 });
 
 	if(user){
