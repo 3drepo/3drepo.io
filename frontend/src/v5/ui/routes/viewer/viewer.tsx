@@ -103,10 +103,7 @@ export const Viewer = () => {
 	}
 
 	if (selectedFederation && !selectedFederation.hasStatsPending) {
-		let message = formatMessage({
-			id: 'noRevisionOverlay.subheading.federation.error',
-			defaultMessage: 'An unexpected error has occurred.',
-		});
+		let message = '';
 		if (!selectedFederation.containers.length) {
 			message = formatMessage({
 				id: 'noRevisionOverlay.subheading.federation.noContainers',
@@ -118,12 +115,14 @@ export const Viewer = () => {
 				defaultMessage: 'All Containers are empty. You\'ll need to upload some revisions.',
 			});
 		}
-		return (
-			<NoRevisionOverlay
-				isContainer={false}
-				message={message}
-			/>
-		);
+		if (message) {
+			return (
+				<NoRevisionOverlay
+					isContainer={false}
+					message={message}
+				/>
+			);
+		}
 	}
 
 	return <ViewerGui match={v4Match} />;
