@@ -549,6 +549,7 @@ export const theme = createTheme({
 					alignItems: 'center',
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
+					zIndex: 10,
 				},
 			},
 		},
