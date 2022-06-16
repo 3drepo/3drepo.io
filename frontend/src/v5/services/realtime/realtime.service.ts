@@ -66,7 +66,7 @@ export const leaveRoom = (roomType : IRoomType) => {
 	roomsJoined[roomTypeToId(roomType)]--;
 	const joinedCount = roomsJoined[roomTypeToId(roomType)];
 
-	if (joinedCount !== 0) return;
+	if (joinedCount > 0) return;
 	delete roomsJoined[roomTypeToId(roomType)];
 
 	socket.emit('leave', roomType);
