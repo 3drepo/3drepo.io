@@ -19,7 +19,7 @@ const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = 
 const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
-const { getCollaboratorsUsed, getQuotaInfo, getSpacedUsed } = require('../../utils/quota');
+const { getCollaboratorsUsed, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
@@ -73,7 +73,7 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 
 Teamspaces.getQuotaInfo = async (teamspace) => {
 	const quotaInfo = await getQuotaInfo(teamspace, true);
-	const spaceUsed = await getSpacedUsed(teamspace, true);
+	const spaceUsed = await getSpaceUsed(teamspace, true);
 	const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
 
 	return {
@@ -83,15 +83,15 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 };
 
 Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
-	await Promise.all([
+	await Promise.all([		
+		removeUserFromAllModels(teamspace, userToRemove),
+		removeUserFromAllProjects(teamspace, userToRemove),
 		removeUserFromAdminPrivilege(teamspace, userToRemove),
-		removeUserFromModels(teamspace, userToRemove),
-		removeUserFromProjects(teamspace, userToRemove),
 	]);
 
 	await Promise.all([
 		await removeUserFromJobs(teamspace, userToRemove),
-		await revokeTeamSpaceRoleFromUser(teamspace, userToRemove),
+		await revokeTeamspaceRoleFromUser(teamspace, userToRemove),
 	]);
 };
 

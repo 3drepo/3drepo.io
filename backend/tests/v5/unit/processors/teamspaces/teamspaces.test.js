@@ -154,7 +154,7 @@ const testGetQuotaInfo = () => {
 			const spaceUsed = generateRandomNumber(0);
 			const collabsUsed = generateRandomNumber(0);
 			Quota.getQuotaInfo.mockResolvedValueOnce(quotaInfo);
-			Quota.getSpacedUsed.mockResolvedValueOnce(spaceUsed);
+			Quota.getSpaceUsed.mockResolvedValueOnce(spaceUsed);
 			Quota.getCollaboratorsUsed.mockResolvedValueOnce(collabsUsed);
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
@@ -172,8 +172,8 @@ const testGetQuotaInfo = () => {
 			);
 			expect(Quota.getQuotaInfo).toHaveBeenCalledTimes(1);
 			expect(Quota.getQuotaInfo).toHaveBeenCalledWith(teamspace, true);
-			expect(Quota.getSpacedUsed).toHaveBeenCalledTimes(1);
-			expect(Quota.getSpacedUsed).toHaveBeenCalledWith(teamspace, true);
+			expect(Quota.getSpaceUsed).toHaveBeenCalledTimes(1);
+			expect(Quota.getSpaceUsed).toHaveBeenCalledWith(teamspace, true);
 			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledTimes(1);
 			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledWith(teamspace);
 		});

@@ -53,7 +53,7 @@ Quota.getQuotaInfo = async (teamspace) => {
 	return { data: dataInMegabytes * 1024 * 1024, collaborators };
 };
 
-Quota.getSpacedUsed = async (teamspace) => {
+Quota.getSpaceUsed = async (teamspace) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
@@ -86,7 +86,7 @@ Quota.sufficientQuota = async (teamspace, size) => {
 
 	const [quotaInfo, dataUsed] = await Promise.all([
 		Quota.getQuotaInfo(teamspace),
-		Quota.getSpacedUsed(teamspace),
+		Quota.getSpaceUsed(teamspace),
 	]);
 
 	if ((dataUsed + size) > quotaInfo.data) {

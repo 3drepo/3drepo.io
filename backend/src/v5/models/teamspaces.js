@@ -30,7 +30,6 @@ const Teamspace = {};
 const teamspaceUpdate = (query, actions) => db.updateOne('admin', 'system.users', query, actions);
 const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
-const teamspaceUpdate = (query, action) => db.updateOne('admin', 'system.users', query, action);
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);

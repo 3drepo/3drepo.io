@@ -123,7 +123,7 @@ const testGetQuotaInfo = () => {
 	});
 };
 
-const testGetSpacedUsed = () => {
+const testGetSpaceUsed = () => {
 	describe('Calculate the spaced used', () => {
 		const teamspace = generateRandomString();
 		const expectedSize = 1048576;
@@ -136,7 +136,7 @@ const testGetSpacedUsed = () => {
 		const fn2 = jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: expectedSize }]));
 
 		test('should return spaced used in bytes', async () => {
-			const res = await Quota.getSpacedUsed(teamspace);
+			const res = await Quota.getSpaceUsed(teamspace);
 			expect(res).toEqual(expectedSize);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledTimes(1);
@@ -205,7 +205,7 @@ const testGetCollaboratorsUsed = () => {
 
 describe('utils/quota', () => {
 	testGetQuotaInfo();
-	testGetSpacedUsed();
+	testGetSpaceUsed();
 	testSufficientQuota();
 	testGetCollaboratorsUsed();
 });
