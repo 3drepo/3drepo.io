@@ -87,16 +87,15 @@ const testGetQuotaInfo = () => {
 	});
 
 	describe.each([
-		['Teamspace with expired quota', tsWithExpiredQuota, null, null, false, templates.licenceExpired],
-		['Teamspace with only basic quota', 'teamspace', 1024 * 1024, 0, false],
-		['Teamspace with only basic quota in megabytes', 'teamspace', 1, 0, true],
-		['Teamspace with sufficient quota', tsWithQuota, 1024 * 1024 * 7, 2, false],
-		['Teamspace with sufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5, 9, false],
-		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3, 'unlimited', false],
-		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 * 2, 3, false],
-	])('Return quota info', (desc, teamspace, size, collaborators, inMegabytes, error) => {
+		['Teamspace with expired quota', tsWithExpiredQuota, null, null, templates.licenceExpired],
+		['Teamspace with only basic quota', 'teamspace', 1024 * 1024, 0],
+		['Teamspace with sufficient quota', tsWithQuota, 1024 * 1024 * 7, 2],
+		['Teamspace with sufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5, 9],
+		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3, 'unlimited'],
+		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 * 2, 3],
+	])('Return quota info', (desc, teamspace, size, collaborators, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : 'should return quota info'}`, async () => {
-			const quotaInfoProm = Quota.getQuotaInfo(teamspace, inMegabytes);
+			const quotaInfoProm = Quota.getQuotaInfo(teamspace);
 			if (error) {
 				await expect(quotaInfoProm).rejects.toHaveProperty('code', error.code);
 			} else {
@@ -141,14 +140,7 @@ const testGetSpacedUsed = () => {
 			expect(res).toEqual(expectedSize);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledTimes(1);
-		});
-
-		test('should return spaced used in megabytes', async () => {
-			const res = await Quota.getSpacedUsed(teamspace, true);
-			expect(res).toEqual(1);
-			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledTimes(1);
-		});
+		});	
 	});
 };
 

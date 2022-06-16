@@ -23,7 +23,7 @@ const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
 
-Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
+Quota.getQuotaInfo = async (teamspace) => {
 	const subs = await getSubscriptions(teamspace);
 	let dataSize = 0;
 	let collaborators = config.subscriptions?.basic?.collaborators ?? 0;
@@ -48,12 +48,12 @@ Quota.getQuotaInfo = async (teamspace, inMegabytes = false) => {
 	if (hasExpiredQuota && dataSize === 0) throw templates.licenceExpired;
 
 	const basicData = config.subscriptions?.basic?.data;
-	const dataInBytes = (dataSize + basicData);
+	const dataInMegabytes = (dataSize + basicData);
 
-	return { data: inMegabytes ? dataInBytes : dataInBytes * 1024 * 1024, collaborators };
+	return { data: dataInMegabytes * 1024 * 1024, collaborators };
 };
 
-Quota.getSpacedUsed = async (teamspace, inMegabytes = false) => {
+Quota.getSpacedUsed = async (teamspace) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
@@ -69,8 +69,7 @@ Quota.getSpacedUsed = async (teamspace, inMegabytes = false) => {
 	});
 
 	const sizes = await Promise.all(promises);
-	const totalSpace = sizes.reduce((accum, val) => accum + val, 0);
-	return inMegabytes ? totalSpace / (1024 * 1024) : totalSpace;
+	return sizes.reduce((accum, val) => accum + val, 0);
 };
 
 Quota.getCollaboratorsUsed = async (teamspace) => {

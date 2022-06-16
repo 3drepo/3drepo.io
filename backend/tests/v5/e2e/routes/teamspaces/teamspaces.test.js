@@ -193,12 +193,12 @@ const testGetTeamspaceMembers = () => {
 
 		test('should fail if the user does not have access to the teamspace', async () => {
 			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should return list of users with their jobs with valid access rights', async () => {
@@ -238,7 +238,7 @@ const testGetAvatar = () => {
 		});
 
 		test('should fail if the user does not have access to the teamspace', async () => {
-			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.notAuthorized.status);
+			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
@@ -287,10 +287,10 @@ const testGetQuotaInfo = () => {
 				.expect(templates.ok.status);
 			const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited'
 				? 'unlimited' : config.subscriptions?.basic?.collaborators + userCollabs;
-			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
+			const spaceLimitInBytes = (config.subscriptions?.basic?.data + licenseData) * 1024 * 1024;
 			expect(res.body).toEqual(
 				{
-					data: { used: 0, available: spaceLimit },
+					data: { used: 0, available: spaceLimitInBytes  },
 					seats: { used: 1, available: collaboratorLimit },
 				},
 			);
@@ -299,10 +299,10 @@ const testGetQuotaInfo = () => {
 		test('should return quota if the user has a valid license and unlimited collaborators', async () => {
 			const res = await agent.get(`${route(tsWithLicenseUnlimitedCollabs.name)}/?key=${userWithLicenseUnlimitedCollabs.apiKey}`)
 				.expect(templates.ok.status);
-			const spaceLimit = config.subscriptions?.basic?.data + licenseData;
+			const spaceLimitInBytes = (config.subscriptions?.basic?.data + licenseData) * 1024 * 1024;
 			expect(res.body).toEqual(
 				{
-					data: { used: 0, available: spaceLimit },
+					data: { used: 0, available: spaceLimitInBytes },
 					seats: { used: 1, available: 'unlimited' },
 				},
 			);

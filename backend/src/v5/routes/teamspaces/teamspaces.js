@@ -224,18 +224,28 @@ const establishRoutes = () => {
 	*             schema:
 	*               type: object
 	*               properties:
-	*                 spaceLimit:
-	*                   type: number
-	*                   description: The number of bytes the user can use
-	*                   example: 1000000
-	*                 collaboratorLimit:
-	*                   type: number
-	*                   description: The number of collaborators a user can have
-	*                   example: johnPaul01
-	*                 spaceUsed:
-	*                   type: number
-	*                   description: The number of bytes the user is currently using
-	*                   example: 500000
+	*                 data:
+	*                   type: object
+	*                   properties:
+	*                     used:
+	*                       type: number
+	*                       description: The number of bytes the user is currently using
+	*                       example: 1000000
+	*                     available:
+	*                       type: number
+	*                       description: The number of bytes the user can use
+	*                       example: 1000000
+	*                 seats:
+	*                   type: object
+	*                   properties:
+	*                     used:
+	*                       type: number
+	*                       description: The number of collaborators the user is currently using
+	*                       example: 1000000
+	*                     available:
+	*                       type: number
+	*                       description: The number of collaborators the user can use
+	*                       example: 1000000
 	*
 	*/
 	router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);

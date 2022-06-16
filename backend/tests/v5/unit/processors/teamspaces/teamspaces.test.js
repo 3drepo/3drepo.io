@@ -172,7 +172,7 @@ const testGetQuotaInfo = () => {
 			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledWith(teamspace);
 		});
 
-		test('should return quota info with zero values if an exception is thrown', async () => {
+		test('should return error if a method called throws an exception', async () => {
 			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => {
 				throw templates.licenceExpired;
 			});
