@@ -160,7 +160,6 @@ export const SidebarForm = ({
 						name="importAnimations"
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
-
 					<TimezoneSelect
 						control={control}
 						name="timezone"
