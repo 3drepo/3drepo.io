@@ -20,7 +20,6 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
 import api from '@/v5/services/api/default';
-import { noop } from 'lodash';
 import {
 	currentUserMockFactory,
 	generateFakeApiKey,
@@ -71,6 +70,7 @@ describe('Current User: sagas', () => {
 		const avatarUrl = generateFakeAvatarUrl();
 		const personalData: UpdatePersonalData = { ...userData };
 		const personalDataWithAvatar: UpdatePersonalData = { ...userData, avatarFile };
+		const onError = jest.fn();
 
 		it('should update user data (without avatar)', async () => {
 			mockServer
@@ -78,10 +78,12 @@ describe('Current User: sagas', () => {
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalData, noop))
+				.dispatch(CurrentUserActions.updatePersonalData(personalData, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
+			
+			expect(onError).not.toHaveBeenCalled();
 		})
 
 		it('should update user data (including avatar)', async () => {
@@ -95,12 +97,14 @@ describe('Current User: sagas', () => {
 				.reply(200, { avatarUrl });
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, noop))
+				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }))
 				.put(CurrentUserActions.updateUserSuccess(userData))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
+			
+			expect(onError).not.toHaveBeenCalled();
 
 			spy.mockClear();
 		})
@@ -111,10 +115,12 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(userData, noop))
+				.dispatch(CurrentUserActions.updatePersonalData(userData, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
+			
+			expect(onError).toHaveBeenCalled();
 		})
 
 		it('should call error callback when API call errors on updateAvatar', async () => {
@@ -125,14 +131,18 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, noop))
+				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
+			
+			expect(onError).toHaveBeenCalled();
 		})
 	})
 
 	describe('generateApiKey', () => {
+		const onError = jest.fn();
+
 		it('should generate an API key and update user data', async () => {
 			const apiKey = generateFakeApiKey();
 
@@ -141,11 +151,13 @@ describe('Current User: sagas', () => {
 				.reply(200, apiKey);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey(noop))
+				.dispatch(CurrentUserActions.generateApiKey(onError))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess(apiKey))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
+			
+			expect(onError).not.toHaveBeenCalled();
 		})
 
 		it('should call error callback when API call errors', async () => {
@@ -154,25 +166,31 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey(noop))
+				.dispatch(CurrentUserActions.generateApiKey(onError))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
+			
+				expect(onError).toHaveBeenCalled();
 		})
 	})
 
 	describe('deleteApiKey', () => {
+		const onError = jest.fn();
+
 		it('should delete an API key and update user data', async () => {
 			mockServer
 				.delete('/user/key')
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey(noop))
+				.dispatch(CurrentUserActions.deleteApiKey(onError))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ apiKey: null }))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
+			
+			expect(onError).not.toHaveBeenCalled();
 		})
 
 		it('should call error callback when API call errors', async () => {
@@ -183,10 +201,12 @@ describe('Current User: sagas', () => {
 				.reply(400, error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey(noop))
+				.dispatch(CurrentUserActions.deleteApiKey(onError))
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
+			
+			expect(onError).toHaveBeenCalled();
 		})
 	})
 });
