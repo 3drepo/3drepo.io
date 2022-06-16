@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { CentredContainer } from '@controls/centredContainer';
 import { FormattedMessage } from 'react-intl';
 import { Heading, NoRevisionBackground, Subheading } from './noRevisionOverlay.styles';
@@ -26,6 +27,19 @@ type INoRevision = {
 
 export const NoRevisionOverlay = ({ isProcessing, isContainer }: INoRevision) => {
 	const viewType = isContainer ? 'Container' : 'Federation';
+
+	const containerMessage = () => (isProcessing ? (
+		formatMessage({
+			id: 'noRevisionOverlay.subheading.container.processing',
+			defaultMessage: 'The Container is empty, you\'ll need to wait for the Container to finish processing.',
+		})
+	) : (
+		formatMessage({
+			id: 'noRevisionOverlay.subheading.container.notProcessing',
+			defaultMessage: 'You\'ll need to upload a new revision.',
+		})
+	));
+
 	return (
 		<NoRevisionBackground>
 			<CentredContainer>
@@ -36,17 +50,14 @@ export const NoRevisionOverlay = ({ isProcessing, isContainer }: INoRevision) =>
 					/>
 				</Heading>
 				<Subheading>
-					{isProcessing ? (
-						<FormattedMessage
-							id="noRevisionOverlay.subheading.processing"
-							defaultMessage={`The ${viewType} is empty, you'll need to wait for the ${viewType} to finish processing.`}
-						/>
-					) : (
-						<FormattedMessage
-							id="noRevisionOverlay.subheading.notProcessing"
-							defaultMessage="You'll need to upload a new revision."
-						/>
-					)}
+					{
+						isContainer ? containerMessage() : (
+							<FormattedMessage
+								id="noRevisionOverlay.subheading.revision"
+								defaultMessage="You'll need to add a container"
+							/>
+						)
+					}
 				</Subheading>
 			</CentredContainer>
 		</NoRevisionBackground>
