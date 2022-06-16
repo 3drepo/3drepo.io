@@ -15,30 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
 import { CentredContainer } from '@controls/centredContainer';
 import { FormattedMessage } from 'react-intl';
 import { Heading, NoRevisionBackground, Subheading } from './noRevisionOverlay.styles';
 
 type INoRevision = {
-	isProcessing: boolean;
+	message: string;
 	isContainer: boolean;
 };
 
-export const NoRevisionOverlay = ({ isProcessing, isContainer }: INoRevision) => {
+export const NoRevisionOverlay = ({ message, isContainer }: INoRevision) => {
 	const viewType = isContainer ? 'Container' : 'Federation';
-
-	const containerMessage = () => (isProcessing ? (
-		formatMessage({
-			id: 'noRevisionOverlay.subheading.container.processing',
-			defaultMessage: 'The Container is empty, you\'ll need to wait for the Container to finish processing.',
-		})
-	) : (
-		formatMessage({
-			id: 'noRevisionOverlay.subheading.container.notProcessing',
-			defaultMessage: 'You\'ll need to upload a new revision.',
-		})
-	));
 
 	return (
 		<NoRevisionBackground>
@@ -50,14 +37,7 @@ export const NoRevisionOverlay = ({ isProcessing, isContainer }: INoRevision) =>
 					/>
 				</Heading>
 				<Subheading>
-					{
-						isContainer ? containerMessage() : (
-							<FormattedMessage
-								id="noRevisionOverlay.subheading.revision"
-								defaultMessage="You'll need to add a container"
-							/>
-						)
-					}
+					{message}
 				</Subheading>
 			</CentredContainer>
 		</NoRevisionBackground>

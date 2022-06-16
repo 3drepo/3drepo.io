@@ -82,14 +82,48 @@ export const Viewer = () => {
 
 	if (selectedContainer && !selectedContainer.hasStatsPending) {
 		if (!selectedContainer.revisionsCount) {
-			return <NoRevisionOverlay isProcessing={!canUploadToBackend(selectedContainer.status)} isContainer />;
+			const message = canUploadToBackend(selectedContainer.status) ? (
+				formatMessage({
+					id: 'noRevisionOverlay.subheading.container.notProcessing',
+					defaultMessage: 'You\'ll need to upload a new revision.',
+				})
+			) : (
+				formatMessage({
+					id: 'noRevisionOverlay.subheading.container.processing',
+					defaultMessage: 'The Container is empty, you\'ll need to wait for the Container to finish processing.',
+				})
+			);
+			return (
+				<NoRevisionOverlay
+					isContainer
+					message={message}
+				/>
+			);
 		}
 	}
 
 	if (selectedFederation && !selectedFederation.hasStatsPending) {
+		let message = formatMessage({
+			id: 'noRevisionOverlay.subheading.federation.error',
+			defaultMessage: 'An unexpected error has occurred.',
+		});
 		if (!selectedFederation.containers.length) {
-			return <NoRevisionOverlay isProcessing={false} isContainer={false} />;
+			message = formatMessage({
+				id: 'noRevisionOverlay.subheading.federation.noContainers',
+				defaultMessage: 'You\'ll need to add some Containers.',
+			});
+		} else if (selectedFederation.containers.every((c) => !getContainerFromId(c).revisionsCount)) {
+			message = formatMessage({
+				id: 'noRevisionOverlay.subheading.federation.noContainers',
+				defaultMessage: 'All Containers are empty. You\'ll need to upload some revisions.',
+			});
 		}
+		return (
+			<NoRevisionOverlay
+				isContainer={false}
+				message={message}
+			/>
+		);
 	}
 
 	return <ViewerGui match={v4Match} />;
