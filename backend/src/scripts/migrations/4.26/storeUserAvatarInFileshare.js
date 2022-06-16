@@ -29,6 +29,7 @@ const storeUserAvatarInFileshare = async (username) => {
 		{ 'customData.avatar': 1, user: 1 });
 
 	if(user){
+		console.log(user);
 		await uploadAvatar(user, customData.avatar.data.buffer);	
 	}
 };
