@@ -102,13 +102,13 @@ export const EditProfilePasswordTab = ({
 		));
 	}, [formIsValid]);
 
-	// re-trigger validation on oldPassword when incorrect
 	useEffect(() => {
 		if (incorrectPassword) {
 			setIncorrectPassword(false);
 		}
 	}, [oldPassword]);
 
+	// re-trigger validation on oldPassword when incorrect
 	useEffect(() => {
 		if (dirtyFields.oldPassword) {
 			trigger('oldPassword');
