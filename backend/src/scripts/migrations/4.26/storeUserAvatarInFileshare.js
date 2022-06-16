@@ -16,14 +16,14 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { storeAvatarFile } = require('../../../v4/models/fileRef');
+const { storeFile } = require('../../../v5/services/filesManager');
 
 const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const storeUserAvatarInFileshare = async (username, avatarBuffer) => {
 	await db.updateOne('admin', 'system.users', { user: username }, { $unset: { 'customData.avatar': 1 } });
-	await storeAvatarFile(username, avatarBuffer);
+	await storeFile('admin', 'avatars', avatarBuffer);
 };
 
 const run = async () => {
