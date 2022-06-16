@@ -61,6 +61,7 @@ export const EditProfilePasswordTab = ({
 		watch,
 		handleSubmit,
 	} = useForm<IUpdatePasswordInputs>({
+		reValidateMode: 'onChange',
 		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
 	});
@@ -87,13 +88,10 @@ export const EditProfilePasswordTab = ({
 		}
 		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
-			trigger('oldPassword');
 			return;
 		}
 		setUnexpectedError(true);
 	};
-
-	const hasPostSubmissionError = () => unexpectedError || incorrectPassword || expectedError;
 
 	useEffect(() => setIsSubmitting(isSubmitting), []);
 
@@ -108,9 +106,14 @@ export const EditProfilePasswordTab = ({
 	useEffect(() => {
 		if (incorrectPassword) {
 			setIncorrectPassword(false);
-			trigger('oldPassword');
 		}
 	}, [oldPassword]);
+
+	useEffect(() => {
+		if (dirtyFields.oldPassword) {
+			trigger('oldPassword');
+		}
+	}, [incorrectPassword]);
 
 	useEffect(() => {
 		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
@@ -153,7 +156,7 @@ export const EditProfilePasswordTab = ({
 			/>
 			{unexpectedError && <UnexpectedError />}
 			{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
-			{isSubmitSuccessful && !hasPostSubmissionError() && (
+			{isSubmitSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
 				</SuccessMessage>
