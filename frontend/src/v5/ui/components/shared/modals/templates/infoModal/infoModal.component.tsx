@@ -58,7 +58,7 @@ export const InfoModal = ({
 			<Button
 				variant="outlined"
 				color="secondary"
-				onClick={onClickSecondary}
+				onClick={() => { onClickClose(); onClickSecondary(); }}
 			>
 				{secondaryButtonLabel}
 			</Button>
