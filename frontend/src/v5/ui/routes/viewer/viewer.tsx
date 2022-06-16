@@ -24,6 +24,7 @@ import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { PROJECTS_LIST_ROUTE, ViewerParams } from '../routes.constants';
 import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
+import { NoRevisionOverlay } from './noRevisionOverlay';
 
 export const Viewer = () => {
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
@@ -78,6 +79,18 @@ export const Viewer = () => {
 			);
 		}
 	}, [selectedContainer, selectedFederation]);
+
+	if (selectedContainer && !selectedContainer.hasStatsPending) {
+		if (!selectedContainer.revisionsCount) {
+			return <NoRevisionOverlay isProcessing={!canUploadToBackend(selectedContainer.status)} isContainer />;
+		}
+	}
+
+	if (selectedFederation && !selectedFederation.hasStatsPending) {
+		if (!selectedFederation.containers.length) {
+			return <NoRevisionOverlay isProcessing={false} isContainer={false} />;
+		}
+	}
 
 	return <ViewerGui match={v4Match} />;
 };
