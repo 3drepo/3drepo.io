@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
-import { ListItemSchema } from '@/v5/validation/containerAndFerderationSchemes/containerSchemes';
+import { ListItemSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';

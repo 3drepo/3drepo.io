@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationSettingsSchema } from '@/v5/validation/containerAndFerderationSchemes/federationSchemes';
+import { FederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SettingsForm } from '../../settingsForm/settingsForm.component';

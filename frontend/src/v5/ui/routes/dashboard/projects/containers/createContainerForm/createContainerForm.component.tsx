@@ -22,7 +22,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
-import { CreateContainerSchema } from '@/v5/validation/containerAndFerderationSchemes/containerSchemes';
+import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
