@@ -71,7 +71,7 @@ export const Username = styled.div`
 
 export const FullName = styled.div`
 	font-size: ${({ theme }) => theme.typography.fontSize.medium};
-	color: #6B778C;
+	color: ${({ theme }) => theme.palette.base.main};
 	margin-top: 1px;
 `;
 
