@@ -70,7 +70,7 @@ export const Username = styled.div`
 `;
 
 export const FullName = styled.div`
-	font-size: ${({ theme }) => theme.typography.fontSize.medium};
+	font-size: ${({ theme }) => theme.typography.body1.fontSize};
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-top: 1px;
 `;
