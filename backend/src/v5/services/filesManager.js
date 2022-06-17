@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllRemovableEntriesByType, getRefEntry } = require('../models/fileRefs');
+const { getAllRemovableEntriesByType, getRefEntry, removeRef, insertRef } = require('../models/fileRefs');
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../models/users.constants');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
 const config = require('../utils/config');
@@ -27,7 +28,16 @@ const getDefaultStorageType = () => config.defaultStorage || (config.fs ? 'fs' :
 
 const FilesManager = {};
 
-FilesManager.removeFiles = (teamspace, collection, storageType, links) => {
+FilesManager.fileExists = async (filename) => {
+	try {
+		await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, filename);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+const removeFiles = (teamspace, collection, storageType, links) => {
 	switch (storageType) {
 	case 'fs':
 		return FSHandler.removeFiles(links);
@@ -45,7 +55,7 @@ const removeAllFilesInCol = async (teamspace, collection) => {
 	const deletePromises = refsByType.map(
 		({ _id, links }) => {
 			if (_id && links?.length) {
-				return FilesManager.removeFiles(teamspace, collection, _id, links);
+				return removeFiles(teamspace, collection, _id, links);
 			}
 			return Promise.resolve();
 		},
@@ -70,12 +80,8 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 
 FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	const refEntry = await getRefEntry(teamspace, collection, fileName);
-
-	if (!refEntry) {
-		throw templates.fileNotFound;
-	}
-
 	let readStream;
+
 	switch (refEntry.type) {
 	case 'fs':
 		readStream = await FSHandler.getFileStream(refEntry.link);
@@ -90,17 +96,28 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	return { readStream, size: refEntry.size };
 };
 
-FilesManager.storeFile = (teamspace, collection, data) => {
+FilesManager.storeFile = async (teamspace, collection, id, data) => {
+	try {
+		const existingRef = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, id);
+		await removeRef(USERS_DB_NAME, AVATARS_COL_NAME, id);
+		await removeFiles(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
+	} catch {
+		//do nothing if existing avatar does not exist
+	}
+
 	const type = getDefaultStorageType();
-	switch (type) {
-	case 'fs':
-		return FSHandler.storeFile(data);
-	case 'gridfs':
-		return GridFSHandler.storeFile(teamspace, collection, data);
-	default:
+	let refInfo;
+
+	if(type === 'fs'){
+		refInfo = await FSHandler.storeFile(data);
+	} else if (type === 'gridfs'){
+		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
+	} else {
 		logger.logError(`Unrecognised external service: ${type}`);
 		return Promise.reject(templates.fileNotFound);
 	}
+
+	await insertRef(teamspace, collection, { ...refInfo, _id: id });
 };
 
 module.exports = FilesManager;

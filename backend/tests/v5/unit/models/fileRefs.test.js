@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUID } = require('../../helper/services');
 
@@ -101,7 +102,13 @@ const testGetRefEntry = () => {
 			await expect(FileRefs.getRefEntry(teamspace, collection, id)).resolves.toEqual(output);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, collection, { _id: id });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id });
+		});
+
+		test('should throw error if the entry is not found', async () => {			
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			await expect(FileRefs.getRefEntry(generateRandomString(), generateRandomString(), generateRandomString()))
+				.rejects.toEqual(templates.fileNotFound);
 		});
 	});
 };

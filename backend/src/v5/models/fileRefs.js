@@ -16,10 +16,21 @@
  */
 
 const db = require('../handler/db');
+const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
 
-FileRefs.getRefEntry = (teamspace, collection, id) => db.findOne(teamspace, collection, { _id: id });
+const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
+
+FileRefs.getRefEntry = async (teamspace, collection, id) => {
+	const entry = await db.findOne(teamspace, collectionName(collection), { _id: id });
+
+	if (!entry) {
+		throw templates.fileNotFound;
+	}
+
+	return entry;
+};
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
@@ -27,7 +38,7 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 		{ $group: { _id: null, total: { $sum: '$size' } } },
 	];
 
-	const res = await db.aggregate(teamspace, collection, pipelines);
+	const res = await db.aggregate(teamspace, collectionName(collection), pipelines);
 
 	return res.length > 0 ? res[0].total : 0;
 };

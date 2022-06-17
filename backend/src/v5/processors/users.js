@@ -19,8 +19,7 @@ const Users = {};
 
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
-const { getFileAsStream, removeFiles, storeFile } = require('../services/filesManager');
-const { getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
+const { getFileAsStream, storeFile, fileExists } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const FileRefs = require('../models/fileRefs');
@@ -72,7 +71,7 @@ Users.getProfileByUsername = async (username) => {
 
 	const { customData } = user;
 
-	const hasAvatar = !!await FileRefs.getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, username);
+	const hasAvatar = !!await fileExists(username);
 
 	return {
 		username: user.user,
@@ -105,16 +104,7 @@ Users.getUserByUsername = getUserByUsername;
 
 Users.getAvatarStream = (username) => getFileAsStream(USERS_DB_NAME, AVATARS_COL_NAME, username);
 
-Users.uploadAvatar = async (username, avatarBuffer) => {
-	const existingRef = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, username);
-	if (existingRef) {
-		await removeRef(USERS_DB_NAME, AVATARS_COL_NAME, username);
-		await removeFiles(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
-	}
-
-	const refInfo = await storeFile(USERS_DB_NAME, AVATARS_COL_NAME, avatarBuffer);
-	await insertRef(USERS_DB_NAME, AVATARS_COL_NAME, { ...refInfo, _id: username });
-};
+Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
 
 Users.generateResetPasswordToken = async (username) => {
 	const expiredAt = new Date();

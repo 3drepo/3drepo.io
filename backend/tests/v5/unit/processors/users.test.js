@@ -131,7 +131,7 @@ const tesGetProfileByUsername = () => {
 				'customData.billing.billingInfo.company': 1,
 			};
 
-			FileRefsModel.getRefEntry.mockImplementationOnce(() => true);
+			FilesManager.fileExists.mockResolvedValueOnce(true);
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, true));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
@@ -242,7 +242,7 @@ const testGetAvatarStream = () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
 			const stream = generateRandomString();
-			const getFileAsStreamMock = FilesManager.getFileAsStream.mockImplementationOnce(() => stream);
+			const getFileAsStreamMock = FilesManager.getFileAsStream.mockResolvedValueOnce(stream);
 			await Users.getAvatarStream(username);
 			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
 			expect(getFileAsStreamMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
@@ -252,46 +252,12 @@ const testGetAvatarStream = () => {
 
 const testUploadAvatar = () => {
 	describe('Remove old avatar and upload a new one', () => {
-		test('should upload new avatar', async () => {
-			const newRef = { type: 'fs', link: generateRandomString() };
-			const getRefEntryMock = FileRefsModel.getRefEntry.mockResolvedValueOnce(undefined);
-			const storeFileMock = FilesManager.storeFile.mockImplementationOnce(() => ({ type: newRef.type,
-				link: newRef.link }));
-
+		test('should upload new avatar', async () => {						
 			const username = generateRandomString();
 			const avatarBuffer = generateRandomString();
 			await Users.uploadAvatar(username, avatarBuffer);
-			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
-			expect(getRefEntryMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
-			expect(FileRefsModel.removeRef).toHaveBeenCalledTimes(0);
-			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(0);
-			expect(storeFileMock).toHaveBeenCalledTimes(1);
-			expect(storeFileMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, avatarBuffer);
-			expect(FileRefsModel.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefsModel.insertRef).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, { ...newRef, _id: username });
-		});
-
-		test('should upload a new avatar and remove existing', async () => {
-			const existingRef = { type: 'fs', link: generateRandomString() };
-			const newRef = { type: 'fs', link: generateRandomString() };
-			const getRefEntryMock = FileRefsModel.getRefEntry.mockImplementationOnce(() => ({ type: existingRef.type,
-				link: existingRef.link }));
-			const storeFileMock = FilesManager.storeFile.mockImplementationOnce(() => ({ type: newRef.type,
-				link: newRef.link }));
-
-			const username = generateRandomString();
-			const avatarBuffer = generateRandomString();
-			await Users.uploadAvatar(username, avatarBuffer);
-			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
-			expect(getRefEntryMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
-			expect(FileRefsModel.removeRef).toHaveBeenCalledTimes(1);
-			expect(FileRefsModel.removeRef).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
-			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFiles).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
-			expect(storeFileMock).toHaveBeenCalledTimes(1);
-			expect(storeFileMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, avatarBuffer);
-			expect(FileRefsModel.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefsModel.insertRef).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, { ...newRef, _id: username });
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
 		});
 	});
 };
