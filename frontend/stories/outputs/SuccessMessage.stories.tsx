@@ -32,8 +32,8 @@ const Template: ComponentStory<typeof SuccessMessage> = ({ children, ...args }) 
 	<SuccessMessage {...args}>{children}</SuccessMessage>
 );
 
-export const BreakLineError = Template.bind({});
-BreakLineError.args = {
+export const Default = Template.bind({});
+Default.args = {
 	children: (
 		<div>
 			This is the success message.
