@@ -93,7 +93,7 @@ export const EditProfilePasswordTab = ({
 		setUnexpectedError(true);
 	};
 
-	useEffect(() => setIsSubmitting(isSubmitting), []);
+	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
 
 	useEffect(() => {
 		setSubmitFunction(() => (formIsValid

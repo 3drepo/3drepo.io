@@ -141,7 +141,7 @@ export const EditProfilePersonalTab = ({
 		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
 	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
 
-	useEffect(() => setIsSubmitting(formIsUploading), []);
+	useEffect(() => setIsSubmitting(formIsUploading), [formIsUploading]);
 
 	// handle successful submit
 	useEffect(() => {
