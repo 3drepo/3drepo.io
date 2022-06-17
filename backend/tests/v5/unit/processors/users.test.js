@@ -17,7 +17,7 @@
 
 const { templates: emailTemplates } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
-const { AVATARS_COL_NAME } = require('../../../../src/v5/models/users.constants');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
@@ -245,7 +245,7 @@ const testGetAvatarStream = () => {
 			const getFileAsStreamMock = FilesManager.getFileAsStream.mockImplementationOnce(() => stream);
 			await Users.getAvatarStream(username);
 			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
-			expect(getFileAsStreamMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(getFileAsStreamMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 		});
 	});
 };
@@ -262,13 +262,13 @@ const testUploadAvatar = () => {
 			const avatarBuffer = generateRandomString();
 			await Users.uploadAvatar(username, avatarBuffer);
 			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
-			expect(getRefEntryMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(getRefEntryMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 			expect(FileRefsModel.removeRef).toHaveBeenCalledTimes(0);
 			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(0);
 			expect(storeFileMock).toHaveBeenCalledTimes(1);
-			expect(storeFileMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, avatarBuffer);
+			expect(storeFileMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, avatarBuffer);
 			expect(FileRefsModel.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefsModel.insertRef).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, { ...newRef, _id: username });
+			expect(FileRefsModel.insertRef).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, { ...newRef, _id: username });
 		});
 
 		test('should upload a new avatar and remove existing', async () => {
@@ -283,15 +283,15 @@ const testUploadAvatar = () => {
 			const avatarBuffer = generateRandomString();
 			await Users.uploadAvatar(username, avatarBuffer);
 			expect(getRefEntryMock).toHaveBeenCalledTimes(1);
-			expect(getRefEntryMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(getRefEntryMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 			expect(FileRefsModel.removeRef).toHaveBeenCalledTimes(1);
-			expect(FileRefsModel.removeRef).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, username);
+			expect(FileRefsModel.removeRef).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFiles).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
 			expect(storeFileMock).toHaveBeenCalledTimes(1);
-			expect(storeFileMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, avatarBuffer);
+			expect(storeFileMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, avatarBuffer);
 			expect(FileRefsModel.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefsModel.insertRef).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, { ...newRef, _id: username });
+			expect(FileRefsModel.insertRef).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, { ...newRef, _id: username });
 		});
 	});
 };

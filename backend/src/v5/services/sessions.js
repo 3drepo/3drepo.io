@@ -21,6 +21,7 @@ const db = require('../handler/db');
 const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { publish } = require('./eventsManager/eventsManager');
+const { USERS_DB_NAME } = require('../models/users.constants');
 
 const Sessions = { SESSION_HEADER: 'connect.sid' };
 const initialiseSession = async () => {
@@ -50,7 +51,7 @@ const initialiseSession = async () => {
 
 Sessions.session = initialiseSession();
 
-Sessions.getSessions = (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
+Sessions.getSessions = (query, projection, sort) => db.find(USERS_DB_NAME, 'sessions', query, projection, sort);
 
 Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
 	if (!referrer) return;
@@ -66,7 +67,7 @@ Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
 	if (sessionsToRemove.length) {
 		const sessionIds = sessionsToRemove.map((s) => s._id);
 
-		await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
+		await db.deleteMany(USERS_DB_NAME, 'sessions', { _id: { $in: sessionIds } });
 		publish(events.SESSIONS_REMOVED, { ids: sessionIds });
 	}
 };

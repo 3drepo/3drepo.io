@@ -22,12 +22,13 @@ const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { USERS_DB_NAME } = require('./users.constants');
 
 const User = {};
 const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
-const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
+const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
+const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
@@ -54,7 +55,7 @@ const recordFailedAuthAttempt = async (user) => {
 
 	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
-	await db.updateOne('admin', COLL_NAME, { user }, {
+	await db.updateOne(USERS_DB_NAME, COLL_NAME, { user }, {
 		$set: {
 			'customData.loginInfo.lastFailedLoginAt': currentTime,
 			'customData.loginInfo.failedLoginCount': newCount,
@@ -128,7 +129,7 @@ User.getFavourites = async (user, teamspace) => {
 
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== 'admin' ? [roleDB] : []));
+	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== USERS_DB_NAME ? [roleDB] : []));
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
@@ -178,7 +179,7 @@ User.updatePassword = async (username, newPassword) => {
 		pwd: newPassword,
 	};
 
-	await db.runCommand('admin', updateUserCmd);
+	await db.runCommand(USERS_DB_NAME, updateUserCmd);
 	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
@@ -235,7 +236,7 @@ User.addUser = async (newUserData) => {
 };
 
 User.verify = async (username) => {
-	const { customData } = await db.findOneAndUpdate('admin', COLL_NAME, { user: username },
+	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, COLL_NAME, { user: username },
 		{
 			$unset: {
 				'customData.inactive': 1,

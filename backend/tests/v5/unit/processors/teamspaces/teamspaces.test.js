@@ -19,7 +19,7 @@ const _ = require('lodash');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
-const { AVATARS_COL_NAME } = require('../../../../../src/v5/models/users.constants');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../../src/v5/models/users.constants');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -169,7 +169,7 @@ const testGetAvatarStream = () => {
 			const getFileAsStreamMock = FilesManager.getFileAsStream.mockImplementationOnce(() => stream);
 			await Teamspaces.getAvatarStream(teamspace);
 			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
-			expect(getFileAsStreamMock).toHaveBeenCalledWith('admin', AVATARS_COL_NAME, teamspace);
+			expect(getFileAsStreamMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 		});
 	});
 };

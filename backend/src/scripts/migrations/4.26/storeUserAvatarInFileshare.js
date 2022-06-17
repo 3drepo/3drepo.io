@@ -16,6 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
+const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
 const { uploadAvatar } = require('../../../v5/processors/users');
 const { getTeamspaceList } = require('../../utils');
 
@@ -23,7 +24,7 @@ const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const storeUserAvatarInFileshare = async (username) => {
-	const user = await db.findOneAndUpdate('admin', 'system.users', 
+	const user = await db.findOneAndUpdate(USERS_DB_NAME, 'system.users', 
 		{ user: username, 'customData.avatar': { $type: 'object' } },		
 		{ $unset: { 'customData.avatar': 1 } },
 		{ 'customData.avatar': 1, user: 1 });

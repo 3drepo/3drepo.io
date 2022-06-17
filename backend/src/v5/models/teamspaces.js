@@ -22,14 +22,15 @@ const db = require('../handler/db');
 const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
 const { topicTypes } = require('./issues.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 
 const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
 
 const Teamspace = {};
 
-const teamspaceUpdate = (query, actions) => db.updateOne('admin', 'system.users', query, actions);
-const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
-const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
+const teamspaceUpdate = (query, actions) => db.updateOne(USERS_DB_NAME, 'system.users', query, actions);
+const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
+const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);

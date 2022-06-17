@@ -19,7 +19,7 @@ const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../model
 const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
-const { AVATARS_COL_NAME } = require('../../models/users.constants');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { getFileAsStream } = require('../../services/filesManager');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
@@ -29,7 +29,7 @@ const { removeUserFromAllProjects } = require('../../models/projectSettings');
 
 const Teamspaces = {};
 
-Teamspaces.getAvatarStream = (teamspace) => getFileAsStream('admin', AVATARS_COL_NAME, teamspace);
+Teamspaces.getAvatarStream = (teamspace) => getFileAsStream(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
 Teamspaces.initTeamspace = async (username) => {
 	try {

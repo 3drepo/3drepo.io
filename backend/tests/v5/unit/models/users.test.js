@@ -25,6 +25,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
 const { generateRandomString } = require('../../helper/services');
 const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
+const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
@@ -538,7 +539,7 @@ const testVerify = () => {
 			const res = await User.verify(username);
 			expect(res).toEqual(customData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: username },
 				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
 				{
 					'customData.firstName': 1,
@@ -559,7 +560,7 @@ const testGrantTeamspacePermissionToUser = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			await User.grantAdminToUser(username, teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: username },
 				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});

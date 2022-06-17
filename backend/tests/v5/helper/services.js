@@ -33,6 +33,7 @@ const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helpe
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const ExternalServices = require('../../../src/v5/handler/externalServices');
 const FilesManager = require('../../../src/v5/services/filesManager');
+const { USERS_DB_NAME } = require('../../../src/v5/models/users.constants');
 
 const db = {};
 const queue = {};
@@ -158,8 +159,8 @@ db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.inse
 db.createAvatar = async (username, type, avatarData) => {
 	const { defaultStorage } = config;
 	config.defaultStorage = type;
-	const refInfo = await FilesManager.storeFile('admin', 'avatars', avatarData);
-	await DbHandler.insertOne('admin', 'avatars', { ...refInfo, _id: username });
+	const refInfo = await FilesManager.storeFile(USERS_DB_NAME, 'avatars', avatarData);
+	await DbHandler.insertOne(USERS_DB_NAME, 'avatars', { ...refInfo, _id: username });
 	config.defaultStorage = defaultStorage;
 };
 
