@@ -19,7 +19,7 @@ const _ = require('lodash');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
-const { AVATARS_COL_NAME } = require('../../../../../src/v5/models/fileRefs.constants');
+const { AVATARS_COL_NAME } = require('../../../../../src/v5/models/users.constants');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 

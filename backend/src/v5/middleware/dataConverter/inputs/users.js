@@ -17,13 +17,10 @@
 
 const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
-const { AVATARS_COL_NAME } = require('../../../models/fileRefs.constants');
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const httpsPost = require('../../../utils/httpsReq').post;
 const { formatPronouns } = require('../../../utils/helper/strings');
-const { getRefEntry } = require('../../../models/fileRefs');
-const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');

@@ -17,7 +17,7 @@
 
 const { templates: emailTemplates } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
-const { AVATARS_COL_NAME } = require('../../../../src/v5/models/fileRefs.constants');
+const { AVATARS_COL_NAME } = require('../../../../src/v5/models/users.constants');
 const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);

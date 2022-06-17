@@ -16,6 +16,9 @@
  */
 
 const UserConstants = {};
+
+UserConstants.AVATARS_COL_NAME = 'avatars';
+
 UserConstants.USERNAME_BLACKLIST = [
 	'payment',
 	'test',

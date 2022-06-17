@@ -22,7 +22,7 @@ const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
 const { getFileAsStream, removeFiles, storeFile } = require('../services/filesManager');
 const { getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
-const { AVATARS_COL_NAME } = require('../models/fileRefs.constants');
+const { AVATARS_COL_NAME } = require('../models/users.constants');
 const FileRefs = require('../models/fileRefs');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');

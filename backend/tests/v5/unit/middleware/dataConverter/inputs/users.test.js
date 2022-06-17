@@ -38,7 +38,6 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 const { generateRandomString } = require('../../../../helper/services');
-const { AVATARS_COL_NAME } = require('../../../../../../src/v5/models/fileRefs.constants');
 
 const config = require(`${src}/utils/config`);
 
