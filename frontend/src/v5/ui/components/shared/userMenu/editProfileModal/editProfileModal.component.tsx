@@ -30,7 +30,6 @@ const INTEGRATIONS_TAB = 'integrations';
 const CONFIRM_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
 	password: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.tab.confirmButton.updatePassword' }),
-	integrations: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateIntegrations' }),
 };
 
 const TAB_LABELS = {
