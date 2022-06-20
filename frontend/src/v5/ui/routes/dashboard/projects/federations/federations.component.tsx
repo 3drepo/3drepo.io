@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
@@ -26,27 +26,18 @@ import {
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { filterFederations } from '@/v5/store/federations/federations.helpers';
-import { useParams } from 'react-router';
-import { enableRealtimeFederationUpdates } from '@/v5/services/realtime/federation.events';
-import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
-import { DashboardParams } from '../../../routes.constants';
 import { CreateFederationForm } from './createFederationForm';
+import { useFederationsData } from './federations.hooks';
 
 export const Federations = (): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
 	const {
 		federations,
 		favouriteFederations,
 		hasFederations,
 		isListPending,
 	} = useFederationsData();
-
-	useEffect(() => {
-		if (isListPending) return undefined;
-		return enableRealtimeFederationUpdates(teamspace, project);
-	}, [isListPending]);
 
 	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
