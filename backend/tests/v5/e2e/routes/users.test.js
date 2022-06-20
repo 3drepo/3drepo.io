@@ -20,6 +20,7 @@ const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 const session = require('supertest-session');
+const fs = require('fs');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -423,10 +424,10 @@ const testUploadAvatar = () => {
 			});
 
 			test('should remove old avatar and upload a new one if the user is logged in', async () => {
-				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
+				await testSession.put('/v5/user/avatar').attach('file', image)
 					.expect(templates.ok.status);
-				// ensure an avatar exists
-				await testSession.get('/v5/user/avatar').expect(200);
+
+				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);	
 			});
 		});
 
@@ -442,8 +443,12 @@ const testUploadAvatar = () => {
 				await testSession.get('/v5/user/avatar').expect(templates.fileNotFound.status);
 				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
 					.expect(templates.ok.status);
-				// ensure an avatar exists
-				await testSession.get('/v5/user/avatar').expect(200);
+				// ensure an avatar exists				
+
+				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
+				const resBuffer = Buffer.from(avatarRes.text,'binary').toString('hex').match(/../g).join(' ');
+				const imageBuffer = fs.readFileSync(image).toString('hex').match(/../g).join(' ');				
+				expect(resBuffer).toEqual(imageBuffer);
 			});
 		});
 	});
