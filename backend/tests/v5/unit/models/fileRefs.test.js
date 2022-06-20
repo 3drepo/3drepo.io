@@ -47,6 +47,17 @@ const testGetTotalSize = () => {
 			expect(fn.mock.calls[0][1]).toEqual(collection);
 		});
 
+		test('should get the total size within the collection with .ref already added', async () => {
+			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, total: 15 }]);
+			const teamspace = 'someTS';
+			const collection = '123.ref';
+			const res = await FileRefs.getTotalSize(teamspace, collection);
+			expect(res).toEqual(15);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(collection);
+		});
+		
 		test('should return 0 if there is no entry', async () => {
 			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => []);
 			const teamspace = 'someTS';
@@ -114,8 +125,8 @@ const testGetRefEntry = () => {
 };
 
 const testInsertRef = () => {
-	describe('get ref entry by id', () => {
-		test('should return the entry if found', async () => {
+	describe('Insert file ref', () => {
+		test('should insert file ref', async () => {
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
 			const refInfo = {
@@ -133,8 +144,8 @@ const testInsertRef = () => {
 };
 
 const testRemoveRef = () => {
-	describe('get ref entry by id', () => {
-		test('should return the entry if found', async () => {
+	describe('Remove file ref', () => {
+		test('should remove file ref', async () => {
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
 			const id = generateUUID();

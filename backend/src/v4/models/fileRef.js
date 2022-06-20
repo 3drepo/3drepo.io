@@ -22,6 +22,8 @@ const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
+const { getFileAsStream } = require("../../v5/services/filesManager");
+const { USERS_DB_NAME } = require("../../v5/models/users.constants");
 
 const AVATARS_COL_NAME = "avatars";
 
@@ -43,11 +45,11 @@ const extensionRe = /\.(\w+)$/;
 
 const FileRef = {};
 
-FileRef.getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, {_id: id}, projection);
+const getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, {_id: id}, projection);
 
 function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
 	const collection =  model ? `${model}${ext}` : ext;
-	return FileRef.getRefEntry(account, collection, fileName).then((entry) => {
+	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
@@ -77,7 +79,7 @@ function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNa
 }
 
 function fetchFileStream(account, model, collection, fileName, useLegacyNameOnFallback = false) {
-	return FileRef.getRefEntry(account, collection, fileName).then((entry) => {
+	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
@@ -135,6 +137,11 @@ async function insertRef(account, collection, user, name, refInfo) {
 
 	return ref;
 }
+
+FileRef.fileExists = async (account, collection, id) => {
+	const fileEntry = await getRefEntry(account, collection, id, { _id: 1 })
+	return !!fileEntry;
+};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
@@ -284,15 +291,7 @@ FileRef.storeUrlAsResource = async function(account, model, user, name, link, ex
 	return ref;
 };
 
-FileRef.getAvatarStream = async function(username) {
-	const refEntry = await FileRef.getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
-
-	if(!refEntry) {
-		throw ResponseCodes.USER_DOES_NOT_HAVE_AVATAR;
-	}
-
-	return ExternalServices.getFileStream("admin", AVATARS_COL_NAME, refEntry.type, refEntry.link);
-};
+FileRef.getAvatarStream = (username) => getFileAsStream(USERS_DB_NAME, AVATARS_COL_NAME, username);
 
 FileRef.storeAvatarFile = async function(username, avatarBuffer) {
 	const refInfo = await ExternalServices.storeFile("admin", AVATARS_COL_NAME, avatarBuffer);
@@ -300,7 +299,7 @@ FileRef.storeAvatarFile = async function(username, avatarBuffer) {
 };
 
 FileRef.removeAvatarFile = async function(username) {
-	const avatarInfo = await FileRef.getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
+	const avatarInfo = await getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
 	if(avatarInfo) {
 		await ExternalServices.removeFiles("admin", AVATARS_COL_NAME, avatarInfo.type, [avatarInfo.link]);
 		await db.deleteOne("admin", AVATARS_COL_NAME, { _id: username });

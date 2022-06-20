@@ -71,7 +71,7 @@ Users.getProfileByUsername = async (username) => {
 
 	const { customData } = user;
 
-	const hasAvatar = !!await fileExists(username);
+	const hasAvatar = await fileExists(username);
 
 	return {
 		username: user.user,

@@ -113,7 +113,7 @@ const tesGetProfileByUsername = () => {
 				'customData.billing.billingInfo.countryCode': 1,
 				'customData.billing.billingInfo.company': 1,
 			};
-
+			FilesManager.fileExists.mockResolvedValueOnce(false);
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, false));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);

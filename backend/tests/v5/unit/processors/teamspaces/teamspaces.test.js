@@ -166,8 +166,8 @@ const testGetAvatarStream = () => {
 		test('should get avatar stream', async () => {
 			const teamspace = generateRandomString();
 			const stream = generateRandomString();
-			const getFileAsStreamMock = FilesManager.getFileAsStream.mockImplementationOnce(() => stream);
-			await Teamspaces.getAvatarStream(teamspace);
+			const getFileAsStreamMock = FilesManager.getFileAsStream.mockResolvedValueOnce(stream);
+			await expect(Teamspaces.getAvatarStream(teamspace)).resolves.toEqual(stream);
 			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
 			expect(getFileAsStreamMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 		});

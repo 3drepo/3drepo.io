@@ -64,11 +64,12 @@ const setupData = async () => {
 		},
 	));
 
-	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
-	await ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], false);
-	await ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], false);
-	await ServiceHelper.db.createAvatar(tsWithFsAvatar.name, 'fs', fsAvatarData);
-	await ServiceHelper.db.createAvatar(tsWithGridFsAvatar.name, 'gridfs', gridFsAvatarData);
+	await Promise.all([
+		ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true),
+		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], false),
+		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], false),		
+	])	
+	
 	await Promise.all([
 		ServiceHelper.db.createUser(
 			testUser,
@@ -91,6 +92,8 @@ const setupData = async () => {
 			[tsWithGridFsAvatar.name],
 		),
 		ServiceHelper.db.createJobs(testUserTSAccess[0].name, jobToUsers),
+		ServiceHelper.db.createAvatar(tsWithFsAvatar.name, 'fs', fsAvatarData),
+		ServiceHelper.db.createAvatar(tsWithGridFsAvatar.name, 'gridfs', gridFsAvatarData),
 	]);
 };
 

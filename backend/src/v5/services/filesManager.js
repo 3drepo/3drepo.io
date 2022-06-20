@@ -24,8 +24,6 @@ const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
-const getDefaultStorageType = () => config.defaultStorage || (config.fs ? 'fs' : null) || 'gridfs';
-
 const FilesManager = {};
 
 FilesManager.fileExists = async (filename) => {
@@ -105,7 +103,7 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 		//do nothing if existing avatar does not exist
 	}
 
-	const type = getDefaultStorageType();
+	const type = config.defaultStorage;
 	let refInfo;
 
 	if(type === 'fs'){
@@ -114,7 +112,7 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
 	} else {
 		logger.logError(`Unrecognised external service: ${type}`);
-		return Promise.reject(templates.fileNotFound);
+		throw templates.fileNotFound;
 	}
 
 	await insertRef(teamspace, collection, { ...refInfo, _id: id });
