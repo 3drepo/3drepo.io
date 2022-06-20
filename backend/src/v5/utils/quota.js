@@ -24,25 +24,25 @@ const { getTotalSize } = require('../models/fileRefs');
 const Quota = {};
 
 Quota.getQuotaInfo = async (teamspace) => {
-	const subs = await getSubscriptions(teamspace);
 	let freeTier = true;
+	let userHasHadPaidPlan = false;
+	let closestExpiryDate = null;
 	let dataSize = config.subscriptions?.basic?.data ?? 0;
 	let collaborators = config.subscriptions?.basic?.collaborators ?? 0;
-	let hasExpiredQuota = false;
-	let expiryDate = null;
 
+	const subs = await getSubscriptions(teamspace);
 	Object.keys(subs).forEach((key) => {
 		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
 		if (key !== 'paypal') {
-			const { expiryDate: subExpiryDate, data, collaborators: subCollaborators } = subs[key];
-			if (subExpiryDate && subExpiryDate < Date.now()) {
-				hasExpiredQuota = true;
-			} else {
+			userHasHadPaidPlan = true;
+			const { expiryDate, data, collaborators: subCollaborators } = subs[key];
+
+			if (!expiryDate || expiryDate > Date.now()) {
 				freeTier = false;
 				dataSize += data;
 
-				if (!expiryDate || subExpiryDate < expiryDate) {
-					expiryDate = subExpiryDate;
+				if (!closestExpiryDate || expiryDate < closestExpiryDate) {
+					closestExpiryDate = expiryDate;
 				}
 
 				if (collaborators !== 'unlimited') {
@@ -52,9 +52,10 @@ Quota.getQuotaInfo = async (teamspace) => {
 		}
 	});
 
-	if (hasExpiredQuota && dataSize === config.subscriptions?.basic?.data) throw templates.licenceExpired;
+	// if the user is currently on the free tier but had a paid plan before
+	if (freeTier && userHasHadPaidPlan) throw templates.licenceExpired;
 
-	return { data: dataSize * 1024 * 1024, collaborators, freeTier, expiryDate };
+	return { data: dataSize * 1024 * 1024, collaborators, freeTier, expiryDate: closestExpiryDate };
 };
 
 Quota.getSpaceUsed = async (teamspace) => {
