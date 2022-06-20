@@ -24,20 +24,20 @@ const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const storeUserAvatarInFileshare = async (username) => {
-	const user = await db.findOneAndUpdate(USERS_DB_NAME, 'system.users', 
-		{ user: username, 'customData.avatar': { $type: 'object' } },		
+	const user = await db.findOneAndUpdate(USERS_DB_NAME, 'system.users',
+		{ user: username, 'customData.avatar': { $type: 'object' } },
 		{ $unset: { 'customData.avatar': 1 } },
 		{ 'customData.avatar': 1, user: 1 });
 
-	if(user){
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
-		await uploadAvatar(user.user, user.customData.avatar.data.buffer);	
+	if (user) {
+		logger.logInfo(`\t\t-${username}`);
+		await uploadAvatar(user.user, user.customData.avatar.data.buffer);
 	}
 };
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
-	for (let i = 0; i < teamspaces.length; ++i) {		
+	for (let i = 0; i < teamspaces.length; ++i) {
 		// eslint-disable-next-line no-await-in-loop
 		await storeUserAvatarInFileshare(teamspaces[i]);
 	}

@@ -129,7 +129,7 @@ const testRemoveAllFilesFromModel = () => {
 };
 
 const testGetFileAsStream = () => {
-	describe('Get file as stream', () => {	
+	describe('Get file as stream', () => {
 		test('should throw error if the storage type is unrecognised', async () => {
 			const fileEntry = { type: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
@@ -210,7 +210,7 @@ const testStoreFile = () => {
 			const { defaultStorage } = config;
 			config.defaultStorage = 'fs';
 
-			const refInfo = { _id: generateRandomString() };			
+			const refInfo = { _id: generateRandomString() };
 			FSHandler.storeFile.mockResolvedValueOnce(refInfo);
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
@@ -226,7 +226,7 @@ const testStoreFile = () => {
 			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection, { ...refInfo, _id: id });
 
 			config.defaultStorage = defaultStorage;
-		});		
+		});
 
 		test('should store file if default storage type is gridfs', async () => {
 			const { defaultStorage } = config;

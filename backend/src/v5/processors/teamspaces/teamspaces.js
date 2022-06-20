@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
-const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { getFileAsStream } = require('../../services/filesManager');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');

@@ -139,7 +139,7 @@ async function insertRef(account, collection, user, name, refInfo) {
 }
 
 FileRef.fileExists = async (account, collection, id) => {
-	const fileEntry = await getRefEntry(account, collection, id, { _id: 1 })
+	const fileEntry = await getRefEntry(account, collection, id, { _id: 1 });
 	return !!fileEntry;
 };
 

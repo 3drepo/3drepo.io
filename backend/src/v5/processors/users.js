@@ -17,12 +17,11 @@
 
 const Users = {};
 
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
-const { getFileAsStream, storeFile, fileExists } = require('../services/filesManager');
+const { fileExists, getFileAsStream, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
-const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const FileRefs = require('../models/fileRefs');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');

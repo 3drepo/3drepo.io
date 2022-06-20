@@ -214,7 +214,7 @@ User.getProfileByUsername = async function (username) {
 	});
 
 	const customData =  user.customData;
-	const hasAvatar = await fileExists( 'admin', 'avatars.ref' , username);
+	const hasAvatar = await fileExists("admin", "avatars.ref" , username);
 
 	return 	{
 		username: user.user,
@@ -753,7 +753,7 @@ async function _createAccounts(roles, userName) {
 				// Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-				const hasAvatar = await fileExists( 'admin', 'avatars.ref' , userName);
+				const hasAvatar = await fileExists("admin", "avatars.ref" , userName);
 				const account = {
 					account: user.user,
 					firstName: user.customData.firstName,
@@ -796,7 +796,7 @@ async function _createAccounts(roles, userName) {
 			// model permissions
 			const modelPromises = [];
 			const dbUserCache = {};
-			const hasAvatar = await fileExists( 'admin', 'avatars.ref' , userName);
+			const hasAvatar = await fileExists("admin", "avatars.ref" , userName);
 			const models = await findModelSettings(user.user, query, projection);
 
 			models.forEach(model => {

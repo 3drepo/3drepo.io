@@ -17,12 +17,12 @@
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { USERS_DB_NAME } = require('./users.constants');
 
 const User = {};
 const COLL_NAME = 'system.users';

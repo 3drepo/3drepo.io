@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllRemovableEntriesByType, getRefEntry, removeRef, insertRef } = require('../models/fileRefs');
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../models/users.constants');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
+const { getAllRemovableEntriesByType, getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
 const config = require('../utils/config');
@@ -100,15 +100,15 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 		await removeRef(USERS_DB_NAME, AVATARS_COL_NAME, id);
 		await removeFiles(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
 	} catch {
-		//do nothing if existing avatar does not exist
+		// do nothing if existing avatar does not exist
 	}
 
 	const type = config.defaultStorage;
 	let refInfo;
 
-	if(type === 'fs'){
+	if (type === 'fs') {
 		refInfo = await FSHandler.storeFile(data);
-	} else if (type === 'gridfs'){
+	} else if (type === 'gridfs') {
 		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
 	} else {
 		logger.logError(`Unrecognised external service: ${type}`);

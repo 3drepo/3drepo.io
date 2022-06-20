@@ -39,7 +39,6 @@ const httpsPost = require("../libs/httpsReq").post;
 const FileType = require("file-type");
 
 const multer = require("multer");
-const FileRef = require("../models/fileRef");
 const { fileExists } = require("../models/fileRef");
 
 /**
@@ -805,7 +804,7 @@ async function listUserInfo(req, res, next) {
 	const accounts = await User.listAccounts(user);
 
 	const {firstName, lastName, email, billing: { billingInfo }}  = user.customData;
-	const hasAvatar = await fileExists( 'admin', 'avatars.ref' , user.user);
+	const hasAvatar = await fileExists("admin", "avatars.ref" , user.user);
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 		accounts,
 		firstName,

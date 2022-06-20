@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { USERS_DB_NAME } = require('../models/users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 
 const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { publish } = require('./eventsManager/eventsManager');
-const { USERS_DB_NAME } = require('../models/users.constants');
 
 const Sessions = { SESSION_HEADER: 'connect.sid' };
 const initialiseSession = async () => {

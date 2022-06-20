@@ -427,7 +427,10 @@ const testUploadAvatar = () => {
 				await testSession.put('/v5/user/avatar').attach('file', image)
 					.expect(templates.ok.status);
 
-				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);	
+				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
+				const resBuffer = Buffer.from(avatarRes.text, 'binary');
+				const imageBuffer = fs.readFileSync(image);
+				expect(resBuffer).toEqual(imageBuffer);
 			});
 		});
 
@@ -443,12 +446,8 @@ const testUploadAvatar = () => {
 				await testSession.get('/v5/user/avatar').expect(templates.fileNotFound.status);
 				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
 					.expect(templates.ok.status);
-				// ensure an avatar exists				
 
-				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
-				const resBuffer = Buffer.from(avatarRes.text,'binary').toString('hex').match(/../g).join(' ');
-				const imageBuffer = fs.readFileSync(image).toString('hex').match(/../g).join(' ');				
-				expect(resBuffer).toEqual(imageBuffer);
+				await testSession.get('/v5/user/avatar').expect(templates.ok.status);
 			});
 		});
 	});

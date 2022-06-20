@@ -57,7 +57,7 @@ const testGetTotalSize = () => {
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual(collection);
 		});
-		
+
 		test('should return 0 if there is no entry', async () => {
 			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => []);
 			const teamspace = 'someTS';
@@ -116,7 +116,7 @@ const testGetRefEntry = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id });
 		});
 
-		test('should throw error if the entry is not found', async () => {			
+		test('should throw error if the entry is not found', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			await expect(FileRefs.getRefEntry(generateRandomString(), generateRandomString(), generateRandomString()))
 				.rejects.toEqual(templates.fileNotFound);

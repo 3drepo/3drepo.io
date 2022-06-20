@@ -67,9 +67,9 @@ const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true),
 		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], false),
-		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], false),		
-	])	
-	
+		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], false),
+	]);
+
 	await Promise.all([
 		ServiceHelper.db.createUser(
 			testUser,

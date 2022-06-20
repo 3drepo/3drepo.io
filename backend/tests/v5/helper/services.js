@@ -157,7 +157,7 @@ db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.inse
 db.createAvatar = async (username, type, avatarData) => {
 	const { defaultStorage } = config;
 	config.defaultStorage = type;
-	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);	
+	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);
 	config.defaultStorage = defaultStorage;
 };
 

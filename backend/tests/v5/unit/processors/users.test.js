@@ -24,8 +24,6 @@ const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
-jest.mock('../../../../src/v5/models/fileRefs');
-const FileRefsModel = require(`${src}/models/fileRefs`);
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 jest.mock('../../../../src/v5/services/filesManager');
@@ -252,12 +250,13 @@ const testGetAvatarStream = () => {
 
 const testUploadAvatar = () => {
 	describe('Remove old avatar and upload a new one', () => {
-		test('should upload new avatar', async () => {						
+		test('should upload new avatar', async () => {
 			const username = generateRandomString();
 			const avatarBuffer = generateRandomString();
 			await Users.uploadAvatar(username, avatarBuffer);
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username,
+				avatarBuffer);
 		});
 	});
 };
