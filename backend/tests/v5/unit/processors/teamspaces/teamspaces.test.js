@@ -142,6 +142,8 @@ const testGetQuotaInfo = () => {
 	describe('Get quota info', () => {
 		test('should return quota info', async () => {
 			const quotaInfo = {
+				freeTier: false,
+				expiryDate: generateRandomNumber(0),
 				data: generateRandomNumber(),
 				collaborators: generateRandomNumber(0),
 			};
@@ -149,11 +151,13 @@ const testGetQuotaInfo = () => {
 			const collabsUsed = generateRandomNumber(0);
 			Quota.getQuotaInfo.mockResolvedValueOnce(quotaInfo);
 			Quota.getSpaceUsed.mockResolvedValueOnce(spaceUsed);
-			Quota.getCollaboratorsUsed.mockResolvedValueOnce(collabsUsed);
+			Quota.getCollaboratorsAssigned.mockResolvedValueOnce(collabsUsed);
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
 			expect(res).toEqual(
 				{
+					freeTier: quotaInfo.freeTier,
+					expiryDate: quotaInfo.expiryDate,
 					data: {
 						available: quotaInfo.data,
 						used: spaceUsed,
@@ -168,8 +172,8 @@ const testGetQuotaInfo = () => {
 			expect(Quota.getQuotaInfo).toHaveBeenCalledWith(teamspace, true);
 			expect(Quota.getSpaceUsed).toHaveBeenCalledTimes(1);
 			expect(Quota.getSpaceUsed).toHaveBeenCalledWith(teamspace, true);
-			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledTimes(1);
-			expect(Quota.getCollaboratorsUsed).toHaveBeenCalledWith(teamspace);
+			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledTimes(1);
+			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledWith(teamspace);
 		});
 
 		test('should return error if a method called throws an exception', async () => {

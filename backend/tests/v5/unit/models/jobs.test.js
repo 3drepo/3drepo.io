@@ -65,7 +65,7 @@ const testAssignUserToJob = () => {
 	});
 };
 
-const testremoveUserFromJobs = () => {
+const testRemoveUserFromJobs = () => {
 	describe('Remove user from job', () => {
 		test('should remove user from jobs', async () => {
 			const teamspace = generateRandomString();
@@ -73,7 +73,7 @@ const testremoveUserFromJobs = () => {
 			const fn = jest.spyOn(db, 'updateMany').mockImplementation(() => {});
 			await Jobs.removeUserFromJobs(teamspace, userToRemove);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { }, { $pull: { users: userToRemove } });
+			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { users: userToRemove }, { $pull: { users: userToRemove } });
 		});
 	});
 };
@@ -82,5 +82,5 @@ describe('models/jobs', () => {
 	testGetJobsToUsers();
 	testAddDefaultJobs();
 	testAssignUserToJob();
-	testremoveUserFromJobs();
+	testRemoveUserFromJobs();
 });

@@ -25,19 +25,26 @@ const Quota = {};
 
 Quota.getQuotaInfo = async (teamspace) => {
 	const subs = await getSubscriptions(teamspace);
-	let dataSize = 0;
+	let freeTier = true;
+	let dataSize = config.subscriptions?.basic?.data ?? 0;
 	let collaborators = config.subscriptions?.basic?.collaborators ?? 0;
 	let hasExpiredQuota = false;
+	let expiryDate = null;
 
-	// eslint-disable-next-line no-loop-func
 	Object.keys(subs).forEach((key) => {
 		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
 		if (key !== 'paypal') {
-			const { expiryDate, data, collaborators: subCollaborators } = subs[key];
-			if (expiryDate && expiryDate < Date.now()) {
+			const { expiryDate: subExpiryDate, data, collaborators: subCollaborators } = subs[key];
+			if (subExpiryDate && subExpiryDate < Date.now()) {
 				hasExpiredQuota = true;
 			} else {
+				freeTier = false;
 				dataSize += data;
+
+				if (!expiryDate || subExpiryDate < expiryDate) {
+					expiryDate = subExpiryDate;
+				}
+
 				if (collaborators !== 'unlimited') {
 					collaborators = subCollaborators === 'unlimited' ? 'unlimited' : collaborators + subCollaborators;
 				}
@@ -45,12 +52,9 @@ Quota.getQuotaInfo = async (teamspace) => {
 		}
 	});
 
-	if (hasExpiredQuota && dataSize === 0) throw templates.licenceExpired;
+	if (hasExpiredQuota && dataSize === config.subscriptions?.basic?.data) throw templates.licenceExpired;
 
-	const basicData = config.subscriptions?.basic?.data;
-	const dataInMegabytes = (dataSize + basicData);
-
-	return { data: dataInMegabytes * 1024 * 1024, collaborators };
+	return { data: dataSize * 1024 * 1024, collaborators, freeTier, expiryDate };
 };
 
 Quota.getSpaceUsed = async (teamspace) => {
@@ -72,9 +76,11 @@ Quota.getSpaceUsed = async (teamspace) => {
 	return sizes.reduce((accum, val) => accum + val, 0);
 };
 
-Quota.getCollaboratorsUsed = async (teamspace) => {
-	const teamspaceUsers = await getAllUsersInTeamspace(teamspace, { _id: 1 });
-	const teamspaceInvitations = await getInvitationsByTeamspace(teamspace, { _id: 1 });
+Quota.getCollaboratorsAssigned = async (teamspace) => {
+	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
+		getAllUsersInTeamspace(teamspace),
+		getInvitationsByTeamspace(teamspace, { _id: 1 }),
+	]);
 
 	return teamspaceUsers.length + teamspaceInvitations.length;
 };

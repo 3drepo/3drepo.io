@@ -30,8 +30,8 @@ let agent;
 
 const testUser = ServiceHelper.generateUserCredentials();
 const testUser2 = ServiceHelper.generateUserCredentials();
-const userCollabs = generateRandomNumber(0);
 const userWithLicense = ServiceHelper.generateUserCredentials();
+const userWithMultipleLicenses = ServiceHelper.generateUserCredentials();
 const userWithLicenseUnlimitedCollabs = ServiceHelper.generateUserCredentials();
 const userWithExpiredLicense = ServiceHelper.generateUserCredentials();
 const userToRemoveFromTs = ServiceHelper.generateUserCredentials();
@@ -52,6 +52,7 @@ const teamspaces = [
 // license related
 const licenseData = generateRandomNumber(0);
 const tsWithLicense = { name: ServiceHelper.generateRandomString() };
+const tsWithMultipleLicenses = { name: ServiceHelper.generateRandomString() };
 const tsWithLicenseUnlimitedCollabs = { name: ServiceHelper.generateRandomString() };
 const tsWithExpiredLicense = { name: ServiceHelper.generateRandomString() };
 
@@ -62,6 +63,8 @@ const tsWithAvatar = teamspaces[1].name;
 // some of its members will be removed after testRemoveTeamspaceMember
 const tsWithUsersToRemove = { name: ServiceHelper.generateRandomString(), isAdmin: true };
 
+const userCollabs = 10;
+
 const jobToUsers = [
 	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
 	{ _id: 'jobB', users: [usersInFirstTeamspace[1]] },
@@ -70,6 +73,7 @@ const jobToUsers = [
 
 const project = generateRandomProject();
 const model = generateRandomModel({ collaborators: [userToRemoveFromTs.user] });
+const validExpiryDate = Date.now() + 100000;
 
 // This is the list of teamspaces the user has access to
 const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
@@ -89,7 +93,23 @@ const setupData = async () => {
 				discretionary: {
 					collaborators: userCollabs,
 					data: licenseData,
-					expiryDate: Date.now() + 100000,
+					expiryDate: validExpiryDate,
+				},
+			},
+		},
+	});
+	await ServiceHelper.db.createTeamspace(tsWithMultipleLicenses.name, [userWithMultipleLicenses.user], false, {
+		billing: {
+			subscriptions: {
+				discretionary: {
+					collaborators: userCollabs,
+					data: licenseData,
+					expiryDate: validExpiryDate,
+				},
+				enterprise: {
+					collaborators: userCollabs,
+					data: licenseData,
+					expiryDate: validExpiryDate - 10,
 				},
 			},
 		},
@@ -101,7 +121,7 @@ const setupData = async () => {
 					discretionary: {
 						collaborators: 'unlimited',
 						data: licenseData,
-						expiryDate: Date.now() + 100000,
+						expiryDate: validExpiryDate,
 					},
 				},
 			},
@@ -135,6 +155,10 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(
 			userWithLicense,
 			[tsWithLicense.name],
+		),
+		ServiceHelper.db.createUser(
+			userWithMultipleLicenses,
+			[tsWithMultipleLicenses.name],
 		),
 		ServiceHelper.db.createUser(
 			userWithLicenseUnlimitedCollabs,
@@ -295,8 +319,26 @@ const testGetQuotaInfo = () => {
 			const spaceLimitInBytes = (config.subscriptions?.basic?.data + licenseData) * 1024 * 1024;
 			expect(res.body).toEqual(
 				{
+					expiryDate: validExpiryDate,
+					freeTier: false,
 					data: { used: 0, available: spaceLimitInBytes },
 					seats: { used: 2, available: collaboratorLimit },
+				},
+			);
+		});
+
+		test('should return quota if the user has a multiple licenses (with expiryDate being the closest to expire)', async () => {
+			const res = await agent.get(`${route(tsWithMultipleLicenses.name)}/?key=${userWithMultipleLicenses.apiKey}`)
+				.expect(templates.ok.status);
+			const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited'
+				? 'unlimited' : config.subscriptions?.basic?.collaborators + userCollabs * 2;
+			const spaceLimitInBytes = (config.subscriptions?.basic?.data + licenseData * 2) * 1024 * 1024;
+			expect(res.body).toEqual(
+				{
+					expiryDate: validExpiryDate - 10,
+					freeTier: false,
+					data: { used: 0, available: spaceLimitInBytes },
+					seats: { used: 1, available: collaboratorLimit },
 				},
 			);
 		});
@@ -307,8 +349,24 @@ const testGetQuotaInfo = () => {
 			const spaceLimitInBytes = (config.subscriptions?.basic?.data + licenseData) * 1024 * 1024;
 			expect(res.body).toEqual(
 				{
+					expiryDate: validExpiryDate,
+					freeTier: false,
 					data: { used: 0, available: spaceLimitInBytes },
 					seats: { used: 1, available: 'unlimited' },
+				},
+			);
+		});
+
+		test('should return quota if the user is using the free plan', async () => {
+			const res = await agent.get(`${route(teamspaces[0].name)}/?key=${testUser.apiKey}`)
+				.expect(templates.ok.status);
+			const spaceLimitInBytes = config.subscriptions?.basic?.data * 1024 * 1024;
+			expect(res.body).toEqual(
+				{
+					expiryDate: null,
+					freeTier: true,
+					data: { used: 0, available: spaceLimitInBytes },
+					seats: { used: 4, available: config.subscriptions.basic.collaborators },
 				},
 			);
 		});

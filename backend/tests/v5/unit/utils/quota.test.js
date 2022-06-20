@@ -29,7 +29,9 @@ const testGetQuotaInfo = () => {
 	const tsWithMultipleLicense = 'multiLicense';
 	const tsWithMultipleLicense2 = 'multiLicense2';
 	const tsWithSomeUsage = 'withUsage';
+	const tsWithFreeQuota = 'freeQuota';
 
+	const validExpiryDate = Date.now() + 100000;
 	const subsByTeamspace = {
 		[tsWithExpiredQuota]: {
 			enterprise: {
@@ -42,26 +44,26 @@ const testGetQuotaInfo = () => {
 		[tsWithQuota]: {
 			enterprise: {
 				data: 6, // 6MB
-				expiryDate: Date.now() + 100000,
+				expiryDate: validExpiryDate,
 				collaborators: 2,
 			},
 		},
 		[tsWithSomeUsage]: {
 			enterprise: {
 				data: 1,
-				expiryDate: Date.now() + 100000,
+				expiryDate: validExpiryDate,
 				collaborators: 3,
 			},
 		},
 		[tsWithMultipleLicense]: {
 			enterprise: {
 				data: 2,
-				expiryDate: Date.now() + 100000,
+				expiryDate: validExpiryDate - 10,
 				collaborators: 4,
 			},
 			discretionary: {
 				data: 2,
-				expiryDate: Date.now() + 100000,
+				expiryDate: validExpiryDate,
 				collaborators: 5,
 			},
 			paypal: {},
@@ -70,7 +72,7 @@ const testGetQuotaInfo = () => {
 		[tsWithMultipleLicense2]: {
 			enterprise: {
 				data: 2,
-				expiryDate: Date.now() + 100000,
+				expiryDate: validExpiryDate,
 				collaborators: 'unlimited',
 			},
 			discretionary: {
@@ -79,6 +81,8 @@ const testGetQuotaInfo = () => {
 				collaborators: 7,
 			},
 		},
+
+		[tsWithFreeQuota]: {},
 	};
 
 	jest.spyOn(db, 'findOne').mockImplementation((ts, col, { user }) => {
@@ -87,19 +91,24 @@ const testGetQuotaInfo = () => {
 	});
 
 	describe.each([
-		['Teamspace with expired quota', tsWithExpiredQuota, null, null, templates.licenceExpired],
-		['Teamspace with only basic quota', 'teamspace', 1024 * 1024, 0],
-		['Teamspace with sufficient quota', tsWithQuota, 1024 * 1024 * 7, 2],
-		['Teamspace with sufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5, 9],
-		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3, 'unlimited'],
-		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 * 2, 3],
-	])('Return quota info', (desc, teamspace, size, collaborators, error) => {
+		['Teamspace with expired quota', tsWithExpiredQuota, null, null, null, false, templates.licenceExpired],
+		['Teamspace with only basic quota', 'teamspace', 1024 * 1024, 0, null, true],
+		['Teamspace with sufficient quota', tsWithQuota, 1024 * 1024 * 7, 2, validExpiryDate, false],
+		['Teamspace with sufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5, 9, validExpiryDate - 10, false],
+		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3, 'unlimited', validExpiryDate, false],
+		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 * 2, 3, validExpiryDate, false],
+	])('Return quota info', (desc, teamspace, size, collaborators, expiryDate, freeTier, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : 'should return quota info'}`, async () => {
 			const quotaInfoProm = Quota.getQuotaInfo(teamspace);
 			if (error) {
 				await expect(quotaInfoProm).rejects.toHaveProperty('code', error.code);
 			} else {
-				await expect(quotaInfoProm).resolves.toStrictEqual({ data: size, collaborators });
+				await expect(quotaInfoProm).resolves.toStrictEqual({
+					data: size,
+					collaborators,
+					expiryDate,
+					freeTier,
+				});
 			}
 		});
 	});
@@ -109,7 +118,10 @@ const testGetQuotaInfo = () => {
 			const initialCollaborators = config.subscriptions.basic.collaborators;
 			delete config.subscriptions.basic.collaborators;
 			const res = await Quota.getQuotaInfo(tsWithQuota);
-			expect(res).toEqual({ data: 1024 * 1024 * 7, collaborators: 2 });
+			expect(res).toEqual({ data: 1024 * 1024 * 7,
+				collaborators: 2,
+				freeTier: false,
+				expiryDate: validExpiryDate });
 			config.subscriptions.basic.collaborators = initialCollaborators;
 		});
 
@@ -117,8 +129,19 @@ const testGetQuotaInfo = () => {
 			const initialCollaborators = config.subscriptions.basic.collaborators;
 			config.subscriptions.basic.collaborators = 'unlimited';
 			const res = await Quota.getQuotaInfo(tsWithQuota);
-			expect(res).toEqual({ data: 1024 * 1024 * 7, collaborators: 'unlimited' });
+			expect(res).toEqual({ data: 1024 * 1024 * 7, collaborators: 'unlimited', freeTier: false, expiryDate: validExpiryDate });
 			config.subscriptions.basic.collaborators = initialCollaborators;
+		});
+
+		test('Teamspace with no config data should return quota info', async () => {
+			const initialData = config.subscriptions.basic.data;
+			delete config.subscriptions.basic.data;
+			const res = await Quota.getQuotaInfo(tsWithQuota);
+			expect(res).toEqual({ data: 1024 * 1024 * 6,
+				collaborators: 2,
+				freeTier: false,
+				expiryDate: validExpiryDate });
+			config.subscriptions.basic.data = initialData;
 		});
 	});
 };
@@ -188,7 +211,7 @@ const testSufficientQuota = () => {
 	});
 };
 
-const testGetCollaboratorsUsed = () => {
+const testGetCollaboratorsAssigned = () => {
 	describe('Get collaborators used', () => {
 		test('should get the total collaborators used by the user', async () => {
 			jest.spyOn(db, 'find').mockImplementationOnce(() => [
@@ -197,7 +220,7 @@ const testGetCollaboratorsUsed = () => {
 			]);
 
 			const teamspace = generateRandomString();
-			const res = await Quota.getCollaboratorsUsed(teamspace);
+			const res = await Quota.getCollaboratorsAssigned(teamspace);
 			expect(res).toEqual(2);
 		});
 	});
@@ -207,5 +230,5 @@ describe('utils/quota', () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();
-	testGetCollaboratorsUsed();
+	testGetCollaboratorsAssigned();
 });

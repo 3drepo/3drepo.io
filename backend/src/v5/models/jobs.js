@@ -36,7 +36,7 @@ Jobs.assignUserToJob = async (teamspace, job, username) => {
 };
 
 Jobs.removeUserFromJobs = async (teamspace, userToRemove) => {
-	await updateMany(teamspace, { }, { $pull: { users: userToRemove } });
+	await updateMany(teamspace, { users: userToRemove }, { $pull: { users: userToRemove } });
 };
 
 module.exports = Jobs;

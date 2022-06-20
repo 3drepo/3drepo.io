@@ -19,7 +19,7 @@ const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = 
 const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
-const { getCollaboratorsUsed, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
+const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
@@ -74,9 +74,11 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 Teamspaces.getQuotaInfo = async (teamspace) => {
 	const quotaInfo = await getQuotaInfo(teamspace, true);
 	const spaceUsed = await getSpaceUsed(teamspace, true);
-	const collaboratorsUsed = await getCollaboratorsUsed(teamspace);
+	const collaboratorsUsed = await getCollaboratorsAssigned(teamspace);
 
 	return {
+		freeTier: quotaInfo.freeTier,
+		expiryDate: quotaInfo.expiryDate,
 		data: { available: quotaInfo.data, used: spaceUsed },
 		seats: { available: quotaInfo.collaborators, used: collaboratorsUsed },
 	};

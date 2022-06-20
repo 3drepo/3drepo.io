@@ -224,6 +224,14 @@ const establishRoutes = () => {
 	*             schema:
 	*               type: object
 	*               properties:
+	*                 freeTier:
+	*                   type: boolean
+	*                   description: Whether or not the user has a paid subscription
+	*                   example: true
+	*                 expiryDate:
+	*                   type: number
+	*                   description: The closest expiry date of a users active plan (in epoch)
+	*                   example: 1233445
 	*                 data:
 	*                   type: object
 	*                   properties:

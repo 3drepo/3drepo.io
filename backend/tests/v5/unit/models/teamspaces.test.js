@@ -408,7 +408,7 @@ const testGetAllUsersInTeamspace = () => {
 			expect(res).toEqual(users.map((u) => u.user));
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				{}, undefined);
+				{ user: 1 }, undefined);
 		});
 	});
 };

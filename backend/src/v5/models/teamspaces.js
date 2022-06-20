@@ -145,9 +145,9 @@ Teamspace.createTeamspaceSettings = async (teamspace) => {
 	await db.insertOne(teamspace, 'teamspace', settings);
 };
 
-Teamspace.getAllUsersInTeamspace = async (teamspace, projection = {}) => {
+Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	const users = await findMany(query, projection);
+	const users = await findMany(query, { user: 1 });
 
 	return users.map(({ user }) => user);
 };
