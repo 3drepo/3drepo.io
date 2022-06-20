@@ -31,7 +31,7 @@ const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace',
 		{
-			describe: 'teamspace to update',
+			describe: 'teamspace to view',
 			type: 'string',
 			demandOption: true,
 		});
