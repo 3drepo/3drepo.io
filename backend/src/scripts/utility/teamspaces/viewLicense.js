@@ -36,7 +36,7 @@ const genYargs = (yargs) => {
 			demandOption: true,
 		});
 	return yargs.command(commandName,
-		'view the license on a teamspace',
+		'View the license on a teamspace',
 		argsSpec,
 		(argv) => run(argv.teamspace));
 };
