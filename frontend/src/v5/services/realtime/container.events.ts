@@ -16,11 +16,11 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { FederationSettings } from '@/v5/store/federations/federations.types';
-import { FederationsActionsDispatchers } from '../actionsDispatchers/federationsActions.dispatchers';
+import { ContainerSettings } from '@/v5/store/containers/containers.types';
+import { ContainersActionsDispatchers } from '../actionsDispatchers/containersActions.dispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
-export const enableRealtimeFederationUpdateSettings = (teamspace:string, project:string, federationId:string) =>
-	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationSettingsUpdate',
-		(settings: FederationSettings) =>
-			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, settings));
+export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:string, containerId:string) =>
+	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerSettingsUpdate',
+		(settings: ContainerSettings) =>
+			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));
