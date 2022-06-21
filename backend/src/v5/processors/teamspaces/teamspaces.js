@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
+const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, getAvatar, grantAdminToUser } = require('../../models/users');
+const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
@@ -47,16 +48,6 @@ Teamspaces.initTeamspace = async (username) => {
 	}
 };
 
-Teamspaces.removeTeamspaceMember = async (teamspace, user) => {
-	// Clean up all possible permissions
-	await Promise.all([
-		removeUserFromAllModels(teamspace, user),
-		removeUserFromAllProjects(teamspace, user),
-		removeUserFromAdminPrivilege(teamspace, user),
-	]);
-	await revokeTeamspaceRoleFromUser(teamspace, user);
-};
-
 Teamspaces.getTeamspaceListByUser = async (user) => {
 	const tsList = await getAccessibleTeamspaces(user);
 	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
@@ -78,6 +69,32 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 	return membersList.map(
 		(member) => (usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
 	);
+};
+
+Teamspaces.getQuotaInfo = async (teamspace) => {
+	const quotaInfo = await getQuotaInfo(teamspace, true);
+	const spaceUsed = await getSpaceUsed(teamspace, true);
+	const collaboratorsUsed = await getCollaboratorsAssigned(teamspace);
+
+	return {
+		freeTier: quotaInfo.freeTier,
+		expiryDate: quotaInfo.expiryDate,
+		data: { available: quotaInfo.data, used: spaceUsed },
+		seats: { available: quotaInfo.collaborators, used: collaboratorsUsed },
+	};
+};
+
+Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
+	await Promise.all([
+		removeUserFromAllModels(teamspace, userToRemove),
+		removeUserFromAllProjects(teamspace, userToRemove),
+		removeUserFromAdminPrivilege(teamspace, userToRemove),
+	]);
+
+	await Promise.all([
+		await removeUserFromJobs(teamspace, userToRemove),
+		await revokeTeamspaceRoleFromUser(teamspace, userToRemove),
+	]);
 };
 
 module.exports = Teamspaces;
