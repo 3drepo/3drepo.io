@@ -62,7 +62,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 						<AvatarSection>
 							<Avatar
 								user={user}
-								size={48}
+								size="medium"
 							/>
 							<UserFullName>
 								<TruncatableName>{user.firstName}</TruncatableName>

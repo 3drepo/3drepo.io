@@ -34,7 +34,7 @@ export const Header = styled.div`
 `;
 
 export const Avatar = styled(AvatarBase).attrs({
-	size: 115,
+	size: 'large',
 })``;
 
 export const UserIcon = styled(UserIconBase)`

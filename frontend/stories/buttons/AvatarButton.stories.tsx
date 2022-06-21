@@ -49,15 +49,15 @@ AvatarWithInitialsHoverStates.args = {
 	isButton: true,
 } as Props;
 
-export const AvatarWithInitialsBigSizeAndHoverStates = Template.bind({});
-AvatarWithInitialsBigSizeAndHoverStates.args = {
+export const AvatarWithInitialsLargeSizeAndHoverStates = Template.bind({});
+AvatarWithInitialsLargeSizeAndHoverStates.args = {
 	user: {
 		firstName: 'Json',
 		lastName: 'Vorhees',
 		hasAvatar: false,
 		avatarUrl: '',
 	},
-	size: 60,
+	size: 'large',
 	isButton: true,
 } as Props;
 

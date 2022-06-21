@@ -18,7 +18,14 @@
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 
-export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $size?: number }>`
+const getSizeInPixels = (size?: string) => {
+	if (size === 'large') return '115px';
+	if (size === 'medium') return '48px';
+	// 'small' or default
+	return '38px';
+};
+
+export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, size?: string }>`
 	padding: 0;
 	margin: 8px 7px;
 
@@ -44,9 +51,9 @@ export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabl
 
 	.MuiAvatar-circular {
 		margin: 0;
-		${({ $size }) => `
-			height: ${$size || 38}px;
-			width: ${$size || 38}px;
+		${({ size }) => `
+			height: ${getSizeInPixels(size)};
+			width: ${getSizeInPixels(size)};
 		`}
 	}
 
