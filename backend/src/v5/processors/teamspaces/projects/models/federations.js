@@ -20,10 +20,12 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
 const Views = require('./commons/views');
+const { events } = require('../../../../services/eventsManager/eventsManager.constants');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRisksCount } = require('../../../../models/risks');
+const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
 const Federations = { ...Groups, ...Views };
@@ -31,7 +33,10 @@ const Federations = { ...Groups, ...Views };
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });
 
-Federations.deleteFederation = deleteModel;
+Federations.deleteFederation = async (teamspace, project, model) => {
+	await deleteModel(teamspace, project, model);
+	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: true });
+};
 
 Federations.getFederationList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

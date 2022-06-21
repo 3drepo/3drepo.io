@@ -36,11 +36,17 @@ const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUp
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
 
-Models.addModel = async (ts, data) => {
+Models.addModel = async (teamspace, project, data) => {
 	const _id = generateUUIDString();
-	await insertOneModel(ts, { ...data, _id });
+	await insertOneModel(teamspace, { ...data, _id });
 
-	publish(events.NEW_MODEL, { teamspace: ts, model: _id });
+	const eventData = { _id, code: data.properties.code };
+	if (data.federate) {
+		eventData.description = data.desc;
+	} else {
+		eventData.category = data.type;
+	}
+	publish(events.NEW_MODEL, { teamspace, project, data: eventData, isFederation: !!data.federate });
 
 	return _id;
 };
@@ -51,8 +57,6 @@ Models.deleteModel = async (ts, model) => {
 	if (deletedCount === 0) {
 		throw templates.modelNotFound;
 	}
-
-	publish(events.DELETE_MODEL, { teamspace: ts, model });
 };
 
 Models.getModelByQuery = async (ts, query, projection) => {

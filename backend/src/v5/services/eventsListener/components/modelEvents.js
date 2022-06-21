@@ -52,6 +52,41 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, i
 	}
 };
 
+const revisionAdded = async ({ teamspace, project, model, data, isFederation }) => {
+	try {
+		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
+		await createModelMessage(event, data, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
+const revisionUpdated = async ({ teamspace, project, model, data }) => {
+	try {
+		await createModelMessage(chatEvents.CONTAINER_REVISION_UPDATE, data, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
+const modelAdded = async ({ teamspace, project, data, isFederation }) => {
+	try {
+		const event = isFederation ? chatEvents.NEW_FEDERATION : chatEvents.NEW_CONTAINER;
+		await createModelMessage(event, data, teamspace, project);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
+const modelDeleted = async ({ teamspace, project, model, isFederation }) => {
+	try {
+		const event = isFederation ? chatEvents.FEDERATION_REMOVED : chatEvents.CONTAINER_REMOVED;
+		await createModelMessage(event, {}, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
@@ -59,6 +94,10 @@ ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
 
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
+	subscribe(events.MODEL_IMPORT_FINISHED, revisionAdded);
+	subscribe(events.REVISION_UPDATED, revisionUpdated);
+	subscribe(events.NEW_MODEL, modelAdded);
+	subscribe(events.DELETE_MODEL, modelDeleted);
 };
 
 module.exports = ModelEventsListener;

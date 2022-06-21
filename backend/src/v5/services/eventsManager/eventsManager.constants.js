@@ -23,7 +23,7 @@ const eventList = [
 	// Model settngs
 	'NEW_MODEL', 'DELETE_MODEL', 'MODEL_SETTINGS_UPDATE',
 	// Model import (including federation and toy project)
-	'MODEL_IMPORT_FINISHED',
+	'MODEL_IMPORT_FINISHED', 'REVISION_UPDATED',
 	// Queue specific
 	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
 	// Socket IO events

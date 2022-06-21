@@ -21,10 +21,12 @@ const { getContainerById, getContainers, updateModelSettings } = require('../../
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const Views = require('./commons/views');
+const { events } = require('../../../../services/eventsManager/eventsManager.constants');
 const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { logger } = require('../../../../utils/logger');
+const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
@@ -33,7 +35,10 @@ const Containers = { ...Groups, ...Views };
 
 Containers.addContainer = addModel;
 
-Containers.deleteContainer = deleteModel;
+Containers.deleteContainer = async (teamspace, project, model) => {
+	await deleteModel(teamspace, project, model);
+	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: false });
+};
 
 Containers.getContainerList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
