@@ -18,7 +18,7 @@
 import { css } from 'styled-components';
 import {
 	SuggestionButtonWrapper,
-	Container as TabContainer,
+	Container,
 } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { Content } from '@/v4/routes/viewerGui/components/risks/components/treatmentFormTab/treatmentFormTab.styles';
 import { Container as TextField, FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
@@ -31,13 +31,20 @@ export default css`
 		${TextField} {
 			margin: 25px 0 0;
 
+			.MuiFormControl-root {
+				label {
+					top: -17px;
+				}
+			}
+
 			label {
 				top: -16px;
 				left: 0;
-				font-size: 14px;
+				font-size: 15px;
 				transform: scale(.7);
 				
 				& ~ span {
+					margin-top: 0;
 					height: 24px;
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 				}
@@ -49,8 +56,8 @@ export default css`
 					height: 23px;
 					box-sizing: border-box;
 					line-height: 22px;
-					padding: 0 12px;
-					margin: 0;
+					padding: 0 10px;
+					margin: -1px 0 0;
 					font-size: 12px;
 					color: ${({ theme }) => theme.palette.secondary.main};
 
@@ -77,8 +84,14 @@ export default css`
 			}
 		}
 
-		${TabContainer} {
+		${Container} {
 			padding-top: 0;
+
+			${StyledSelect} svg {
+				/* TODO: fix after new palette is released */
+				color: #C1C8D5;
+				top: -13px;
+			}
 
 			&:first-of-type {
 				padding-top: 30px;
@@ -87,10 +100,6 @@ export default css`
 
 		${SuggestionButtonWrapper} ~ * {
 			margin-top: 10px;
-		}
-
-		${StyledSelect} svg {
-			margin-top: 13px;
 		}
 	}
 `;
