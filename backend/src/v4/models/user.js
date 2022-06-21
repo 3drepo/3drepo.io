@@ -1130,8 +1130,8 @@ User.findUserByBillingId = async function (billingAgreementId) {
 };
 
 User.updateAvatar = async function(username, avatarBuffer) {
-	await FileRef.removeAvatarFile(username);
-	await FileRef.storeAvatarFile(username, avatarBuffer);
+	const userProcessorV5 = require("../../v5/processors/users");
+	await userProcessorV5.uploadAvatar(username, avatarBuffer);
 };
 
 User.updatePermissions = async function(username, updatedPermissions) {

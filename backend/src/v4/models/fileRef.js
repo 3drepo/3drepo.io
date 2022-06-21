@@ -293,11 +293,6 @@ FileRef.storeUrlAsResource = async function(account, model, user, name, link, ex
 
 FileRef.getAvatarStream = (username) => getFileAsStream(USERS_DB_NAME, AVATARS_COL_NAME, username);
 
-FileRef.storeAvatarFile = async function(username, avatarBuffer) {
-	const refInfo = await ExternalServices.storeFile("admin", AVATARS_COL_NAME, avatarBuffer);
-	await db.insertOne("admin", AVATARS_COL_NAME, {...refInfo, _id: username});
-};
-
 FileRef.removeAvatarFile = async function(username) {
 	const avatarInfo = await getRefEntry("admin", AVATARS_COL_NAME, username, { _id: 0, link: 1, type: 1 });
 	if(avatarInfo) {
