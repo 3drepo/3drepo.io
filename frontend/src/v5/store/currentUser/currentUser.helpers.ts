@@ -17,4 +17,4 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 
-export const fileIsTooBig = (file): boolean => (file.size > clientConfigService.avatarSizeLimit);
+export const avatarFileIsTooBig = (file): boolean => (file.size > clientConfigService.avatarSizeLimit);

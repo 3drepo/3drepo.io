@@ -18,7 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { getPasswordStrength } from '@/v4/services/validation';
-import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
+import { avatarFileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
 
 export const username = (alreadyExistingUsernames) => Yup.string()
 	.transform((value) => value.trim(''))
@@ -151,5 +151,5 @@ export const avatarFile = Yup.mixed()
 			id: 'validation.avatar.error.fileSize',
 			defaultMessage: 'Image cannot exceed 1 MB.',
 		}),
-		(file) => !fileIsTooBig(file),
+		(file) => !avatarFileIsTooBig(file),
 	);
