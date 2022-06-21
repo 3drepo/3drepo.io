@@ -76,6 +76,20 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 	await Promise.all(removeProms);
 };
 
+FilesManager.getFile = async (teamspace, collection, fileName) => {
+	const { type, link } = await getRefEntry(teamspace, collection, fileName);
+
+	switch (type) {
+	case 'fs':
+		return FSHandler.getFile(link);
+	case 'gridfs':
+		return GridFSHandler.getFile(teamspace, collection, link);
+	default:
+		logger.logError(`Unrecognised external service: ${type}`);
+		throw templates.fileNotFound;
+	}
+};
+
 FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	const { type, link, size } = await getRefEntry(teamspace, collection, fileName);
 	let readStream;

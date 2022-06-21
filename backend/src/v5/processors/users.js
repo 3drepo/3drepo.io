@@ -20,7 +20,7 @@ const Users = {};
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
-const { fileExists, getFileAsStream, storeFile } = require('../services/filesManager');
+const { fileExists, getFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -101,7 +101,7 @@ Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
 
-Users.getAvatarStream = (username) => getFileAsStream(USERS_DB_NAME, AVATARS_COL_NAME, username);
+Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
 
 Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
 

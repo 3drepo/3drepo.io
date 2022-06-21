@@ -721,13 +721,14 @@ function getAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	// Update user info
-	User.getAvatarStream(req.params[C.REPO_REST_API_ACCOUNT]).then(avatarStream => {
+	UsersV5.getAvatar(req.params[C.REPO_REST_API_ACCOUNT]).then(avatar => {
 
-		if(!avatarStream) {
+		if(!avatar) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 
-		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, avatarStream.readStream);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, avatar);
+
 	}).catch((err) => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

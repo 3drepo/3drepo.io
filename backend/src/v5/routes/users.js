@@ -17,12 +17,13 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { mimeTypes, respond, writeStreamRespond } = require('../utils/responder');
 const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
 	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
+const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
+const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 
 const login = (req, res, next) => {
@@ -81,9 +82,10 @@ const deleteApiKey = (req, res) => {
 const getAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
-		const avatarStream = await Users.getAvatarStream(user);
-		writeStreamRespond(req, res, templates.ok, avatarStream.readStream,
-			user, avatarStream.size, { mimeType: mimeTypes.bin });
+		const buffer = await Users.getAvatar(user);
+		const fileExt = await fileExtensionFromBuffer(buffer);
+		req.params.format = fileExt || 'png';
+		respond(req, res, templates.ok, buffer);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

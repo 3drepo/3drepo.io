@@ -166,10 +166,10 @@ const testGetAvatarStream = () => {
 		test('should get avatar stream', async () => {
 			const teamspace = generateRandomString();
 			const stream = generateRandomString();
-			const getFileAsStreamMock = FilesManager.getFileAsStream.mockResolvedValueOnce(stream);
-			await expect(Teamspaces.getAvatarStream(teamspace)).resolves.toEqual(stream);
-			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
-			expect(getFileAsStreamMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
+			FilesManager.getFile.mockResolvedValueOnce(stream);
+			await expect(Teamspaces.getAvatar(teamspace)).resolves.toEqual(stream);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 		});
 	});
 };

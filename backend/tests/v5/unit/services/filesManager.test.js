@@ -128,6 +128,69 @@ const testRemoveAllFilesFromModel = () => {
 	});
 };
 
+const testGetFile = () => {
+	describe('Get file', () => {
+		test('should throw error if the storage type is unrecognised', async () => {
+			const fileEntry = { type: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			await expect(FilesManager.getFile(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should throw error if ref entry is not found', async () => {
+			FileRefs.getRefEntry.mockRejectedValueOnce(templates.fileNotFound);
+			await expect(FilesManager.getFile(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should return a stream if the reference is found', async () => {
+			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+			const fileBin = generateRandomString();
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			FSHandler.getFile.mockResolvedValueOnce(fileBin);
+
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const fileName = generateRandomString();
+
+			await expect(FilesManager.getFile(teamspace, collection, fileName))
+				.resolves.toEqual(fileBin);
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(FSHandler.getFile).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getFile).toHaveBeenCalledWith(fileEntry.link);
+		});
+
+		test('should return a stream of the reference is found (gridFs)', async () => {
+			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
+			const fileBin = generateRandomString();
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			GridFSHandler.getFile.mockResolvedValueOnce(fileBin);
+
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const fileName = generateRandomString();
+
+			await expect(FilesManager.getFile(teamspace, collection, fileName))
+				.resolves.toEqual(fileBin);
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(GridFSHandler.getFile).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.getFile).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+		});
+	});
+};
+
 const testGetFileAsStream = () => {
 	describe('Get file as stream', () => {
 		test('should throw error if the storage type is unrecognised', async () => {
@@ -278,6 +341,7 @@ const testFileExists = () => {
 
 describe('services/filesManager', () => {
 	testRemoveAllFilesFromModel();
+	testGetFile();
 	testGetFileAsStream();
 	testStoreFile();
 	testFileExists();

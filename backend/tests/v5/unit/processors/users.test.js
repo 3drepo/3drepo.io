@@ -240,10 +240,10 @@ const testGetAvatarStream = () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
 			const stream = generateRandomString();
-			const getFileAsStreamMock = FilesManager.getFileAsStream.mockResolvedValueOnce(stream);
-			await Users.getAvatarStream(username);
-			expect(getFileAsStreamMock).toHaveBeenCalledTimes(1);
-			expect(getFileAsStreamMock).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
+			FilesManager.getFile.mockResolvedValueOnce(stream);
+			await Users.getAvatar(username);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 		});
 	});
 };

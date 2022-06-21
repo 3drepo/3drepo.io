@@ -188,12 +188,12 @@ const testGetAvatar = () => {
 
 		test('should return teamspace fs avatar', async () => {
 			const res = await agent.get(`${route()}/?key=${userWithFsAvatar.apiKey}`).expect(templates.ok.status);
-			expect(res.text).toEqual(fsAvatarData);
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 		});
 
 		test('should return teamspace gridfs avatar', async () => {
 			const res = await agent.get(`${route(tsWithGridFsAvatar.name)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.ok.status);
-			expect(res.text).toEqual(gridFsAvatarData);
+			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
 		});
 	});
 };
