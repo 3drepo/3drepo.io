@@ -16,6 +16,7 @@
  */
 
 const { TEAM_MEMBER } = require('./roles.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 
 const Roles = {};
@@ -44,7 +45,7 @@ Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
 		roles: [{ role: TEAM_MEMBER, db: teamspace }],
 	};
 
-	return db.runCommand('admin', grantRoleCmd);
+	return db.runCommand(USERS_DB_NAME, grantRoleCmd);
 };
 
 Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => {
@@ -53,7 +54,7 @@ Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => {
 		roles: [{ role: TEAM_MEMBER, db: teamspace }],
 	};
 
-	return db.runCommand('admin', revokeRoleCmd);
+	return db.runCommand(USERS_DB_NAME, revokeRoleCmd);
 };
 
 module.exports = Roles;

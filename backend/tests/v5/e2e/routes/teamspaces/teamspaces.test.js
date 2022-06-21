@@ -41,6 +41,8 @@ const usersInFirstTeamspace = [
 	ServiceHelper.generateUserCredentials(),
 	ServiceHelper.generateUserCredentials(),
 ];
+const userWithFsAvatar = ServiceHelper.generateUserCredentials();
+const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 
 // This is the list of teamspaces the user has access to
 const teamspaces = [
@@ -49,16 +51,17 @@ const teamspaces = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
 
+const fsAvatarData = ServiceHelper.generateRandomString();
+const gridFsAvatarData = ServiceHelper.generateRandomString();
+const tsWithFsAvatar = { name: ServiceHelper.generateRandomString() };
+const tsWithGridFsAvatar = { name: ServiceHelper.generateRandomString() };
+
 // license related
 const licenseData = generateRandomNumber(0);
 const tsWithLicense = { name: ServiceHelper.generateRandomString() };
 const tsWithMultipleLicenses = { name: ServiceHelper.generateRandomString() };
 const tsWithLicenseUnlimitedCollabs = { name: ServiceHelper.generateRandomString() };
 const tsWithExpiredLicense = { name: ServiceHelper.generateRandomString() };
-
-// avatar related
-const avatar = ServiceHelper.generateRandomString();
-const tsWithAvatar = teamspaces[1].name;
 
 // some of its members will be removed after testRemoveTeamspaceMember
 const tsWithUsersToRemove = { name: ServiceHelper.generateRandomString(), isAdmin: true };
@@ -82,70 +85,71 @@ const setupData = async () => {
 	await Promise.all(teamspaces.map(
 		({ name, isAdmin }) => {
 			const perms = isAdmin ? [testUser.user] : [];
-			const customData = tsWithAvatar === name ? { avatar: { data: { buffer: avatar } } } : {};
-			return ServiceHelper.db.createTeamspace(name, perms, false, customData);
+			return ServiceHelper.db.createTeamspace(name, perms, false);
 		},
 	));
-	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
-	await ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], false, {
-		billing: {
-			subscriptions: {
-				discretionary: {
-					collaborators: userCollabs,
-					data: licenseData,
-					expiryDate: validExpiryDate,
-				},
-			},
-		},
-	});
-	await ServiceHelper.db.createTeamspace(tsWithMultipleLicenses.name, [userWithMultipleLicenses.user], false, {
-		billing: {
-			subscriptions: {
-				discretionary: {
-					collaborators: userCollabs,
-					data: licenseData,
-					expiryDate: validExpiryDate,
-				},
-				enterprise: {
-					collaborators: userCollabs,
-					data: licenseData,
-					expiryDate: validExpiryDate - 10,
-				},
-			},
-		},
-	});
-	await ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
-		[userWithLicenseUnlimitedCollabs.user], false, {
+	await Promise.all([
+		ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true),
+		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], false),
+		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], false),
+		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], false, {
 			billing: {
 				subscriptions: {
 					discretionary: {
-						collaborators: 'unlimited',
+						collaborators: userCollabs,
 						data: licenseData,
 						expiryDate: validExpiryDate,
 					},
 				},
 			},
-		});
-	await ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], false, {
-		billing: {
-			subscriptions: {
-				discretionary: {
-					collaborators: 'unlimited',
-					data: licenseData,
-					expiryDate: Date.now() - 100000,
+		}),
+		ServiceHelper.db.createTeamspace(tsWithMultipleLicenses.name, [userWithMultipleLicenses.user], false, {
+			billing: {
+				subscriptions: {
+					discretionary: {
+						collaborators: userCollabs,
+						data: licenseData,
+						expiryDate: validExpiryDate,
+					},
+					enterprise: {
+						collaborators: userCollabs,
+						data: licenseData,
+						expiryDate: validExpiryDate - 10,
+					},
 				},
 			},
+		}),
+		ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
+			[userWithLicenseUnlimitedCollabs.user], false, {
+				billing: {
+					subscriptions: {
+						discretionary: {
+							collaborators: 'unlimited',
+							data: licenseData,
+							expiryDate: validExpiryDate,
+						},
+					},
+				},
+			}),
+		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], false, {
+			billing: {
+				subscriptions: {
+					discretionary: {
+						collaborators: 'unlimited',
+						data: licenseData,
+						expiryDate: Date.now() - 100000,
+					},
+				},
 
-		},
-	});
-
-	await ServiceHelper.db.createTeamspace(tsWithUsersToRemove.name, [], false, {
-		permissions: [
-			{ user: userToRemoveFromTs.user, permissions: TEAMSPACE_ADMIN },
-			{ user: testUser.user, permissions: TEAMSPACE_ADMIN },
-			{ user: testUser2.user, permissions: TEAM_MEMBER },
-		],
-	});
+			},
+		}),
+		ServiceHelper.db.createTeamspace(tsWithUsersToRemove.name, [], false, {
+			permissions: [
+				{ user: userToRemoveFromTs.user, permissions: TEAMSPACE_ADMIN },
+				{ user: testUser.user, permissions: TEAMSPACE_ADMIN },
+				{ user: testUser2.user, permissions: TEAM_MEMBER },
+			],
+		})]);
 
 	await Promise.all([
 		ServiceHelper.db.createUser(
@@ -180,6 +184,17 @@ const setupData = async () => {
 			user,
 			[teamspaces[0].name],
 		)),
+		ServiceHelper.db.createUser(
+			userWithFsAvatar,
+			[tsWithFsAvatar.name],
+		),
+		ServiceHelper.db.createUser(
+			userWithGridFsAvatar,
+			[tsWithGridFsAvatar.name],
+		),
+		ServiceHelper.db.createAvatar(tsWithFsAvatar.name, 'fs', fsAvatarData),
+		ServiceHelper.db.createAvatar(tsWithGridFsAvatar.name, 'gridfs', gridFsAvatarData),
+
 		ServiceHelper.db.createJobs(teamspaces[0].name, jobToUsers),
 	]);
 
@@ -255,30 +270,35 @@ const testGetTeamspaceMembers = () => {
 
 const testGetAvatar = () => {
 	describe('Get teamspace avatar', () => {
-		const route = (ts = teamspaces[0].name) => `/v5/teamspaces/${ts}/avatar`;
+		const route = (ts = tsWithFsAvatar.name) => `/v5/teamspaces/${ts}/avatar`;
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user does not have access to the teamspace', async () => {
-			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test(`should return ${templates.avatarNotFound.code} if the teamspace does not have an avatar`, async () => {
-			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.avatarNotFound.status);
-			expect(res.body.code).toEqual(templates.avatarNotFound.code);
+		test(`should return ${templates.fileNotFound.code} if the teamspace does not have an avatar`, async () => {
+			const res = await agent.get(`${route(teamspaces[0].name)}/?key=${testUser.apiKey}`).expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 
-		test('should return avatar if the teamspace has one', async () => {
-			const res = await agent.get(`${route(tsWithAvatar)}/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.text).toEqual(avatar);
+		test('should return teamspace fs avatar', async () => {
+			const res = await agent.get(`${route()}/?key=${userWithFsAvatar.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
+		});
+
+		test('should return teamspace gridfs avatar', async () => {
+			const res = await agent.get(`${route(tsWithGridFsAvatar.name)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
 		});
 	});
 };

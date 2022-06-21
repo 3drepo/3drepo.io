@@ -19,6 +19,7 @@ const _ = require('lodash');
 
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../../src/v5/models/users.constants');
 const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
@@ -44,6 +45,8 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
 
+jest.mock('../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);
 
@@ -211,10 +214,24 @@ const testRemoveTeamspaceMember = () => {
 	});
 };
 
+const testGetAvatarStream = () => {
+	describe('Get avatar stream', () => {
+		test('should get avatar stream', async () => {
+			const teamspace = generateRandomString();
+			const stream = generateRandomString();
+			FilesManager.getFile.mockResolvedValueOnce(stream);
+			await expect(Teamspaces.getAvatar(teamspace)).resolves.toEqual(stream);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
 	testRemoveTeamspaceMember();
+	testGetAvatarStream();
 	testGetQuotaInfo();
 });

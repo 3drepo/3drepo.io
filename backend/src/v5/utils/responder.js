@@ -48,7 +48,7 @@ const createErrorResponse = (req, res, resCode) => {
 Responder.mimeTypes = {
 	src: 'text/plain',
 	gltf: 'application/json',
-	bin: 'text/plain',
+	bin: 'application/octet-stream',
 	json: 'application/json',
 	png: 'image/png',
 	jpg: 'image/jpg',
@@ -94,12 +94,16 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType =
 	}
 };
 
-Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize) => {
+Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize, { mimeType } = {}) => {
 	const headers = {
 		'Content-Length': fileSize,
 		'Content-Disposition': `attachment;filename=${fileName}`,
 	};
 
+	const contentType = Responder.mimeTypes[req.params.format] || mimeType;
+	if (contentType) {
+		headers['Content-Type'] = contentType;
+	}
 	let response = createResponseCode(resCode);
 
 	readStream.on('error', (error) => {

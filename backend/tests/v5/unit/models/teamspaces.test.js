@@ -27,6 +27,7 @@ const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.consta
 const { topicTypes } = require('../../../../src/v5/models/issues.constants');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
 const { riskCategories } = require('../../../../src/v5/models/risks.constants');
+const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const testHasAccessToTeamspace = () => {
 	test('should return true if the user has access to teamspace', async () => {
@@ -172,7 +173,7 @@ const testEditSubscriptions = () => {
 
 			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $set: formatToMongoAction(update, subsObjPath) });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, { $set: formatToMongoAction(update, subsObjPath) });
 		});
 
 		test('should only update fields that are recognised', async () => {
@@ -189,7 +190,7 @@ const testEditSubscriptions = () => {
 
 			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $set: formatToMongoAction({ collaborators: update.collaborators }, subsObjPath) });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, { $set: formatToMongoAction({ collaborators: update.collaborators }, subsObjPath) });
 		});
 
 		test('should not call update if there was no valid data to update', async () => {
@@ -220,7 +221,7 @@ const testRemoveSubscription = () => {
 
 			await expect(Teamspace.removeSubscription(teamspace, type)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
 		});
 
 		test('should get rid of all licenses if subscription type is not given', async () => {
@@ -232,7 +233,7 @@ const testRemoveSubscription = () => {
 
 			await expect(Teamspace.removeSubscription(teamspace)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
 		});
 	});
 };
@@ -254,7 +255,7 @@ const testRemoveAddOns = () => {
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: unsetObj });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, { $unset: unsetObj });
 		});
 	});
 };
@@ -280,7 +281,7 @@ const testGetAddOns = () => {
 				powerBIEnabled: true,
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, {
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, {
 				'customData.vrEnabled': 1,
 				'customData.srcEnabled': 1,
 				'customData.hereEnabled': 1,
@@ -304,7 +305,7 @@ const testGetAddOns = () => {
 				hereEnabled: true,
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, {
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, {
 				'customData.vrEnabled': 1,
 				'customData.srcEnabled': 1,
 				'customData.hereEnabled': 1,
@@ -348,7 +349,7 @@ const testUpdateAddOns = () => {
 			};
 			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, formatToMongoAction(update));
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, formatToMongoAction(update));
 		});
 
 		test('should only update fields that are recognised', async () => {
@@ -363,7 +364,7 @@ const testUpdateAddOns = () => {
 
 			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, formatToMongoAction({ [ADD_ONS.POWERBI]: true }));
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, formatToMongoAction({ [ADD_ONS.POWERBI]: true }));
 		});
 
 		test('should not call update if there was no valid data to update', async () => {
@@ -421,7 +422,7 @@ const testRemoveUserFromAdminPrivileges = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
 			await expect(Teamspace.removeUserFromAdminPrivilege(teamspace, user)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
 		});
 	});
 };
