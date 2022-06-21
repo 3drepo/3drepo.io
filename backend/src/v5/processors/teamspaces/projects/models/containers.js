@@ -33,14 +33,7 @@ const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups, ...Views };
 
-Containers.addContainer = async (teamspace, project, data) => {
-	const _id = await addModel(teamspace, project, data);
-
-	publish(events.NEW_MODEL, { teamspace, project, isFederation: false, model: _id,
-		data: { code: data.properties.code, category: data.type }});
-	
-	return _id;
-};
+Containers.addContainer = addModel;
 
 Containers.deleteContainer = async (teamspace, project, model) => {
 	await deleteModel(teamspace, project, model);

@@ -71,13 +71,7 @@ Revisions.updateRevisionStatus = async (teamspace, project, model, revision, sta
 		throw templates.revisionNotFound;
 	}
 
-	publish(events.REVISION_UPDATED, { teamspace,
-		project,
-		model,
-		data: {
-			_id: revision,
-			void: status,
-		} });
+	publish(events.REVISION_UPDATED, { teamspace, project, model, data: { _id: revision, void: status } });
 };
 
 Revisions.isTagUnique = async (teamspace, model, tag) => {

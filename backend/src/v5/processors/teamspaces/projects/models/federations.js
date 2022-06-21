@@ -30,14 +30,8 @@ const { queueFederationUpdate } = require('../../../../services/modelProcessing'
 
 const Federations = { ...Groups, ...Views };
 
-Federations.addFederation = async (teamspace, project, data) => {
-	const _id = await addModel(teamspace, project, data);
-
-	publish(events.NEW_MODEL, { teamspace, project, model: _id, isFederation: true,
-		data: { code: data.properties.code, description: data.desc }});
-	
-	return _id;
-};
+Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
+	{ ...federation, federate: true });
 
 Federations.deleteFederation = async (teamspace, project, model) => {
 	await deleteModel(teamspace, project, model);
