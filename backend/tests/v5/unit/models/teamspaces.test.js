@@ -25,6 +25,7 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { topicTypes } = require('../../../../src/v5/models/issues.constants');
+const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
 const { riskCategories } = require('../../../../src/v5/models/risks.constants');
 const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
@@ -395,6 +396,24 @@ const testCreateTeamspaceSettings = () => {
 	});
 };
 
+const testGetAllUsersInTeamspace = () => {
+	describe('Get all users in teamspace', () => {
+		test('should get all users in a teamspace', async () => {
+			const teamspace = generateRandomString();
+			const users = [
+				{ id: generateRandomString(), user: generateRandomString() },
+				{ id: generateRandomString(), user: generateRandomString() },
+			];
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
+			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
+			expect(res).toEqual(users.map((u) => u.user));
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
+				{ user: 1 }, undefined);
+		});
+	});
+};
+
 const testRemoveUserFromAdminPrivileges = () => {
 	describe('Remove user from admin privileges', () => {
 		test('Should trigger a query to remove user from admin permissions array', async () => {
@@ -419,5 +438,6 @@ describe('models/teamspaces', () => {
 	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
+	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
 });

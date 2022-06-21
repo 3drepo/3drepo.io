@@ -18,7 +18,7 @@
 const { ADD_ONS } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
-
+const { TEAM_MEMBER } = require('./roles.constants');
 const db = require('../handler/db');
 const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
@@ -144,6 +144,13 @@ Teamspace.getMembersInfo = async (teamspace) => {
 Teamspace.createTeamspaceSettings = async (teamspace) => {
 	const settings = { _id: teamspace, topicTypes, riskCategories };
 	await db.insertOne(teamspace, 'teamspace', settings);
+};
+
+Teamspace.getAllUsersInTeamspace = async (teamspace) => {
+	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
+	const users = await findMany(query, { user: 1 });
+
+	return users.map(({ user }) => user);
 };
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
