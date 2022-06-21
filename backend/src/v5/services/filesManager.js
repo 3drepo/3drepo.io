@@ -77,21 +77,21 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 };
 
 FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
-	const refEntry = await getRefEntry(teamspace, collection, fileName);
+	const { type, link, size } = await getRefEntry(teamspace, collection, fileName);
 	let readStream;
 
-	switch (refEntry.type) {
+	switch (type) {
 	case 'fs':
-		readStream = await FSHandler.getFileStream(refEntry.link);
+		readStream = await FSHandler.getFileStream(link);
 		break;
 	case 'gridfs':
-		readStream = await GridFSHandler.getFileStream(teamspace, collection, refEntry.link);
+		readStream = await GridFSHandler.getFileStream(teamspace, collection, link);
 		break;
 	default:
-		logger.logError(`Unrecognised external service: ${refEntry.type}`);
+		logger.logError(`Unrecognised external service: ${type}`);
 		throw templates.fileNotFound;
 	}
-	return { readStream, size: refEntry.size };
+	return { readStream, size };
 };
 
 FilesManager.storeFile = async (teamspace, collection, id, data) => {
@@ -102,16 +102,17 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 	} catch {
 		// do nothing if existing avatar does not exist
 	}
-
-	const type = config.defaultStorage;
 	let refInfo;
 
-	if (type === 'fs') {
+	switch (config.defaultStorage) {
+	case 'fs':
 		refInfo = await FSHandler.storeFile(data);
-	} else if (type === 'gridfs') {
+		break;
+	case 'gridfs':
 		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
-	} else {
-		logger.logError(`Unrecognised external service: ${type}`);
+		break;
+	default:
+		logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
 		throw templates.unknown;
 	}
 
