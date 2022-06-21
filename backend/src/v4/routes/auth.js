@@ -29,6 +29,7 @@ const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
 const { createSession, destroySession } = require(`${v5Path}/middleware/sessions`);
+const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
 const { validateLoginData} = require(`${v5Path}/middleware/dataConverter/inputs/users`);
 
 const { respond: respondV5} = require(`${v5Path}/utils/responder`);
@@ -721,12 +722,13 @@ function getAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	// Update user info
-	UsersV5.getAvatar(req.params[C.REPO_REST_API_ACCOUNT]).then(avatar => {
+	UsersV5.getAvatar(req.params[C.REPO_REST_API_ACCOUNT]).then(async avatar => {
 
 		if(!avatar) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
-
+		const fileExt = await fileExtensionFromBuffer(avatar);
+		req.params.format = fileExt || "png";
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, avatar);
 
 	}).catch((err) => {
