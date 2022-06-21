@@ -21,10 +21,10 @@ const { events } = require('../../eventsManager/eventsManager.constants');
 const { logger } = require('../../../utils/logger');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const modelAdded = async ({ teamspace, project, data, isFederation }) => {
+const modelAdded = async ({ teamspace, project, model, data, isFederation }) => {
 	try {
 		const event = isFederation ? chatEvents.NEW_FEDERATION : chatEvents.NEW_CONTAINER;
-		await createProjectMessage(event, data, teamspace, project);
+		await createProjectMessage(event, { ...data, _id: model }, teamspace, project);
 	} catch (err) {
 		logger.logError(`Failed to send a project message to queue: ${err?.message}`);
 	}
