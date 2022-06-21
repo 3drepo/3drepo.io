@@ -72,7 +72,6 @@ export const MyTeamspaceImage = styled(Avatar).attrs({
 		border-radius: 0;
 		width: 100%;
 		height: 175px;
-		margin: 0;
 		font-size: 40px;
 		color: ${({ theme }) => theme.palette.tertiary.dark};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
