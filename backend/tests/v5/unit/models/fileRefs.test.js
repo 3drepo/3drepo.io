@@ -22,18 +22,6 @@ const { generateRandomString, generateUUID } = require('../../helper/services');
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
 
-const unrecognisedType = 'qwerrtyuui';
-
-jest.mock('../../../../src/v5/handler/externalServices', () => ({
-	...jest.requireActual('../../../../src/v5/handler/externalServices'),
-	getFileStream: jest.fn().mockImplementation((account, collection, type) => {
-		if (type === unrecognisedType) {
-			throw new Error();
-		}
-	}),
-	removeFiles: jest.fn(),
-}));
-
 const testGetTotalSize = () => {
 	describe('Get total size', () => {
 		test('should get the total size within the collection', async () => {

@@ -201,7 +201,7 @@ const testStoreFile = () => {
 				generateRandomString(),
 				generateRandomString(),
 				generateRandomString(),
-			)).rejects.toEqual(templates.fileNotFound);
+			)).rejects.toEqual(templates.unknown);
 
 			config.defaultStorage = defaultStorage;
 		});
