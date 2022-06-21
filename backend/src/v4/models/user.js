@@ -45,6 +45,7 @@ const {
 	removeUserFromProjects
 } = require("./project");
 const FileRef = require("./fileRef");
+const UserProcessorV5 = require("../../v5/processors/users");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { assignUserToJob } = require("../../v5/models/jobs.js");
@@ -590,7 +591,7 @@ User.verify = async function (username, token, options) {
 	}
 };
 
-User.getAvatarStream = FileRef.getAvatarStream;
+User.getAvatarStream = UserProcessorV5.getAvatarStream;
 
 User.updateInfo = async function(username, updateObj) {
 	const updateableFields = new Set(["firstName", "lastName", "email"]);
@@ -1130,8 +1131,7 @@ User.findUserByBillingId = async function (billingAgreementId) {
 };
 
 User.updateAvatar = async function(username, avatarBuffer) {
-	const userProcessorV5 = require("../../v5/processors/users");
-	await userProcessorV5.uploadAvatar(username, avatarBuffer);
+	await UserProcessorV5.uploadAvatar(username, avatarBuffer);
 };
 
 User.updatePermissions = async function(username, updatedPermissions) {
