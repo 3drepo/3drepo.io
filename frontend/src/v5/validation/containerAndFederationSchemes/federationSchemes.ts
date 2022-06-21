@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AdvancedSettingsSchema, BaseSettingsSchema } from './settingsSchemes';
+import { SettingsSchemaWithGeoPosition, SettingsSchema } from './settingsSchemes';
 
-export const NewFederationSettingsSchema = BaseSettingsSchema;
-export const FederationSettingsSchema = AdvancedSettingsSchema;
+export const NewFederationSettingsSchema = SettingsSchema;
+export const FederationSettingsSchema = SettingsSchemaWithGeoPosition;

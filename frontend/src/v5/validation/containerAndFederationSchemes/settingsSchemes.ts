@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { numberField } from './validators';
 
-export const BaseSettingsSchema = Yup.object().shape({
+export const SettingsSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2,
 			formatMessage({
@@ -76,7 +76,7 @@ export const BaseSettingsSchema = Yup.object().shape({
 	)),
 });
 
-export const AdvancedSettingsSchema = BaseSettingsSchema.shape({
+export const SettingsSchemaWithGeoPosition = SettingsSchema.shape({
 	defaultView: Yup.string()
 		.nullable()
 		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),

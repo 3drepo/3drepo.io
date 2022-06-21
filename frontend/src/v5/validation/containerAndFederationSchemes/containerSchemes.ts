@@ -16,7 +16,7 @@
  */
 
 import * as Yup from 'yup';
-import { AdvancedSettingsSchema } from './settingsSchemes';
+import { SettingsSchemaWithGeoPosition } from './settingsSchemes';
 import {
 	containerName,
 	containerType,
@@ -27,7 +27,7 @@ import {
 	revisionTag,
 } from './validators';
 
-export const ContainerSettingsSchema = AdvancedSettingsSchema.shape({ type: Yup.string() });
+export const ContainerSettingsSchema = SettingsSchemaWithGeoPosition.shape({ type: Yup.string() });
 
 export const CreateContainerSchema = Yup.object().shape({
 	name: containerName,
