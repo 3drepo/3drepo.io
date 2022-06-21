@@ -69,6 +69,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	useEffect(() => {
 		if (open) {
 			setActiveTab(PERSONAL_TAB);
+			setHideSubmitButton(false);
 		}
 	}, [open]);
 
