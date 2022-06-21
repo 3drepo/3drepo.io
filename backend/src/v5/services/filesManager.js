@@ -112,7 +112,7 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
 	} else {
 		logger.logError(`Unrecognised external service: ${type}`);
-		throw templates.fileNotFound;
+		throw templates.unknown;
 	}
 
 	await insertRef(teamspace, collection, { ...refInfo, _id: id });
