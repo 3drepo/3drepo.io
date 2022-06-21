@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
+const { getModelById, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createModelMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
+const { getRevisionByIdOrTag } = require('../../../models/revisions');
 const { logger } = require('../../../utils/logger');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
@@ -38,6 +39,12 @@ const queueTasksCompleted = async ({
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
+
+		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, corId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+		const { federate } = await getModelById(teamspace, model, { _id: 0, federate: 1 });
+		const event = federate ? chatEvents.CONTAINER_NEW_REVISION : chatEvents.FEDERATION_NEW_REVISION;
+		await createModelMessage(event, { tag, author, timestamp }, teamspace, projectId, model);
 	} catch (err) {
 		// do nothing - the model may have been deleted before the task came back.
 	}
@@ -52,27 +59,10 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, i
 	}
 };
 
-const revisionAdded = async ({ teamspace, project, model, data, isFederation }) => {
-	try {
-		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
-		await createModelMessage(event, data, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
-	}
-};
-
 const revisionUpdated = async ({ teamspace, project, model, data }) => {
 	try {
-		await createModelMessage(chatEvents.CONTAINER_REVISION_UPDATE, data, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
-	}
-};
-
-const modelAdded = async ({ teamspace, project, data, isFederation }) => {
-	try {
-		const event = isFederation ? chatEvents.NEW_FEDERATION : chatEvents.NEW_CONTAINER;
-		await createModelMessage(event, data, teamspace, project);
+		await createModelMessage(chatEvents.CONTAINER_REVISION_UPDATE, { ...data, _id: UUIDToString(data._id) },
+			teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
@@ -94,9 +84,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
 
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
-	subscribe(events.MODEL_IMPORT_FINISHED, revisionAdded);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
-	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
 };
 

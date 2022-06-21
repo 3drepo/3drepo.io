@@ -90,6 +90,13 @@ ChatService.createModelMessage = (event, data, teamspace, projectId, model, send
 	broadcastMessage(eventExchange, message);
 };
 
+ChatService.createProjectMessage = (event, data, teamspace, projectId) => {
+	const project = UUIDToString(projectId);
+	const recipients = [`${teamspace}::${project}`];
+	const message = JSON.stringify({ event, data: { data, teamspace, project }, recipients });
+	broadcastMessage(eventExchange, message);
+};
+
 ChatService.createApp = async (server) => {
 	const { middleware } = await session;
 	const socketServer = RTMsg.createApp(server, middleware, SESSION_HEADER, SocketsManager.addSocket);
