@@ -17,13 +17,39 @@
 import { css } from 'styled-components';
 import {
 	Container,
+	StyledGrid,
+	StyledTypography,
 	StyledDialogContent,
 } from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';
 
 export default css`
 	${Container} {
+		${StyledGrid} {
+			display: flex;
+			justify-content: center;
+		}
+
+		${StyledTypography} {
+			font-weight: 400;
+			font-size: 13px;
+			line-height: 1.125rem;
+			color: ${({ theme }) => theme.palette.base.main};
+		}
+
+		.MuiInputBase-root {
+			svg {
+				/* TODO: fix after new palette is released */
+				color: #C1C8D5;
+				margin-top: -15px;
+			}
+		}
+
+		.MuiSelect-select {
+			margin-top: 0;
+		}
+
 		${StyledDialogContent} {
-			margin-top: 68px;
+			margin-top: 52px;
 		}
 	}
 `;
