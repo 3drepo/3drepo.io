@@ -14,17 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import generalDialogStyles from './generalDialogStyling.overrides';
-import attachResourcesDialog from './attachResourcesDialog.overrides';
-import screenshotDialog from './screenshotDialog.overrides';
-import suggestedTreatmentsDialog from './suggestedTreatmentsDialog.overrides';
+import { css } from 'styled-components';
+import {
+	Container,
+	StyledDialogContent,
+} from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';
 
-export const V4DialogsOverridesContainer = styled.div`
-	display: contents;
-	
-	${generalDialogStyles}
-	${attachResourcesDialog}
-	${screenshotDialog}
-	${suggestedTreatmentsDialog}
+export default css`
+	${Container} {
+		${StyledDialogContent} {
+			margin-top: 68px;
+		}
+	}
 `;
