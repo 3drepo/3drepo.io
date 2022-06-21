@@ -41,7 +41,7 @@ Quota.getQuotaInfo = async (teamspace) => {
 				freeTier = false;
 				dataSize += data;
 
-				if (!closestExpiryDate || expiryDate < closestExpiryDate) {
+				if (expiryDate && (!closestExpiryDate || expiryDate < closestExpiryDate)) {
 					closestExpiryDate = expiryDate;
 				}
 
