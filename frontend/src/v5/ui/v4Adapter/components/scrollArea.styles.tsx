@@ -15,21 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollbarProps } from 'react-custom-scrollbars';
-import { ScrollbarWrapper } from './scrollArea.styles';
+import Scrollbars from 'react-custom-scrollbars';
+import styled from 'styled-components';
+import { COLOR } from '@/v5/ui/themes/theme';
 
-export type IScrollArea = ScrollbarProps & {
-	variant?: 'base' | 'secondary';
-	as?: React.ElementType;
-	hideHorizontal?: boolean;
-};
-
-export const ScrollArea = ({ variant = 'base', hideHorizontal = true, children, ...props }: IScrollArea) => (
-	<ScrollbarWrapper
-		$hidehorizontal={hideHorizontal}
-		variant={variant}
-		{...props}
-	>
-		{children}
-	</ScrollbarWrapper>
-);
+export const ScrollbarWrapper = styled(Scrollbars).attrs({
+	autoHideTimeout: 3000,
+	autoHideDuration: 300,
+	autohide: true,
+	renderThumbVertical: ({ style }) => (
+		<div
+			style={{
+				...style,
+				backgroundColor: COLOR.BASE_LIGHTEST,
+				right: '3px',
+				bottom: '6px',
+				top: '0px',
+				borderRadius: '3px',
+				width: '6px',
+			}}
+		/>
+	),
+})`
+	& > div:last-child > div {
+		z-index: 6;
+		right: 2px !important;
+		/* scrollbar-width: 0px;
+		::-webkit-scrollbar {
+			width: 0;
+		} */
+	}
+`;

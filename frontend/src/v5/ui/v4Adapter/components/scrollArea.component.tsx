@@ -15,21 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollbarProps } from 'react-custom-scrollbars';
+import { IScrollArea } from '@controls/scrollArea/scrollArea.component';
 import { ScrollbarWrapper } from './scrollArea.styles';
 
-export type IScrollArea = ScrollbarProps & {
-	variant?: 'base' | 'secondary';
-	as?: React.ElementType;
-	hideHorizontal?: boolean;
-};
-
-export const ScrollArea = ({ variant = 'base', hideHorizontal = true, children, ...props }: IScrollArea) => (
-	<ScrollbarWrapper
-		$hidehorizontal={hideHorizontal}
-		variant={variant}
-		{...props}
-	>
+export const V4ScrollArea = ({ children, ...props }: IScrollArea) => (
+	<ScrollbarWrapper {...props}>
 		{children}
 	</ScrollbarWrapper>
 );
