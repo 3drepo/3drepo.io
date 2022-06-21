@@ -22,7 +22,7 @@ const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
-const { templates: responseCodesV5 } = require("../../../src/v5/responseCodes.js");
+const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
 
