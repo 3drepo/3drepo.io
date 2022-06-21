@@ -27,6 +27,7 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 export const ViewsIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.VIEWS];
 
@@ -36,7 +37,7 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.VIEWS]}px;
 `;
 
-export const Container = styled.div`
+export const Container = styled(ScrollArea).attrs({ autoHide: true })`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
