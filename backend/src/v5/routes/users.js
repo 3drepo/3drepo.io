@@ -17,7 +17,7 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { respond, writeStreamRespond } = require('../utils/responder');
+const { mimeTypes, respond, writeStreamRespond } = require('../utils/responder');
 const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
 	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
@@ -82,7 +82,8 @@ const getAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const avatarStream = await Users.getAvatarStream(user);
-		writeStreamRespond(req, res, templates.ok, avatarStream.readStream, user, avatarStream.size);
+		writeStreamRespond(req, res, templates.ok, avatarStream.readStream,
+			user, avatarStream.size, { mimeType: mimeTypes.bin });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

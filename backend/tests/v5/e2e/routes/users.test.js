@@ -378,18 +378,18 @@ const testGetAvatar = () => {
 
 		test('should get the avatar if the user has an fs avatar and has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`).expect(200);
-			expect(res.text).toEqual(fsAvatarData);
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 		});
 
 		test('should get the avatar if the user has an gridfs avatar and has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user/avatar?key=${userWithGridFsAvatar.apiKey}`).expect(200);
-			expect(res.text).toEqual(gridFsAvatarData);
+			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
 		});
 
 		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
 			await testSession.post('/v5/login/').send({ user: userWithFsAvatar.user, password: userWithFsAvatar.password });
 			const res = await testSession.get('/v5/user/avatar').expect(200);
-			expect(res.text).toEqual(fsAvatarData);
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 			await testSession.post('/v5/logout/');
 		});
 
@@ -428,7 +428,7 @@ const testUploadAvatar = () => {
 					.expect(templates.ok.status);
 
 				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
-				const resBuffer = Buffer.from(avatarRes.text, 'binary');
+				const resBuffer = avatarRes.body;
 				const imageBuffer = fs.readFileSync(image);
 				expect(resBuffer).toEqual(imageBuffer);
 			});
@@ -447,7 +447,10 @@ const testUploadAvatar = () => {
 				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
 					.expect(templates.ok.status);
 
-				await testSession.get('/v5/user/avatar').expect(templates.ok.status);
+				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
+				const resBuffer = avatarRes.body;
+				const imageBuffer = fs.readFileSync(image);
+				expect(resBuffer).toEqual(imageBuffer);
 			});
 		});
 	});
