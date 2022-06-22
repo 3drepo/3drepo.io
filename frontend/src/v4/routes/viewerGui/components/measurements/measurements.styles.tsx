@@ -34,7 +34,7 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASUREMENTS]}px;
 `;
 
-const ContainerComponent = styled.div`
+export const ContainerComponent = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;

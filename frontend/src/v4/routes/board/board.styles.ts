@@ -22,7 +22,7 @@ import Select from '@mui/material/Select';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
-import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
+import { ViewerPanelContentComponent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
 	height: 100%;
@@ -190,7 +190,7 @@ export const LoaderContainer = styled.div`
 export const FormWrapper = styled.div<{ size: string }>`
 	width: ${({ size }) => size === 'sm' ? 400 : 800}px;
 
-	${ViewerPanelContent} {
+	${ViewerPanelContentComponent} {
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
