@@ -33,14 +33,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _ from 'lodash';
-
 interface Props {
 	groups: any [];
 }
 
 const groupsToTree = (groups) => {
-	const sortedGroups = _.sortBy(groups, 'name');
+	groups.sort((groupA, groupB) => {
+		const depthDiff = groupA.name.split('::').length - groupB.name.split('::').length;
+		if (depthDiff !== 0) {
+			return depthDiff;
+		}
+
+		const nameA = groupA.name.toLowerCase();
+		const nameB = groupB.name.toLowerCase();
+
+		if (nameB === nameA) return 0;
+		return (nameB > nameA ? -1 : 1);
+	});
 
 	const treeDict = {
 	};
@@ -64,33 +73,41 @@ const groupsToTree = (groups) => {
 	//
 	// If if there was some ancestors created, then returns null
 	const createFullPath = (path, dict) => {
-		let lastAncestor = null;
+		let previous = null;
 
 		while (path.length) {
-			const ancestorName = path.join('::');
+			const pathName = path.join('::');
 			const name = path.pop();
-			if (dict[ancestorName]) {
-				lastAncestor = null;
+
+			if (dict[pathName]) {
+				previous = null;
 				break;
 			}
+
 			const groupsContainer = {
 				name,
 				children: [],
 			};
 
-			if (lastAncestor) {
-				groupsContainer.children.push(groupsContainer);
+			if (previous) {
+				groupsContainer.children.push(previous);
+			}
+
+			const parentPathName = path.join('::');
+
+			if (dict[parentPathName]) {
+				dict[parentPathName].children.push(groupsContainer);
 			}
 
 			// eslint-disable-next-line no-param-reassign
-			dict[ancestorName] = groupsContainer;
-			lastAncestor = groupsContainer;
+			dict[pathName] = groupsContainer;
+			previous = groupsContainer;
 		}
 
-		return lastAncestor;
+		return previous;
 	};
 
-	sortedGroups.forEach((group) => {
+	groups.forEach((group) => {
 		// The group path is given by the name like 'dad::child:grandchild'
 		const path = group.name.split('::');
 		path.pop();
@@ -99,7 +116,7 @@ const groupsToTree = (groups) => {
 		if (path.length) {
 			const rootElement = createFullPath(path, treeDict);
 
-			if (rootElement && !rootElement?.children.length) {
+			if (rootElement) {
 				tree.push(rootElement);
 			}
 		}
@@ -107,7 +124,7 @@ const groupsToTree = (groups) => {
 		if (treeDict[parentName]) {
 			treeDict[parentName].children.push(group);
 		} else {
-			tree.unshift(group);
+			tree.push(group);
 		}
 	});
 
@@ -118,7 +135,7 @@ const TreeItem = ({ item }) => {
 	if (item.children) {
 		return (
 			<li>
-				{item.name} ({item.children.length})v
+				<b>{item.name} ({item.children.length})v</b>
 				<Tree tree={item.children} />
 			</li>
 		);
