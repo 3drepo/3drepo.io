@@ -38,4 +38,12 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs({
 			}}
 		/>
 	),
+	renderThumbHorizontal: ({ style }) => (
+		<div
+			style={{
+				...style,
+				display: 'none',
+			}}
+		/>
+	),
 })``;
