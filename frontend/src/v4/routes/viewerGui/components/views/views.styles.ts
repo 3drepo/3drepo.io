@@ -17,6 +17,7 @@
 
 import { MenuItem, MenuList, TextField } from '@mui/material';
 import styled from 'styled-components';
+import { ScrollArea } from '@controls/scrollArea';
 
 import { COLOR } from '../../../../styles';
 
@@ -27,7 +28,6 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ScrollArea } from '@controls/scrollArea';
 
 export const ViewsIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.VIEWS];
 

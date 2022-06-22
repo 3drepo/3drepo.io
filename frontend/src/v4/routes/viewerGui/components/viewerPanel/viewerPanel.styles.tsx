@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { forwardRef, RefObject } from 'react';
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
 import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
@@ -22,7 +23,6 @@ import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component'
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
 import { SubmitButton } from '../../../components/submitButton/submitButton.component';
-import { forwardRef, RefObject } from 'react';
 
 interface IViewerPanelFooter {
 	padding?: string;
