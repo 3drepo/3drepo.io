@@ -22,7 +22,7 @@ import { COLOR } from '@/v5/ui/themes/theme';
 export const ScrollbarWrapper = styled(Scrollbars).attrs({
 	autoHideTimeout: 3000,
 	autoHideDuration: 300,
-	autohide: true,
+	autoHide: true,
 	renderThumbVertical: ({ style }) => (
 		<div
 			style={{
@@ -33,16 +33,8 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs({
 				top: '0px',
 				borderRadius: '3px',
 				width: '6px',
+				zIndex: 10,
 			}}
 		/>
 	),
-})`
-	& > div:last-child > div {
-		z-index: 6;
-		right: 2px !important;
-		/* scrollbar-width: 0px;
-		::-webkit-scrollbar {
-			width: 0;
-		} */
-	}
-`;
+})``;
