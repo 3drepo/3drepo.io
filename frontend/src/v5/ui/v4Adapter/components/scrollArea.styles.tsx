@@ -18,9 +18,10 @@
 import Scrollbars from 'react-custom-scrollbars';
 import styled from 'styled-components';
 import { COLOR } from '@/v5/ui/themes/theme';
+import { isV5 } from '@/v4/helpers/isV5';
 
 export const ScrollbarWrapper = styled(Scrollbars).attrs({
-	autoHideTimeout: 3000,
+	autoHideTimeout: 1000,
 	autoHideDuration: 300,
 	autoHide: true,
 	renderThumbVertical: ({ style }) => (
@@ -28,7 +29,7 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs({
 			style={{
 				...style,
 				backgroundColor: COLOR.BASE_LIGHTEST,
-				right: '3px',
+				right: isV5() ? '3px' : '2px',
 				bottom: '6px',
 				top: '0px',
 				borderRadius: '3px',
