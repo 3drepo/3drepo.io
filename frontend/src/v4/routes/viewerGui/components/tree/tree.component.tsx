@@ -67,7 +67,7 @@ interface IState {
 
 const CustomScrollArea = ({ forwardedRef, style, children, onScroll }) => {
 	const refSetter = useCallback(scrollbarRef => forwardedRef(scrollbarRef?.view || null), [forwardedRef]);
-  
+
 	return (
 		<V4ScrollArea
 			ref={refSetter}
