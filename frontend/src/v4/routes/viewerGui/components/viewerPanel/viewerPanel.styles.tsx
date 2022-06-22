@@ -108,7 +108,7 @@ export const TitleIcon = styled.div`
 	}
 `;
 
-const ViewerPanelContentComponent = styled.div<IViewerPanelContent>`
+export const ViewerPanelContentComponent = styled.div<IViewerPanelContent>`
 	overflow: ${({ scrollDisabled }) => scrollDisabled ? 'hidden' : 'auto'};
 	display: ${({ scrollDisabled }) => scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${({ scrollDisabled }) => scrollDisabled ? 'column' : 'unset'};

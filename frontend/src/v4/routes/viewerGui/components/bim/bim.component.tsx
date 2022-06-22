@@ -25,6 +25,7 @@ import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
 import { getFilters, sortMetadata, transformMetadataToNestedList } from '@/v4/helpers/bim';
 import { renderWhenTrue } from '@/v4/helpers/rendering';
 import { isV5 } from '@/v4/helpers/isV5';
+import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
 import { IMetaRecord } from '@/v4/modules/bim/bim.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
@@ -36,7 +37,7 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { ISelectedFilter } from '../../../components/filterPanel/filterPanel';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContentComponent } from '../viewerPanel/viewerPanel.styles';
 import { Container, Tabs } from './bim.styles';
 import { MetaRecord } from './components/metaRecord/';
 
@@ -178,13 +179,15 @@ export class Bim extends PureComponent<IProps, any> {
 					<Tab label={isV5() ? 'All data' : 'All'} />
 					<Tab label="Starred" />
 				</Tabs>
-				<ViewerPanelContent>
-					<Container>
-						{this.renderMetadata()}
-						{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
-						{this.renderNotFound(areFiltersActive && !hasMetadata)}
-					</Container>
-				</ViewerPanelContent>
+				<V4ScrollArea autoHeight autoHeightMax={'100%'}>
+					<ViewerPanelContentComponent>
+						<Container>
+							{this.renderMetadata()}
+							{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
+							{this.renderNotFound(areFiltersActive && !hasMetadata)}
+						</Container>
+					</ViewerPanelContentComponent>
+				</V4ScrollArea>
 			</>
 		);
 	};
