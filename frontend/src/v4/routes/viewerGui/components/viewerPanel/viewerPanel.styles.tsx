@@ -17,10 +17,12 @@
 
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
+import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
 import { SubmitButton } from '../../../components/submitButton/submitButton.component';
+import { forwardRef, RefObject } from 'react';
 
 interface IViewerPanelFooter {
 	padding?: string;
@@ -106,13 +108,21 @@ export const TitleIcon = styled.div`
 	}
 `;
 
-export const ViewerPanelContent = styled.div<IViewerPanelContent>`
+const ViewerPanelContentComponent = styled.div<IViewerPanelContent>`
 	overflow: ${({ scrollDisabled }) => scrollDisabled ? 'hidden' : 'auto'};
 	display: ${({ scrollDisabled }) => scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${({ scrollDisabled }) => scrollDisabled ? 'column' : 'unset'};
 	position: relative;
 	flex: 1;
 `;
+
+export const ViewerPanelContent = forwardRef(({ children, ...props }: any, ref: RefObject<any>) => (
+	<V4ScrollArea>
+		<ViewerPanelContentComponent ref={ref} {...props}>
+			{children}
+		</ViewerPanelContentComponent>
+	</V4ScrollArea>
+));
 
 export const LoaderContainer = styled(ViewerPanelContent)<IPanel>`
 	padding: 24px;
