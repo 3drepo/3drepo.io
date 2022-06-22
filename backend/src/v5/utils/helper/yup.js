@@ -38,7 +38,7 @@ YupHelper.types.strings.code = YupHelper.validators.alphanumeric(
 
 YupHelper.types.degrees = Yup.number().min(0).max(360);
 
-YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(65).strict(true));
+YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(63).strict(true));
 
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
