@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { RefObject, forwardRef } from 'react';
 import styled from 'styled-components';
-
+import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -33,12 +34,20 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASUREMENTS]}px;
 `;
 
-export const Container = styled.div`
+const ContainerComponent = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
 	flex: auto;
 `;
+
+export const Container = forwardRef(({ children, ...props }: any, ref: RefObject<any>) => (
+	<V4ScrollArea>
+		<ContainerComponent ref={ref} {...props}>
+			{children}
+		</ContainerComponent>
+	</V4ScrollArea>
+));
 
 export const ViewerBottomActions = styled.div`
 	height: 100%;
