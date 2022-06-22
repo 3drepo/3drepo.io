@@ -43,7 +43,7 @@ const queueTasksCompleted = async ({
 		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, corId,
 			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 		const { federate } = await getModelById(teamspace, model, { _id: 0, federate: 1 });
-		const event = federate ? chatEvents.CONTAINER_NEW_REVISION : chatEvents.FEDERATION_NEW_REVISION;
+		const event = federate ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 		await createModelMessage(event, { tag, author, timestamp }, teamspace, projectId, model);
 	} catch (err) {
 		// do nothing - the model may have been deleted before the task came back.

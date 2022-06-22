@@ -207,19 +207,54 @@ const testGetFederations = () => {
 
 const testAddModel = () => {
 	describe('Add model', () => {
-		test('should return inserted ID on success', async () => {
+		test('should return inserted ID on success when a container is added', async () => {
 			const fn = jest.spyOn(db, 'insertOne');
 
-			const teamspace = 'someTS';
-			const res = await Model.addModel(teamspace, {});
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const data = { properties: { code: generateRandomString() },
+				type: generateRandomString(),
+				federate: false };
+			const res = await Model.addModel(teamspace, project, data);
 
-			expect(fn.mock.calls.length).toBe(1);
+			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('settings');
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
-
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
+				project,
+				model: fn.mock.calls[0][2]._id,
+				data: { code: data.properties.code, category: data.type },
+				isFederation: false });
+		});
+	});
+
+	describe('Add model', () => {
+		test('should return inserted ID on success when a federation is added', async () => {
+			const fn = jest.spyOn(db, 'insertOne');
+
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const data = { properties: { code: generateRandomString() }, desc: generateRandomString(), federate: true };
+			const res = await Model.addModel(teamspace, project, data);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
+			expect(res).toEqual(fn.mock.calls[0][2]._id);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
+				project,
+				model: fn.mock.calls[0][2]._id,
+				data: { code: data.properties.code, description: data.desc },
+				isFederation: true });
 		});
 	});
 };

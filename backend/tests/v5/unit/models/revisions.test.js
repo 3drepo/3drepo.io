@@ -126,11 +126,11 @@ const testUpdateRevisionStatus = () => {
 	};
 
 	describe('UpdateRevisionStatus', () => {
-		const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
-		const newStatus = false;
 		test('Should update the void status of a revision', async () => {
+			const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
+			const newStatus = false;
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(), 
+			await Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(),
 				generateRandomString(), revision._id, newStatus);
 			checkResults(fn, revision._id, newStatus);
 		});
@@ -139,8 +139,8 @@ const testUpdateRevisionStatus = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
 			const revisionId = generateRandomString();
 			const newStatus = true;
-			await expect(Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(), 
-				generateRandomString(),	revisionId, newStatus)).rejects.toEqual(templates.revisionNotFound);
+			await expect(Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(),
+				generateRandomString(), revisionId, newStatus)).rejects.toEqual(templates.revisionNotFound);
 			checkResults(fn, revisionId, newStatus);
 		});
 	});
