@@ -26,13 +26,14 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../common/utils');
 const FS = require('fs');
 const Path = require('path');
+const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
 
 const { find } = require(`${v5Path}/handler/db`);
 
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
 const findMembersInTS = async (teamspace) => {
-	const results = await find('admin', 'system.users', { 'roles.db': teamspace }, { user: 1, 'customData.lastLoginAt': 1 });
+	const results = await find(USERS_DB_NAME, 'system.users', { 'roles.db': teamspace }, { user: 1, 'customData.lastLoginAt': 1 });
 	return results.map(({ user, customData: { lastLoginAt } }) => ({ user, lastLoginAt }));
 };
 

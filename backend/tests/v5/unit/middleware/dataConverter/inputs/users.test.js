@@ -27,6 +27,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
 const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 const MockExpressRequest = require('mock-express-request');
