@@ -25,6 +25,7 @@ import InvertColors from '@mui/icons-material/InvertColors';
 import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
 
+import { GroupsListComponent } from '@/v5/ui/routes/viewer/groups/groupsListComponent';
 import {
 	DEFAULT_OVERRIDE_COLOR,
 	GROUP_PANEL_NAME,
@@ -152,29 +153,33 @@ export class Groups extends PureComponent<IProps> {
 		);
 	}
 
-	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.props.groups.map((group) => (
-				<GroupListItem
-					{...group}
-					created=""
-					key={group._id}
-					hideThumbnail
-					statusColor={this.getOverriddenColor(group._id, group.color)}
-					highlighted={this.isHighlighted(group)}
-					roleColor={group.color}
-					onItemClick={this.setActiveGroup(group)}
-					onArrowClick={this.handleShowGroupDetails(group)}
-					active={this.isActive(group)}
-					modelLoaded={this.props.isModelLoaded}
-					renderActions={this.renderGroupActions(group)}
-					hasViewPermission={stubTrue}
-					panelName={GROUP_PANEL_NAME}
-					extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-				/>
-		));
+	public renderGroupsList = renderWhenTrue(() =>
+		<GroupsListComponent groups={this.props.groups} />
+	);
 
-		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
-	});
+
+	// public renderGroupsList = renderWhenTrue(() => {
+	// 	const Items = this.props.groups.map((group) => (
+	// 			<GroupListItem
+	// 				{...group}
+	// 				created=""
+	// 				key={group._id}
+	// 				hideThumbnail
+	// 				statusColor={this.getOverriddenColor(group._id, group.color)}
+	// 				highlighted={this.isHighlighted(group)}
+	// 				roleColor={group.color}
+	// 				onItemClick={this.setActiveGroup(group)}
+	// 				onArrowClick={this.handleShowGroupDetails(group)}
+	// 				active={this.isActive(group)}
+	// 				modelLoaded={this.props.isModelLoaded}
+	// 				renderActions={this.renderGroupActions(group)}
+	// 				hasViewPermission={stubTrue}
+	// 				panelName={GROUP_PANEL_NAME}
+	// 				extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
+	// 			/>
+	// 	));
+	// 	return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
+	// });
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No groups have been created yet</EmptyStateInfo>
