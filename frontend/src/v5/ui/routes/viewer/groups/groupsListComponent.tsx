@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SyntheticEvent, useState } from 'react';
+
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  *  Copyright (C) 2022 3D Repo Ltd
@@ -86,6 +88,7 @@ const groupsToTree = (groups) => {
 
 			const groupsContainer = {
 				name,
+				pathName,
 				children: [],
 			};
 
@@ -131,12 +134,26 @@ const groupsToTree = (groups) => {
 	return tree;
 };
 
-const TreeItem = ({ item }) => {
+const TreeItem = ({ item, collapse }) => {
 	if (item.children) {
+		const [collapseDict, setCollapse] = collapse;
+		const hidden = collapseDict[item.pathName] ?? true;
+		const hiddenIcon = hidden ? '^' : 'v';
+
+		const onClickItem = (event: SyntheticEvent) => {
+			event.stopPropagation();
+			setCollapse({ ...collapseDict, [item.pathName]: !hidden });
+		};
+
 		return (
-			<li>
-				<b>{item.name} ({item.children.length})v</b>
-				<Tree tree={item.children} />
+			<li
+				onClick={onClickItem}
+				onKeyDown={onClickItem}
+				role="treeitem"
+				style={{ cursor: 'default' }}
+			>
+				<b>{item.name} ({item.children.length})  {hiddenIcon}</b>
+				{!hidden && <Tree tree={item.children} collapse={collapse} />}
 			</li>
 		);
 	}
@@ -144,13 +161,15 @@ const TreeItem = ({ item }) => {
 	return (<li> {item.name} objects: {item.objects.length}</li>);
 };
 
-const Tree = ({ tree }) => (
+const Tree = ({ tree, collapse }) => (
 	<ul>
-		{tree.map((item) => (<TreeItem item={item} />))}
+		{tree.map((item) => (<TreeItem item={item} collapse={collapse} />))}
 	</ul>
 );
 
 export const GroupsListComponent = ({ groups }:Props) => {
 	const tree = groupsToTree(groups);
-	return (<Tree tree={tree} />);
+	const collapse = useState({});
+
+	return (<Tree tree={tree} collapse={collapse} />);
 };
