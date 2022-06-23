@@ -45,8 +45,10 @@ export default css`
 				
 				& ~ span {
 					margin-top: 0;
+					padding-top: 2px;
 					min-height: 24px;
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+					word-break: break-word;
 				}
 				
 				& ~ * {
@@ -55,7 +57,7 @@ export default css`
 					background: ${({ theme }) => theme.palette.primary.contrast};
 					min-height: 23px;
 					box-sizing: border-box;
-					line-height: 22px;
+					line-height: 18px;
 					padding: 0 10px;
 					margin: -1px 0 0;
 					font-size: 12px;
