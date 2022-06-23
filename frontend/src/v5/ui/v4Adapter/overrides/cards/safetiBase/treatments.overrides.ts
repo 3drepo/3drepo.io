@@ -52,8 +52,8 @@ export default css`
 				& ~ * {
 					position: relative;
 					border-radius: 4px;
-					background: #fff;
-					height: 23px;
+					background: ${({ theme }) => theme.palette.primary.contrast};
+					min-height: 23px;
 					box-sizing: border-box;
 					line-height: 22px;
 					padding: 0 10px;
