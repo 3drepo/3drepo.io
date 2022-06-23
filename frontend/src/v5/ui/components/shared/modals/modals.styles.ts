@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
 
 export const ModalContainer = styled.div`
@@ -24,15 +23,11 @@ export const ModalContainer = styled.div`
 	flex-direction: column;
 	align-items: center;
 	min-width: 633px;
-	padding: 43px 0;
+	padding: 43px 0 25px;
 `;
 
 export const Actions = styled.div`
 	display: flex;
-`;
-
-export const Content = styled(DialogContent)`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const Details = styled(Typography).attrs({
