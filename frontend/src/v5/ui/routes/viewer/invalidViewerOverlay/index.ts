@@ -15,4 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NoRevisionOverlay } from './noRevisionOverlay.component';
+export { InvalidContainerOverlay } from './invalidContainerOverlay.component';
+export { InvalidFederationOverlay } from './invalidFederationOverlay.component';

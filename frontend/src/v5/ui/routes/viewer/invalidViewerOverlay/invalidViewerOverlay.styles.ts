@@ -16,30 +16,23 @@
  */
 
 import { CentredContainer } from '@controls/centredContainer';
-import { FormattedMessage } from 'react-intl';
-import { Heading, NoRevisionBackground, Subheading } from './noRevisionOverlay.styles';
+import { Typography } from '@controls/typography';
+import styled from 'styled-components';
 
-type INoRevision = {
-	message: string;
-	isContainer: boolean;
-};
+export const OverlayContainer = styled(CentredContainer)`
+	background: transparent;
+	text-align: center;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
 
-export const NoRevisionOverlay = ({ message, isContainer }: INoRevision) => {
-	const viewType = isContainer ? 'Container' : 'Federation';
+export const Heading = styled(Typography).attrs({
+	variant: 'h1',
+})`
+	margin-bottom: 10px;
+`;
 
-	return (
-		<NoRevisionBackground>
-			<CentredContainer>
-				<Heading>
-					<FormattedMessage
-						id="noRevisionOverlay.heading"
-						defaultMessage={`The ${viewType} is empty`}
-					/>
-				</Heading>
-				<Subheading>
-					{message}
-				</Subheading>
-			</CentredContainer>
-		</NoRevisionBackground>
-	);
-};
+export const Subheading = styled(Typography).attrs({
+	variant: 'h3',
+})`
+	max-width: 450px;
+`;
