@@ -45,15 +45,15 @@ export default css`
 				
 				& ~ span {
 					margin-top: 0;
-					height: 24px;
+					min-height: 24px;
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 				}
 				
 				& ~ * {
 					position: relative;
 					border-radius: 4px;
-					background: #fff;
-					height: 23px;
+					background: ${({ theme }) => theme.palette.primary.contrast};
+					min-height: 23px;
 					box-sizing: border-box;
 					line-height: 22px;
 					padding: 0 10px;
