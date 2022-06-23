@@ -261,32 +261,56 @@ const testAddModel = () => {
 
 const testDeleteModel = () => {
 	describe('Delete model', () => {
-		test('should succeed', async () => {
-			const expectedData = { deletedCount: 1 };
-			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+		test('should succeed (federation)', async () => {
+			const expectedData = { _id: generateRandomString(), federate: true };
+			const fn = jest.spyOn(db, 'findOneAndDelete').mockResolvedValue(expectedData);
 
-			const teamspace = 'someTS';
-			const modelId = 'someModel';
-			const res = await Model.deleteModel(teamspace, modelId);
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model =  generateRandomString();
+			const res = await Model.deleteModel(teamspace, project, model);
 			expect(res).toEqual(undefined);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model}, { federate: 1 } );
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, { 
+				teamspace,
+				project, 
+				model, 
+				isFederation: true
+			});
+		});
+
+		test('should succeed (container)', async () => {
+			const expectedData = { _id: generateRandomString(), federate: false };
+			const fn = jest.spyOn(db, 'findOneAndDelete').mockResolvedValue(expectedData);
+
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model =  generateRandomString();
+			const res = await Model.deleteModel(teamspace, project, model);
+			expect(res).toEqual(undefined);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model}, { federate: 1 } );
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, { 
+				teamspace,
+				project, 
+				model, 
+				isFederation: false
+			});
 		});
 
 		test('should return model not found with invalid model ID', async () => {
-			const expectedData = { deletedCount: 0 };
-			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'findOneAndDelete').mockResolvedValue(undefined);
 
-			const teamspace = 'someTS';
-			const modelId = 'badModel';
-			await expect(Model.deleteModel(teamspace, modelId))
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model =  generateRandomString();
+			await expect(Model.deleteModel(teamspace, project, model))
 				.rejects.toEqual(templates.modelNotFound);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model}, { federate: 1 } )
 		});
 	});
 };

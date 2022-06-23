@@ -35,10 +35,7 @@ const Containers = { ...Groups, ...Views };
 
 Containers.addContainer = addModel;
 
-Containers.deleteContainer = async (teamspace, project, model) => {
-	await deleteModel(teamspace, project, model);
-	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: false });
-};
+Containers.deleteContainer = deleteModel;
 
 Containers.getContainerList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

@@ -33,10 +33,7 @@ const Federations = { ...Groups, ...Views };
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });
 
-Federations.deleteFederation = async (teamspace, project, model) => {
-	await deleteModel(teamspace, project, model);
-	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: true });
-};
+Federations.deleteFederation = deleteModel;
 
 Federations.getFederationList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

@@ -18,7 +18,7 @@
 const { getModelById, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
-const { createModelMessage } = require('../../chat');
+const { createModelMessage, createProjectMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { getRevisionByIdOrTag } = require('../../../models/revisions');
@@ -63,11 +63,24 @@ const revisionUpdated = async ({ teamspace, project, model, data }) => {
 };
 
 const revisionAdded = async({ teamspace, project, model, revision, isFederation }) => {
-	const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, revision,
-		{ _id: 0, tag: 1, author: 1, timestamp: 1 });
-	const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
-	await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model);
-}
+	try {
+		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, revision,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
+		await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
+const modelAdded = async ({ teamspace, project, model, data, isFederation }) => {
+	try {
+		const event = isFederation ? chatEvents.NEW_FEDERATION : chatEvents.NEW_CONTAINER;
+		await createProjectMessage(event, { ...data, _id: model }, teamspace, project);
+	} catch (err) {
+		logger.logError(`Failed to send a project message to queue: ${err?.message}`);
+	}
+};
 
 const modelDeleted = async ({ teamspace, project, model, isFederation }) => {
 	try {
@@ -87,6 +100,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
 	subscribe(events.NEW_REVISION, revisionAdded);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
+	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
 };
 

@@ -33,7 +33,7 @@ ModelList.addModel = async (teamspace, project, data) => {
 };
 
 ModelList.deleteModel = async (teamspace, project, model) => {
-	await removeModelData(teamspace, model);
+	await removeModelData(teamspace, project, model);
 	await removeModelFromProject(teamspace, project, model);
 };
 

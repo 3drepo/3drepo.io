@@ -24,7 +24,7 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const SETTINGS_COL = 'settings';
-const deleteOneModel = (ts, query) => db.deleteOne(ts, SETTINGS_COL, query);
+const findAndDeleteOneModel = (ts, query, projection) => db.findOneAndDelete(ts, SETTINGS_COL, query, projection);
 const findOneModel = (ts, query, projection) => db.findOne(ts, SETTINGS_COL, query, projection);
 const findModels = (ts, query, projection, sort) => db.find(ts, SETTINGS_COL, query, projection, sort);
 const insertOneModel = (ts, data) => db.insertOne(ts, SETTINGS_COL, data);
@@ -51,12 +51,14 @@ Models.addModel = async (teamspace, project, data) => {
 	return _id;
 };
 
-Models.deleteModel = async (ts, model) => {
-	const { deletedCount } = await deleteOneModel(ts, { _id: model });
+Models.deleteModel = async (teamspace, project, model) => {
+	const deletedModel = await findAndDeleteOneModel(teamspace, { _id: model }, { federate: 1 });
 
-	if (deletedCount === 0) {
+	if (!deletedModel) {
 		throw templates.modelNotFound;
 	}
+
+	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: !!deletedModel.federate });
 };
 
 Models.getModelByQuery = async (ts, query, projection) => {
