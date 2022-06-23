@@ -15,14 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllRemovableEntriesByType, getRefEntry } = require('../models/fileRefs');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
+const { getAllRemovableEntriesByType, getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
+const config = require('../utils/config');
 const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
 const FilesManager = {};
+
+FilesManager.fileExists = async (filename) => {
+	try {
+		await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, filename);
+		return true;
+	} catch {
+		return false;
+	}
+};
 
 const removeFiles = (teamspace, collection, storageType, links) => {
 	switch (storageType) {
@@ -65,10 +76,24 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 	await Promise.all(removeProms);
 };
 
+FilesManager.getFile = async (teamspace, collection, fileName) => {
+	const { type, link } = await getRefEntry(teamspace, collection, fileName);
+
+	switch (type) {
+	case 'fs':
+		return FSHandler.getFile(link);
+	case 'gridfs':
+		return GridFSHandler.getFile(teamspace, collection, link);
+	default:
+		logger.logError(`Unrecognised external service: ${type}`);
+		throw templates.fileNotFound;
+	}
+};
+
 FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	const { type, link, size } = await getRefEntry(teamspace, collection, fileName);
-
 	let readStream;
+
 	switch (type) {
 	case 'fs':
 		readStream = await FSHandler.getFileStream(link);
@@ -82,4 +107,30 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	}
 	return { readStream, size };
 };
+
+FilesManager.storeFile = async (teamspace, collection, id, data) => {
+	try {
+		const existingRef = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, id);
+		await removeRef(USERS_DB_NAME, AVATARS_COL_NAME, id);
+		await removeFiles(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
+	} catch {
+		// do nothing if existing avatar does not exist
+	}
+	let refInfo;
+
+	switch (config.defaultStorage) {
+	case 'fs':
+		refInfo = await FSHandler.storeFile(data);
+		break;
+	case 'gridfs':
+		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
+		break;
+	default:
+		logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
+		throw templates.unknown;
+	}
+
+	await insertRef(teamspace, collection, { ...refInfo, _id: id });
+};
+
 module.exports = FilesManager;

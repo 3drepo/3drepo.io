@@ -51,6 +51,10 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							fontSize: '13px',
+							textTransform: 'lowercase',
+							':first-letter': {
+								textTransform: 'uppercase',
+							},
 						},
 					},
 				},
@@ -125,6 +129,32 @@ export const theme = createTheme(
 								margin: 0,
 								'.react-autosuggest__suggestion': {
 									height: '34px',
+								},
+							},
+							'&.react-autosuggest__suggestions-container': {
+								boxShadow: 'none',
+							},
+							'&.color-picker__panel': { // Colour picker modal
+								'.MuiInput-root': {
+									border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+									borderRadius: 5,
+									padding: '0 7px',
+									width: 'auto',
+									'.MuiInput-input': {
+										fontSize: 12,
+										marginLeft: -13,
+										paddingRight: '0 !important',
+									},
+									'.MuiInputAdornment-positionEnd': {
+										margin: '0 0 0 -30px',
+									},
+								},
+								'.MuiSlider-root': {
+									width: 145,
+									marginRight: 15,
+								},
+								'.MuiCheckbox-root': {
+									margin: '8px 8px 8px -8px',
 								},
 							},
 						},

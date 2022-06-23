@@ -103,7 +103,7 @@ function* kickedOut() {
 	yield put(DialogsActions.open('warning', {
 		title: formatMessage({
 			id: 'auth.logout.kickedOutTitle',
-			defaultMessage: 'You\' ve been logged out',
+			defaultMessage: 'You\'ve been logged out',
 		}),
 		message: formatMessage({
 			id: 'auth.logout.kickedOutMessage',
