@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { goBack, push } from 'connected-react-router';
 import { matchPath } from 'react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
