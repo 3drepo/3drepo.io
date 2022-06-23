@@ -14,9 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	margin: 16px;
+export const CardList = styled.ul`
+	flex-direction: row;
+	justify-content: center;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	width: clamp(40px, 85vw, 798px);
+	margin-bottom: auto;
+	margin-top: 150px;
 `;
+
