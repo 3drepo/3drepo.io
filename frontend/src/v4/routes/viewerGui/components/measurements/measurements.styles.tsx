@@ -17,7 +17,7 @@
 
 import { RefObject, forwardRef } from 'react';
 import styled from 'styled-components';
-import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -42,11 +42,11 @@ export const ContainerComponent = styled.div`
 `;
 
 export const Container = forwardRef(({ children, ...props }: any, ref: RefObject<any>) => (
-	<V4ScrollArea>
+	<ViewerScrollArea>
 		<ContainerComponent ref={ref} {...props}>
 			{children}
 		</ContainerComponent>
-	</V4ScrollArea>
+	</ViewerScrollArea>
 ));
 
 export const ViewerBottomActions = styled.div`

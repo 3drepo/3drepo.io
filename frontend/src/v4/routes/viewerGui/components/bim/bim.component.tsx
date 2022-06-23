@@ -25,7 +25,7 @@ import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
 import { getFilters, sortMetadata, transformMetadataToNestedList } from '@/v4/helpers/bim';
 import { renderWhenTrue } from '@/v4/helpers/rendering';
 import { isV5 } from '@/v4/helpers/isV5';
-import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import { IMetaRecord } from '@/v4/modules/bim/bim.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
@@ -179,7 +179,7 @@ export class Bim extends PureComponent<IProps, any> {
 					<Tab label={isV5() ? 'All data' : 'All'} />
 					<Tab label="Starred" />
 				</Tabs>
-				<V4ScrollArea autoHeight autoHeightMax={'100%'}>
+				<ViewerScrollArea autoHeight autoHeightMax={'100%'}>
 					<ViewerPanelContentComponent>
 						<Container>
 							{this.renderMetadata()}
@@ -187,7 +187,7 @@ export class Bim extends PureComponent<IProps, any> {
 							{this.renderNotFound(areFiltersActive && !hasMetadata)}
 						</Container>
 					</ViewerPanelContentComponent>
-				</V4ScrollArea>
+				</ViewerScrollArea>
 			</>
 		);
 	};

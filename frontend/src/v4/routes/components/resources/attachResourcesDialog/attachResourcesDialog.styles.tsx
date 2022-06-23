@@ -19,7 +19,7 @@ import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { isV5 } from '@/v4/helpers/isV5';
-import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
@@ -56,11 +56,11 @@ export const ResourcesListContainerComponent = styled.div`
 `;
 
 export const ResourcesListContainer = ({ children }) => (
-	<V4ScrollArea autoHeight autoHeightMax={isV5() ? 200 : 114}>
+	<ViewerScrollArea autoHeight autoHeightMax={isV5() ? 200 : 114}>
 		<ResourcesListContainerComponent>
 			{children}
 		</ResourcesListContainerComponent>
-	</V4ScrollArea>
+	</ViewerScrollArea>
 );
 
 export const ResourcesListScroller = styled.div`

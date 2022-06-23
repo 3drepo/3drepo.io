@@ -18,7 +18,7 @@
 import { forwardRef, RefObject } from 'react';
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
-import { V4ScrollArea } from '@/v5/ui/v4Adapter/components/scrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
@@ -117,11 +117,11 @@ export const ViewerPanelContentComponent = styled.div<IViewerPanelContent>`
 `;
 
 export const ViewerPanelContent = forwardRef(({ children, ...props }: any, ref: RefObject<any>) => (
-	<V4ScrollArea>
+	<ViewerScrollArea>
 		<ViewerPanelContentComponent ref={ref} {...props}>
 			{children}
 		</ViewerPanelContentComponent>
-	</V4ScrollArea>
+	</ViewerScrollArea>
 ));
 
 export const LoaderContainer = styled(ViewerPanelContent)<IPanel>`

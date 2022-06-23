@@ -16,9 +16,9 @@
  */
 
 import { IScrollArea } from '@controls/scrollArea/scrollArea.component';
-import { ScrollbarWrapper } from './scrollArea.styles';
+import { ScrollbarWrapper } from './viewerScrollArea.styles';
 
-export const V4ScrollArea = ({ children, ...props }: IScrollArea) => (
+export const ViewerScrollArea = ({ children, ...props }: IScrollArea) => (
 	<ScrollbarWrapper {...props}>
 		{children}
 	</ScrollbarWrapper>
