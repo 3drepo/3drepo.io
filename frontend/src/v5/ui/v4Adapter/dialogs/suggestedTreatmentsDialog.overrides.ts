@@ -17,10 +17,15 @@
 import { css } from 'styled-components';
 import {
 	Container,
+	Label,
 	StyledGrid,
 	StyledTypography,
 	StyledDialogContent,
+	Description,
+	ExpandButton,
 } from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';
+import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
+import { labelButtonSecondaryStyles } from '@controls/button/button.styles';
 
 export default css`
 	${Container} {
@@ -29,7 +34,7 @@ export default css`
 			justify-content: center;
 		}
 
-		${StyledTypography} {
+		${Label} ${StyledTypography} {
 			font-weight: 400;
 			font-size: 13px;
 			line-height: 1.125rem;
@@ -50,6 +55,56 @@ export default css`
 
 		${StyledDialogContent} {
 			margin-top: 52px;
+			
+			& * {
+				font-family: ${({ theme }) => theme.typography.fontFamily};
+				text-transform: none;
+				letter-spacing: normal;
+			}
+
+			& > ul {
+				padding: 0 24px;
+			}
+
+			.MuiListItemText-root * {
+				font-size: 0.75rem;
+			}
+
+			// title
+			.MuiListItemText-primary {
+				font-size: 0.875rem;
+				font-weight: 500;
+				margin-bottom: 4px;
+			}
+
+			${Description} {
+				color: ${({ theme }) => theme.palette.base.main};
+			}
+
+			${ExpandButton} {
+				margin-top: 12px;
+				font-weight: 500;
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+
+			${LabelButton} {
+				${labelButtonSecondaryStyles}
+				border-radius: 5px;
+				padding: 8px 15px;
+			}
+
+			${StyledTypography} {
+				color: ${({ theme }) => theme.palette.base.dark};
+			}
+
+			// "Stage:" & "Type"
+			.MuiTypography-noWrap {
+				font-weight: 600;
+
+				& > span {
+					font-weight: 400;
+				}
+			}
 		}
 	}
 `;
