@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,8 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const ExternalServices = require(`${v4Path}/handler/externalServices`);
+/* eslint-disable implicit-arrow-linebreak */
 
-module.exports = ExternalServices;
+import { ContainerSettings } from '@/v5/store/containers/containers.types';
+import { ContainersActionsDispatchers } from '../actionsDispatchers/containersActions.dispatchers';
+import { subscribeToRoomEvent } from './realtime.service';
+
+export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:string, containerId:string) =>
+	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerSettingsUpdate',
+		(settings: ContainerSettings) =>
+			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));

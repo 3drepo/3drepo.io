@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const addAdminJob = require('./addAdminJob');
-const addAndAssignDefaultRole = require('./addAndAssignDefaultRole');
-const storeUserAvatarInFileshare = require('./storeUserAvatarInFileshare');
+const Invitations = {};
+const db = require('../handler/db');
 
-const scripts = [
-	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
-	{ script: addAndAssignDefaultRole, desc: 'Add Default role and assign it to all users' },
-	{ script: storeUserAvatarInFileshare, desc: 'Store user avatar in fileshare' },
-];
+const COL_NAME = 'invitations';
 
-module.exports = scripts;
+const findMany = (query, projection, sort) => db.find('admin', COL_NAME, query, projection, sort);
+
+Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
+
+module.exports = Invitations;

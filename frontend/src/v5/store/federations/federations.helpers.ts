@@ -81,7 +81,7 @@ export const prepareFederationsData = (
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
-}: FederationBackendSettings) => ({
+}: FederationBackendSettings):FederationSettings => ({
 	surveyPoint: surveyPoints?.[0],
 	...otherProps,
 });

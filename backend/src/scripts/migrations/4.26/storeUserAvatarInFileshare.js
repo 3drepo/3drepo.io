@@ -17,35 +17,30 @@
 
 const { v5Path } = require('../../../interop');
 const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
+const { uploadAvatar } = require('../../../v5/processors/users');
+const { getTeamspaceList } = require('../../utils');
 
 const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
-const { DEFAULT } = require(`${v5Path}/models/roles.constants`);
 
-const createDefaultRole = async () => {
-	const roleFound = await db.findOne(USERS_DB_NAME, 'system.roles', { _id: `admin.${DEFAULT}` });
+const storeUserAvatarInFileshare = async (username) => {
+	const user = await db.findOneAndUpdate(USERS_DB_NAME, 'system.users',
+		{ user: username, 'customData.avatar': { $type: 'object' } },
+		{ $unset: { 'customData.avatar': 1 } },
+		{ 'customData.avatar': 1, user: 1 });
 
-	if (!roleFound) {
-		const createRoleCmd = { createRole: DEFAULT, privileges: [], roles: [] };
-		await db.runCommand(USERS_DB_NAME, createRoleCmd);
+	if (user) {
+		logger.logInfo(`\t\t-${username}`);
+		await uploadAvatar(user.user, user.customData.avatar.data.buffer);
 	}
 };
 
-const addAndAssignDefaultRole = async () => {
-	const users = await db.find(USERS_DB_NAME, 'system.users',
-		{ 'roles.role': { $ne: DEFAULT } }, { user: 1 });
-
-	const role = { role: DEFAULT, db: USERS_DB_NAME };
-	await Promise.all(users.map(async ({ user }) => {
-		logger.logInfo(`\t\t-${user}`);
-		const grantRoleCmd = { grantRolesToUser: user, roles: [role] };
-		await db.runCommand(USERS_DB_NAME, grantRoleCmd);
-	}));
-};
-
 const run = async () => {
-	await createDefaultRole();
-	await addAndAssignDefaultRole();
+	const teamspaces = await getTeamspaceList();
+	for (let i = 0; i < teamspaces.length; ++i) {
+		// eslint-disable-next-line no-await-in-loop
+		await storeUserAvatarInFileshare(teamspaces[i]);
+	}
 };
 
 module.exports = run;

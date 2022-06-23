@@ -17,8 +17,8 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { validateAvatarFile, validateForgotPasswordData, validateLoginData, validateResetPasswordData,
-	validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
+const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
+	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
@@ -92,14 +92,15 @@ const getAvatar = async (req, res) => {
 	}
 };
 
-const uploadAvatar = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.uploadAvatar(user, req.file.buffer).then(() => {
+const uploadAvatar = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		await Users.uploadAvatar(user, req.file.buffer);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 const forgotPassword = async (req, res) => {

@@ -27,6 +27,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
 const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 const MockExpressRequest = require('mock-express-request');
@@ -270,6 +271,7 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
 		[{ body: { ...newUserData, email: generateRandomString() } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { ...newUserData, username: generateRandomString(64) } }, false, 'with too large username', templates.invalidArguments],
 		[{ body: { ...newUserData, firstName: generateRandomString(50) } }, false, 'with too large firstName', templates.invalidArguments],
 		[{ body: { ...newUserData, lastName: generateRandomString(50) } }, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],

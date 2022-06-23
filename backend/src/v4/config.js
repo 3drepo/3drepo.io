@@ -162,6 +162,8 @@ if (config.db.host.length > 1 && !config.db.replicaSet) {
 	process.exit(1);
 }
 
+config.defaultStorage = config.defaultStorage || (config.fs ? "fs" : "gridfs");
+
 let multipleAPIServer = false;
 
 for (let i = 0; i < config.servers.length; i++) {
