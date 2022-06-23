@@ -57,18 +57,27 @@ export const MainRoute = () => {
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
 				</Route>
-				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
+				<AuthenticatedRoute exact path={`${path}/dashboard`}>
 					<TeamspaceSelection />
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project?`}>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace?`}>
 					<DashboardLayout>
-						<Route path={`${path}/dashboard/:teamspace/`}>
-							<TeamspaceContent />
-						</Route>
 						<Switch>
-							<Route exact path={`${path}/dashboard/:teamspace/t/settings`}>
+							<Route exact path={`${path}/dashboard/:teamspace`}>
+								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
+							</Route>
+							<Route exact path={`${path}/dashboard/:teamspace/t`}>
+								<Redirect to={`${discardSlash(pathname)}/projects`} />
+							</Route>
+							<Route path={`${path}/dashboard/:teamspace`}>
 								<TeamspaceContent />
 							</Route>
+						</Switch>
+					</DashboardLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace?/:project?`}>
+					<DashboardLayout>
+						<Switch>
 							<Route exact path={`${path}/dashboard/:teamspace/:project`}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
 							</Route>
