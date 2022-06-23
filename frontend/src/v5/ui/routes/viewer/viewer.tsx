@@ -15,20 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
 import { ViewerGui } from '@/v4/routes/viewerGui';
-import { useHistory, useParams, generatePath } from 'react-router-dom';
-import { formatMessage } from '@/v5/services/intl';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
-import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { PROJECTS_LIST_ROUTE, ViewerParams } from '../routes.constants';
-import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
+import { useParams } from 'react-router-dom';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
+import { ViewerParams } from '../routes.constants';
+import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
-import { NoRevisionOverlay } from './noRevisionOverlay';
+import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
 export const Viewer = () => {
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
-	const history = useHistory();
+
+	useContainersData();
+	useFederationsData();
+
+	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
+	const isListPending = FederationsHooksSelectors.selectIsListPending();
+	const isLoading = areStatsPending || isListPending;
+
+	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
+	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
+	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
+	const federationIsEmpty = selectedFederation?.containers?.length === 0
+		|| federationsContainers.every((container) => container?.revisionsCount === 0);
+
 	const v4Match = {
 		params: {
 			model: containerOrFederation,
@@ -36,94 +48,20 @@ export const Viewer = () => {
 			revision,
 		} };
 
-	const { federations } = useFederationsData();
-	const { containers } = useContainersData();
-
-	const getContainerFromId = (containerId: string) => containers.find((container) => container._id === containerId);
-	const getFederationFromId = (federationId: string) => federations.find(
-		(federation) => federation._id === federationId,
-	);
-	const selectedFederation = getFederationFromId(containerOrFederation);
-	const selectedContainer = getContainerFromId(containerOrFederation);
-
-	const checkLatestRevisionReady = (container) => {
-		if ((!canUploadToBackend(container.status))
-			&& container.revisionsCount
-		) {
-			DialogsActionsDispatchers.open('info', {
-				title: formatMessage(
-					{ id: 'viewer.latestRevisionNotReady.title', defaultMessage: 'The latest revision is still processing' },
-				),
-				message: formatMessage({
-					id: 'viewer.latestRevisionNotReady.message',
-					defaultMessage: 'Until processing has completed, we can only show the latest available revision.',
-				}),
-				primaryButtonLabel: formatMessage({
-					id: 'viewer.latestRevisionNotReady.primaryLabel',
-					defaultMessage: 'Go to viewer',
-				}),
-				onClickSecondary: () => {
-					history.push(generatePath(PROJECTS_LIST_ROUTE, { teamspace }));
-				},
-			});
+	const handleEmptyViewer = () => {
+		if (selectedContainer?.revisionsCount === 0) {
+			return <InvalidContainerOverlay status={selectedContainer.status} />;
 		}
+		if (federationIsEmpty) {
+			return <InvalidFederationOverlay containers={federationsContainers} />;
+		}
+		return (
+			<>
+				<CheckLatestRevisionReadiness />
+				<ViewerGui match={v4Match} />;
+			</>
+		);
 	};
 
-	useEffect(() => {
-		if (selectedContainer) {
-			checkLatestRevisionReady(selectedContainer);
-		}
-		if (selectedFederation) {
-			selectedFederation.containers.forEach(
-				(containerId) => checkLatestRevisionReady(getContainerFromId(containerId)),
-			);
-		}
-	}, [selectedContainer, selectedFederation]);
-
-	if (selectedContainer && !selectedContainer.hasStatsPending) {
-		if (!selectedContainer.revisionsCount) {
-			const message = canUploadToBackend(selectedContainer.status) ? (
-				formatMessage({
-					id: 'noRevisionOverlay.subheading.container.notProcessing',
-					defaultMessage: 'You\'ll need to upload a new revision.',
-				})
-			) : (
-				formatMessage({
-					id: 'noRevisionOverlay.subheading.container.processing',
-					defaultMessage: 'The Container is empty, you\'ll need to wait for the Container to finish processing.',
-				})
-			);
-			return (
-				<NoRevisionOverlay
-					isContainer
-					message={message}
-				/>
-			);
-		}
-	}
-
-	if (selectedFederation && !selectedFederation.hasStatsPending) {
-		let message = '';
-		if (!selectedFederation.containers.length) {
-			message = formatMessage({
-				id: 'noRevisionOverlay.subheading.federation.noContainers',
-				defaultMessage: 'You\'ll need to add some Containers.',
-			});
-		} else if (selectedFederation.containers.every((c) => !getContainerFromId(c).revisionsCount)) {
-			message = formatMessage({
-				id: 'noRevisionOverlay.subheading.federation.noContainers',
-				defaultMessage: 'All Containers are empty. You\'ll need to upload some revisions.',
-			});
-		}
-		if (message) {
-			return (
-				<NoRevisionOverlay
-					isContainer={false}
-					message={message}
-				/>
-			);
-		}
-	}
-
-	return <ViewerGui match={v4Match} />;
+	return isLoading ? (<></>) : handleEmptyViewer();
 };

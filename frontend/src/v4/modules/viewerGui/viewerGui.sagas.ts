@@ -87,10 +87,6 @@ function* fetchData({ teamspace, model }) {
 		]);
 
 		const revision = yield select(selectCurrentRevisionId);
-		if (isV5() && !revision) {
-			document.body.style.cursor = 'initial';
-			return
-		}
 		yield all([
 			put(ViewerGuiActions.loadModel()),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),

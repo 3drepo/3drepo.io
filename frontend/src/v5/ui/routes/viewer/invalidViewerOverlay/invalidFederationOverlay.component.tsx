@@ -26,7 +26,6 @@ type IInvalidFederation = {
 
 export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => {
 	let message = 'Error!';
-	console.log({ containers });
 	if (!containers.length) {
 		message = formatMessage({
 			id: 'noRevisionOverlay.subheading.federation.noContainers',
