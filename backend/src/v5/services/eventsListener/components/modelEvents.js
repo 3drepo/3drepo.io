@@ -38,13 +38,7 @@ const queueTasksCompleted = async ({
 }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
-
-		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, corId,
-			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
-		const { federate } = await getModelById(teamspace, model, { _id: 0, federate: 1 });
-		const event = federate ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
-		await createModelMessage(event, { tag, author, timestamp }, teamspace, projectId, model);
+		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);		
 	} catch (err) {
 		// do nothing - the model may have been deleted before the task came back.
 	}
@@ -68,6 +62,13 @@ const revisionUpdated = async ({ teamspace, project, model, data }) => {
 	}
 };
 
+const revisionAdded = async({ teamspace, project, model, revision, isFederation }) => {
+	const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, revision,
+		{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+	const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
+	await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model);
+}
+
 const modelDeleted = async ({ teamspace, project, model, isFederation }) => {
 	try {
 		const event = isFederation ? chatEvents.FEDERATION_REMOVED : chatEvents.CONTAINER_REMOVED;
@@ -84,6 +85,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
 
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
+	subscribe(events.NEW_REVISION, revisionAdded);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.DELETE_MODEL, modelDeleted);
 };

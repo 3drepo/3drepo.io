@@ -221,6 +221,107 @@ const testSocketsEvents = () => {
 
 		describe('On Join', () => {
 			afterEach(SocketsManager.reset);
+			
+			describe('Project room', () => {
+				afterEach(SocketsManager.reset);
+
+				test('should join successfully if the user is authorised to do so', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					const teamspace = generateRandomString();
+					const project = generateRandomString();					
+
+					Permissions.isProjectAdmin.mockResolvedValueOnce(true);
+
+					const data = { teamspace, project };
+					await eventFns.join(data);
+					expect(socket.join).toHaveBeenCalledWith(`${teamspace}::${project}`);
+					checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+				});
+
+				// test('should join successfully if the user is authorised to do so (v4)', async () => {
+				// 	const { eventFns, socket } = createSocketWithEvents();
+				// 	SocketsManager.addSocket(socket);
+
+				// 	const account = generateRandomString();
+				// 	const project = generateRandomString();
+				// 	const model = generateRandomString();
+
+				// 	Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+				// 	Projects.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+
+				// 	const data = { account, model };
+				// 	await eventFns.join(data);
+				// 	expect(socket.join).toHaveBeenCalledWith(`${account}::${project}::${model}`);
+				// 	checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+				// });
+
+				test('should fail to join the room if the user is not project admin', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+
+					Permissions.isProjectAdmin.mockResolvedValueOnce(false);
+
+					const data = { teamspace, project };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if isProjectAdmin() threw an error', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+
+					Permissions.isProjectAdmin.mockRejectedValueOnce(templates.projectNotFound);
+
+					const data = { teamspace, project };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				// test('should fail gracefully if project was not found (v4)', async () => {
+				// 	const { eventFns, socket } = createSocketWithEvents();
+				// 	SocketsManager.addSocket(socket);
+
+				// 	socket.join.mockClear();
+				// 	const account = generateRandomString();
+				// 	const model = generateRandomString();
+
+				// 	Projects.findProjectByModelId.mockRejectedValueOnce(templates.projectNotFound);
+
+				// 	const data = { account, model };
+				// 	await eventFns.join(data);
+				// 	expect(socket.join).not.toHaveBeenCalled();
+				// 	checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				// });
+
+				// test('should fail gracefully if findProjectByModelId failed with generic error (v4)', async () => {
+				// 	const { eventFns, socket } = createSocketWithEvents();
+				// 	SocketsManager.addSocket(socket);
+
+				// 	socket.join.mockClear();
+				// 	const account = generateRandomString();
+				// 	const model = generateRandomString();
+
+				// 	Projects.findProjectByModelId.mockRejectedValueOnce(templates.unknown);
+
+				// 	const data = { account, model };
+				// 	await eventFns.join(data);
+				// 	expect(socket.join).not.toHaveBeenCalled();
+				// 	checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				// });
+			});
+
 			describe('Model room', () => {
 				afterEach(SocketsManager.reset);
 

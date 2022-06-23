@@ -128,13 +128,7 @@ const testModelEventsListener = () => {
 
 		test(`Should trigger queueTasksCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (container)`, async () => {
 			const project = generateRandomString();
-			const tag = generateRandomString();
-			const author = generateRandomString();
-			const timestamp = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelById.mockResolvedValueOnce({ federate: false });
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
-
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -152,25 +146,11 @@ const testModelEventsListener = () => {
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
 				data.corId, data.value, data.user, data.containers);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.corId,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
-			expect(ModelSettings.getModelById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelById).toHaveBeenCalledWith(data.teamspace, data.model,
-				{ _id: 0, federate: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.CONTAINER_NEW_REVISION,
-				{ tag, author, timestamp }, data.teamspace, project, data.model);
 		});
 
 		test(`Should trigger queueTasksCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (federation)`, async () => {
 			const project = generateRandomString();
-			const tag = generateRandomString();
-			const author = generateRandomString();
-			const timestamp = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelById.mockResolvedValueOnce({ federate: true });
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
 
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
@@ -189,15 +169,6 @@ const testModelEventsListener = () => {
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
 				data.corId, data.value, data.user, data.containers);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.corId,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
-			expect(ModelSettings.getModelById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelById).toHaveBeenCalledWith(data.teamspace, data.model,
-				{ _id: 0, federate: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.FEDERATION_NEW_REVISION,
-				{ tag, author, timestamp }, data.teamspace, project, data.model);
 		});
 
 		test(`Should trigger modelSettingsUpdated if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
@@ -375,6 +346,57 @@ const testModelEventsListener = () => {
 				data.project,
 				data.model,
 			);
+		});
+
+		test(`Should trigger queueTasksCompleted if there is a ${events.NEW_REVISION} (container)`, async () => {
+			const tag = generateRandomString();
+			const author = generateRandomString();
+			const timestamp = generateRandomString();
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
+
+			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				revision: generateRandomString(),
+				isFederation: false
+			};
+			EventsManager.publish(events.NEW_REVISION, data);
+
+			await waitOnEvent;
+			
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1 });			
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.CONTAINER_NEW_REVISION,
+				{ tag, author, timestamp }, data.teamspace, data.project, data.model);
+		});
+
+		test(`Should trigger queueTasksCompleted if there is a ${events.NEW_REVISION} (federation)`, async () => {
+			const tag = generateRandomString();
+			const author = generateRandomString();
+			const timestamp = generateRandomString();
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
+
+			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				revision: generateRandomString(),
+				isFederation: true
+			};
+			EventsManager.publish(events.NEW_REVISION, data);
+
+			await waitOnEvent;
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.FEDERATION_NEW_REVISION,
+				{ tag, author, timestamp }, data.teamspace, data.project, data.model);
 		});
 	});
 };

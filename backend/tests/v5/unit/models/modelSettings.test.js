@@ -375,7 +375,7 @@ const testNewRevisionProcessed = () => {
 				}
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn).toHaveBeenCalledTimes(2);
+				expect(publishFn).toHaveBeenCalledTimes(3);
 				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -394,6 +394,14 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...action.$set, status: action.$set.status || 'ok' },
+						isFederation: false,
+					});
+
+				expect(publishFn).toHaveBeenCalledWith(events.NEW_REVISION,
+					{
+						teamspace,
+						project,
+						model,
 						isFederation: false,
 					});
 			});
@@ -425,7 +433,7 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn).toHaveBeenCalledTimes(2);
+				expect(publishFn).toHaveBeenCalledTimes(3);
 				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -450,6 +458,14 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
+						isFederation: true,
+					});
+
+				expect(publishFn).toHaveBeenCalledWith(events.NEW_REVISION,
+					{
+						teamspace,
+						project,
+						model,
 						isFederation: true,
 					});
 			});
