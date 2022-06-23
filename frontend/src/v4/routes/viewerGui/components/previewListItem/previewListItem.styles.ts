@@ -44,11 +44,12 @@ export const ArrowButton = styled(Button)`
 		right: 0;
 		top: 0;
 		width: 28px;
+		padding-right: 10px;
 		min-width: 39px;
 		height: 100%;
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: end;
 		border-radius: 0;
 
 		&:disabled {
