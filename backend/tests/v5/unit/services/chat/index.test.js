@@ -27,10 +27,6 @@ jest.mock('../../../../../src/v5/services/sessions', () => ({
 }));
 const SessionService = require(`${src}/services/sessions`);
 
-jest.mock('../../../../../src/v5/services/eventsManager/eventsManager');
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-
 jest.mock('../../../../../src/v5/services/chat/socketsManager');
 const SocketsManager = require(`${src}/services/chat/socketsManager`);
 
@@ -60,9 +56,6 @@ const testInit = () => {
 				server, middleware, SessionService.SESSION_HEADER, SocketsManager.addSocket,
 			);
 
-			expect(EventsManager.subscribe).toHaveBeenCalledTimes(1);
-			expect(EventsManager.subscribe.mock.calls[0][0]).toEqual(events.SESSION_CREATED);
-
 			expect(QueueService.listenToExchange).toHaveBeenCalledTimes(1);
 			expect(QueueService.listenToExchange.mock.calls[0][0]).toEqual(eventExchange);
 		});
@@ -74,39 +67,6 @@ const testInit = () => {
 			await expect(chatServiceClose()).resolves.toBeUndefined();
 			expect(server.close).toHaveBeenCalledTimes(1);
 			expect(socketCloseFn).toHaveBeenCalledTimes(1);
-		});
-	});
-};
-
-const testOnNewSessions = () => {
-	describe('On new session event', () => {
-		let subscribeCallBack;
-		beforeAll(async () => {
-			EventsManager.subscribe.mockClear();
-			await ChatService.createApp({});
-			[[, subscribeCallBack]] = EventsManager.subscribe.mock.calls;
-		});
-
-		test('Should try to update session on the socket if it is within its management', () => {
-			const socketId = generateRandomString();
-			const sessionID = generateRandomString();
-			SocketsManager.getSocketById.mockReturnValueOnce(true);
-			subscribeCallBack({ sessionID, socketId });
-
-			expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
-			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
-		});
-
-		test('Should ignore the event if the socket is not within its management', () => {
-			const socketId = generateRandomString();
-			const sessionID = generateRandomString();
-			SocketsManager.getSocketById.mockReturnValueOnce(false);
-			subscribeCallBack({ sessionID, socketId });
-
-			expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
-			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
-
-			expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -144,6 +104,31 @@ const testOnNewMsg = () => {
 				for (let i = 0; i < recipients.length; ++i) {
 					expect(broadcastFn).toHaveBeenNthCalledWith(i + 1, recipients[i], event, data);
 				}
+			});
+		});
+
+		describe('Internal message', () => {
+			test('Should try to update session on the socket if it is within its management', () => {
+				const socketId = generateRandomString();
+				const sessionID = generateRandomString();
+				SocketsManager.getSocketById.mockReturnValueOnce(true);
+
+				subscribeCallBack({ content: Buffer.from(JSON.stringify({ sessionID, socketId })) });
+
+				expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+				expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+			});
+
+			test('Should ignore the event if the socket is not within its management', () => {
+				const socketId = generateRandomString();
+				const sessionID = generateRandomString();
+				SocketsManager.getSocketById.mockReturnValueOnce(false);
+				subscribeCallBack({ content: Buffer.from(JSON.stringify({ sessionID, socketId })) });
+
+				expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+				expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+
+				expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
 			});
 		});
 
@@ -219,7 +204,6 @@ const testCreateModelMessage = () => {
 };
 describe('services/chat/index', () => {
 	testInit();
-	testOnNewSessions();
 	testOnNewMsg();
 	testCreateDirectMessage();
 	testCreateModelMessage();
