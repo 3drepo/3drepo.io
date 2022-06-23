@@ -19,7 +19,7 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_LIST_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectCurrentModel, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
@@ -47,10 +47,14 @@ export const BreadcrumbsRouting = () => {
 	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
 	let options: BreadcrumbItem[];
 
-	if (matchesPath(PROJECTS_LIST_ROUTE)) {
+	if (matchesPath(TEAMSPACE_ROUTE)) {
+
+		// eslint-disable-next-line no-restricted-globals
+		const { params: teamspaceParams } = matchPath(location.pathname, { path: TEAMSPACE_ROUTE });
+
 		options = teamspaces.map(({ name }) => ({
 			title: name,
-			to: generatePath(PROJECTS_LIST_ROUTE, { teamspace: name }),
+			to: generatePath(TEAMSPACE_ROUTE, { ...teamspaceParams, teamspace: name }),
 			selected: name === teamspace,
 		}));
 
@@ -61,7 +65,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [
 			{
 				title: teamspace,
-				to: generatePath(PROJECTS_LIST_ROUTE, { teamspace }),
+				to: generatePath(TEAMSPACE_ROUTE, { teamspace }),
 			},
 		];
 

@@ -33,7 +33,7 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	const isPersonalTeamspace = teamspaceName === user.username;
 	const { url } = useRouteMatch();
-	const to = uriCombine(url, teamspaceName || '');
+	const to = uriCombine(url, `${teamspaceName || ''}/t/projects`);
 
 	const [imgSrc, setImgSrc] = useState(imageURL);
 	const DEFAULT_IMAGE = 'assets/images/teamspace_placeholder.svg';
