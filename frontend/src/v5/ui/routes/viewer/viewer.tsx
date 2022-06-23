@@ -52,7 +52,7 @@ export const Viewer = () => {
 		if (selectedContainer?.revisionsCount === 0) {
 			return <InvalidContainerOverlay status={selectedContainer.status} />;
 		}
-		if (federationIsEmpty) {
+		if (selectedFederation && federationIsEmpty) {
 			return <InvalidFederationOverlay containers={federationsContainers} />;
 		}
 		return (
