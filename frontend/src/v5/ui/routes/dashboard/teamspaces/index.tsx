@@ -16,24 +16,52 @@
  */
 
 import { discardSlash } from '@/v5/services/routing/routing';
-import { useRouteMatch, Route, Switch } from 'react-router-dom';
-import { ProjectList } from '@/v5/ui/routes/dashboard/projects/projectsList/projectsList.component';
+import { useRouteMatch, Route, Switch, Redirect, useParams } from 'react-router-dom';
+import { ScrollArea } from '@controls/scrollArea';
+import { TeamspaceNavigation } from '@components/shared/teamspaceNavigation/teamspaceNavigation.component';
+import { FormattedMessage } from 'react-intl';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { NOT_FOUND_ROUTE_PATH } from '../../routes.constants';
+import { TopBar, TeamspaceInfo, TeamspaceName } from './teampsace.styles';
+import { ProjectList } from './projects/projectsList.component';
 
 export const TeamspaceContent = () => {
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
+	
+	const { teamspace } = useParams<DashboardParams>();
 
 	return (
 		<>
-			<Switch>
-				<Route exact path={`${path}/t/settings`}>
-					Teamspace settings
-				</Route>
-
-				<Route exact path={`${path}`}>
-					<ProjectList />
-				</Route>
-			</Switch>
+			<TopBar>
+				{/* TODO change to use avatar */}
+				<img height="142" width="142" src="https://upload.wikimedia.org/wikipedia/commons/c/c7/General_Conference.jpg" />
+				<TeamspaceInfo>
+					<TeamspaceName>
+						{teamspace} <FormattedMessage id="teamspace.definition" defaultMessage="Teamspace" />
+					</TeamspaceName>
+				</TeamspaceInfo>
+			</TopBar>
+			<TeamspaceNavigation />
+			<ScrollArea variant="base" autoHide>
+				<Switch>
+					<Route exact path={`${path}/t/projects`}>
+						<ProjectList />
+					</Route>
+					<Route exact path={`${path}/t/settings`}>
+						Settings
+					</Route>
+					<Route exact path={`${path}/t/users`}>
+						Users
+					</Route>
+					<Route exact path={`${path}/t/jobs`}>
+						Jobs
+					</Route>
+					<Route path="*">
+						<Redirect to={NOT_FOUND_ROUTE_PATH} />
+					</Route>
+				</Switch>
+			</ScrollArea>
 		</>
 	);
 };
