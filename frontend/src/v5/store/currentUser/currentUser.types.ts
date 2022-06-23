@@ -25,5 +25,5 @@ export interface ICurrentUser {
 	company?: string,
 	countryCode?: string,
 	avatarUrl?: string,
-	intercomHash?: string,
+	intercomRef?: string,
 }
