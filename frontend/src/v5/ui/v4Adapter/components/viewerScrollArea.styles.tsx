@@ -20,30 +20,24 @@ import styled from 'styled-components';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { isV5 } from '@/v4/helpers/isV5';
 
+const ThumbVertical = styled.div`
+	background-color: ${COLOR.BASE_LIGHTEST};
+	right: ${isV5() ? 3 : 2}px;
+	bottom: 6px;
+	top: 0px;
+	border-radius: 3px;
+	width: 6px;
+	z-index: 10;
+`;
+
+const ThumbHorizontal = styled.div`
+	display: none;
+`;
+
 export const ViewerScrollArea = styled(Scrollbars).attrs({
 	autoHideTimeout: 1000,
 	autoHideDuration: 300,
 	autoHide: true,
-	renderThumbVertical: ({ style }) => (
-		<div
-			style={{
-				...style,
-				backgroundColor: COLOR.BASE_LIGHTEST,
-				right: isV5() ? '3px' : '2px',
-				bottom: '6px',
-				top: '0px',
-				borderRadius: '3px',
-				width: '6px',
-				zIndex: 10,
-			}}
-		/>
-	),
-	renderThumbHorizontal: ({ style }) => (
-		<div
-			style={{
-				...style,
-				display: 'none',
-			}}
-		/>
-	),
+	renderThumbVertical: ({ style }) => <ThumbVertical style={style}/>,
+	renderThumbHorizontal: ({ style }) => <ThumbHorizontal style={style}/>,
 })``;
