@@ -16,15 +16,17 @@
  */
 
 const Crypto = require('crypto');
-const { intercom } = require('../utils/config');
+const config = require('../utils/config');
 
 const Intercom = {};
 
 Intercom.generateUserHash = (email) => {
-	if (intercom?.secretKey) {
-		const hasher = Crypto.createHmac('sha256', intercom.secretKey);
+	const key = config?.intercom?.secretKey;
+	if (key) {
+		const hasher = Crypto.createHmac('sha256', key);
 		return hasher.update(email).digest('hex');
 	}
+	return undefined;
 };
 
 module.exports = Intercom;
