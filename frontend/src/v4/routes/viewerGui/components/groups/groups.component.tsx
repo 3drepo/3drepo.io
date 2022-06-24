@@ -25,7 +25,7 @@ import InvertColors from '@mui/icons-material/InvertColors';
 import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
 
-import { GroupsListComponent } from '@/v5/ui/routes/viewer/groups/groupsListComponent';
+import { GroupsListComponent } from '@/v5/ui/routes/viewer/groups/groupsList.component';
 import {
 	DEFAULT_OVERRIDE_COLOR,
 	GROUP_PANEL_NAME,

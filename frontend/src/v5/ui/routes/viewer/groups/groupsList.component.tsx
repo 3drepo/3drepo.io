@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import _ from 'lodash';
 import { SyntheticEvent, useState } from 'react';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -40,17 +40,26 @@ interface Props {
 }
 
 const groupsToTree = (groups) => {
+	// eslint-disable-next-line no-param-reassign
+	groups = _.sortBy(groups, ({ name }) => name.toLowerCase());
+
+	const parentName = (group):string => {
+		const path = group.name.split('::');
+		path.pop();
+		return path.join('::');
+	};
+
 	groups.sort((groupA, groupB) => {
-		const depthDiff = groupA.name.split('::').length - groupB.name.split('::').length;
-		if (depthDiff !== 0) {
-			return depthDiff;
+		const parentA = parentName(groupA);
+		const parentB = parentName(groupB);
+		const isAncestorA = groupB.name.startsWith(parentA);
+		const isAncestorB = groupA.name.startsWith(parentB);
+
+		if (isAncestorA === isAncestorB) {
+			return 0;
 		}
 
-		const nameA = groupA.name.toLowerCase();
-		const nameB = groupB.name.toLowerCase();
-
-		if (nameB === nameA) return 0;
-		return (nameB > nameA ? -1 : 1);
+		return isAncestorA ? -1 : 1;
 	});
 
 	const treeDict = {
@@ -114,7 +123,7 @@ const groupsToTree = (groups) => {
 		// The group path is given by the name like 'dad::child:grandchild'
 		const path = group.name.split('::');
 		path.pop();
-		const parentName = path.join('::');
+		const parentNamed = path.join('::');
 
 		if (path.length) {
 			const rootElement = createFullPath(path, treeDict);
@@ -124,8 +133,8 @@ const groupsToTree = (groups) => {
 			}
 		}
 
-		if (treeDict[parentName]) {
-			treeDict[parentName].children.push(group);
+		if (treeDict[parentNamed]) {
+			treeDict[parentNamed].children.push(group);
 		} else {
 			tree.push(group);
 		}
