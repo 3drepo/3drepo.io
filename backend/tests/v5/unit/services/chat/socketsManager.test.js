@@ -146,15 +146,20 @@ const testSocketsEvents = () => {
 				const project = generateRandomString();
 				const model = generateRandomString();
 
-				const data = { teamspace, model, project };
+				const data = { teamspace, project };
 				eventFns.leave(data);
-				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}::${model}`);
+				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}`);
 				checkMessageCall(socket.emit, ACTIONS.LEAVE, data);
 
-				const data2 = { notifications: true };
+				const data2 = { teamspace, model, project };
 				eventFns.leave(data2);
-				expect(socket.leave).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}::${model}`);
 				checkMessageCall(socket.emit, ACTIONS.LEAVE, data2);
+
+				const data3 = { notifications: true };
+				eventFns.leave(data3);
+				expect(socket.leave).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				checkMessageCall(socket.emit, ACTIONS.LEAVE, data3);
 			});
 
 			test('should process the leave function appropriately (v4)', async () => {

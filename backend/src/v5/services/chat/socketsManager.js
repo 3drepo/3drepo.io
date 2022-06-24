@@ -19,7 +19,7 @@ const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require('./chat.cons
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projectSettings');
-const { hasReadAccessToModel, isProjectAdmin } = require('../../utils/permissions/permissions');
+const { hasReadAccessToModel, isProjectAdmin, isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const socketIdToSocket = {};
@@ -57,7 +57,8 @@ const joinRoom = async (socket, data) => {
 	} else if (teamspace && project) {
 		channelName = `${teamspace}::${project}`;
 		try {
-			if (!await isProjectAdmin(teamspace, stringToUUID(project), username)) {
+			const isProjAdmin = await isProjectAdmin(teamspace, stringToUUID(project), username);
+			if (!isProjAdmin && !await isTeamspaceAdmin(teamspace, username)) {
 				throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
 			}
 		} catch (err) {
@@ -103,6 +104,8 @@ const leaveRoom = (socket, data) => {
 		channelName = `notifications::${getUserNameFromSocket(socket)}`;
 	} else if (teamspace && model && project) {
 		channelName = `${teamspace}::${project}::${model}`;
+	} else if (teamspace && project) {
+		channelName = `${teamspace}::${project}`;
 	} else {
 		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}

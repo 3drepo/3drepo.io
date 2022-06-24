@@ -90,10 +90,10 @@ ChatService.createModelMessage = (event, data, teamspace, projectId, model, send
 	broadcastMessage(eventExchange, message);
 };
 
-ChatService.createProjectMessage = (event, data, teamspace, projectId) => {
+ChatService.createProjectMessage = (event, data, teamspace, projectId, sender) => {
 	const project = UUIDToString(projectId);
 	const recipients = [`${teamspace}::${project}`];
-	const message = JSON.stringify({ event, data: { data, teamspace, project }, recipients });
+	const message = JSON.stringify({ event, data: { data, teamspace, project }, recipients, sender });
 	broadcastMessage(eventExchange, message);
 };
 

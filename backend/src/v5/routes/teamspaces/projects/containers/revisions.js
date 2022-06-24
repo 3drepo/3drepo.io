@@ -19,6 +19,7 @@ const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../.
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
+const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
@@ -41,8 +42,9 @@ const getRevisions = (req, res, next) => {
 const updateRevisionStatus = (req, res) => {
 	const { teamspace, project, container, revision } = req.params;
 	const status = req.body.void;
+	const sender = req.headers[SOCKET_HEADER];
 
-	Containers.updateRevisionStatus(teamspace, project, container, revision, status).then(() => {
+	Containers.updateRevisionStatus(teamspace, project, container, revision, status, sender).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };

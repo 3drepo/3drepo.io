@@ -53,39 +53,39 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, i
 	}
 };
 
-const revisionUpdated = async ({ teamspace, project, model, data }) => {
+const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 	try {
 		await createModelMessage(chatEvents.CONTAINER_REVISION_UPDATE, { ...data, _id: UUIDToString(data._id) },
-			teamspace, project, model);
+			teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
 };
 
-const revisionAdded = async({ teamspace, project, model, revision, isFederation }) => {
+const revisionAdded = async({ teamspace, project, model, revision, sender, isFederation }) => {
 	try {
 		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, revision,
 			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
-		await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model);
+		await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
 };
 
-const modelAdded = async ({ teamspace, project, model, data, isFederation }) => {
+const modelAdded = async ({ teamspace, project, model, data, sender, isFederation }) => {
 	try {
 		const event = isFederation ? chatEvents.NEW_FEDERATION : chatEvents.NEW_CONTAINER;
-		await createProjectMessage(event, { ...data, _id: model }, teamspace, project);
+		await createProjectMessage(event, { ...data, _id: model }, teamspace, project, sender);
 	} catch (err) {
 		logger.logError(`Failed to send a project message to queue: ${err?.message}`);
 	}
 };
 
-const modelDeleted = async ({ teamspace, project, model, isFederation }) => {
+const modelDeleted = async ({ teamspace, project, model, sender, isFederation }) => {
 	try {
 		const event = isFederation ? chatEvents.FEDERATION_REMOVED : chatEvents.CONTAINER_REMOVED;
-		await createModelMessage(event, {}, teamspace, project, model);
+		await createModelMessage(event, {}, teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}

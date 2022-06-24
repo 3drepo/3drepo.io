@@ -27,7 +27,9 @@ const { templates } = require('../../../../utils/responseCodes');
 
 const addFederation = (req, res) => {
 	const { teamspace, project } = req.params;
-	Federations.addFederation(teamspace, project, req.body).then((federationId) => {
+	const sender = req.headers[SOCKET_HEADER];
+
+	Federations.addFederation(teamspace, project, req.body, sender).then((federationId) => {
 		respond(req, res, templates.ok, { _id: federationId });
 	}).catch(
 		// istanbul ignore next
@@ -37,7 +39,9 @@ const addFederation = (req, res) => {
 
 const deleteFederation = (req, res) => {
 	const { teamspace, project, federation } = req.params;
-	Federations.deleteFederation(teamspace, project, federation).then(() => {
+	const sender = req.headers[SOCKET_HEADER];
+
+	Federations.deleteFederation(teamspace, project, federation, sender).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
