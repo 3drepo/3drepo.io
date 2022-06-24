@@ -21,6 +21,7 @@ import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing'
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
+import { LegalTemplate } from '@components/legalTemplate/legalTemplate.component';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
@@ -36,6 +37,7 @@ import { UserVerification } from '../userVerification/userVerification.component
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
+	const { legal: LEGAL_PAPERS } = ClientConfig;
 
 	return (
 		<>
@@ -56,6 +58,9 @@ export const MainRoute = () => {
 				</Route>
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
+				</Route>
+				<Route path={LEGAL_PAPERS.map(({ page }) => `${path}/${page}`)}>
+					<LegalTemplate />
 				</Route>
 				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />

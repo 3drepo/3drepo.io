@@ -15,31 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
-import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
+import styled from 'styled-components';
 
-const { legal: LEGAL_PAPERS } = ClientConfig;
-
-export const DashboardFooter = (): JSX.Element => (
-	<FooterContainer showLabels>
-		<FooterLogo />
-		<FooterItems>
-			{LEGAL_PAPERS.map(({ page, title }) => (
-				<FooterItem>
-					<Link to={`/v5/${page}`}>
-						{title}
-					</Link>
-				</FooterItem>
-			))}
-			<FooterItem>
-				<a href="https://3drepo.com/pricing">
-					<FormattedMessage
-						id="dashboardFooter.pricing"
-						defaultMessage="Pricing"
-					/>
-				</a>
-			</FooterItem>
-		</FooterItems>
-	</FooterContainer>
-);
+export const LegalContent = styled.div`
+	width: 90%;
+	max-width: 800px;
+	margin: 70px auto;
+	${({ theme }) => theme.typography.h4};
+	color: ${({ theme }) => theme.palette.base.main};
+	
+	strong {
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
+`;
