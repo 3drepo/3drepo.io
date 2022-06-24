@@ -15,24 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash } from '@/v5/services/routing/routing';
-import { useRouteMatch, Route, Switch, Redirect, useParams } from 'react-router-dom';
-import { ScrollArea } from '@controls/scrollArea';
+import { ReactNode, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { AppBar } from '@components/shared/appBar';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { Container, Content } from './teamspaceLayout.styles';
 import { TeamspaceNavigation } from '@components/shared/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { NOT_FOUND_ROUTE_PATH } from '../../routes.constants';
-import { TopBar, TeamspaceInfo, TeamspaceName } from './teampsace.styles';
-import { ProjectsList } from './projects/projectsList.component';
+import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
+import { TopBar, TeamspaceInfo, TeamspaceName } from './teamspaceLayout.styles';
 
-export const TeamspaceContent = () => {
-	let { path } = useRouteMatch();
-	path = discardSlash(path);
-	
-	const { teamspace } = useParams<DashboardParams>();
+interface ITeamspaceLayout {
+	children: ReactNode;
+	className?: string;
+}
+
+export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
+	const { teamspace } = useParams<TeamspaceParams>();
+
+	useEffect(() => {
+		if (teamspace) {
+			ProjectsActionsDispatchers.fetch(teamspace);
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		}
+	}, [teamspace]);
 
 	return (
-		<>
+		<Container className={className}>
+			<AppBar />
 			<TopBar>
 				{/* TODO change to use avatar */}
 				<img height="142" width="142" src="https://upload.wikimedia.org/wikipedia/commons/c/c7/General_Conference.jpg" />
@@ -43,25 +54,9 @@ export const TeamspaceContent = () => {
 				</TeamspaceInfo>
 			</TopBar>
 			<TeamspaceNavigation />
-			<ScrollArea variant="base" autoHide>
-				<Switch>
-					<Route exact path={`${path}/t/projects`}>
-						<ProjectsList />
-					</Route>
-					<Route exact path={`${path}/t/settings`}>
-						Settings
-					</Route>
-					<Route exact path={`${path}/t/users`}>
-						Users
-					</Route>
-					<Route exact path={`${path}/t/jobs`}>
-						Jobs
-					</Route>
-					<Route path="*">
-						<Redirect to={NOT_FOUND_ROUTE_PATH} />
-					</Route>
-				</Switch>
-			</ScrollArea>
-		</>
+			<Content>
+				{children}
+			</Content>
+		</Container>
 	);
 };

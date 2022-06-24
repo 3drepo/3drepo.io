@@ -34,6 +34,10 @@ export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE}/federations`;
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
 
+export interface TeamspaceParams {
+	teamspace?: string;
+}
+
 export interface DashboardParams {
 	teamspace?: string;
 	project?: string;
