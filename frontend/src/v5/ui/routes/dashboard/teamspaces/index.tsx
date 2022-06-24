@@ -23,7 +23,7 @@ import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { NOT_FOUND_ROUTE_PATH } from '../../routes.constants';
 import { TopBar, TeamspaceInfo, TeamspaceName } from './teampsace.styles';
-import { ProjectList } from './projects/projectsList.component';
+import { ProjectsList } from './projects/projectsList.component';
 
 export const TeamspaceContent = () => {
 	let { path } = useRouteMatch();
@@ -46,7 +46,7 @@ export const TeamspaceContent = () => {
 			<ScrollArea variant="base" autoHide>
 				<Switch>
 					<Route exact path={`${path}/t/projects`}>
-						<ProjectList />
+						<ProjectsList />
 					</Route>
 					<Route exact path={`${path}/t/settings`}>
 						Settings
