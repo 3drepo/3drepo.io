@@ -23,9 +23,10 @@ export const SIGN_UP_PATH = '/v5/signup';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
 export const DASHBOARD_ROUTE = '/v5/dashboard';
-export const TEAMSPACE_ROUTE = `${DASHBOARD_ROUTE}/:teamspace/t/:tab`;
+export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
+export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
 
-const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE}/:project/t`;
+const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project/t`;
 
 export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE}/:tab`;
 export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE}/containers`;

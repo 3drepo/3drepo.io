@@ -25,10 +25,10 @@ export const TeamspaceNavigation = (): JSX.Element => {
 
 	return (
 		<Container>
-			<Link to={`${url}/t/projects`}><FormattedMessage id="teamspaceNavigation.project" defaultMessage="Project" /></Link>
-			<Link to={`${url}/t/settings`}><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Settings" /></Link>
-			<Link to={`${url}/t/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>
-			<Link to={`${url}/t/jobs`}><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
+			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
+			<Link to={`${url}/settings`}><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Settings" /></Link>
+			<Link to={`${url}/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>
+			<Link to={`${url}/jobs`}><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
 		</Container>
 	);
 };
