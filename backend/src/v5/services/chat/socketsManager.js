@@ -23,6 +23,7 @@ const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const socketIdToSocket = {};
+const sessionIdToSockets = {};
 const SocketsManager = {};
 
 const getUserNameFromSocket = (socket) => socket.session?.user?.username;
@@ -151,6 +152,8 @@ SocketsManager.getSocketById = (id) => socketIdToSocket[id];
 
 SocketsManager.addSocketToSession = (session, socket) => {
 	socket.join(`${SESSION_CHANNEL_PREFIX}${session}`);
+	sessionIdToSockets[session] = sessionIdToSockets[session] || [];
+	sessionIdToSockets[session].push(socket);
 };
 
 SocketsManager.addSocket = (socket) => {
@@ -160,6 +163,15 @@ SocketsManager.addSocket = (socket) => {
 	if (getUserNameFromSocket(socket)) {
 		SocketsManager.addSocketToSession(socket.session.id, socket);
 	}
+};
+
+SocketsManager.resetSocketsBySessionIds = (sessionIds) => {
+	sessionIds.forEach((sessionId) => {
+		if (sessionIdToSockets[sessionId]) {
+			sessionIdToSockets[sessionId].forEach((socket) => socket.leaveAll());
+			delete sessionIdToSockets[sessionId];
+		}
+	});
 };
 
 // Used for testing only - should not be called in real life.

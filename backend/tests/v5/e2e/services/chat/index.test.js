@@ -229,6 +229,11 @@ const broadcastErrorTests = () => {
 				broadcastMessage(eventExchange, ServiceHelper.generateRandomString()),
 				broadcastMessage(eventExchange,
 					JSON.stringify({ [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() })),
+				broadcastMessage(eventExchange,
+					JSON.stringify({
+						[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+						internal: true,
+					})),
 			]);
 		});
 	});

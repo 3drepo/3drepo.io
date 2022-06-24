@@ -54,13 +54,17 @@ const processMessage = (service, msg) => {
 const processInternalMessage = (service, msg) => {
 	const { event, data } = msg;
 
-	// istanbul ignore else
 	if (event === chatEvents.LOGGED_IN) {
 		const { sessionID, socketId } = data;
 		const socket = SocketsManager.getSocketById(socketId);
+
+		// istanbul ignore else
 		if (socket) {
 			SocketsManager.addSocketToSession(sessionID, socket);
 		}
+	} else if (event === chatEvents.LOGGED_OUT) {
+		const { sessionIds } = data;
+		SocketsManager.resetSocketsBySessionIds(sessionIds);
 	} else {
 		logger.logError('Unrecognised event message', msg);
 	}

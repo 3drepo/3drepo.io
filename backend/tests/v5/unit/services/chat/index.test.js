@@ -108,39 +108,57 @@ const testOnNewMsg = () => {
 		});
 
 		describe('Internal message', () => {
-			test('Should try to update session on the socket if it is within its management', () => {
-				const socketId = generateRandomString();
-				const sessionID = generateRandomString();
-				SocketsManager.getSocketById.mockReturnValueOnce(true);
+			describe(`${chatEvents.LOGGED_IN}`, () => {
+				test('Should try to update session on the socket if it is within its management', () => {
+					const socketId = generateRandomString();
+					const sessionID = generateRandomString();
+					SocketsManager.getSocketById.mockReturnValueOnce(true);
 
-				const data = { sessionID, socketId };
+					const data = { sessionID, socketId };
 
-				subscribeCallBack({
-					content: Buffer.from(
-						JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
-					),
+					subscribeCallBack({
+						content: Buffer.from(
+							JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
+						),
+					});
+
+					expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+					expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
 				});
 
-				expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
-				expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+				test('Should ignore the event if the socket is not within its management', () => {
+					const socketId = generateRandomString();
+					const sessionID = generateRandomString();
+					SocketsManager.getSocketById.mockReturnValueOnce(false);
+					const data = { sessionID, socketId };
+
+					subscribeCallBack({
+						content: Buffer.from(
+							JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
+						),
+					});
+
+					expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+					expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+
+					expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
+				});
 			});
 
-			test('Should ignore the event if the socket is not within its management', () => {
-				const socketId = generateRandomString();
-				const sessionID = generateRandomString();
-				SocketsManager.getSocketById.mockReturnValueOnce(false);
-				const data = { sessionID, socketId };
+			describe(`${chatEvents.LOGGED_OUT}`, () => {
+				test('Should try call socketManager to reset the sockets associated with the sessions', () => {
+					const sessionIds = [generateRandomString(), generateRandomString()];
+					const data = { sessionIds };
 
-				subscribeCallBack({
-					content: Buffer.from(
-						JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
-					),
+					subscribeCallBack({
+						content: Buffer.from(
+							JSON.stringify({ internal: true, event: chatEvents.LOGGED_OUT, data }),
+						),
+					});
+
+					expect(SocketsManager.resetSocketsBySessionIds).toHaveBeenCalledTimes(1);
+					expect(SocketsManager.resetSocketsBySessionIds).toHaveBeenCalledWith(sessionIds);
 				});
-
-				expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
-				expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
-
-				expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
 			});
 
 			test('Should ignore the event and not crash if it is not recognised', () => {
