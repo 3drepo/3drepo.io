@@ -34,7 +34,7 @@ jest.mock('../../../../../src/v5/handler/queue');
 const QueueService = require(`${src}/handler/queue`);
 
 const ChatService = require(`${src}/services/chat`);
-const { SESSION_CHANNEL_PREFIX } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS: chatEvents, SESSION_CHANNEL_PREFIX } = require(`${src}/services/chat/chat.constants`);
 const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/config`);
 
 const socketCloseFn = jest.fn();
@@ -113,7 +113,13 @@ const testOnNewMsg = () => {
 				const sessionID = generateRandomString();
 				SocketsManager.getSocketById.mockReturnValueOnce(true);
 
-				subscribeCallBack({ content: Buffer.from(JSON.stringify({ sessionID, socketId })) });
+				const data = { sessionID, socketId };
+
+				subscribeCallBack({
+					content: Buffer.from(
+						JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
+					),
+				});
 
 				expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
 				expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
@@ -123,12 +129,28 @@ const testOnNewMsg = () => {
 				const socketId = generateRandomString();
 				const sessionID = generateRandomString();
 				SocketsManager.getSocketById.mockReturnValueOnce(false);
-				subscribeCallBack({ content: Buffer.from(JSON.stringify({ sessionID, socketId })) });
+				const data = { sessionID, socketId };
+
+				subscribeCallBack({
+					content: Buffer.from(
+						JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
+					),
+				});
 
 				expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
 				expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
 
 				expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
+			});
+
+			test('Should ignore the event and not crash if it is not recognised', () => {
+				const data = { [generateRandomString()]: generateRandomString() };
+
+				subscribeCallBack({
+					content: Buffer.from(
+						JSON.stringify({ internal: true, event: generateRandomString(), data }),
+					),
+				});
 			});
 		});
 
@@ -202,9 +224,26 @@ const testCreateModelMessage = () => {
 		});
 	});
 };
+
+const testCreateInternalMessage = () => {
+	describe('CreateInternalMessage', () => {
+		test('Should broadcast to event exchange', () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+
+			ChatService.createInternalMessage(event, data);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ internal: true, event, data });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+	});
+};
+
 describe('services/chat/index', () => {
 	testInit();
 	testOnNewMsg();
 	testCreateDirectMessage();
 	testCreateModelMessage();
+	testCreateInternalMessage();
 });
