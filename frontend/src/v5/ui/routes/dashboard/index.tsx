@@ -61,16 +61,16 @@ export const MainRoute = () => {
 				<AuthenticatedRoute exact path={`${path}/dashboard`}>
 					<TeamspaceSelection />
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path={`${path}/dashboard/:teamspace`}>
+				<AuthenticatedRoute exact path={`${path}/dashboard/:teamspace`}>
+					<Redirect to={`${discardSlash(pathname)}/t/projects`} />
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/t`}>
 					<TeamspaceLayout>
 						<Switch>
-							<Route exact path={`${path}/dashboard/:teamspace`}>
-								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
-							</Route>
 							<Route exact path={`${path}/dashboard/:teamspace/t`}>
 								<Redirect to={`${discardSlash(pathname)}/projects`} />
 							</Route>
-							<Route path={`${path}/dashboard/:teamspace`}>
+							<Route path={`${path}/dashboard/:teamspace/`}>
 								<TeamspaceContent />
 							</Route>
 						</Switch>
