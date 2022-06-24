@@ -19,7 +19,7 @@ import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>

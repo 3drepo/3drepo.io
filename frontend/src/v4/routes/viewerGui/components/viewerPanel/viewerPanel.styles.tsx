@@ -18,7 +18,7 @@
 import { forwardRef, RefObject } from 'react';
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';

@@ -17,7 +17,7 @@
 
 import { RefObject, forwardRef } from 'react';
 import styled from 'styled-components';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,

@@ -25,7 +25,7 @@ import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
 import { getFilters, sortMetadata, transformMetadataToNestedList } from '@/v4/helpers/bim';
 import { renderWhenTrue } from '@/v4/helpers/rendering';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import { IMetaRecord } from '@/v4/modules/bim/bim.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {

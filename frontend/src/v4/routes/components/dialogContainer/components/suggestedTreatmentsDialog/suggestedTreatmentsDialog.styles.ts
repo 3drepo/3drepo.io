@@ -22,7 +22,7 @@ import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../../styles';

@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { isV5 } from '@/v4/helpers/isV5';
 
-export const ScrollbarWrapper = styled(Scrollbars).attrs({
+export const ViewerScrollArea = styled(Scrollbars).attrs({
 	autoHideTimeout: 1000,
 	autoHideDuration: 300,
 	autoHide: true,
