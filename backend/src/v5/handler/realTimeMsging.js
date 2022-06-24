@@ -20,24 +20,33 @@ const sharedSession = require('express-socket.io-session');
 
 const RealTimeMsging = {};
 
-const socketWrapper = (callback) => (socket) => callback({
-	id: socket.id,
-	session: socket?.handshake?.session,
-	onDisconnect: (fn) => socket.on('disconnect', fn),
-	onJoin: (fn) => socket.on('join', fn),
-	onLeave: (fn) => socket.on('leave', fn),
-	emit: (event, msg) => socket.emit(event, msg),
-	broadcast: (channel, event, data) => socket.to(channel).emit(event, data),
-	join: (channel) => socket.join(channel),
-	leave: (channel) => socket.leave(channel),
-
-});
+const socketWrapper = (service, callback) => (socket) => {
+	const roomsJoined = new Set();
+	const wrapperObj = {
+		id: socket.id,
+		session: socket?.handshake?.session,
+		onDisconnect: (fn) => socket.on('disconnect', fn),
+		onJoin: (fn) => socket.on('join', fn),
+		onLeave: (fn) => socket.on('leave', fn),
+		emit: (event, msg) => socket.emit(event, msg),
+		broadcast: (channel, event, data) => socket.to(channel).emit(event, data),
+		join: (channel) => { socket.join(channel); roomsJoined.add(channel); },
+		leave: (channel) => { socket.leave(channel); roomsJoined.delete(channel); },
+		leaveAll: () => {
+			roomsJoined.forEach((room) => {
+				socket.leave(room);
+			});
+			roomsJoined.clear();
+		},
+	};
+	callback(wrapperObj);
+};
 
 RealTimeMsging.createApp = (server, sessionService, sessionHeader, onNewSockets) => {
 	const service = SocketIO(server, { path: '/chat' });
 	service.use(sharedSession(sessionService, { autoSave: true }));
 
-	const newSocketsFn = socketWrapper(onNewSockets);
+	const newSocketsFn = socketWrapper(service, onNewSockets);
 	service.on('connection', (socket) => {
 		newSocketsFn(socket);
 	});
