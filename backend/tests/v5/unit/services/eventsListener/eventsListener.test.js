@@ -153,20 +153,45 @@ const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
 		test(`Should trigger UserLoggedIn if there is a ${events.SESSION_CREATED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
-			const data = {
-				username: 'username1',
-				sessionID: '123',
-				ipAddress: '1.2.3.4',
-				userAgent: 'user agent',
-				referer: 'www.google.com',
-			};
-			EventsManager.publish(events.SESSION_CREATED, data);
+			const username = generateRandomString();
+			const sessionID = generateRandomString();
+			const socketId = generateRandomString();
+			const ipAddress = generateRandomString();
+			const userAgent = generateRandomString();
+			const referer = generateRandomString();
+			EventsManager.publish(events.SESSION_CREATED,
+				{ username, sessionID, socketId, ipAddress, userAgent, referer });
 
 			await waitOnEvent;
-			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
-			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
-			expect(Sessions.removeOldSessions.mock.calls.length).toBe(1);
-			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123', 'www.google.com']);
+			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledTimes(1);
+			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledWith(
+				username, sessionID, ipAddress, userAgent, referer,
+			);
+			expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
+			expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
+			expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createInternalMessage).toHaveBeenCalledWith(chatEvents.LOGGED_IN,
+				{ sessionID, socketId });
+		});
+
+		test(`Should not create an event message if there is a ${events.SESSION_CREATED} event without socketId`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+			const username = generateRandomString();
+			const sessionID = generateRandomString();
+			const ipAddress = generateRandomString();
+			const userAgent = generateRandomString();
+			const referer = generateRandomString();
+			EventsManager.publish(events.SESSION_CREATED,
+				{ username, sessionID, ipAddress, userAgent, referer });
+
+			await waitOnEvent;
+			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledTimes(1);
+			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledWith(
+				username, sessionID, ipAddress, userAgent, referer,
+			);
+			expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
+			expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
+			expect(ChatService.createInternalMessage).not.toHaveBeenCalled();
 		});
 
 		test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
@@ -182,6 +207,30 @@ const testAuthEventsListener = () => {
 				chatEvents.LOGGED_OUT,
 				{ reason: 'You have logged in else where' },
 				data.ids,
+			);
+
+			expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createInternalMessage).toHaveBeenCalledWith(
+				chatEvents.LOGGED_OUT,
+				{ sessionIds: data.ids },
+			);
+		});
+
+		test(`Should not send a direct message if the ${events.SESSIONS_REMOVED} was triggered by session owner`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+			const data = {
+				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+				elective: true,
+			};
+			EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+			await waitOnEvent;
+			expect(ChatService.createDirectMessage).not.toHaveBeenCalled();
+
+			expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createInternalMessage).toHaveBeenCalledWith(
+				chatEvents.LOGGED_OUT,
+				{ sessionIds: data.ids },
 			);
 		});
 

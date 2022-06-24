@@ -26,12 +26,15 @@ const { subscribe } = require('../../eventsManager/eventsManager');
 const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => Promise.all([
 	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
 	removeOldSessions(username, sessionID, referer),
-	createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId }),
+	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 ]);
 
-const sessionsRemoved = async ({ ids }) => {
+const sessionsRemoved = async ({ ids, elective }) => {
 	try {
-		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+		if (!elective) {
+			await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+		}
+		createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 	} catch (err) {
 		logger.logError(`Failed to create direct message: ${err.message}`);
 	}
