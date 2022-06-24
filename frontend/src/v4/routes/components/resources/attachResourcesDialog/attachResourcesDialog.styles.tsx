@@ -47,7 +47,7 @@ export const StyledDropZone = styled(Dropzone)`
 	margin-bottom: 0;
 `;
 
-export const ResourcesListContainerComponent = styled.div`
+export const ResourcesListContainer = styled.div`
 	overflow: hidden;
 	width: 500px;
 	& >:last-child {
@@ -55,15 +55,10 @@ export const ResourcesListContainerComponent = styled.div`
 	}
 `;
 
-export const ResourcesListContainer = ({ children }) => (
-	<ViewerScrollArea autoHeight autoHeightMax={isV5() ? 200 : 114}>
-		<ResourcesListContainerComponent>
-			{children}
-		</ResourcesListContainerComponent>
-	</ViewerScrollArea>
-);
-
-export const ResourcesListScroller = styled.div`
+export const ResourcesListScroller = styled(ViewerScrollArea).attrs({
+	autoHeight: true,
+	autoHeightMax: isV5() ? 200 : 114,
+})`
 	margin-top: 20px;
     overflow: hidden;
 	width: 520px;

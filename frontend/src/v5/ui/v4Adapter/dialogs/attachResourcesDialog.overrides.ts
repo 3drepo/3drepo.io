@@ -26,7 +26,7 @@ import {
 	Content,
 	AddLinkContainer,
 	ResourceListItem,
-	ResourcesListContainerComponent,
+	ResourcesListContainer,
 	ResourcesListScroller,
 	StyledDropZone,
 } from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
@@ -165,7 +165,7 @@ const AttachResourcesLink = css`
 		overflow-y: overlay;
 		max-height: 207px;
 
-		${ResourcesListContainerComponent} {
+		${ResourcesListContainer} {
 			width: 100%;
 			box-sizing: border-box;
 			padding: 0 23px;
