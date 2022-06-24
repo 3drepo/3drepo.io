@@ -205,6 +205,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined
 			);
 		});
 
@@ -227,6 +228,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined
 			);
 		});
 
@@ -236,14 +238,19 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: true,
+				isFederation: true				
 			};
 			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
 			await EventsManager.publish(events.NEW_MODEL, data);
 			await waitOnEvent;
 			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(chatEvents.NEW_FEDERATION,
-				{ ...data.data, _id: data.model }, data.teamspace, data.project);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_FEDERATION,
+				{ ...data.data, _id: data.model },
+				data.teamspace,
+				data.project,
+				undefined
+			);
 		});
 
 		test(`Should trigger modelAdded if there is a ${events.NEW_MODEL} (container)`, async () => {
@@ -253,13 +260,19 @@ const testModelEventsListener = () => {
 				model: generateRandomString(),
 				data: { [generateRandomString()]: generateRandomString() },
 				isFederation: false,
+				undefined
 			};
 			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
 			await EventsManager.publish(events.NEW_MODEL, data);
 			await waitOnEvent;
 			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(chatEvents.NEW_CONTAINER,
-				{ ...data.data, _id: data.model }, data.teamspace, data.project);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_CONTAINER,
+				{ ...data.data, _id: data.model },
+				data.teamspace,
+				data.project,
+				undefined
+			);
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.NEW_MODEL} (container)`, async () => {
@@ -276,8 +289,13 @@ const testModelEventsListener = () => {
 
 			await waitOnEvent;
 			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(chatEvents.NEW_CONTAINER,
-				{ ...data.data, _id: data.model }, data.teamspace, data.project);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_CONTAINER,
+				{ ...data.data, _id: data.model }, 
+				data.teamspace, 
+				data.project,
+				undefined
+			);
 		});
 
 		test(`Should trigger modelDeleted if there is a ${events.DELETE_MODEL} (federation)`, async () => {
@@ -298,6 +316,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined
 			);
 		});
 
@@ -319,6 +338,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined
 			);
 		});
 
@@ -341,6 +361,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined
 			);
 		});
 
@@ -366,8 +387,14 @@ const testModelEventsListener = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
 				{ _id: 0, tag: 1, author: 1, timestamp: 1 });			
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.CONTAINER_NEW_REVISION,
-				{ tag, author, timestamp }, data.teamspace, data.project, data.model);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.CONTAINER_NEW_REVISION,
+				{ tag, author, timestamp }, 
+				data.teamspace,
+				data.project, 
+				data.model,
+				undefined
+			);
 		});
 
 		test(`Should trigger revisionAdded if there is a ${events.NEW_REVISION} (federation)`, async () => {
@@ -382,7 +409,7 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
-				isFederation: true
+				isFederation: true,
 			};
 			EventsManager.publish(events.NEW_REVISION, data);
 
@@ -391,8 +418,14 @@ const testModelEventsListener = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
 				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.FEDERATION_NEW_REVISION,
-				{ tag, author, timestamp }, data.teamspace, data.project, data.model);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.FEDERATION_NEW_REVISION,
+				{ tag, author, timestamp }, 
+				data.teamspace, 
+				data.project, 
+				data.model,
+				undefined
+			);
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.NEW_REVISION} (container)`, async () => {
@@ -417,8 +450,14 @@ const testModelEventsListener = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
 				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.CONTAINER_NEW_REVISION,
-				{ tag, author, timestamp }, data.teamspace, data.project, data.model);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.CONTAINER_NEW_REVISION,
+				{ tag, author, timestamp }, 
+				data.teamspace, 
+				data.project, 
+				data.model,
+				undefined
+			);
 		});
 	});
 };

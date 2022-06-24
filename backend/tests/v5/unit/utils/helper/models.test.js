@@ -42,14 +42,15 @@ const testRemoveModelData = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
+			const sender = generateRandomString();
 
-			await ModelHelper.removeModelData(teamspace, project, model);
+			await ModelHelper.removeModelData(teamspace, project, model, sender);
 
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model, sender);
 
 			expect(DB.listCollections).toHaveBeenCalledTimes(1);
 			expect(DB.listCollections).toHaveBeenCalledWith(teamspace);
