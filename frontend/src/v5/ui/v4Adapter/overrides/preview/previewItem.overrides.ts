@@ -67,9 +67,8 @@ export default css`
 
 	${ArrowButton} {
 		background-color: ${({ theme }) => theme.palette.primary.lightest};
-		padding: 0 0 0 5px;
+		padding: 0;
 		margin: 0;
-		justify-content: start;
 
 		svg {
 			color: ${({ theme }) => theme.palette.primary.main};
