@@ -30,6 +30,13 @@ export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0,
 
 export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(component, ''));
 
+export const discardTabComponent = (uri) => {
+	const uriDiscardedSlash = discardSlash(uri);
+	const uriComponents = uriDiscardedSlash.split("/");
+	if (uriComponents.at(-2) !== 't') return uriDiscardedSlash;
+	return uriDiscardedSlash.replace(`/t/${uriComponents.at(-1)}`, '');
+};
+
 export const uriCombine = (uri, path) => {
 	let pathname = appendSlashIfNeeded(uri);
 	const otherPath = appendSlashIfNeeded(path);

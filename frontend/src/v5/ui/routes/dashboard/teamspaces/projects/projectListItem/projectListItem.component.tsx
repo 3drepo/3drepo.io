@@ -20,12 +20,11 @@ import {
 	DashboardListItemRow,
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-
-import { discardSlash } from '@/v5/services/routing/routing';
+import { discardTabComponent } from '@/v5/services/routing/routing';
 
 export const ProjectListItem = ({ projectId, name }): JSX.Element => {
 	let { url } = useRouteMatch();
-	url = discardSlash(url);
+	url = discardTabComponent(url);
 
 	return (
 		<DashboardListItem>
