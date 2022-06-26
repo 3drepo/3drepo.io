@@ -16,7 +16,7 @@
  */
 
 const { getModelById, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
-const { UUIDToString } = require('../../../utils/helper/uuids');
+const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
@@ -62,12 +62,12 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 	}
 };
 
-const revisionAdded = async({ teamspace, project, model, revision, sender, isFederation }) => {
+const revisionAdded = async({ teamspace, project, model, revision, isFederation }) => {
 	try {
-		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, revision,
+		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, stringToUUID(revision),
 			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
-		await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model, sender);
+		await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}

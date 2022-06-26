@@ -177,6 +177,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 		publish(events.NEW_REVISION, { teamspace,
 				project,
 				model,
+				revision: corId,
 				isFederation: !!containers });
 	}
 };

@@ -376,7 +376,8 @@ const testNewRevisionProcessed = () => {
 		const user = generateRandomString();
 		const corId = generateRandomString();
 		const { success, message, userErr } = getInfoFromCode(retVal);
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED},
+			a ${events.MODEL_SETTINGS_UPDATE} and a ${events.NEW_REVISION} event`,
 			async () => {
 				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
 				publishFn.mockClear();
@@ -426,6 +427,7 @@ const testNewRevisionProcessed = () => {
 						teamspace,
 						project,
 						model,
+						revision: corId,
 						isFederation: false,
 					});
 			});
@@ -490,6 +492,7 @@ const testNewRevisionProcessed = () => {
 						teamspace,
 						project,
 						model,
+						revision: corId,
 						isFederation: true,
 					});
 			});

@@ -208,7 +208,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: updates the status of the revision
+	 *         description: creates a new revision
 	 */
 	router.post('', hasWriteAccessToContainer, validateNewRevisionData, newRevision);
 

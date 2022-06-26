@@ -392,8 +392,7 @@ const testModelEventsListener = () => {
 				{ tag, author, timestamp }, 
 				data.teamspace,
 				data.project, 
-				data.model,
-				undefined
+				data.model
 			);
 		});
 
@@ -423,8 +422,7 @@ const testModelEventsListener = () => {
 				{ tag, author, timestamp }, 
 				data.teamspace, 
 				data.project, 
-				data.model,
-				undefined
+				data.model
 			);
 		});
 
@@ -455,8 +453,7 @@ const testModelEventsListener = () => {
 				{ tag, author, timestamp }, 
 				data.teamspace, 
 				data.project, 
-				data.model,
-				undefined
+				data.model
 			);
 		});
 	});

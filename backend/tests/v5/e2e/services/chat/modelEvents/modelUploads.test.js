@@ -19,7 +19,7 @@ const ServiceHelper = require('../../../../helper/services');
 const { src, objModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
-const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS, ACTIONS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
@@ -31,6 +31,7 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const container2 = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+const revision = ServiceHelper.generateRevisionEntry();
 
 let agent;
 const setupData = async () => {
@@ -59,6 +60,7 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id]),
+		ServiceHelper.db.createRevision(teamspace, container._id, { ...revision, author: user.user })
 	]);
 };
 
@@ -224,6 +226,58 @@ const queueFinishedTest = () => {
 const revisionAddedTest = () => {
 	describe('On adding a new revision', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_NEW_REVISION} event when a new container revision has been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const data = { teamspace, project: project.id, model: container._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
+
+			const content = { value: 0, database: teamspace, project: container._id };
+			await queueMessage(queueConfig.callback_queue, revision._id, JSON.stringify(content));
+
+			const results = await modelUpdatePromise;
+			
+			expect(results?.data?.timestamp).not.toBeUndefined();
+			expect(results).toEqual(expect.objectContaining({ ...data, data: { 
+				author: user.user,
+				tag: revision.tag,
+				timestamp: results.data.timestamp 
+			} }));
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.FEDERATION_NEW_REVISION} event when a new federation revision has been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const data = { teamspace, project: project.id, model: federation._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+
+			const content = { value: 0, database: teamspace, project: federation._id };
+			const fileContent = { subProjects: [{ project: container._id }] };
+			mkdirSync(`${queueConfig.shared_storage}/${revision._id}`);
+			writeFileSync(`${queueConfig.shared_storage}/${revision._id}/obj.json`, JSON.stringify(fileContent));
+
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_NEW_REVISION);
+
+			await queueMessage(queueConfig.callback_queue, revision._id, JSON.stringify(content));
+
+			const results = await modelUpdatePromise;
+			
+			expect(results?.data?.timestamp).not.toBeUndefined();
+			expect(results).toEqual(expect.objectContaining({ ...data, data: { 
+				author: user.user,
+				tag: revision.tag,
+				timestamp: results.data.timestamp 
+			} }));
+
+			socket.close();
+		});
+	});
+};
+
+const revisionUpdateTest = () => {
+	describe('On updating a revision', () => {
+		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when settings have been updated`, async () => {
 			const socket1 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 			const socket2 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
@@ -235,62 +289,23 @@ const revisionAddedTest = () => {
 			
 			const socket1CB = jest.fn();
 
-			const socket2Promise = new Promise((resolve, reject) => {				
-				socket2.on(EVENTS.CONTAINER_NEW_REVISION, resolve);
-				setTimeout(reject, 1000);				
+			const socket2Promise = new Promise((resolve, reject) => {
+				socket2.on(EVENTS.CONTAINER_REVISION_UPDATE, resolve);
+				setTimeout(reject, 1000);
 			});
 
 			// Sender should not get the update
 			const socket1Promise = new Promise((resolve, reject) => {
-				socket1.on(EVENTS.CONTAINER_NEW_REVISION, () => { socket1CB(); reject(); });
+				socket1.on(EVENTS.CONTAINER_REVISION_UPDATE, () => { socket1CB(); reject(); });
 				setTimeout(resolve, 100);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString(), unit: 'mm', type: generateRandomString(), code: generateRandomString(3) };
-			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers${container._id}/revisions?key=${user.apiKey}`)
+			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions/${revision._id}?key=${user.apiKey}`)
 				.set({ [SOCKET_HEADER]: socket1.id })
-				.send(payload)
+				.send({ void: true })
 				.expect(templates.ok.status);
-			
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { _id: res.body._id, code: payload.code, category: payload.type } });
-
-			await expect(socket1Promise).resolves.toBeUndefined();
-			expect(socket1CB).not.toHaveBeenCalled();
-
-			socket1.close();
-			socket2.close();
-		});
-
-		test(`should trigger a ${EVENTS.NEW_FEDERATION} event when a new federation has been added`, async () => {
-			const socket1 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-			const socket2 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-
-			const data = { teamspace, project: project.id };
-			await Promise.all([
-				ServiceHelper.socket.joinRoom(socket1, data),
-				ServiceHelper.socket.joinRoom(socket2, data),
-			]);
-			
-			const socket1CB = jest.fn();
-
-			const socket2Promise = new Promise((resolve, reject) => {				
-				socket2.on(EVENTS.NEW_FEDERATION, resolve);
-				setTimeout(reject, 1000);				
-			});
-
-			// Sender should not get the update
-			const socket1Promise = new Promise((resolve, reject) => {
-				socket1.on(EVENTS.NEW_FEDERATION, () => { socket1CB(); reject(); });
-				setTimeout(resolve, 100);
-			});
-
-			const payload = { name: ServiceHelper.generateRandomString(), unit: 'mm', desc: generateRandomString(), code: generateRandomString(3) };
-			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations?key=${user.apiKey}`)
-				.set({ [SOCKET_HEADER]: socket1.id })
-				.send(payload)
-				.expect(templates.ok.status);
-			
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { _id: res.body._id, code: payload.code, description: payload.desc } });
+ 
+			await expect(socket2Promise).resolves.toEqual({ ...data, data: { _id: revision._id, void: true } });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();
@@ -316,4 +331,6 @@ describe('E2E Chat Service (Model Upload Events)', () => {
 	modelUploadTest();
 	queueUpdateTest();
 	queueFinishedTest();
+	revisionAddedTest();
+	revisionUpdateTest();
 });
