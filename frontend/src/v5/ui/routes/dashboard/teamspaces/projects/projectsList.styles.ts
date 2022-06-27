@@ -54,7 +54,6 @@ export const ActionComponents = styled.div`
 export const NewProjectButton = styled(Button).attrs({
 	color: 'primary',
 	variant: 'contained',
-	startIcon: AddCircleIcon,
 })`
 	width: 124px;
 `;

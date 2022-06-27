@@ -19,6 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
 
@@ -46,7 +47,7 @@ export const ProjectsList = () => {
 						value={filterQuery}
 						placeholder={formatMessage({ id: 'projectsList.search.placeholder', defaultMessage: 'Search projects...' })}
 					/>
-					<NewProjectButton>
+					<NewProjectButton startIcon={<AddCircleIcon />}>
 						<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
 					</NewProjectButton>
 				</ActionComponents>
