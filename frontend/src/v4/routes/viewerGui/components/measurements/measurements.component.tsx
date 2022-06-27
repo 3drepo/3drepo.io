@@ -16,7 +16,7 @@
  */
 
 import { PureComponent } from 'react';
-
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
@@ -172,12 +172,14 @@ export class Measurements extends PureComponent<IProps, IState> {
 				pending={!isViewerReady}
 				id={this.props.id}
 			>
-				<Container>
-					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
-					{this.renderMeasurementDetails(
+				<ViewerScrollArea>
+					<Container>
+						{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
+						{this.renderMeasurementDetails(
 							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
-					)}
-				</Container>
+							)}
+					</Container>
+				</ViewerScrollArea>
 				{this.renderFooterContent()}
 			</ViewsContainer>
 		);

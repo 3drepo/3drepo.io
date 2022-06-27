@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, RefObject } from 'react';
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
 import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
@@ -108,21 +107,13 @@ export const TitleIcon = styled.div`
 	}
 `;
 
-export const ViewerPanelContentComponent = styled.div<IViewerPanelContent>`
+export const ViewerPanelContent = styled(ViewerScrollArea)<IViewerPanelContent>`
 	overflow: ${({ scrollDisabled }) => scrollDisabled ? 'hidden' : 'auto'};
 	display: ${({ scrollDisabled }) => scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${({ scrollDisabled }) => scrollDisabled ? 'column' : 'unset'};
 	position: relative;
 	flex: 1;
 `;
-
-export const ViewerPanelContent = forwardRef(({ children, ...props }: any, ref: RefObject<any>) => (
-	<ViewerScrollArea>
-		<ViewerPanelContentComponent ref={ref} {...props}>
-			{children}
-		</ViewerPanelContentComponent>
-	</ViewerScrollArea>
-));
 
 export const LoaderContainer = styled(ViewerPanelContent)<IPanel>`
 	padding: 24px;

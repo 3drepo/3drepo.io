@@ -20,9 +20,10 @@ import FormControlBase from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import styled from 'styled-components';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
-import { ViewerPanelContentComponent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
 	height: 100%;
@@ -32,7 +33,7 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const BoardContainer = styled.div`
+export const BoardContainer = styled(ViewerScrollArea)`
 	height: 100%;
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
@@ -190,7 +191,7 @@ export const LoaderContainer = styled.div`
 export const FormWrapper = styled.div<{ size: string }>`
 	width: ${({ size }) => size === 'sm' ? 400 : 800}px;
 
-	${ViewerPanelContentComponent} {
+	${ViewerPanelContent} {
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
