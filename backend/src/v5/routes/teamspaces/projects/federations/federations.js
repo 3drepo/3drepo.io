@@ -65,7 +65,7 @@ const appendFavourites = (req, res) => {
 const deleteFavourites = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToRemove = req.body.federations;
+	const favouritesToRemove = req.query.ids.split(',');
 
 	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
@@ -256,7 +256,7 @@ const establishRoutes = () => {
 	 *                         description: name of the federation
 	 *                         example: Complete structure
 	 *                       role:
-	 *                         $ref: "#/components/roles"
+	 *                         $ref: "#/components/schemas/roles"
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the federation is a favourited item for the user
@@ -326,17 +326,12 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               federations:
-	 *                 type: array
-	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
+	 *       - name: ids
+	 *         description: list of federation ids to remove (comma separated)
+	 *         in: query
+	 *         schema:
+	 *           type: string
+	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

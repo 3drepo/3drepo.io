@@ -85,6 +85,7 @@ const modelSettings = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
+		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			subModels: [{ model: modelWithoutRevId }],
 		},
@@ -491,43 +492,43 @@ const testDeleteFavourites = () => {
 	describe('Remove Favourite Federations', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.delete(route)
-				.expect(templates.notLoggedIn.status).send({ federations: [modelSettings[0]._id] });
+				.expect(templates.notLoggedIn.status).query({ ids: `${modelSettings[0]._id}` });
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user is not a member of the teamspace', async () => {
 			const res = await agent.delete(`${route}?key=${nobody.apiKey}`)
-				.expect(templates.teamspaceNotFound.status).send({ federations: [modelSettings[0]._id] });
+				.expect(templates.teamspaceNotFound.status).query({ ids: `${modelSettings[0]._id}` });
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the project does not exist', async () => {
 			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/favourites?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.projectNotFound.status).send({ federations: [modelSettings[0]._id] });
+				.expect(templates.projectNotFound.status).query({ ids: `${modelSettings[0]._id}` });
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
 		test('should fail if the user has no access to one or more federations', async () => {
 			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [modelSettings[1]._id] });
+				.expect(templates.invalidArguments.status).query({ ids: `${modelSettings[1]._id}` });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the favourites list provided has a container', async () => {
 			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
+				.expect(templates.invalidArguments.status).query({ ids: `${container._id}` });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the favourites list provided is empty', async () => {
 			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [] });
+				.expect(templates.invalidArguments.status).query({ ids: '' });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should remove a federation from the user favourites', async () => {
 			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status).send({ federations: [modelSettings[0]._id] });
+				.expect(templates.ok.status).query({ ids: `${modelSettings[0]._id},${modelSettings[1]._id}` });
 		});
 	});
 };

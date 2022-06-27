@@ -17,7 +17,6 @@
 const {
 	canDeleteContainer,
 	validateAddModelData,
-	validateDeleteFavourites,
 	validateUpdateSettingsData,
 } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
@@ -428,7 +427,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
-	router.delete('/favourites', hasAccessToTeamspace, validateDeleteFavourites, deleteFavourites);
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 
 	/**
 	 * @openapi
