@@ -14,26 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import _ from 'lodash';
 import { SyntheticEvent, useState } from 'react';
-
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/**
- *  Copyright (C) 2022 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+import { Checkbox } from '@mui/material';
+import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
+import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 
 interface Props {
 	groups: any [];
@@ -143,6 +129,21 @@ const groupsToTree = (groups) => {
 	return tree;
 };
 
+const GroupItem = ({ group }) => {
+	const setOverride = (event) => {
+		event.stopPropagation();
+		GroupsActionsDispatchers.toggleColorOverride(group._id);
+	};
+
+	const isOverriden = GroupsHooksSelectors.selectIsGroupColorOverriden(group._id);
+
+	return (
+		<li> {group.name} objects: {group.objects.length}
+			<Checkbox checked={isOverriden} onClick={setOverride} />
+		</li>
+	);
+};
+
 const TreeItem = ({ item, collapse }) => {
 	if (item.children) {
 		const [collapseDict, setCollapse] = collapse;
@@ -167,7 +168,7 @@ const TreeItem = ({ item, collapse }) => {
 		);
 	}
 
-	return (<li> {item.name} objects: {item.objects.length}</li>);
+	return (<GroupItem group={item} />);
 };
 
 const Tree = ({ tree, collapse }) => (

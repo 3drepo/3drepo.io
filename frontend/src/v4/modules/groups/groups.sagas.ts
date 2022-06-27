@@ -38,7 +38,7 @@ import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './grou
 import {
 	selectActiveGroupDetails,
 	selectActiveGroupId,
-	selectColorOverrides,
+	selectGroupsColourOverrides,
 	selectEditingGroupDetails,
 	selectFilteredGroups,
 	selectGroups,
@@ -149,7 +149,7 @@ function* selectGroup({ group = {} }) {
 
 function* toggleColorOverride({ groupId }) {
 	try {
-		const colorOverrides = yield select(selectColorOverrides);
+		const colorOverrides = yield select(selectGroupsColourOverrides);
 		const hasColorOverride = colorOverrides.includes(groupId);
 
 		if (!hasColorOverride) {
@@ -167,7 +167,7 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 		yield API.deleteGroups(teamspace, modelId, groups);
 
 		const groupsToDelete = groups.split(',');
-		const colorOverrides = yield select(selectColorOverrides);
+		const colorOverrides = yield select(selectGroupsColourOverrides);
 		const groupsMap = yield select(selectGroupsMap);
 		const isShowDetails = yield select(selectShowDetails);
 		const activeGroupId = yield select(selectActiveGroupId);

@@ -22,7 +22,7 @@ import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../../../modules/dialog';
 import {
 	selectActiveGroupId,
-	selectColorOverrides,
+	selectGroupsColourOverrides,
 	selectFilteredGroups,
 	selectGroupsMap,
 	selectHighlightedGroups,
@@ -49,7 +49,7 @@ const mapStateToProps = createStructuredSelector({
 	highlightedGroups: selectHighlightedGroups,
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
-	colorOverrides: selectColorOverrides,
+	colorOverrides: selectGroupsColourOverrides,
 	modelSettings: selectSettings,
 	isModelLoaded: selectIsModelLoaded,
 	isAllOverridden: selectIsAllOverridden,

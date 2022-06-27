@@ -100,11 +100,17 @@ export const selectFilteredGroups = createSelector(
 	}
 );
 
-export const selectColorOverrides = createSelector(
-	selectGroupsDomain, (state) => {
-		return state.colorOverrides;
-	}
+export const selectGroupsColourOverrides = createSelector(
+	selectGroupsDomain, (state): string[] => state.colorOverrides
 );
+
+export const selectGroupsColourOverridesSet = createSelector(
+	selectGroupsColourOverrides, (colorOverrides) =>
+		colorOverrides.reduce(
+			(overrides, groupId) => overrides.add(groupId)
+		 , new Set<string>())
+);
+
 
 export const selectTotalMeshes = createSelector(
 	selectComponentState, (state) => state.totalMeshes
@@ -113,9 +119,8 @@ export const selectTotalMeshes = createSelector(
 export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
-
 export const selectAllOverridesDict = createSelector(
-	selectColorOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
+	selectGroupsColourOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
 	(groupOverrides, filteredGroups, componentState, issuesGroups) => {
 		const issuesOverrides = issuesGroups.map(({_id}) => _id);
 
@@ -160,4 +165,10 @@ export const selectOverrides = createSelector(
 
 export const selectTransparencies = createSelector(
 	selectOverridesDict, (overrides) => overrides.transparencies
+);
+
+export const selectIsGroupColorOverriden = createSelector(
+	selectGroupsColourOverridesSet,
+	(_, groupId: string) => groupId,
+	(overrides, groupId) => overrides.has(groupId)
 );
