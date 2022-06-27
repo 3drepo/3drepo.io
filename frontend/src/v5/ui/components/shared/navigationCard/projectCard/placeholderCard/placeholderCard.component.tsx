@@ -15,28 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { OtherTeamspaceImage } from '../teamspaceCard.styles';
+import { ImagePlaceholder, ListItem, TextPlaceholder } from './placeholderCard.styles';
+import { StyledCard } from '../../linkCard.styles';
 
-const PlaceholderStyle = css`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	opacity: 0.1;
-	border-radius: 3px;
-`;
+interface IAddTeamspaceCard {
+	variant?: 'primary' | 'secondary',
+}
 
-export const ListItem = styled.li`
-	list-style-type: none;
-	float: left;
-	margin: 10px;
-`;
-
-export const ImagePlaceholder = styled(OtherTeamspaceImage)`
-	${PlaceholderStyle}
-`;
-
-export const TextPlaceholder = styled.div<{ width?: string;}>`
-	${PlaceholderStyle}
-	height: 10px;
-	width: ${({ width }) => width || '100%'};
-	margin-top: 13px;
-`;
+export const PlaceholderCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+	<ListItem>
+		<StyledCard $variant={variant}>
+			<ImagePlaceholder />
+			<TextPlaceholder />
+			<TextPlaceholder width="50%" />
+		</StyledCard>
+	</ListItem>
+);

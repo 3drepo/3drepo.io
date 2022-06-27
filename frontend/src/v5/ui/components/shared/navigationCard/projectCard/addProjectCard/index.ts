@@ -15,21 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { ListItem } from '../teamspaceCard.styles';
-import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
-
-interface IAddTeamspaceCard {
-	variant?: 'primary' | 'secondary',
-}
-
-export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
-	<ListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container $variant={variant}>
-				<AddTeamspaceIcon />
-				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
-			</Container>
-		</a>
-	</ListItem>
-);
+export { AddTeamspaceCard } from './addProjectCard.component';

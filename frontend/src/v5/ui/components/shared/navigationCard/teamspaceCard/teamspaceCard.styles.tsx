@@ -15,4 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { AddTeamspaceCard } from './addTeamspaceCard.component';
+import styled from 'styled-components';
+import { Avatar } from '@controls/avatar';
+
+export const MyTeamspaceImage = styled(Avatar)`
+	width: 100%;
+	.MuiAvatar-root {
+		cursor: pointer;
+		border-radius: 0;
+		width: 100%;
+		height: 175px;
+		margin: 0;
+		font-size: 40px;
+		color: ${({ theme }) => theme.palette.tertiary.dark};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;
+
+export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
+	position: relative;
+	height: 175px;
+	width: 222px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	object-fit: cover;
+	margin-bottom: -5px;
+`;

@@ -15,19 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledCard } from '../teamspaceCard.styles';
-import { ImagePlaceholder, ListItem, TextPlaceholder } from './placeholderCard.styles';
+import { FormattedMessage } from 'react-intl';
+import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
+import { ListItem } from '../../linkCard.styles';
 
 interface IAddTeamspaceCard {
 	variant?: 'primary' | 'secondary',
 }
 
-export const PlaceholderCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
 	<ListItem>
-		<StyledCard $variant={variant}>
-			<ImagePlaceholder />
-			<TextPlaceholder />
-			<TextPlaceholder width="50%" />
-		</StyledCard>
+		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
+			<Container $variant={variant}>
+				<AddTeamspaceIcon />
+				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
+			</Container>
+		</a>
 	</ListItem>
 );
