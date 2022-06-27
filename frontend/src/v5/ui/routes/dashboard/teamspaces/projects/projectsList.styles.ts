@@ -17,7 +17,6 @@
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
 import { ListItem } from '@components/shared/linkCard/linkCard.styles';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { Button } from '@controls/button';
 import { SearchInput as SearchInputBase } from '@controls/searchInput';
 
