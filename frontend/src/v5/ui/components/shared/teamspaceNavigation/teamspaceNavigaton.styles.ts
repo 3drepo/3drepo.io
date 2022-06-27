@@ -21,7 +21,7 @@ import { NavLink } from 'react-router-dom';
 
 export const Container = styled.nav`
 	display: flex;
-	margin-right: 20px;
+	padding-left: 79px;
 `;
 
 export const Link: typeof NavLink = styled(LinkComponent).attrs({
