@@ -31,7 +31,8 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const container2 = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-const revision = ServiceHelper.generateRevisionEntry();
+const containerRevision = ServiceHelper.generateRevisionEntry();
+const federationRevision = ServiceHelper.generateRevisionEntry();
 
 let agent;
 const setupData = async () => {
@@ -60,7 +61,8 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id]),
-		ServiceHelper.db.createRevision(teamspace, container._id, { ...revision, author: user.user })
+		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, federation._id, { ...federationRevision, author: user.user }),
 	]);
 };
 
@@ -233,16 +235,17 @@ const revisionAddedTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
 			const content = { value: 0, database: teamspace, project: container._id };
-			await queueMessage(queueConfig.callback_queue, revision._id, JSON.stringify(content));
+			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
 
 			const results = await modelUpdatePromise;
-			
+
 			expect(results?.data?.timestamp).not.toBeUndefined();
-			expect(results).toEqual(expect.objectContaining({ ...data, data: { 
-				author: user.user,
-				tag: revision.tag,
-				timestamp: results.data.timestamp 
-			} }));
+			expect(results).toEqual(expect.objectContaining({ ...data,
+				data: {
+					author: user.user,
+					tag: containerRevision.tag,
+					timestamp: results.data.timestamp,
+				} }));
 
 			socket.close();
 		});
@@ -254,21 +257,22 @@ const revisionAddedTest = () => {
 
 			const content = { value: 0, database: teamspace, project: federation._id };
 			const fileContent = { subProjects: [{ project: container._id }] };
-			mkdirSync(`${queueConfig.shared_storage}/${revision._id}`);
-			writeFileSync(`${queueConfig.shared_storage}/${revision._id}/obj.json`, JSON.stringify(fileContent));
+			mkdirSync(`${queueConfig.shared_storage}/${federationRevision._id}`);
+			writeFileSync(`${queueConfig.shared_storage}/${federationRevision._id}/obj.json`, JSON.stringify(fileContent));
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_NEW_REVISION);
 
-			await queueMessage(queueConfig.callback_queue, revision._id, JSON.stringify(content));
+			await queueMessage(queueConfig.callback_queue, federationRevision._id, JSON.stringify(content));
 
 			const results = await modelUpdatePromise;
-			
+
 			expect(results?.data?.timestamp).not.toBeUndefined();
-			expect(results).toEqual(expect.objectContaining({ ...data, data: { 
-				author: user.user,
-				tag: revision.tag,
-				timestamp: results.data.timestamp 
-			} }));
+			expect(results).toEqual(expect.objectContaining({ ...data,
+				data: {
+					author: user.user,
+					tag: federationRevision.tag,
+					timestamp: results.data.timestamp,
+				} }));
 
 			socket.close();
 		});
@@ -286,7 +290,7 @@ const revisionUpdateTest = () => {
 				ServiceHelper.socket.joinRoom(socket1, data),
 				ServiceHelper.socket.joinRoom(socket2, data),
 			]);
-			
+
 			const socket1CB = jest.fn();
 
 			const socket2Promise = new Promise((resolve, reject) => {
@@ -300,12 +304,14 @@ const revisionUpdateTest = () => {
 				setTimeout(resolve, 100);
 			});
 
-			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions/${revision._id}?key=${user.apiKey}`)
+			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions/${containerRevision._id}?key=${user.apiKey}`)
 				.set({ [SOCKET_HEADER]: socket1.id })
 				.send({ void: true })
 				.expect(templates.ok.status);
- 
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { _id: revision._id, void: true } });
+
+			await expect(socket2Promise).resolves.toEqual({ ...data,
+				data: { _id: containerRevision._id,
+					void: true } });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();

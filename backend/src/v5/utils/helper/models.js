@@ -37,7 +37,9 @@ ModelHelper.removeModelData = async (teamspace, project, model, sender) => {
 
 	return Promise.all([
 		removeModelCollections(teamspace, model),
-		deleteModel(teamspace, project, model, sender).catch((err) => { if (err.code !== templates.modelNotFound.code) throw err; }),
+		deleteModel(teamspace, project, model, sender).catch((err) => {
+			if (err.code !== templates.modelNotFound.code) throw err;
+		}),
 	]);
 };
 

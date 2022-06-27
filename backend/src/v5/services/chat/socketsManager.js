@@ -17,9 +17,9 @@
 
 const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
+const { hasReadAccessToModel, isProjectAdmin, isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projectSettings');
-const { hasReadAccessToModel, isProjectAdmin, isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const socketIdToSocket = {};

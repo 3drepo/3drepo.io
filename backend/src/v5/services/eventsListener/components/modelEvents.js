@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const { getModelById, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
-const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createModelMessage, createProjectMessage } = require('../../chat');
+const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
+const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { getRevisionByIdOrTag } = require('../../../models/revisions');
@@ -38,7 +37,7 @@ const queueTasksCompleted = async ({
 }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);		
+		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
 	} catch (err) {
 		// do nothing - the model may have been deleted before the task came back.
 	}
@@ -62,7 +61,7 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 	}
 };
 
-const revisionAdded = async({ teamspace, project, model, revision, isFederation }) => {
+const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
 	try {
 		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, stringToUUID(revision),
 			{ _id: 0, tag: 1, author: 1, timestamp: 1 });

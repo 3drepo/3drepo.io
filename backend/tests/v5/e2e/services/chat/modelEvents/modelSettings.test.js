@@ -62,7 +62,7 @@ const setupData = async () => {
 	]);
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id, 
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id,
 			containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
 	]);
 };
@@ -158,12 +158,12 @@ const modelAddedTest = () => {
 				ServiceHelper.socket.joinRoom(socket1, data),
 				ServiceHelper.socket.joinRoom(socket2, data),
 			]);
-			
+
 			const socket1CB = jest.fn();
 
-			const socket2Promise = new Promise((resolve, reject) => {				
+			const socket2Promise = new Promise((resolve, reject) => {
 				socket2.on(EVENTS.NEW_CONTAINER, resolve);
-				setTimeout(reject, 1000);				
+				setTimeout(reject, 1000);
 			});
 
 			// Sender should not get the update
@@ -177,8 +177,11 @@ const modelAddedTest = () => {
 				.set({ [SOCKET_HEADER]: socket1.id })
 				.send(payload)
 				.expect(templates.ok.status);
-			
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { _id: res.body._id, code: payload.code, category: payload.type } });
+
+			await expect(socket2Promise).resolves.toEqual({ ...data,
+				data: { _id: res.body._id,
+					code: payload.code,
+					category: payload.type } });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();
@@ -196,12 +199,12 @@ const modelAddedTest = () => {
 				ServiceHelper.socket.joinRoom(socket1, data),
 				ServiceHelper.socket.joinRoom(socket2, data),
 			]);
-			
+
 			const socket1CB = jest.fn();
 
-			const socket2Promise = new Promise((resolve, reject) => {				
+			const socket2Promise = new Promise((resolve, reject) => {
 				socket2.on(EVENTS.NEW_FEDERATION, resolve);
-				setTimeout(reject, 1000);				
+				setTimeout(reject, 1000);
 			});
 
 			// Sender should not get the update
@@ -215,8 +218,11 @@ const modelAddedTest = () => {
 				.set({ [SOCKET_HEADER]: socket1.id })
 				.send(payload)
 				.expect(templates.ok.status);
-			
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { _id: res.body._id, code: payload.code, description: payload.desc } });
+
+			await expect(socket2Promise).resolves.toEqual({ ...data,
+				data: { _id: res.body._id,
+					code: payload.code,
+					description: payload.desc } });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();
@@ -233,17 +239,17 @@ const modelDeletedTest = () => {
 			const socket1 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 			const socket2 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
-			const data = { teamspace, project: project.id, model: containerToBeDeleted._id};
+			const data = { teamspace, project: project.id, model: containerToBeDeleted._id };
 			await Promise.all([
 				ServiceHelper.socket.joinRoom(socket1, data),
 				ServiceHelper.socket.joinRoom(socket2, data),
 			]);
-			
+
 			const socket1CB = jest.fn();
 
-			const socket2Promise = new Promise((resolve, reject) => {				
+			const socket2Promise = new Promise((resolve, reject) => {
 				socket2.on(EVENTS.CONTAINER_REMOVED, resolve);
-				setTimeout(reject, 1000);				
+				setTimeout(reject, 1000);
 			});
 
 			// Sender should not get the update
@@ -253,9 +259,9 @@ const modelDeletedTest = () => {
 			});
 
 			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerToBeDeleted._id}?key=${user.apiKey}`)
-				.set({ [SOCKET_HEADER]: socket1.id })				
+				.set({ [SOCKET_HEADER]: socket1.id })
 				.expect(templates.ok.status);
-			
+
 			await expect(socket2Promise).resolves.toEqual({ ...data, data: { } });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
@@ -269,17 +275,17 @@ const modelDeletedTest = () => {
 			const socket1 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 			const socket2 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
-			const data = { teamspace, project: project.id, model: federationToBeDeleted._id};
+			const data = { teamspace, project: project.id, model: federationToBeDeleted._id };
 			await Promise.all([
 				ServiceHelper.socket.joinRoom(socket1, data),
 				ServiceHelper.socket.joinRoom(socket2, data),
 			]);
-			
+
 			const socket1CB = jest.fn();
 
-			const socket2Promise = new Promise((resolve, reject) => {				
+			const socket2Promise = new Promise((resolve, reject) => {
 				socket2.on(EVENTS.FEDERATION_REMOVED, resolve);
-				setTimeout(reject, 1000);				
+				setTimeout(reject, 1000);
 			});
 
 			// Sender should not get the update
@@ -289,9 +295,9 @@ const modelDeletedTest = () => {
 			});
 
 			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationToBeDeleted._id}?key=${user.apiKey}`)
-				.set({ [SOCKET_HEADER]: socket1.id })				
+				.set({ [SOCKET_HEADER]: socket1.id })
 				.expect(templates.ok.status);
-			
+
 			await expect(socket2Promise).resolves.toEqual({ ...data, data: { } });
 
 			await expect(socket1Promise).resolves.toBeUndefined();

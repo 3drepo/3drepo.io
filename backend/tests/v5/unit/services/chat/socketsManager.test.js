@@ -226,7 +226,7 @@ const testSocketsEvents = () => {
 
 		describe('On Join', () => {
 			afterEach(SocketsManager.reset);
-			
+
 			describe('Project room', () => {
 				afterEach(SocketsManager.reset);
 
@@ -235,7 +235,7 @@ const testSocketsEvents = () => {
 					SocketsManager.addSocket(socket);
 
 					const teamspace = generateRandomString();
-					const project = generateRandomString();					
+					const project = generateRandomString();
 
 					Permissions.isProjectAdmin.mockResolvedValueOnce(true);
 

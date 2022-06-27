@@ -267,17 +267,17 @@ const testDeleteModel = () => {
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const model =  generateRandomString();
+			const model = generateRandomString();
 			const res = await Model.deleteModel(teamspace, project, model);
 			expect(res).toEqual(undefined);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model}, { federate: 1 } );
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, { 
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
 				teamspace,
-				project, 
-				model, 
-				isFederation: true
+				project,
+				model,
+				isFederation: true,
 			});
 		});
 
@@ -287,17 +287,17 @@ const testDeleteModel = () => {
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const model =  generateRandomString();
+			const model = generateRandomString();
 			const res = await Model.deleteModel(teamspace, project, model);
 			expect(res).toEqual(undefined);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model}, { federate: 1 } );
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, { 
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
 				teamspace,
-				project, 
-				model, 
-				isFederation: false
+				project,
+				model,
+				isFederation: false,
 			});
 		});
 
@@ -306,11 +306,11 @@ const testDeleteModel = () => {
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const model =  generateRandomString();
+			const model = generateRandomString();
 			await expect(Model.deleteModel(teamspace, project, model))
 				.rejects.toEqual(templates.modelNotFound);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model}, { federate: 1 } )
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
 		});
 	});
 };
@@ -378,59 +378,59 @@ const testNewRevisionProcessed = () => {
 		const { success, message, userErr } = getInfoFromCode(retVal);
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED},
 			a ${events.MODEL_SETTINGS_UPDATE} and a ${events.NEW_REVISION} event`,
-			async () => {
-				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
-				publishFn.mockClear();
-				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, retVal, user,
-				)).resolves.toBe(undefined);
+		async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+			publishFn.mockClear();
+			await expect(Model.newRevisionProcessed(
+				teamspace, project, model, corId, retVal, user,
+			)).resolves.toBe(undefined);
 
-				expect(fn.mock.calls.length).toBe(1);
-				const action = fn.mock.calls[0][3];
-				if (success) {
-					expect(action.$set.status).toBe(undefined);
-					expect(action.$set).toHaveProperty('timestamp');
-				} else {
-					expect(action.$set.status).toEqual('failed');
-					expect(action.$set).not.toHaveProperty('timestamp');
-					expect(action.$set).toHaveProperty('errorReason');
-					expect(action.$set.errorReason.message).toEqual(message);
-					expect(action.$set.errorReason.errorCode).toEqual(retVal);
-					expect(action.$set.errorReason).toHaveProperty('timestamp');
-				}
-				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			if (success) {
+				expect(action.$set.status).toBe(undefined);
+				expect(action.$set).toHaveProperty('timestamp');
+			} else {
+				expect(action.$set.status).toEqual('failed');
+				expect(action.$set).not.toHaveProperty('timestamp');
+				expect(action.$set).toHaveProperty('errorReason');
+				expect(action.$set.errorReason.message).toEqual(message);
+				expect(action.$set.errorReason.errorCode).toEqual(retVal);
+				expect(action.$set.errorReason).toHaveProperty('timestamp');
+			}
+			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn).toHaveBeenCalledTimes(3);
-				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
-					{
-						teamspace,
-						model,
-						corId,
-						userErr,
-						message,
-						success,
-						errCode: retVal,
-						user,
-					});
+			expect(publishFn).toHaveBeenCalledTimes(3);
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+				{
+					teamspace,
+					model,
+					corId,
+					userErr,
+					message,
+					success,
+					errCode: retVal,
+					user,
+				});
 
-				expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-					{
-						teamspace,
-						project,
-						model,
-						data: { ...action.$set, status: action.$set.status || 'ok' },
-						isFederation: false,
-					});
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{
+					teamspace,
+					project,
+					model,
+					data: { ...action.$set, status: action.$set.status || 'ok' },
+					isFederation: false,
+				});
 
-				expect(publishFn).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
-						isFederation: false,
-					});
-			});
+			expect(publishFn).toHaveBeenCalledWith(events.NEW_REVISION,
+				{
+					teamspace,
+					project,
+					model,
+					revision: corId,
+					isFederation: false,
+				});
+		});
 	});
 
 	describe('Update with new revision (Federation)', () => {

@@ -24,7 +24,7 @@ const eventList = [
 	'NEW_MODEL', 'DELETE_MODEL', 'MODEL_SETTINGS_UPDATE',
 	// Model import (including federation and toy project)
 	'MODEL_IMPORT_FINISHED',
-	//Revisions
+	// Revisions
 	'NEW_REVISION', 'REVISION_UPDATED',
 	// Queue specific
 	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',

@@ -46,7 +46,13 @@ Models.addModel = async (teamspace, project, data, sender) => {
 	} else {
 		eventData.category = data.type;
 	}
-	publish(events.NEW_MODEL, { teamspace, project, model: _id, data: eventData, sender, isFederation: !!data.federate });
+
+	publish(events.NEW_MODEL, { teamspace,
+		project,
+		model: _id,
+		data: eventData,
+		sender,
+		isFederation: !!data.federate });
 
 	return _id;
 };
@@ -173,12 +179,12 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			model,
 			data,
 			isFederation: !!containers });
-		
+
 		publish(events.NEW_REVISION, { teamspace,
-				project,
-				model,
-				revision: corId,
-				isFederation: !!containers });
+			project,
+			model,
+			revision: corId,
+			isFederation: !!containers });
 	}
 };
 
