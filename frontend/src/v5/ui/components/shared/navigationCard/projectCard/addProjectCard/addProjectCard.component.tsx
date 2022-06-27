@@ -23,7 +23,7 @@ interface IAddProjectCard {
 	variant?: 'primary' | 'secondary',
 }
 
-export const AddTeamspaceCard = ({ variant = 'primary' }: IAddProjectCard): JSX.Element => (
+export const AddProjectCard = ({ variant = 'primary' }: IAddProjectCard): JSX.Element => (
 	<ListItem>
 		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
 			<Container $variant={variant}>
