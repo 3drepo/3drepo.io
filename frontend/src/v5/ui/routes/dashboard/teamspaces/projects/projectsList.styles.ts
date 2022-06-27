@@ -15,15 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
+import { Typography } from '@mui/material';
+import { Button } from '@controls/button';
 
-export const CardList = styled.ul`
-	flex-direction: row;
-	justify-content: center;
-	padding: 0;
+export const Container = styled.ul`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	width: calc(100% - 150px);
+	flex-direction: column;
 	display: flex;
-	flex-wrap: wrap;
-	width: clamp(40px, 85vw, 798px);
-	margin-bottom: auto;
-	margin-top: 150px;
+	justify-content: flex-start;
+	padding: 17px 30px 41px;
+	margin: 32px 75px;
+	border-radius: 10px;
+	box-sizing: border-box;
 `;
 
+export const Header = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+`;
+
+export const Title = styled(Typography).attrs({
+	variant: 'h2',
+})``;
+
+export const ActionComponents = styled.div`
+	display: flex;
+	flex-direction: row;
+`;
+
+export const NewProjectButton = styled(Button).attrs({
+	color: 'primary',
+	variant: 'contained'
+})``;

@@ -17,23 +17,34 @@
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { Container } from './projectsList.styles'
+import { ProjectCard } from '@components/shared/navigationCard/projectCard/projectCard.component';
+import { ActionComponents, Container, Header, NewProjectButton, Title } from './projectsList.styles';
 
-export const ProjectList = (): JSX.Element => {
+
+export const ProjectsList = (): JSX.Element => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
 	return (
 		<Container>
-			{projects.map((project) => (
-				// <ProjectListItem
-				// 	key={project._id}
-				// 	projectId={project._id}
-				// 	name={project.name}
-				// />
-				<div>Project: {name}</div>
+			<Header>
+				<Title>
+					<FormattedMessage id="projectsList.title" defaultMessage="Projects" />
+				</Title>
+				<ActionComponents>
+					<div>Search Bar</div>
+					<NewProjectButton>
+						<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
+					</NewProjectButton>
+				</ActionComponents>
+			</Header>
+			{[...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects].map((project) => (
+				<ProjectCard
+					key={project._id}
+					project={project}
+				/>
 			))}
 			<div>
-				<FormattedMessage id="projectList.NewProject" defaultMessage="add new project" />
+				<FormattedMessage id="projectsList.newProject.card" defaultMessage="New Project" />
 			</div>
 		</Container>
 	);
