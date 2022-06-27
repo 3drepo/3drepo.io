@@ -20,7 +20,7 @@ import { LinkCard as LinkCardBase } from '../linkCard.component';
 
 export const LinkCard = styled(LinkCardBase)`
 	height: 190px;
-`
+`;
 
 export const ProjectImage = styled.img`
 	width: 100%;
