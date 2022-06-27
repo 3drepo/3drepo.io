@@ -45,7 +45,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 						{project.name}
 					</Highlight>
 				</CardHeading>
-				<EllipsisMenuContainer  onClick={(e) => e.preventDefault()}>
+				<EllipsisMenuContainer onClick={(e) => e.preventDefault()}>
 					<EllipsisMenu>
 						<EllipsisMenuItem
 							title={formatMessage({
