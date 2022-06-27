@@ -14,7 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { canDeleteContainer, validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const {
+	canDeleteContainer,
+	validateAddModelData,
+	validateDeleteFavourites,
+	validateUpdateSettingsData,
+} = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
@@ -74,7 +79,7 @@ const getContainerStats = (req, res) => {
 const deleteFavourites = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToRemove = req.body.containers;
+	const favouritesToRemove = req.query.ids.split(',');
 
 	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
@@ -261,7 +266,7 @@ const establishRoutes = () => {
 	 *                         description: name of the container
 	 *                         example: Structure
 	 *                       role:
-	 *                         $ref: "#/components/roles"
+	 *                         $ref: "#/components/schemas/roles"
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the container is a favourited item for the user
@@ -409,17 +414,12 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               containers:
-	 *                 type: array
-	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
+	 *       - name: ids
+	 *         description: list of container ids to remove (comma separated)
+	 *         in: query
+	 *         schema:
+	 *           type: string
+	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -428,7 +428,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
-	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
+	router.delete('/favourites', hasAccessToTeamspace, validateDeleteFavourites, deleteFavourites);
 
 	/**
 	 * @openapi

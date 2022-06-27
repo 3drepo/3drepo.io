@@ -17,6 +17,7 @@
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
+const { validateDeleteFavourites } = require('./commons/favourites');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
 const { respond } = require('../../../../../../utils/responder');
 const { validateNewRevisionData } = require('./commons/revisions');
@@ -24,6 +25,7 @@ const { validateNewRevisionData } = require('./commons/revisions');
 const Containers = {};
 
 Containers.validateAddModelData = validateAddModelData(false);
+Containers.validateDeleteFavourites = validateDeleteFavourites(false);
 Containers.validateUpdateSettingsData = validateUpdateSettingsData(false);
 
 Containers.canDeleteContainer = async (req, res, next) => {
