@@ -17,8 +17,9 @@
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
 import { Button } from '@controls/button';
+import { ListItem } from '@components/shared/linkCard/linkCard.styles';
 
-export const Container = styled.ul`
+export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	width: calc(100% - 150px);
 	flex-direction: column;
@@ -50,3 +51,17 @@ export const NewProjectButton = styled(Button).attrs({
 	color: 'primary',
 	variant: 'contained'
 })``;
+
+export const ProjectCardsList = styled.ul`
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	padding: 0;
+	margin: 0;
+	gap: 20px;
+
+	${ListItem} {
+		margin: 0;
+	}
+`;
