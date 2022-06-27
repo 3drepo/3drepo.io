@@ -172,14 +172,12 @@ export class Measurements extends PureComponent<IProps, IState> {
 				pending={!isViewerReady}
 				id={this.props.id}
 			>
-				<ViewerScrollArea>
-					<Container>
-						{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
-						{this.renderMeasurementDetails(
-							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
-							)}
-					</Container>
-				</ViewerScrollArea>
+				<Container>
+					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
+					{this.renderMeasurementDetails(
+						!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
+						)}
+				</Container>
 				{this.renderFooterContent()}
 			</ViewsContainer>
 		);
