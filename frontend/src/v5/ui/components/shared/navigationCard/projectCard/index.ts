@@ -16,4 +16,4 @@
  */
 export { ProjectCard } from './projectCard.component';
 export { AddProjectCard } from './addProjectCard/addProjectCard.component';
-export { PlaceholderCard } from './placeholderCard/placeholderCard.component';
+export { ProjectPlaceholderCard } from './placeholderCard/placeholderCard.component';

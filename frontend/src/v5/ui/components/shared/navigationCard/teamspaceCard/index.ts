@@ -17,4 +17,4 @@
 
 export { TeamspaceCard } from './teamspaceCard.component';
 export { AddTeamspaceCard } from './addTeamspaceCard/addTeamspaceCard.component';
-export { PlaceholderCard } from './placeholderCard/placeholderCard.component';
+export { TeamspacePlaceholderCard } from './placeholderCard/placeholderCard.component';
