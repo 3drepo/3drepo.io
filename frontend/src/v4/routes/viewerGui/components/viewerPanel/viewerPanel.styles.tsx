@@ -117,6 +117,7 @@ export const ViewerPanelContent = styled(ViewerScrollArea)<IViewerPanelContent>`
 
 export const LoaderContainer = styled(ViewerPanelContent)<IPanel>`
 	padding: 24px;
+	width: unset !important;
 	${({ flexHeight }) => flexHeight ? '' : css`height: 100%;`};
 `;
 

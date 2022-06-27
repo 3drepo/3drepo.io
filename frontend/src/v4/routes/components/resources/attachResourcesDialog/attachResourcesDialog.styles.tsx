@@ -61,7 +61,7 @@ export const ResourcesListScroller = styled(ViewerScrollArea).attrs({
 })`
 	margin-top: 20px;
     overflow: hidden;
-	width: 520px;
+	width: 520px !important;
 	max-height: 114px;
 `;
 
