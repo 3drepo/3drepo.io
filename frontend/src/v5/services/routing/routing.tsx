@@ -32,7 +32,7 @@ export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(
 
 export const discardTabComponent = (uri) => {
 	const uriDiscardedSlash = discardSlash(uri);
-	const uriComponents = uriDiscardedSlash.split("/");
+	const uriComponents = uriDiscardedSlash.split('/');
 	if (uriComponents.at(-2) !== 't') return uriDiscardedSlash;
 	return uriDiscardedSlash.replace(`/t/${uriComponents.at(-1)}`, '');
 };
