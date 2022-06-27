@@ -14,15 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
-import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList } from './projectsList.styles';
+import { formatMessage } from '@/v5/services/intl';
+import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
 
-
-export const ProjectsList = (): JSX.Element => {
+export const ProjectsList = () => {
+	const [filterQuery, setFilterQuery] = useState('');
+	
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+
+	const getFilteredProjects = () => (
+		[...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects].filter(({ name }) => (
+			name.toLowerCase().includes(filterQuery.trim().toLowerCase())
+		))
+	);
 
 	return (
 		<Container>
@@ -31,15 +40,21 @@ export const ProjectsList = (): JSX.Element => {
 					<FormattedMessage id="projectsList.title" defaultMessage="Projects" />
 				</Title>
 				<ActionComponents>
-					<div>Search Bar</div>
+					<SearchInput
+						onClear={() => setFilterQuery('')}
+						onChange={(event) => setFilterQuery(event.currentTarget.value)}
+						value={filterQuery}
+						placeholder={formatMessage({ id: 'projectsList.search.placeholder', defaultMessage: 'Search projects...' })}
+					/>
 					<NewProjectButton>
 						<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
 					</NewProjectButton>
 				</ActionComponents>
 			</Header>
 			<ProjectCardsList>
-				{[...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects].map((project) => (
+				{getFilteredProjects().map((project) => (
 					<ProjectCard
+						filterQuery={filterQuery}
 						key={project._id}
 						project={project}
 					/>

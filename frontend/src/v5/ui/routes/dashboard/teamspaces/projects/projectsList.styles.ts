@@ -16,8 +16,10 @@
  */
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
-import { Button } from '@controls/button';
 import { ListItem } from '@components/shared/linkCard/linkCard.styles';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import { Button } from '@controls/button';
+import { SearchInput as SearchInputBase } from '@controls/searchInput';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -25,7 +27,7 @@ export const Container = styled.div`
 	flex-direction: column;
 	display: flex;
 	justify-content: flex-start;
-	padding: 17px 30px 41px;
+	padding: 9px 30px 41px;
 	margin: 32px 75px;
 	border-radius: 10px;
 	box-sizing: border-box;
@@ -35,7 +37,9 @@ export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	align-items: center;
 	width: 100%;
+	margin-bottom: 16px;
 `;
 
 export const Title = styled(Typography).attrs({
@@ -49,8 +53,15 @@ export const ActionComponents = styled.div`
 
 export const NewProjectButton = styled(Button).attrs({
 	color: 'primary',
-	variant: 'contained'
-})``;
+	variant: 'contained',
+	startIcon: AddCircleIcon,
+})`
+	width: 124px;
+`;
+
+export const SearchInput = styled(SearchInputBase)`
+	width: 345px;
+`;
 
 export const ProjectCardsList = styled.ul`
 	display: flex;
