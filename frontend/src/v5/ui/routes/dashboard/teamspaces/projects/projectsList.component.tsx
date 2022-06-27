@@ -17,8 +17,8 @@
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { ProjectCard } from '@components/shared/navigationCard/projectCard/projectCard.component';
-import { ActionComponents, Container, Header, NewProjectButton, Title } from './projectsList.styles';
+import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
+import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList } from './projectsList.styles';
 
 
 export const ProjectsList = (): JSX.Element => {
@@ -37,15 +37,15 @@ export const ProjectsList = (): JSX.Element => {
 					</NewProjectButton>
 				</ActionComponents>
 			</Header>
-			{[...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects].map((project) => (
-				<ProjectCard
-					key={project._id}
-					project={project}
-				/>
-			))}
-			<div>
-				<FormattedMessage id="projectsList.newProject.card" defaultMessage="New Project" />
-			</div>
+			<ProjectCardsList>
+				{[...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects].map((project) => (
+					<ProjectCard
+						key={project._id}
+						project={project}
+					/>
+				))}
+				<AddProjectCard />
+			</ProjectCardsList>
 		</Container>
 	);
 };
