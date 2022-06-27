@@ -25,11 +25,11 @@ import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCa
 
 export const ProjectsList = () => {
 	const [filterQuery, setFilterQuery] = useState('');
-	
+
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
 	const getFilteredProjects = () => (
-		[...projects, ...projects, ...projects, ...projects, ...projects, ...projects, ...projects].filter(({ name }) => (
+		projects.filter(({ name }) => (
 			name.toLowerCase().includes(filterQuery.trim().toLowerCase())
 		))
 	);
