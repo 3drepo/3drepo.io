@@ -74,12 +74,12 @@ Schemas.schemas.group = {
 			example: 'JohnDoe',
 		},
 		createdAt: {
-			type: 'int64',
+			type: 'number',
 			description: 'Timestamp when the group was created, epoch time in ms',
 			example: 1632821117000,
 		},
 		updatedAt: {
-			type: 'int64',
+			type: 'number',
 			description: 'Timestamp when the group was last updated, epoch time in ms',
 			example: 1632821119000,
 		},

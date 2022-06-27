@@ -59,27 +59,24 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: ExportContainerGroups
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       description: List of group ids to export
 	 *       content:
@@ -98,18 +95,18 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/containersNotFound"
+	 *         $ref: "#/components/responses/containerNotFound"
 	 *       200:
 	 *         description: returns list of containers
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/group"
-	 *     links:
-	 *       importGroups:
-	 *         operationId: ImportContainerGroups
-	 *         requestBody:
-	 *           groups: "$response.body#/groups"
+	 *         links:
+	 *           importGroups:
+	 *             operationId: ImportContainerGroups
+	 *             requestBody:
+	 *               groups: "$response.body#/groups"
 	 *
 	 */
 	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
@@ -121,27 +118,24 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: ImportContainerGroups
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       description: List of group ids to export
 	 *       content:

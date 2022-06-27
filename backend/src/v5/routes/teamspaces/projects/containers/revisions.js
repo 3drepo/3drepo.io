@@ -47,7 +47,7 @@ const updateRevisionStatus = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const newRevision = (req, res) => {
+const createNewContainerRevision = (req, res) => {
 	const { file } = req;
 	const revInfo = req.body;
 	const { teamspace, container } = req.params;
@@ -82,34 +82,30 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: getRevisions
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-		   *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - showVoid :
-	 *         name: showVoid
+	 *           type: string
+	 *       - name: showVoid
 	 *         description: Include void revisions or not
 	 *         in: query
 	 *         required: false
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -150,29 +146,26 @@ const establishRoutes = () => {
 	 *   post:
 	 *     description: Create a new revision.
 	 *     tags: [Containers]
-	 *     operationId: createNewRevision
+	 *     operationId: createNewContainerRevision
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       content:
 	 *         multipart/form-data:
@@ -188,7 +181,7 @@ const establishRoutes = () => {
 	 *                 type: string
 	 *                 example: Initial design
 	 *               importAnimations:
-	 *                 type: bool
+	 *                 type: boolean
 	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
 	 *               timezone:
 	 *                 description: Timezone of the revision
@@ -208,7 +201,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.post('', hasWriteAccessToContainer, validateNewRevisionData, newRevision);
+	router.post('', hasWriteAccessToContainer, validateNewRevisionData, createNewContainerRevision);
 
 	/**
 	 * @openapi
@@ -218,34 +211,30 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: updateRevisionStatus
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - revision:
-	 *         name: revision
+	 *           type: string
+	 *       - name: revision
 	 *         description: Revision ID or Revision tag
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       content:
      *         application/json:
@@ -274,34 +263,30 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: downloadRevisionFiles
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - revision:
-	 *         name: revision
+	 *           type: string
+	 *       - name: revision
 	 *         description: Revision ID or Revision tag
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -312,7 +297,8 @@ const establishRoutes = () => {
 	 *         content:
 	 *           application/octet-stream:
 	 *             schema:
-	 *               type: file
+	 *               type: string
+	 *               format: binary
 	 */
 	router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles);
 
