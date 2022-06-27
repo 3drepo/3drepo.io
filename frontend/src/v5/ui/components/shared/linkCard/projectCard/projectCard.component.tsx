@@ -23,7 +23,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
 import { CardHeading } from '../linkCard.styles';
-import { ProjectImage, CardDetails, EllipsisMenyContainer, LinkCard } from './projectCard.styles';
+import { ProjectImage, CardDetails, EllipsisMenuContainer, LinkCard } from './projectCard.styles';
 
 interface IProjectCard {
 	project: IProject;
@@ -45,7 +45,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 						{project.name}
 					</Highlight>
 				</CardHeading>
-				<EllipsisMenyContainer  onClick={(e) => e.preventDefault()}>
+				<EllipsisMenuContainer  onClick={(e) => e.preventDefault()}>
 					<EllipsisMenu>
 						<EllipsisMenuItem
 							title={formatMessage({
@@ -60,7 +60,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							})}
 						/>
 					</EllipsisMenu>
-				</EllipsisMenyContainer>
+				</EllipsisMenuContainer>
 			</CardDetails>
 		</LinkCard>
 	);

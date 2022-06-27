@@ -67,6 +67,10 @@ export const CardDetails = styled(CardContent)`
 export const CardHeading = styled(Typography).attrs({
 	variant: 'h5',
 })`
+	max-width: 190px;
+    text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 `;
 
 export const CardSubheading = styled(Typography).attrs({

@@ -16,13 +16,28 @@
  */
 
 import styled from 'styled-components';
+import { LinkCard as LinkCardBase } from '../linkCard.component';
+
+export const LinkCard = styled(LinkCardBase)`
+	height: 190px;
+`
 
 export const ProjectImage = styled.img`
 	width: 100%;
+	height: 132px;
+	object-fit: cover;
 `;
 
-export const FlexContainer = styled.div`
+export const CardDetails = styled.div`
 	display: flex;
 	flex-direction: row;
-	justify-content: stretch;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+    height: 36px;
+	padding: 0;
+`;
+
+export const EllipsisMenuContainer = styled.div`
+	margin-right: -20px;
 `;
