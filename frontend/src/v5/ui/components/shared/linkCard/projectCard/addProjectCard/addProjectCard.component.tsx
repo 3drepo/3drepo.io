@@ -19,14 +19,10 @@ import { FormattedMessage } from 'react-intl';
 import { AddProjectIcon, Container } from './addProjectCard.styles';
 import { ListItem } from '../../linkCard.styles';
 
-interface IAddProjectCard {
-	variant?: 'primary' | 'secondary',
-}
-
-export const AddProjectCard = ({ variant = 'primary' }: IAddProjectCard): JSX.Element => (
+export const AddProjectCard = () => (
 	<ListItem>
 		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container $variant={variant}>
+			<Container>
 				<AddProjectIcon />
 				<FormattedMessage id="projectSelect.addNewProject" defaultMessage="New Project" />
 			</Container>
