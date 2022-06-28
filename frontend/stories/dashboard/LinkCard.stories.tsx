@@ -64,7 +64,6 @@ export const SecondaryWithEllipsisHeading = SecondaryTemplate.bind({});
 SecondaryWithEllipsisHeading.args = {
 	variant: 'secondary',
 	heading: 'I am a heading looooooooooooooong enough to wrap and use ellipsis',
-	subheading: 'I am a subheading',
 	children: ImgPlaceholder,
 };
 
