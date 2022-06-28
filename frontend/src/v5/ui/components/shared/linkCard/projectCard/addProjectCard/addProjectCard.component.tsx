@@ -23,7 +23,7 @@ export const AddProjectCard = () => (
 	<ListItem>
 		<Container>
 			<AddProjectIcon />
-			<FormattedMessage id="projectSelect.addNewProject" defaultMessage="New Project" />
+			<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />
 		</Container>
 	</ListItem>
 );
