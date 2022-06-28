@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import LogoIcon from '@assets/icons/logo.svg';
-import PrintIcon from '@assets/icons/print.svg';
-import { CircleButton } from '@/v5/ui/controls/circleButton';
-import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
+import styled from 'styled-components';
 
-export const LegalAppBar = (): JSX.Element => (
-	<AppBarContainer position="static">
-		<Items>
-			<LogoIcon />
-		</Items>
-		<Items>
-			<CircleButton variant="contrast" aria-label="print">
-				<PrintIcon />
-			</CircleButton>
-		</Items>
-	</AppBarContainer>
-);
+export const NavLinks = styled.div`
+	margin: 0 13px;
+`;
+
+export const NavLink = styled.span<{ selected: boolean }>`
+	margin: 0 12px;
+	${({ theme }) => theme.typography.h5}
+	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
+	cursor: pointer;
+`;
