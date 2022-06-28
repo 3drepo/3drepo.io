@@ -19,14 +19,10 @@ import { FormattedMessage } from 'react-intl';
 import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
 import { ListItem } from '../../linkCard.styles';
 
-interface IAddTeamspaceCard {
-	variant?: 'primary' | 'secondary',
-}
-
-export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+export const AddTeamspaceCard = (): JSX.Element => (
 	<ListItem>
 		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container $variant={variant}>
+			<Container>
 				<AddTeamspaceIcon />
 				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
 			</Container>

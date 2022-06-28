@@ -47,13 +47,13 @@ export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 					))
 				) : (
 					<>
-						<TeamspacePlaceholderCard variant="secondary" />
-						<TeamspacePlaceholderCard variant="secondary" />
-						<TeamspacePlaceholderCard variant="secondary" />
+						<TeamspacePlaceholderCard />
+						<TeamspacePlaceholderCard />
+						<TeamspacePlaceholderCard />
 					</>
 				)
 			}
-			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
+			{ !!teamspaces.length && (<AddTeamspaceCard />) }
 		</CardList>
 	);
 };

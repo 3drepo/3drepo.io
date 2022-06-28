@@ -18,13 +18,9 @@
 import { ImagePlaceholder, ListItem, TextPlaceholder } from './placeholderCard.styles';
 import { StyledCard } from '../../linkCard.styles';
 
-interface IAddTeamspaceCard {
-	variant?: 'primary' | 'secondary',
-}
-
-export const TeamspacePlaceholderCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+export const TeamspacePlaceholderCard = (): JSX.Element => (
 	<ListItem>
-		<StyledCard $variant={variant}>
+		<StyledCard $variant="secondary">
 			<ImagePlaceholder />
 			<TextPlaceholder />
 			<TextPlaceholder width="50%" />
