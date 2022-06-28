@@ -55,6 +55,7 @@ export const NewProjectButton = styled(Button).attrs({
 	variant: 'contained',
 })`
 	width: 124px;
+	margin-right: 0;
 `;
 
 export const SearchInput = styled(SearchInputBase)`
