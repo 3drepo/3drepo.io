@@ -18,12 +18,9 @@
 const { src } = require('../../helper/path');
 const ServiceHelper = require('../../helper/services');
 const SuperTest = require('supertest');
-const session = require('supertest-session');
-
-const { templates } = require(`${src}/utils/responseCodes`);
 const schemaValidator = require('openapi-schema-validator');
 
-let testSession;
+//let testSession;
 let server;
 let agent;
 
@@ -36,11 +33,7 @@ const setupData = async () => {
 const testSwaggerDocumentation = () => {
 	describe('Check swagger documentation for errors and warnings', () => {
 		test('should return error if errors or warnings are found in swagger documentation', async () => {
-			await testSession.post('/v5/login/')
-				.send({ user: user.user, password: user.password })
-				.expect(templates.ok.status);
-
-			const res = await testSession.get('/docs/openapi.json');
+			const res = await agent.get(`/docs/openapi.json?key=${user.apiKey}`);
 
 			const OpenAPISchemaValidator = schemaValidator.default;
 			const validator = new OpenAPISchemaValidator({ version: 3 });
@@ -50,13 +43,10 @@ const testSwaggerDocumentation = () => {
 	});
 };
 
-const app = ServiceHelper.app();
-
 describe('swagger', () => {
 	beforeAll(async () => {
-		server = app;
+		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(app);
 		await setupData();
 	});
 
