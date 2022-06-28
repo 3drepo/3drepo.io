@@ -54,6 +54,7 @@ export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabl
 		${({ size }) => `
 			height: ${getSizeInPixels(size)};
 			width: ${getSizeInPixels(size)};
+			font-size: calc(${getSizeInPixels(size)} / 3.1);
 		`}
 	}
 
