@@ -39,7 +39,7 @@ export const TopBar = styled.div`
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
-	// TODO: fix after new palette is released
+	/* TODO: fix after new palette is released */
 	border-top: 1px solid ${({ theme }) => theme.palette.secondary.mid};
 `;
 
