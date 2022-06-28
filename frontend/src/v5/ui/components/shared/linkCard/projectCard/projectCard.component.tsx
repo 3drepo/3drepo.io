@@ -34,7 +34,9 @@ interface IProjectCard {
 export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
 	let { url } = useRouteMatch();
 	url = discardTabComponent(url);
-	const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1513735539099-cf6e5d559d82?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8cGFub3JhbWF8ZW58MHx8MHx8&w=1000&q=80';
+
+	// TODO - use placholder picture
+	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
 
 	return (
 		<LinkCard {...props} to={`${url}/${project._id}`}>
