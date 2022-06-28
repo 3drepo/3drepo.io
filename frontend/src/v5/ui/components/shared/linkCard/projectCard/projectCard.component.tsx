@@ -35,7 +35,6 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 	let { url } = useRouteMatch();
 	url = discardTabComponent(url);
 
-	// TODO - use placholder picture
 	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
 
 	return (
