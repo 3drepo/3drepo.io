@@ -21,11 +21,9 @@ import { ListItem } from '../../linkCard.styles';
 
 export const AddProjectCard = () => (
 	<ListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container>
-				<AddProjectIcon />
-				<FormattedMessage id="projectSelect.addNewProject" defaultMessage="New Project" />
-			</Container>
-		</a>
+		<Container>
+			<AddProjectIcon />
+			<FormattedMessage id="projectSelect.addNewProject" defaultMessage="New Project" />
+		</Container>
 	</ListItem>
 );
