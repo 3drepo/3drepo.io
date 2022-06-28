@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
+import { Avatar } from '@controls/avatar';
 
-// TODO check if needed
 export const Container = styled.div`
 	height: 100%;
 	display: flex;
@@ -29,7 +29,6 @@ export const Content = styled.section`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
 	flex-grow: 1;
-	/* using inset box-shadow because ScrollArea gives an absolute position to the component */
 	box-shadow: inset 0 6px 16px -16px;
 `;
 
@@ -56,3 +55,15 @@ export const TeamspaceInfo = styled.div`
 export const TeamspaceName = styled(Typography).attrs({
 	variant: 'h1',
 })``;
+
+export const TeamspaceAvatar = styled(Avatar)`
+	.MuiAvatar-root {
+		border-radius: 10px;
+		height: 142px;
+		width: 142px;
+		margin: 0;
+		font-size: 40px;
+		color: ${({ theme }) => theme.palette.tertiary.dark};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;

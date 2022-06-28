@@ -20,11 +20,11 @@ import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
-import { Container, Content } from './teamspaceLayout.styles';
 import { TeamspaceNavigation } from '@components/shared/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
-import { TopBar, TeamspaceInfo, TeamspaceName } from './teamspaceLayout.styles';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceAvatar } from './teamspaceLayout.styles';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
@@ -33,6 +33,7 @@ interface ITeamspaceLayout {
 
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	useEffect(() => {
 		if (teamspace) {
@@ -45,8 +46,7 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 		<Container className={className}>
 			<AppBar />
 			<TopBar>
-				{/* TODO change to use avatar */}
-				<img height="142" width="142" src="https://upload.wikimedia.org/wikipedia/commons/c/c7/General_Conference.jpg" />
+				<TeamspaceAvatar user={user} isButton={false} />
 				<TeamspaceInfo>
 					<TeamspaceName>
 						{teamspace} <FormattedMessage id="teamspace.definition" defaultMessage="Teamspace" />
