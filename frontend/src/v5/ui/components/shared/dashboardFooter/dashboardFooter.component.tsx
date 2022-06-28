@@ -17,9 +17,8 @@
 
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
+import { LEGAL_PAPERS } from '@components/legal/legal.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
-
-const { legal: LEGAL_PAPERS } = ClientConfig;
 
 export const DashboardFooter = (): JSX.Element => (
 	<FooterContainer showLabels>

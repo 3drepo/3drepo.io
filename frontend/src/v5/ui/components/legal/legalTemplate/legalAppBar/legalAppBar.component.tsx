@@ -18,12 +18,11 @@
 import { useHistory, Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
 import PrintIcon from '@assets/icons/print.svg';
+import { LEGAL_PAPERS } from '@components/legal/legal.constants';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavLink, NavLinks } from './legalAppBar.styles';
-
-const { legal: LEGAL_PAPERS } = ClientConfig;
 
 export const LegalAppBar = ({ activePage }): JSX.Element => {
 	const history = useHistory();
