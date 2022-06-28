@@ -15,35 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 
 import { ScrollArea } from '@controls/scrollArea';
-import { LegalAppBar } from './legalAppBar';
 import { LegalContent } from './legalTemplate.styles';
+import { LegalAppBar } from './legalAppBar/legalAppBar.component';
 
-export const LegalTemplate = () => {
-	const [innerHtml, setInnerHtml] = useState('Loading...');
+type ILegalLayout = {
+	children: any;
+};
+
+export const LegalLayout = ({ children }: ILegalLayout) => {
 	const { params: { legalPage } } = useRouteMatch('/v5/:legalPage');
-	const { legal: LEGAL_PAPERS } = ClientConfig;
-	const { fileName } = LEGAL_PAPERS.find((paper) => paper.page === legalPage);
-
-	const loadHtml = async () => {
-		const { default: url } = await import(`@/v5/legal/${fileName}`);
-		setInnerHtml(await url);
-	};
-
-	useEffect(() => {
-		if (legalPage) loadHtml();
-	}, [legalPage]);
-
 	return (
 		<>
-			<LegalAppBar />
+			<LegalAppBar activePage={legalPage} />
 			<ScrollArea>
 				<LegalContent>
-					{/* eslint-disable-next-line react/no-danger */}
-					<div dangerouslySetInnerHTML={{ __html: innerHtml }} />
+					{children}
 				</LegalContent>
 			</ScrollArea>
 		</>
