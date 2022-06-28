@@ -26,18 +26,12 @@ export const ProjectImage = styled.img`
 	width: 100%;
 	height: 132px;
 	object-fit: cover;
-`;
-
-export const CardDetails = styled.div`
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	width: 100%;
-    height: 36px;
-	padding: 0;
+    margin-bottom: -6px;
 `;
 
 export const EllipsisMenuContainer = styled.div`
-	margin-right: -20px;
+	right: -20px;
+	top: -2px;
+	position: relative;
+	float: right;
 `;

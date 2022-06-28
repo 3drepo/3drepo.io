@@ -22,8 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
-import { CardHeading } from '../linkCard.styles';
-import { ProjectImage, CardDetails, EllipsisMenuContainer, LinkCard } from './projectCard.styles';
+import { ProjectImage, EllipsisMenuContainer, LinkCard } from './projectCard.styles';
 
 interface IProjectCard {
 	project: IProject;
@@ -36,35 +35,32 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 
 	let { url } = useRouteMatch();
 	url = discardTabComponent(url);
-	
+
 	const preventNavigation = (e) => e.preventDefault();
 
 	return (
-		<LinkCard {...props} to={`${url}/${project._id}`}>
+		<LinkCard
+			{...props}
+			to={`${url}/${project._id}`}
+			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
+		>
 			<ProjectImage src={DEFAULT_IMAGE} />
-			<CardDetails>
-				<CardHeading>
-					<Highlight search={filterQuery}>
-						{project.name}
-					</Highlight>
-				</CardHeading>
-				<EllipsisMenuContainer onClick={preventNavigation}>
-					<EllipsisMenu>
-						<EllipsisMenuItem
-							title={formatMessage({
-								id: 'projectCard.ellipsisMenu.share',
-								defaultMessage: 'Share',
-							})}
-						/>
-						<EllipsisMenuItem
-							title={formatMessage({
-								id: 'projectCard.ellipsisMenu.delete',
-								defaultMessage: 'Delete Project',
-							})}
-						/>
-					</EllipsisMenu>
-				</EllipsisMenuContainer>
-			</CardDetails>
+			<EllipsisMenuContainer onClick={preventNavigation}>
+				<EllipsisMenu>
+					<EllipsisMenuItem
+						title={formatMessage({
+							id: 'projectCard.ellipsisMenu.share',
+							defaultMessage: 'Share',
+						})}
+					/>
+					<EllipsisMenuItem
+						title={formatMessage({
+							id: 'projectCard.ellipsisMenu.delete',
+							defaultMessage: 'Delete Project',
+						})}
+					/>
+				</EllipsisMenu>
+			</EllipsisMenuContainer>
 		</LinkCard>
 	);
 };

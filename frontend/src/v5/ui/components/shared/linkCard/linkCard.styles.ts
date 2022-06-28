@@ -36,27 +36,6 @@ export const Link = styled(DecoratedLink)`
 	display: block;
 	text-decoration: none;
 `;
-
-export const StyledCard = styled(Card)<{ $variant: string; }>`
-	${({ $variant, theme }) => {
-		if ($variant === 'primary') {
-			return css`
-				background-color: ${theme.palette.tertiary.lightest};
-				h5 { color: ${theme.palette.secondary.main};}
-			`;
-		}
-		if ($variant === 'secondary') {
-			return css`
-				background-color: rgb(255 255 255 / 5%);
-				h5 { color: ${theme.palette.primary.contrast};}
-			`;
-		}
-		return '';
-	}};
-	width: 246px;
-	height: 253px;
-`;
-
 export const CardDetails = styled(CardContent)`
 	padding: 15px 0;
 `;
@@ -68,4 +47,30 @@ export const CardHeading = styled(Typography).attrs({
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
+`;
+
+export const CardSubheading = styled(Typography).attrs({
+	variant: 'body1',
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const StyledCard = styled(Card)<{ $variant: string; }>`
+	${({ $variant, theme }) => {
+		if ($variant === 'primary') {
+			return css`
+				background-color: ${theme.palette.tertiary.lightest};
+				${CardHeading} { color: ${theme.palette.secondary.main};}
+			`;
+		}
+		if ($variant === 'secondary') {
+			return css`
+				background-color: rgb(255 255 255 / 5%);
+				${CardHeading} { color: ${theme.palette.primary.contrast};}
+			`;
+		}
+		return '';
+	}};
+	width: 246px;
+	height: 253px;
 `;

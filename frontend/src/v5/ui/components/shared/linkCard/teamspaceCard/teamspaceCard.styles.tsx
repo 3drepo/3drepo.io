@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 import { Avatar } from '@controls/avatar';
-import { Typography } from '@controls/typography';
 
 export const MyTeamspaceImage = styled(Avatar)`
 	width: 100%;
@@ -40,10 +39,4 @@ export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	object-fit: cover;
 	margin-bottom: -5px;
-`;
-
-export const CardSubheading = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
 `;

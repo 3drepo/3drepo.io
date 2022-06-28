@@ -21,8 +21,7 @@ import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { LinkCard } from '../linkCard.component';
-import { CardHeading, CardDetails } from '../linkCard.styles';
-import { OtherTeamspaceImage, MyTeamspaceImage, CardSubheading } from './teamspaceCard.styles';
+import { OtherTeamspaceImage, MyTeamspaceImage } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	teamspaceName?: string;
@@ -42,25 +41,22 @@ export const TeamspaceCard = ({ teamspaceName, imageURL, ...props }: ITeamspaceC
 		setImgSrc(DEFAULT_IMAGE);
 	};
 	return (
-		<LinkCard {...props} to={to} variant="secondary">
+		<LinkCard
+			{...props}
+			to={to}
+			variant="secondary"
+			heading={teamspaceName}
+			subheading={
+				isPersonalTeamspace
+					? <FormattedMessage id="teamspaceCard.myTeamspace" defaultMessage="My Teamspace" />
+					: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
+			}
+		>
 			{
 				isPersonalTeamspace
-					? (
-						<MyTeamspaceImage user={user} isButton={false} />
-					) : (
-						<OtherTeamspaceImage src={imgSrc} onError={onImageError} />
-					)
+					? <MyTeamspaceImage user={user} isButton={false} />
+					: <OtherTeamspaceImage src={imgSrc} onError={onImageError} />
 			}
-			<CardDetails>
-				<CardHeading>{teamspaceName}</CardHeading>
-				<CardSubheading>
-					{
-						isPersonalTeamspace
-							? <FormattedMessage id="teamspaceCard.myTeamspace" defaultMessage="My Teamspace" />
-							: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
-					}
-				</CardSubheading>
-			</CardDetails>
 		</LinkCard>
 	);
 };
