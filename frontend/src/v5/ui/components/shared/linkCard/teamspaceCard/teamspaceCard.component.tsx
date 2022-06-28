@@ -29,7 +29,7 @@ interface ITeamspaceCard {
 	className?: string;
 }
 
-export const TeamspaceCard = ({ teamspaceName, imageURL, ...props }: ITeamspaceCard): JSX.Element => {
+export const TeamspaceCard = ({ teamspaceName, imageURL, className }: ITeamspaceCard): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	const isPersonalTeamspace = teamspaceName === user.username;
 	const { url } = useRouteMatch();
@@ -42,7 +42,7 @@ export const TeamspaceCard = ({ teamspaceName, imageURL, ...props }: ITeamspaceC
 	};
 	return (
 		<LinkCard
-			{...props}
+			className={className}
 			to={to}
 			variant="secondary"
 			heading={teamspaceName}
