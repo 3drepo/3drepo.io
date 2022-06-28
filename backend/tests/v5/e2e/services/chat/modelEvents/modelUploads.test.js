@@ -242,6 +242,7 @@ const revisionAddedTest = () => {
 			expect(results?.data?.timestamp).not.toBeUndefined();
 			expect(results).toEqual(expect.objectContaining({ ...data,
 				data: {
+					_id: containerRevision._id,
 					author: user.user,
 					tag: containerRevision.tag,
 					timestamp: results.data.timestamp,
@@ -269,6 +270,7 @@ const revisionAddedTest = () => {
 			expect(results?.data?.timestamp).not.toBeUndefined();
 			expect(results).toEqual(expect.objectContaining({ ...data,
 				data: {
+					_id: federationRevision._id,
 					author: user.user,
 					tag: federationRevision.tag,
 					timestamp: results.data.timestamp,

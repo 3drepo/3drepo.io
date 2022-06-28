@@ -389,7 +389,7 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.CONTAINER_NEW_REVISION,
-				{ tag, author, timestamp },
+				{ _id: data.revision, tag, author, timestamp },
 				data.teamspace,
 				data.project,
 				data.model,
@@ -419,7 +419,7 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.FEDERATION_NEW_REVISION,
-				{ tag, author, timestamp },
+				{ _id: data.revision, tag, author, timestamp },
 				data.teamspace,
 				data.project,
 				data.model,
@@ -450,7 +450,7 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.CONTAINER_NEW_REVISION,
-				{ tag, author, timestamp },
+				{ _id: data.revision, tag, author, timestamp },
 				data.teamspace,
 				data.project,
 				data.model,

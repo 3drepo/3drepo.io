@@ -63,7 +63,7 @@ const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id,
-			containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
+		containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
 	]);
 };
 
@@ -178,10 +178,15 @@ const modelAddedTest = () => {
 				.send(payload)
 				.expect(templates.ok.status);
 
-			await expect(socket2Promise).resolves.toEqual({ ...data,
-				data: { _id: res.body._id,
+			await expect(socket2Promise).resolves.toEqual({
+				...data,
+				data: {
+					_id: res.body._id,
 					code: payload.code,
-					category: payload.type } });
+					category: payload.type,
+					name: payload.name
+				}
+			});
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();
@@ -219,10 +224,15 @@ const modelAddedTest = () => {
 				.send(payload)
 				.expect(templates.ok.status);
 
-			await expect(socket2Promise).resolves.toEqual({ ...data,
-				data: { _id: res.body._id,
+			await expect(socket2Promise).resolves.toEqual({
+				...data,
+				data: {
+					_id: res.body._id,
 					code: payload.code,
-					description: payload.desc } });
+					description: payload.desc,
+					name: payload.name
+				}
+			});
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();
@@ -262,7 +272,7 @@ const modelDeletedTest = () => {
 				.set({ [SOCKET_HEADER]: socket1.id })
 				.expect(templates.ok.status);
 
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { } });
+			await expect(socket2Promise).resolves.toEqual({ ...data, data: {} });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();
@@ -298,7 +308,7 @@ const modelDeletedTest = () => {
 				.set({ [SOCKET_HEADER]: socket1.id })
 				.expect(templates.ok.status);
 
-			await expect(socket2Promise).resolves.toEqual({ ...data, data: { } });
+			await expect(socket2Promise).resolves.toEqual({ ...data, data: {} });
 
 			await expect(socket1Promise).resolves.toBeUndefined();
 			expect(socket1CB).not.toHaveBeenCalled();

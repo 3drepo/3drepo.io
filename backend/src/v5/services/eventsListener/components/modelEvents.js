@@ -66,7 +66,7 @@ const revisionAdded = async ({ teamspace, project, model, revision, isFederation
 		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, stringToUUID(revision),
 			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
-		await createModelMessage(event, { tag, author, timestamp }, teamspace, project, model);
+		await createModelMessage(event, { _id: revision, tag, author, timestamp }, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
