@@ -102,11 +102,6 @@ const establishRoutes = () => {
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/group"
-	 *         links:
-	 *           importGroups:
-	 *             operationId: ImportContainerGroups
-	 *             requestBody:
-	 *               groups: "$response.body#/groups"
 	 *
 	 */
 	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
