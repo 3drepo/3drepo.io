@@ -41,27 +41,28 @@ export const Viewer = () => {
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
+	if (isLoading) return (<></>);
+
+	if (selectedContainer?.revisionsCount === 0) {
+		return <InvalidContainerOverlay status={selectedContainer.status} />;
+	}
+
+	if (selectedFederation && federationIsEmpty) {
+		return <InvalidFederationOverlay containers={federationsContainers} />;
+	}
+
 	const v4Match = {
 		params: {
 			model: containerOrFederation,
 			teamspace,
 			revision,
-		} };
-
-	const handleEmptyViewer = () => {
-		if (selectedContainer?.revisionsCount === 0) {
-			return <InvalidContainerOverlay status={selectedContainer.status} />;
-		}
-		if (selectedFederation && federationIsEmpty) {
-			return <InvalidFederationOverlay containers={federationsContainers} />;
-		}
-		return (
-			<>
-				<CheckLatestRevisionReadiness />
-				<ViewerGui match={v4Match} />;
-			</>
-		);
+		},
 	};
 
-	return isLoading ? (<></>) : handleEmptyViewer();
+	return (
+		<>
+			<CheckLatestRevisionReadiness />
+			<ViewerGui match={v4Match} />;
+		</>
+	);
 };
