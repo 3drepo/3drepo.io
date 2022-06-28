@@ -22,7 +22,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
-import { ProjectImage, EllipsisMenuContainer, LinkCard } from './projectCard.styles';
+import { ProjectImage, EllipsisMenuContainer } from './projectCard.styles';
+import { LinkCard } from '../linkCard.component';
 
 interface IProjectCard {
 	project: IProject;

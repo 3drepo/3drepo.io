@@ -37,13 +37,14 @@ export const Link = styled(DecoratedLink)`
 	text-decoration: none;
 `;
 export const CardDetails = styled(CardContent)`
-	padding: 15px 0;
+	&, &:last-child {
+		padding: 15px 0 0;
+	}
 `;
 
 export const CardHeading = styled(Typography).attrs({
 	variant: 'h5',
 })`
-	max-width: 190px;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
@@ -72,5 +73,4 @@ export const StyledCard = styled(Card)<{ $variant: string; }>`
 		return '';
 	}};
 	width: 246px;
-	height: 253px;
 `;

@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { StyledIconButton } from '@controls/ellipsisButton/ellipsisButton.styles';
 import styled from 'styled-components';
-import { LinkCard as LinkCardBase } from '../linkCard.component';
-
-export const LinkCard = styled(LinkCardBase)`
-	height: 190px;
-`;
 
 export const ProjectImage = styled.img`
 	width: 100%;
 	height: 132px;
 	object-fit: cover;
-    margin-bottom: -6px;
+	margin-bottom: -5px;
 `;
 
 export const EllipsisMenuContainer = styled.div`
-	right: -20px;
-	top: -2px;
+	right: -7px;
+	top: 6px;
 	position: relative;
 	float: right;
+
+	${StyledIconButton} {
+		margin: 0;
+	}
 `;
