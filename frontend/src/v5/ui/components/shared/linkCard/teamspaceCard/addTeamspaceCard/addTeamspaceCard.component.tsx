@@ -16,8 +16,8 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
 import { ListItem } from '../../linkCard.styles';
+import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
 
 export const AddTeamspaceCard = (): JSX.Element => (
 	<ListItem>
