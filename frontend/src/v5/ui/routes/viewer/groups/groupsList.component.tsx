@@ -16,13 +16,26 @@
  */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import _ from 'lodash';
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useEffect, useState } from 'react';
 import { Checkbox } from '@mui/material';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 
 interface Props {
 	groups: any [];
+}
+
+interface Group {
+	name: string;
+	_id: string;
+}
+
+interface GroupSet {
+	name: string;
+	pathName: string;
+	children: (GroupSet | Group)[],
+	override?: Boolean;
+	count?: number;
 }
 
 const groupsToTree = (groups) => {
@@ -129,46 +142,103 @@ const groupsToTree = (groups) => {
 	return tree;
 };
 
-const GroupItem = ({ group }) => {
+const getGroupSetData = (groupSet: GroupSet) => {
+	// eslint-disable-next-line no-param-reassign
+
+	const overrides = GroupsHooksSelectors.selectGroupsColourOverridesSet();
+
+	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
+		// eslint-disable-next-line prefer-const
+		let { override, descendants } = partialData;
+		let childData = null;
+
+		if (groupOrGroupSet.children) {
+			childData = getGroupSetData(groupOrGroupSet as GroupSet);
+			Array.prototype.push.apply(descendants, childData.descendants);
+		} else {
+			descendants.push(groupOrGroupSet._id);
+		}
+
+		if (override !== undefined) {
+			let childOverride = null;
+
+			if (!(groupOrGroupSet as GroupSet).children) {
+				const groupId = (groupOrGroupSet as Group)._id;
+				childOverride = overrides.has(groupId);
+			} else {
+				childOverride = childData.override;
+			}
+
+			override = override === null || override === childOverride ? childOverride : undefined;
+		}
+
+		return { override, descendants };
+	}, { override: null, descendants: [] });
+
+	return data;
+};
+
+const GroupItem = ({ item }) => {
+	const isOverriden = GroupsHooksSelectors.selectIsGroupColorOverriden(item._id);
+
 	const setOverride = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.toggleColorOverride(group._id);
+		GroupsActionsDispatchers.toggleColorOverride(item._id);
 	};
 
-	const isOverriden = GroupsHooksSelectors.selectIsGroupColorOverriden(group._id);
+	return (
+		<li> {item.name} objects: {item.objects.length}
+			<Checkbox checked={isOverriden} onClick={setOverride} />
+		</li>
+	);
+};
+
+const GroupSetItem = ({ item, collapse }: {item: GroupSet, collapse}) => {
+	const [collapseDict, setCollapse] = collapse;
+	const hidden = collapseDict[item.pathName] ?? true;
+	const hiddenIcon = hidden ? '^' : 'v';
+	const { override, descendants } = getGroupSetData(item);
+
+	const onClickItem = (event: SyntheticEvent) => {
+		event.stopPropagation();
+		setCollapse({ ...collapseDict, [item.pathName]: !hidden });
+	};
+
+	const onClickOverride = (event: SyntheticEvent) => {
+		event.stopPropagation();
+
+		if (!override) {
+			GroupsActionsDispatchers.addColorOverrides(descendants);
+		} else {
+			GroupsActionsDispatchers.removeColorOverrides(descendants);
+		}
+	};
+
+	const indeterminate = override === undefined;
+	const checked = !!override;
 
 	return (
-		<li> {group.name} objects: {group.objects.length}
-			<Checkbox checked={isOverriden} onClick={setOverride} />
+		<li
+			onClick={onClickItem}
+			onKeyDown={onClickItem}
+			role="treeitem"
+			style={{ cursor: 'default' }}
+		>
+			<b>{item.name} ({descendants.length})
+				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />
+				{hiddenIcon}
+			</b>
+			{!hidden && <Tree tree={item.children} collapse={collapse} />}
 		</li>
 	);
 };
 
 const TreeItem = ({ item, collapse }) => {
 	if (item.children) {
-		const [collapseDict, setCollapse] = collapse;
-		const hidden = collapseDict[item.pathName] ?? true;
-		const hiddenIcon = hidden ? '^' : 'v';
-
-		const onClickItem = (event: SyntheticEvent) => {
-			event.stopPropagation();
-			setCollapse({ ...collapseDict, [item.pathName]: !hidden });
-		};
-
-		return (
-			<li
-				onClick={onClickItem}
-				onKeyDown={onClickItem}
-				role="treeitem"
-				style={{ cursor: 'default' }}
-			>
-				<b>{item.name} ({item.children.length})  {hiddenIcon}</b>
-				{!hidden && <Tree tree={item.children} collapse={collapse} />}
-			</li>
-		);
+		return (<GroupSetItem item={item} collapse={collapse} />);
 	}
 
-	return (<GroupItem group={item} />);
+	return (<GroupItem item={item} />);
 };
 
 const Tree = ({ tree, collapse }) => (
@@ -178,8 +248,12 @@ const Tree = ({ tree, collapse }) => (
 );
 
 export const GroupsListComponent = ({ groups }:Props) => {
-	const tree = groupsToTree(groups);
+	const [tree, setTree] = useState([]);
 	const collapse = useState({});
+
+	useEffect(() => {
+		setTree(groupsToTree(groups));
+	}, [groups]);
 
 	return (<Tree tree={tree} collapse={collapse} />);
 };

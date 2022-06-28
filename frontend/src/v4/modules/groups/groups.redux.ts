@@ -40,6 +40,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	clearColorOverrides: [],
 	clearColorOverridesSuccess: [],
 	setColorOverrides: ['groupIds'],
+	addColorOverrides: ['groupIds'],
+	removeColorOverrides: ['groupIds'],
 	toggleColorOverride: ['groupId'],
 	setOverrideAll: ['overrideAll'],
 	setOverrideAllSuccess: [],
@@ -189,12 +191,25 @@ export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
 	return {...state, componentState, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
 };
 
+
+export const removeColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
+	const overridesLeft = state.colorOverrides.filter((groupId) => !groupIds.includes(groupId));
+
+	return {...state, colorOverrides: overridesLeft};
+};
+
+export const addColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
+	const overridesLeft = state.colorOverrides.filter((groupId) => !groupIds.includes(groupId));
+
+	return {...state, colorOverrides: overridesLeft.concat(groupIds)};
+};
+
 export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 	// This is done to keep the relative override order
-	const overridesLeft = state.colorOverrides.filter((groupId) => groupIds.includes(groupId));
+	const overridesFound = state.colorOverrides.filter((groupId) => groupIds.includes(groupId));
 	const newOverrides = groupIds.filter((groupId) =>  !state.colorOverrides.includes(groupId));
 
-	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
+	return {...state, colorOverrides: newOverrides.concat(overridesFound)};
 };
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
@@ -313,6 +328,8 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.ADD_COLOR_OVERRIDE]: addColorOverride,
 	[GroupsTypes.REMOVE_COLOR_OVERRIDE]: removeColorOverride,
 	[GroupsTypes.SET_COLOR_OVERRIDES]: setColorOverrides,
+	[GroupsTypes.ADD_COLOR_OVERRIDES]: addColorOverrides,
+	[GroupsTypes.REMOVE_COLOR_OVERRIDES]: removeColorOverrides,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
