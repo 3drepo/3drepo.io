@@ -100,6 +100,10 @@ export const Indent = styled.div`
 
 export const TermsForm = styled.div``;
 
+export const ListItem = styled.span`
+	margin-right: 10px;
+`;
+
 export const PaperTitle = styled.div`
 	${({ theme }) => theme.typography.fontStyle}
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -107,4 +111,12 @@ export const PaperTitle = styled.div`
 	font-weight: ${FONT_WEIGHT.MEDIUM};
 	line-height: 1em;
 	margin-bottom: 20px;
+`;
+
+export const SupportEmail = styled.a.attrs({
+	href: 'mailto:support@3drepo.org',
+})`
+	::after {
+		content: 'support@3drepo.org';
+	}
 `;

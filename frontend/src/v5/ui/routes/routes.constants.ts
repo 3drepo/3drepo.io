@@ -25,6 +25,10 @@ export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederati
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const PROJECTS_LIST_ROUTE = `${DASHBOARD_ROUTE}/:teamspace`;
 
+export const PRIVACY_ROUTE = '/v5/privacy';
+export const COOKIES_ROUTE = '/v5/cookies';
+export const TERMS_ROUTE = '/v5/terms';
+
 const PROJECT_ROUTE_BASE = `${PROJECTS_LIST_ROUTE}/:project/t`;
 
 export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE}/:tab`;
