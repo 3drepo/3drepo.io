@@ -40,7 +40,6 @@ export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 					sortedTeamspaces.map((teamspace) => (
 						<TeamspaceCard
 							key={teamspace.name}
-							variant="secondary"
 							teamspaceName={teamspace.name}
 							imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
 						/>

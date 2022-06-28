@@ -21,15 +21,10 @@ import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { LinkCard } from '../linkCard.component';
-import {
-	CardHeading,
-	CardSubheading,
-	CardDetails,
-} from '../linkCard.styles';
-import { OtherTeamspaceImage, MyTeamspaceImage } from './teamspaceCard.styles';
+import { CardHeading, CardDetails } from '../linkCard.styles';
+import { OtherTeamspaceImage, MyTeamspaceImage, CardSubheading } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
-	variant?: 'primary' | 'secondary',
 	teamspaceName?: string;
 	imageURL?: string;
 	className?: string;
@@ -47,7 +42,7 @@ export const TeamspaceCard = ({ teamspaceName, imageURL, ...props }: ITeamspaceC
 		setImgSrc(DEFAULT_IMAGE);
 	};
 	return (
-		<LinkCard {...props} to={to}>
+		<LinkCard {...props} to={to} variant="secondary">
 			{
 				isPersonalTeamspace
 					? (
