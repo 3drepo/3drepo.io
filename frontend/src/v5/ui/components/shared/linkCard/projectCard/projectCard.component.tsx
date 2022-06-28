@@ -32,10 +32,12 @@ interface IProjectCard {
 }
 
 export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
+	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
+
 	let { url } = useRouteMatch();
 	url = discardTabComponent(url);
-
-	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
+	
+	const preventNavigation = (e) => e.preventDefault();
 
 	return (
 		<LinkCard {...props} to={`${url}/${project._id}`}>
@@ -46,7 +48,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 						{project.name}
 					</Highlight>
 				</CardHeading>
-				<EllipsisMenuContainer onClick={(e) => e.preventDefault()}>
+				<EllipsisMenuContainer onClick={preventNavigation}>
 					<EllipsisMenu>
 						<EllipsisMenuItem
 							title={formatMessage({
