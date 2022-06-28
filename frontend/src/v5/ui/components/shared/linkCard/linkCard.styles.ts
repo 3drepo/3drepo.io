@@ -25,13 +25,10 @@ export const ListItem = styled.li`
 	float: left;
 	margin: 10px;
 	.MuiCard-root { transition: margin 0.1s; }
-	:hover {
-		.MuiCard-root {
-			margin-top: -5px;
-			margin-bottom: 5px;
-			transition: margin 0.1s;
-			box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-		}
+	:hover .MuiCard-root {
+		margin-top: -5px;
+		margin-bottom: 5px;
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	}
 `;
 
@@ -71,10 +68,4 @@ export const CardHeading = styled(Typography).attrs({
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
-`;
-
-export const CardSubheading = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
 `;
