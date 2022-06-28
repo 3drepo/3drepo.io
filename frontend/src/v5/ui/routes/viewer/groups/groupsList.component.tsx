@@ -207,7 +207,7 @@ const GroupSetItem = ({ item, collapse }: {item: GroupSet, collapse}) => {
 	const onClickOverride = (event: SyntheticEvent) => {
 		event.stopPropagation();
 
-		if (!override) {
+		if (override === false) {
 			GroupsActionsDispatchers.addColorOverrides(descendants);
 		} else {
 			GroupsActionsDispatchers.removeColorOverrides(descendants);
