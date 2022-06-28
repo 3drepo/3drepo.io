@@ -213,6 +213,7 @@ const testAddModel = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const data = { properties: { code: generateRandomString() },
+				name: generateRandomString(),
 				type: generateRandomString(),
 				federate: false };
 			const res = await Model.addModel(teamspace, project, data);
@@ -228,18 +229,17 @@ const testAddModel = () => {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
 				project,
 				model: fn.mock.calls[0][2]._id,
-				data: { code: data.properties.code, category: data.type },
+				data: { code: data.properties.code, category: data.type, name: data.name },
 				isFederation: false });
 		});
-	});
-
-	describe('Add model', () => {
+	
 		test('should return inserted ID on success when a federation is added', async () => {
 			const fn = jest.spyOn(db, 'insertOne');
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const data = { properties: { code: generateRandomString() }, desc: generateRandomString(), federate: true };
+			const data = { properties: { code: generateRandomString() }, 
+				desc: generateRandomString(), name: generateRandomString(), federate: true };
 			const res = await Model.addModel(teamspace, project, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -253,7 +253,7 @@ const testAddModel = () => {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
 				project,
 				model: fn.mock.calls[0][2]._id,
-				data: { code: data.properties.code, description: data.desc },
+				data: { code: data.properties.code, description: data.desc, name: data.name },
 				isFederation: true });
 		});
 	});
