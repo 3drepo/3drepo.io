@@ -16,7 +16,6 @@
  */
 
 import { PureComponent } from 'react';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
