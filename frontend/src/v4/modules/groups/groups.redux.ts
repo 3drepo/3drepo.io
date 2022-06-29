@@ -87,7 +87,7 @@ export interface IGroupComponentState {
 	editingGroup: any;
 	updatedGroup: any;
 	selectedFilters: any[];
-	highlightedGroups: any;
+	highlightedGroups: Set<string>;
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
@@ -121,7 +121,7 @@ export const INITIAL_STATE: IGroupState = {
 	isPending: true,
 	componentState: {
 		activeGroup: null,
-		highlightedGroups: {},
+		highlightedGroups: new Set(),
 		showDetails: false,
 		expandDetails: true,
 		editingGroup: {},
@@ -165,14 +165,14 @@ export const setCriteriaFieldState = (state = INITIAL_STATE, { criteriaFieldStat
 };
 
 export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
-	const highlightedGroups = { ...state.componentState.highlightedGroups };
-	highlightedGroups[groupId] = true;
+	const highlightedGroups = new Set(state.componentState.highlightedGroups);
+	highlightedGroups.add(groupId);
 	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
 export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
-	const highlightedGroups = { ...state.componentState.highlightedGroups };
-	highlightedGroups[groupId] = false;
+	const highlightedGroups = new Set(state.componentState.highlightedGroups);
+	highlightedGroups.delete(groupId);
 	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 

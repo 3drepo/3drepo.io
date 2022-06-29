@@ -146,18 +146,28 @@ const getGroupSetData = (groupSet: GroupSet) => {
 	// eslint-disable-next-line no-param-reassign
 
 	const overrides = GroupsHooksSelectors.selectGroupsColourOverridesSet();
+	const highlights = GroupsHooksSelectors.selectHighlightedGroups();
 
 	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
 		// eslint-disable-next-line prefer-const
-		let { override, descendants } = partialData;
-		let childData = null;
+		let { override, descendants, highlight } = partialData;
+		let childGroupSetData = null;
+		let childHighlight = null;
 
 		if (groupOrGroupSet.children) {
-			childData = getGroupSetData(groupOrGroupSet as GroupSet);
-			Array.prototype.push.apply(descendants, childData.descendants);
+			childGroupSetData = getGroupSetData(groupOrGroupSet as GroupSet);
+			childHighlight = childGroupSetData.highlight;
+			Array.prototype.push.apply(descendants, childGroupSetData.descendants);
 		} else {
 			descendants.push(groupOrGroupSet._id);
+			childHighlight = highlights.has(groupOrGroupSet._id);
 		}
+
+		if (highlight === null) {
+			highlight = childHighlight;
+		}
+
+		highlight = highlight && childHighlight;
 
 		if (override !== undefined) {
 			let childOverride = null;
@@ -166,20 +176,22 @@ const getGroupSetData = (groupSet: GroupSet) => {
 				const groupId = (groupOrGroupSet as Group)._id;
 				childOverride = overrides.has(groupId);
 			} else {
-				childOverride = childData.override;
+				childOverride = childGroupSetData.override;
 			}
 
 			override = override === null || override === childOverride ? childOverride : undefined;
 		}
 
-		return { override, descendants };
-	}, { override: null, descendants: [] });
+		return { override, descendants, highlight };
+	}, { override: null, descendants: [], highlight: null });
 
 	return data;
 };
 
 const GroupItem = ({ item }) => {
-	const isOverriden = GroupsHooksSelectors.selectIsGroupColorOverriden(item._id);
+	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(item._id);
+	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(item._id);
+	const backgroundColor = isHighlighted ? 'cyan' : 'white';
 
 	const onClickOverride = (event) => {
 		event.stopPropagation();
@@ -191,8 +203,19 @@ const GroupItem = ({ item }) => {
 		GroupsActionsDispatchers.isolateGroups([item._id]);
 	};
 
+	const onClickHighlight = (event) => {
+		event.stopPropagation();
+		GroupsActionsDispatchers.setActiveGroup(item);
+	};
+
 	return (
-		<li> {item.name} objects: {item.objects.length}
+		<li
+			role="treeitem"
+			style={{ backgroundColor }}
+			onClick={onClickHighlight}
+			onKeyDown={onClickHighlight}
+		>
+			{item.name} objects: {item.objects.length}
 			<Checkbox checked={isOverriden} onClick={onClickOverride} />
 			<button onClick={onClickIsolate} type="button">
 				<span role="img" aria-label="isolate">👁️</span>
@@ -205,7 +228,9 @@ const GroupSetItem = ({ item, collapse }: {item: GroupSet, collapse}) => {
 	const [collapseDict, setCollapse] = collapse;
 	const hidden = collapseDict[item.pathName] ?? true;
 	const hiddenIcon = hidden ? '^' : 'v';
-	const { override, descendants } = getGroupSetData(item);
+	const { override, descendants, highlight } = getGroupSetData(item);
+
+	const backgroundColor = highlight ? 'cyan' : 'white';
 
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
@@ -230,7 +255,7 @@ const GroupSetItem = ({ item, collapse }: {item: GroupSet, collapse}) => {
 			onClick={onClickItem}
 			onKeyDown={onClickItem}
 			role="treeitem"
-			style={{ cursor: 'default' }}
+			style={{ cursor: 'default', backgroundColor }}
 		>
 			<b>{item.name} ({descendants.length})
 				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />

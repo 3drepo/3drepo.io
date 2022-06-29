@@ -21,8 +21,9 @@ import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
+import { IGroupState } from './groups.redux';
 
-export const selectGroupsDomain = (state) => (state.groups);
+export const selectGroupsDomain = (state): IGroupState => (state.groups);
 
 export const selectGroups = createSelector(
 	selectGroupsDomain, (state) => values(state.groupsMap)
@@ -165,10 +166,4 @@ export const selectOverrides = createSelector(
 
 export const selectTransparencies = createSelector(
 	selectOverridesDict, (overrides) => overrides.transparencies
-);
-
-export const selectIsGroupColorOverriden = createSelector(
-	selectGroupsColourOverridesSet,
-	(_, groupId: string) => groupId,
-	(overrides, groupId) => overrides.has(groupId)
 );

@@ -116,7 +116,7 @@ function* dehighlightGroup({ group }) {
 
 function* clearSelectionHighlights({ shouldClearTree = true }) {
 	try {
-		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
+		yield put(GroupsActions.setComponentState({ highlightedGroups: new Set() }));
 		if (shouldClearTree) {
 			yield put(TreeActions.clearCurrentlySelected());
 		}

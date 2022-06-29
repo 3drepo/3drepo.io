@@ -369,7 +369,7 @@ export class Groups extends PureComponent<IProps> {
 	public isOverridden = (groupId) => this.props.colorOverrides.includes(groupId);
 
 	public isHighlighted = (group) => {
-		return Boolean(this.props.highlightedGroups[group._id]);
+		return Boolean(this.props.highlightedGroups.has(group._id));
 	}
 
 	public isActive = (group) => {
