@@ -396,7 +396,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 				{...(!isViewerUrl() && options.containerProps)}
 			>
-				{isViewerUrl() 
+				{isViewerUrl()
 					? (
 					<ViewerScrollArea {...options.containerProps}>
 						{options.children}
