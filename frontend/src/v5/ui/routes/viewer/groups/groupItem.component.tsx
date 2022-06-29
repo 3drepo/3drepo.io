@@ -22,6 +22,7 @@ import { Checkbox } from '@mui/material';
 export const GroupItem = ({ item }) => {
 	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(item._id);
 	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(item._id);
+	const isActive = GroupsHooksSelectors.selectActiveGroupId() === item._id;
 	const backgroundColor = isHighlighted ? 'cyan' : 'white';
 
 	const onClickOverride = (event) => {
@@ -39,6 +40,11 @@ export const GroupItem = ({ item }) => {
 		GroupsActionsDispatchers.setActiveGroup(item);
 	};
 
+	const onClickGotoDetails = (event) => {
+		event.stopPropagation();
+		GroupsActionsDispatchers.showDetails(item);
+	};
+
 	return (
 		<li
 			role="treeitem"
@@ -51,6 +57,13 @@ export const GroupItem = ({ item }) => {
 			<button onClick={onClickIsolate} type="button">
 				<span role="img" aria-label="isolate">👁️</span>
 			</button>
+
+			{isActive
+			&& (
+				<button onClick={onClickGotoDetails} type="button">
+					<span role="img" aria-label="isolate">➡</span>
+				</button>
+			)}
 		</li>
 	);
 };

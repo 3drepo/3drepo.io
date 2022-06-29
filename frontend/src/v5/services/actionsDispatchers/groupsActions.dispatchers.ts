@@ -22,6 +22,7 @@ interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;
 	isolateGroups: (groupIds: string[]) => Action;
 	setActiveGroup: (group: any) => Action;
+	showDetails: (group: any) => Action;
 }
 
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
