@@ -34,7 +34,7 @@ const ThumbHorizontal = styled.div`
 	display: none;
 `;
 
-export const ViewerScrollArea = styled(Scrollbars).attrs({
+export const ViewerScrollAreaBase = styled(Scrollbars).attrs({
 	autoHideTimeout: 1000,
 	autoHideDuration: 300,
 	autoHide: true,

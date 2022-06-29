@@ -24,7 +24,6 @@ import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
-import { isViewerUrl } from '@/v4/helpers/isViewerUrl';
 import { isV5 } from '@/v4/helpers/isV5';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -394,15 +393,10 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			<Paper
 				square
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
-				{...(!isViewerUrl() && options.containerProps)}
 			>
-				{isViewerUrl()
-					? (
-					<ViewerScrollArea {...options.containerProps}>
-						{options.children}
-					</ViewerScrollArea>
-					) : options.children
-				}
+				<ViewerScrollArea {...options.containerProps}>
+					{options.children}
+				</ViewerScrollArea>
 			</Paper>
 		</SuggestionsList>
 	)

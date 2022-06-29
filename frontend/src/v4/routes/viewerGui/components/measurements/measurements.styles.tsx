@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,

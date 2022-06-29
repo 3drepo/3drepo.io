@@ -22,7 +22,7 @@ import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
 import styled from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
+import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import { COLOR } from './../../../styles/colors';
 
 interface IContainer {

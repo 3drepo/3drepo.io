@@ -14,7 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { forwardRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { ViewerScrollAreaBase } from './viewerScrollArea.styles';
 
-import { isV5 } from './isV5';
-
-export const isViewerUrl = () => window.location.pathname.startsWith(`${isV5() ? '/v5' : ''}/viewer`);
+export const ViewerScrollArea = forwardRef(({ children, ...props }, ref: any) => {
+	const { pathname } = useLocation();
+	const isViewer = pathname.startsWith('/viewer') || pathname.startsWith('/v5/viewer');
+	return isViewer
+		? <ViewerScrollAreaBase {...props} ref={ref}>{children}</ViewerScrollAreaBase>
+		: <div {...props} ref={ref}>{children}</div>;
+});
