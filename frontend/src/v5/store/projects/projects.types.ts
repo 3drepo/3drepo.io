@@ -14,12 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-export const MailToButton = styled.a`
-	${({ theme }) => theme.typography.link};
-	color: ${({ theme }) => theme.palette.base.main};
-	font-family: ${({ theme }) => theme.typography.fontFamily};
-	margin-top: 20px;
-	width: fit-content;
-`;
+export interface IProject {
+	_id: string;
+	name: string;
+	isAdmin: boolean;
+}

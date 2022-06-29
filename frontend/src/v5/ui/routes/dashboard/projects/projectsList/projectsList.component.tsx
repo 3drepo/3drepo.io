@@ -19,7 +19,7 @@ import {
 	DashboardList,
 	DashboardListEmptyContainer,
 } from '@components/dashboard/dashboardList';
-import { IProject } from '@/v5/store/projects/projects.redux';
+import { IProject } from '@/v5/store/projects/projects.types';
 import { ProjectListItem } from '@/v5/ui/routes/dashboard/projects/projectsList/projectListItem/projectListItem.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { Container } from './projectsList.styles';
