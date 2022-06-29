@@ -43,7 +43,9 @@ export const LinkBar = styled(TextField)`
 	}
 
 	.MuiInputBase-root {
-		cursor: pointer;
+		${({ disabled }) => !disabled && `
+			cursor: pointer;
+		`}
 		margin-top: 0;
 		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 

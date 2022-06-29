@@ -23,10 +23,22 @@ export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {},
 );
 
-export const selectUsername: (state) => string = createSelector(
+export const selectUsername = createSelector(
 	selectCurrentUser, (state) => state.username || '',
 );
 
-export const selectFirstName: (state) => string = createSelector(
+export const selectFirstName = createSelector(
 	selectCurrentUser, (state) => state.firstName || '',
+);
+
+export const selectPersonalDataIsUpdating = createSelector(
+	selectCurrentUser, (state) => !!(state.personalDataIsUpdating),
+);
+
+export const selectApiKey = createSelector(
+	selectCurrentUser, (state) => state.apiKey || '',
+);
+
+export const selectApiKeyIsUpdating = createSelector(
+	selectCurrentUser, (state) => !!(state.apiKeyIsUpdating),
 );

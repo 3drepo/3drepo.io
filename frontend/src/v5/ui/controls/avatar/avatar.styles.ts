@@ -18,41 +18,49 @@
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 
-export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $largeIcon?: boolean }>`
-	&& {
-		padding: 0;
-		margin: 0;
+const getSizeInPixels = (size?: string) => {
+	if (size === 'large') return '115px';
+	if (size === 'medium') return '48px';
+	// 'small' or default
+	return '38px';
+};
 
-		${({ $isButton, theme }) => ($isButton ? `
-			cursor: pointer;
-			
-			&:hover {
-				.MuiAvatar-root {
-					background-color: ${theme.palette.tertiary.mid};
-				}
-			}
+export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, size?: string }>`
+	padding: 0;
+	margin: 8px 7px;
 
-			&:active {
-				.MuiAvatar-root {
-					background-color: ${theme.palette.tertiary.main};
-				}
+	${({ $isButton, theme }) => ($isButton ? `
+		cursor: pointer;
+		
+		&:hover {
+			.MuiAvatar-root {
+				background-color: ${theme.palette.tertiary.mid};
 			}
-		` : `
-			cursor: default;
-		`)}
+		}
+
+		&:active {
+			.MuiAvatar-root {
+				background-color: ${theme.palette.tertiary.main};
+			}
+		}
+	` : 'cursor: default;')}
+
+	&:hover {
+		background-color: transparent;
 	}
 
-	.MuiAvatar-circle {
+	.MuiAvatar-circular {
 		margin: 0;
-		${({ $largeIcon }) => `
-			height: ${$largeIcon ? '48px' : '38px'};
-			width: ${$largeIcon ? '48px' : '38px'};
+		${({ size }) => `
+			height: ${getSizeInPixels(size)};
+			width: ${getSizeInPixels(size)};
+			font-size: calc(${getSizeInPixels(size)} / 3.1);
 		`}
 	}
 
 	${({ disabled }) => disabled && css`
 		&& {
-		pointer-events: none;
+			pointer-events: none;
 			.MuiAvatar-root {
 				background-color: ${({ theme }) => theme.palette.secondary.mid};
 				color: ${({ theme }) => theme.palette.secondary.light};
