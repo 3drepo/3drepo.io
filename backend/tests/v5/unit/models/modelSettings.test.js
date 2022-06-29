@@ -311,6 +311,7 @@ const testDeleteModel = () => {
 				.rejects.toEqual(templates.modelNotFound);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
+			expect(EventsManager.publish).toHaveBeenCalledTimes(0);
 		});
 	});
 };

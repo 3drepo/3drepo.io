@@ -29,11 +29,7 @@ const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) =>
 ]);
 
 const sessionsRemoved = async ({ ids }) => {
-	try {
-		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
-	} catch (err) {
-		logger.logError(`Failed to create direct message: ${err.message}`);
-	}
+	await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 };
 
 const AuthEventsListener = {};

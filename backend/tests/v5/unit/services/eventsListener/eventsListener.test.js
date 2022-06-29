@@ -16,8 +16,9 @@
  */
 
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
+const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
@@ -55,7 +56,7 @@ const eventTriggeredPromise = (event) => new Promise(
 
 const testModelEventsListener = () => {
 	describe('Model Events', () => {
-		test(`Should trigger queueStatusUpdate if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
+		test(`Should trigger updateModelStatus if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
@@ -72,7 +73,23 @@ const testModelEventsListener = () => {
 				data.model, data.status, data.corId);
 		});
 
-		test(`Should trigger queueTasksCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (container)`, async () => {
+		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.projectNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
+			await waitOnEvent;
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
+			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+		});
+
+		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (container)`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
@@ -94,7 +111,26 @@ const testModelEventsListener = () => {
 				data.corId, data.value, data.user, data.containers);
 		});
 
-		test(`Should trigger queueTasksCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (federation)`, async () => {
+		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED}`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.projectNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				value: generateRandomString(),
+				user: generateRandomString(),
+				containers: [generateRandomString()],
+			};
+			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
+			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+		});
+
+		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (federation)`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 
@@ -117,7 +153,7 @@ const testModelEventsListener = () => {
 				data.corId, data.value, data.user, data.containers);
 		});
 
-		test(`Should trigger modelSettingsUpdated if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
+		test(`Should create a ${chatEvents.FEDERATION_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
@@ -140,7 +176,7 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should trigger modelSettingsUpdated if there is a ${events.MODEL_SETTINGS_UPDATE} (container)`, async () => {
+		test(`Should create a ${chatEvents.CONTAINER_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (container)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
@@ -163,31 +199,7 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should fail gracefully on error if there is a ${events.MODEL_SETTINGS_UPDATE} (container)`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateRandomString(),
-				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: false,
-			};
-			ChatService.createModelMessage.mockRejectedValueOnce(new Error());
-			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
-
-			await waitOnEvent;
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.CONTAINER_SETTINGS_UPDATE,
-				data.data,
-				data.teamspace,
-				data.project,
-				data.model,
-				undefined,
-			);
-		});
-
-		test(`Should trigger revisionUpdated if there is a ${events.REVISION_UPDATED}`, async () => {
+		test(`Should create a ${chatEvents.CONTAINER_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -209,30 +221,7 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should fail gracefully on error if there is a ${events.REVISION_UPDATED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateRandomString(),
-				data: { _id: generateUUID() },
-			};
-			ChatService.createModelMessage.mockRejectedValueOnce(new Error());
-			EventsManager.publish(events.REVISION_UPDATED, data);
-
-			await waitOnEvent;
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.CONTAINER_REVISION_UPDATE,
-				{ ...data.data, _id: UUIDToString(data.data._id) },
-				data.teamspace,
-				data.project,
-				data.model,
-				undefined,
-			);
-		});
-
-		test(`Should trigger modelAdded if there is a ${events.NEW_MODEL} (federation)`, async () => {
+		test(`Should create a ${chatEvents.NEW_FEDERATION} chat event if there is a ${events.NEW_MODEL} (federation)`, async () => {
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -253,7 +242,7 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should trigger modelAdded if there is a ${events.NEW_MODEL} (container)`, async () => {
+		test(`Should create a ${chatEvents.NEW_CONTAINER} chat event if there is a ${events.NEW_MODEL} (container)`, async () => {
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -275,30 +264,7 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should fail gracefully on error if there is a ${events.NEW_MODEL} (container)`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				model: generateRandomString(),
-				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: false,
-			};
-			ChatService.createProjectMessage.mockRejectedValueOnce(new Error());
-			EventsManager.publish(events.NEW_MODEL, data);
-
-			await waitOnEvent;
-			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
-				chatEvents.NEW_CONTAINER,
-				{ ...data.data, _id: data.model },
-				data.teamspace,
-				data.project,
-				undefined,
-			);
-		});
-
-		test(`Should trigger modelDeleted if there is a ${events.DELETE_MODEL} (federation)`, async () => {
+		test(`Should create a ${chatEvents.FEDERATION_REMOVED} chat event if there is a ${events.DELETE_MODEL} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
 			const data = {
 				teamspace: generateRandomString(),
@@ -320,7 +286,7 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should trigger modelDeleted if there is a ${events.DELETE_MODEL} (container)`, async () => {
+		test(`Should create a ${chatEvents.CONTAINER_REMOVED} chat event if there is a ${events.DELETE_MODEL} (container)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
 			const data = {
 				teamspace: generateRandomString(),
@@ -342,33 +308,10 @@ const testModelEventsListener = () => {
 			);
 		});
 
-		test(`Should fail gracefully on error if there is a ${events.DELETE_MODEL} (container)`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateRandomString(),
-				isFederation: false,
-			};
-			ChatService.createModelMessage.mockRejectedValueOnce(new Error());
-			EventsManager.publish(events.DELETE_MODEL, data);
-
-			await waitOnEvent;
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.CONTAINER_REMOVED,
-				{},
-				data.teamspace,
-				data.project,
-				data.model,
-				undefined,
-			);
-		});
-
-		test(`Should trigger revisionAdded if there is a ${events.NEW_REVISION} (container)`, async () => {
+		test(`Should create a ${chatEvents.CONTAINER_NEW_REVISION} chat event if there is a ${events.NEW_REVISION} (container)`, async () => {
 			const tag = generateRandomString();
 			const author = generateRandomString();
-			const timestamp = generateRandomString();
+			const timestamp = generateRandomDate();
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
 
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
@@ -389,17 +332,17 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.CONTAINER_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp },
+				{ _id: data.revision, tag, author, timestamp: timestamp.getTime() },
 				data.teamspace,
 				data.project,
 				data.model,
 			);
 		});
 
-		test(`Should trigger revisionAdded if there is a ${events.NEW_REVISION} (federation)`, async () => {
+		test(`Should create a ${chatEvents.FEDERATION_NEW_REVISION} chat event if if there is a ${events.NEW_REVISION} (federation)`, async () => {
 			const tag = generateRandomString();
 			const author = generateRandomString();
-			const timestamp = generateRandomString();
+			const timestamp = generateRandomDate();
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
 
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
@@ -419,7 +362,7 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.FEDERATION_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp },
+				{ _id: data.revision, tag, author, timestamp: timestamp.getTime() },
 				data.teamspace,
 				data.project,
 				data.model,
@@ -430,7 +373,7 @@ const testModelEventsListener = () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
 			const tag = generateRandomString();
 			const author = generateRandomString();
-			const timestamp = generateRandomString();
+			const timestamp = generateRandomDate();
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -438,23 +381,15 @@ const testModelEventsListener = () => {
 				revision: generateRandomString(),
 				isFederation: false,
 			};
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
 
-			ChatService.createModelMessage.mockRejectedValueOnce(new Error());
+			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
 			EventsManager.publish(events.NEW_REVISION, data);
 
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
 				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.CONTAINER_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp },
-				data.teamspace,
-				data.project,
-				data.model,
-			);
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);			
 		});
 	});
 };
@@ -493,24 +428,7 @@ const testAuthEventsListener = () => {
 				{ reason: 'You have logged in else where' },
 				data.ids,
 			);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.SESSIONS_REMOVED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
-			const data = {
-				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
-			};
-			ChatService.createDirectMessage.mockRejectedValueOnce(new Error());
-			EventsManager.publish(events.SESSIONS_REMOVED, data);
-
-			await waitOnEvent;
-			expect(ChatService.createDirectMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createDirectMessage).toHaveBeenCalledWith(
-				chatEvents.LOGGED_OUT,
-				{ reason: 'You have logged in else where' },
-				data.ids,
-			);
-		});
+		});		
 	});
 };
 
