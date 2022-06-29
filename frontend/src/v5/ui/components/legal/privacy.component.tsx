@@ -171,12 +171,12 @@ export const PrivacyLegalPaper = () => (
 					</tbody>
 				</table>
 
-				<p>We also collect, use and share <strong>Aggregated Data</strong> such as statistical or
-					demographic data for any purpose.Aggregated Data may be derived from your personal data but
-					is not considered personal data in law as this data does <strong>not</strong>
+				<p>We also collect, use and share <strong>Aggregated Data </strong> such as statistical or
+					demographic data for any purpose. Aggregated Data may be derived from your personal data but
+					is not considered personal data in law as this data does <strong>not </strong>
 					directly or indirectly reveal your identity. For example, we may aggregate your Usage Data
 					to calculate the percentage of users accessing a specific website feature. However, if we
-					combine or connect Aggregated Data with your personal dataso that it can directly or indirectly
+					combine or connect Aggregated Data with your personal data so that it can directly or indirectly
 					identify you, we treat the combined data as personal data which will be used in accordance
 					with this privacy notice.
 				</p>
@@ -567,7 +567,7 @@ export const PrivacyLegalPaper = () => (
 						<tr>
 							<td width="400">
 								Object to processing of your personal data where we are relying on a legitimate interest
-								(orthose of a third party) and there is something about your particular situation which
+								(or those of a third party) and there is something about your particular situation which
 								makes you want to object to processing on this ground as you feel it impacts on your
 								fundamental rights and freedoms.
 							</td>

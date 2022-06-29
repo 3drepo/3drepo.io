@@ -98,7 +98,9 @@ export const Indent = styled.div`
 	margin-left: 15px;
 `;
 
-export const TermsForm = styled.div``;
+export const TermsForm = styled.div`
+	margin: 30px;
+`;
 
 export const ListItem = styled.span`
 	margin-right: 10px;

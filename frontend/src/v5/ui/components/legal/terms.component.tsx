@@ -426,13 +426,13 @@ export const TermsLegalPaper = () => (
 		<ol start={13}>
 			<li><h2>Contact us and complaints</h2></li>
 		</ol>
-		<p><ListItem>13.1..</ListItem>To contact us, including with any comments or complaints regarding the
+		<p><ListItem>13.1.</ListItem>To contact us, including with any comments or complaints regarding the
 			Service, or if you are concerned that any content accessed through the Service breaches intellectual
 			property or other rights, please contact us using the &quot;Contact Us&quot; section of the Service or
 			email at <SupportEmail />
 		</p>
+		<p><strong>VERSION DATED 30th MARCH 2022</strong></p>
 		<TermsForm>
-			<p><strong>VERSION DATED 30th MARCH 2022</strong></p>
 			<p><em>MODEL CANCELLATION FORM FOR CONSUMERS (see clause 11.2):</em></p>
 			<p>
 				<em>
