@@ -16,6 +16,7 @@
  */
 
 import { PureComponent } from 'react';
+
 import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
@@ -174,8 +175,8 @@ export class Measurements extends PureComponent<IProps, IState> {
 				<Container>
 					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
 					{this.renderMeasurementDetails(
-						!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
-						)}
+							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
+					)}
 				</Container>
 				{this.renderFooterContent()}
 			</ViewsContainer>

@@ -62,7 +62,7 @@ export const ResourcesListScroller = styled(ViewerScrollArea).attrs({
 	autoHeightMax: isV5() ? 200 : 114,
 })`
 	margin-top: 20px;
-    overflow: hidden;
+	overflow: hidden;
 	max-height: 114px;
 `;
 
