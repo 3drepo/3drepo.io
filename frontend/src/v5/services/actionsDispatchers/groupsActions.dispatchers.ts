@@ -19,9 +19,8 @@ import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helpe
 import { Action } from 'redux';
 
 interface IGroupsActionCreators {
-	toggleColorOverride: (groupId: string) => Action;
-	addColorOverrides: (groupIds: string[]) => Action;
-	removeColorOverrides: (groupIds: string[]) => Action;
+	setColorOverrides: (groupIds: string[], on: boolean) => Action;
+	isolateGroups: (groupIds: string[]) => Action;
 }
 
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);

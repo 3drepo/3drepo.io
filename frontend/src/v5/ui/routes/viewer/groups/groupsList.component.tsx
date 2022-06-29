@@ -181,14 +181,22 @@ const getGroupSetData = (groupSet: GroupSet) => {
 const GroupItem = ({ item }) => {
 	const isOverriden = GroupsHooksSelectors.selectIsGroupColorOverriden(item._id);
 
-	const setOverride = (event) => {
+	const onClickOverride = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.toggleColorOverride(item._id);
+		GroupsActionsDispatchers.setColorOverrides([item._id], !isOverriden);
+	};
+
+	const onClickIsolate = (event) => {
+		event.stopPropagation();
+		GroupsActionsDispatchers.isolateGroups([item._id]);
 	};
 
 	return (
 		<li> {item.name} objects: {item.objects.length}
-			<Checkbox checked={isOverriden} onClick={setOverride} />
+			<Checkbox checked={isOverriden} onClick={onClickOverride} />
+			<button onClick={onClickIsolate} type="button">
+				<span role="img" aria-label="isolate">👁️</span>
+			</button>
 		</li>
 	);
 };
@@ -206,12 +214,12 @@ const GroupSetItem = ({ item, collapse }: {item: GroupSet, collapse}) => {
 
 	const onClickOverride = (event: SyntheticEvent) => {
 		event.stopPropagation();
+		GroupsActionsDispatchers.setColorOverrides(descendants, (override === false));
+	};
 
-		if (override === false) {
-			GroupsActionsDispatchers.addColorOverrides(descendants);
-		} else {
-			GroupsActionsDispatchers.removeColorOverrides(descendants);
-		}
+	const onClickIsolate = (event) => {
+		event.stopPropagation();
+		GroupsActionsDispatchers.isolateGroups(descendants);
 	};
 
 	const indeterminate = override === undefined;
@@ -226,7 +234,10 @@ const GroupSetItem = ({ item, collapse }: {item: GroupSet, collapse}) => {
 		>
 			<b>{item.name} ({descendants.length})
 				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />
-				{hiddenIcon}
+				<button onClick={onClickIsolate} type="button">
+					<span role="img" aria-label="isolate">👁️</span>
+				</button>
+				&nbsp; {hiddenIcon}
 			</b>
 			{!hidden && <Tree tree={item.children} collapse={collapse} />}
 		</li>
