@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UploadStatuses } from '../containers/containers.types';
 import { SurveyPoint, View } from '../store.types';
 
 export interface IFederation {
@@ -24,7 +25,7 @@ export interface IFederation {
 	role: string;
 	isFavourite: boolean;
 	code?: string;
-	status: string;
+	status: UploadStatuses;
 	containers: string[];
 	issues: number;
 	risks: number;
@@ -50,7 +51,7 @@ export type FederationBackendSettings = {
 	desc?: string;
 	name?: string;
 	surveyPoints?: SurveyPoint[];
-	status?: string;
+	status?: UploadStatuses;
 	timestamp?: number;
 	type?: string;
 	angleFromNorth: number;
@@ -72,7 +73,7 @@ export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isF
 
 export type FederationStats = {
 	code: string;
-	status: string;
+	status: UploadStatuses;
 	containers: string[];
 	tickets: {
 		issues: number;

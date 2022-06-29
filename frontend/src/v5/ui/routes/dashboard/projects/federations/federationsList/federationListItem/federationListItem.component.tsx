@@ -24,8 +24,8 @@ import {
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
-	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { DashboardListItemFederationTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { Highlight } from '@controls/highlight';
 import { Tooltip } from '@mui/material';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
@@ -78,19 +78,16 @@ export const FederationListItem = ({
 				key={federation._id}
 			>
 				<DashboardListItemRow>
-					<DashboardListItemTitle
-						tooltipTitle={
-							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
-						}
-						subtitle={federation.desc}
+					<DashboardListItemFederationTitle
 						minWidth={90}
+						federation={federation}
 					>
 						<Link to={viewerRoute(teamspace, project, federation)}>
 							<Highlight search={filterQuery}>
 								{federation.name}
 							</Highlight>
 						</Link>
-					</DashboardListItemTitle>
+					</DashboardListItemFederationTitle>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
 						onClick={() => {
