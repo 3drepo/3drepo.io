@@ -24,7 +24,12 @@ import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles'
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavLink, NavLinks } from './legalAppBar.styles';
 
-export const LegalAppBar = ({ activePage }): JSX.Element => {
+const possiblePages = LEGAL_PAPERS.map((paper) => paper.page);
+type ILegalAppBar = {
+	activePage: typeof possiblePages[number];
+};
+
+export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => {
 	const history = useHistory();
 	const onTabChange = (_, selectedTab) => {
 		history.push(`/v5/${selectedTab}`);
