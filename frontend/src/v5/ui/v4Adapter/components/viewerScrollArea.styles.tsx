@@ -40,4 +40,4 @@ export const ViewerScrollAreaBase = styled(Scrollbars).attrs({
 	autoHide: true,
 	renderThumbVertical: ({ style }) => <ThumbVertical style={style} />,
 	renderThumbHorizontal: ({ style }) => <ThumbHorizontal style={style} />,
-})``;
+})`` as any;

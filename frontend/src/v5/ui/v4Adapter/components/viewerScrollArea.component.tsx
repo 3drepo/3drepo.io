@@ -16,12 +16,13 @@
  */
 import { forwardRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ScrollbarProps } from 'react-custom-scrollbars';
 import { ViewerScrollAreaBase } from './viewerScrollArea.styles';
 
-export const ViewerScrollArea = forwardRef(({ children, ...props }, ref: any) => {
+export const ViewerScrollArea = forwardRef(({ children, ...props }: ScrollbarProps, ref: any) => {
 	const { pathname } = useLocation();
 	const isViewer = pathname.startsWith('/viewer') || pathname.startsWith('/v5/viewer');
 	return isViewer
 		? <ViewerScrollAreaBase {...props} ref={ref}>{children}</ViewerScrollAreaBase>
-		: <div {...props} ref={ref}>{children}</div>;
+		: <div ref={ref}>{children}</div>;
 });
