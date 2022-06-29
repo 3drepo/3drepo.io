@@ -20,7 +20,6 @@ import FormControlBase from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import styled from 'styled-components';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
