@@ -21,7 +21,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { calculateSpaceUsed } = require(`${v5Path}/utils/quota`);
+const { getSpaceUsed } = require(`${v5Path}/utils/quota`);
 const { getDatabaseStats } = require(`${v5Path}/handler/db`);
 const { getTotalSize } = require(`${v5Path}/models/fileRefs`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
@@ -59,7 +59,7 @@ const calculateStorageUsed = async (teamspace) => {
 
 const calculateUsage = async (teamspace) => ({
 	teamspace,
-	quotaUsed: await calculateSpaceUsed(teamspace),
+	quotaUsed: await getSpaceUsed(teamspace),
 	dataUsed: await calculateStorageUsed(teamspace),
 });
 

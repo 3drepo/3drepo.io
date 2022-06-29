@@ -17,7 +17,8 @@
 
 const { ADD_ONS } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
-
+const { TEAM_MEMBER } = require('./roles.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
@@ -27,9 +28,9 @@ const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
 
 const Teamspace = {};
 
-const teamspaceUpdate = (query, actions) => db.updateOne('admin', 'system.users', query, actions);
-const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
-const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
+const teamspaceUpdate = (query, actions) => db.updateOne(USERS_DB_NAME, 'system.users', query, actions);
+const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
+const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);
@@ -143,6 +144,13 @@ Teamspace.getMembersInfo = async (teamspace) => {
 Teamspace.createTeamspaceSettings = async (teamspace) => {
 	const settings = { _id: teamspace, topicTypes, riskCategories };
 	await db.insertOne(teamspace, 'teamspace', settings);
+};
+
+Teamspace.getAllUsersInTeamspace = async (teamspace) => {
+	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
+	const users = await findMany(query, { user: 1 });
+
+	return users.map(({ user }) => user);
 };
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
