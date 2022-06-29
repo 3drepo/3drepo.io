@@ -81,13 +81,8 @@ export const FederationListItem = ({
 					<DashboardListItemFederationTitle
 						minWidth={90}
 						federation={federation}
-					>
-						<Link to={viewerRoute(teamspace, project, federation)}>
-							<Highlight search={filterQuery}>
-								{federation.name}
-							</Highlight>
-						</Link>
-					</DashboardListItemFederationTitle>
+						filterQuery={filterQuery}
+					/>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
 						onClick={() => {
