@@ -73,6 +73,7 @@ export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isF
 
 export type FederationStats = {
 	code: string;
+	desc: string;
 	status: UploadStatuses;
 	containers: string[];
 	tickets: {
