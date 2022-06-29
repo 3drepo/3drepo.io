@@ -38,7 +38,9 @@ export const Container = styled(DialogContent)`
 
 export const Content = styled.div``;
 
-export const ResourcesContainer = styled.div``;
+export const ResourcesContainer = styled.div`
+	width: 520px;
+`;
 
 export const StyledDropZone = styled(Dropzone)`
 	margin-left: 20px;
@@ -61,7 +63,6 @@ export const ResourcesListScroller = styled(ViewerScrollArea).attrs({
 })`
 	margin-top: 20px;
     overflow: hidden;
-	width: 520px !important;
 	max-height: 114px;
 `;
 
