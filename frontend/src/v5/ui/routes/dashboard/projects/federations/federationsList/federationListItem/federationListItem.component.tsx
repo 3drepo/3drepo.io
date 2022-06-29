@@ -34,7 +34,9 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
-import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import {
+	ShareModalContainerOrFederation as ShareModal,
+} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalContainerOrFederation/shareModalContainerOrFederation.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
 import { useParams, Link } from 'react-router-dom';
