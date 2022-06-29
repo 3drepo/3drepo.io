@@ -33,7 +33,7 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const BoardContainer = styled(ViewerScrollArea)`
+export const BoardContainer = styled.div`
 	height: 100%;
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
