@@ -22,6 +22,7 @@ import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
+import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { ScrollArea } from '@controls/scrollArea';
 import { Federations } from './federations';
 import { Containers } from './containers';
@@ -39,7 +40,7 @@ export const ProjectContent = () => {
 	}, [teamspace]);
 
 	return (
-		<ScrollArea variant="base" autoHide>
+		<ScrollArea>
 			<Content>
 				<Switch>
 					<Route exact path={path}>
@@ -68,6 +69,7 @@ export const ProjectContent = () => {
 					</Route>
 				</Switch>
 			</Content>
+			<DashboardFooter />
 		</ScrollArea>
 	);
 };

@@ -22,6 +22,7 @@ export const Content = styled.div`
 	margin: 18px auto;
 	padding: 0 30px;
 	height: auto;
+	min-height: calc(100% - 78px);
 
 	@media (max-width: ${Display.Desktop}px) {
 		margin-top: 30px;

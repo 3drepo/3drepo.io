@@ -21,7 +21,6 @@ import Logo from '@assets/icons/colored_logo.svg';
 
 const FOOTER_HEIGHT = 42;
 export const FooterContainer = styled(BottomNavigation)`
-	border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	justify-content: left;
 	height: ${FOOTER_HEIGHT}px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -40,7 +39,6 @@ export const FooterItems = styled.span`
 
 export const FooterItem = styled.span`
 	line-height: ${FOOTER_HEIGHT}px;
-	height: max-content;
 
 	&:not(:last-child)&:after {
 			content: '\\2022';
