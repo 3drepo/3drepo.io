@@ -18,8 +18,9 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const session = require('supertest-session');
 const { generateRandomString } = require('../../helper/services');
+const session = require('supertest-session');
+const fs = require('fs');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -29,24 +30,28 @@ let agent;
 
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
+const userWithFsAvatar = ServiceHelper.generateUserCredentials();
+const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 const nonVerifiedUser = ServiceHelper.generateUserCredentials();
 const nonVerifiedUserWithExpiredToken = ServiceHelper.generateUserCredentials();
 const testUserWithToken = ServiceHelper.generateUserCredentials();
 const testUserWithExpiredToken = ServiceHelper.generateUserCredentials();
-const testUserWithNoAvatar = ServiceHelper.generateUserCredentials();
 const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
 const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
-const userWithNoAvatarEmail = 'example2@email.com';
-const userAvatar = { data: { buffer: 'image buffer data' } };
+const userEmail2 = 'example2@email.com';
+const fsAvatarData = generateRandomString();
+const gridFsAvatarData = generateRandomString();
 const validPasswordToken = { token: generateRandomString(), expiredAt: new Date(2030, 12, 12) };
 const validEmailToken = { token: generateRandomString(), expiredAt: new Date(2030, 12, 12) };
 const expiredEmailToken = { token: generateRandomString(), expiredAt: new Date(2020, 12, 12) };
 const expiredPasswordToken = { token: generateRandomString(), expiredAt: new Date(2020, 12, 12) };
 const setupData = async () => {
 	await Promise.all([
-		ServiceHelper.db.createUser(testUser, [], { email: userEmail, avatar: userAvatar }),
+		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
+		ServiceHelper.db.createUser(userWithFsAvatar, []),
+		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
 		ServiceHelper.db.createUser(nonVerifiedUser, [], {
 			inactive: true,
 			emailVerifyToken: {
@@ -64,6 +69,7 @@ const setupData = async () => {
 			permissions: [],
 		}),
 		ServiceHelper.db.createUser(testUserWithToken, [], {
+			email: userEmail2,
 			resetPasswordToken: {
 				token: validPasswordToken.token,
 				expiredAt: validPasswordToken.expiredAt,
@@ -74,7 +80,6 @@ const setupData = async () => {
 				token: expiredPasswordToken.token, expiredAt: expiredPasswordToken.expiredAt,
 			},
 		}),
-		ServiceHelper.db.createUser(testUserWithNoAvatar, [], { email: userWithNoAvatarEmail }),
 		ServiceHelper.db.createUser(lockedUser, [], {
 			loginInfo: {
 				failedLoginCount: 10,
@@ -93,6 +98,8 @@ const setupData = async () => {
 				lastFailedLoginAt: new Date(),
 			},
 		}),
+		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
+		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
 	]);
 };
 
@@ -219,11 +226,11 @@ const testGetUsername = () => {
 	});
 };
 
-const formatUserProfile = (user, hasAvatar = true) => ({
+const formatUserProfile = (user, email, hasAvatar) => ({
 	username: user.user,
 	firstName: user.basicData.firstName,
 	lastName: user.basicData.lastName,
-	email: userEmail,
+	email,
 	apiKey: user.apiKey,
 	hasAvatar,
 	countryCode: user.basicData.billing.billingInfo.countryCode,
@@ -239,7 +246,12 @@ const testGetProfile = () => {
 
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser));
+			expect(res.body).toEqual(formatUserProfile(testUser, userEmail, false));
+		});
+
+		test('should return the user profile if the user has a session via an API key and has avatar', async () => {
+			const res = await agent.get(`/v5/user?key=${userWithFsAvatar.apiKey}`).expect(200);
+			expect(res.body).toEqual(formatUserProfile(userWithFsAvatar, undefined, true));
 		});
 
 		describe('With valid authentication', () => {
@@ -252,7 +264,7 @@ const testGetProfile = () => {
 
 			test('should return the user profile if the user is logged in', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(testUser));
+				expect(res.body).toEqual(formatUserProfile(testUser, userEmail, false));
 			});
 		});
 	});
@@ -288,7 +300,7 @@ const testUpdateProfile = () => {
 			});
 
 			test('should fail if the update data have existing email', async () => {
-				const data = { email: userWithNoAvatarEmail };
+				const data = { email: userEmail2 };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
@@ -364,22 +376,27 @@ const testGetAvatar = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should get the avatar if the user has a session via an API key', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`).expect(200);
-			expect(res.text).toEqual(userAvatar.data.buffer);
+		test('should get the avatar if the user has an fs avatar and has a session via an API key', async () => {
+			const res = await agent.get(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`).expect(200);
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 		});
 
-		test('should get the avatar if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+		test('should get the avatar if the user has an gridfs avatar and has a session via an API key', async () => {
+			const res = await agent.get(`/v5/user/avatar?key=${userWithGridFsAvatar.apiKey}`).expect(200);
+			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
+		});
+
+		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
+			await testSession.post('/v5/login/').send({ user: userWithFsAvatar.user, password: userWithFsAvatar.password });
 			const res = await testSession.get('/v5/user/avatar').expect(200);
-			expect(res.text).toEqual(userAvatar.data.buffer);
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 			await testSession.post('/v5/logout/');
 		});
 
 		test('should fail if the user has no avatar', async () => {
-			await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
-			await testSession.get('/v5/user/avatar').expect(templates.avatarNotFound.status);
-			await testSession.post('/v5/logout/');
+			const res = await testSession.get(`/v5/user/avatar?key=${testUser.apiKey}`)
+				.expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 	});
 };
@@ -393,22 +410,47 @@ const testUploadAvatar = () => {
 		});
 
 		test('should fail if the user has a session via an API key', async () => {
-			const res = await agent.put(`/v5/user/avatar?key=${testUser.apiKey}`)
+			const res = await agent.put(`/v5/user/avatar?key=${userWithGridFsAvatar.apiKey}`)
 				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		describe('With valid authentication', () => {
+		describe('With valid authentication and existing avatar', () => {
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
+				await testSession.post('/v5/login/').send({ user: userWithGridFsAvatar.user, password: userWithGridFsAvatar.password });
 			});
 			afterAll(async () => {
 				await testSession.post('/v5/logout/');
 			});
 
-			test('should upload the avatar if the user is logged in', async () => {
+			test('should remove old avatar and upload a new one if the user is logged in', async () => {
+				await testSession.put('/v5/user/avatar').attach('file', image)
+					.expect(templates.ok.status);
+
+				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
+				const resBuffer = avatarRes.body;
+				const imageBuffer = fs.readFileSync(image);
+				expect(resBuffer).toEqual(imageBuffer);
+			});
+		});
+
+		describe('With valid authentication', () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should upload a new avatar if the user is logged in', async () => {
+				await testSession.get('/v5/user/avatar').expect(templates.fileNotFound.status);
 				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
 					.expect(templates.ok.status);
+
+				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
+				const resBuffer = avatarRes.body;
+				const imageBuffer = fs.readFileSync(image);
+				expect(resBuffer).toEqual(imageBuffer);
 			});
 		});
 	});
