@@ -27,7 +27,7 @@ import Settings from '@mui/icons-material/Settings';
 import SettingsBackupRestore from '@mui/icons-material/SettingsBackupRestore';
 import Share from '@mui/icons-material/Share';
 import Board from '@mui/icons-material/TableChart';
-import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
+import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel';
 import { SortAmountDown, SortAmountUp } from '../components/fontAwesomeIcon';
 
 export const ROW_ACTIONS = {

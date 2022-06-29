@@ -14,13 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 const UserConstants = {};
+
+UserConstants.AVATARS_COL_NAME = 'avatars.ref';
+UserConstants.USERS_DB_NAME = 'admin';
+
 UserConstants.USERNAME_BLACKLIST = [
 	'payment',
 	'test',
+	'config',
 	'os',
 	'info',
 	'contact',
+	'config',
 	'cookies',
 	'password-change',
 	'password-forgot',
@@ -35,7 +42,7 @@ UserConstants.USERNAME_BLACKLIST = [
 	'local',
 	'root',
 	'notifications',
-	'loginRecord',
+	'loginRecords',
 	'sessions',
 ];
 

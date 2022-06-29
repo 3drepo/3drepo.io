@@ -17,10 +17,7 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ViewerParams } from '../routes.constants';
-import { theme } from './theme';
 import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
 import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
@@ -36,11 +33,5 @@ export const Viewer = () => {
 	useFederationsData();
 	useContainersData();
 
-	return (
-		<ThemeProvider theme={theme}>
-			<MuiThemeProvider theme={theme}>
-				<ViewerGui match={v4Match} />
-			</MuiThemeProvider>
-		</ThemeProvider>
-	);
+	return <ViewerGui match={v4Match} />;
 };

@@ -17,7 +17,7 @@
 
 import { PasswordForgotSchema } from '@/v5/validation/auth';
 import EmailIcon from '@assets/icons/email.svg';
-import { AuthPage } from '@components/authPage';
+import { AuthTemplate } from '@components/authTemplate';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Gap } from '@controls/gap';
@@ -36,7 +36,7 @@ export const PasswordForgot = (): JSX.Element => {
 	const onSubmit = ({ username }) => API.Auth.resetPassword(username);
 
 	return (
-		<AuthPage>
+		<AuthTemplate>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
 					<FormattedMessage id="auth.forgotPassword.heading" defaultMessage="Forgot Password" />
@@ -67,6 +67,6 @@ export const PasswordForgot = (): JSX.Element => {
 				}
 				<ReturnLink />
 			</form>
-		</AuthPage>
+		</AuthTemplate>
 	);
 };

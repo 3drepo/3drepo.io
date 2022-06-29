@@ -18,6 +18,7 @@ import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
 import { DialogProps } from '@mui/material/Dialog';
+import { FormattedMessage } from 'react-intl';
 import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
@@ -30,12 +31,14 @@ import {
 	Subtitle,
 } from './formDialog.styles';
 
-interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
+export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
-	title: string;
+	onClickCancel?: () => void;
+	title?: string;
 	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
+	cancelLabel?: string;
 	isValid?: boolean;
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
@@ -45,9 +48,11 @@ interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormE
 export const FormModal = (props: IFormModal) => {
 	const {
 		onClickClose,
+		onClickCancel,
 		title,
 		subtitle,
 		confirmLabel,
+		cancelLabel,
 		open,
 		children,
 		className,
@@ -57,6 +62,7 @@ export const FormModal = (props: IFormModal) => {
 		zeroMargin = false,
 		...formProps
 	} = props;
+
 	return (
 		<Dialog
 			onClose={onClickClose}
@@ -85,11 +91,11 @@ export const FormModal = (props: IFormModal) => {
 				</ScrollArea>
 				{showButtons && (
 					<FormDialogActions>
-						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
-							Cancel
+						<Button autoFocus onClick={onClickCancel || onClickClose} variant="outlined" color="secondary" size="medium">
+							{cancelLabel || <FormattedMessage id="formDialog.actions.cancel" defaultMessage="Cancel" />}
 						</Button>
 						<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
-							{confirmLabel || 'OK'}
+							{confirmLabel || <FormattedMessage id="formDialog.actions.ok" defaultMessage="OK" />}
 						</Button>
 					</FormDialogActions>
 				)}

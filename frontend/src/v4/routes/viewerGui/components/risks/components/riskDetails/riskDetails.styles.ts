@@ -33,7 +33,6 @@ import {
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
-import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
 `;
@@ -189,17 +188,9 @@ export const Content = styled.div<{ active: boolean }>`
 	width: 100%;
 	margin-bottom: 5px;
 
-	${TabContainer} {
+	${Container} {
 		margin-top: 6px;
 	}
-`;
-
-export const ExpandAction = styled.span<{ top?: boolean }>`
-	font-size: 11px;
-	cursor: pointer;
-	display: block;
-	text-align: center;
-	margin-top: ${({ top }) => top ? '5px' : 0};
 `;
 
 export const SuggestionButtonWrapper = styled.div`

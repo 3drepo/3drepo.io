@@ -20,8 +20,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import SequencesIcon from '@mui/icons-material/Movie';
 import { Field } from 'formik';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { isDateOutsideRange } from '../../../helpers/dateTime';
-import { NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
+import { LONG_DATE_TIME_FORMAT_V5, NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
 import {
 	FieldsRow,
 	StyledFormControl,
@@ -60,13 +61,14 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 		<SequenceDateContainer>
 			<SequenceDateField
 				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
-				inputFormat={NAMED_MONTH_DATETIME_FORMAT}
+				inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_V5 : NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
 				value={value}
 				onChange={handleChange}
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
+				placeholder={isV5() ? 'Set time and date' : ''}
 			/>
 			{ value &&
 				<SequenceDateActions>

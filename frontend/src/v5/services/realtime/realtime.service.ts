@@ -27,6 +27,7 @@ interface IRoomType {
 export enum SocketEvents {
 	CONNECT = 'connect',
 	DISCONNECT = 'disconnect',
+	LOGGED_OUT = 'loggedOut',
 }
 
 let socket:Socket = null;
@@ -65,7 +66,7 @@ export const leaveRoom = (roomType : IRoomType) => {
 	roomsJoined[roomTypeToId(roomType)]--;
 	const joinedCount = roomsJoined[roomTypeToId(roomType)];
 
-	if (joinedCount !== 0) return;
+	if (joinedCount > 0) return;
 	delete roomsJoined[roomTypeToId(roomType)];
 
 	socket.emit('leave', roomType);
@@ -91,12 +92,27 @@ const unsubscribeToEvent = (event, callback) => {
 	socket.off(event, callback);
 };
 
+/**
+ * Subscribes to a room event and returns a function to unsubscribe
+ * @param roomType
+ * @param event
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callback) => {
 	joinRoom(roomType);
-	subscribeToEvent(event, callback);
+	const roomCallback = (roomEvent) => {
+		const { data, ...room } = roomEvent;
+
+		if (roomTypeToId(roomType) !== roomTypeToId(room)) return;
+
+		callback(data);
+	};
+
+	subscribeToEvent(event, roomCallback);
 
 	return () => {
-		unsubscribeToEvent(event, callback);
+		unsubscribeToEvent(event, roomCallback);
 		leaveRoom(roomType);
 	};
 };
@@ -106,6 +122,12 @@ interface IDirectMessage {
 	data: any;
 }
 
+/**
+ * Subscribes to a direct message event and returns a function to unsubscribe
+ * @param event
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToDM = (event: string, callback) => {
 	const dmCallback = (message: IDirectMessage) => {
 		if (message.event !== event) return;
@@ -119,6 +141,12 @@ export const subscribeToDM = (event: string, callback) => {
 	};
 };
 
+/**
+ * Subscribes to a socket event and returns a function to unsubscribe
+ * @param socketEvent
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToSocketEvent = (socketEvent:SocketEvents, callback) => {
 	subscribeToEvent(socketEvent.toString(), callback);
 

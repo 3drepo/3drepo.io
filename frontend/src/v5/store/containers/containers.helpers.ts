@@ -31,13 +31,13 @@ export const filterContainers = (federations: IContainer[], filterQuery: string)
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
 );
 
-export const canUploadToBackend = (status?: UploadStatuses) => {
+export const canUploadToBackend = (status?: UploadStatuses): boolean => {
 	const statusesForUpload = [
 		UploadStatuses.OK,
 		UploadStatuses.FAILED,
 	];
 
-	return !status || !statusesForUpload.includes(status);
+	return statusesForUpload.includes(status);
 };
 
 export const prepareSingleContainerData = (

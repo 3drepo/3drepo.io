@@ -22,6 +22,8 @@ import IconButton from '@mui/material/IconButton';
 import { COLOR } from '../../../../../../styles';
 import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
 
+export const Container = styled.div``;
+
 export const StyledIconButton = styled(IconButton)`
 	&& {
 		padding: 3px;

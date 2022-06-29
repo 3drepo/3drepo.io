@@ -27,6 +27,7 @@ import { Field, Formik } from 'formik';
 import { lowerCase, pick, values as _values } from 'lodash';
 import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -122,7 +123,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	get commentPlaceholder() {
 		if (this.props.canComment) {
-			return 'Write your comment here';
+			return isV5() ? 'Leave a comment' : 'Write your comment here';
 		}
 		return 'You are not able to comment';
 	}

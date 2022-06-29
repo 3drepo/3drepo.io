@@ -17,7 +17,7 @@
 import { FunctionComponent, useState, useEffect, useCallback, useRef } from 'react';
 import { GhostElement } from '../../../../../components/screenshotDialog/components/editableText/editableText.styles';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { ExpandAction } from '../riskDetails/riskDetails.styles';
+import { ExpandAction } from './../../../../../components/textField/textField.styles';
 
 interface IProps {
 	value: string;

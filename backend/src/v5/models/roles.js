@@ -16,6 +16,7 @@
  */
 
 const { TEAM_MEMBER } = require('./roles.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 
 const Roles = {};
@@ -30,13 +31,30 @@ Roles.createTeamspaceRole = async (teamspace) => {
 	await db.runCommand(teamspace, createRoleCmd);
 };
 
+Roles.removeTeamspaceRole = async (teamspace) => {
+	const cmd = {
+		dropRole: TEAM_MEMBER,
+	};
+
+	await db.runCommand(teamspace, cmd);
+};
+
 Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
 	const grantRoleCmd = {
 		grantRolesToUser: username,
 		roles: [{ role: TEAM_MEMBER, db: teamspace }],
 	};
 
-	return db.runCommand('admin', grantRoleCmd);
+	return db.runCommand(USERS_DB_NAME, grantRoleCmd);
+};
+
+Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => {
+	const revokeRoleCmd = {
+		revokeRolesFromUser: username,
+		roles: [{ role: TEAM_MEMBER, db: teamspace }],
+	};
+
+	return db.runCommand(USERS_DB_NAME, revokeRoleCmd);
 };
 
 module.exports = Roles;

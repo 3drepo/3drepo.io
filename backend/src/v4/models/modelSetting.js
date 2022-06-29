@@ -77,6 +77,18 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	}
 };
 
+const checkUserHasPermissionTemplate = (dbUser, permission) => {
+	if (permission.permission && !PermissionTemplates.findById(dbUser, permission.permission)) {
+		throw responseCodes.PERM_NOT_FOUND;
+	}
+};
+
+const checkPermissionIsValid = (permission) => {
+	if (!utils.isString(permission.user) || !utils.isString(permission.permission)) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+};
+
 ModelSetting.changePermissions = async function(account, model, permissions) {
 	const setting = await ModelSetting.findModelSettingById(account, model);
 
@@ -96,13 +108,8 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		const promises = [];
 
 		permissions.forEach(permission => {
-			if (!utils.isString(permission.user) || !utils.isString(permission.permission)) {
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-
-			if (!PermissionTemplates.findById(dbUser, permission.permission)) {
-				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
-			}
+			checkPermissionIsValid(permission);
+			checkUserHasPermissionTemplate(dbUser, permission);
 
 			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
 				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
@@ -438,33 +445,40 @@ ModelSetting.updateMultiplePermissions = async function(account, modelIds, updat
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = []) {
-	const setting = await ModelSetting.findModelSettingById(account, model);
+	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
+	if (!Array.isArray(permissions)) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	const setting = await ModelSetting.findModelSettingById(account, model);
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	permissions.forEach((permissionUpdate) => {
-		if (!setting.permissions) {
-			setting.permissions = [];
-		}
+	permissions = _.uniq(permissions, "user");
+	const dbUser = await findByUserName(account);
 
-		const userIndex = setting.permissions.findIndex(x => x.user === permissionUpdate.user);
+	const promises = permissions.map(async (permission) => {
+		checkPermissionIsValid(permission);
+		checkUserHasPermissionTemplate(dbUser, permission);
 
-		if (-1 !== userIndex) {
-			if ("" !== permissionUpdate.permission) {
-				setting.permissions[userIndex].permission = permissionUpdate.permission;
+		await teamspaceMemberCheck(permission.user, dbUser.user);
+		const index = setting.permissions.findIndex(x => x.user === permission.user);
+		if (index !== -1) {
+			if (permission.permission) {
+				setting.permissions[index].permission = permission.permission;
 			} else {
-				setting.permissions.splice(userIndex, 1);
+				setting.permissions.splice(index, 1);
 			}
-		} else if ("" !== permissionUpdate.permission) {
-			setting.permissions.push(permissionUpdate);
+		} else if (permission.permission) {
+			setting.permissions.push(permission);
 		}
 	});
 
-	const updatedSetting = await ModelSetting.changePermissions(account, model, setting.permissions);
-
-	return { "status": updatedSetting.status };
+	await Promise.all(promises);
+	await db.updateOne(account, MODELS_COLL, { _id: model }, { $set: { permissions: setting.permissions } });
+	return { status: setting.status };
 };
 
 ModelSetting.getDefaultLegendId = async (account, model) => {

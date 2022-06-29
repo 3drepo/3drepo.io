@@ -39,8 +39,8 @@ class GridFSHandler {
 		return DB.getFileFromGridFS(account, this.cleanColName(col), file);
 	}
 
-	storeFile(account, col, data) {
-		const _id = utils.generateUUID({string: true});
+	storeFile(account, col, data, id) {
+		const _id = id || utils.generateUUID({string: true});
 		return DB.storeFileInGridFS(account, this.cleanColName(col), _id, data).then(() => (
 			{_id, link: _id, size: data.length, type: "gridfs"}
 		));

@@ -125,7 +125,7 @@ export const Containers = (): JSX.Element => {
 			)}
 			<CreateContainerForm
 				open={createContainerOpen}
-				close={() => setCreateContainerOpen(false)}
+				onClickClose={() => setCreateContainerOpen(false)}
 			/>
 			<UploadFileForm openState={uploadModalOpen} onClickClose={onClickClose} />
 		</>

@@ -22,6 +22,7 @@ import TextField from '@mui/material/Input';
 import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
+
 export const Container = styled.div`
 	position: relative;
 	background-color: ${COLOR.WHITE};
@@ -82,7 +83,9 @@ export const ActionsGroup = styled.div`
 	display: flex;
 `;
 
-export const FileUploadContainer = styled.div``;
+export const FileUploadContainer = styled.div`
+	display: contents;
+`;
 
 export const FileUploadInvoker = styled.input.attrs({
 	type: 'file',

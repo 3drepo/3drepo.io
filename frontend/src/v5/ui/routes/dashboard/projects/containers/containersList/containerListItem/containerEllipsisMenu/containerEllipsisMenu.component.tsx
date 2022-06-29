@@ -52,6 +52,7 @@ export const ContainerEllipsisMenu = ({
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
 				to={viewerRoute(teamspace, project, container)}
+				disabled={!container.revisionsCount}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

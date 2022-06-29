@@ -31,7 +31,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const ExternalServices = require('../../../src/v5/handler/externalServices');
+const FilesManager = require('../../../src/v5/services/filesManager');
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../../../src/v5/models/users.constants');
 
 const db = {};
 const queue = {};
@@ -98,8 +99,7 @@ db.createModel = (teamspace, _id, name, props) => {
 db.createRevision = async (teamspace, modelId, revision) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		const refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, revision.refData);
-		DbHandler.insertOne(teamspace, `${modelId}.history.ref`, { ...refInfo, _id: refId });
+		await FilesManager.storeFile(teamspace, `${modelId}.history.ref`, refId, revision.refData);
 	}
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	delete formattedRevision.refData;
@@ -151,8 +151,17 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
+	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
 
+db.createAvatar = async (username, type, avatarData) => {
+	const { defaultStorage } = config;
+	config.defaultStorage = type;
+	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);
+	config.defaultStorage = defaultStorage;
+};
+
+ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
@@ -200,11 +209,12 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 	return {
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		permissions,
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
 			...(isFederation ? { federate: true } : {}),
-			...properties },
+			...properties,
+			permissions,
+		},
 	};
 };
 

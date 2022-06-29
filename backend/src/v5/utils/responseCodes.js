@@ -32,7 +32,6 @@ ResponseCodes.templates = {
 	userNotVerified: { message: 'Account not yet verified. Please check your email', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
-	avatarNotFound: { message: 'No Avatar available', status: 404 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -57,6 +56,7 @@ ResponseCodes.templates = {
 	containerIsSubModel: { message: 'Container is a submodel.', status: 400 },
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
+	metadataNotFound: { message: 'Metadata not found.', status: 404 },
 
 	// File upload related error
 	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },

@@ -16,7 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { createIndex } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
@@ -29,6 +29,7 @@ const processTeamspace = async (teamspace) => {
 			createIndex(teamspace, colName, [['rev_id', 1], ['metadata.key', 1], ['metadata.value', 1]]),
 			createIndex(teamspace, colName, [['metadata.key', 1], ['metadata.value', 1]]),
 			createIndex(teamspace, colName, [['rev_id', 1], ['shared_id', 1], ['type', 1]]),
+			createIndex(teamspace, colName, [['rev_id', 1], ['type', 1]]),
 			createIndex(teamspace, colName, [['shared_id', 1]]),
 		]);
 	});

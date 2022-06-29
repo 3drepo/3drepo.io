@@ -214,4 +214,13 @@ Models.updateModelSettings = async (teamspace, project, model, data, sender) => 
 	}
 };
 
+Models.removeUserFromAllModels = async (teamspace, user) => {
+	await db.updateMany(
+		teamspace,
+		SETTINGS_COL,
+		{ 'permissions.user': user },
+		{ $pull: { permissions: { user } } },
+	);
+};
+
 module.exports = Models;

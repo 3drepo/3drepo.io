@@ -45,7 +45,7 @@ export const UserMessage = ({
 	const handleRemoveMessage = () => removeMessage(index, guid);
 
 	return (
-		<Container>
+		<Container self={props.self}>
 			<UserMarker name={name} />
 			<CommentContainer self={props.self}>
 				{isScreenshot && <Screenshot comment={commentWithMarkdown} viewpoint={viewpoint} />}

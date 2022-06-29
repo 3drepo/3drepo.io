@@ -27,12 +27,15 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	setPendingStatus: ['isPending'],
 	setAuthenticationStatus: ['status'],
 	sessionExpired: [],
+	setReturnUrl: ['url'],
+	kickedOut: [],
 }, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActionCreators>; Creators: IAuthActionCreators };
 
 export const INITIAL_STATE: IAuthState = {
 	isAuthenticated: null,
 	isPending: false,
 	errorMessage: null,
+	returnUrl: null,
 };
 
 export const setAuthenticationStatus = (state = INITIAL_STATE, { status }) => (
@@ -49,26 +52,36 @@ export const loginFailed = (state = INITIAL_STATE, { errorMessage }): IAuthState
 	}
 );
 
+export const setReturnUrl = (state = INITIAL_STATE, { url }):IAuthState => ({ ...state, returnUrl: url });
+
 export const authReducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_FAILED]: loginFailed,
 	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
 	[AuthTypes.SET_AUTHENTICATION_STATUS]: setAuthenticationStatus,
+	[AuthTypes.SET_RETURN_URL]: setReturnUrl,
 });
 
 /**
  * Types
 */
 
-interface IAuthState {
+export interface IAuthState {
 	isAuthenticated: boolean;
 	isPending: boolean;
 	errorMessage: string;
+	returnUrl: {
+		pathname: string,
+		search?: string,
+		hash?: string
+	}
 }
 
 export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
 export type LoginFailedAction = Action<'LOGIN_FAILED'> & { errorMessage: string };
 export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
 export type SetAuthenticationStatusAction = Action<'SET_AUTHENTICATION_STATUS'> & { status: boolean };
+export type SetReturnUrlAction = Action<'SET_RETURN_URL'> & { url:string };
+
 export interface IAuthActionCreators {
 	authenticate: () => Action<'AUTHENTICATE'>;
 	login: (username: string, password: string) => LoginAction;
@@ -77,4 +90,6 @@ export interface IAuthActionCreators {
 	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
 	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
 	sessionExpired: () => void;
+	setReturnUrl: (url: IAuthState['returnUrl']) => SetReturnUrlAction;
+	kickedOut: () => void;
 }

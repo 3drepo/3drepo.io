@@ -16,7 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
@@ -36,7 +36,7 @@ const processTeamspace = async (teamspace) => {
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
+		logger.logInfo(`\t\t-[TEAMSPACE]${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspaces[i]);
 	}

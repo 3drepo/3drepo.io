@@ -65,7 +65,7 @@ const legends = [
 
 const models = [
 	{
-		...ServiceHelper.generateRandomModel({ viewers: [users.viewer], commenters: [users.commenter] }),
+		...ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], commenters: [users.commenter.user] }),
 		isFavourite: true,
 	},
 	ServiceHelper.generateRandomModel(),
@@ -90,7 +90,7 @@ const models = [
 	// NOTE: this model gets deleted after deleteContainer test
 	{
 		...ServiceHelper.generateRandomModel({
-			viewers: [users.viewer], commenters: [users.commenter],
+			viewers: [users.viewer.user], commenters: [users.commenter.user],
 		}),
 		isFavourite: true,
 	},

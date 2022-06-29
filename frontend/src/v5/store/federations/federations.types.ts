@@ -23,7 +23,7 @@ export interface IFederation {
 	name: string;
 	role: string;
 	isFavourite: boolean;
-	code: string;
+	code?: string;
 	status: string;
 	containers: string[];
 	issues: number;
@@ -37,6 +37,13 @@ export interface IFederation {
 	defaultView?: string;
 	unit?: string;
 }
+
+export type NewFederation = {
+	name: string;
+	unit: string;
+	desc?: string;
+	code?: string;
+};
 
 export type FederationBackendSettings = {
 	_id?: string;

@@ -62,7 +62,7 @@ export const StyledTextField = styled(TextField)`
 	}
 `;
 
-export const StyledMarkdownField = styled(MarkdownField)`
+export const StyledMarkdownField = styled(MarkdownField)<{ $isPlaceholder?: boolean }>`
 	&& {
 		display: block;
 		position: relative;
@@ -70,6 +70,10 @@ export const StyledMarkdownField = styled(MarkdownField)`
 		min-height: 14px;
 		font-size: 14px;
 		overflow: hidden;
+
+		/* TODO: fix after new palette is released */
+		${({ $isPlaceholder }) => $isPlaceholder && css`color: #C1C8D5;`}
+
 	}
 `;
 
@@ -119,4 +123,12 @@ export const CopyButton = styled(ContainedButton)`
 	&& {
 		margin-left: 8px;
 	}
+`;
+
+export const ExpandAction = styled.span<{ top?: boolean }>`
+	font-size: 11px;
+	cursor: pointer;
+	display: block;
+	text-align: center;
+	margin-top: ${({ top }) => top ? '5px' : 0};
 `;

@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { TextField } from '@mui/material';
 import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
-import tick from '@assets/icons/tick';
+import tick from '@assets/icons/tick.svg';
 
 const SVG_PADDING_IN_PX = 9;
 

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
@@ -40,6 +40,7 @@ import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federatio
 import { useParams, Link } from 'react-router-dom';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
@@ -68,6 +69,8 @@ export const FederationListItem = ({
 	}
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
+
+	useEffect(() => enableRealtimeFederationUpdateSettings(teamspace, project, federation._id), [federation._id]);
 
 	return (
 		<>
@@ -124,10 +127,7 @@ export const FederationListItem = ({
 					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={Display.Tablet}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('handle containers button');
-						}}
+						onClick={() => setOpenModal(MODALS.editFederation)}
 						width={165}
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
