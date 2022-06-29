@@ -16,10 +16,11 @@
  */
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
+import { IProject } from '@/v5/store/projects/projects.types';
 import { Route, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { LOGIN_PATH, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { LOGIN_PATH, PROJECT_ROUTE_BASE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
@@ -45,6 +46,17 @@ const getBaseDomain = () => `${window.location.protocol}//${window.location.host
 
 type RevisionParam = IRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
+type ProjectParam = IProject | string;
+
+export const projectRoute = (
+	teamspace: string,
+	project: ProjectParam,
+	withDomain: boolean = false,
+) => {
+	const projectId = (project as IProject)?._id || (project as string);
+	const domain = withDomain ? getBaseDomain() : '';
+	return `${domain}${generatePath(PROJECT_ROUTE_BASE, { teamspace, project: projectId })}`;
+};
 
 const relativeViewerRoute = (
 	teamspace: string,
