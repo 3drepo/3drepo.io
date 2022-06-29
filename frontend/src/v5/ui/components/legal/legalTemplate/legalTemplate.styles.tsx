@@ -53,7 +53,6 @@ export const LegalContent = styled.div`
 		li {
 			${({ theme }) => theme.typography.h2};
 			&::marker {
-				font-weight: bold;
 				color: ${({ theme }) => theme.palette.secondary.main};
 			}
 			li {
@@ -72,6 +71,7 @@ export const LegalContent = styled.div`
 	}
 	table {
 		padding: 0;
+		margin: 35px 0;
 		td {
 			padding: 10px;
 			font-weight: 400;

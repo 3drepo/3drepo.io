@@ -21,11 +21,11 @@ import { ScrollArea } from '@controls/scrollArea';
 import { LegalContent } from './legalTemplate.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';
 
-type ILegalLayout = {
+type ILegalTemplate = {
 	children: any;
 };
 
-export const LegalLayout = ({ children }: ILegalLayout) => {
+export const LegalTemplate = ({ children }: ILegalTemplate) => {
 	const { params: { legalPage } } = useRouteMatch('/v5/:legalPage');
 	return (
 		<>

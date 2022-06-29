@@ -51,7 +51,6 @@ export const PrivacyLegalPaper = () => (
 			<p>It is important that the personal data we hold about you is accurate and current. Please keep us informed
 				if your personal data changes during your relationship with us.
 			</p>
-			<p />
 			<li>
 				<h2>The data we collect about you</h2>
 				<p>Personal data, or personal information, means any information about an individual from which that
@@ -181,7 +180,6 @@ export const PrivacyLegalPaper = () => (
 					identify you, we treat the combined data as personal data which will be used in accordance
 					with this privacy notice.
 				</p>
-				<p />
 			</li>
 			<li>
 				<h2>How is your personal data collected?</h2>
@@ -305,12 +303,10 @@ export const PrivacyLegalPaper = () => (
 							<p>To register you as a new user and maintain your account</p>
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Contact</li>
 								<li>Other Identifier</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
 							<p>Performance of a contract with you</p>
@@ -323,22 +319,18 @@ export const PrivacyLegalPaper = () => (
 							</p>
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Contact</li>
 								<li>Other Identifier</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
-							<p />
 							<ol type="a">
 								<li>Performance of a contract with you</li>
 								<li>Necessary for our legitimate interests (providing the means of collaboration
 									between users on our platform)
 								</li>
 							</ol>
-							<p />
 						</td>
 					</tr>
 					<tr>
@@ -348,25 +340,20 @@ export const PrivacyLegalPaper = () => (
 								<li>Manage payments, fees and charges</li>
 								<li>Collect and recover money owed to us</li>
 							</ol>
-							<p />
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Contact</li>
 								<li>Financial</li>
 								<li>Transaction</li>
 								<li>Communications</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
-							<p />
 							<ol type="a">
 								<li>Performance of a contract with you</li>
 								<li>Necessary for our legitimate interests (to recover debts due to us)</li>
 							</ol>
-							<p />
 						</td>
 					</tr>
 					<tr>
@@ -376,23 +363,19 @@ export const PrivacyLegalPaper = () => (
 							</p>
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Contact</li>
 								<li>Financial</li>
 								<li>Communications</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
-							<p />
 							<ol type="a">
 								<li>Performance of a contract with you</li>
 								<li>Necessary for our legitimate interests (to keep our records updated and to study
 									how users use our products)
 								</li>
 							</ol>
-							<p />
 						</td>
 					</tr>
 					<tr>
@@ -402,14 +385,12 @@ export const PrivacyLegalPaper = () => (
 							</p>
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Contact</li>
 								<li>Financial</li>
 								<li>Technical</li>
 								<li>Communications</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
 							<p>Necessary for our legitimate interests (for running our business, provision of
@@ -423,7 +404,6 @@ export const PrivacyLegalPaper = () => (
 							<p>To deliver relevant website content and marketing messages to you</p>
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Contact</li>
 								<li>Other Identifier</li>
@@ -431,7 +411,6 @@ export const PrivacyLegalPaper = () => (
 								<li>Communications</li>
 								<li>Technical</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
 							<p>Necessary for our legitimate interests (to study how customers use our products, to
@@ -446,14 +425,12 @@ export const PrivacyLegalPaper = () => (
 							</p>
 						</td>
 						<td width="200">
-							<p />
 							<ol type="a">
 								<li>Technical</li>
 								<li>Usage</li>
 								<li>Location</li>
 								<li>Connection</li>
 							</ol>
-							<p />
 						</td>
 						<td width="300">
 							<p>Necessary for our legitimate interests (to define types of customers for our products, to
@@ -468,7 +445,7 @@ export const PrivacyLegalPaper = () => (
 				You can set your browser to refuse all or some browser cookies, or to alert you when websites set or
 				access cookies. If you disable or refuse cookies, please note that some parts of this website may
 				become inaccessible or not function properly. For more information about the cookies we use, please see
-				<Link to={COOKIES_ROUTE}>Cookies Policy</Link>
+				<Link to={COOKIES_ROUTE}> Cookies Policy</Link>
 			</p>
 			<li>
 				<h2>How is your personal data shared?</h2>
@@ -538,7 +515,6 @@ export const PrivacyLegalPaper = () => (
 					data from our records 7 days following the closure of your account
 					with us.
 				</p>
-				<p />
 			</li>
 			<li>
 				<h2>Your legal rights</h2>
@@ -637,7 +613,6 @@ export const PrivacyLegalPaper = () => (
 					You will not have to pay a fee to access your personal data (or to exercise any of the other
 					rights).
 				</p>
-				<p />
 				<h3>What we may need from you</h3>
 				<p>We may need to request specific information from you to help us confirm your identity and
 					ensure your right to access your personal data (or to exercise any of your other rights).
@@ -645,13 +620,11 @@ export const PrivacyLegalPaper = () => (
 					disclosed to any person who has no right to receive it. We may also contact you to ask
 					you for further information in relation to your request to speed up our response.
 				</p>
-				<p />
 				<h3>Time limit to respond</h3>
 				<p>We try to respond to all legitimate requests within one month. Occasionally it may take us
 					longer than a month if your request is particularly complex or you have made a number of
 					requests. In this case, we will notify you and keep you updated.
 				</p>
-				<p />
 			</li>
 		</ol>
 	</>
