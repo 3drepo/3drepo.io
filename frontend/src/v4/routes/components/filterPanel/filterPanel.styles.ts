@@ -22,6 +22,7 @@ import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
 import styled from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
+import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.styles';
 import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
@@ -53,20 +54,37 @@ export const Container = styled.div<IContainer>`
 	${(props) => isV5() && props.filtersOpen && 'height: 57px;'}
 `;
 
-export const SelectedFilters = styled.div<ISelectedFilters>`
+export const Chips = styled.div<IChips>`
+	position: relative;
+	width: 380px;
+	box-sizing: border-box;
+
+	&.compare {
+		margin-left: ${(props) => props.filtersOpen ? '38px' : '0'};
+	}
+`;
+
+export const SelectedFilters = styled(ViewerScrollAreaBase).attrs(({ empty }: ISelectedFilters) => ({
+	autoHeight: true,
+	autoMaxHeight: 240,
+	autoMinHeight: isV5() ? 38 : (empty ? 0 : 45),
+}))<ISelectedFilters>`
 	display: flex;
 	flex-wrap: wrap;
-	padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
 	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'};
-	min-height: ${(props) => props.empty ? '0' : '45px'};
 	position: relative;
-	max-height: 240px;
+	box-sizing: border-box;
+	
+	${Chips} {
+		padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
+	}
 
 	${({ theme, empty, filtersOpen}) => isV5() && `
 		${!empty && `
 			border-bottom: solid 1px ${theme.palette.base.lightest};
-			padding: 9px 40px 9px 15px;
-			min-height: 38px;
+			${Chips} {
+				padding: 9px 40px 9px 15px;
+			}
 		`}
 
 		${!empty && filtersOpen && `
@@ -131,6 +149,15 @@ export const SuggestionsList = styled(Popper)`
 	}
 `;
 
+export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
+	autoHeight: true,
+	autoHeightMax: 250,
+})`
+	.react-autosuggest__suggestions-list {
+		max-height: unset;
+	}
+`;
+
 export const StyledTextField = styled(TextField)`
 	font-size: 14px;
 	margin-bottom: 12px;
@@ -153,6 +180,7 @@ export const FiltersButton = styled(IconButton)`
 
 	&& {
 		position: absolute;
+		z-index: 1;
 		top: 8px;
 		width: 28px;
 		height: 28px;
@@ -191,14 +219,6 @@ export const CopyIcon = styled(Copy)`
 export const ButtonWrapper = styled.div`
 	position: relative;
 	height: 50px;
-`;
-
-export const Chips = styled.div<IChips>`
-	position: relative;
-
-	&.compare {
-		margin-left: ${(props) => props.filtersOpen ? '38px' : '0'};
-	}
 `;
 
 export const Placeholder = styled.div`
