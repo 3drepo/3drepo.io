@@ -34,6 +34,19 @@ export function* fetch({ teamspace }) {
 	}
 }
 
+export function* deleteProject({ teamspace, projectId }) {
+	try {
+		yield API.Projects.deleteProject(teamspace, projectId);
+		yield put(ProjectsActions.deleteProjectSuccess(teamspace, projectId));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'projects.delete.error', defaultMessage: 'trying to delete project' }),
+			error,
+		}));
+	}
+}
+
 export default function* ProjectsSaga() {
 	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
+	yield takeLatest(ProjectsTypes.DELETE_PROJECT as any, deleteProject);
 }
