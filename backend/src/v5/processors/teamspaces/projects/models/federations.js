@@ -28,8 +28,8 @@ const { queueFederationUpdate } = require('../../../../services/modelProcessing'
 
 const Federations = { ...Groups, ...Views };
 
-Federations.addFederation = (teamspace, project, federation, sender) => addModel(teamspace, project,
-	{ ...federation, federate: true }, sender);
+Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
+	{ ...federation, federate: true });
 
 Federations.deleteFederation = deleteModel;
 

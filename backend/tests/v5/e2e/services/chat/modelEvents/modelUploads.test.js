@@ -256,42 +256,29 @@ const queueFinishedTest = () => {
 const revisionUpdateTest = () => {
 	describe('On updating a revision', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when settings have been updated`, async () => {
-			const socket1 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-			const socket2 = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
 			const data = { teamspace, project: project.id, model: container._id };
-			await Promise.all([
-				ServiceHelper.socket.joinRoom(socket1, data),
-				ServiceHelper.socket.joinRoom(socket2, data),
-			]);
+			await ServiceHelper.socket.joinRoom(socket, data);
 
-			const socket1CB = jest.fn();
-
-			const socket2Promise = new Promise((resolve, reject) => {
-				socket2.on(EVENTS.CONTAINER_REVISION_UPDATE, resolve);
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.CONTAINER_REVISION_UPDATE, resolve);
 				setTimeout(reject, 1000);
 			});
 
-			// Sender should not get the update
-			const socket1Promise = new Promise((resolve, reject) => {
-				socket1.on(EVENTS.CONTAINER_REVISION_UPDATE, () => { socket1CB(); reject(); });
-				setTimeout(resolve, 100);
-			});
-
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions/${containerRevision._id}?key=${user.apiKey}`)
-				.set({ [SOCKET_HEADER]: socket1.id })
 				.send({ void: true })
 				.expect(templates.ok.status);
 
-			await expect(socket2Promise).resolves.toEqual({ ...data,
-				data: { _id: containerRevision._id,
-					void: true } });
+			await expect(socketPromise).resolves.toEqual({ 
+				...data,
+				data: { 
+					_id: containerRevision._id,
+					void: true
+				} 
+			});
 
-			await expect(socket1Promise).resolves.toBeUndefined();
-			expect(socket1CB).not.toHaveBeenCalled();
-
-			socket1.close();
-			socket2.close();
+			socket.close();
 		});
 	});
 };

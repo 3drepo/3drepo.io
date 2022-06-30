@@ -42,9 +42,8 @@ const getRevisions = (req, res, next) => {
 const updateRevisionStatus = (req, res) => {
 	const { teamspace, project, container, revision } = req.params;
 	const status = req.body.void;
-	const sender = req.headers[SOCKET_HEADER];
 
-	Containers.updateRevisionStatus(teamspace, project, container, revision, status, sender).then(() => {
+	Containers.updateRevisionStatus(teamspace, project, container, revision, status).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };

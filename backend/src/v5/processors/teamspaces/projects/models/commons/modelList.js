@@ -24,16 +24,16 @@ const { removeModelData } = require('../../../../../utils/helper/models');
 
 const ModelList = {};
 
-ModelList.addModel = async (teamspace, project, data, sender) => {
-	const insertedId = await addModel(teamspace, project, data, sender);
+ModelList.addModel = async (teamspace, project, data) => {
+	const insertedId = await addModel(teamspace, project, data);
 
 	await addModelToProject(teamspace, project, insertedId);
 
 	return insertedId;
 };
 
-ModelList.deleteModel = async (teamspace, project, model, sender) => {
-	await removeModelData(teamspace, project, model, sender);
+ModelList.deleteModel = async (teamspace, project, model) => {
+	await removeModelData(teamspace, project, model);
 	await removeModelFromProject(teamspace, project, model);
 };
 
