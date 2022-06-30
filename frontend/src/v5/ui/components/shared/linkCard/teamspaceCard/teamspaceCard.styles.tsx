@@ -20,6 +20,8 @@ import { Avatar } from '@controls/avatar';
 
 export const MyTeamspaceImage = styled(Avatar)`
 	width: 100%;
+	margin: 0;
+	
 	.MuiAvatar-root {
 		cursor: pointer;
 		border-radius: 0;
