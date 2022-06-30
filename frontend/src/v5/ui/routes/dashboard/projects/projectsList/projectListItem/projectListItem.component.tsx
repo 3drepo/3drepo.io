@@ -20,19 +20,48 @@ import {
 	DashboardListItemRow,
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-
+import { useDispatch } from 'react-redux';
 import { discardSlash } from '@/v5/services/routing/routing';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { FormattedMessage } from 'react-intl';
+import { IProject } from '@/v5/store/projects/projects.redux';
+import { Button } from '@controls/button';
+import { formatMessage } from '@/v5/services/intl';
 
-export const ProjectListItem = ({ projectId, name }): JSX.Element => {
+type ProjectListItemProps = {
+	project: IProject,
+};
+
+export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
+	const dispatch = useDispatch();
+
+	const onClickDelete = (e) => {
+		e.preventDefault();
+		dispatch(DialogsActions.open('delete', {
+			title: formatMessage(
+				{ id: 'deleteModal.project.title', defaultMessage: 'Delete {name}?' },
+				{ name: project.name },
+			),
+			// eslint-disable-next-line no-console
+			onClickConfirm: () => console.log('Deleting project'),
+			message: formatMessage({
+				id: 'deleteModal.project.message',
+				defaultMessage: 'By deleting this Project your data will be lost permanently and will not be recoverable.',
+			}),
+		}));
+	};
 
 	return (
 		<DashboardListItem>
-			<Link to={`${url}/${projectId}`}>
+			<Link to={`${url}/${project._id}`}>
 				<DashboardListItemRow>
 					<DashboardListItemText>
-						{name}
+						{project.name}
+						<Button onClick={onClickDelete}>
+							<FormattedMessage id="deleteProject.button" defaultMessage="Delete Project" />
+						</Button>
 					</DashboardListItemText>
 				</DashboardListItemRow>
 			</Link>

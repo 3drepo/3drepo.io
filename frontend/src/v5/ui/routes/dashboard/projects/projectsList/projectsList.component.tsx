@@ -36,8 +36,7 @@ export const ProjectList = (): JSX.Element => {
 						projects.map((project) => (
 							<ProjectListItem
 								key={project._id}
-								projectId={project._id}
-								name={project.name}
+								project={project}
 							/>
 						))
 					) : (
