@@ -18,7 +18,6 @@
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDirectMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { logger } = require('../../../utils/logger');
 const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');

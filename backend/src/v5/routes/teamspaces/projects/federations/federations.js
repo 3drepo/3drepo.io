@@ -19,7 +19,6 @@ const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederat
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');

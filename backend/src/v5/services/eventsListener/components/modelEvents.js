@@ -33,7 +33,7 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	}
 };
 
-const queueTasksCompleted = async ({teamspace, model, value, corId, user, containers}) => {
+const queueTasksCompleted = async ({ teamspace, model, value, corId, user, containers }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
@@ -49,7 +49,7 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, i
 
 const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 	await createModelMessage(chatEvents.CONTAINER_REVISION_UPDATE, { ...data, _id: UUIDToString(data._id) },
-			teamspace, project, model, sender);
+		teamspace, project, model, sender);
 };
 
 const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
@@ -58,8 +58,9 @@ const revisionAdded = async ({ teamspace, project, model, revision, isFederation
 			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 
-		await createModelMessage(event, { _id: revision, tag, author, timestamp: timestamp.getTime() }, teamspace, project, model);
-	} catch(err){
+		await createModelMessage(event, { _id: revision, tag, author, timestamp: timestamp.getTime() },
+			teamspace, project, model);
+	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
 };

@@ -20,7 +20,7 @@ const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 const { generateRandomString } = require('../../../../helper/services');
 
-const { EVENTS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const user = ServiceHelper.generateUserCredentials();
@@ -63,7 +63,7 @@ const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id,
-		containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
+			containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
 	]);
 };
 
@@ -137,8 +137,8 @@ const modelAddedTest = () => {
 					_id: res.body._id,
 					code: payload.code,
 					category: payload.type,
-					name: payload.name
-				}
+					name: payload.name,
+				},
 			});
 
 			socket.close();
@@ -166,8 +166,8 @@ const modelAddedTest = () => {
 					_id: res.body._id,
 					code: payload.code,
 					description: payload.desc,
-					name: payload.name
-				}
+					name: payload.name,
+				},
 			});
 
 			socket.close();

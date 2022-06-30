@@ -83,7 +83,7 @@ ChatService.createDirectMessage = async (event, data, sessionIds) => {
 		const message = JSON.stringify({ event, data, recipients });
 		await broadcastMessage(eventExchange, message);
 	} catch (err) {
-		//istanbul ignore next
+		// istanbul ignore next
 		logger.logError(`Failed to create direct message: ${err.message}`);
 	}
 };
@@ -95,7 +95,7 @@ ChatService.createModelMessage = async (event, data, teamspace, projectId, model
 		const message = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients, sender });
 		await broadcastMessage(eventExchange, message);
 	} catch (err) {
-		//istanbul ignore next
+		// istanbul ignore next
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
 };
@@ -107,7 +107,7 @@ ChatService.createProjectMessage = async (event, data, teamspace, projectId, sen
 		const message = JSON.stringify({ event, data: { data, teamspace, project }, recipients, sender });
 		await broadcastMessage(eventExchange, message);
 	} catch (err) {
-		//istanbul ignore next
+		// istanbul ignore next
 		logger.logError(`Failed to send a project message to queue: ${err?.message}`);
 	}
 };

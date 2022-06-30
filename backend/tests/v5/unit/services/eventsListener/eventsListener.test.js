@@ -371,9 +371,7 @@ const testModelEventsListener = () => {
 
 		test(`Should fail gracefully on error if there is a ${events.NEW_REVISION} (container)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
-			const tag = generateRandomString();
-			const author = generateRandomString();
-			const timestamp = generateRandomDate();
+
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -389,7 +387,7 @@ const testModelEventsListener = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
 				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);			
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 	});
 };
@@ -428,7 +426,7 @@ const testAuthEventsListener = () => {
 				{ reason: 'You have logged in else where' },
 				data.ids,
 			);
-		});		
+		});
 	});
 };
 

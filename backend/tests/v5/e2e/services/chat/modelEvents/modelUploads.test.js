@@ -19,7 +19,7 @@ const ServiceHelper = require('../../../../helper/services');
 const { src, objModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
-const { EVENTS, ACTIONS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
@@ -199,9 +199,9 @@ const queueFinishedTest = () => {
 				JSON.stringify(content));
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
 
-			const modelUpdateResults = await modelUpdatePromise;			
+			const modelUpdateResults = await modelUpdatePromise;
 			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
-			expect(modelUpdateResults).toEqual(expect.objectContaining({ ...data, 
+			expect(modelUpdateResults).toEqual(expect.objectContaining({ ...data,
 				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp } }));
 
 			const newRevisionResults = await newRevisionPromise;
@@ -214,10 +214,9 @@ const queueFinishedTest = () => {
 					timestamp: newRevisionResults.data.timestamp,
 				} }));
 
-
 			socket.close();
 		});
-		
+
 		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event if a federation revision has finished`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 			const data = { teamspace, project: project.id, model: federation._id };
@@ -232,10 +231,10 @@ const queueFinishedTest = () => {
 			const newRevisionPromise = waitForEvent(socket, EVENTS.FEDERATION_NEW_REVISION);
 
 			await queueMessage(queueConfig.callback_queue, federationRevision._id, JSON.stringify(content));
-			
+
 			const modelUpdateResults = await modelUpdatePromise;
 			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
-			expect(modelUpdateResults).toEqual({ ...data, 
+			expect(modelUpdateResults).toEqual({ ...data,
 				data: { containers: [container._id], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
 
 			const newRevisionResults = await newRevisionPromise;
@@ -270,12 +269,12 @@ const revisionUpdateTest = () => {
 				.send({ void: true })
 				.expect(templates.ok.status);
 
-			await expect(socketPromise).resolves.toEqual({ 
+			await expect(socketPromise).resolves.toEqual({
 				...data,
-				data: { 
+				data: {
 					_id: containerRevision._id,
-					void: true
-				} 
+					void: true,
+				},
 			});
 
 			socket.close();

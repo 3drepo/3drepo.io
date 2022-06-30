@@ -19,7 +19,6 @@ const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../.
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
-const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');

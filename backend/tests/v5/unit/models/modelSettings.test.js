@@ -232,14 +232,16 @@ const testAddModel = () => {
 				data: { code: data.properties.code, category: data.type, name: data.name },
 				isFederation: false });
 		});
-	
+
 		test('should return inserted ID on success when a federation is added', async () => {
 			const fn = jest.spyOn(db, 'insertOne');
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const data = { properties: { code: generateRandomString() }, 
-				desc: generateRandomString(), name: generateRandomString(), federate: true };
+			const data = { properties: { code: generateRandomString() },
+				desc: generateRandomString(),
+				name: generateRandomString(),
+				federate: true };
 			const res = await Model.addModel(teamspace, project, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
