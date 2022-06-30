@@ -37,8 +37,7 @@ import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federa
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
-import { useParams, Link } from 'react-router-dom';
-import { viewerRoute } from '@/v5/services/routing/routing';
+import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
