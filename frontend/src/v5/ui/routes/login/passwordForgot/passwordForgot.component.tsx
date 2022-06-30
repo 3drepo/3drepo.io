@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PasswordForgotSchema } from '@/v5/validation/auth';
+import { PasswordForgotSchema } from '@/v5/validation/userSchemes/passwordChangeSchemes';
 import EmailIcon from '@assets/icons/email.svg';
 import { AuthTemplate } from '@components/authTemplate';
 import { SubmitButton } from '@controls/submitButton';
