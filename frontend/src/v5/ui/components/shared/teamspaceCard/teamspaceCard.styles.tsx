@@ -61,14 +61,17 @@ export const StyledCard = styled(Card)<{ $variant: string; }>`
 	height: 253px;
 `;
 
-export const MyTeamspaceImage = styled(Avatar)`
+export const MyTeamspaceImage = styled(Avatar).attrs({
+	isButton: false,
+})`
 	width: 100%;
+	margin: 0;
+	
 	.MuiAvatar-root {
 		cursor: pointer;
 		border-radius: 0;
 		width: 100%;
 		height: 175px;
-		margin: 0;
 		font-size: 40px;
 		color: ${({ theme }) => theme.palette.tertiary.dark};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};

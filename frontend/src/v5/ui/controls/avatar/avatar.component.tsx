@@ -16,10 +16,11 @@
  */
 import { MouseEvent } from 'react';
 import AvatarIcon from '@mui/material/Avatar';
+import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { IUser } from '@/v5/store/users/users.redux';
 import { StyledIconButton } from './avatar.styles';
 
-const getUserNamesInitials = ({ firstName, lastName }) => {
+const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser | IUser) => {
 	if (!(firstName || lastName)) return '';
 
 	return [firstName, lastName]
@@ -29,15 +30,16 @@ const getUserNamesInitials = ({ firstName, lastName }) => {
 
 type AvatarProps = {
 	onClick?: (event: MouseEvent) => void;
-	user: IUser;
-	largeIcon?: boolean;
+	user: ICurrentUser | IUser;
+	size?: 'small' | 'medium' | 'large';
 	isButton?: boolean;
+	className?: string;
 };
 
-export const Avatar = ({ user, largeIcon, isButton, ...props }: AvatarProps) => (
+export const Avatar = ({ user, size, isButton, ...props }: AvatarProps) => (
 	<StyledIconButton
-		$largeIcon={largeIcon}
 		$isButton={isButton}
+		size={size}
 		{...props}
 	>
 		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
