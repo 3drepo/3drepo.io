@@ -43,11 +43,7 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 	const onClickDelete = (e) => {
 		e.preventDefault();
 		dispatch(DialogsActions.open('delete', {
-			title: formatMessage(
-				{ id: 'deleteModal.project.title', defaultMessage: 'Delete {name}?' },
-				{ name: project.name },
-			),
-			// eslint-disable-next-line no-console
+			name: project.name,
 			onClickConfirm: () => (
 				ProjectsActionsDispatchers.deleteProject(teamspace, project._id)
 			),
@@ -55,6 +51,7 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 				id: 'deleteModal.project.message',
 				defaultMessage: 'By deleting this Project your data will be lost permanently and will not be recoverable.',
 			}),
+			confidenceCheck: true,
 		}));
 	};
 

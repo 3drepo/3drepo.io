@@ -18,6 +18,8 @@
 import styled, { css } from 'styled-components';
 import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 
 export const Container = styled.div`
 	display: flex;
@@ -35,8 +37,8 @@ export const Actions = styled.div<{ bottomMargin?: boolean }>`
 	`}
 `;
 
-export const Content = styled(DialogContent)`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+export const Message = styled(DialogContent)`
+	width: 450px;
 `;
 
 export const Details = styled(Typography).attrs({
@@ -55,4 +57,23 @@ export const Status = styled(Typography).attrs({
 	margin-top: 8px;
 	margin-bottom: 0;
 	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const RetypeCheck = styled.div`
+	${({ theme }) => theme.typography.body1}
+	color: ${({ theme }) => theme.palette.base.main};
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	margin-top: 22px;
+`;
+
+export const RetypeCheckField = styled(FormTextField)`
+	margin-top: 10px;
+	width: 296px;
+`;
+
+export const ConfirmationPhrase = styled.span`
+	font-weight: ${FONT_WEIGHT.BOLDER};
+	color: ${({ theme }) => theme.palette.error.main};
 `;

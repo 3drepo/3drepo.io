@@ -14,48 +14,75 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Button, DialogContentText, DialogTitle } from '@mui/material';
 import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions, RetypeCheck, ConfirmationPhrase, RetypeCheckField, Message } from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
+import { useForm } from 'react-hook-form';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
 	onClickConfirm: () => void,
-	title: string,
+	name: string,
 	message?: string,
+	confidenceCheck?: boolean,
 }
 
-export const DeleteModal = ({ onClickConfirm, onClickClose, title, message }: IDeleteModal) => (
-	<Container>
-		<CircledIcon variant="error" size="large">
-			<DeleteIcon />
-		</CircledIcon>
-		<DialogTitle>
-			<FormattedMessage
-				id="deleteModal.header"
-				defaultMessage={title}
-			/>
-		</DialogTitle>
-		<DialogContent>
-			<DialogContentText>
-				{message}
-			</DialogContentText>
-		</DialogContent>
-		<Actions>
-			<Button autoFocus type="submit" onClick={() => { onClickClose(); onClickConfirm(); }} variant="contained" color="primary">
+export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confidenceCheck }: IDeleteModal) => {
+	const { control, watch } = useForm({
+		mode: 'onChange',
+	});
+	const isValid = confidenceCheck ? (watch('retypedName') === name) : true;
+	return (
+		<DialogContainer>
+			<CircledIcon variant="error" size="large">
+				<DeleteIcon />
+			</CircledIcon>
+			<DialogTitle>
 				<FormattedMessage
-					id="deleteModal.action.confirm"
-					defaultMessage="Delete"
+					id="deleteModal.header"
+					defaultMessage="Delete {name}?"
+					values={{ name }}
 				/>
-			</Button>
-			<Button onClick={onClickClose} variant="outlined" color="secondary">
-				<FormattedMessage
-					id="deleteModal.action.cancel"
-					defaultMessage="Cancel"
-				/>
-			</Button>
-		</Actions>
-	</Container>
-);
+			</DialogTitle>
+			<Message>
+				<DialogContentText>
+					{message}
+				</DialogContentText>
+				{ confidenceCheck && (
+					<RetypeCheck>
+						<div>
+							<FormattedMessage
+								id="deleteModal.content.retypeCheck"
+								defaultMessage="Confirm by typing <Bold>{name}</Bold> below:"
+								values={{
+									name,
+									Bold: (val: string) => <ConfirmationPhrase>{val}</ConfirmationPhrase>,
+								}}
+							/>
+						</div>
+						<RetypeCheckField
+							control={control}
+							name="retypedName"
+						/>
+					</RetypeCheck>
+				)}
+			</Message>
+			<Actions>
+				<Button onClick={onClickClose} variant="contained" color="primary">
+					<FormattedMessage
+						id="deleteModal.action.cancel"
+						defaultMessage="Cancel"
+					/>
+				</Button>
+				<Button autoFocus type="submit" onClick={() => { onClickClose(); onClickConfirm(); }} variant="outlined" color="secondary" disabled={!isValid}>
+					<FormattedMessage
+						id="deleteModal.action.confirm"
+						defaultMessage="Delete"
+					/>
+				</Button>
+			</Actions>
+		</DialogContainer>
+	);
+};
