@@ -17,7 +17,7 @@
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
 
 interface IWarningModal {
 	message: string;
@@ -26,7 +26,7 @@ interface IWarningModal {
 }
 
 export const WarningModal = ({ title, message, onClickClose }: IWarningModal) => (
-	<Container>
+	<DialogContainer>
 		<WarningIcon />
 		<DialogTitle>
 			{ title }
@@ -44,5 +44,5 @@ export const WarningModal = ({ title, message, onClickClose }: IWarningModal) =>
 				/>
 			</Button>
 		</Actions>
-	</Container>
+	</DialogContainer>
 );
