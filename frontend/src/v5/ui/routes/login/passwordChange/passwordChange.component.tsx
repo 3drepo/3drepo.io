@@ -22,7 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import * as API from '@/v5/services/api';
 import { AuthTemplate } from '@components/authTemplate';
-import { PasswordChangeSchema } from '@/v5/validation/auth';
+import { PasswordChangeSchema } from '@/v5/validation/userSchemes/passwordChangeSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
