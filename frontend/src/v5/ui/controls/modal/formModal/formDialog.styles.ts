@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import { Typography } from '@controls/typography';
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
 import { DialogActions, DialogContent, IconButton, Paper } from '@mui/material';
 
 export const RemoveWhiteCorners = styled(Paper)`
@@ -27,7 +28,7 @@ export const RemoveWhiteCorners = styled(Paper)`
 export const CloseButton = styled(IconButton)`
 	&& {
 		position: absolute;
-		top: 10px;
+		top: 8px;
 		right: 10px;
 
 		svg path {
@@ -80,4 +81,8 @@ export const FormDialogContent = styled(DialogContent)<{ $zeromargin?: boolean }
 export const FormDialogActions = styled(DialogActions)`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
+`;
+
+export const SubmitButton = styled(SubmitButtonBase)`
+	margin: 8px;
 `;

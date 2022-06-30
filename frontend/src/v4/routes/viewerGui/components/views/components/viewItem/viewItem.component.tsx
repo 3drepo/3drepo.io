@@ -21,6 +21,7 @@ import { useState } from 'react';
 import * as Yup from 'yup';
 import { Menu, MenuItem, Tooltip } from '@mui/material';
 import MoreVert from '@mui/icons-material/MoreVert';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
@@ -40,7 +41,8 @@ import {
 	StyledSaveIcon,
 	StyledShareIcon,
 	ThumbnailPlaceholder,
-	ViewpointItem
+	ViewpointItem,
+	SaveButton,
 } from './viewItem.styles';
 
 interface IProps {
@@ -207,9 +209,13 @@ export class ViewItem extends PureComponent<IProps, any> {
 					)} />
 					<IconsGroup disabled={this.state.isDeletePending}>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
-						<SaveIconButton type="submit" disableRipple id="views-card-save-button">
-							<StyledSaveIcon />
-						</SaveIconButton>
+						{isV5() ? (
+							<SaveButton type="submit" disableRipple id="views-card-save-button"> Save </SaveButton>
+						) : (
+							<SaveIconButton type="submit" disableRipple id="views-card-save-button">
+								<StyledSaveIcon />
+							</SaveIconButton>
+						)}
 					</IconsGroup>
 				</StyledForm>
 			</Formik>

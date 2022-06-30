@@ -17,6 +17,7 @@
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -26,8 +27,8 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const User = {};
 const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
-const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
+const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
+const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
@@ -54,7 +55,7 @@ const recordFailedAuthAttempt = async (user) => {
 
 	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
-	await db.updateOne('admin', COLL_NAME, { user }, {
+	await db.updateOne(USERS_DB_NAME, COLL_NAME, { user }, {
 		$set: {
 			'customData.loginInfo.lastFailedLoginAt': currentTime,
 			'customData.loginInfo.failedLoginCount': newCount,
@@ -128,7 +129,7 @@ User.getFavourites = async (user, teamspace) => {
 
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== 'admin' ? [roleDB] : []));
+	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== USERS_DB_NAME ? [roleDB] : []));
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
@@ -154,10 +155,15 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	const favourites = userProfile.customData.starredModels || {};
 
 	if (favourites[teamspace]) {
-		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
-		if (updatedFav.length) {
-			favourites[teamspace] = updatedFav;
-			await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+		if (favouritesToRemove?.length) {
+			const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
+			if (updatedFav.length) {
+				favourites[teamspace] = updatedFav;
+				await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+			} else {
+				const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+				await updateUser(username, action);
+			}
 		} else {
 			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 			await updateUser(username, action);
@@ -173,7 +179,7 @@ User.updatePassword = async (username, newPassword) => {
 		pwd: newPassword,
 	};
 
-	await db.runCommand('admin', updateUserCmd);
+	await db.runCommand(USERS_DB_NAME, updateUserCmd);
 	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
@@ -199,17 +205,6 @@ User.generateApiKey = async (username) => {
 };
 
 User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
-
-User.getAvatar = async (username) => {
-	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
-	const avatar = user.customData?.avatar;
-
-	if (!avatar) {
-		throw templates.avatarNotFound;
-	}
-
-	return avatar.data.buffer;
-};
 
 User.addUser = async (newUserData) => {
 	const customData = {
@@ -241,7 +236,7 @@ User.addUser = async (newUserData) => {
 };
 
 User.verify = async (username) => {
-	const { customData } = await db.findOneAndUpdate('admin', COLL_NAME, { user: username },
+	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, COLL_NAME, { user: username },
 		{
 			$unset: {
 				'customData.inactive': 1,
@@ -261,8 +256,6 @@ User.verify = async (username) => {
 
 User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
 	{ $push: { 'customData.permissions': { user: username, permissions: [TEAMSPACE_ADMIN] } } });
-
-User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
 User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
 	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });

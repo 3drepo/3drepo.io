@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { TextField } from '@mui/material';
 import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
-import tick from '@assets/icons/tick';
+import tick from '@assets/icons/tick.svg';
 
 const SVG_PADDING_IN_PX = 9;
 
@@ -43,7 +43,9 @@ export const LinkBar = styled(TextField)`
 	}
 
 	.MuiInputBase-root {
-		cursor: pointer;
+		${({ disabled }) => !disabled && `
+			cursor: pointer;
+		`}
 		margin-top: 0;
 		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 

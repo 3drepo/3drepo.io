@@ -16,29 +16,30 @@
  */
 
 const { v5Path } = require('../../../interop');
+const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
 
 const db = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { DEFAULT } = require(`${v5Path}/models/roles.constants`);
 
 const createDefaultRole = async () => {
-	const roleFound = await db.findOne('admin', 'system.roles', { _id: `admin.${DEFAULT}` });
+	const roleFound = await db.findOne(USERS_DB_NAME, 'system.roles', { _id: `admin.${DEFAULT}` });
 
 	if (!roleFound) {
 		const createRoleCmd = { createRole: DEFAULT, privileges: [], roles: [] };
-		await db.runCommand('admin', createRoleCmd);
+		await db.runCommand(USERS_DB_NAME, createRoleCmd);
 	}
 };
 
 const addAndAssignDefaultRole = async () => {
-	const users = await db.find('admin', 'system.users',
+	const users = await db.find(USERS_DB_NAME, 'system.users',
 		{ 'roles.role': { $ne: DEFAULT } }, { user: 1 });
 
-	const role = { role: DEFAULT, db: 'admin' };
+	const role = { role: DEFAULT, db: USERS_DB_NAME };
 	await Promise.all(users.map(async ({ user }) => {
 		logger.logInfo(`\t\t-${user}`);
 		const grantRoleCmd = { grantRolesToUser: user, roles: [role] };
-		await db.runCommand('admin', grantRoleCmd);
+		await db.runCommand(USERS_DB_NAME, grantRoleCmd);
 	}));
 };
 

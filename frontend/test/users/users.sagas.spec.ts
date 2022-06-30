@@ -30,7 +30,7 @@ describe('Users: sagas', () => {
 	// This action creator is being hijacked becayse we actually dont care about the props for testing,
 	// only that a dialog of type alert is being dispatched.
 	const spy = jest.spyOn(DialogsActions, 'open').mockImplementation((modalType,props) => {
-		return ({ type: DialogsTypes.OPEN, modalType});
+		return ({ type: DialogsTypes.OPEN, modalType, props:{}});
 	});
 
 	describe('fetch', () => {

@@ -16,6 +16,9 @@
  */
 
 import styled from 'styled-components';
+import { AppBar } from '@mui/material';
+
+export const AppBarContainer = styled(AppBar)``;
 
 export const Items = styled.div`
 	display: flex;
@@ -23,6 +26,7 @@ export const Items = styled.div`
 	align-items: center;
 	flex: 1;
 	max-width: calc(100% - 200px);
+	margin-left: 5px;
 	
 	&:last-child {
 		justify-content: flex-end;

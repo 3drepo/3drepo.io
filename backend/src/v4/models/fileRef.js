@@ -37,11 +37,9 @@ const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
 
 const extensionRe = /\.(\w+)$/;
 
-function getRefEntry(account, collection, fileName) {
-	return db.getCollection(account, collection).then((col) => {
-		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
-	});
-}
+const FileRef = {};
+
+const getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, {_id: id}, projection);
 
 async function _fetchFile(account, model, ext, fileName, metadata = false) {
 	const collection =  model ? `${model}${ext}` : ext;
@@ -105,7 +103,10 @@ async function insertRef(account, collection, user, name, refInfo) {
 	return ref;
 }
 
-const FileRef = {};
+FileRef.fileExists = async (account, collection, id) => {
+	const fileEntry = await getRefEntry(account, collection, id, { _id: 1 });
+	return !!fileEntry;
+};
 
 FileRef.fetchFileStream = (account, collection, fileName) => fetchFileStream(account, `${collection}.ref`, fileName);
 

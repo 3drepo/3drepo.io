@@ -18,6 +18,7 @@ import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
 import { DialogProps } from '@mui/material/Dialog';
+import { FormattedMessage } from 'react-intl';
 import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
@@ -28,26 +29,36 @@ import {
 	FormDialogActions,
 	RemoveWhiteCorners,
 	Subtitle,
+	SubmitButton,
 } from './formDialog.styles';
 
-interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
+export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
-	title: string;
+	onSubmit?: (event) => void;
+	onClickCancel?: () => void;
+	title?: any;
 	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
+	cancelLabel?: string;
 	isValid?: boolean;
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
 	zeroMargin?: boolean;
+	isSubmitting?: boolean;
+	disableClosing?: boolean;
+	hideSubmitButton?: boolean;
 }
 
 export const FormModal = (props: IFormModal) => {
 	const {
+		onSubmit = () => {},
 		onClickClose,
+		onClickCancel,
 		title,
 		subtitle,
 		confirmLabel,
+		cancelLabel,
 		open,
 		children,
 		className,
@@ -55,11 +66,20 @@ export const FormModal = (props: IFormModal) => {
 		showButtons = true,
 		maxWidth = false,
 		zeroMargin = false,
+		isSubmitting = false,
+		disableClosing = false,
+		hideSubmitButton = false,
 		...formProps
 	} = props;
+
+	const handleClose = () => {
+		if (disableClosing) return;
+		(onClickCancel || onClickClose)();
+	};
+
 	return (
 		<Dialog
-			onClose={onClickClose}
+			onClose={handleClose}
 			open={open}
 			PaperComponent={RemoveWhiteCorners}
 			className={className}
@@ -74,7 +94,7 @@ export const FormModal = (props: IFormModal) => {
 						</Title>
 						{subtitle && <Subtitle>{subtitle}</Subtitle>}
 					</div>
-					<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+					<CloseButton aria-label="Close dialog" onClick={handleClose} disabled={disableClosing}>
 						<CloseIcon />
 					</CloseButton>
 				</Header>
@@ -85,12 +105,22 @@ export const FormModal = (props: IFormModal) => {
 				</ScrollArea>
 				{showButtons && (
 					<FormDialogActions>
-						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
-							Cancel
+						<Button autoFocus onClick={handleClose} variant="outlined" color="secondary" size="medium" disabled={isSubmitting}>
+							{cancelLabel || <FormattedMessage id="formDialog.actions.cancel" defaultMessage="Cancel" />}
 						</Button>
-						<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
-							{confirmLabel || 'OK'}
-						</Button>
+						{!hideSubmitButton && (
+							<SubmitButton
+								disabled={!isValid}
+								onClick={onSubmit}
+								variant="contained"
+								color="primary"
+								size="medium"
+								isPending={isSubmitting}
+								fullWidth={false}
+							>
+								{confirmLabel || <FormattedMessage id="formDialog.actions.ok" defaultMessage="OK" />}
+							</SubmitButton>
+						)}
 					</FormDialogActions>
 				)}
 			</Form>

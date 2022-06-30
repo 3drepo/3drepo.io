@@ -36,7 +36,7 @@ import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federation
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
-import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -52,6 +52,7 @@ type IFederationsList = {
 	},
 	hasFederations: boolean;
 	showBottomButton?: boolean;
+	onClickCreate: () => void;
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
 };
@@ -63,6 +64,7 @@ export const FederationsList = ({
 	titleTooltips,
 	filterQuery,
 	onFilterQueryChange,
+	onClickCreate,
 	showBottomButton = false,
 	hasFederations,
 }: IFederationsList): JSX.Element => {
@@ -101,6 +103,7 @@ export const FederationsList = ({
 							startIcon={<AddCircleIcon />}
 							variant="contained"
 							color="primary"
+							onClick={onClickCreate}
 						>
 							<FormattedMessage id="federations.newFederation" defaultMessage="New Federation" />
 						</Button>
@@ -147,17 +150,12 @@ export const FederationsList = ({
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasFederations && (
-					<DashedButtonContainer>
-						<DashboardListButton
-							startIcon={<AddCircleIcon />}
-							onClick={() => {
-								// eslint-disable-next-line no-console
-								console.log('->  handle add federation');
-							}}
-						>
-							<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
-						</DashboardListButton>
-					</DashedButtonContainer>
+					<DashboardListButton
+						startIcon={<AddCircleIcon />}
+						onClick={onClickCreate}
+					>
+						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
+					</DashboardListButton>
 				)}
 			</DashboardListCollapse>
 		</Container>

@@ -21,6 +21,7 @@ const removeGridFSBackUps = require('./removeGridFSBackUps');
 const moveGridFSToFS = require('./moveGridFSToFS');
 const addAndAssignDefaultRole = require('./addAndAssignDefaultRole');
 const addSharedIdToMeshMap = require('./addSharedIdToMeshMap');
+const storeUserAvatarInFileshare = require('./storeUserAvatarInFileshare');
 
 const scripts = [
 	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
@@ -30,6 +31,7 @@ const scripts = [
 	{ script: moveGridFSToFS, desc: 'Move gridFS documents to fileshare' },
 	{ script: removeGridFSBackUps, desc: 'Remove redundant GridFS files (due to last script)' },
 	{ script: addSharedIdToMeshMap, desc: 'Add shared Id to super mesh mappings' },
+	{ script: storeUserAvatarInFileshare, desc: 'Store user avatar in fileshare' },
 ];
 
 module.exports = scripts;

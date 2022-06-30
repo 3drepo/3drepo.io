@@ -16,10 +16,9 @@
  */
 
 import styled from 'styled-components';
+import { TextField } from '@mui/material';
 
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-
-export const TextInput = styled(FormTextField)<{ neworexisting: string }>`
+export const DestinationInput = styled(TextField)<{ neworexisting: string }>`
 	margin: 0;
 	border: none;
 	>.MuiInputBase-root {

@@ -19,7 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
-import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel.component';
+import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel';
 
 export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	toggleCompare: [],

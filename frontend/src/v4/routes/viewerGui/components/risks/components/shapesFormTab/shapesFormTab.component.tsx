@@ -16,6 +16,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { isV5 } from '@/v4/helpers/isV5';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
@@ -52,7 +53,8 @@ export const ShapesFormTab = ({
 		<Content active={active}>
 			{addButtonsEnabled &&
 				<MeasuringTypeContainer>
-					Create Markup: &nbsp; &nbsp;<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
+					Create {isV5() ? 'markup' : 'Markup:'} &nbsp; &nbsp;
+					<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
 				</MeasuringTypeContainer>
 			}
 			<AllMeasurementsList
@@ -62,7 +64,7 @@ export const ShapesFormTab = ({
 				pointMeasurements={[]}
 				modelUnit={props.units}
 				units={props.units === 'ft' ? props.units : 'm'}
-				/>
+			/>
 
 			{isEmpty(shapes) && <EmptyStateInfo>No shapes have been attached yet</EmptyStateInfo>}
 

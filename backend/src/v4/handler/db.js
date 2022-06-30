@@ -196,6 +196,11 @@
 		});
 	};
 
+	Handler.getDatabaseStats = async (database) => {
+		const dbConn = await Handler.getDB(database);
+		return dbConn.stats();
+	};
+
 	Handler.getCollectionStats = function (database, colName) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
@@ -365,6 +370,20 @@
 		return defaultRoleProm;
 	};
 
+	Handler.dropDatabase = async (database) => {
+		if(!["config", "admin"].includes(database)) {
+			try {
+				const dbConn = await Handler.getDB(database);
+				await dbConn.dropDatabase();
+			} catch (err) {
+				if(err.message !== "ns not found") {
+					Handler.disconnect();
+					throw err;
+				}
+			}
+		}
+	};
+
 	Handler.createUser = async function (username, password, customData, roles = []) {
 		const [adminDB] = await Promise.all([
 			Handler.getAuthDB(),
@@ -373,6 +392,10 @@
 
 		roles.push(C.DEFAULT_ROLE_OBJ);
 		await adminDB.addUser(username, password, { customData, roles});
+	};
+
+	Handler.dropUser = async (user) => {
+		await Handler.deleteOne("admin", "system.users", { user });
 	};
 
 	module.exports = Handler;

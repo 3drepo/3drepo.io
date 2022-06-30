@@ -23,7 +23,6 @@ interface IProps {
 	message: string;
 	status: string;
 	handleResolve: () => void;
-	handleClose: () => void;
 }
 
 export const RedirectToTeamspaceDialog = ({ content, message, status, handleResolve }: IProps) => {

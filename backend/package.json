@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.23.2",
+  "version": "4.25.0",
   "engines": {
     "node": "14.x.x"
   },
@@ -20,7 +20,7 @@
     "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js",
     "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js",
     "run-migration": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/migrations/runMigrations",
-    "run-script": "cross-env NODE_CONFIG_DIR=../config node"
+    "run-script": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/index"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.17.0",

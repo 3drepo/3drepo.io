@@ -152,6 +152,7 @@ export const ErrorButton = styled(MuiButton).attrs({
 	&:hover {
 		color: ${({ theme }) => theme.palette.error.contrastText};
 		background-color: ${({ theme }) => theme.palette.error.main};
+		border-color: ${({ theme }) => theme.palette.error.main};
 		text-decoration-line: none;
 	}
 

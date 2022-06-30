@@ -369,26 +369,30 @@ export class SignUp extends PureComponent<IProps, IState> {
 											/>}
 									/>
 								}
-								<Field name="mailListAgreed" render={({ field }) => (
-										<FormControlLabel
-											{...field}
-											value={field.value ? '1' : '0'}
-											control={<Checkbox color="secondary" checked={field.value} />}
-											label="Sign up for the latest news and tutorials!"
-											disabled={isPending}
-										/>
-									)}
-								/>
-								<Field name="termsAgreed" required render={({ field }) => (
-										<FormControlLabel
-											{...field}
-											value={field.value ? '1' : '0'}
-											disabled={isPending}
-											control={<Checkbox color="secondary" checked={field.value} />}
-											label={<TermsLabel />}
-										/>
-									)}
-								/>
+								<FieldsRow>
+									<Field name="mailListAgreed" render={({ field }) => (
+											<FormControlLabel
+												{...field}
+												value={field.value ? '1' : '0'}
+												control={<Checkbox color="secondary" checked={field.value} />}
+												label="Sign up for the latest news and tutorials!"
+												disabled={isPending}
+											/>
+										)}
+									/>
+								</FieldsRow>
+								<FieldsRow>
+									<Field name="termsAgreed" required render={({ field }) => (
+											<FormControlLabel
+												{...field}
+												value={field.value ? '1' : '0'}
+												disabled={isPending}
+												control={<Checkbox color="secondary" checked={field.value} />}
+												label={<TermsLabel />}
+											/>
+										)}
+									/>
+								</FieldsRow>
 								<ButtonContainer>
 									<Field render={({ form }) => (
 										<SubmitButton

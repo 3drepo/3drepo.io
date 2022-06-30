@@ -27,7 +27,7 @@ import {
 import MoreIcon from '@mui/icons-material/MoreVert';
 import styled, { css } from 'styled-components';
 
-import { hexToRgba } from '../../../helpers/colors';
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../styles';
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
@@ -154,13 +154,17 @@ export const SelectField = styled(SelectFieldComponent)`
 	width: 100%;
 `;
 
-const emptySelectFieldValueStyle = css`
+const emptySelectFieldValueStyleV4 = css`
 	color: ${COLOR.BLACK_87};
 	opacity: 0.42;
 `;
+const emptySelectFieldValueStyleV5 = css`
+	/* TODO - fix after new palette is released */
+	color: #C1C8D5;
+`;
 
 export const SelectFieldValue = styled.div`
-	${(props: any) => props.placeholder && emptySelectFieldValueStyle};
+	${(props: any) => props.placeholder && (isV5() ? emptySelectFieldValueStyleV5 : emptySelectFieldValueStyleV4)};
 ` as any;
 
 export const MenuItem = styled(MenuItemComponent)`
