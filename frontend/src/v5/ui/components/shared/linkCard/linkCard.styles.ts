@@ -36,6 +36,7 @@ export const Link = styled(DecoratedLink)`
 	display: block;
 	text-decoration: none;
 `;
+
 export const CardDetails = styled(CardContent)`
 	&, &:last-child {
 		padding: 15px 0 0;
