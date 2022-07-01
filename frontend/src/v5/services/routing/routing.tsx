@@ -19,7 +19,8 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { Route, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { LOGIN_PATH, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { IProject } from '@/v5/store/projects/projects.redux';
+import { LOGIN_PATH, VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
@@ -30,11 +31,9 @@ export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0,
 
 export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(component, ''));
 
-export const discardTabComponent = (uri) => {
-	const uriDiscardedSlash = discardSlash(uri);
-	const uriComponents = uriDiscardedSlash.split('/');
-	if (uriComponents.at(-2) !== 't') return uriDiscardedSlash;
-	return uriDiscardedSlash.replace(`/t/${uriComponents.at(-1)}`, '');
+export const projectRoute = (teamspace: string, project: IProject | string) => {
+	const projectId = (project as IProject)?._id || (project as string);
+	return generatePath(PROJECT_ROUTE_BASE, { teamspace, project: projectId });
 };
 
 export const uriCombine = (uri, path) => {

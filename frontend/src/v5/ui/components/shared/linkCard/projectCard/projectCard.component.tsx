@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { discardTabComponent } from '@/v5/services/routing/routing';
+import { projectRoute } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
+import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectImage, EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -33,16 +34,15 @@ interface IProjectCard {
 
 export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
 	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
-
-	let { url } = useRouteMatch();
-	url = discardTabComponent(url);
+	const { teamspace } = useParams<TeamspaceParams>();
+	const to = projectRoute(teamspace, project);
 
 	const preventNavigation = (e) => e.preventDefault();
 
 	return (
 		<LinkCard
 			{...props}
-			to={`${url}/${project._id}`}
+			to={to}
 			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
 		>
 			<ProjectImage src={DEFAULT_IMAGE} />
