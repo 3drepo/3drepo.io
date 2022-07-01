@@ -25,10 +25,10 @@ export const isFileFormatUnsupported = (error: any): boolean => getErrorCode(err
 
 export const isNetworkError = (error: any): boolean => getErrorMessage(error) === 'Network Error';
 
-export const usernameAlreadyExists = (error: any): boolean => (
-	getErrorMessage(error).toLowerCase().includes('username already exists')
+const fieldAlreadyExists = (error: any, field: string): boolean => (
+	getErrorMessage(error).toLowerCase().includes(`${field} already exists`)
 );
 
-export const emailAlreadyExists = (error: any): boolean => (
-	getErrorMessage(error).toLowerCase().includes('email already exists')
-);
+export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
+export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
+export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
