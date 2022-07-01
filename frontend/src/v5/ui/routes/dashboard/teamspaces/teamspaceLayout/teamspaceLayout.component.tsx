@@ -49,7 +49,11 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 				<TeamspaceAvatar user={user} isButton={false} />
 				<TeamspaceInfo>
 					<TeamspaceName>
-						{teamspace} <FormattedMessage id="teamspace.definition" defaultMessage="Teamspace" />
+						<FormattedMessage
+							id="teamspace.definition"
+							defaultMessage="{teamspace} Teamspace"
+							values={{ teamspace }}
+						/>
 					</TeamspaceName>
 				</TeamspaceInfo>
 			</TopBar>
