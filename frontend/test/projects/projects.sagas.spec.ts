@@ -22,9 +22,9 @@ import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Teamspaces: sagas', () => {
-	describe('fetch', () => {
-		const teamspace = 'teamspaceName'
+	const teamspace = 'teamspaceName';
 
+	describe('fetch', () => {
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
 			const projects = [];
 
@@ -47,6 +47,43 @@ describe('Teamspaces: sagas', () => {
 					.dispatch(ProjectsActions.fetch(teamspace))
 					.put(ProjectsActions.fetchFailure())
 					.silentRun();
+		});
+	});
+
+	describe('createProject', () => {
+		const name = 'newProject';
+		const _id = '123';
+		const newProject = {
+			name,
+			_id,
+			isAdmin: true,
+		};
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
+
+		it('should create a project', async () => {
+			mockServer
+					.post(`/teamspaces/${teamspace}/projects`, { name })
+					.reply(200, { _id });
+
+			await expectSaga(ProjectsSaga.default)
+					.dispatch(ProjectsActions.createProject(teamspace, name, onError, onSuccess))
+					.put(ProjectsActions.createProjectSuccess(teamspace, newProject))
+					.silentRun();
+
+			expect(onSuccess).toBeCalled();
+		});
+
+		it('should call error callback when API call errors', async () => {
+			mockServer
+					.post(`/teamspaces/${teamspace}/projects`, { name })
+					.reply(404)
+
+			await expectSaga(ProjectsSaga.default)
+					.dispatch(ProjectsActions.createProject(teamspace, name, onError, onSuccess))
+					.silentRun();
+			
+			expect(onError).toBeCalled();
 		});
 	});
 });

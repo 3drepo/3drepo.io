@@ -21,10 +21,10 @@ describe('Projects: redux', () => {
 	const defaultState: IProjectsState = {
 		...INITIAL_STATE,
 	};
+	const teamspaceName = 'teamspaceName';
 
 	describe('on fetchSuccess action', () => {
 		it('should set teamspaces', () => {
-			const teamspaceName = 'teamspaceName';
 			const projects = [{
 				_id: '123',
 				name: 'teamspace 1',
@@ -47,6 +47,32 @@ describe('Projects: redux', () => {
 			};
 
 			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual(resultState);
+		});
+	});
+
+	describe('on createProjectSuccess action', () => {
+		it('should add the project', () => {
+			const newProject = {
+				_id: '123',
+				name: 'proj 1',
+				isAdmin: true,
+			};
+
+			const initialState = {
+				...defaultState,
+				projectsByTeamspace: {
+					[teamspaceName]: [],
+				},
+			}
+
+			const resultState: IProjectsState = {
+				...initialState,
+				projectsByTeamspace: {
+					[teamspaceName]: [newProject],
+				},
+			};
+
+			expect(projectsReducer(initialState, ProjectsActions.createProjectSuccess(teamspaceName, newProject))).toEqual(resultState);
 		});
 	});
 });
