@@ -15,46 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useHistory, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
 import PrintIcon from '@assets/icons/print.svg';
-import { LEGAL_PAPERS } from '@components/legal/legal.constants';
+import { FormattedMessage } from 'react-intl';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavLink, NavLinks } from './legalAppBar.styles';
 
-const possiblePages = LEGAL_PAPERS.map((paper) => paper.page);
 type ILegalAppBar = {
-	activePage: typeof possiblePages[number];
+	activePage: string;
 };
 
-export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => {
-	const history = useHistory();
-	const onTabChange = (_, selectedTab) => {
-		history.push(`/v5/${selectedTab}`);
-	};
-	return (
-		<AppBarContainer position="static">
-			<Items>
-				<Link to={DASHBOARD_ROUTE}>
-					<LogoIcon />
-				</Link>
-				<NavLinks>
-					{
-						LEGAL_PAPERS.map(({ page, title }) => (
-							<NavLink onClick={() => onTabChange('_', page)} key={page} selected={page === activePage}>
-								{title}
-							</NavLink>
-						))
-					}
-				</NavLinks>
-			</Items>
-			<Items>
-				<CircleButton onClick={window.print} variant="contrast" aria-label="print">
-					<PrintIcon />
-				</CircleButton>
-			</Items>
-		</AppBarContainer>
-	);
-};
+export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
+	<AppBarContainer position="static">
+		<Items>
+			<Link to={DASHBOARD_ROUTE}>
+				<LogoIcon />
+			</Link>
+			<NavLinks>
+				<NavLink to="/v5/privacy" selected={activePage === 'privacy'}>
+					<FormattedMessage id="legalAppBar.privacy" defaultMessage="Privacy Policy" />
+				</NavLink>
+				<NavLink to="/v5/terms" selected={activePage === 'terms'}>
+					<FormattedMessage id="legalAppBar.terms" defaultMessage="Terms and Conditions" />
+				</NavLink>
+				<NavLink to="/v5/cookies" selected={activePage === 'cookies'}>
+					<FormattedMessage id="legalAppBar.cookies" defaultMessage="Cookies Policy" />
+				</NavLink>
+			</NavLinks>
+		</Items>
+		<Items>
+			<CircleButton onClick={window.print} variant="contrast" aria-label="print">
+				<PrintIcon />
+			</CircleButton>
+		</Items>
+	</AppBarContainer>
+);

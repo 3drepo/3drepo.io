@@ -16,12 +16,13 @@
  */
 
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 export const NavLinks = styled.div`
 	margin: 0 13px;
 `;
 
-export const NavLink = styled.span<{ selected: boolean }>`
+export const NavLink = styled(Link)<{ selected: boolean }>`
 	margin: 0 12px;
 	${({ theme }) => theme.typography.h5}
 	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};

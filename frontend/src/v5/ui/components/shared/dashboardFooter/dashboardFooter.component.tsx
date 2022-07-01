@@ -17,20 +17,27 @@
 
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { LEGAL_PAPERS } from '@components/legal/legal.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 
 export const DashboardFooter = (): JSX.Element => (
 	<FooterContainer showLabels>
 		<FooterLogo />
 		<FooterItems>
-			{LEGAL_PAPERS.map(({ page, title }) => (
-				<FooterItem>
-					<Link to={`/v5/${page}`}>
-						{title}
-					</Link>
-				</FooterItem>
-			))}
+			<FooterItem>
+				<Link to="/v5/privacy">
+					<FormattedMessage id="dashboardFooter.privacy" defaultMessage="Privacy" />
+				</Link>
+			</FooterItem>
+			<FooterItem>
+				<Link to="/v5/terms">
+					<FormattedMessage id="dashboardFooter.terms" defaultMessage="Terms" />
+				</Link>
+			</FooterItem>
+			<FooterItem>
+				<Link to="/v5/cookies">
+					<FormattedMessage id="dashboardFooter.cookies" defaultMessage="Cookies" />
+				</Link>
+			</FooterItem>
 			<FooterItem>
 				<a href="https://3drepo.com/pricing">
 					<FormattedMessage
