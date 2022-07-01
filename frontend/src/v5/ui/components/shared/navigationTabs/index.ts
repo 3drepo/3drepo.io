@@ -16,4 +16,4 @@
  */
 
 export { ProjectNavigation } from './projectNavigation/projectNavigation.component';
-export { TeamspaceNavigation } from './teamspaceNavigation/TeamspaceNavigation.component';
+export { TeamspaceNavigation } from './teamspaceNavigation/teamspaceNavigation.component';
