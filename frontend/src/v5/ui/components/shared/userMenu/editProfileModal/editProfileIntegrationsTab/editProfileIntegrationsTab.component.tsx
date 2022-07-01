@@ -21,7 +21,6 @@ import { useState } from 'react';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { formatMessage } from '@/v5/services/intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { isNetworkError } from '@/v5/validation/errors.helpers';
 import { NETWORK_ERROR_MESSAGE } from '@controls/errorMessage/networkError/networkError.component';
