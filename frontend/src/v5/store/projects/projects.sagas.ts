@@ -34,6 +34,22 @@ export function* fetch({ teamspace }) {
 	}
 }
 
+export function* createProject({ teamspace, projectName, onSuccess, onError }) {
+	try {
+		const projectId = yield API.Projects.createProject(teamspace, projectName);
+		const project = {
+			_id: projectId,
+			name: projectName,
+			isAdmin: true,
+		};
+		yield put(ProjectsActions.createProjectSuccess(teamspace, project));
+		onSuccess();
+	} catch (error) {
+		onError(error);
+	}
+}
+
 export default function* ProjectsSaga() {
 	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
+	yield takeLatest(ProjectsTypes.CREATE_PROJECT as any, createProject);
 }
