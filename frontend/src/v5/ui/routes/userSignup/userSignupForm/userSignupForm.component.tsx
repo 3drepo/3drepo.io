@@ -21,10 +21,9 @@ import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
 import {
 	emailAlreadyExists,
-	getRegistrationErrorMessage,
 	isInvalidArguments,
 	usernameAlreadyExists,
-} from '@/v5/store/auth/auth.helpers';
+} from '@/v5/validation/errors.helpers';
 import { INewUser } from '@/v5/store/auth/auth.types';
 import { omit } from 'lodash';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
@@ -95,11 +94,11 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const moveToNextStep = () => moveToStep(activeStep + 1);
 
-	const handleInvalidArgumentsError = (errorMessage: string) => {
+	const handleInvalidArgumentsError = (error) => {
 		setHasUnexpectedError(false);
-		if (usernameAlreadyExists(errorMessage)) {
+		if (usernameAlreadyExists(error)) {
 			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
-		} else if (emailAlreadyExists(errorMessage)) {
+		} else if (emailAlreadyExists(error)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, fields.email]);
 		}
 		updateFields({ password: '', confirmPassword: '' });
@@ -117,9 +116,8 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			const { email, firstName } = fields;
 			completeRegistration({ email, firstName });
 		} catch (error) {
-			const errorMessage = getRegistrationErrorMessage(error);
 			if (isInvalidArguments(error)) {
-				handleInvalidArgumentsError(errorMessage);
+				handleInvalidArgumentsError(error);
 			} else {
 				updateUnexpectedError();
 			}

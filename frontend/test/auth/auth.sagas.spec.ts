@@ -35,7 +35,7 @@ describe('Auth: sagas', () => {
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.authenticate())
 				.put(AuthActions.setPendingStatus(true))
-				.put(CurrentUserActions.getProfile())
+				.put(CurrentUserActions.fetchUser())
 				.put(AuthActions.setAuthenticationStatus(true))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
@@ -65,7 +65,7 @@ describe('Auth: sagas', () => {
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.login(username, password))
 				.put(AuthActions.setPendingStatus(true))
-				.put(CurrentUserActions.getProfile())
+				.put(CurrentUserActions.fetchUser())
 				.put(AuthActions.setAuthenticationStatus(true))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
