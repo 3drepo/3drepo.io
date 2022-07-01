@@ -18,12 +18,12 @@
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import { Checkbox } from '@mui/material';
+import { GroupsTreeListItem } from './groupLists.styles';
 
 export const GroupItem = ({ item }) => {
 	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(item._id);
 	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(item._id);
 	const isActive = GroupsHooksSelectors.selectActiveGroupId() === item._id;
-	const backgroundColor = isHighlighted ? 'cyan' : 'white';
 
 	const onClickOverride = (event) => {
 		event.stopPropagation();
@@ -46,11 +46,9 @@ export const GroupItem = ({ item }) => {
 	};
 
 	return (
-		<li
-			role="treeitem"
-			style={{ backgroundColor }}
+		<GroupsTreeListItem
 			onClick={onClickHighlight}
-			onKeyDown={onClickHighlight}
+			$highlighted={isHighlighted}
 		>
 			{item.name} objects: {item.objects.length}
 			<Checkbox checked={isOverriden} onClick={onClickOverride} />
@@ -64,6 +62,6 @@ export const GroupItem = ({ item }) => {
 					<span role="img" aria-label="isolate">➡</span>
 				</button>
 			)}
-		</li>
+		</GroupsTreeListItem>
 	);
 };

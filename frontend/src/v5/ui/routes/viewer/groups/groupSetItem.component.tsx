@@ -18,6 +18,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import { Checkbox } from '@mui/material';
 import { SyntheticEvent } from 'react';
+import { GroupsTreeListItem } from './groupLists.styles';
 
 const getGroupSetData = (groupSet) => {
 	// eslint-disable-next-line no-param-reassign
@@ -71,8 +72,6 @@ export const GroupSetItem = ({ item, collapse, children }) => {
 	const hiddenIcon = hidden ? '^' : 'v';
 	const { override, descendants, highlight } = getGroupSetData(item);
 
-	const backgroundColor = highlight ? 'cyan' : 'white';
-
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
 		setCollapse({ ...collapseDict, [item.pathName]: !hidden });
@@ -92,11 +91,11 @@ export const GroupSetItem = ({ item, collapse, children }) => {
 	const checked = !!override;
 
 	return (
-		<li
+		<GroupsTreeListItem
 			onClick={onClickItem}
 			onKeyDown={onClickItem}
 			role="treeitem"
-			style={{ cursor: 'default', backgroundColor }}
+			$highlighted={highlight}
 		>
 			<b>{item.name} ({descendants.length})
 				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />
@@ -106,6 +105,6 @@ export const GroupSetItem = ({ item, collapse, children }) => {
 				&nbsp; {hiddenIcon}
 			</b>
 			{!hidden && children}
-		</li>
+		</GroupsTreeListItem>
 	);
 };

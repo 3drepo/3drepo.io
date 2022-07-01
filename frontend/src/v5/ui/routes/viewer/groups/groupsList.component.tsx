@@ -18,6 +18,7 @@
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { GroupItem } from './groupItem.component';
+import { GroupsTreeList } from './groupLists.styles';
 
 import { GroupSetItem } from './groupSetItem.component';
 
@@ -129,7 +130,7 @@ const groupsToTree = (groups) => {
 	return tree;
 };
 
-const TreeItem = ({ item, collapse }) => {
+const GroupTreeItem = ({ item, collapse }) => {
 	if (item.children) {
 		return (
 			<GroupSetItem item={item} collapse={collapse}>
@@ -142,9 +143,9 @@ const TreeItem = ({ item, collapse }) => {
 };
 
 export const GroupTree = ({ tree, collapse }) => (
-	<ul>
-		{tree.map((item) => (<TreeItem item={item} collapse={collapse} />))}
-	</ul>
+	<GroupsTreeList>
+		{tree.map((item) => (<GroupTreeItem item={item} collapse={collapse} />))}
+	</GroupsTreeList>
 );
 
 export const GroupsListComponent = ({ groups }:Props) => {
