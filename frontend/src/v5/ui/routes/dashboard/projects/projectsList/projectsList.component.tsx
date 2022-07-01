@@ -22,10 +22,15 @@ import {
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectListItem } from '@/v5/ui/routes/dashboard/projects/projectsList/projectListItem/projectListItem.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { Button } from '@controls/button';
+import { useState } from 'react';
 import { Container } from './projectsList.styles';
+import { CreateProjectForm } from './createProjectModal/createProjectModal.component';
 
 export const ProjectList = (): JSX.Element => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+
+	const [openNewProject, setOpenNewProject] = useState(false);
 
 	return (
 		<Container>
@@ -50,6 +55,15 @@ export const ProjectList = (): JSX.Element => {
 					)
 				}
 			</DashboardList>
+			<Button onClick={() => setOpenNewProject(true)}>
+				<FormattedMessage id="projects.addProject" defaultMessage="Add Project" />
+			</Button>
+			{openNewProject && (
+				<CreateProjectForm
+					open={openNewProject}
+					onClickClose={() => setOpenNewProject(false)}
+				/>
+			)}
 		</Container>
 	);
 };
