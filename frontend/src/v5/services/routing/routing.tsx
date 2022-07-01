@@ -42,7 +42,7 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
-const prefixBaseDomain = (uri: string) => `${window.location.protocol}//${window.location.hostname}${uri}`;
+export const prefixBaseDomain = (uri: string) => `${window.location.protocol}//${window.location.hostname}${uri}`;
 
 type RevisionParam = IRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
@@ -51,18 +51,16 @@ type ProjectParam = IProject | string;
 export const projectRoute = (
 	teamspace: string,
 	project: ProjectParam,
-	withBaseDomain: boolean = false,
 ) => {
 	const projectId = (project as IProject)?._id || (project as string);
-	const route = generatePath(PROJECT_ROUTE_BASE, { teamspace, project: projectId });
-	return withBaseDomain ? prefixBaseDomain(route) : route;
+	return generatePath(PROJECT_ROUTE_BASE, { teamspace, project: projectId });
 };
 
-const relativeViewerRoute = (
+export const viewerRoute = (
 	teamspace: string,
 	project,
 	containerOrFederation: ContainerOrFederationParam,
-	revision: RevisionParam,
+	revision: RevisionParam = undefined,
 ) => {
 	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
 		|| (containerOrFederation as string);
@@ -77,17 +75,6 @@ const relativeViewerRoute = (
 	};
 
 	return generatePath(VIEWER_ROUTE, params);
-};
-
-export const viewerRoute = (
-	teamspace: string,
-	project: string,
-	containerOrFederation: ContainerOrFederationParam,
-	revision: RevisionParam = undefined,
-	withBaseDomain: boolean = false,
-) => {
-	const route = relativeViewerRoute(teamspace, project, containerOrFederation, revision);
-	return withBaseDomain ? prefixBaseDomain(route) : route;
 };
 
 interface RouteProps {

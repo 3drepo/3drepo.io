@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { viewerRoute } from '@/v5/services/routing/routing';
+import { viewerRoute, prefixBaseDomain } from '@/v5/services/routing/routing';
 import { useParams } from 'react-router-dom';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
@@ -36,7 +36,7 @@ export const ShareModalContainerOrFederation = ({
 	...props
 }: IShareModalContainerOrFederation) => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const link = viewerRoute(teamspace, project, containerOrFederation, null, true);
+	const link = prefixBaseDomain(viewerRoute(teamspace, project, containerOrFederation));
 	const subject = isFederation(containerOrFederation)
 		? formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' })
 		: formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
