@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 
@@ -23,6 +24,8 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
+	createProject: ['teamspace', 'projectName', 'onError', 'onSuccess'],
+	createProjectSuccess: ['teamspace', 'project'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
 export const INITIAL_STATE: IProjectsState = {
@@ -43,9 +46,21 @@ export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjec
 	currentProject: projectId,
 });
 
+export const createProjectSuccess = (state = INITIAL_STATE, { teamspace, project }): IProjectsState => ({
+	...state,
+	projectsByTeamspace: {
+		...state.projectsByTeamspace,
+		[teamspace]: [
+			...state.projectsByTeamspace[teamspace],
+			project,
+		],
+	},
+});
+
 export const projectsReducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[ProjectsTypes.SET_CURRENT_PROJECT]: setCurrentProject,
+	[ProjectsTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,
 }) as (state: IProjectsState, action: any) => IProjectsState;
 
 /**
@@ -62,9 +77,19 @@ export interface IProject {
 	isAdmin: boolean;
 }
 
+export type CreateProjectAction = Action<'CREATE_PROJECT'> & { teamspace: string, projectName: string };
+export type CreateProjectSuccessAction = Action<'CREATE_PROJECT_SUCCESS'> & { project: IProject };
+
 export interface IProjectsActions {
 	fetch: (teamspace: string) => any;
 	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
 	fetchFailure: () => any;
 	setCurrentProject: (projectId: string) => any;
+	createProject: (
+		teamspace: string,
+		projectName: string,
+		onError: (error) => void,
+		onSuccess: () => void,
+	) => CreateProjectAction;
+	createProjectSuccess: (teamspace: string, project: IProject) => CreateProjectSuccessAction;
 }
