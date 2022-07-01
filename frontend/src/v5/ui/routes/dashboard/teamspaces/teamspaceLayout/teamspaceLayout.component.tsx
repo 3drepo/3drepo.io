@@ -20,7 +20,7 @@ import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
-import { TeamspaceNavigation } from '@components/shared/teamspaceNavigation/teamspaceNavigation.component';
+import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';

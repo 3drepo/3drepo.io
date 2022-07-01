@@ -14,13 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useRouteMatch } from 'react-router-dom';
+import { discardSlash } from '@/v5/services/routing/routing';
+import { FormattedMessage } from 'react-intl';
+import { Container, Link } from '../navigationTabs.styles';
 
-import styled from 'styled-components';
+export const TeamspaceNavigation = (): JSX.Element => {
+	let { url } = useRouteMatch();
+	url = discardSlash(url);
 
-export const Wrapper = styled.div`
-	width: 100%;
-	height: 50px;
-	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding-left: 79px;
-`;
+	return (
+		<Container>
+			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
+		</Container>
+	);
+};

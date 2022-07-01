@@ -17,7 +17,7 @@
 import { useRouteMatch } from 'react-router-dom';
 import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
-import { Container, Link } from './projectNavigaton.styles';
+import { Container, Link } from '../navigationTabs.styles';
 
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
