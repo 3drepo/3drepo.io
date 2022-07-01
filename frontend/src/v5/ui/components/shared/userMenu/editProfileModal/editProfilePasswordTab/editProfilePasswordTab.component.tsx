@@ -28,6 +28,7 @@ import * as API from '@/v5/services/api';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { isNetworkError, isPasswordIncorrect } from '@/v5/validation/errors.helpers';
+import { NETWORK_ERROR_MESSAGE } from '@controls/errorMessage/networkError/networkError.component';
 
 interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -80,10 +81,7 @@ export const EditProfilePasswordTab = ({
 
 	const onSubmitError = (apiError) => {
 		if (isNetworkError(apiError)) {
-			setExpectedError(formatMessage({
-				id: 'editProfile.networkError',
-				defaultMessage: 'Network Error',
-			}));
+			setExpectedError(NETWORK_ERROR_MESSAGE);
 			return;
 		}
 		if (isPasswordIncorrect(apiError)) {

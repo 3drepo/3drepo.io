@@ -33,6 +33,7 @@ import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpect
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { emailAlreadyExists, isFileFormatUnsupported, isNetworkError } from '@/v5/validation/errors.helpers';
+import { NETWORK_ERROR_MESSAGE } from '@controls/errorMessage/networkError/networkError.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
 
@@ -98,10 +99,7 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmissionError = (apiError) => {
 		if (isNetworkError(apiError)) {
-			setExpectedError(formatMessage({
-				id: 'editProfile.networkError',
-				defaultMessage: 'Network Error',
-			}));
+			setExpectedError(NETWORK_ERROR_MESSAGE);
 			return;
 		}
 		if (emailAlreadyExists(apiError)) {
