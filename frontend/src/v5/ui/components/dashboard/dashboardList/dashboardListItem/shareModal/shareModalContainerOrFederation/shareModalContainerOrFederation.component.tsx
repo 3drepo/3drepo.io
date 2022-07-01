@@ -20,6 +20,8 @@ import { useParams } from 'react-router-dom';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { formatMessage } from '@/v5/services/intl';
+import { isFederation } from '@/v5/store/store.helpers';
 import { ShareModal } from '../shareModal.component';
 
 type IShareModalContainerOrFederation = {
@@ -35,6 +37,9 @@ export const ShareModalContainerOrFederation = ({
 }: IShareModalContainerOrFederation) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const link = viewerRoute(teamspace, project, containerOrFederation, null, true);
+	const subject = isFederation(containerOrFederation)
+		? formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' })
+		: formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
 
-	return <ShareModal link={link} {...props} name={containerOrFederation.name} />;
+	return <ShareModal subject={subject} link={link} {...props} name={containerOrFederation.name} />;
 };

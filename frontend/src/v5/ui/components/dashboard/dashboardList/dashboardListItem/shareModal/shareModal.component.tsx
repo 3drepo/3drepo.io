@@ -25,8 +25,10 @@ type IShareModal = {
 	// the title in the modal
 	title: string;
 	// the title in the email
-	openState: boolean;
 	name: string;
+
+	subject: string;
+	openState: boolean;
 	link: string;
 	onClickClose: () => void;
 };
@@ -35,6 +37,7 @@ export const ShareModal = ({
 	openState,
 	title,
 	name,
+	subject,
 	onClickClose,
 	link,
 }: IShareModal) => (
@@ -51,7 +54,7 @@ export const ShareModal = ({
 			})}
 			value={link}
 		/>
-		<MailToButton href={`mailto:?subject=3D Repo container - ${name}&body=${link}`}>
+		<MailToButton href={`mailto:?subject=3D Repo ${subject} - ${name}&body=${link}`}>
 			<FormattedMessage
 				id="shareModal.mailTo"
 				defaultMessage="Send by email"

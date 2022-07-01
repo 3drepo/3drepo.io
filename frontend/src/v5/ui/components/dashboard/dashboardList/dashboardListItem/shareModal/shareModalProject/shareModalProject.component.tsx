@@ -19,6 +19,7 @@ import { useParams } from 'react-router-dom';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { projectRoute } from '@/v5/services/routing/routing';
+import { formatMessage } from '@/v5/services/intl';
 import { ShareModal } from '../shareModal.component';
 
 type IShareModalProject = {
@@ -31,6 +32,7 @@ type IShareModalProject = {
 export const ShareModalProject = ({ project, ...props }: IShareModalProject) => {
 	const { teamspace } = useParams<DashboardParams>();
 	const link = projectRoute(teamspace, project, true);
+	const subject = formatMessage({ id: 'shareModal.project.subject', defaultMessage: 'project' });
 
-	return <ShareModal link={link} {...props} name={project.name} />;
+	return <ShareModal subject={subject} link={link} {...props} name={project.name} />;
 };
