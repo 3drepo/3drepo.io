@@ -26,7 +26,7 @@ import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
-	PRIMARY_MAIN_CONTRAST: '#fff',
+	PRIMARY_MAIN_CONTRAST: '#FFFFFF',
 	PRIMARY_MAIN: '#00C1D4',
 	PRIMARY_DARK: '#01ACBD',
 	PRIMARY_DARKEST: '#009BAA',

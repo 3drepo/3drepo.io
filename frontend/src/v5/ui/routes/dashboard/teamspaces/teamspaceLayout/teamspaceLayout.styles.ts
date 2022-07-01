@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
 import { Avatar } from '@controls/avatar';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Container = styled.div`
 	height: 100%;
@@ -39,8 +40,7 @@ export const TopBar = styled.div`
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
-	/* TODO: fix after new palette is released */
-	border-top: 1px solid ${({ theme }) => theme.palette.secondary.mid};
+	border-top: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.main, 10)};
 `;
 
 export const TeamspaceInfo = styled.div`
