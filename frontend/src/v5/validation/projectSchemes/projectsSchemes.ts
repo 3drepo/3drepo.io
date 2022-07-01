@@ -52,7 +52,7 @@ export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, s
 				defaultMessage: 'This name is already taken',
 			}),
 			(projectName, testContext) => (
-				!existingProjectByTeamspace?.[testContext.parent.teamspace].includes(projectName)
+				!(existingProjectByTeamspace?.[testContext.parent.teamspace] || []).includes(projectName)
 			),
 		),
 });

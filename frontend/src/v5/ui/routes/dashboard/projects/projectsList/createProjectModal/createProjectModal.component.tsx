@@ -25,7 +25,8 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
+import { projectAlreadyExists, isNetworkError } from '@/v5/validation/errors.helpers';
+import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
 
 interface ICreateProject {
 	open: boolean;
@@ -42,6 +43,8 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 
 	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
+	const [networkError, setNetworkError] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const DEFAULT_VALUES = {
 		teamspace: currentTeamspace,
@@ -55,6 +58,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 		reset,
 		handleSubmit,
 		getValues,
+		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateProjectSchema(existingProjectsByTeamspace)),
@@ -62,22 +66,33 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	});
 
 	const onSubmissionError = (error) => {
+		setIsSubmitting(false);
 		const { projectName, teamspace } = getValues();
 		if (projectAlreadyExists(error)) {
 			setExistingProjectsByTeamspace({
 				...existingProjectsByTeamspace,
-				[teamspace]: projectName,
+				[teamspace]: [
+					...(existingProjectsByTeamspace[teamspace] || []),
+					projectName,
+				],
 			});
+		}
+		if (isNetworkError(error)) {
+			setNetworkError(true);
 		}
 	};
 
 	const onSubmit: SubmitHandler<IFormInput> = () => {
+		setIsSubmitting(true);
 		const { teamspace, projectName } = getValues();
-		ProjectsActionsDispatchers.createProject(teamspace, projectName, onSubmissionError, onClickClose);
-		onClickClose();
+		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onSubmissionError, onClickClose);
 	};
 
 	useEffect(() => { reset(DEFAULT_VALUES); }, [open]);
+
+	useEffect(() => {
+		if (Object.keys(existingProjectsByTeamspace).length) trigger('projectName');
+	}, [errors, JSON.stringify(existingProjectsByTeamspace)]);
 
 	return (
 		<FormModal
@@ -86,7 +101,8 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'projects.creation.ok', defaultMessage: 'Create Project' })}
-			isValid={formState.isValid}
+			isValid={formState.isValid && !networkError}
+			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
 			<FormSelect
@@ -110,6 +126,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 				control={control}
 				formError={errors.projectName}
 			/>
+			{networkError && <NetworkError />}
 		</FormModal>
 	);
 };
