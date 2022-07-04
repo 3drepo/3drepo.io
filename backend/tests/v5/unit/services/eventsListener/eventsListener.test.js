@@ -239,7 +239,7 @@ const testAuthEventsListener = () => {
 			const data = {
 				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
 			};
-			ChatService.createDirectMessage.mockRejectedValueOnce(new Error());
+			ChatService.createDirectMessage.mockImplementationOnce(() => { throw new Error(); });
 			EventsManager.publish(events.SESSIONS_REMOVED, data);
 
 			await waitOnEvent;
