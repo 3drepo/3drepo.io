@@ -55,11 +55,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [includedContainers, setIncludedContainers] = useState([]);
 
-	useEffect(() => {
-		if (open) {
-			setModalPhase('settings');
-		} else reset();
-	}, [open]);
+	useEffect(() => (open ? setModalPhase('settings') : reset()), [open]);
 
 	const onClickBack = (): void => {
 		setModalPhase('settings');
