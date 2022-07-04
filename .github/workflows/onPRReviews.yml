@@ -1,0 +1,17 @@
+name: Check if all reviewers approved
+on:
+  pull_request:
+    types: [review_requested, review_request_removed]
+  pull_request_review:
+    types: [edited, dismissed, submitted]
+jobs:
+  checkMergeReady:
+    name: Ensure all reviewers have approved the PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check reviews
+        uses: carmenfan/all-reviewers-approved@v1.0
+        with:
+          pr: ${{ github.event.number }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
