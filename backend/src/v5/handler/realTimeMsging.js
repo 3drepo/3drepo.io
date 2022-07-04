@@ -20,7 +20,7 @@ const sharedSession = require('express-socket.io-session');
 
 const RealTimeMsging = {};
 
-const socketWrapper = (service, callback) => (socket) => {
+const socketWrapper = (callback) => (socket) => {
 	const roomsJoined = new Set();
 	const wrapperObj = {
 		id: socket.id,
@@ -42,11 +42,11 @@ const socketWrapper = (service, callback) => (socket) => {
 	callback(wrapperObj);
 };
 
-RealTimeMsging.createApp = (server, sessionService, sessionHeader, onNewSockets) => {
+RealTimeMsging.createApp = (server, sessionService, onNewSockets) => {
 	const service = SocketIO(server, { path: '/chat' });
 	service.use(sharedSession(sessionService, { autoSave: true }));
 
-	const newSocketsFn = socketWrapper(service, onNewSockets);
+	const newSocketsFn = socketWrapper(onNewSockets);
 	service.on('connection', (socket) => {
 		newSocketsFn(socket);
 	});

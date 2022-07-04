@@ -23,7 +23,6 @@ const RTM = require(`${src}/handler/realTimeMsging`);
 
 jest.mock('../../../../../src/v5/services/sessions', () => ({
 	session: Promise.resolve({ middleware: jest.fn() }),
-	SESSION_HEADER: 'sessionHeader',
 }));
 const SessionService = require(`${src}/services/sessions`);
 
@@ -53,7 +52,7 @@ const testInit = () => {
 			const { middleware } = await SessionService.session;
 
 			expect(RTM.createApp).toHaveBeenCalledWith(
-				server, middleware, SessionService.SESSION_HEADER, SocketsManager.addSocket,
+				server, middleware, SocketsManager.addSocket,
 			);
 
 			expect(QueueService.listenToExchange).toHaveBeenCalledTimes(1);

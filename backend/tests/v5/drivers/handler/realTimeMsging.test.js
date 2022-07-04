@@ -20,7 +20,7 @@ const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
-const { SESSION_HEADER, session } = require(`${src}/services/sessions`);
+const { session } = require(`${src}/services/sessions`);
 
 const RealTime = require(`${src}/handler/realTimeMsging`);
 
@@ -49,7 +49,7 @@ const startServer = async (onNewSocket) => {
 	const server = http.createServer();
 	server.listen(port, ip);
 	const { middleware } = await session;
-	const { broadcast, close: destroySocketIO } = RealTime.createApp(server, middleware, SESSION_HEADER, onNewSocket);
+	const { broadcast, close: destroySocketIO } = RealTime.createApp(server, middleware, onNewSocket);
 
 	return {
 		broadcast,

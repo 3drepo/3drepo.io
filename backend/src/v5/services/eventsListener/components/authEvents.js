@@ -29,10 +29,10 @@ const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, ref
 	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 ]);
 
-const sessionsRemoved = async ({ ids, elective }) => {
+const sessionsRemoved = ({ ids, elective }) => {
 	try {
 		if (!elective) {
-			await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+			createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 		}
 		createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 	} catch (err) {

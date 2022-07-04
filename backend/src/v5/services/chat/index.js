@@ -16,7 +16,7 @@
  */
 
 const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
-const { SESSION_HEADER, session } = require('../sessions');
+const { session } = require('../sessions');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
 const SocketsManager = require('./socketsManager');
@@ -51,7 +51,7 @@ const processMessage = (service, msg) => {
 	}
 };
 
-const processInternalMessage = (service, msg) => {
+const processInternalMessage = (msg) => {
 	const { event, data } = msg;
 
 	if (event === chatEvents.LOGGED_IN) {
@@ -76,7 +76,7 @@ const onMessage = (service) => (msg) => {
 		if (content.channel) {
 			onMessageV4(service, content);
 		} else if (content.internal) {
-			processInternalMessage(service, content);
+			processInternalMessage(content);
 		} else {
 			processMessage(service, content);
 		}
@@ -109,7 +109,7 @@ ChatService.createModelMessage = (event, data, teamspace, projectId, model, send
 
 ChatService.createApp = async (server) => {
 	const { middleware } = await session;
-	const socketServer = RTMsg.createApp(server, middleware, SESSION_HEADER, SocketsManager.addSocket);
+	const socketServer = RTMsg.createApp(server, middleware, SocketsManager.addSocket);
 	subscribeToEvents(socketServer);
 	return {
 		close: async () => {
