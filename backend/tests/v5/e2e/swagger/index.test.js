@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../helper/path');
 const ServiceHelper = require('../../helper/services');
 const SuperTest = require('supertest');
 const schemaValidator = require('openapi-schema-validator');
 
-//let testSession;
+// let testSession;
 let server;
 let agent;
 
