@@ -21,8 +21,6 @@ import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing'
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
-import { LegalTemplate } from '@components/legal/legalTemplate/legalTemplate.component';
-import { CookiesLegalPaper, PrivacyLegalPaper, TermsLegalPaper } from '@components/legal';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
@@ -32,6 +30,7 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 
@@ -59,20 +58,8 @@ export const MainRoute = () => {
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
 				</Route>
-				<Route exact path={`${path}/terms`}>
-					<LegalTemplate>
-						<TermsLegalPaper />
-					</LegalTemplate>
-				</Route>
-				<Route exact path={`${path}/cookies`}>
-					<LegalTemplate>
-						<CookiesLegalPaper />
-					</LegalTemplate>
-				</Route>
-				<Route exact path={`${path}/privacy`}>
-					<LegalTemplate>
-						<PrivacyLegalPaper />
-					</LegalTemplate>
+				<Route exact path={`${path}/(terms|privacy|cookies)`}>
+					<LegalRoutes path={path} />
 				</Route>
 				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
