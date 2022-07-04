@@ -440,7 +440,8 @@ export const PrivacyLegalPaper = () => (
 						</td>
 					</tr>
 				</tbody>
-			</table><h3>Cookies</h3>
+			</table>
+			<h3>Cookies</h3>
 			<p>
 				You can set your browser to refuse all or some browser cookies, or to alert you when websites set or
 				access cookies. If you disable or refuse cookies, please note that some parts of this website may
@@ -487,8 +488,8 @@ export const PrivacyLegalPaper = () => (
 					specific contracts approved by the European Commission, which give personal data the same
 					protection it has in Europe.
 				</p>
-				<p>Please contact us at  if you want further information on the specific mechanism used by us when
-					transferring your personal data out of the EEA.
+				<p>Please contact us at <SupportEmail /> if you want further information on the specific mechanism used
+					by us when transferring your personal data out of the EEA.
 				</p>
 			</li>
 			<li>
