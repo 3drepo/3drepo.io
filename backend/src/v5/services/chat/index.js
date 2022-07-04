@@ -16,7 +16,6 @@
  */
 
 const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
-const { session } = require('../sessions');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
 const SocketsManager = require('./socketsManager');
@@ -24,6 +23,7 @@ const { UUIDToString } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
+const { session } = require('../sessions');
 
 const ChatService = {};
 
