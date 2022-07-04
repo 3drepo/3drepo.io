@@ -39,11 +39,11 @@ export const DashboardListItemFederationTitle = ({
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	const { status, desc, name } = federation;
-	const subtitle = status === UploadStatuses.OK ? desc : <RevisionStatus status={status} name={name} />;
+	const uploadStatus = status === UploadStatuses.OK ? desc : <RevisionStatus status={status} name={name} />;
 
 	return (
 		<DashboardListItemTitle
-			subtitle={subtitle}
+			subtitle={uploadStatus}
 			tooltipTitle={
 				<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 			}
