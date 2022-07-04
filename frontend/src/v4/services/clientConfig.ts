@@ -46,6 +46,8 @@ export class ClientConfigService {
 	public intercomLicense;
 	public tagRegExp;
 	public uploadSizeLimit;
+	public avatarSizeLimit;
+	public imageExtensions;
 	public apiUrls;
 	private chatHost;
 	private chatPath;

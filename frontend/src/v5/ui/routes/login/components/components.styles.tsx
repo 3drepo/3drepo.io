@@ -22,6 +22,7 @@ import { Typography } from '@controls/typography';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
 import styled from 'styled-components';
+import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 
 export const AuthHeading = styled(Typography).attrs({
 	variant: 'h1',
@@ -60,14 +61,8 @@ export const PasswordField = styled(AuthField).attrs({
 	type: 'password',
 })``;
 
-export const ErrorMessage = styled.div`
-	color: ${({ theme }) => theme.palette.error.main};
-	display: flex;
-	align-items: center;
-	margin-top: 10px;
-	svg {
-		margin-right: 5px;
-	}
+export const ErrorMessage = styled(ErrorMessageBase)`
+	margin-top: 5px;
 `;
 
 export const AuthParagraph = styled.div`
