@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useHistory, useParams, generatePath } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.styles';
+import { FEDERATIONS_ROUTE } from '../../routes.constants';
 
 type IInvalidFederation = {
 	containers: IContainer[];
 };
 
 export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => {
+	const history = useHistory();
+	const params = useParams();
+	const containersListRoute = generatePath(FEDERATIONS_ROUTE, params);
+
 	let message = 'Error!';
 	if (!containers.length) {
 		message = formatMessage({
@@ -37,6 +44,9 @@ export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => 
 			defaultMessage: 'All Containers are empty. You\'ll need to upload some revisions.',
 		});
 	}
+
+	const onClickBack = () => history.push(containersListRoute);
+
 	return (
 		<OverlayContainer>
 			<Heading>
@@ -48,6 +58,12 @@ export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => 
 			<Subheading>
 				{message}
 			</Subheading>
+			<Button onClick={onClickBack} variant="contained">
+				<FormattedMessage
+					id="InvalidFederationOverlay.backButton"
+					defaultMessage="Back to Federations"
+				/>
+			</Button>
 		</OverlayContainer>
 	);
 };

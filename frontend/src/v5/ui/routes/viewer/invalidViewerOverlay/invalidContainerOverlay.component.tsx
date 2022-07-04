@@ -18,14 +18,21 @@
 import { formatMessage } from '@/v5/services/intl';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { Button } from '@controls/button';
+import { useHistory, useParams, generatePath } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.styles';
+import { CONTAINERS_ROUTE } from '../../routes.constants';
 
 type IInvalidContainer = {
 	status: UploadStatuses;
 };
 
 export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
+	const history = useHistory();
+	const params = useParams();
+	const containersListRoute = generatePath(CONTAINERS_ROUTE, params);
+
 	const message = canUploadToBackend(status) ? (
 		formatMessage({
 			id: 'noRevisionOverlay.subheading.container.notProcessing',
@@ -37,6 +44,9 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 			defaultMessage: 'The Container is empty, you\'ll need to wait for the Container to finish processing.',
 		})
 	);
+
+	const onClickBack = () => history.push(containersListRoute);
+
 	return (
 		<OverlayContainer>
 			<Heading>
@@ -48,6 +58,12 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 			<Subheading>
 				{message}
 			</Subheading>
+			<Button onClick={onClickBack} variant="contained">
+				<FormattedMessage
+					id="InvalidContainerOverlay.backButton"
+					defaultMessage="Back to Containers"
+				/>
+			</Button>
 		</OverlayContainer>
 	);
 };

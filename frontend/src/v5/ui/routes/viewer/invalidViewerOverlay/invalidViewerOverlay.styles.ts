@@ -35,4 +35,5 @@ export const Subheading = styled(Typography).attrs({
 	variant: 'h3',
 })`
 	max-width: 450px;
+	margin-bottom: 9px;
 `;
