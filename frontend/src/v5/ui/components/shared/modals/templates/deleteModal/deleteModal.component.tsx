@@ -17,7 +17,16 @@
 import { Button, DialogContentText, DialogTitle } from '@mui/material';
 import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
-import { DialogContainer, Actions, RetypeCheck, ConfirmationPhrase, RetypeCheckField, Message } from '@/v5/ui/components/shared/modals/modals.styles';
+import {
+	DialogContainer,
+	Actions,
+	RetypeCheck,
+	ConfirmationPhrase,
+	RetypeCheckField,
+	Message,
+	TruncatableTitle,
+	Instruction,
+} from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
 
@@ -40,11 +49,13 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 				<DeleteIcon />
 			</CircledIcon>
 			<DialogTitle>
-				<FormattedMessage
-					id="deleteModal.header"
-					defaultMessage="Delete {name}?"
-					values={{ name }}
-				/>
+				<TruncatableTitle>
+					<FormattedMessage
+						id="deleteModal.header"
+						defaultMessage="Delete {name}?"
+						values={{ name }}
+					/>
+				</TruncatableTitle>
 			</DialogTitle>
 			<Message>
 				<DialogContentText>
@@ -52,7 +63,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 				</DialogContentText>
 				{ confidenceCheck && (
 					<RetypeCheck>
-						<div>
+						<Instruction>
 							<FormattedMessage
 								id="deleteModal.content.retypeCheck"
 								defaultMessage="Confirm by typing <Bold>{name}</Bold> below:"
@@ -61,7 +72,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 									Bold: (val: string) => <ConfirmationPhrase>{val}</ConfirmationPhrase>,
 								}}
 							/>
-						</div>
+						</Instruction>
 						<RetypeCheckField
 							control={control}
 							name="retypedName"

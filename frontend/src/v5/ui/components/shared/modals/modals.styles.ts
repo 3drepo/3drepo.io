@@ -20,6 +20,7 @@ import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 
 export const DialogContainer = styled.div`
 	display: flex;
@@ -54,13 +55,25 @@ export const Status = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
+export const TruncatableTitle = styled(Truncate).attrs({
+	lines: 1,
+	width: 400,
+})``;
+
 export const RetypeCheck = styled.div`
-	${({ theme }) => theme.typography.body1}
-	color: ${({ theme }) => theme.palette.base.main};
-	align-items: center;
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	margin-top: 22px;
+`;
+
+export const Instruction = styled.div`
+	${({ theme }) => theme.typography.body1}
+	color: ${({ theme }) => theme.palette.base.main};
+	text-align: center;
+	overflow-wrap: break-word;
+	width: auto;
+	max-width: 450px;
 `;
 
 export const RetypeCheckField = styled(FormTextField)`
