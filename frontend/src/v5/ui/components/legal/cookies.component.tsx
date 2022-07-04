@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PaperTitle } from './legalTemplate/legalTemplate.styles';
+import { PaperTitle } from './LegalLayout/legalLayout.styles';
 
 export const CookiesLegalPaper = () => (
 	<>

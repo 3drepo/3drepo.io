@@ -17,7 +17,7 @@
 
 import { Link } from 'react-router-dom';
 import { COOKIES_ROUTE, PRIVACY_ROUTE } from '../../routes/routes.constants';
-import { Indent, ListItem, PaperTitle, SupportEmail, TermsForm } from './legalTemplate/legalTemplate.styles';
+import { Indent, ListItem, PaperTitle, SupportEmail, TermsForm } from './LegalLayout/legalLayout.styles';
 
 export const TermsLegalPaper = () => (
 	<>

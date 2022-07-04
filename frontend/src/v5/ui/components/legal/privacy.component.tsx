@@ -17,7 +17,7 @@
 
 import { Link } from 'react-router-dom';
 import { COOKIES_ROUTE } from '../../routes/routes.constants';
-import { PaperTitle, SupportEmail } from './legalTemplate/legalTemplate.styles';
+import { PaperTitle, SupportEmail } from './LegalLayout/legalLayout.styles';
 
 export const PrivacyLegalPaper = () => (
 	<>

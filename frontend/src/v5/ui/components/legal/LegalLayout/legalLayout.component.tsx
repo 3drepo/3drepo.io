@@ -18,14 +18,14 @@
 import { useRouteMatch } from 'react-router-dom';
 
 import { ScrollArea } from '@controls/scrollArea';
-import { LegalContent } from './legalTemplate.styles';
+import { LegalContent } from './legalLayout.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';
 
-type ILegalTemplate = {
+type ILegalLayout = {
 	children: any;
 };
 
-export const LegalTemplate = ({ children }: ILegalTemplate) => {
+export const LegalLayout = ({ children }: ILegalLayout) => {
 	const { params: { legalPage } } = useRouteMatch('/v5/:legalPage');
 	return (
 		<>
