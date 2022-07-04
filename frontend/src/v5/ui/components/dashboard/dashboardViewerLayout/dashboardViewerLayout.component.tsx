@@ -20,11 +20,11 @@ import { theme } from '@/v5/ui/routes/viewer/theme';
 import { DashboardLayout } from './dashboardViewerLayout.styles';
 
 export const DashboardViewerLayout = ({ children }) => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<DashboardLayout>
+	<DashboardLayout>
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
 				{children}
-			</DashboardLayout>
-		</MuiThemeProvider>
-	</ThemeProvider>
+			</MuiThemeProvider>
+		</ThemeProvider>
+	</DashboardLayout>
 );

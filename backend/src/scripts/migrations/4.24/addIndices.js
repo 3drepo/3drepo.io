@@ -18,19 +18,19 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { createIndex } = require(`${v5Path}/handler/db`);
+const { createIndices } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processTeamspace = async (teamspace) => {
 	const collections = await getCollectionsEndsWith(teamspace, '.scene');
 	const proms = collections.map(({ name: colName }) => {
 		logger.logInfo(`\t\t\t${colName}`);
-		return Promise.all([
-			createIndex(teamspace, colName, [['rev_id', 1], ['metadata.key', 1], ['metadata.value', 1]]),
-			createIndex(teamspace, colName, [['metadata.key', 1], ['metadata.value', 1]]),
-			createIndex(teamspace, colName, [['rev_id', 1], ['shared_id', 1], ['type', 1]]),
-			createIndex(teamspace, colName, [['rev_id', 1], ['type', 1]]),
-			createIndex(teamspace, colName, [['shared_id', 1]]),
+		return createIndices(teamspace, colName, [
+			{ key: { rev_id: 1, 'metadata.key': 1, 'metadata.value': 1 } },
+			{ key: { 'metadata.key': 1, 'metadata.value': 1 } },
+			{ key: { rev_id: 1, shared_id: 1, type: 1 } },
+			{ key: { rev_id: 1, type: 1 } },
+			{ key: { shared_id: 1 } },
 		]);
 	});
 
@@ -40,7 +40,7 @@ const processTeamspace = async (teamspace) => {
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
+		logger.logInfo(`\t\t-[TEAMSPACE]${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspaces[i]);
 	}
