@@ -23,12 +23,11 @@ import { discardSlash } from '@/v5/services/routing/routing';
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
-import { ScrollArea } from '@controls/scrollArea';
 import { Federations } from './federations';
 import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
 import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
-import { Content } from './projects.styles';
+import { Content, DashboardScroll } from './projects.styles';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -40,7 +39,7 @@ export const ProjectContent = () => {
 	}, [teamspace]);
 
 	return (
-		<ScrollArea>
+		<DashboardScroll>
 			<Content>
 				<Switch>
 					<Route exact path={path}>
@@ -70,6 +69,6 @@ export const ProjectContent = () => {
 				</Switch>
 			</Content>
 			<DashboardFooter variant="light" />
-		</ScrollArea>
+		</DashboardScroll>
 	);
 };

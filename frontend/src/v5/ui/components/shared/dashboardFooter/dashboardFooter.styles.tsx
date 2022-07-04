@@ -33,6 +33,7 @@ export const FooterContainer = styled(BottomNavigation)<{ variant: string }>`
 	color: ${({ variant }) => COLOR_MAP[variant]};
 	align-items: center;
 	padding: 0 20px;
+	margin: auto auto 0 0;
 `;
 
 export const FooterLogo = styled(Logo)`

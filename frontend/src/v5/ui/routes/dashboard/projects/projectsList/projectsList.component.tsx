@@ -22,34 +22,39 @@ import {
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectListItem } from '@/v5/ui/routes/dashboard/projects/projectsList/projectListItem/projectListItem.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { Container } from './projectsList.styles';
+import { DashboardScroll } from '../projects.styles';
 
 export const ProjectList = (): JSX.Element => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
 	return (
-		<Container>
-			<DashboardList>
-				<FormattedMessage id="dashboard.projectsList.header" defaultMessage="Projects" />
-				{
-					projects.length ? (
-						projects.map((project) => (
-							<ProjectListItem
-								key={project._id}
-								projectId={project._id}
-								name={project.name}
-							/>
-						))
-					) : (
-						<DashboardListEmptyContainer>
-							<FormattedMessage
-								id="dashboard.projectsList.emptyList"
-								defaultMessage="No projects found"
-							/>
-						</DashboardListEmptyContainer>
-					)
-				}
-			</DashboardList>
-		</Container>
+		<DashboardScroll>
+			<Container>
+				<DashboardList>
+					<FormattedMessage id="dashboard.projectsList.header" defaultMessage="Projects" />
+					{
+						projects.length ? (
+							projects.map((project) => (
+								<ProjectListItem
+									key={project._id}
+									projectId={project._id}
+									name={project.name}
+								/>
+							))
+						) : (
+							<DashboardListEmptyContainer>
+								<FormattedMessage
+									id="dashboard.projectsList.emptyList"
+									defaultMessage="No projects found"
+								/>
+							</DashboardListEmptyContainer>
+						)
+					}
+				</DashboardList>
+			</Container>
+			<DashboardFooter variant="light" />
+		</DashboardScroll>
 	);
 };
