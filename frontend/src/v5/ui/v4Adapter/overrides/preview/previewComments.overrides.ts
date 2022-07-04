@@ -130,12 +130,12 @@ export default css`
 
 				${CommentFooter} {
 					${Username} {
-						color: #6b778c; // TODO - fix after new palette is released
+						color: ${({ theme }) => theme.palette.base.main};
 						font-style: unset;
 					}
 	
 					${Date} {
-						color: #6b778c; // TODO - fix after new palette is released
+						color: ${({ theme }) => theme.palette.base.main};
 						font-style: unset;
 						&::before {
 							content: '';

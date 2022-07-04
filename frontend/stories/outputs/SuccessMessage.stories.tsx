@@ -14,22 +14,29 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ShareTextField } from '@controls/shareTextField';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Inputs/ShareTextField',
-	component: ShareTextField,
-	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof ShareTextField>;
+	title: 'Outputs/SuccessMessage',
+	component: SuccessMessage,
+	argTypes: {
+		children: {
+			description: 'The text or component to display',
+			defaultValue: 'Success message\'s content',
+		},
+	},
+} as ComponentMeta<typeof SuccessMessage>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof ShareTextField> = (args) => <ShareTextField {...args} />;
+const Template: ComponentStory<typeof SuccessMessage> = ({ children, ...args }) => (
+	<SuccessMessage {...args}>{children}</SuccessMessage>
+);
 
 export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {
-	label: 'Textfield label',
-	value: 'https://3drepo.com/',
+	children: (
+		<div>
+			This is the success message.
+		</div>
+	),
 };

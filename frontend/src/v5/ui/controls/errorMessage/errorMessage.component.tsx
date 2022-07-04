@@ -14,10 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export const isInvalidArguments = (error: any): boolean => error.response.data.code === 'INVALID_ARGUMENTS';
+import { Container, ErrorIcon, Message } from './errorMessage.styles';
 
-export const usernameAlreadyExists = (error: string): boolean => error.toLowerCase().includes('username already exists');
+type ErrorMessageProps = {
+	children: any,
+	className?: string,
+};
 
-export const emailAlreadyExists = (error: string): boolean => error.toLowerCase().includes('email already exists');
-
-export const getRegistrationErrorMessage = (error: any) => error.response.data.message;
+export const ErrorMessage = ({ children, className }: ErrorMessageProps) => (
+	<Container className={className}>
+		<ErrorIcon />
+		<Message>
+			{children}
+		</Message>
+	</Container>
+);

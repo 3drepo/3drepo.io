@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,22 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { SettingsSchemaWithGeoPosition, SettingsSchema } from './settingsSchemes';
 
-const { v5Path } = require('../../interop');
-
-const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
-const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
-
-const Utils = {};
-
-Utils.getTeamspaceList = async () => {
-	const dbList = await listDatabases();
-	return dbList.flatMap(({ name: db }) => (USERNAME_BLACKLIST.includes(db) ? [] : db));
-};
-
-Utils.getCollectionsEndsWith = async (teamspace, str) => {
-	const collections = await listCollections(teamspace);
-	return collections.filter(({ name }) => name.endsWith(str));
-};
-
-module.exports = Utils;
+export const NewFederationSettingsSchema = SettingsSchema;
+export const FederationSettingsSchema = SettingsSchemaWithGeoPosition;

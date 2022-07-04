@@ -52,4 +52,12 @@ FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
 	return db.aggregate(teamspace, collection, pipeline);
 };
 
+FileRefs.insertRef = async (teamspace, collection, refInfo) => {
+	await db.insertOne(teamspace, collection, refInfo);
+};
+
+FileRefs.removeRef = async (teamspace, collection, id) => {
+	await db.deleteOne(teamspace, collection, { _id: id });
+};
+
 module.exports = FileRefs;
