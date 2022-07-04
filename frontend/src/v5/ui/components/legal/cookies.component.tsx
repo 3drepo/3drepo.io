@@ -59,24 +59,24 @@ export const CookiesLegalPaper = () => (
 		<table>
 			<tbody>
 				<tr>
-					<td width="118">
+					<td width="55">
 						<p><strong>Cookie</strong></p>
 					</td>
-					<td width="119">
+					<td width="55">
 						<p><strong>Name</strong></p>
 					</td>
-					<td width="119">
+					<td width="219">
 						<p><strong>Purpose</strong></p>
 					</td>
-					<td width="118">
+					<td width="55">
 						<p><strong>More information</strong></p>
 					</td>
 				</tr>
 				<tr>
-					<td width="118">
+					<td width="55">
 						<p>connect.sid</p>
 					</td>
-					<td width="119">
+					<td width="55">
 						<p>connect.sid</p>
 					</td>
 					<td width="119">
@@ -85,13 +85,13 @@ export const CookiesLegalPaper = () => (
 							you close your browser.
 						</p>
 					</td>
-					<td width="118" />
+					<td width="55" />
 				</tr>
 				<tr>
-					<td width="118">
+					<td width="55">
 						<p>Google Analytics</p>
 					</td>
-					<td width="119">
+					<td width="55">
 						<p>utma</p>
 						<p>utmb</p>
 						<p>utmc</p>
@@ -106,7 +106,7 @@ export const CookiesLegalPaper = () => (
 							site, where visitors have come to the site from and the pages they visited.
 						</p>
 					</td>
-					<td width="118">
+					<td width="55">
 						<p>
 							<a href="https://support.google.com/analytics/answer/6004245">
 								Read Google&apos;s overview of privacy and safeguarding data

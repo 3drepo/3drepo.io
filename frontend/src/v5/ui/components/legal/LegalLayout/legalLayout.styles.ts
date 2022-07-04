@@ -72,6 +72,7 @@ export const LegalContent = styled.div`
 	table {
 		padding: 0;
 		margin: 35px 0;
+		width: 100%;
 		td {
 			padding: 10px;
 			font-weight: 400;

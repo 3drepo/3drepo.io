@@ -65,10 +65,10 @@ export const PrivacyLegalPaper = () => (
 				<table>
 					<tbody>
 						<tr>
-							<td>
+							<td width="100">
 								Contact Data
 							</td>
-							<td width="413">
+							<td width="400">
 								<p>includes first name, last name and email address.</p>
 							</td>
 						</tr>
@@ -76,7 +76,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Other Identifier Data
 							</td>
-							<td width="413">
+							<td>
 								<p>Other Identifier Data includes role, username, company name.</p>
 							</td>
 						</tr>
@@ -84,7 +84,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Financial Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes business bank account and business payment card details, VAT number, billing
 									address (unless you use Paypal to process any payment in which case we do not
 									process or store that financial data).
@@ -95,7 +95,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Transaction Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes details about payments to and from you and other details of products you
 									have purchased from us (including details of any payment you have made to us via
 									Paypal).
@@ -106,7 +106,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Technical Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes internet protocol (IP) address, your login data, browser type and version,
 									time zone setting and location, browser plug-in types and versions, operating system
 									and platform and other technology on the devices you use to access this website.
@@ -117,7 +117,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Connection Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes the type of device you use (<strong>Device</strong>), a unique device
 									identifier (for example, your Device&apos;s IMEI number, the MAC address of the
 									Device&apos;s wireless network interface, or the mobile phone number used by the
@@ -130,7 +130,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Location Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes details of your use of our service including, but not limited to, traffic
 									data, statistics of content uploaded, downloaded and viewed. We may make use of
 									location data sent from Devices. You can turn off this functionality at any time
@@ -149,7 +149,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Usage Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes information about your use of our service, including the full Uniform
 									Resource Locators (URL) clickstream to, through and from our website (including
 									date and time); elements you viewed or words you searched for; page
@@ -162,7 +162,7 @@ export const PrivacyLegalPaper = () => (
 							<td>
 								Communications Data
 							</td>
-							<td width="413">
+							<td>
 								<p>includes emails, note of conversations, and records of online chats through
 									3drepo.io.
 								</p>
