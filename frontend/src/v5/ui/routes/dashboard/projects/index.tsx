@@ -69,7 +69,7 @@ export const ProjectContent = () => {
 					</Route>
 				</Switch>
 			</Content>
-			<DashboardFooter />
+			<DashboardFooter variant="light" />
 		</ScrollArea>
 	);
 };

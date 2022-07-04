@@ -18,13 +18,19 @@
 import styled from 'styled-components';
 import { BottomNavigation } from '@mui/material';
 import Logo from '@assets/icons/colored_logo.svg';
+import { COLOR } from '@/v5/ui/themes/theme';
 
 const FOOTER_HEIGHT = 42;
-export const FooterContainer = styled(BottomNavigation)`
+const COLOR_MAP = {
+	light: COLOR.BASE_LIGHT,
+	dark: COLOR.BASE_MAIN,
+};
+
+export const FooterContainer = styled(BottomNavigation)<{ variant: string }>`
 	justify-content: left;
 	height: ${FOOTER_HEIGHT}px;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	color: ${({ theme }) => theme.palette.base.light};
+	background-color: transparent;
+	color: ${({ variant }) => COLOR_MAP[variant]};
 	align-items: center;
 	padding: 0 20px;
 `;

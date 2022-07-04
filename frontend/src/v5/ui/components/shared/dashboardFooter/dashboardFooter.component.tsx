@@ -19,8 +19,12 @@ import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 
-export const DashboardFooter = (): JSX.Element => (
-	<FooterContainer showLabels>
+type IDashboardFooter = {
+	variant?: 'light' | 'dark';
+};
+
+export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.Element => (
+	<FooterContainer variant={variant} showLabels>
 		<FooterLogo />
 		<FooterItems>
 			<FooterItem>
