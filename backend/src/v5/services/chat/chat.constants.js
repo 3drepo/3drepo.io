@@ -21,15 +21,23 @@ const ChatConstants = {};
 const events = [
 	'message',
 	'error',
+	'loggedIn',
 	'loggedOut',
 	// message events
 	'success',
 
 	// Container events
 	'containerSettingsUpdate',
+	'containerNewRevision',
+	'containerRevisionUpdate',
+	'newContainer',
+	'containerRemoved',
 
 	// Federation events
 	'federationSettingsUpdate',
+	'federationNewRevision',
+	'newFederation',
+	'federationRemoved',
 ];
 
 const errors = [
