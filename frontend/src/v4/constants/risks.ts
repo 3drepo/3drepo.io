@@ -102,7 +102,7 @@ export const RISK_LEVELS_ICONS = {
 	[RISK_LEVELS.AGREED_FULLY]: CheckCircle,
 	[RISK_LEVELS.REJECTED]: SyncProblem,
 	[RISK_LEVELS.VOID]: HighlightOff,
-};	
+};
 
 export const RISK_LEVELS_COLOURS = {
 	[LEVELS.UNSET]: {
