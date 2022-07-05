@@ -58,32 +58,29 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: ContainerViewsList
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
+	 *           type: string
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/containersNotFound"
+	 *         $ref: "#/components/responses/containerNotFound"
 	 *       200:
 	 *         description: returns list of views
 	 *         content:
@@ -118,37 +115,32 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: ContainerViewThumbnail
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - container:
-	 *         name: container
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - view:
-	 *         name: view
+	 *       - name: view
 	 *         description: View ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *         type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
