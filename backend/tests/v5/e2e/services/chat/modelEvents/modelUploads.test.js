@@ -252,36 +252,6 @@ const queueFinishedTest = () => {
 	});
 };
 
-const revisionUpdateTest = () => {
-	describe('On updating a revision', () => {
-		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when settings have been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-
-			const data = { teamspace, project: project.id, model: container._id };
-			await ServiceHelper.socket.joinRoom(socket, data);
-
-			const socketPromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_REVISION_UPDATE, resolve);
-				setTimeout(reject, 1000);
-			});
-
-			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions/${containerRevision._id}?key=${user.apiKey}`)
-				.send({ void: true })
-				.expect(templates.ok.status);
-
-			await expect(socketPromise).resolves.toEqual({
-				...data,
-				data: {
-					_id: containerRevision._id,
-					void: true,
-				},
-			});
-
-			socket.close();
-		});
-	});
-};
-
 describe('E2E Chat Service (Model Upload Events)', () => {
 	let server;
 	let chatApp;

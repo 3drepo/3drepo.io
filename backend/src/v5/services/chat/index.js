@@ -96,7 +96,7 @@ ChatService.createModelMessage = async (event, data, teamspace, projectId, model
 		await broadcastMessage(eventExchange, message);
 	} catch (err) {
 		// istanbul ignore next
-		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+		logger.logError(`Failed to send a model message: ${err?.message}`);
 	}
 };
 
@@ -108,7 +108,7 @@ ChatService.createProjectMessage = async (event, data, teamspace, projectId, sen
 		await broadcastMessage(eventExchange, message);
 	} catch (err) {
 		// istanbul ignore next
-		logger.logError(`Failed to send a project message to queue: ${err?.message}`);
+		logger.logError(`Failed to send a project message: ${err?.message}`);
 	}
 };
 
