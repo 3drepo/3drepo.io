@@ -66,10 +66,9 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						<Instruction>
 							<FormattedMessage
 								id="deleteModal.content.retypeCheck"
-								defaultMessage="Confirm by typing <Bold>{name}</Bold> below:"
+								defaultMessage="Confirm by typing {confirmationPhrase} below:"
 								values={{
-									name,
-									Bold: (val: string) => <ConfirmationPhrase>{val}</ConfirmationPhrase>,
+									confirmationPhrase: <ConfirmationPhrase>{name}</ConfirmationPhrase>,
 								}}
 							/>
 						</Instruction>
