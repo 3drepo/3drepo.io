@@ -267,5 +267,4 @@ describe('E2E Chat Service (Model Upload Events)', () => {
 	modelUploadTest();
 	queueUpdateTest();
 	queueFinishedTest();
-	revisionUpdateTest();
 });

@@ -21,6 +21,7 @@ const ChatConstants = {};
 const events = [
 	'message',
 	'error',
+	'loggedIn',
 	'loggedOut',
 	// message events
 	'success',
