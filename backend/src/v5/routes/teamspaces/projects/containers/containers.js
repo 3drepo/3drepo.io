@@ -19,6 +19,7 @@ const {
 	validateAddModelData,
 	validateUpdateSettingsData,
 } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
@@ -26,7 +27,6 @@ const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
 
 const addContainer = (req, res) => {
 	const { teamspace, project } = req.params;
@@ -79,10 +79,13 @@ const getContainerStats = (req, res) => {
 const deleteFavourites = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToRemove = req.query.ids.split(',');
-
-	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+	if (req.query.ids?.length) {
+		const favouritesToRemove = req.query.ids.split(',');
+		Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
+			.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+	} else {
+		respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
+	}
 };
 
 const appendFavourites = (req, res) => {
