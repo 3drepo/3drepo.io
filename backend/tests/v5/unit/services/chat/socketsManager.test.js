@@ -146,15 +146,20 @@ const testSocketsEvents = () => {
 				const project = generateRandomString();
 				const model = generateRandomString();
 
-				const data = { teamspace, model, project };
+				const data = { teamspace, project };
 				eventFns.leave(data);
-				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}::${model}`);
+				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}`);
 				checkMessageCall(socket.emit, ACTIONS.LEAVE, data);
 
-				const data2 = { notifications: true };
+				const data2 = { teamspace, model, project };
 				eventFns.leave(data2);
-				expect(socket.leave).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}::${model}`);
 				checkMessageCall(socket.emit, ACTIONS.LEAVE, data2);
+
+				const data3 = { notifications: true };
+				eventFns.leave(data3);
+				expect(socket.leave).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				checkMessageCall(socket.emit, ACTIONS.LEAVE, data3);
 			});
 
 			test('should process the leave function appropriately (v4)', async () => {
@@ -221,6 +226,58 @@ const testSocketsEvents = () => {
 
 		describe('On Join', () => {
 			afterEach(SocketsManager.reset);
+
+			describe('Project room', () => {
+				afterEach(SocketsManager.reset);
+
+				test('should join successfully if the user is authorised to do so', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+
+					Permissions.isProjectAdmin.mockResolvedValueOnce(true);
+
+					const data = { teamspace, project };
+					await eventFns.join(data);
+					expect(socket.join).toHaveBeenCalledWith(`${teamspace}::${project}`);
+					checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+				});
+
+				test('should fail to join the room if the user is not project admin', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+
+					Permissions.isProjectAdmin.mockResolvedValueOnce(false);
+
+					const data = { teamspace, project };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if isProjectAdmin() threw an error', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+
+					Permissions.isProjectAdmin.mockRejectedValueOnce(templates.projectNotFound);
+
+					const data = { teamspace, project };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+			});
+
 			describe('Model room', () => {
 				afterEach(SocketsManager.reset);
 
