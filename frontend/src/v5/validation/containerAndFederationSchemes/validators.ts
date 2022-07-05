@@ -18,45 +18,55 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 
-export const numberField = Yup.number().typeError(formatMessage({
-	id: 'settings.surveyPoint.error.number',
-	defaultMessage: 'Must be a decimal number or integer',
-}));
+export const numberField = Yup.number()
+	.default(0)
+	.typeError(formatMessage({
+		id: 'settings.surveyPoint.error.number',
+		defaultMessage: 'Must be a decimal number or integer',
+	}));
 
-export const containerName = Yup.string()
+export const name = Yup.string()
 	.max(120,
 		formatMessage({
-			id: 'validation.containers.name.error.max',
-			defaultMessage: 'Container Name is limited to 120 characters',
+			id: 'validation.model.name.error.max',
+			defaultMessage: 'Name is limited to 120 characters',
 		}))
 	.required(
 		formatMessage({
-			id: 'validation.containers.name.error.required',
-			defaultMessage: 'Container Name is a required field',
+			id: 'validation.model.name.error.required',
+			defaultMessage: 'Name is a required field',
 		}),
 	);
 
-export const containerUnit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
-export const containerType = Yup.string().required().default('Uncategorised');
+export const unit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
+export const type = Yup.string().required().default('Uncategorised');
 
-export const containerCode = Yup.string()
-	.max(50,
-		formatMessage({
-			id: 'validation.containers.code.error.max',
-			defaultMessage: 'Code is limited to 50 characters',
-		}))
-	.matches(/^[\w|_|-]*$/,
-		formatMessage({
-			id: 'validation.containers.code.error.characters',
-			defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
-		}));
+export const code = Yup.lazy((value) => (
+	value === ''
+		? Yup.string().strip()
+		: Yup.string()
+			.max(50,
+				formatMessage({
+					id: 'validation.model.code.error.max',
+					defaultMessage: 'Code is limited to 50 characters',
+				}))
+			.matches(/^[\w|_|-]*$/,
+				formatMessage({
+					id: 'validation.model.code.error.characters',
+					defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
+				}))
+));
 
-export const containerDesc = Yup.string()
-	.max(660,
-		formatMessage({
-			id: 'validation.containers.description.error.max',
-			defaultMessage: 'Container Description is limited to 50 characters',
-		}));
+export const desc = Yup.lazy((value) => (
+	value === ''
+		? Yup.string().strip()
+		: Yup.string()
+			.max(660,
+				formatMessage({
+					id: 'validation.model.description.error.max',
+					defaultMessage: 'Description is limited to 660 characters',
+				}))
+));
 
 export const revisionTag = Yup.string()
 	.max(50,
@@ -76,9 +86,13 @@ export const revisionTag = Yup.string()
 		}),
 	);
 
-export const revisionDesc = Yup.string()
-	.max(660,
-		formatMessage({
-			id: 'validation.revisions.desc.error.max',
-			defaultMessage: 'Revision Description is limited to 50 characters',
-		}));
+export const revisionDesc = Yup.lazy((value) => (
+	value === ''
+		? Yup.string().strip()
+		: Yup.string()
+			.max(660,
+				formatMessage({
+					id: 'validation.revisions.desc.error.max',
+					defaultMessage: 'Revision Description is limited to 660 characters',
+				}))
+));
