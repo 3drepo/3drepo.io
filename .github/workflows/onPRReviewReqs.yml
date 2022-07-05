@@ -1,7 +1,7 @@
-name: On Review submitted
+name: On review requested
 on:
-  pull_request_review:
-    types: [edited, dismissed, submitted]
+  pull_request:
+    types: [review_requested, review_request_removed]
 jobs:
   checkMergeReady:
     name: Ensure all reviewers have approved the PR
@@ -10,6 +10,6 @@ jobs:
       - name: Check reviews
         uses: carmenfan/all-reviewers-approved@v1.0
         with:
-          pr: ${{ github.event.pull_request.number }}
+          pr: ${{ github.event.number }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
