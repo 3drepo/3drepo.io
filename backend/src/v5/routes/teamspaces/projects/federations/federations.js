@@ -19,7 +19,6 @@ const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederat
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
@@ -27,6 +26,7 @@ const { templates } = require('../../../../utils/responseCodes');
 
 const addFederation = (req, res) => {
 	const { teamspace, project } = req.params;
+
 	Federations.addFederation(teamspace, project, req.body).then((federationId) => {
 		respond(req, res, templates.ok, { _id: federationId });
 	}).catch(
@@ -37,6 +37,7 @@ const addFederation = (req, res) => {
 
 const deleteFederation = (req, res) => {
 	const { teamspace, project, federation } = req.params;
+
 	Federations.deleteFederation(teamspace, project, federation).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
@@ -85,9 +86,8 @@ const getFederationStats = (req, res) => {
 
 const updateFederationSettings = (req, res) => {
 	const { teamspace, project, federation } = req.params;
-	const sender = req.headers[SOCKET_HEADER];
 
-	Federations.updateSettings(teamspace, project, federation, req.body, sender)
+	Federations.updateSettings(teamspace, project, federation, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),

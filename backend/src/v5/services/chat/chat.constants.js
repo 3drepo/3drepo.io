@@ -27,9 +27,16 @@ const events = [
 
 	// Container events
 	'containerSettingsUpdate',
+	'containerNewRevision',
+	'containerRevisionUpdate',
+	'newContainer',
+	'containerRemoved',
 
 	// Federation events
 	'federationSettingsUpdate',
+	'federationNewRevision',
+	'newFederation',
+	'federationRemoved',
 ];
 
 const errors = [

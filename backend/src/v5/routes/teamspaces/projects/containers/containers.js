@@ -22,7 +22,6 @@ const {
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
-const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
@@ -31,6 +30,7 @@ const { templates } = require('../../../../utils/responseCodes');
 
 const addContainer = (req, res) => {
 	const { teamspace, project } = req.params;
+
 	Containers.addContainer(teamspace, project, req.body).then((containerId) => {
 		respond(req, res, templates.ok, { _id: containerId });
 	}).catch(
@@ -41,6 +41,7 @@ const addContainer = (req, res) => {
 
 const deleteContainer = (req, res) => {
 	const { teamspace, project, container } = req.params;
+
 	Containers.deleteContainer(teamspace, project, container).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
@@ -95,9 +96,8 @@ const appendFavourites = (req, res) => {
 
 const updateContainerSettings = (req, res) => {
 	const { teamspace, project, container } = req.params;
-	const sender = req.headers[SOCKET_HEADER];
 
-	Containers.updateSettings(teamspace, project, container, req.body, sender)
+	Containers.updateSettings(teamspace, project, container, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),

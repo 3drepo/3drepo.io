@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
@@ -186,12 +187,25 @@ const testOnNewMsg = () => {
 
 const testCreateDirectMessage = () => {
 	describe('CreateDirectMessage', () => {
-		test('Should broadcast to event exchange', () => {
+		test('Should broadcast to event exchange', async () => {
 			const event = generateRandomString();
 			const data = generateRandomString();
 			const recipients = [generateRandomString(), generateRandomString(), generateRandomString()];
 
-			ChatService.createDirectMessage(event, data, recipients);
+			await ChatService.createDirectMessage(event, data, recipients);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ event, data, recipients: recipients.map((id) => `${SESSION_CHANNEL_PREFIX}${id}`) });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+
+		test('Should catch error if broadcastMessage fails', async () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const recipients = [generateRandomString(), generateRandomString(), generateRandomString()];
+
+			QueueService.broadcastMessage.mockRejectedValueOnce(new Error());
+			await ChatService.createDirectMessage(event, data, recipients);
 			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
 
 			const expectedMsg = JSON.stringify({ event, data, recipients: recipients.map((id) => `${SESSION_CHANNEL_PREFIX}${id}`) });
@@ -202,14 +216,29 @@ const testCreateDirectMessage = () => {
 
 const testCreateModelMessage = () => {
 	describe('CreateModelMessage', () => {
-		test('Should broadcast to event exchange', () => {
+		test('Should broadcast to event exchange', async () => {
 			const event = generateRandomString();
 			const data = generateRandomString();
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 
-			ChatService.createModelMessage(event, data, teamspace, project, model);
+			await ChatService.createModelMessage(event, data, teamspace, project, model);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients: [`${teamspace}::${project}::${model}`], sender: undefined });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+
+		test('Should catch error if broadcastMessage fails', async () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			QueueService.broadcastMessage.mockRejectedValueOnce(new Error());
+			await ChatService.createModelMessage(event, data, teamspace, project, model);
 			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
 
 			const expectedMsg = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients: [`${teamspace}::${project}::${model}`], sender: undefined });
@@ -217,10 +246,43 @@ const testCreateModelMessage = () => {
 		});
 	});
 };
+
+const testCreateProjectMessage = () => {
+	describe('CreateProjectMessage', () => {
+		test('Should broadcast to event exchange', async () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+
+			await ChatService.createProjectMessage(event, data, teamspace, project);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ event, data: { data, teamspace, project }, recipients: [`${teamspace}::${project}`] });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+
+		test('Should catch error if broadcastMessage fails', async () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+
+			QueueService.broadcastMessage.mockRejectedValueOnce(templates.unknown);
+			await ChatService.createProjectMessage(event, data, teamspace, project);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ event, data: { data, teamspace, project }, recipients: [`${teamspace}::${project}`] });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+	});
+};
+
 describe('services/chat/index', () => {
 	testInit();
 	testOnNewSessions();
 	testOnNewMsg();
 	testCreateDirectMessage();
 	testCreateModelMessage();
+	testCreateProjectMessage();
 });
