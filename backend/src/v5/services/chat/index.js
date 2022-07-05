@@ -89,22 +89,49 @@ const subscribeToEvents = (service) => {
 	listenToExchange(eventExchange, onMessage(service));
 };
 
-ChatService.createInternalMessage = (event, data) => {
-	const message = JSON.stringify({ internal: true, event, data });
-	broadcastMessage(eventExchange, message);
+ChatService.createInternalMessage = async (event, data) => {
+	try {
+		const message = JSON.stringify({ internal: true, event, data });
+		await broadcastMessage(eventExchange, message);
+	} catch (err) {
+		// istanbul ignore next
+		logger.logError(`Failed to create internal message: ${err.message}`);
+	}
 };
 
-ChatService.createDirectMessage = (event, data, sessionIds) => {
-	const recipients = sessionIds.map((sessionId) => `${SESSION_CHANNEL_PREFIX}${sessionId}`);
-	const message = JSON.stringify({ event, data, recipients });
-	broadcastMessage(eventExchange, message);
+ChatService.createDirectMessage = async (event, data, sessionIds) => {
+	try {
+		const recipients = sessionIds.map((sessionId) => `${SESSION_CHANNEL_PREFIX}${sessionId}`);
+		const message = JSON.stringify({ event, data, recipients });
+		await broadcastMessage(eventExchange, message);
+	} catch (err) {
+		// istanbul ignore next
+		logger.logError(`Failed to create direct message: ${err.message}`);
+	}
 };
 
-ChatService.createModelMessage = (event, data, teamspace, projectId, model, sender) => {
-	const project = UUIDToString(projectId);
-	const recipients = [`${teamspace}::${project}::${model}`];
-	const message = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients, sender });
-	broadcastMessage(eventExchange, message);
+ChatService.createModelMessage = async (event, data, teamspace, projectId, model, sender) => {
+	try {
+		const project = UUIDToString(projectId);
+		const recipients = [`${teamspace}::${project}::${model}`];
+		const message = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients, sender });
+		await broadcastMessage(eventExchange, message);
+	} catch (err) {
+		// istanbul ignore next
+		logger.logError(`Failed to send a model message: ${err?.message}`);
+	}
+};
+
+ChatService.createProjectMessage = async (event, data, teamspace, projectId, sender) => {
+	try {
+		const project = UUIDToString(projectId);
+		const recipients = [`${teamspace}::${project}`];
+		const message = JSON.stringify({ event, data: { data, teamspace, project }, recipients, sender });
+		await broadcastMessage(eventExchange, message);
+	} catch (err) {
+		// istanbul ignore next
+		logger.logError(`Failed to send a project message: ${err?.message}`);
+	}
 };
 
 ChatService.createApp = async (server) => {

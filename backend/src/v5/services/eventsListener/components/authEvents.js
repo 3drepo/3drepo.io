@@ -18,7 +18,6 @@
 const { createDirectMessage, createInternalMessage } = require('../../chat');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { logger } = require('../../../utils/logger');
 const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
@@ -29,15 +28,11 @@ const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, ref
 	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 ]);
 
-const sessionsRemoved = ({ ids, elective }) => {
-	try {
-		if (!elective) {
-			createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
-		}
-		createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
-	} catch (err) {
-		logger.logError(`Failed to create direct message: ${err.message}`);
+const sessionsRemoved = async ({ ids, elective }) => {
+	if (!elective) {
+		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 	}
+	await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 };
 
 const AuthEventsListener = {};

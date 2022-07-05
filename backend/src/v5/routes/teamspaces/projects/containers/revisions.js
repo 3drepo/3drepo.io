@@ -39,10 +39,10 @@ const getRevisions = (req, res, next) => {
 };
 
 const updateRevisionStatus = (req, res) => {
-	const { teamspace, container, revision } = req.params;
+	const { teamspace, project, container, revision } = req.params;
 	const status = req.body.void;
 
-	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
+	Containers.updateRevisionStatus(teamspace, project, container, revision, status).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
@@ -206,7 +206,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: updates the status of the revision
+	 *         description: creates a new revision
 	 */
 	router.post('', hasWriteAccessToContainer, validateNewRevisionData, newRevision);
 

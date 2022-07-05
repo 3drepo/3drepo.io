@@ -26,6 +26,8 @@ const { io: ioClient } = require('socket.io-client');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
@@ -371,6 +373,8 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();
 	if (server) await server.close();
+	EventsManager.reset();
+	QueueHandler.close();
 };
 
 module.exports = ServiceHelper;
