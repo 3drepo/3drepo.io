@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { SESSION_HEADER, session } = require('../sessions');
+const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
-const { SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const SocketsManager = require('./socketsManager');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
-const { events } = require('../eventsManager/eventsManager.constants');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
-const { subscribe } = require('../eventsManager/eventsManager');
+const { session } = require('../sessions');
 
 const ChatService = {};
 
@@ -53,11 +51,32 @@ const processMessage = (service, msg) => {
 	}
 };
 
+const processInternalMessage = (msg) => {
+	const { event, data } = msg;
+
+	if (event === chatEvents.LOGGED_IN) {
+		const { sessionID, socketId } = data;
+		const socket = SocketsManager.getSocketById(socketId);
+
+		// istanbul ignore else
+		if (socket) {
+			SocketsManager.addSocketToSession(sessionID, socket);
+		}
+	} else if (event === chatEvents.LOGGED_OUT) {
+		const { sessionIds } = data;
+		SocketsManager.resetSocketsBySessionIds(sessionIds);
+	} else {
+		logger.logError('Unrecognised event message', msg);
+	}
+};
+
 const onMessage = (service) => (msg) => {
 	try {
 		const content = JSON.parse(msg.content);
 		if (content.channel) {
 			onMessageV4(service, content);
+		} else if (content.internal) {
+			processInternalMessage(content);
 		} else {
 			processMessage(service, content);
 		}
@@ -67,14 +86,17 @@ const onMessage = (service) => (msg) => {
 };
 
 const subscribeToEvents = (service) => {
-	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
-		const socket = SocketsManager.getSocketById(socketId);
-		if (socket) {
-			SocketsManager.addSocketToSession(sessionID, socket);
-		}
-	});
-
 	listenToExchange(eventExchange, onMessage(service));
+};
+
+ChatService.createInternalMessage = async (event, data) => {
+	try {
+		const message = JSON.stringify({ internal: true, event, data });
+		await broadcastMessage(eventExchange, message);
+	} catch (err) {
+		// istanbul ignore next
+		logger.logError(`Failed to create internal message: ${err.message}`);
+	}
 };
 
 ChatService.createDirectMessage = async (event, data, sessionIds) => {
@@ -114,7 +136,7 @@ ChatService.createProjectMessage = async (event, data, teamspace, projectId, sen
 
 ChatService.createApp = async (server) => {
 	const { middleware } = await session;
-	const socketServer = RTMsg.createApp(server, middleware, SESSION_HEADER, SocketsManager.addSocket);
+	const socketServer = RTMsg.createApp(server, middleware, SocketsManager.addSocket);
 	subscribeToEvents(socketServer);
 	return {
 		close: async () => {

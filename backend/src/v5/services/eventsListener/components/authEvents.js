@@ -15,20 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createDirectMessage, createInternalMessage } = require('../../chat');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
-const { createDirectMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) => Promise.all([
+const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => Promise.all([
 	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
 	removeOldSessions(username, sessionID, referer),
+	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 ]);
 
-const sessionsRemoved = async ({ ids }) => {
-	await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+const sessionsRemoved = async ({ ids, elective }) => {
+	if (!elective) {
+		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+	}
+	await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 };
 
 const AuthEventsListener = {};

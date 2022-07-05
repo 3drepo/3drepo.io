@@ -57,22 +57,21 @@ const urlDomain = 'url domain';
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
 StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
-const publishFn = EventsManager.publish.mockImplementation(() => { });
 
 const testCreateSession = () => {
 	const checkResults = (request) => {
-		expect(Responder.respond.mock.calls.length).toBe(1);
+		expect(Responder.respond).toHaveBeenCalledTimes(1);
 		expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
-		expect(publishFn.mock.calls.length).toBe(1);
-		expect(publishFn.mock.calls[0][0]).toEqual(events.SESSION_CREATED);
-		expect(publishFn.mock.calls[0][1]).toEqual({
-			username: request.body.user,
-			sessionID: request.sessionID,
-			ipAddress: request.ips[0] || request.ip,
-			userAgent: request.headers['user-agent'],
-			referer: request?.session?.user?.referer,
-			socketId: request.headers[SOCKET_HEADER],
-		});
+		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
+			{
+				username: request.body.user,
+				sessionID: request.sessionID,
+				ipAddress: request.ips[0] || request.ip,
+				userAgent: request.headers['user-agent'],
+				referer: request?.session?.user?.referer,
+				socketId: request.headers[SOCKET_HEADER],
+			});
 	};
 
 	const req = {
@@ -152,15 +151,29 @@ const testDestroySession = () => {
 	describe('Destroy session', () => {
 		test('Should destroy session', async () => {
 			await Sessions.destroySession(req, res);
-			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED,
+				{
+					ids: [req.sessionID],
+					elective: true,
+				});
 		});
 
 		test('Should destroy session (v4)', async () => {
 			await Sessions.destroySession({ ...req, v4: true }, res);
-			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
 			expect(Responder.respond.mock.calls[0][3]).toEqual({ username: req.session.user.username });
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED,
+				{
+					ids: [req.sessionID],
+					elective: true,
+				});
 		});
 	});
 };
