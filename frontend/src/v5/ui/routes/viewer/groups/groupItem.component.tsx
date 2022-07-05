@@ -15,34 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { hexToRgba } from '@/v4/helpers/colors';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
+import LightingIcon from '@assets/icons/lighting.svg';
 import { Checkbox } from '@mui/material';
-import { GroupsTreeListItem } from './groupLists.styles';
+import { GroupIcon, GroupsTreeListItem } from './groupLists.styles';
 
-export const GroupItem = ({ item }) => {
-	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(item._id);
-	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(item._id);
-	const isActive = GroupsHooksSelectors.selectActiveGroupId() === item._id;
+const isSmart = (group) => !group.objects || !!group.rules;
+
+const GroupIconComponent = ({ group }) => (
+	<GroupIcon $color={hexToRgba(group.color)}>
+		{isSmart(group) && <LightingIcon /> }
+	</GroupIcon>
+
+);
+export const GroupItem = ({ group }) => {
+	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
+	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(group._id);
+	const isActive = GroupsHooksSelectors.selectActiveGroupId() === group._id;
 
 	const onClickOverride = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.setColorOverrides([item._id], !isOverriden);
+		GroupsActionsDispatchers.setColorOverrides([group._id], !isOverriden);
 	};
 
 	const onClickIsolate = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.isolateGroups([item._id]);
+		GroupsActionsDispatchers.isolateGroups([group._id]);
 	};
 
 	const onClickHighlight = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.setActiveGroup(item);
+		GroupsActionsDispatchers.setActiveGroup(group);
 	};
 
 	const onClickGotoDetails = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.showDetails(item);
+		GroupsActionsDispatchers.showDetails(group);
 	};
 
 	return (
@@ -50,7 +60,9 @@ export const GroupItem = ({ item }) => {
 			onClick={onClickHighlight}
 			$highlighted={isHighlighted}
 		>
-			{item.name} objects: {item.objects.length}
+			<GroupIconComponent group={group} />
+
+			{group.name} objects: {group.objects.length}
 			<Checkbox checked={isOverriden} onClick={onClickOverride} />
 			<button onClick={onClickIsolate} type="button">
 				<span role="img" aria-label="isolate">👁️</span>

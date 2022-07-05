@@ -139,7 +139,7 @@ const GroupTreeItem = ({ item, collapse }) => {
 		);
 	}
 
-	return (<GroupItem item={item} />);
+	return (<GroupItem group={item} />);
 };
 
 export const GroupTree = ({ tree, collapse }) => (

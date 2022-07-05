@@ -16,33 +16,26 @@
  */
 import styled from 'styled-components';
 
-export const GroupsTreeList = styled.ul`
-    list-style-type: none;
-    padding-inline-start: 0px;
-
+export const Body1 = styled.div`
+${({ theme }) => theme.typography.body1};
 `;
 
-export const GroupsTreeListItem = styled.li<{$highlighted?: boolean }>`
-    minimum-height: 41px;
-    background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
-    padding: 0 0 px;
-    cursor: default;
+export const Body2 = styled.div`
+    ${({ theme }) => theme.typography.body2};
 `;
 
-export const GroupsListItemTitle = styled.div`
-    cursor: default;
-    weight: 500;
-    size: 12px;
-    color
+export const Link = styled.div`
+    ${({ theme }) => theme.typography.link};
 `;
 
-export const GroupIcon = styled.div<{$color?: string }>`
-    width: 30px;
-    height: 28px;
-    background-color: ${({ $color }) => $color};
-    padding: 0 0 px;
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+export const Caption = styled.div`
+    ${({ theme }) => theme.typography.caption};
+`;
+
+export const KickerTitle = styled.div`
+    ${({ theme }) => theme.typography.kickerTitle};
+`;
+
+export const Kicker = styled.div`
+    ${({ theme }) => theme.typography.kicker};
 `;
