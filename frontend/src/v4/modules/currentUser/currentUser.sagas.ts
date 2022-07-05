@@ -16,7 +16,7 @@
  */
 
 import { get } from 'lodash';
-import { all, call, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
