@@ -13,8 +13,8 @@ jobs:
         id: condval
         with:
           cond: ${{ github.event_name == 'pull_request' }}
-            if_true: ${{ github.event.number }}
-            if_false: ${{ github.event.pull_request.number }}
+          if_true: ${{ github.event.number }}
+          if_false: ${{ github.event.pull_request.number }}
       - name: Check reviews
         uses: carmenfan/all-reviewers-approved@v1.0
         with:
