@@ -16,7 +16,7 @@
  */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { LinkCard } from '@/v5/ui/components/shared/linkCard/linkCard.component';
+import { LinkCard } from '@components/shared/linkCard/linkCard.component';
 import { BrowserRouter } from 'react-router-dom';
 import { COLOR } from '@/v5/ui/themes/theme';
 

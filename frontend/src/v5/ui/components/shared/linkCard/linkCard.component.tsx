@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { StyledCard, ListItem, Link, CardHeading, CardSubheading, CardDetails } from './linkCard.styles';
+import { Card, CardListItem, Link, Heading, Subheading, Details } from './linkCard.styles';
 
 interface ILinkCard {
 	variant?: 'primary' | 'secondary',
@@ -26,15 +26,15 @@ interface ILinkCard {
 }
 
 export const LinkCard = ({ variant = 'primary', className, children, to, heading, subheading }: ILinkCard): JSX.Element => (
-	<ListItem>
+	<CardListItem>
 		<Link to={to}>
-			<StyledCard $variant={variant} className={className}>
+			<Card $variant={variant} className={className}>
 				{children}
-				<CardDetails>
-					{heading && <CardHeading>{heading}</CardHeading>}
-					{subheading && <CardSubheading>{subheading}</CardSubheading>}
-				</CardDetails>
-			</StyledCard>
+				<Details>
+					{heading && <Heading>{heading}</Heading>}
+					{subheading && <Subheading>{subheading}</Subheading>}
+				</Details>
+			</Card>
 		</Link>
-	</ListItem>
+	</CardListItem>
 );

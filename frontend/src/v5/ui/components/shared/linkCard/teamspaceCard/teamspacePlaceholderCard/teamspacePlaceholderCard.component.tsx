@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledCard } from '../../linkCard.styles';
+import { Card } from '../../linkCard.styles';
 import { ImagePlaceholder, ListItem, TextPlaceholder } from './teamspacePlaceholderCard.styles';
 
 export const TeamspacePlaceholderCard = (): JSX.Element => (
 	<ListItem>
-		<StyledCard $variant="secondary">
+		<Card $variant="secondary">
 			<ImagePlaceholder />
 			<TextPlaceholder />
 			<TextPlaceholder width="50%" />
-		</StyledCard>
+		</Card>
 	</ListItem>
 );

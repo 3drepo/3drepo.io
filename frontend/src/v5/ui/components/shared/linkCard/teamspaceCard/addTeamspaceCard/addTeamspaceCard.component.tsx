@@ -16,16 +16,16 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { ListItem } from '../../linkCard.styles';
+import { CardListItem } from '../../linkCard.styles';
 import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
 
 export const AddTeamspaceCard = (): JSX.Element => (
-	<ListItem>
+	<CardListItem>
 		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
 			<Container>
 				<AddTeamspaceIcon />
 				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
 			</Container>
 		</a>
-	</ListItem>
+	</CardListItem>
 );

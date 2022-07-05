@@ -17,10 +17,10 @@
 
 import { Typography } from '@controls/typography';
 import { Link as DecoratedLink } from 'react-router-dom';
-import { Card, CardContent } from '@mui/material';
+import { Card as CardBase, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const ListItem = styled.li`
+export const CardListItem = styled.li`
 	list-style-type: none;
 	float: left;
 	margin: 10px;
@@ -37,13 +37,13 @@ export const Link = styled(DecoratedLink)`
 	text-decoration: none;
 `;
 
-export const CardDetails = styled(CardContent)`
+export const Details = styled(CardContent)`
 	&, &:last-child {
 		padding: 15px 0 0;
 	}
 `;
 
-export const CardHeading = styled(Typography).attrs({
+export const Heading = styled(Typography).attrs({
 	variant: 'h5',
 })`
 	text-overflow: ellipsis;
@@ -51,24 +51,24 @@ export const CardHeading = styled(Typography).attrs({
 	overflow: hidden;
 `;
 
-export const CardSubheading = styled(Typography).attrs({
+export const Subheading = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const StyledCard = styled(Card)<{ $variant: string; }>`
+export const Card = styled(CardBase)<{ $variant: string; }>`
 	${({ $variant, theme }) => {
 		if ($variant === 'primary') {
 			return css`
 				background-color: ${theme.palette.tertiary.lightest};
-				${CardHeading} { color: ${theme.palette.secondary.main};}
+				${Heading} { color: ${theme.palette.secondary.main}; }
 			`;
 		}
 		if ($variant === 'secondary') {
 			return css`
 				background-color: rgb(255 255 255 / 5%);
-				${CardHeading} { color: ${theme.palette.primary.contrast};}
+				${Heading} { color: ${theme.palette.primary.contrast}; }
 			`;
 		}
 		return '';

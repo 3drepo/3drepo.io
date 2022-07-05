@@ -17,13 +17,13 @@
 
 import { FormattedMessage } from 'react-intl';
 import { AddProjectIcon, Container } from './addProjectCard.styles';
-import { ListItem } from '../../linkCard.styles';
+import { CardListItem } from '../../linkCard.styles';
 
 export const AddProjectCard = () => (
-	<ListItem>
+	<CardListItem>
 		<Container>
 			<AddProjectIcon />
 			<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />
 		</Container>
-	</ListItem>
+	</CardListItem>
 );

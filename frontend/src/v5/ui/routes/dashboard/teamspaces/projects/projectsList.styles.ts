@@ -16,7 +16,7 @@
  */
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
-import { ListItem } from '@components/shared/linkCard/linkCard.styles';
+import { CardListItem } from '@components/shared/linkCard/linkCard.styles';
 import { Button } from '@controls/button';
 import { SearchInput as SearchInputBase } from '@controls/searchInput';
 
@@ -71,7 +71,7 @@ export const ProjectCardsList = styled.ul`
 	margin: 0;
 	gap: 20px;
 
-	${ListItem} {
+	${CardListItem} {
 		margin: 0;
 	}
 `;
