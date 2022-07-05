@@ -33,7 +33,6 @@ module.exports.createApp = function (config, v5Init = true) {
 	const utils = require("../utils");
 	const keyAuthentication =  require("../middlewares/keyAuthentication");
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
-	const docsService = require("../../v5/services/swagger/swagger");
 
 	// Express app
 	const app = express();
@@ -52,8 +51,6 @@ module.exports.createApp = function (config, v5Init = true) {
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
-
-	docsService(app);
 
 	app.set("views", "./resources/pug");
 	app.set("view_engine", "pug");

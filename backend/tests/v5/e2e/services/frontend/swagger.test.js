@@ -15,24 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ServiceHelper = require('../../helper/services');
+const ServiceHelper = require('../../../helper/services');
 const SuperTest = require('supertest');
 const schemaValidator = require('openapi-schema-validator');
 
-// let testSession;
 let server;
 let agent;
 
-const user = ServiceHelper.generateUserCredentials();
-
-const setupData = async () => {
-	await ServiceHelper.db.createUser(user);
-};
-
 const testSwaggerDocumentation = () => {
 	describe('Check swagger documentation for errors and warnings', () => {
-		test('should return error if errors or warnings are found in swagger documentation', async () => {
-			const res = await agent.get(`/docs/openapi.json?key=${user.apiKey}`);
+		test('Open API schema should not contain any errors', async () => {
+			const res = await agent.get('/docs/openapi.json');
 
 			const OpenAPISchemaValidator = schemaValidator.default;
 			const validator = new OpenAPISchemaValidator({ version: 3 });
@@ -42,14 +35,13 @@ const testSwaggerDocumentation = () => {
 	});
 };
 
-describe('swagger', () => {
+describe('Swagger', () => {
 	beforeAll(async () => {
-		server = await ServiceHelper.app();
+		server = await ServiceHelper.frontend();
 		agent = await SuperTest(server);
-		await setupData();
 	});
 
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() => server.close());
 
 	testSwaggerDocumentation();
 });
