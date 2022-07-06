@@ -20,22 +20,52 @@ import {
 	DashboardListItemRow,
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-
+import {
+	ShareModalProject as ShareModal,
+} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalProject/shareModalProject.component';
+import { useState } from 'react';
 import { discardSlash } from '@/v5/services/routing/routing';
+import { formatMessage } from '@/v5/services/intl';
+import { IProject } from '@/v5/store/projects/projects.types';
+import { Button } from '@controls/button';
+import { FormattedMessage } from 'react-intl';
 
-export const ProjectListItem = ({ projectId, name }): JSX.Element => {
+type ProjectListItemProps = {
+	project: IProject,
+};
+
+export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
 
+	const [openModal, setOpenModal] = useState(false);
+
+	const openShareModal = (e) => {
+		e.preventDefault();
+		setOpenModal(true);
+	};
+
 	return (
 		<DashboardListItem>
-			<Link to={`${url}/${projectId}`}>
+			<Link to={`${url}/${project._id}`}>
 				<DashboardListItemRow>
 					<DashboardListItemText>
-						{name}
+						{project.name}
+						<Button onClick={openShareModal}>
+							<FormattedMessage id="shareProject.button" defaultMessage="Share Project" />
+						</Button>
 					</DashboardListItemText>
 				</DashboardListItemRow>
 			</Link>
+			<ShareModal
+				openState={openModal}
+				onClickClose={() => setOpenModal(false)}
+				title={formatMessage({
+					id: 'shareProject.title',
+					defaultMessage: 'Share Project',
+				})}
+				project={project}
+			/>
 		</DashboardListItem>
 	);
 };

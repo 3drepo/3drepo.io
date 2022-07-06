@@ -18,50 +18,47 @@
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { viewerRoute } from '@/v5/services/routing/routing';
-import { useParams } from 'react-router-dom';
 import { ShareTextField } from '@controls/shareTextField';
-import { IContainer } from '@/v5/store/containers/containers.types';
-import { IFederation } from '@/v5/store/federations/federations.types';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
-	openState: boolean;
+	// the title in the modal
 	title: string;
-	containerOrFederation: IContainer | IFederation;
+	// the title in the email
+	name: string;
+
+	subject: string;
+	openState: boolean;
+	link: string;
 	onClickClose: () => void;
 };
 
 export const ShareModal = ({
 	openState,
 	title,
-	containerOrFederation,
+	name,
+	subject,
 	onClickClose,
-}: IShareModal): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
-	const link = viewerRoute(teamspace, project, containerOrFederation, null, true);
-
-	return (
-		<FormModal
-			open={openState}
-			onClickClose={onClickClose}
-			title={title}
-			showButtons={false}
-		>
-			<ShareTextField
-				label={formatMessage({
-					id: 'shareModal.linkLabel',
-					defaultMessage: 'Link',
-				})}
-				value={link}
+	link,
+}: IShareModal) => (
+	<FormModal
+		open={openState}
+		onClickClose={onClickClose}
+		title={title}
+		showButtons={false}
+	>
+		<ShareTextField
+			label={formatMessage({
+				id: 'shareModal.linkLabel',
+				defaultMessage: 'Link',
+			})}
+			value={link}
+		/>
+		<MailToButton href={`mailto:?subject=3D Repo ${subject} - ${name}&body=${link}`}>
+			<FormattedMessage
+				id="shareModal.mailTo"
+				defaultMessage="Send by email"
 			/>
-			<MailToButton href={`mailto:?subject=3D Repo container - ${containerOrFederation.name}&body=${link}`}>
-				<FormattedMessage
-					id="shareModal.mailTo"
-					defaultMessage="Send by email"
-				/>
-			</MailToButton>
-		</FormModal>
-	);
-};
+		</MailToButton>
+	</FormModal>
+);
