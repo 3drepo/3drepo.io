@@ -110,10 +110,15 @@ export const ContainerEllipsisMenu = ({
 				})}
 				onClick={() => dispatch(DialogsActions.open('delete', {
 					name: container.name,
-					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(
+					onClickConfirm: (
+						onSuccess,
+						onError,
+					) => ContainersActionsDispatchers.deleteContainer(
 						teamspace,
 						project,
 						container._id,
+						onSuccess,
+						onError,
 					),
 					message: formatMessage({
 						id: 'deleteModal.container.message',

@@ -26,23 +26,46 @@ import {
 	Message,
 	TruncatableTitle,
 	Instruction,
+	ErrorMessage,
 } from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
+import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { isNetworkError } from '@/v5/validation/errors.helpers';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
-	onClickConfirm: () => void,
+	onClickConfirm: (onSuccess, onError) => any,
 	name: string,
 	message?: string,
 	confidenceCheck?: boolean,
 }
 
 export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confidenceCheck }: IDeleteModal) => {
-	const { control, watch } = useForm({
+	const { control, watch, handleSubmit } = useForm({
 		mode: 'onChange',
+		defaultValues: { retypedName: '' },
 	});
 	const isValid = confidenceCheck ? (watch('retypedName') === name) : true;
+	const [errorMessage, setErrorMessage] = useState('');
+	const onError = (error) => {
+		if (isNetworkError(error)) {
+			setErrorMessage(
+				formatMessage({
+					id: 'editProfile.networkError',
+					defaultMessage: 'Network Error',
+				}),
+			);
+		} else {
+			setErrorMessage(error.response.data.message);
+		}
+	};
+
+	const onSuccess = () => {
+		onClickClose();
+	};
+
 	return (
 		<DialogContainer>
 			<CircledIcon variant="error" size="large">
@@ -78,6 +101,11 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						/>
 					</RetypeCheck>
 				)}
+				{errorMessage && (
+					<ErrorMessage>
+						{errorMessage}
+					</ErrorMessage>
+				)}
 			</Message>
 			<Actions>
 				<Button onClick={onClickClose} variant="contained" color="primary">
@@ -86,7 +114,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						defaultMessage="Cancel"
 					/>
 				</Button>
-				<Button autoFocus type="submit" onClick={() => { onClickClose(); onClickConfirm(); }} variant="outlined" color="secondary" disabled={!isValid}>
+				<Button autoFocus type="submit" onClick={() => handleSubmit(onClickConfirm(onSuccess, onError))} variant="outlined" color="secondary" disabled={!isValid}>
 					<FormattedMessage
 						id="deleteModal.action.confirm"
 						defaultMessage="Delete"

@@ -44,8 +44,8 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 		e.preventDefault();
 		dispatch(DialogsActions.open('delete', {
 			name: project.name,
-			onClickConfirm: () => (
-				ProjectsActionsDispatchers.deleteProject(teamspace, project._id)
+			onClickConfirm: (onSuccess, onError) => (
+				ProjectsActionsDispatchers.deleteProject(teamspace, project._id, onSuccess, onError)
 			),
 			message: formatMessage({
 				id: 'deleteModal.project.message',

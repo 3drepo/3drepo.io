@@ -266,26 +266,32 @@ describe('Containers: sagas', () => {
 		})
 	})
 	
+	const onSuccess = jest.fn();
+	const onError = jest.fn();
 	describe('deleteContainer', () => {
 		it('should call deleteContainer endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-			.reply(200);
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(200);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
-			.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
-			.silentRun();
+				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
+				.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
+				.silentRun();
+				
+			expect(onSuccess).toBeCalled();
 		})
 
 		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-			.reply(404);
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(404);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
-			.silentRun();
+				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
+				.silentRun();
+
+			expect(onError).toBeCalled();
 		})
 	})
 })

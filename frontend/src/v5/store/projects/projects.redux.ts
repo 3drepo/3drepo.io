@@ -23,7 +23,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
-	deleteProject: ['teamspace', 'projectId'],
+	deleteProject: ['teamspace', 'projectId', 'onSuccess', 'onError'],
 	deleteProjectSuccess: ['teamspace', 'projectId'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
@@ -78,6 +78,6 @@ export interface IProjectsActions {
 	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
 	fetchFailure: () => any;
 	setCurrentProject: (projectId: string) => any;
-	deleteProject: (teamspace: string, projectId: string) => any;
+	deleteProject: (teamspace: string, projectId: string, onSuccess: () => void, onError: (error) => void) => any;
 	deleteProjectSuccess: (teamspace: string, projectId: string) => any;
 }

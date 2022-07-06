@@ -265,15 +265,19 @@ describe('Federations: sagas', () => {
 	})
 
 	describe('deleteFederation', () => {
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
 		it('should call deleteFederation endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 				.reply(200);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId, onSuccess, onError))
 				.put(FederationsActions.deleteFederationSuccess(projectId, federationId))
 				.silentRun();
+			
+			expect(onSuccess).toBeCalled();
 		})
 
 		it('should call deleteFederation endpoint with 404 and open alert modal', async () => {
@@ -282,8 +286,10 @@ describe('Federations: sagas', () => {
 				.reply(404);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId, onSuccess, onError))
 				.silentRun();
+
+			expect(onSuccess).toBeCalled();
 		})
 	})
 })

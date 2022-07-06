@@ -34,15 +34,13 @@ export function* fetch({ teamspace }) {
 	}
 }
 
-export function* deleteProject({ teamspace, projectId }) {
+export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	try {
 		yield API.Projects.deleteProject(teamspace, projectId);
 		yield put(ProjectsActions.deleteProjectSuccess(teamspace, projectId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'projects.delete.error', defaultMessage: 'trying to delete project' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 

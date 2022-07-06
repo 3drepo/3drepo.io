@@ -52,15 +52,19 @@ describe('Teamspaces: sagas', () => {
 		});
 	});
 	describe('delete Project', () => {
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
 		it('should call deleteProject endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
 				.reply(200)
 
 			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.deleteProject(teamspace, projectId))
+				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
 				.put(ProjectsActions.deleteProjectSuccess(teamspace, projectId))
 				.silentRun();
+
+			expect(onSuccess).toBeCalled();
 		});
 		it('should call deleteProject endpoint with 404 and open alert modal', async () => {
 			mockServer
@@ -68,9 +72,10 @@ describe('Teamspaces: sagas', () => {
 				.reply(400)
 
 			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.deleteProject(teamspace, projectId))
-				.put.like(alertAction('trying to delete project'))
+				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
 				.silentRun();
+
+			expect(onError).toBeCalled();
 		});
 	});
 });

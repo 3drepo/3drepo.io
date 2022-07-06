@@ -108,10 +108,15 @@ export const FederationEllipsisMenu = ({
 				onClick={() => {
 					dispatch(DialogsActions.open('delete', {
 						name: federation.name,
-						onClickConfirm: () => FederationsActionsDispatchers.deleteFederation(
+						onClickConfirm: (
+							onSuccess,
+							onError,
+						) => FederationsActionsDispatchers.deleteFederation(
 							teamspace,
 							project,
 							federation._id,
+							onSuccess,
+							onError,
 						),
 						message: formatMessage({
 							id: 'deleteFederation.federation.message',
