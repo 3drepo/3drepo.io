@@ -15,10 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CentredContainer } from '@controls/centredContainer';
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { ModalContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
 
-export const Container = styled(ContainerBase)`
-	min-width: 450px;
-	min-height: 248px;
+export const OverlayContainer = styled(CentredContainer)`
+	background: transparent;
+	text-align: center;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const Heading = styled(Typography).attrs({
+	variant: 'h1',
+})`
+	margin-bottom: 10px;
+`;
+
+export const Subheading = styled(Typography).attrs({
+	variant: 'h3',
+})`
+	max-width: 450px;
+	margin-bottom: 9px;
 `;
