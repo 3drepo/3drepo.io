@@ -73,12 +73,15 @@ export const LegalContent = styled.div`
 		padding: 0;
 		margin: 35px 0;
 		width: 100%;
+		border-collapse: collapse;
 		td {
 			padding: 10px;
 			font-weight: 400;
+			display: table-cell;
+			vertical-align: top;
 			ol {
 				color: inherit;
-				padding: 10px 20px;
+				padding: 0px 20px;
 				li {
 					${({ theme }) => theme.typography.h5}
 					font-weight: 400;
@@ -86,6 +89,9 @@ export const LegalContent = styled.div`
 				li::marker {
 					color: inherit;
 				}
+			}
+			p {
+				margin: 0;
 			}
 		}
 		tr td:first-child {
