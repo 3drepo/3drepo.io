@@ -15,9 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const CentredContainer = styled.div`
+export const PositionedWrapper = styled.div`
+	position: relative;
+	width: 100%;
+	height: 100%;
+`;
+
+export const MarginWrapper = styled.div<{ vertical?: boolean, horizontal?: boolean}>`
+	position: absolute;
 	width: fit-content;
-	margin: inherit auto;
+	height: fit-content;
+	margin: auto;
+
+	${({ vertical }) => vertical && css`
+		top: 0;
+		bottom: 0;
+	`}
+	${({ horizontal }) => horizontal && css`
+		left: 0;
+		right: 0;
+	`}
 `;

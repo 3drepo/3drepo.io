@@ -20,6 +20,7 @@ const { src } = require('../../helper/path');
 const Revisions = require(`${src}/models/revisions`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { generateRandomString } = require('../../helper/services');
 
 const testGetRevisionCount = () => {
 	describe('GetRevisionCount', () => {
@@ -125,17 +126,22 @@ const testUpdateRevisionStatus = () => {
 	};
 
 	describe('UpdateRevisionStatus', () => {
-		const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
 		test('Should update the void status of a revision', async () => {
+			const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
+			const newStatus = false;
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Revisions.updateRevisionStatus('someTS', 'someModel', 1, false);
-			checkResults(fn, revision._id, false);
+			await Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(),
+				generateRandomString(), revision._id, newStatus);
+			checkResults(fn, revision._id, newStatus);
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
-			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
-			checkResults(fn, -1, true);
+			const revisionId = generateRandomString();
+			const newStatus = true;
+			await expect(Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(),
+				generateRandomString(), revisionId, newStatus)).rejects.toEqual(templates.revisionNotFound);
+			checkResults(fn, revisionId, newStatus);
 		});
 	});
 };
