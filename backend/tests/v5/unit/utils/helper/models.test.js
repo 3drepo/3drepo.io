@@ -40,24 +40,22 @@ const testRemoveModelData = () => {
 			ModelSettings.deleteModel.mockRejectedValue(templates.modelNotFound);
 
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
 			const model = generateRandomString();
 
-			await ModelHelper.removeModelData(teamspace, model);
+			await ModelHelper.removeModelData(teamspace, project, model);
 
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, model);
+			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
 
 			expect(DB.listCollections).toHaveBeenCalledTimes(1);
 			expect(DB.listCollections).toHaveBeenCalledWith(teamspace);
 
 			// We mocked listCollections to return empty array, so we shouldn't have removed any collections
 			expect(DB.dropCollection).not.toHaveBeenCalled();
-
-			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, model);
 		});
 
 		test(`should throw error if deleteModel threw an error that was not ${templates.modelNotFound.code}`, async () => {
@@ -66,9 +64,10 @@ const testRemoveModelData = () => {
 			ModelSettings.deleteModel.mockRejectedValue(templates.unknown);
 
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
 			const model = generateRandomString();
 
-			await expect(ModelHelper.removeModelData(teamspace, model)).rejects.toEqual(templates.unknown);
+			await expect(ModelHelper.removeModelData(teamspace, project, model)).rejects.toEqual(templates.unknown);
 		});
 	});
 };

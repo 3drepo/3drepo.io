@@ -17,13 +17,16 @@
 
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
+import { CentredContainer } from '@controls/centredContainer';
 import { LOGIN_PATH } from '../../routes.constants';
 import { ReturnLinkContainer } from './components.styles';
 
 export const ReturnLink = () => (
 	<ReturnLinkContainer>
-		<Link to={LOGIN_PATH}>
-			<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
-		</Link>
+		<CentredContainer>
+			<Link to={LOGIN_PATH}>
+				<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
+			</Link>
+		</CentredContainer>
 	</ReturnLinkContainer>
 );

@@ -20,15 +20,14 @@ import {
 	DashboardListItemRow,
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { useDispatch } from 'react-redux';
 import { discardSlash } from '@/v5/services/routing/routing';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { FormattedMessage } from 'react-intl';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { Button } from '@controls/button';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 
 type ProjectListItemProps = {
 	project: IProject,
@@ -38,11 +37,10 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 	let { url } = useRouteMatch();
 	const { teamspace } = useParams<DashboardParams>();
 	url = discardSlash(url);
-	const dispatch = useDispatch();
 
 	const onClickDelete = (e) => {
 		e.preventDefault();
-		dispatch(DialogsActions.open('delete', {
+		DialogsActionsDispatchers.open('delete', {
 			name: project.name,
 			onClickConfirm: (onSuccess, onError) => (
 				ProjectsActionsDispatchers.deleteProject(teamspace, project._id, onSuccess, onError)
@@ -52,7 +50,7 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 				defaultMessage: 'By deleting this Project your data will be lost permanently and will not be recoverable.',
 			}),
 			confidenceCheck: true,
-		}));
+		});
 	};
 
 	return (

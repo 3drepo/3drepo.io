@@ -37,7 +37,6 @@ const options = {
 		security: [
 			{ keyAuth: [] },
 		],
-		basePath: '/api/v5',
 	},
 	apis: [`${__dirname}/../../routes/**/*.js`], // files containing annotations as above
 };
