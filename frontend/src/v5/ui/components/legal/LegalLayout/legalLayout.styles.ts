@@ -103,8 +103,13 @@ export const TermsForm = styled.div`
 	margin: 30px;
 `;
 
-export const ListItem = styled.span`
-	margin-right: 10px;
+export const Clause = styled.div`
+	margin: 1px;
+	display: inline-flex;
+`;
+
+export const ClauseNo = styled.span`
+	margin: 13px 10px 13px 0;
 `;
 
 export const PaperTitle = styled.div`
