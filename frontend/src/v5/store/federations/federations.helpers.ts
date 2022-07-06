@@ -60,6 +60,7 @@ export const prepareSingleFederationData = (
 	return {
 		...federation,
 		code: stats?.code ?? '',
+		desc: stats?.desc ?? '',
 		status: stats?.status ?? UploadStatuses.OK,
 		containers,
 		issues: stats?.tickets.issues ?? 0,

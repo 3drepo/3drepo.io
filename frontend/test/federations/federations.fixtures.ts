@@ -70,6 +70,7 @@ export const prepareMockStatsReply = (federation: IFederation): FederationStats 
 	category: federation.category,
 	status: federation.status,
 	code: federation.code,
+	desc: federation.desc,
 });
 
 export const prepareMockContainers = (min = 1, max = 10): string[] => (
