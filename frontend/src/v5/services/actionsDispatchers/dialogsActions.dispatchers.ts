@@ -15,10 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ModalContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
 
-export const Container = styled(ContainerBase)`
-	min-width: 450px;
-	min-height: 248px;
-`;
+export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
