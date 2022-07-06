@@ -81,6 +81,12 @@ Sessions.destroySession = (req, res) => {
 		req.session.destroy(() => {
 			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
 			const sessionData = { user: { username } };
+
+			publish(events.SESSIONS_REMOVED, {
+				ids: [req.sessionID],
+				elective: true,
+			});
+
 			respond({ ...req, session: sessionData }, res, templates.ok, req.v4 ? { username } : undefined);
 		});
 	} catch (err) {

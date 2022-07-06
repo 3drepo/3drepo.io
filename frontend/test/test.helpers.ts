@@ -24,3 +24,15 @@ export const alertAction = (currentAction: string) => ({
 		},
 	},
 });
+
+// A different Node version between the backend and the frontend
+// is causing a problem with axios when files are sent to an endpoint.
+// This is a workaround for that.
+export const spyOnAxiosApiCallWithFile = (api, method) => {
+	const methodFn = api[method];
+	return jest.spyOn(api, method).mockImplementation((url, body) => {
+		// Transforms the formData to a string to avoid a problem with axios
+		// in its node implementation.
+		return methodFn(url, body.toString());
+	});
+};
