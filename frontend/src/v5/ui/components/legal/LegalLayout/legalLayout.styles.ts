@@ -35,6 +35,7 @@ export const LegalContent = styled.div`
 	}
 	h2 {
 		${({ theme }) => theme.typography.h2}
+		margin-top: 35px;
 	}
 	h3 {
 		${({ theme }) => theme.typography.h3}
@@ -48,7 +49,7 @@ export const LegalContent = styled.div`
 	}
 	/* Lists */
 	ol {
-		padding: 0;
+		padding-left: 21px;
 		color: ${({ theme }) => theme.palette.base.main};
 		li {
 			${({ theme }) => theme.typography.h2};
