@@ -18,13 +18,12 @@ import { useParams } from 'react-router';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -42,7 +41,6 @@ export const ContainerEllipsisMenu = ({
 	openContainerSettings,
 }: ContainerEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const dispatch = useDispatch();
 
 	return (
 		<EllipsisMenu>
@@ -108,7 +106,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				onClick={() => dispatch(DialogsActions.open('delete', {
+				onClick={() => DialogsActionsDispatchers.open('delete', {
 					title: formatMessage(
 						{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
 						{ name: container.name },
@@ -122,7 +120,7 @@ export const ContainerEllipsisMenu = ({
 						id: 'deleteModal.container.message',
 						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
 					}),
-				}))}
+				})}
 			/>
 		</EllipsisMenu>
 	);

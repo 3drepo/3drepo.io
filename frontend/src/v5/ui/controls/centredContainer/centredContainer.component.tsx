@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v5Path } = require('../../interop');
+import { MarginWrapper, PositionedWrapper } from './centredContainer.styles';
 
-const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
-const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
-
-const Utils = {};
-
-Utils.getTeamspaceList = async () => {
-	const dbList = await listDatabases();
-	return dbList.flatMap(({ name: db }) => (USERNAME_BLACKLIST.includes(db) ? [] : db));
+export type ICentredContainer = {
+	vertical?: boolean;
+	horizontal?: boolean;
+	className?: string;
+	children: any;
 };
 
-Utils.getCollectionsEndsWith = async (teamspace, str) => {
-	const collections = await listCollections(teamspace);
-	return collections.filter(({ name }) => name.endsWith(str));
-};
-
-module.exports = Utils;
+export const CentredContainer = ({
+	vertical = true,
+	horizontal = true,
+	className,
+	children,
+}: ICentredContainer): JSX.Element => (
+	<PositionedWrapper>
+		<MarginWrapper vertical={vertical} horizontal={horizontal} className={className}>
+			{children}
+		</MarginWrapper>
+	</PositionedWrapper>
+);

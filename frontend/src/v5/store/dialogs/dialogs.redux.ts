@@ -57,14 +57,14 @@ export const dialogsReducer = createReducer(INITIAL_STATE, {
 type OpenAction<T> = Action<'OPEN'> & { modalType: string, props: T };
 type CloseAction = Action<'CLOSE'> & { dialogId: string };
 
-interface IDialogsActionCreators {
+export interface IDialogsActionCreators {
 	open: <T>(type?: string, props?: T) => OpenAction<T>;
 	close: (id: string) => CloseAction;
 }
 
 export interface IDialogConfig {
 	id: string;
-	modalType?: 'error' | 'info' | 'alert';
+	modalType?: 'delete' | 'warning' | 'alert' | 'info';
 	props: any;
 }
 
