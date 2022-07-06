@@ -28,7 +28,7 @@ Schemas.securitySchemes = {
 	},
 };
 
-Schemas.schemas.roleDefinitions = {
+Schemas.schemas.roles = {
 	type: 'string',
 	enum: ['admin', 'collaborator', 'commenter', 'viewer'],
 	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
@@ -74,12 +74,12 @@ Schemas.schemas.group = {
 			example: 'JohnDoe',
 		},
 		createdAt: {
-			type: 'int64',
+			type: 'number',
 			description: 'Timestamp when the group was created, epoch time in ms',
 			example: 1632821117000,
 		},
 		updatedAt: {
-			type: 'int64',
+			type: 'number',
 			description: 'Timestamp when the group was last updated, epoch time in ms',
 			example: 1632821119000,
 		},

@@ -124,8 +124,7 @@ const establishRoutes = () => {
 	 *     tags: [Teamspaces]
 	 *     operationId: getTeamspaceMembers
 	 *     parameters:
-   	 *       - teamspace:
-	 *         name: teamspace
+   	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
@@ -177,8 +176,7 @@ const establishRoutes = () => {
 	*     description: Gets the avatar of the teamspace
 	*     tags: [Teamspaces]
 	*     parameters:
-   	*       - teamspace:
-	*         name: teamspace
+   	*       - name: teamspace
 	*         description: name of teamspace
 	*         in: path
 	*         required: true
@@ -190,8 +188,6 @@ const establishRoutes = () => {
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
 	*         description: Gets the avatar of the Teamspace
-	*         produces:
-	*           image/png:
 	*         content:
 	*           image/png:
 	*             schema:
