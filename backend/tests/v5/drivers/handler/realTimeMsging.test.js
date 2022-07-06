@@ -20,7 +20,7 @@ const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
-const { SESSION_HEADER, session } = require(`${src}/services/sessions`);
+const { session } = require(`${src}/services/sessions`);
 
 const RealTime = require(`${src}/handler/realTimeMsging`);
 
@@ -49,7 +49,7 @@ const startServer = async (onNewSocket) => {
 	const server = http.createServer();
 	server.listen(port, ip);
 	const { middleware } = await session;
-	const { broadcast, close: destroySocketIO } = RealTime.createApp(server, middleware, SESSION_HEADER, onNewSocket);
+	const { broadcast, close: destroySocketIO } = RealTime.createApp(server, middleware, onNewSocket);
 
 	return {
 		broadcast,
@@ -149,7 +149,7 @@ const testSocketEmit = () => {
 			socketAtClient.disconnect();
 		});
 
-		test('Server should be able to leave join requests', async () => {
+		test('Server should be able to catch leave requests', async () => {
 			const { socketAtClient, socketAtServer } = await connectSocket(onNewSocket);
 
 			const message = { [generateRandomString()]: generateRandomString() };
@@ -192,46 +192,132 @@ const testSocketRooms = () => {
 		});
 
 		const noMessageProm = (socket, event) => new Promise((resolve, reject) => {
-			socket.on(event, reject);
+			socket.on(event, () => { reject(new Error(`Event ${event} received at socket when it is not expected`)); });
 			setTimeout(resolve, 10);
 		});
 
-		test('Server should be able to broadcast to channels', async () => {
-			const socket1 = await connectSocket(onNewSocket);
-			const socket2 = await connectSocket(onNewSocket);
+		describe('Server should be able to broadcast to channels', () => {
+			let socket1;
+			let socket2;
+			beforeEach(async () => {
+				socket1 = await connectSocket(onNewSocket);
+				socket2 = await connectSocket(onNewSocket);
+			});
 
-			const channel = generateRandomString();
+			afterEach(() => {
+				socket1.socketAtClient.disconnect();
+				socket2.socketAtClient.disconnect();
+			});
 
-			socket1.socketAtServer.join(channel);
-			socket2.socketAtServer.join(channel);
+			test('Sockets should receive the message should they have subscribed', async () => {
+				const channel = generateRandomString();
 
-			const event = generateRandomString();
-			const message = generateRandomString();
+				socket1.socketAtServer.join(channel);
+				socket2.socketAtServer.join(channel);
 
-			const msgProm1 = Promise.all([
-				messageProm(socket1.socketAtClient, event, message),
-				messageProm(socket2.socketAtClient, event, message),
-			]);
+				const event = generateRandomString();
+				const message = generateRandomString();
 
-			sendToRoom(channel, event, message);
+				const msgProm = Promise.all([
+					messageProm(socket1.socketAtClient, event, message),
+					messageProm(socket2.socketAtClient, event, message),
+				]);
 
-			await msgProm1;
+				sendToRoom(channel, event, message);
 
-			socket2.socketAtServer.leave(channel);
+				await msgProm;
+			});
 
-			const event2 = generateRandomString();
-			const message2 = generateRandomString();
+			test('Sockets should not receive the message should they have not subscribed', async () => {
+				const channel = generateRandomString();
 
-			const msgProm2 = Promise.all([
-				messageProm(socket1.socketAtClient, event2, message2),
-				noMessageProm(socket2.socketAtClient, event2),
-			]);
+				socket1.socketAtServer.join(channel);
 
-			sendToRoom(channel, event2, message2);
-			await msgProm2;
+				const event = generateRandomString();
+				const message = generateRandomString();
 
-			socket1.socketAtClient.disconnect();
-			socket2.socketAtClient.disconnect();
+				const msgProm = Promise.all([
+					messageProm(socket1.socketAtClient, event, message),
+					noMessageProm(socket2.socketAtClient, event),
+				]);
+
+				sendToRoom(channel, event, message);
+
+				await msgProm;
+			});
+
+			test('Sockets should not receive the message if they have left the channel', async () => {
+				const channel = generateRandomString();
+
+				socket1.socketAtServer.join(channel);
+				socket2.socketAtServer.join(channel);
+
+				const event = generateRandomString();
+				const message = generateRandomString();
+
+				socket2.socketAtServer.leave(channel);
+
+				const msgProm = Promise.all([
+					messageProm(socket1.socketAtClient, event, message),
+					noMessageProm(socket2.socketAtClient, event),
+				]);
+
+				sendToRoom(channel, event, message);
+
+				await msgProm;
+			});
+
+			test('Sockets should still get messages from other channels if they have left one', async () => {
+				const channel = generateRandomString();
+				const channel2 = generateRandomString();
+
+				socket1.socketAtServer.join(channel);
+				socket1.socketAtServer.join(channel2);
+
+				const event = generateRandomString();
+				const message = generateRandomString();
+
+				const event2 = generateRandomString();
+				const message2 = generateRandomString();
+
+				socket1.socketAtServer.leave(channel);
+
+				const msgProm = Promise.all([
+					messageProm(socket1.socketAtClient, event2, message2),
+					noMessageProm(socket1.socketAtClient, event),
+				]);
+
+				sendToRoom(channel, event, message);
+				sendToRoom(channel2, event2, message2);
+
+				await msgProm;
+			});
+
+			test('Sockets should not get messages from any channels if they have left all channels', async () => {
+				const channel = generateRandomString();
+				const channel2 = generateRandomString();
+
+				socket1.socketAtServer.join(channel);
+				socket1.socketAtServer.join(channel2);
+
+				const event = generateRandomString();
+				const message = generateRandomString();
+
+				const event2 = generateRandomString();
+				const message2 = generateRandomString();
+
+				socket1.socketAtServer.leaveAll();
+
+				const msgProm = Promise.all([
+					noMessageProm(socket1.socketAtClient, event),
+					noMessageProm(socket1.socketAtClient, event2),
+				]);
+
+				sendToRoom(channel, event, message);
+				sendToRoom(channel2, event2, message2);
+
+				await msgProm;
+			});
 		});
 
 		test('Socket broadcast should be able only be received by other subscribed sockets', async () => {
