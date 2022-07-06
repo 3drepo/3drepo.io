@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import ErrorIconBase from '@assets/icons/warning_small.svg';
 import { FormCheckbox as FormCheckboxBase } from '@controls/formCheckbox/formCheckbox.component';
 
 export const CreateAccountButton = styled(SubmitButton)`
@@ -62,24 +61,6 @@ export const Link = styled(LinkBase).attrs({
 	}
 `;
 
-export const ErrorContainer = styled.div`
-	color: ${({ theme }) => theme.palette.error.main};
-	${({ theme }) => theme.typography.body1};
-	font-weight: 500;
-	margin-top: 13px;
-	justify-content: flex-start;
-	display: flex;
-`;
-
-export const ErrorIcon = styled(ErrorIconBase)`
-	margin-right: 8px;
-	min-width: 18px;
-`;
-
-export const ErrorMessage = styled.div`
-	margin-left: 8px;
-`;
-
 export const CircularProgressContainer = styled.div`
 	margin: auto;
 	margin-top: 20px;
@@ -87,10 +68,6 @@ export const CircularProgressContainer = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-`;
-
-export const Gap = styled.div`
-	height: 10px;
 `;
 
 export const FormCheckbox = styled(FormCheckboxBase)`

@@ -16,10 +16,14 @@
  */
 
 import * as Yup from 'yup';
-import filesize from 'filesize';
-import { formatMessage } from '../services/intl';
+import { formatMessage } from '@/v5/services/intl';
 
-const containerName = Yup.string()
+export const numberField = Yup.number().typeError(formatMessage({
+	id: 'settings.surveyPoint.error.number',
+	defaultMessage: 'Must be a decimal number or integer',
+}));
+
+export const containerName = Yup.string()
 	.max(120,
 		formatMessage({
 			id: 'validation.containers.name.error.max',
@@ -32,10 +36,10 @@ const containerName = Yup.string()
 		}),
 	);
 
-const containerUnit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
-const containerType = Yup.string().required().default('Uncategorised');
+export const containerUnit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
+export const containerType = Yup.string().required().default('Uncategorised');
 
-const containerCode = Yup.string()
+export const containerCode = Yup.string()
 	.max(50,
 		formatMessage({
 			id: 'validation.containers.code.error.max',
@@ -47,22 +51,14 @@ const containerCode = Yup.string()
 			defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
 		}));
 
-export const filesizeTooLarge = (file: File): string => {
-	const { uploadSizeLimit } = ClientConfig;
-	return (file.size > uploadSizeLimit) && formatMessage({
-		id: 'validation.revisions.file.error.tooLarge',
-		defaultMessage: 'File exceeds size limit of {sizeLimit}',
-	}, { sizeLimit: filesize(uploadSizeLimit) });
-};
-
-const containerDesc = Yup.string()
+export const containerDesc = Yup.string()
 	.max(660,
 		formatMessage({
 			id: 'validation.containers.description.error.max',
 			defaultMessage: 'Container Description is limited to 50 characters',
 		}));
 
-const revisionTag = Yup.string()
+export const revisionTag = Yup.string()
 	.max(50,
 		formatMessage({
 			id: 'validation.revisions.tag.error.error.max',
@@ -80,38 +76,9 @@ const revisionTag = Yup.string()
 		}),
 	);
 
-const revisionDesc = Yup.string()
+export const revisionDesc = Yup.string()
 	.max(660,
 		formatMessage({
 			id: 'validation.revisions.desc.error.max',
 			defaultMessage: 'Revision Description is limited to 50 characters',
 		}));
-
-export const CreateContainerSchema = Yup.object().shape({
-	name: containerName,
-	unit: containerUnit,
-	type: containerType,
-	code: containerCode,
-	desc: containerDesc,
-});
-
-export const ListItemSchema = Yup.object().shape({
-	revisionTag,
-	containerName,
-});
-
-export const SidebarSchema = Yup.object().shape({
-	containerUnit,
-	containerType,
-	containerCode,
-	containerDesc,
-	revisionDesc,
-});
-
-export const UploadsSchema = Yup.object().shape({
-	uploads: Yup
-		.array()
-		.of(ListItemSchema.concat(SidebarSchema))
-		.required()
-		.min(1),
-});

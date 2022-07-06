@@ -22,10 +22,9 @@ import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { LoginSchema } from '@/v5/validation/auth';
+import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import ErrorIcon from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt } from './login.styles';
 import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
@@ -71,7 +70,7 @@ export const Login = () => {
 						defaultMessage: 'Password',
 					})}
 				/>
-				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
+				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage
