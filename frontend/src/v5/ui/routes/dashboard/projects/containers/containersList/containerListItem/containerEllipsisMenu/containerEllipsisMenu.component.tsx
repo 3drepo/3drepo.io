@@ -108,16 +108,16 @@ export const ContainerEllipsisMenu = ({
 				})}
 				onClick={() => DialogsActionsDispatchers.open('delete', {
 					name: container.name,
-					onClickConfirm: (
-						onSuccess,
-						onError,
-					) => ContainersActionsDispatchers.deleteContainer(
-						teamspace,
-						project,
-						container._id,
-						onSuccess,
-						onError,
-					),
+					onClickConfirm: () => new Promise<void>(
+						(accept, reject) => {
+							ContainersActionsDispatchers.deleteContainer(
+								teamspace,
+								project,
+								container._id,
+								accept,
+								reject,
+							);
+						}),
 					message: formatMessage({
 						id: 'deleteModal.container.message',
 						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',

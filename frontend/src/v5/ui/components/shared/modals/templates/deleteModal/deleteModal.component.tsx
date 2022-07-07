@@ -36,7 +36,7 @@ import { isNetworkError } from '@/v5/validation/errors.helpers';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
-	onClickConfirm: (onSuccess, onError) => any,
+	onClickConfirm: () => Promise<void>,
 	name: string,
 	message?: string,
 	confidenceCheck?: boolean,
@@ -62,8 +62,13 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 		}
 	};
 
-	const onSuccess = () => {
-		onClickClose();
+	const onSubmit = async () => {
+		try {
+			await onClickConfirm();
+			onClickClose();
+		} catch (e) {
+			onError(e);
+		}
 	};
 
 	return (
@@ -114,7 +119,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						defaultMessage="Cancel"
 					/>
 				</Button>
-				<Button autoFocus type="submit" onClick={() => handleSubmit(onClickConfirm(onSuccess, onError))} variant="outlined" color="secondary" disabled={!isValid}>
+				<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
 					<FormattedMessage
 						id="deleteModal.action.confirm"
 						defaultMessage="Delete"

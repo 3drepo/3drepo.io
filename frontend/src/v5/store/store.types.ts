@@ -33,7 +33,7 @@ export type ProjectAndContainerId = ProjectId & ContainerId;
 
 export type ProjectAndFederationId = ProjectId & FederationId;
 
-export type SuccessAndError = OnSuccess & OnError;
+export type SuccessAndErrorCallbacks = OnSuccess & OnError;
 
 export type SurveyPoint = {
 	latLong: [number, number];
