@@ -66,15 +66,15 @@ const getGroupSetData = (groupSet) => {
 	return data;
 };
 
-export const GroupSetItem = ({ item, collapse, children }) => {
+export const GroupSetItem = ({ groupSet, collapse, children }) => {
 	const [collapseDict, setCollapse] = collapse;
-	const hidden = collapseDict[item.pathName] ?? true;
+	const hidden = collapseDict[groupSet.pathName] ?? true;
 	const hiddenIcon = hidden ? '^' : 'v';
-	const { override, descendants, highlight } = getGroupSetData(item);
+	const { override, descendants, highlight } = getGroupSetData(groupSet);
 
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
-		setCollapse({ ...collapseDict, [item.pathName]: !hidden });
+		setCollapse({ ...collapseDict, [groupSet.pathName]: !hidden });
 	};
 
 	const onClickOverride = (event: SyntheticEvent) => {
@@ -97,7 +97,7 @@ export const GroupSetItem = ({ item, collapse, children }) => {
 			role="treeitem"
 			$highlighted={highlight}
 		>
-			<b>{item.name} ({descendants.length})
+			<b>{groupSet.name} ({descendants.length})
 				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />
 				<button onClick={onClickIsolate} type="button">
 					<span role="img" aria-label="isolate">👁️</span>

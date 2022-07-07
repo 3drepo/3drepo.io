@@ -133,7 +133,7 @@ const groupsToTree = (groups) => {
 const GroupTreeItem = ({ item, collapse }) => {
 	if (item.children) {
 		return (
-			<GroupSetItem item={item} collapse={collapse}>
+			<GroupSetItem groupSet={item} collapse={collapse}>
 				<GroupTree tree={item.children} collapse={collapse} />
 			</GroupSetItem>
 		);

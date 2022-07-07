@@ -28,8 +28,8 @@ const GroupIconComponent = ({ group }) => (
 	<GroupIcon $color={hexToRgba(group.color)}>
 		{isSmart(group) && <LightingIcon /> }
 	</GroupIcon>
-
 );
+
 export const GroupItem = ({ group }) => {
 	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
 	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(group._id);
@@ -60,8 +60,9 @@ export const GroupItem = ({ group }) => {
 			onClick={onClickHighlight}
 			$highlighted={isHighlighted}
 		>
-			<GroupIconComponent group={group} />
-
+			HELLO
+			[<GroupIconComponent group={group} />]
+			THERE
 			{group.name} objects: {group.objects.length}
 			<Checkbox checked={isOverriden} onClick={onClickOverride} />
 			<button onClick={onClickIsolate} type="button">
