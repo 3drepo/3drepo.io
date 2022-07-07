@@ -24,3 +24,10 @@ export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerSettingsUpdate',
 		(settings: ContainerSettings) =>
 			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));
+
+export const enableRealtimeNewContainerUpdate = (teamspace:string, project:string) => {
+	subscribeToRoomEvent({ teamspace, project }, 'newContainer',
+		(container) =>
+			ContainersActionsDispatchers.createContainerSuccess(project, container));
+};
+

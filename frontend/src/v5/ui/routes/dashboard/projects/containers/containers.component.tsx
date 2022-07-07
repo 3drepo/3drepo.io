@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
+import { enableRealtimeNewContainerUpdate } from '@/v5/services/realtime/container.events';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
@@ -29,8 +31,10 @@ import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
+import { DashboardParams } from '../../../routes.constants';
 
 export const Containers = (): JSX.Element => {
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
 		containers,
@@ -45,6 +49,8 @@ export const Containers = (): JSX.Element => {
 	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	const onClickClose = () => setUploadModalOpen(false);
+
+	useEffect(() => enableRealtimeNewContainerUpdate(teamspace, project), []);
 
 	return (
 		<>
