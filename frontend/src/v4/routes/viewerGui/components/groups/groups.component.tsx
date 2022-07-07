@@ -97,7 +97,15 @@ interface IProps {
 	id?: string	;
 }
 
-export class Groups extends PureComponent<IProps> {
+interface IState {
+	collapse: object;
+}
+
+export class Groups extends PureComponent<IProps, IState> {
+	public state = {
+		collapse: {},
+	};
+
 
 	get type() {
 		return VIEWER_PANELS.GROUPS;
@@ -154,7 +162,7 @@ export class Groups extends PureComponent<IProps> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() =>
-		<GroupsListComponent groups={this.props.groups} />
+		<GroupsListComponent groups={this.props.groups} collapse={[this.state.collapse, (collapse) => this.setState({collapse})]} />
 	);
 
 

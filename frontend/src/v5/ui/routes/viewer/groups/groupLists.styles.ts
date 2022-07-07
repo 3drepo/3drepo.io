@@ -14,7 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import Checkers from '@assets/images/checkers.svg';
+import { SVGComponentToString } from '@/v5/helpers/react.helper';
 
 export const GroupsTreeList = styled.ul`
     list-style-type: none;
@@ -36,13 +38,41 @@ export const GroupsListItemTitle = styled.div`
     color
 `;
 
-export const GroupIcon = styled.div<{$color?: string }>`
+const IconSize = css`
     width: 30px;
     height: 28px;
-    background-color: ${({ $color }) => $color};
+`;
+
+const PseudoElement = css`
+    ${IconSize}
+    content: '';
+    position: absolute;
+`;
+
+export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
+    ${IconSize}
     padding: 0 0 px;
     color: white;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    
+    ${({ $variant }) => ($variant === 'light' ? `
+        border: 1px solid #E0E5F0;
+        color: #6B778C;
+    ` : '')};
+
+    & svg {
+        z-index: 2;
+    }
+
+    &::after {
+        background-color: ${({ $color }) => $color};
+        ${PseudoElement}
+    }
+
+    &::before {
+        background-image:url('data:image/svg+xml;utf8,${SVGComponentToString(Checkers)}');
+        ${PseudoElement}
+    }
 `;

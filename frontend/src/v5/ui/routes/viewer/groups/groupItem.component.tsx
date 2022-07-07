@@ -25,7 +25,7 @@ import { GroupIcon, GroupsTreeListItem } from './groupLists.styles';
 const isSmart = (group) => !group.objects || !!group.rules;
 
 const GroupIconComponent = ({ group }) => (
-	<GroupIcon $color={hexToRgba(group.color)}>
+	<GroupIcon $color={hexToRgba(group.color)} $variant="light">
 		{isSmart(group) && <LightingIcon /> }
 	</GroupIcon>
 );

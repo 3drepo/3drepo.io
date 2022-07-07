@@ -24,6 +24,7 @@ import { GroupSetItem } from './groupSetItem.component';
 
 interface Props {
 	groups: any [];
+	collapse: [state: object, setState: (any)=>void];
 }
 
 const groupsToTree = (groups) => {
@@ -148,9 +149,8 @@ export const GroupTree = ({ tree, collapse }) => (
 	</GroupsTreeList>
 );
 
-export const GroupsListComponent = ({ groups }:Props) => {
+export const GroupsListComponent = ({ groups, collapse }:Props) => {
 	const [tree, setTree] = useState([]);
-	const collapse = useState({});
 
 	useEffect(() => {
 		setTree(groupsToTree(groups));
