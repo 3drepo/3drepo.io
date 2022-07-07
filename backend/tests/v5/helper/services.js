@@ -21,7 +21,8 @@ const http = require('http');
 
 const { src, srcV4 } = require('./path');
 
-const { createApp } = require(`${srcV4}/services/api`);
+const { createApp: createServer } = require(`${srcV4}/services/api`);
+const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
@@ -311,7 +312,9 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = () => createApp().listen(8080);
+ServiceHelper.app = () => createServer().listen(8080);
+
+ServiceHelper.frontend = () => createFrontend().listen(8080);
 
 ServiceHelper.chatApp = () => {
 	const server = http.createServer();

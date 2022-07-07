@@ -19,6 +19,8 @@ import { createSelector } from 'reselect';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IFederationsState } from './federations.redux';
+import { IFederation } from './federations.types';
+import { selectContainers } from '../containers/containers.selectors';
 
 const selectFederationsDomain = (state): IFederationsState => state.federations;
 
@@ -47,4 +49,18 @@ export const selectIsListPending = createSelector(
 
 export const selectAreStatsPending = createSelector(
 	selectFederations, (federations) => federations.some(({ hasStatsPending }) => hasStatsPending),
+);
+
+export const selectFederationById = createSelector(
+	selectFederations,
+	(_, id) => id,
+	(federations, id): IFederation | null => federations.find((federation) => (federation._id === id)),
+);
+
+export const selectContainersByFederationId = createSelector(
+	selectContainers,
+	selectFederationById,
+	(containers, federation) => federation?.containers?.map(
+		(containerId) => containers.find((container) => container._id === containerId),
+	) ?? [],
 );

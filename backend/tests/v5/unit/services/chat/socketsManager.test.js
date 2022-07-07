@@ -39,7 +39,7 @@ const generateSocket = (session = generateRandomString()) => {
 		},
 	};
 
-	const functions = ['onDisconnect', 'onLeave', 'onJoin', 'emit', 'leave', 'join', 'broadcast'];
+	const functions = ['onDisconnect', 'onLeave', 'onJoin', 'emit', 'leave', 'join', 'broadcast', 'leaveAll'];
 
 	functions.forEach((fnName) => {
 		socket[fnName] = jest.fn();
@@ -442,7 +442,46 @@ const testSocketsEvents = () => {
 	});
 };
 
+const testResetSocketsBySessionIds = () => {
+	describe('Reset sockets by session Ids', () => {
+		beforeEach(SocketsManager.reset);
+
+		test('Should do nothing and return gracefully if sessions are empty', () => {
+			const socket = generateSocket();
+			SocketsManager.addSocket(socket);
+			SocketsManager.resetSocketsBySessionIds([]);
+			expect(socket.leaveAll).not.toHaveBeenCalled();
+		});
+
+		test('Socket with the given session should be forced to leave all rooms subscribed', () => {
+			const session1 = generateRandomString();
+			const session2 = generateRandomString();
+
+			const sess1Soc1 = generateSocket(session1);
+			SocketsManager.addSocket(sess1Soc1);
+
+			const sess1Soc2 = generateSocket(session1);
+			SocketsManager.addSocket(sess1Soc2);
+
+			const sess2Soc1 = generateSocket(session2);
+			SocketsManager.addSocket(sess2Soc1);
+
+			const otherSoc = generateSocket();
+			SocketsManager.addSocket(otherSoc);
+
+			SocketsManager.resetSocketsBySessionIds([session1, session2, generateRandomString()]);
+
+			[sess1Soc1, sess1Soc2, sess2Soc1].forEach((soc) => {
+				expect(soc.leaveAll).toHaveBeenCalledTimes(1);
+			});
+
+			expect(otherSoc.leaveAll).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe('services/chat/socketsManager', () => {
 	testSocketsCollection();
 	testSocketsEvents();
+	testResetSocketsBySessionIds();
 });
