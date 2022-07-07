@@ -117,7 +117,8 @@ export const ContainerEllipsisMenu = ({
 								accept,
 								reject,
 							);
-						}),
+						},
+					),
 					message: formatMessage({
 						id: 'deleteModal.container.message',
 						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
