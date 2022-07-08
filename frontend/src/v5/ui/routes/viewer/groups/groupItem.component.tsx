@@ -55,7 +55,9 @@ export const GroupItem = ({ group, disabled }) => {
 		GroupsActionsDispatchers.showDetails(group);
 	};
 
-	const depth = group.name.split('::').length;
+	const path = group.name.split('::');
+	const depth = path.length;
+	const name = path.pop();
 
 	return (
 		<GroupsTreeListItemComponent
@@ -72,7 +74,7 @@ export const GroupItem = ({ group, disabled }) => {
 			<GroupIconComponent group={group} />
 			<GroupItemTextContainer>
 				<GroupItemName>
-					{group.name}
+					{name}
 				</GroupItemName>
 				<GroupItemObjects>
 					Objects: {group.objects.length}

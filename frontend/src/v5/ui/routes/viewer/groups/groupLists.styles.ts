@@ -19,6 +19,7 @@ import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 import SmallChevron from '@assets/icons/small_chevron.svg';
+import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
 export const GroupsTreeList = styled.ul`
     list-style-type: none;
@@ -27,11 +28,11 @@ export const GroupsTreeList = styled.ul`
 `;
 
 export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
-    background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
     cursor: default;
     position: relative;
 `;
 export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
+    background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
     padding-left: ${({ $depth }) => $depth * 10}px;
     min-height: 41px;
     align-items: center;
@@ -87,7 +88,7 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
 
 export const ButtonsContainer = styled.div`
     position: absolute;
-    right: 25px;
+    right: 30px;
     color: #DCDCDC;
     ${StyledIconButton} {
         right: -10px;
@@ -129,4 +130,9 @@ export const GroupSetName = styled.div`
     font-weight: 500;
     font-size: 13px;
     line-height: 16px;
+`;
+
+export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>` {
+    padding-top:  ${({ $padding }) => ($padding ? '11' : '0')}px;
+    background-color: #EBEBEB;
 `;

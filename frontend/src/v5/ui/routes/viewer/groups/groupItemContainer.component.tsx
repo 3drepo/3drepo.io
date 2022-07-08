@@ -33,6 +33,7 @@ interface Props {
 	active?: boolean;
 	children: any;
 	grandChildren?: any[] | null;
+	className?: string;
 }
 
 export const GroupsTreeListItemComponent = (
@@ -48,10 +49,11 @@ export const GroupsTreeListItemComponent = (
 		active,
 		children,
 		grandChildren,
+		className,
 	}:Props,
 ) => (
-	<GroupsTreeListItem onClick={onClick} $highlighted={highlighted}>
-		<GroupsTreeListItemContainer $depth={depth}>
+	<GroupsTreeListItem onClick={onClick} className={className}>
+		<GroupsTreeListItemContainer $depth={depth} $highlighted={highlighted}>
 			{children}
 			<ButtonsContainer>
 				<TooltipButton action={onClickIsolate} label="Isolate" Icon={Visibility} disabled={disabled} />
