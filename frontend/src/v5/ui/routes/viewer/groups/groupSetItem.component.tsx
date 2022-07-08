@@ -53,7 +53,7 @@ const getGroupSetData = (groupSet) => {
 				const groupId = (groupOrGroupSet)._id;
 				childOverride = overrides.has(groupId);
 			} else {
-				childOverride = childGroupSetData.override;
+				childOverride = childGroupSetData.overriden;
 			}
 
 			overriden = overriden === null || overriden === childOverride ? childOverride : undefined;
