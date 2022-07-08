@@ -17,12 +17,9 @@
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import LightingIcon from '@assets/icons/lighting.svg';
-import { Checkbox } from '@mui/material';
 import { contrastColor } from 'contrast-color';
-import Visibility from '@mui/icons-material/VisibilityOutlined';
-import { ArrowButton, StyledArrowIcon } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
-import { GroupIcon, GroupsTreeListItem } from './groupLists.styles';
+import { GroupIcon, GroupItemName, GroupItemObjects, GroupItemTextContainer } from './groupLists.styles';
+import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
 const isSmart = (group) => (group.rules || []).length > 0;
 const isLight = (colour) => contrastColor({ bgColor: colour, threshold: 150 }) === '#FFFFFF';
@@ -34,13 +31,13 @@ const GroupIconComponent = ({ group }) => (
 );
 
 export const GroupItem = ({ group, disabled }) => {
-	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
-	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(group._id);
-	const isActive = GroupsHooksSelectors.selectActiveGroupId() === group._id;
+	const overriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
+	const highlighted = GroupsHooksSelectors.selectHighlightedGroups().has(group._id);
+	const active = GroupsHooksSelectors.selectActiveGroupId() === group._id;
 
 	const onClickOverride = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.setColorOverrides([group._id], !isOverriden);
+		GroupsActionsDispatchers.setColorOverrides([group._id], !overriden);
 	};
 
 	const onClickIsolate = (event) => {
@@ -58,27 +55,29 @@ export const GroupItem = ({ group, disabled }) => {
 		GroupsActionsDispatchers.showDetails(group);
 	};
 
+	const depth = group.name.split('::').length;
+
 	return (
-		<GroupsTreeListItem
+		<GroupsTreeListItemComponent
 			onClick={onClickHighlight}
-			$highlighted={isHighlighted}
+			onClickGotoDetails={onClickGotoDetails}
+			onClickIsolate={onClickIsolate}
+			onClickOverride={onClickOverride}
+			overriden={overriden}
+			highlighted={highlighted}
+			active={active}
+			disabled={disabled}
+			depth={depth}
 		>
 			<GroupIconComponent group={group} />
-			{group.name} objects: {group.objects.length}
-			<Checkbox checked={isOverriden} onClick={onClickOverride} />
-			<TooltipButton
-				label="Isolate"
-				action={onClickIsolate}
-				Icon={Visibility}
-				disabled={disabled}
-			/>
-
-			{isActive
-			&& (
-				<ArrowButton onClick={onClickGotoDetails} disabled={disabled}>
-					<StyledArrowIcon />
-				</ArrowButton>
-			)}
-		</GroupsTreeListItem>
+			<GroupItemTextContainer>
+				<GroupItemName>
+					{group.name}
+				</GroupItemName>
+				<GroupItemObjects>
+					Objects: {group.objects.length}
+				</GroupItemObjects>
+			</GroupItemTextContainer>
+		</GroupsTreeListItemComponent>
 	);
 };

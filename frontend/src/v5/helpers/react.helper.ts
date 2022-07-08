@@ -17,4 +17,4 @@
 import { createElement } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-export const SVGComponentToString = (SVGComponent) => ReactDOMServer.renderToString(createElement(SVGComponent));
+export const ComponentToString = (Component, props?) => ReactDOMServer.renderToString(createElement(Component, props));

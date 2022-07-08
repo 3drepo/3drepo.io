@@ -16,7 +16,8 @@
  */
 import styled, { css } from 'styled-components';
 import Checkers from '@assets/images/checkers.svg';
-import { SVGComponentToString } from '@/v5/helpers/react.helper';
+import { ComponentToString } from '@/v5/helpers/react.helper';
+import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 
 export const GroupsTreeList = styled.ul`
     list-style-type: none;
@@ -24,12 +25,17 @@ export const GroupsTreeList = styled.ul`
 
 `;
 
-export const GroupsTreeListItem = styled.li<{$highlighted?: boolean }>`
-    minimum-height: 41px;
+export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
     background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
-    padding: 0 0 px;
     cursor: default;
     position: relative;
+    border-bottom: 1px solid #DCDCDC;
+`;
+export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
+    padding-left: ${({ $depth }) => $depth * 10}px;
+    min-height: 41px;
+    align-items: center;
+    display: flex;
 `;
 
 export const GroupsListItemTitle = styled.div`
@@ -73,7 +79,38 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
     }
 
     &::before {
-        background-image:url('data:image/svg+xml;utf8,${SVGComponentToString(Checkers)}');
+        background-image:url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
         ${PseudoElement}
     }
+`;
+
+export const ButtonsContainer = styled.div`
+    position: absolute;
+    right: 25px;
+    top: -10px;
+    ${StyledIconButton} {
+        right: -20px;
+    }
+`;
+
+export const GroupItemTextContainer = styled.div`
+    padding-left: 10px;
+    display: inline-flex;
+    flex-direction: column;
+`;
+
+export const GroupItemName = styled.div`
+    color: #757575;
+    font-family: Roboto;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+`;
+
+export const GroupItemObjects = styled.div`
+    color: #6B778C;
+    font-family: inter;
+    font-weight: 500;
+    font-size: 9px;
+    line-height: 16px;
 `;

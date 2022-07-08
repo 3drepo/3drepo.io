@@ -14,13 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
-import Visibility from '@mui/icons-material/VisibilityOutlined';
-import { Checkbox } from '@mui/material';
 import { SyntheticEvent } from 'react';
-import { GroupsTreeListItem } from './groupLists.styles';
+import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
 const getGroupSetData = (groupSet) => {
 	// eslint-disable-next-line no-param-reassign
@@ -30,7 +27,7 @@ const getGroupSetData = (groupSet) => {
 
 	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
 		// eslint-disable-next-line prefer-const
-		let { override, descendants, highlight } = partialData;
+		let { overriden, descendants, highlighted } = partialData;
 		let childGroupSetData = null;
 		let childHighlight = null;
 
@@ -43,13 +40,13 @@ const getGroupSetData = (groupSet) => {
 			childHighlight = highlights.has(groupOrGroupSet._id);
 		}
 
-		if (highlight === null) {
-			highlight = childHighlight;
+		if (highlighted === null) {
+			highlighted = childHighlight;
 		}
 
-		highlight = highlight && childHighlight;
+		highlighted = highlighted && childHighlight;
 
-		if (override !== undefined) {
+		if (overriden !== undefined) {
 			let childOverride = null;
 
 			if (!groupOrGroupSet.children) {
@@ -59,11 +56,11 @@ const getGroupSetData = (groupSet) => {
 				childOverride = childGroupSetData.override;
 			}
 
-			override = override === null || override === childOverride ? childOverride : undefined;
+			overriden = overriden === null || overriden === childOverride ? childOverride : undefined;
 		}
 
-		return { override, descendants, highlight };
-	}, { override: null, descendants: [], highlight: null });
+		return { overriden, descendants, highlight: highlighted };
+	}, { overriden: null, descendants: [], highlighted: null });
 
 	return data;
 };
@@ -72,7 +69,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const [collapseDict, setCollapse] = collapse;
 	const hidden = collapseDict[groupSet.pathName] ?? true;
 	const hiddenIcon = hidden ? '^' : 'v';
-	const { override, descendants, highlight } = getGroupSetData(groupSet);
+	const { overriden, descendants, highlighted } = getGroupSetData(groupSet);
 
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
@@ -81,7 +78,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 
 	const onClickOverride = (event: SyntheticEvent) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.setColorOverrides(descendants, (override === false));
+		GroupsActionsDispatchers.setColorOverrides(descendants, (overriden === false));
 	};
 
 	const onClickIsolate = (event) => {
@@ -89,27 +86,23 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 		GroupsActionsDispatchers.isolateGroups(descendants);
 	};
 
-	const indeterminate = override === undefined;
-	const checked = !!override;
+	const depth = groupSet.pathName.split('::').len;
 
 	return (
-		<GroupsTreeListItem
+		<GroupsTreeListItemComponent
 			onClick={onClickItem}
-			onKeyDown={onClickItem}
-			role="treeitem"
-			$highlighted={highlight}
+			onClickIsolate={onClickIsolate}
+			onClickOverride={onClickOverride}
+			overriden={overriden}
+			highlighted={highlighted}
+			disabled={disabled}
+			depth={depth}
+			grandChildren={!hidden ? children : null}
 		>
+			&nbsp; {hiddenIcon}
 			<b>{groupSet.name} ({descendants.length})
-				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />
-				<TooltipButton
-					label="Isolate"
-					action={onClickIsolate}
-					Icon={Visibility}
-					disabled={disabled}
-				/>
-				&nbsp; {hiddenIcon}
+				
 			</b>
-			{!hidden && children}
-		</GroupsTreeListItem>
+		</GroupsTreeListItemComponent>
 	);
 };
