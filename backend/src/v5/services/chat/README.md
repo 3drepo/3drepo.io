@@ -147,7 +147,7 @@ The following events will be emitted if the user has subscribed to [Container/Fe
 
 #### Container New Revision
   - Event name: `containerNewRevision`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  owner: "owner name" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  author: "author name" }}`
   - Description: Used to notify the user of a new container revision addition. This will be triggered when a new container revision has been processed successfully
 
 #### Revision Updated
