@@ -18,6 +18,7 @@ import styled, { css } from 'styled-components';
 import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
+import SmallChevron from '@assets/icons/small_chevron.svg';
 
 export const GroupsTreeList = styled.ul`
     list-style-type: none;
@@ -29,13 +30,13 @@ export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
     background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
     cursor: default;
     position: relative;
-    border-bottom: 1px solid #DCDCDC;
 `;
 export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
     padding-left: ${({ $depth }) => $depth * 10}px;
     min-height: 41px;
     align-items: center;
     display: flex;
+    border-bottom: 1px solid #DCDCDC;
 `;
 
 export const GroupsListItemTitle = styled.div`
@@ -87,9 +88,9 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
 export const ButtonsContainer = styled.div`
     position: absolute;
     right: 25px;
-    top: -10px;
+    color: #DCDCDC;
     ${StyledIconButton} {
-        right: -20px;
+        right: -10px;
     }
 `;
 
@@ -112,5 +113,20 @@ export const GroupItemObjects = styled.div`
     font-family: inter;
     font-weight: 500;
     font-size: 9px;
+    line-height: 16px;
+`;
+
+export const CollapsibleIcon = styled(SmallChevron)<{$collapsed?: boolean}>` {
+    color: #757575;
+
+    ${({ $collapsed }) => (!$collapsed ? `
+    transform: rotate(90deg);` : '')};
+`;
+
+export const GroupSetName = styled.div`
+    color: #757575;
+    font-family: Roboto;
+    font-weight: 500;
+    font-size: 13px;
     line-height: 16px;
 `;

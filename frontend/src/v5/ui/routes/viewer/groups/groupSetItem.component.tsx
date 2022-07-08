@@ -18,6 +18,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import { SyntheticEvent } from 'react';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
+import { CollapsibleIcon, GroupSetName } from './groupLists.styles';
 
 const getGroupSetData = (groupSet) => {
 	// eslint-disable-next-line no-param-reassign
@@ -68,7 +69,6 @@ const getGroupSetData = (groupSet) => {
 export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const [collapseDict, setCollapse] = collapse;
 	const hidden = collapseDict[groupSet.pathName] ?? true;
-	const hiddenIcon = hidden ? '^' : 'v';
 	const { overriden, descendants, highlighted } = getGroupSetData(groupSet);
 
 	const onClickItem = (event: SyntheticEvent) => {
@@ -86,7 +86,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 		GroupsActionsDispatchers.isolateGroups(descendants);
 	};
 
-	const depth = groupSet.pathName.split('::').len;
+	const depth = groupSet.pathName.split('::').length;
 
 	return (
 		<GroupsTreeListItemComponent
@@ -99,10 +99,8 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 			depth={depth}
 			grandChildren={!hidden ? children : null}
 		>
-			&nbsp; {hiddenIcon}
-			<b>{groupSet.name} ({descendants.length})
-				
-			</b>
+			<CollapsibleIcon $collapsed={hidden} />
+			<GroupSetName>{groupSet.name} ({descendants.length}) </GroupSetName>
 		</GroupsTreeListItemComponent>
 	);
 };
