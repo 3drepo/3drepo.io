@@ -65,3 +65,7 @@ export type CreateRevisionPayload = {
 	uploadId: string;
 	body: CreateRevisionBody;
 };
+
+export type IRevisionUpdate = Partial<Omit<IRevision, '_id'>> & {
+	_id: string;
+};
