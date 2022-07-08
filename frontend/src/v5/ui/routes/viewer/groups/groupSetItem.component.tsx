@@ -14,8 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
+import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { Checkbox } from '@mui/material';
 import { SyntheticEvent } from 'react';
 import { GroupsTreeListItem } from './groupLists.styles';
@@ -66,7 +68,7 @@ const getGroupSetData = (groupSet) => {
 	return data;
 };
 
-export const GroupSetItem = ({ groupSet, collapse, children }) => {
+export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const [collapseDict, setCollapse] = collapse;
 	const hidden = collapseDict[groupSet.pathName] ?? true;
 	const hiddenIcon = hidden ? '^' : 'v';
@@ -99,9 +101,12 @@ export const GroupSetItem = ({ groupSet, collapse, children }) => {
 		>
 			<b>{groupSet.name} ({descendants.length})
 				<Checkbox checked={checked} indeterminate={indeterminate} onClick={onClickOverride} />
-				<button onClick={onClickIsolate} type="button">
-					<span role="img" aria-label="isolate">👁️</span>
-				</button>
+				<TooltipButton
+					label="Isolate"
+					action={onClickIsolate}
+					Icon={Visibility}
+					disabled={disabled}
+				/>
 				&nbsp; {hiddenIcon}
 			</b>
 			{!hidden && children}

@@ -25,6 +25,7 @@ import { GroupSetItem } from './groupSetItem.component';
 interface Props {
 	groups: any [];
 	collapse: [state: object, setState: (any)=>void];
+	disabled: boolean;
 }
 
 const groupsToTree = (groups) => {
@@ -131,30 +132,30 @@ const groupsToTree = (groups) => {
 	return tree;
 };
 
-const GroupTreeItem = ({ item, collapse }) => {
+const GroupTreeItem = ({ item, collapse, disabled }) => {
 	if (item.children) {
 		return (
-			<GroupSetItem groupSet={item} collapse={collapse}>
-				<GroupTree tree={item.children} collapse={collapse} />
+			<GroupSetItem groupSet={item} collapse={collapse} disabled={disabled}>
+				<GroupTree tree={item.children} collapse={collapse} disabled={disabled} />
 			</GroupSetItem>
 		);
 	}
 
-	return (<GroupItem group={item} />);
+	return (<GroupItem group={item} disabled={disabled} />);
 };
 
-export const GroupTree = ({ tree, collapse }) => (
+export const GroupTree = ({ tree, collapse, disabled }) => (
 	<GroupsTreeList>
-		{tree.map((item) => (<GroupTreeItem item={item} collapse={collapse} />))}
+		{tree.map((item) => (<GroupTreeItem item={item} collapse={collapse} disabled={disabled} />))}
 	</GroupsTreeList>
 );
 
-export const GroupsListComponent = ({ groups, collapse }:Props) => {
+export const GroupsListComponent = ({ groups, collapse, disabled }:Props) => {
 	const [tree, setTree] = useState([]);
 
 	useEffect(() => {
 		setTree(groupsToTree(groups));
 	}, [groups]);
 
-	return (<GroupTree tree={tree} collapse={collapse} />);
+	return (<GroupTree tree={tree} collapse={collapse} disabled={disabled} />);
 };

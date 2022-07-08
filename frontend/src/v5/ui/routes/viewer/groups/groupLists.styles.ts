@@ -29,6 +29,7 @@ export const GroupsTreeListItem = styled.li<{$highlighted?: boolean }>`
     background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
     padding: 0 0 px;
     cursor: default;
+    position: relative;
 `;
 
 export const GroupsListItemTitle = styled.div`

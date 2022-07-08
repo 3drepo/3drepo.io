@@ -162,7 +162,11 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() =>
-		<GroupsListComponent groups={this.props.groups} collapse={[this.state.collapse, (collapse) => this.setState({collapse})]} />
+		<GroupsListComponent
+			groups={this.props.groups}
+			collapse={[this.state.collapse, (collapse) => this.setState({collapse})]}
+			disabled={!this.props.isModelLoaded}
+		/>
 	);
 
 

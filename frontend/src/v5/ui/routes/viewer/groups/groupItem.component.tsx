@@ -14,23 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { hexToRgba } from '@/v4/helpers/colors';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import LightingIcon from '@assets/icons/lighting.svg';
 import { Checkbox } from '@mui/material';
+import { contrastColor } from 'contrast-color';
+import Visibility from '@mui/icons-material/VisibilityOutlined';
+import { ArrowButton, StyledArrowIcon } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
+import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { GroupIcon, GroupsTreeListItem } from './groupLists.styles';
 
-const isSmart = (group) => !group.objects || !!group.rules;
+const isSmart = (group) => (group.rules || []).length > 0;
+const isLight = (colour) => contrastColor({ bgColor: colour, threshold: 150 }) === '#FFFFFF';
 
 const GroupIconComponent = ({ group }) => (
-	<GroupIcon $color={hexToRgba(group.color)} $variant="light">
+	<GroupIcon $color={group.color} $variant={isLight(group.color) ? 'dark' : 'light'}>
 		{isSmart(group) && <LightingIcon /> }
 	</GroupIcon>
 );
 
-export const GroupItem = ({ group }) => {
+export const GroupItem = ({ group, disabled }) => {
 	const isOverriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
 	const isHighlighted = GroupsHooksSelectors.selectHighlightedGroups().has(group._id);
 	const isActive = GroupsHooksSelectors.selectActiveGroupId() === group._id;
@@ -60,20 +63,21 @@ export const GroupItem = ({ group }) => {
 			onClick={onClickHighlight}
 			$highlighted={isHighlighted}
 		>
-			HELLO
-			[<GroupIconComponent group={group} />]
-			THERE
+			<GroupIconComponent group={group} />
 			{group.name} objects: {group.objects.length}
 			<Checkbox checked={isOverriden} onClick={onClickOverride} />
-			<button onClick={onClickIsolate} type="button">
-				<span role="img" aria-label="isolate">👁️</span>
-			</button>
+			<TooltipButton
+				label="Isolate"
+				action={onClickIsolate}
+				Icon={Visibility}
+				disabled={disabled}
+			/>
 
 			{isActive
 			&& (
-				<button onClick={onClickGotoDetails} type="button">
-					<span role="img" aria-label="isolate">➡</span>
-				</button>
+				<ArrowButton onClick={onClickGotoDetails} disabled={disabled}>
+					<StyledArrowIcon />
+				</ArrowButton>
 			)}
 		</GroupsTreeListItem>
 	);
