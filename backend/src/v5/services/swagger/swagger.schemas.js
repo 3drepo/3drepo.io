@@ -30,10 +30,10 @@ Schemas.securitySchemes = {
 };
 
 const helpers = {
-	boolDef: (description, example, required) => ({ type: 'boolean', ...deleteIfUndefined({ description, example, required }) }),
-	numberDef: (description, example, required) => ({ type: 'number', ...deleteIfUndefined({ description, example, required }) }),
-	stringDef: (description, example, required, enumVal) => ({ type: 'string', ...deleteIfUndefined({ description, example, required, enum: enumVal }) }),
-	arrayDef: (description, items, example, required) => ({ type: 'array', ...deleteIfUndefined({ description, items, example, required }) }),
+	boolDef: (description, example) => ({ type: 'boolean', ...deleteIfUndefined({ description, example }) }),
+	numberDef: (description, example) => ({ type: 'number', ...deleteIfUndefined({ description, example }) }),
+	stringDef: (description, example, enumVal) => ({ type: 'string', ...deleteIfUndefined({ description, example, enum: enumVal }) }),
+	arrayDef: (description, items, example) => ({ type: 'array', ...deleteIfUndefined({ description, items, example }) }),
 };
 
 Schemas.schemas.roles = {
@@ -45,9 +45,10 @@ Schemas.schemas.roles = {
 const ticketTemplatePropSchema = {
 	description: 'Properties within a ticket or module',
 	type: 'object',
+	required: ['name', 'type'],
 	properties: {
-		name: helpers.stringDef('Name of the field', 'Floor', true),
-		type: helpers.stringDef('Field type', fieldTypes.ONE_OF, true, Object.values(fieldTypes)),
+		name: helpers.stringDef('Name of the field', 'Floor'),
+		type: helpers.stringDef('Field type', fieldTypes.ONE_OF, Object.values(fieldTypes)),
 		deprecated: helpers.boolDef('Denotes if this field is no longer in use', false),
 		required: helpers.boolDef('If this field is required (default: false)', true),
 		values: helpers.arrayDef(`list of possible values (only applicable if type is ${fieldTypes.ONE_OF} or ${fieldTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
@@ -69,8 +70,9 @@ const ticketTemplateModSchema = {
 Schemas.schemas.ticketTemplate = {
 	description: 'Custom ticket Template',
 	type: 'object',
+	required: ['name'],
 	properties: {
-		name: helpers.stringDef('Name of the ticket', 'Risk', true),
+		name: helpers.stringDef('Name of the ticket', 'Risk'),
 		comments: helpers.boolDef('Comments enabled'),
 		deprecated: helpers.boolDef('Denotes if this template is no longer in used', false),
 		properties: ticketTemplatePropSchema,
