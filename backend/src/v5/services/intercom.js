@@ -15,32 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface ICurrentUser {
-	username: string,
-	firstName: string,
-	lastName: string,
-	email: string,
-	hasAvatar?: boolean,
-	apiKey?: string,
-	company?: string,
-	countryCode?: string,
-	avatarUrl?: string,
-	intercomRef?: string,
-	personalDataIsUpdating?: boolean,
-	apiKeyIsUpdating?: boolean,
-}
+const Crypto = require('crypto');
+const config = require('../utils/config');
 
-export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {
-	avatarFile?: File,
+const Intercom = {};
+
+Intercom.generateUserHash = (email) => {
+	const key = config?.intercom?.secretKey;
+	if (key) {
+		const hasher = Crypto.createHmac('sha256', key);
+		return hasher.update(email).digest('hex');
+	}
+	return undefined;
 };
 
-export type UpdatePassword = {
-	oldPassword: string;
-	newPassword: string;
-};
-
-export type UpdateApiKey = Pick<ICurrentUser, 'apiKey'>;
-
-export type UpdateUser = UpdatePersonalData | UpdatePassword | UpdateApiKey;
-
-export type UpdateUserSuccess = Partial<ICurrentUser>;
+module.exports = Intercom;
