@@ -16,8 +16,8 @@
  */
 
 const { fieldTypes, presetModules } = require('./templates.constants');
+const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
-const { types } = require('../../utils/helper/yup');
 
 const typeNameToType = {
 	[fieldTypes.TEXT]: types.strings.title,
@@ -29,11 +29,13 @@ const typeNameToType = {
 	[fieldTypes.MANY_OF]: Yup.array().of(types.strings.title),
 };
 
+const deprecated = stripWhen(Yup.boolean().default(false), (v) => !v);
+
 const fieldSchema = Yup.object().shape({
 	name: types.strings.title.required(),
 	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
-	deprecated: Yup.boolean().default(false),
-	required: Yup.boolean().default(false),
+	deprecated,
+	required: stripWhen(Yup.boolean().default(false), (val) => !val),
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === fieldTypes.MANY_OF || val === fieldTypes.ANY_OF) {
 			return typeNameToType[val];
@@ -61,14 +63,14 @@ const fieldSchema = Yup.object().shape({
 const moduleSchema = Yup.object().shape({
 	name: types.strings.title,
 	type: Yup.string().oneOf(Object.values(presetModules)),
-	deprecated: Yup.boolean().default(false),
+	deprecated,
 	properties: Yup.array().of(fieldSchema),
 }).test('Name and type', 'Only one of these fields should be provided', ({ name, type }) => (name && !type) || (!name && type));
 
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),
 	comments: Yup.boolean().required().default(true),
-	deprecated: Yup.boolean().default(false),
+	deprecated,
 	properties: Yup.array().of(fieldSchema),
 	modules: Yup.array().of(moduleSchema),
 

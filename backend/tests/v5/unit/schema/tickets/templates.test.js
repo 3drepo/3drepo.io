@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
@@ -183,14 +185,35 @@ const testValidate = () => {
 		});
 	});
 
-	test('Any unknown fields should be stripped from the schema', () => {
+	test('Any unknown fields should be stripped from the schema and necessary fields filled in', () => {
 		const data = {
 			name: generateRandomString(),
-
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+			},
+			{
+				name: generateRandomString(),
+				type: fieldTypes.TEXT,
+				deprecated: true,
+			},
+			],
+			modules: [{
+				name: generateRandomString(),
+			}, {
+				type: presetModules.SAFETIBASE,
+				deprecated: true,
+			}],
 		};
-	});
+		const expectedData = { ...cloneDeep(data), comments: true };
 
-	// test auto fields filled in
+		data[generateRandomString()] = generateRandomString();
+		data.properties[0][generateRandomString()] = generateRandomString();
+		data.modules[0][generateRandomString()] = generateRandomString();
+		const output = TemplateSchema.validate(data);
+
+		expect(output).toEqual(expectedData);
+	});
 };
 
 describe('schema/tickets/templates', () => {

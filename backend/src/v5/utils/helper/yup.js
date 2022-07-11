@@ -20,7 +20,9 @@ const Yup = require('yup');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
 
-const YupHelper = { validators: {}, types: { strings: {} } };
+const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
+
+YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
 
 YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
