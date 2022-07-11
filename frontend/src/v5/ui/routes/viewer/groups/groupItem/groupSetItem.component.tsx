@@ -17,7 +17,7 @@
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import { SyntheticEvent } from 'react';
-import { CollapsibleIcon, GroupSetName, GroupsSetTreeListItemComponent } from './groupLists.styles';
+import { CollapsibleIcon, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
 const getGroupSetData = (groupSet) => {
 	// eslint-disable-next-line no-param-reassign

@@ -14,10 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled from 'styled-components';
+import SmallChevron from '@assets/icons/small_chevron.svg';
+import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
-export const GroupsTreeList = styled.ul`
-    list-style-type: none;
-    padding-inline-start: 0px;
+export const GroupSetName = styled.div`
+    color: #757575;
+    font-family: Roboto;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+`;
 
+export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>` {
+    padding-top:  ${({ $padding }) => ($padding ? '11' : '0')}px;
+    background-color: #EBEBEB;
+`;
+
+export const CollapsibleIcon = styled(SmallChevron)<{$collapsed?: boolean}>` {
+    color: #757575;
+
+    ${({ $collapsed }) => (!$collapsed ? `
+    transform: rotate(90deg);` : '')};
 `;

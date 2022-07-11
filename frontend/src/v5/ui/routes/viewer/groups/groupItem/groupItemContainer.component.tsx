@@ -19,7 +19,8 @@ import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { ArrowButton, StyledArrowIcon } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { Checkbox } from '@mui/material';
-import { ButtonsContainer, GroupsTreeListItem, GroupsTreeListItemContainer } from './groupLists.styles';
+import { isV5 } from '@/v4/helpers/isV5';
+import { GroupsTreeListItem, GroupsTreeListItemContainer, ButtonsContainer } from './groupItem.styles';
 
 interface Props {
 	onClick: (event: any) => void;
@@ -56,7 +57,7 @@ export const GroupsTreeListItemComponent = (
 		<GroupsTreeListItemContainer $depth={depth} $highlighted={highlighted}>
 			{children}
 			<ButtonsContainer>
-				<TooltipButton action={onClickIsolate} label="Isolate" Icon={Visibility} disabled={disabled} />
+				{!isV5() && <TooltipButton action={onClickIsolate} label="Isolate" Icon={Visibility} disabled={disabled} />}
 				<Checkbox onClick={onClickOverride} checked={overriden} indeterminate={overriden === undefined} />
 			</ButtonsContainer>
 			{active

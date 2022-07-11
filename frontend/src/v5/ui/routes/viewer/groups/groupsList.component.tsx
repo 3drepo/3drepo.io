@@ -17,10 +17,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { GroupItem } from './groupItem.component';
 import { GroupsTreeList } from './groupLists.styles';
 
-import { GroupSetItem } from './groupSetItem.component';
+import { GroupSetItem } from './groupItem/groupSetItem.component';
+import { GroupItem } from './groupItem/groupItem.component';
 
 interface Props {
 	groups: any [];

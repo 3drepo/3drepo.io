@@ -18,7 +18,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import LightingIcon from '@assets/icons/lighting.svg';
 import { contrastColor } from 'contrast-color';
-import { GroupIcon, GroupItemName, GroupItemObjects, GroupItemTextContainer } from './groupLists.styles';
+import { GroupIcon, GroupItemTextContainer, GroupItemName, GroupItemObjects } from './groupItem.styles';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
 const isSmart = (group) => (group.rules || []).length > 0;
