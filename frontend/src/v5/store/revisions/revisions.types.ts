@@ -20,7 +20,7 @@ export interface IRevision {
 	timestamp: Date;
 	tag: string;
 	author: string;
-	desc: string;
+	desc?: string;
 	void?: boolean;
 }
 

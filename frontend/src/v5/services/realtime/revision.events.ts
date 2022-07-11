@@ -16,13 +16,19 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { IRevisionUpdate } from '@/v5/store/revisions/revisions.types';
+import { IRevision, IRevisionUpdate } from '@/v5/store/revisions/revisions.types';
+import { ContainersActionsDispatchers } from '../actionsDispatchers/containersActions.dispatchers';
 import { RevisionsActionsDispatchers } from '../actionsDispatchers/revisionsActions.dispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeContainerRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerRevisionUpdate',
-		(data: IRevisionUpdate) => {
-			RevisionsActionsDispatchers.fetchRevisionStatsSuccess(containerId, data);
-		});
+		(updatedStats: IRevisionUpdate) =>
+			RevisionsActionsDispatchers.fetchRevisionStatsSuccess(containerId, updatedStats));
 
+export const enableRealtimeNewRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
+	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerNewRevision',
+		(revision: IRevision) => {
+			ContainersActionsDispatchers.containerProcessSuccess(project, containerId, revision);
+			RevisionsActionsDispatchers.revisionProcessingSuccess(containerId, revision);
+		});

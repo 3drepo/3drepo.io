@@ -17,12 +17,14 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
 import { View } from '@/v5/store/store.types';
 import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
+import { IRevision } from '../revisions/revisions.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
@@ -43,6 +45,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	deleteContainer: ['teamspace', 'projectId', 'containerId'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 	setContainerStatus: ['projectId', 'containerId', 'status'],
+	containerProcessSuccess: ['projectId', 'containerId', 'revision'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -188,6 +191,26 @@ export const setContainerStatus = (state = INITIAL_STATE, {
 	},
 });
 
+export const containerProcessSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+	revision,
+}): IContainersState => ({
+	...state,
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => {
+			if (containerId !== container._id) return container;
+			return {
+				...container,
+				revisionsCount: container.revisionsCount + 1,
+				lastUpdated: getNullableDate(revision.timestamp),
+				latestRevision: revision.tag,
+			};
+		}),
+	},
+});
+
 export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
@@ -198,6 +221,7 @@ export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, 
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 	[ContainersTypes.SET_CONTAINER_STATUS]: setContainerStatus,
+	[ContainersTypes.CONTAINER_PROCESS_SUCCESS]: containerProcessSuccess,
 }) as (state: IContainersState, action: any) => IContainersState;
 
 /**
@@ -226,6 +250,7 @@ export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & 
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
 export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
+export type ContainerProcessSuccessAction = Action<'CONTAINER_PROCESS_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
 
 export interface IContainersActionCreators {
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
@@ -278,4 +303,9 @@ export interface IContainersActionCreators {
 	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 	setContainerStatus: (projectId: string, containerId: string, status: UploadStatuses) => SetContainerStatusAction;
+	containerProcessSuccess: (
+		projectId: string,
+		containerId: string,
+		revision: IRevision
+	) => ContainerProcessSuccessAction;
 }

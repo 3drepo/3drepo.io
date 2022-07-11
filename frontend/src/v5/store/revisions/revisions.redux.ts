@@ -31,6 +31,7 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	setUploadComplete: ['uploadId', 'isComplete', 'errorMessage'],
 	setUploadProgress: ['uploadId', 'progress'],
 	fetchRevisionStatsSuccess: ['containerId', 'data'],
+	revisionProcessingSuccess: ['containerId', 'revision'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
@@ -105,6 +106,20 @@ export const setUploadComplete = (state = INITIAL_STATE, {
 	},
 });
 
+export const revisionProcessingSuccess = (state = INITIAL_STATE, {
+	containerId,
+	revision,
+}): IRevisionsState => ({
+	...state,
+	revisionsByContainer: {
+		...state.revisionsByContainer,
+		[containerId]: [
+			revision,
+			...state.revisionsByContainer[containerId],
+		],
+	},
+});
+
 export const setUploadProgress = (state = INITIAL_STATE, { uploadId, progress }): IRevisionsState => ({
 	...state,
 	revisionsUploadStatus: {
@@ -123,6 +138,7 @@ export const revisionsReducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.SET_UPLOAD_COMPLETE]: setUploadComplete,
 	[RevisionsTypes.SET_UPLOAD_PROGRESS]: setUploadProgress,
 	[RevisionsTypes.FETCH_REVISION_STATS_SUCCESS]: fetchRevisionStatsSuccess,
+	[RevisionsTypes.REVISION_PROCESSING_SUCCESS]: revisionProcessingSuccess,
 });
 
 /**
@@ -167,6 +183,8 @@ export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPay
 export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { containerId: string, isComplete: boolean, errorMessage?: string };
 export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { containerId: string, progress: number };
 export type FetchRevisionStatsSuccessAction = Action<'FETCH_REVISION_STATS_SUCCESS'> & { containerId: string, data: IRevisionUpdate };
+export type RevisionProcessingSuccessAction = Action<'REVISION_PROCESSING_SUCCESS'> & { containerId: string, revision: IRevision };
+
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
 	SetRevisionVoidStatusAction;
@@ -183,4 +201,5 @@ export interface IRevisionsActionCreators {
 	setUploadComplete: (containerId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
 	setUploadProgress: (containerId: string, progress: number) => SetUploadProgressAction;
 	fetchRevisionStatsSuccess: (containerId: string, data: IRevisionUpdate) => FetchRevisionStatsSuccessAction;
+	revisionProcessingSuccess: (containerId: string, revision: IRevision) => RevisionProcessingSuccessAction;
 }

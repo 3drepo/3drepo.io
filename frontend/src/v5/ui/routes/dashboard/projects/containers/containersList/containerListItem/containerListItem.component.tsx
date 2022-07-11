@@ -39,6 +39,7 @@ import {
 import { enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
 import {
 	enableRealtimeContainerRevisionUpdate,
+	enableRealtimeNewRevisionUpdate,
 } from '@/v5/services/realtime/revision.events';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
@@ -77,6 +78,7 @@ export const ContainerListItem = ({
 	useEffect(() => {
 		enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
 		enableRealtimeContainerRevisionUpdate(teamspace, project, container._id);
+		enableRealtimeNewRevisionUpdate(teamspace, project, container._id);
 	}, [container._id]);
 
 	const [openModal, setOpenModal] = useState(MODALS.none);
