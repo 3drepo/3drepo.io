@@ -82,7 +82,7 @@ export const LegalContent = styled.div`
 			vertical-align: top;
 			ol {
 				color: inherit;
-				padding: 0px 20px;
+				padding: 0 20px;
 				li {
 					${({ theme }) => theme.typography.h5}
 					font-weight: 400;
