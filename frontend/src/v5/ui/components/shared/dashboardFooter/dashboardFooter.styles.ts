@@ -49,7 +49,7 @@ export const FooterItem = styled.span`
 	line-height: ${FOOTER_HEIGHT}px;
 
 	&:not(:last-child)&:after {
-			content: '\\2022';
-			padding: 0 10px;
+		content: '\\2022';
+		padding: 0 10px;
 	}
 `;
