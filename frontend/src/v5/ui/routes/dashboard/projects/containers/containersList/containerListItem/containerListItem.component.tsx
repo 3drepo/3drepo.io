@@ -36,7 +36,7 @@ import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/
 import {
 	ShareModalContainerOrFederation as ShareModal,
 } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalContainerOrFederation/shareModalContainerOrFederation.component';
-import { enableRealtimeContainerDeleteUpdate, enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
+import { enableRealtimeContainerRemoved, enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
@@ -73,7 +73,7 @@ export const ContainerListItem = ({
 
 	useEffect(() => {
 		enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
-		enableRealtimeContainerDeleteUpdate(teamspace, project, container._id);
+		enableRealtimeContainerRemoved(teamspace, project, container._id);
 	}, [container._id]);
 
 	const [openModal, setOpenModal] = useState(MODALS.none);

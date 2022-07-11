@@ -246,7 +246,7 @@ export interface IContainersActionCreators {
 	) => CreateContainerAction;
 	createContainerSuccess: (
 		projectId: string,
-		container: NewContainer & { _id: string},
+		container: NewContainer,
 	) => CreateContainerSuccessAction;
 	fetchContainerViews: (teamspace: string, projectId: string, containerId: string) => FetchContainerViewsAction;
 	fetchContainerViewsSuccess: (

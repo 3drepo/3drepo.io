@@ -16,7 +16,7 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { ContainerSettings } from '@/v5/store/containers/containers.types';
+import { ContainerSettings, NewContainer } from '@/v5/store/containers/containers.types';
 import { ContainersActionsDispatchers } from '../actionsDispatchers/containersActions.dispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
@@ -25,13 +25,13 @@ export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:
 		(settings: ContainerSettings) =>
 			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));
 
-export const enableRealtimeNewContainerUpdate = (teamspace:string, project:string) => {
+export const enableRealtimeNewContainer = (teamspace:string, project:string) => {
 	subscribeToRoomEvent({ teamspace, project }, 'newContainer',
-		(container) =>
+		(container: NewContainer) =>
 			ContainersActionsDispatchers.createContainerSuccess(project, container));
 };
 
-export const enableRealtimeContainerDeleteUpdate = (teamspace:string, project:string, containerId:string) => {
+export const enableRealtimeContainerRemoved = (teamspace:string, project:string, containerId:string) => {
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerRemoved',
 		() =>
 			ContainersActionsDispatchers.deleteContainerSuccess(project, containerId));

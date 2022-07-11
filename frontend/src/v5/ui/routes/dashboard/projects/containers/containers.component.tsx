@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { enableRealtimeNewContainerUpdate } from '@/v5/services/realtime/container.events';
+import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
@@ -50,7 +50,7 @@ export const Containers = (): JSX.Element => {
 
 	const onClickClose = () => setUploadModalOpen(false);
 
-	useEffect(() => enableRealtimeNewContainerUpdate(teamspace, project), []);
+	useEffect(() => enableRealtimeNewContainer(teamspace, project), []);
 
 	return (
 		<>
