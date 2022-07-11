@@ -162,7 +162,7 @@ const testValidate = () => {
 		['one of the modules are invalid', createSkeleton([
 			{ type: generateRandomString() }, { name: generateRandomString() }]), false],
 		// copy over the properties test and test it with module
-		...propertiesTest.map((desc, { properties, ...other }, output) => [
+		...propertiesTest.map(([desc, { properties, ...other }, output]) => [
 			`module with ${desc}`,
 			{ ...other, modules: [{ name: generateRandomString(), properties }, output] },
 		]),
