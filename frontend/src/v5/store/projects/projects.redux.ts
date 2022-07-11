@@ -17,6 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
+import { IProject } from './projects.types';
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
@@ -65,12 +66,6 @@ export const projectsReducer = createReducer(INITIAL_STATE, {
 export interface IProjectsState {
 	projectsByTeamspace: Record<string, IProject[]>;
 	currentProject: string;
-}
-
-export interface IProject {
-	_id: string;
-	name: string;
-	isAdmin: boolean;
 }
 
 export interface IProjectsActions {

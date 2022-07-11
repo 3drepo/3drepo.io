@@ -45,7 +45,12 @@ import { Container as FiltersContainer,
 	ButtonContainer,
 	FormControl,
 } from '@/v4/routes/components/criteriaField/criteriaField.styles';
-import { Container as TextFieldContainer, FieldWrapper, StyledLinkableField } from '@/v4/routes/components/textField/textField.styles';
+import {
+	StyledTextField as TitleTextField,
+	Container as TextFieldContainer,
+	FieldWrapper,
+	StyledLinkableField,
+} from '@/v4/routes/components/textField/textField.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 
 const previewGroupItem = css`
@@ -112,6 +117,10 @@ const previewGroupItem = css`
 `;
 
 const expandedGroupItem = css`
+	${TitleTextField} {
+		margin: 1px 0;
+	}
+
 	.MuiChip-root {
 		&:hover, 
 		&:active {

@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useState } from 'react';
 import { Link, useRouteMatch, useParams } from 'react-router-dom';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import {
@@ -22,12 +23,15 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
-import { IProject } from '@/v5/store/projects/projects.redux';
 import { Button } from '@controls/button';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { IProject } from '@/v5/store/projects/projects.types';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import {
+	ShareModalProject as ShareModal,
+} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalProject/shareModalProject.component';
 
 type ProjectListItemProps = {
 	project: IProject,
@@ -60,6 +64,13 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 		});
 	};
 
+	const [openModal, setOpenModal] = useState(false);
+
+	const openShareModal = (e) => {
+		e.preventDefault();
+		setOpenModal(true);
+	};
+
 	return (
 		<DashboardListItem>
 			<Link to={`${url}/${project._id}`}>
@@ -69,9 +80,21 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 						<Button onClick={onClickDelete}>
 							<FormattedMessage id="deleteProject.button" defaultMessage="Delete Project" />
 						</Button>
+						<Button onClick={openShareModal}>
+							<FormattedMessage id="shareProject.button" defaultMessage="Share Project" />
+						</Button>
 					</DashboardListItemText>
 				</DashboardListItemRow>
 			</Link>
+			<ShareModal
+				openState={openModal}
+				onClickClose={() => setOpenModal(false)}
+				title={formatMessage({
+					id: 'shareProject.title',
+					defaultMessage: 'Share Project',
+				})}
+				project={project}
+			/>
 		</DashboardListItem>
 	);
 };

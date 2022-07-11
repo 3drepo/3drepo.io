@@ -44,7 +44,6 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	isValid?: boolean;
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
-	zeroMargin?: boolean;
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
 	hideSubmitButton?: boolean;
@@ -65,7 +64,6 @@ export const FormModal = (props: IFormModal) => {
 		isValid = true,
 		showButtons = true,
 		maxWidth = false,
-		zeroMargin = false,
 		isSubmitting = false,
 		disableClosing = false,
 		hideSubmitButton = false,
@@ -99,7 +97,7 @@ export const FormModal = (props: IFormModal) => {
 					</CloseButton>
 				</Header>
 				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
-					<FormDialogContent $zeromargin={zeroMargin}>
+					<FormDialogContent>
 						{children}
 					</FormDialogContent>
 				</ScrollArea>

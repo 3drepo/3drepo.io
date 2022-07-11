@@ -15,32 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface ICurrentUser {
-	username: string,
-	firstName: string,
-	lastName: string,
-	email: string,
-	hasAvatar?: boolean,
-	apiKey?: string,
-	company?: string,
-	countryCode?: string,
-	avatarUrl?: string,
-	intercomRef?: string,
-	personalDataIsUpdating?: boolean,
-	apiKeyIsUpdating?: boolean,
+export interface IProject {
+	_id: string;
+	name: string;
+	isAdmin: boolean;
 }
-
-export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {
-	avatarFile?: File,
-};
-
-export type UpdatePassword = {
-	oldPassword: string;
-	newPassword: string;
-};
-
-export type UpdateApiKey = Pick<ICurrentUser, 'apiKey'>;
-
-export type UpdateUser = UpdatePersonalData | UpdatePassword | UpdateApiKey;
-
-export type UpdateUserSuccess = Partial<ICurrentUser>;
