@@ -17,10 +17,10 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Body1, Body2, Caption, Kicker, KickerTitle, Link } from './typography.styles';
+import { Body1, Body2, Caption, Kicker, KickerTitle, Link, TypographyContainer } from './typography.styles';
 
 const TypographySampleComponent = () => (
-	<div>
+	<TypographyContainer>
 		<h1>Header 1</h1>
 		<h2>Header 2</h2>
 		<h3>Header 3</h3>
@@ -33,7 +33,7 @@ const TypographySampleComponent = () => (
 		<Caption>Caption</Caption>
 		<KickerTitle>KickerTitle</KickerTitle>
 		<Kicker>Kicker</Kicker>
-	</div>
+	</TypographyContainer>
 );
 
 export default {

@@ -16,8 +16,18 @@
  */
 import styled from 'styled-components';
 
+export const TypographyContainer = styled.div`
+    font-family: ${({ theme }) => theme.typography.fontFamily};
+    padding: 50px;
+
+    * {
+        border: 1px solid #cacaca;
+        margin: 10px;
+    }
+`;
+
 export const Body1 = styled.div`
-${({ theme }) => theme.typography.body1};
+    ${({ theme }) => theme.typography.body1};
 `;
 
 export const Body2 = styled.div`

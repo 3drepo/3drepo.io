@@ -18,6 +18,8 @@ import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 import styled, { css } from 'styled-components';
+import { V4OverridesContainer } from '@/v5/ui/v4Adapter/v4Overrides.styles';
+import { isV5 } from '@/v4/helpers/isV5';
 
 export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
     cursor: default;
@@ -94,7 +96,7 @@ export const GroupItemTextContainer = styled.div`
     flex-direction: column;
 `;
 
-export const GroupItemName = styled.div`
+const GroupItemNameV4 = css`
     color: #757575;
     font-family: Roboto;
     font-weight: 500;
@@ -102,10 +104,28 @@ export const GroupItemName = styled.div`
     line-height: 16px;
 `;
 
-export const GroupItemObjects = styled.div`
+const GroupItemNameV5 = css`
+    ${({ theme }) => theme.typography.body1};
+    color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+const GroupItemObjectsV4 = css`
     color: #6B778C;
     font-family: inter;
     font-weight: 500;
     font-size: 9px;
     line-height: 16px;
+`;
+
+const GroupItemObjectsV5 = css`
+    ${({ theme }) => theme.typography.caption};
+    color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const GroupItemName = styled.div`
+    ${() => (isV5() ? GroupItemNameV5 : GroupItemNameV4)}
+`;
+
+export const GroupItemObjects = styled.div`
+    ${() => (isV5() ? GroupItemObjectsV5 : GroupItemObjectsV4)}
 `;
