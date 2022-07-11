@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { fieldTypes, presetModules } = require('../../schemas/tickets/templates.constants');
+const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
 
 const Schemas = { responses: getSwaggerComponents(), schemas: {} };
@@ -28,10 +29,54 @@ Schemas.securitySchemes = {
 	},
 };
 
+const helpers = {
+	boolDef: (description, example, required) => ({ type: 'boolean', ...deleteIfUndefined({ description, example, required }) }),
+	numberDef: (description, example, required) => ({ type: 'number', ...deleteIfUndefined({ description, example, required }) }),
+	stringDef: (description, example, required, enumVal) => ({ type: 'string', ...deleteIfUndefined({ description, example, required, enum: enumVal }) }),
+	arrayDef: (description, items, example, required) => ({ type: 'array', ...deleteIfUndefined({ description, items, example, required }) }),
+};
+
 Schemas.schemas.roles = {
 	type: 'string',
 	enum: ['admin', 'collaborator', 'commenter', 'viewer'],
 	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
+};
+
+const ticketTemplatePropSchema = {
+	description: 'Properties within a ticket or module',
+	type: 'object',
+	properties: {
+		name: helpers.stringDef('Name of the field', 'Floor', true),
+		type: helpers.stringDef('Field type', fieldTypes.ONE_OF, true, Object.values(fieldTypes)),
+		deprecated: helpers.boolDef('Denotes if this field is no longer in use', false),
+		required: helpers.boolDef('If this field is required (default: false)', true),
+		values: helpers.arrayDef(`list of possible values (only applicable if type is ${fieldTypes.ONE_OF} or ${fieldTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+		range: helpers.arrayDef('Range of values accepted (numbers only)', helpers.numberDef(), [0, 10]),
+	},
+};
+
+const ticketTemplateModSchema = {
+	description: 'Configure a custom or preset module',
+	type: 'object',
+	properties: {
+		name: helpers.stringDef('Name of the module', 'BCF Reference'),
+		type: helpers.stringDef('Preset module name', undefined, undefined, Object.values(presetModules)),
+		deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
+		properties: ticketTemplatePropSchema,
+	},
+};
+
+Schemas.schemas.ticketTemplate = {
+	description: 'Custom ticket Template',
+	type: 'object',
+	properties: {
+		name: helpers.stringDef('Name of the ticket', 'Risk', true),
+		comments: helpers.boolDef('Comments enabled'),
+		deprecated: helpers.boolDef('Denotes if this template is no longer in used', false),
+		properties: ticketTemplatePropSchema,
+		modules: ticketTemplateModSchema,
+
+	},
 };
 
 Schemas.schemas.group = {
