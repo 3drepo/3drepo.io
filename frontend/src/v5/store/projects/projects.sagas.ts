@@ -19,7 +19,8 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
+import { ProjectsActions, ProjectsTypes } from './projects.redux';
+import { IProject } from './projects.types';
 
 export function* fetch({ teamspace }) {
 	try {

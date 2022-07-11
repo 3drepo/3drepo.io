@@ -28,6 +28,8 @@ jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 jest.mock('../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../src/v5/services/intercom');
+const Intercom = require(`${src}/services/intercom`);
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -88,7 +90,7 @@ const testLogin = () => {
 	});
 };
 
-const formatUser = (userProfile, hasAvatar) => ({
+const formatUser = (userProfile, hasAvatar, hash) => ({
 	username: userProfile.user,
 	firstName: userProfile.customData.firstName,
 	lastName: userProfile.customData.lastName,
@@ -97,6 +99,7 @@ const formatUser = (userProfile, hasAvatar) => ({
 	apiKey: userProfile.customData.apiKey,
 	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
+	...(hash ? { intercomRef: hash } : {}),
 });
 
 const tesGetProfileByUsername = () => {
@@ -114,6 +117,27 @@ const tesGetProfileByUsername = () => {
 			FilesManager.fileExists.mockResolvedValueOnce(false);
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, false));
+			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+		});
+
+		test('should return user profile with intercom reference if configured', async () => {
+			const projection = {
+				user: 1,
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.apiKey': 1,
+				'customData.billing.billingInfo.countryCode': 1,
+				'customData.billing.billingInfo.company': 1,
+			};
+			FilesManager.fileExists.mockResolvedValueOnce(false);
+
+			const hash = generateRandomString();
+			Intercom.generateUserHash.mockReturnValueOnce(hash);
+
+			const res = await Users.getProfileByUsername(user.user);
+			expect(res).toEqual(formatUser(user, false, hash));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
 			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
 		});
