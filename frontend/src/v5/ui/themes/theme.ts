@@ -490,6 +490,9 @@ export const theme = createTheme({
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
+					'.MuiPaper-root': {
+						boxShadow: 'none',
+					},
 				},
 				paperFullWidth: {
 					width: 'calc(100% - 100px)',
