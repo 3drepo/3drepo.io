@@ -197,6 +197,11 @@ const testValidate = () => {
 				type: fieldTypes.TEXT,
 				deprecated: true,
 			},
+			{
+				name: generateRandomString(),
+				type: fieldTypes.DATE,
+				default: Date.now(),
+			},
 			],
 			modules: [{
 				name: generateRandomString(),
@@ -206,6 +211,7 @@ const testValidate = () => {
 			}],
 		};
 		const expectedData = { ...cloneDeep(data), comments: true };
+		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

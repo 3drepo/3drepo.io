@@ -96,4 +96,6 @@ YupHelper.types.strings.email = Yup.string().email();
 
 YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
+YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
+
 module.exports = YupHelper;

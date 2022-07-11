@@ -23,7 +23,7 @@ const typeNameToType = {
 	[fieldTypes.TEXT]: types.strings.title,
 	[fieldTypes.LONG_TEXT]: types.strings.longDescription,
 	[fieldTypes.BOOLEAN]: Yup.boolean(),
-	[fieldTypes.DATE]: Yup.date(),
+	[fieldTypes.DATE]: types.date,
 	[fieldTypes.NUMBER]: Yup.number(),
 	[fieldTypes.ONE_OF]: types.strings.title,
 	[fieldTypes.MANY_OF]: Yup.array().of(types.strings.title),
