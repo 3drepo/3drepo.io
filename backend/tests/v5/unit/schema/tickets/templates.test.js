@@ -18,6 +18,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
+const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -39,12 +40,124 @@ const testValidate = () => {
 		['modules is of the wrong type', { name: generateRandomString(), modules: 'a' }, false],
 	];
 
+	const propertiesTest = [
+		['property is undefined', { name: generateRandomString(), properties: [undefined] }, false],
+		['property is not an object', { name: generateRandomString(), properties: ['a'] }, false],
+		['property is an empty object', { name: generateRandomString(), properties: [{}] }, false],
+		['property has an unknown type', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: 'abc',
+			}] }, false],
+		['property has all required fields', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.TEXT,
+			}] }, true],
+		['all properties has all required fields', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.TEXT,
+			}, {
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				default: 10,
+			}] }, true],
+		['one of the properties doesn\'t match the schema', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.TEXT,
+			}, {
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				default: generateRandomString(),
+			}] }, false],
+		['property default value type matches', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.TEXT,
+				default: generateRandomString(),
+			}] }, true],
+		['property default value type mismatches', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				default: generateRandomString(),
+			}] }, false],
+		['number property with valid range', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [0, 10],
+			}] }, true],
+		['number property with invalid range', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [10, -10],
+			}] }, false],
+		['number property with invalid range (1 number)', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [10],
+			}] }, false],
+		['number property with invalid range (3 numbers)', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [10, 20, 30],
+			}] }, false],
+		['number property with invalid range (type mismatch)', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [10, -10],
+			}] }, false],
+		['number property with empty range', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [],
+			}] }, false],
+		['boolean property with range', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.BOOLEAN,
+				range: [10, -10],
+			}] }, false],
+		['number property with default that satisfies the range condition', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [0, 10],
+				default: 0,
+			}] }, true],
+		['number property with default that does not satisfy the range condition', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.NUMBER,
+				range: [0, 10],
+				default: -1,
+			}] }, false],
+
+	];
+
+	const moduleSchemaTest = [
+		...propertiesTest.map((desc, { properties, ...other }, output) => [
+			`module with ${desc}`,
+			{ ...other, modules: [{ name: generateRandomString(), properties }, output] },
+		]),
+	];
+
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
 		['the template has all the required fields', { name: generateRandomString() }, true],
 		...nameTests,
 		...schemaFieldsTest,
+		...propertiesTest,
+		...moduleSchemaTest,
 
 	])('Validate ticket template', (desc, data, output) => {
 		test(`Validation should ${output ? 'succeed' : 'fail'} if ${desc}`, () => {

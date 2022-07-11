@@ -15,53 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { fieldTypes, presetModules } = require('./templates.constants');
 const Yup = require('yup');
 const { types } = require('../../utils/helper/yup');
 
 const typeNameToType = {
-	text: types.strings.title,
-	longText: types.strings.longDescription,
-	boolean: Yup.boolean(),
-	date: Yup.date(),
-	number: Yup.number(),
-	oneOf: types.strings.title,
-	manyOf: Yup.array().of(types.strings.title),
+	[fieldTypes.TEXT]: types.strings.title,
+	[fieldTypes.LONG_TEXT]: types.strings.longDescription,
+	[fieldTypes.BOOLEAN]: Yup.boolean(),
+	[fieldTypes.DATE]: Yup.date(),
+	[fieldTypes.NUMBER]: Yup.number(),
+	[fieldTypes.ONE_OF]: types.strings.title,
+	[fieldTypes.MANY_OF]: Yup.array().of(types.strings.title),
 };
-
-const defaultModules = [
-	'4D',
-	'Shapes',
-	'Attachments',
-	'Safetibase',
-];
-
-const fieldTypes = Object.keys(typeNameToType);
 
 const fieldSchema = Yup.object().shape({
 	name: types.strings.title.required(),
-	type: Yup.string().oneOf(fieldTypes).required(),
+	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
 	deprecated: Yup.boolean().default(false),
 	required: Yup.boolean().default(false),
-	default: Yup.mixed().when('type', ([val]) => typeNameToType[val]),
-	values: Yup.mixed().when('type', ([val], schema) => {
-		if (val === 'oneOf' || val === 'manyOf') {
+	values: Yup.mixed().when('type', (val, schema) => {
+		if (val === fieldTypes.MANY_OF || val === fieldTypes.ANY_OF) {
 			return typeNameToType[val];
 		}
 		return schema.strip();
 	}),
 
-	range: Yup.mixed().when('type', ([val], schema) => {
-		if (val === 'number') {
-			return Yup.array().of(Yup.number).length(2)
-				.test('value range', 'max number cannot be smaller than min', (rangeVal) => rangeVal[1] > rangeVal[2]);
+	range: Yup.mixed().when('type', (val, schema) => {
+		if (val === fieldTypes.NUMBER) {
+			return Yup.array().of(typeNameToType[val]).length(2)
+				.test('value range', 'max number cannot be smaller than min', (rangeVal) => rangeVal === undefined || rangeVal[0] < rangeVal[1]);
 		}
-		return schema.strip();
+		return schema.test('value range', 'is not supported for types other than number', (value) => value === undefined);
+	}),
+	default: Yup.mixed().when(['type', 'range'], (type, range) => {
+		const sch = typeNameToType[type];
+		if (range?.length === 2) {
+			return sch.min(range[0]).max(range[1]);
+		}
+		return sch;
 	}),
 
 });
 
 const moduleSchema = Yup.object().shape({
-	name: types.strings.title.when('type', ([name], schema) => {
+	name: types.strings.title.when('type', (name, schema) => {
 		if (name === undefined) {
 			return schema.required();
 		}
@@ -69,7 +67,7 @@ const moduleSchema = Yup.object().shape({
 			.test('Name and type', 'only one should be specified', (val) => val === undefined)
 			.strip();
 	}),
-	type: Yup.string().oneOf(defaultModules).when('name', ([name], schema) => {
+	type: Yup.string().oneOf(Object.values(presetModules)).when('name', ([name], schema) => {
 		if (name === undefined) {
 			return schema.required();
 		}
