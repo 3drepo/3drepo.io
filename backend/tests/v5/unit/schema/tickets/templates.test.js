@@ -18,7 +18,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -54,6 +54,11 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: fieldTypes.TEXT,
 			}] }, true],
+		['property name is too long', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(121),
+				type: fieldTypes.TEXT,
+			}] }, false],
 		['all properties has all required fields', { name: generateRandomString(),
 			properties: [{
 				name: generateRandomString(),
@@ -143,7 +148,18 @@ const testValidate = () => {
 
 	];
 
+	const createSkeleton = (modules) => ({ name: generateRandomString(), modules });
 	const moduleSchemaTest = [
+		['module with all required fields filled in (custom module)', createSkeleton([{ name: generateRandomString() }]), true],
+		['module with a name that is too long', createSkeleton([{ name: generateRandomString(121) }]), false],
+		['module with all required fields filled in (preset module)', createSkeleton([{ type: presetModules.SEQUENCING }]), true],
+		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString }]), false],
+		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
+		['all modules provided are valid', createSkeleton([
+			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
+		['one of the modules are invalid', createSkeleton([
+			{ type: generateRandomString() }, { name: generateRandomString() }]), false],
+		// copy over the properties test and test it with module
 		...propertiesTest.map((desc, { properties, ...other }, output) => [
 			`module with ${desc}`,
 			{ ...other, modules: [{ name: generateRandomString(), properties }, output] },
@@ -167,7 +183,13 @@ const testValidate = () => {
 		});
 	});
 
-	// test strip unknowns
+	test('Any unknown fields should be stripped from the schema', () => {
+		const data = {
+			name: generateRandomString(),
+
+		};
+	});
+
 	// test auto fields filled in
 };
 

@@ -59,25 +59,11 @@ const fieldSchema = Yup.object().shape({
 });
 
 const moduleSchema = Yup.object().shape({
-	name: types.strings.title.when('type', (name, schema) => {
-		if (name === undefined) {
-			return schema.required();
-		}
-		return schema
-			.test('Name and type', 'only one should be specified', (val) => val === undefined)
-			.strip();
-	}),
-	type: Yup.string().oneOf(Object.values(presetModules)).when('name', ([name], schema) => {
-		if (name === undefined) {
-			return schema.required();
-		}
-		return schema
-			.test('Name and type', 'only one should be specified', (val) => val === undefined)
-			.strip();
-	}),
+	name: types.strings.title,
+	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: Yup.boolean().default(false),
 	properties: Yup.array().of(fieldSchema),
-}, ['name', 'type']);
+}).test('Name and type', 'Only one of these fields should be provided', ({ name, type }) => (name && !type) || (!name && type));
 
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),

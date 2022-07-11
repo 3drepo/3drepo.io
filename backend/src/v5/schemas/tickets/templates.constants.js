@@ -36,7 +36,7 @@ TemplateConstants.fieldTypes = {};
 TemplateConstants.presetModules = {};
 
 [
-	'4D',
+	'Sequencing',
 	'Shapes',
 	'Attachments',
 	'Safetibase',
