@@ -540,16 +540,19 @@ export const theme = createTheme({
 		MuiAppBar: {
 			styleOverrides: {
 				root: {
+					height: 62,
 					boxShadow: 'none',
 					paddingLeft: 20,
 					paddingRight: 20,
-					minHeight: 65,
 					display: 'flex',
 					flexDirection: 'row',
 					alignItems: 'center',
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
 					zIndex: 10,
+					'>*': {
+						maxHeight: '100%',
+					},
 				},
 			},
 		},
@@ -557,13 +560,11 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					margin: '8px 7px',
-					color: COLOR.PRIMARY_MAIN_CONTRAST,
-					backgroundColor: COLOR.TERTIARY_MAIN,
 					...typography.body1,
 				},
 				colorDefault: {
-					color: null,
-					backgroundColor: null,
+					color: COLOR.SECONDARY_MAIN,
+					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
 				},
 			},
 		},
