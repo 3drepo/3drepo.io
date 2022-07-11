@@ -134,7 +134,7 @@ export interface MinimumContainer {
 }
 
 export type NewContainer = {
-	id?: string;
+	_id?: string;
 	name: string;
 	unit: string;
 	type: string;
