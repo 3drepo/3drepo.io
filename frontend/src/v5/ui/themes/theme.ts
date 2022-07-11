@@ -549,6 +549,7 @@ export const theme = createTheme({
 					alignItems: 'center',
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
+					zIndex: 10,
 				},
 			},
 		},
@@ -870,7 +871,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				contained: {
 					position: 'absolute',
-					bottom: '-16px',
+					top: '35px',
 					margin: 0,
 				},
 			},

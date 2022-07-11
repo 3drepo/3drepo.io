@@ -72,6 +72,7 @@ describe('Federations: sagas', () => {
 				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation, newFederationContainers))
 				.put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId))
 				.put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, newFederationContainers))
+				.put(FederationsActions.fetchFederationStats(teamspace, projectId, federationId))
 				.silentRun();
 		});
 		it('should successfully create a new federation with no containers', async () => {
@@ -154,6 +155,7 @@ describe('Federations: sagas', () => {
 				category: federation.category,
 				status: federation.status,
 				code: federation.code,
+				desc: federation.desc,
 			})
 
 			mockFederations.forEach((federation) => {

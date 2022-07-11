@@ -24,16 +24,16 @@ export const PASSWORD_CHANGE_PATH = '/v5/password-change';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const PROJECTS_LIST_ROUTE = `${DASHBOARD_ROUTE}/:teamspace`;
+export const PROJECT_ROUTE_BASE = `${PROJECTS_LIST_ROUTE}/:project`;
+const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
 
 export const PRIVACY_ROUTE = '/v5/privacy';
 export const COOKIES_ROUTE = '/v5/cookies';
 export const TERMS_ROUTE = '/v5/terms';
 
-const PROJECT_ROUTE_BASE = `${PROJECTS_LIST_ROUTE}/:project/t`;
-
-export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE}/:tab`;
-export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE}/containers`;
-export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE}/federations`;
+export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
+export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
+export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
