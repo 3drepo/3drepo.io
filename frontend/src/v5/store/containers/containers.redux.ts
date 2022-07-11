@@ -45,7 +45,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	deleteContainer: ['teamspace', 'projectId', 'containerId'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 	setContainerStatus: ['projectId', 'containerId', 'status'],
-	containerProcessSuccess: ['projectId', 'containerId', 'revision'],
+	containerProcessingSuccess: ['projectId', 'containerId', 'revision'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -191,7 +191,7 @@ export const setContainerStatus = (state = INITIAL_STATE, {
 	},
 });
 
-export const containerProcessSuccess = (state = INITIAL_STATE, {
+export const containerProcessingSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	revision,
@@ -221,7 +221,7 @@ export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, 
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 	[ContainersTypes.SET_CONTAINER_STATUS]: setContainerStatus,
-	[ContainersTypes.CONTAINER_PROCESS_SUCCESS]: containerProcessSuccess,
+	[ContainersTypes.CONTAINER_PROCESSING_SUCCESS]: containerProcessingSuccess,
 }) as (state: IContainersState, action: any) => IContainersState;
 
 /**
@@ -250,7 +250,7 @@ export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & 
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
 export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
-export type ContainerProcessSuccessAction = Action<'CONTAINER_PROCESS_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
+export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
 
 export interface IContainersActionCreators {
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
@@ -303,9 +303,9 @@ export interface IContainersActionCreators {
 	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 	setContainerStatus: (projectId: string, containerId: string, status: UploadStatuses) => SetContainerStatusAction;
-	containerProcessSuccess: (
+	containerProcessingSuccess: (
 		projectId: string,
 		containerId: string,
 		revision: IRevision
-	) => ContainerProcessSuccessAction;
+	) => ContainerProcessingSuccessAction;
 }

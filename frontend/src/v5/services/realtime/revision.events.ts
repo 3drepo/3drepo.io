@@ -29,6 +29,6 @@ export const enableRealtimeContainerRevisionUpdate = (teamspace: string, project
 export const enableRealtimeNewRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerNewRevision',
 		(revision: IRevision) => {
-			ContainersActionsDispatchers.containerProcessSuccess(project, containerId, revision);
+			ContainersActionsDispatchers.containerProcessingSuccess(project, containerId, revision);
 			RevisionsActionsDispatchers.revisionProcessingSuccess(containerId, revision);
 		});

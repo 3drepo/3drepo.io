@@ -26,7 +26,7 @@ export interface IRevision {
 
 export interface IUploadStatus {
 	isComplete: boolean;
-	errorMessage: string;
+	errorMessage?: string;
 	progress: number;
 }
 
