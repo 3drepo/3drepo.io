@@ -25,13 +25,22 @@ export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
     position: relative;
 `;
 
-export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
+const GroupsTreeListItemContainerV4 = css<{$highlighted?: boolean}>`
     background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
+    border-bottom: 1px solid #DCDCDC;
+`;
+
+const GroupsTreeListItemContainerV5 = css<{$highlighted?: boolean}>`
+    background-color: ${({ $highlighted, theme: { palette } }) => ($highlighted ? palette.base.lightest : palette.primary.contrast)};
+    border-bottom: 1px solid  ${({ theme: { palette } }) => palette.base.lightest};
+`;
+
+export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
     padding-left: ${({ $depth }) => $depth * 10}px;
     min-height: 41px;
     align-items: center;
     display: flex;
-    border-bottom: 1px solid #DCDCDC;
+    ${() => (isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4)}
 `;
 
 export const GroupsListItemTitle = styled.div`
