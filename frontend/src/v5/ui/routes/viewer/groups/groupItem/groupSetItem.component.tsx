@@ -14,10 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
+import { ChevronButton } from '@controls/chevronButton';
 import { SyntheticEvent } from 'react';
-import { CollapsibleIcon, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
+import { CollapsibleIconV4, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
 const getGroupSetData = (groupSet) => {
 	// eslint-disable-next-line no-param-reassign
@@ -64,6 +66,10 @@ const getGroupSetData = (groupSet) => {
 
 	return data;
 };
+
+const CollapsibleIcon = ({ $collapsed }) => (isV5()
+	? <ChevronButton isOn={!$collapsed} size="small" />
+	: <CollapsibleIconV4 $collapsed={$collapsed} />);
 
 export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const [collapseDict, setCollapse] = collapse;

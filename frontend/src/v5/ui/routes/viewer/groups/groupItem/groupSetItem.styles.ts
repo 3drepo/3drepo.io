@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import SmallChevron from '@assets/icons/small_chevron.svg';
+import { ChevronStyledIconButton } from '@controls/chevronButton/chevronButton.styles';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
 export const GroupSetName = styled.div`
@@ -30,9 +31,13 @@ export const GroupSetName = styled.div`
 export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>` {
     padding-top:  ${({ $padding }) => ($padding ? '11' : '0')}px;
     background-color: #EBEBEB;
+
+    ${ChevronStyledIconButton} {
+        margin: 0;
+    }
 `;
 
-export const CollapsibleIcon = styled(SmallChevron)<{$collapsed?: boolean}>` {
+export const CollapsibleIconV4 = styled(SmallChevron)<{$collapsed?: boolean}>` {
     color: #757575;
 
     ${({ $collapsed }) => (!$collapsed ? `
