@@ -98,7 +98,7 @@ const testValidate = () => {
 		['module with all required fields filled in (custom module)', createSkeleton([{ name: generateRandomString() }]), true],
 		['module with a name that is too long', createSkeleton([{ name: generateRandomString(121) }]), false],
 		['module with all required fields filled in (preset module)', createSkeleton([{ type: presetModules.SEQUENCING }]), true],
-		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString }]), false],
+		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString() }]), false],
 		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
 		['all modules provided are valid', createSkeleton([
 			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
@@ -153,7 +153,7 @@ const testValidate = () => {
 				deprecated: true,
 			}],
 		};
-		const expectedData = { ...cloneDeep(data), comments: true };
+		const expectedData = { ...cloneDeep(data) };
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 
 		data[generateRandomString()] = generateRandomString();

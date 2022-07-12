@@ -72,7 +72,7 @@ Schemas.schemas.ticketTemplate = {
 	required: ['name'],
 	properties: {
 		name: helpers.stringDef('Name of the ticket', 'Risk'),
-		comments: helpers.boolDef('Comments enabled'),
+		comments: helpers.boolDef('Comments enabled (default: false)'),
 		deprecated: helpers.boolDef('Denotes if this template is no longer in used', false),
 		properties: ticketTemplatePropSchema,
 		modules: ticketTemplateModSchema,

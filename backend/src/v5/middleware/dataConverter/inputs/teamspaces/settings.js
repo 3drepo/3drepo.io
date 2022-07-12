@@ -15,35 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { toConstantCase } = require('../../utils/helper/strings');
+const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { respond } = require('../../../../utils/responder');
+const { validate } = require('../../../../schemas/tickets/templates');
 
-const TemplateConstants = {};
+const Settings = {};
 
-TemplateConstants.fieldTypes = {};
+Settings.validateNewTicketSchema = async (req, res, next) => {
+	const data = req.body;
 
-[
-	'text',
-	'longText',
-	'boolean',
-	'date',
-	'number',
-	'oneOf',
-	'manyOf',
-].forEach((type) => {
-	TemplateConstants.fieldTypes[toConstantCase(type)] = type;
-});
+	try {
+		// check if the name is already used
+		req.body = validate(data);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
 
-TemplateConstants.presetModules = {};
-
-[
-	'Viewpoint',
-	'Issues',
-	'Sequencing',
-	'Shapes',
-	'Attachments',
-	'Safetibase',
-].forEach((mod) => {
-	TemplateConstants.presetModules[toConstantCase(mod)] = mod;
-});
-
-module.exports = TemplateConstants;
+module.exports = Settings;

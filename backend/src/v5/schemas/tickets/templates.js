@@ -29,13 +29,13 @@ const typeNameToType = {
 	[fieldTypes.MANY_OF]: Yup.array().of(types.strings.title),
 };
 
-const deprecated = stripWhen(Yup.boolean().default(false), (v) => !v);
+const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 
 const fieldSchema = Yup.object().shape({
 	name: types.strings.title.required(),
 	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
-	deprecated,
-	required: stripWhen(Yup.boolean().default(false), (val) => !val),
+	deprecated: defaultFalse,
+	required: defaultFalse,
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === fieldTypes.MANY_OF || val === fieldTypes.ANY_OF) {
 			return typeNameToType[val];
@@ -50,14 +50,17 @@ const fieldSchema = Yup.object().shape({
 const moduleSchema = Yup.object().shape({
 	name: types.strings.title,
 	type: Yup.string().oneOf(Object.values(presetModules)),
-	deprecated,
+	deprecated: defaultFalse,
 	properties: Yup.array().of(fieldSchema),
-}).test('Name and type', 'Only one of these fields should be provided', ({ name, type }) => (name && !type) || (!name && type));
+}).test('Name and type', 'Only provide a name or a type for module, not both', ({ name, type }) => {
+	console.log(name, type);
+	return (name && !type) || (!name && type);
+});
 
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),
-	comments: Yup.boolean().required().default(false),
-	deprecated,
+	comments: defaultFalse,
+	deprecated: defaultFalse,
 	properties: Yup.array().of(fieldSchema),
 	modules: Yup.array().of(moduleSchema),
 
