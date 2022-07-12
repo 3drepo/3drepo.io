@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Display } from '@/v5/ui/themes/media';
-import { ScrollArea } from '@controls/scrollArea';
 
-export const DashboardScroll = styled(ScrollArea)`
-	>div {
-		display: flex;
-		flex-direction: column;
-	}
+import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+
+export const NavLinks = styled.div`
+	margin: 0 13px;
 `;
 
-export const Content = styled.div`
-	max-width: 1289px;
-	margin: 18px auto;
-	padding: 0 30px;
-	height: auto;
-	width: 90vw;
-
-	@media (max-width: ${Display.Desktop}px) {
-		margin-top: 30px;
-	}
+export const NavLink = styled(Link)<{ selected: boolean }>`
+	margin: 0 12px;
+	${({ theme }) => theme.typography.h5}
+	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
+	cursor: pointer;
 `;

@@ -30,6 +30,7 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 
@@ -56,6 +57,9 @@ export const MainRoute = () => {
 				</Route>
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
+				</Route>
+				<Route exact path={`${path}/(terms|privacy|cookies)`}>
+					<LegalRoutes path={path} />
 				</Route>
 				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
