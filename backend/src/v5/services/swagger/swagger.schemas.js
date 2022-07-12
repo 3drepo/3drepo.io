@@ -52,7 +52,6 @@ const ticketTemplatePropSchema = {
 		deprecated: helpers.boolDef('Denotes if this field is no longer in use', false),
 		required: helpers.boolDef('If this field is required (default: false)', true),
 		values: helpers.arrayDef(`list of possible values (only applicable if type is ${fieldTypes.ONE_OF} or ${fieldTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
-		range: helpers.arrayDef('Range of values accepted (numbers only)', helpers.numberDef(), [0, 10]),
 	},
 };
 
