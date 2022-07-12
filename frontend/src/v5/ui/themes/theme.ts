@@ -375,16 +375,11 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				root: {
-					height: '31px',
-					'.MuiFormControl-root .MuiInputBase-root': {
-						'&.MuiAutocomplete-inputRoot ': {
-							padding: '0 0 0 10px',
-							height: '31px',
-							lineHeight: '31px',
-						},
+					'.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot': {
+						padding: '0 0 0 10px',
 					},
-					'&.Mui-focused .MuiAutocomplete-inputRoot .MuiOutlinedInput-notchedOutline': {
-						borderWidth: 1,
+					'>*': {
+						height: '100%',
 					},
 				},
 				input: {
@@ -392,6 +387,7 @@ export const theme = createTheme({
 					padding: 0,
 				},
 				inputRoot: {
+					height: '100%',
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 						'.MuiAutocomplete-endAdornment': {
