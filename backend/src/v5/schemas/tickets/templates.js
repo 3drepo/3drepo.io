@@ -43,20 +43,7 @@ const fieldSchema = Yup.object().shape({
 		return schema.strip();
 	}),
 
-	range: Yup.mixed().when('type', (val, schema) => {
-		if (val === fieldTypes.NUMBER) {
-			return Yup.array().of(typeNameToType[val]).length(2)
-				.test('value range', 'max number cannot be smaller than min', (rangeVal) => rangeVal === undefined || rangeVal[0] < rangeVal[1]);
-		}
-		return schema.test('value range', 'is not supported for types other than number', (value) => value === undefined);
-	}),
-	default: Yup.mixed().when(['type', 'range'], (type, range) => {
-		const sch = typeNameToType[type];
-		if (range?.length === 2) {
-			return sch.min(range[0]).max(range[1]);
-		}
-		return sch;
-	}),
+	default: Yup.mixed().when(['type'], (type) => typeNameToType[type]),
 
 });
 

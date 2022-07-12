@@ -91,63 +91,6 @@ const testValidate = () => {
 				type: fieldTypes.NUMBER,
 				default: generateRandomString(),
 			}] }, false],
-		['number property with valid range', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [0, 10],
-			}] }, true],
-		['number property with invalid range', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [10, -10],
-			}] }, false],
-		['number property with invalid range (1 number)', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [10],
-			}] }, false],
-		['number property with invalid range (3 numbers)', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [10, 20, 30],
-			}] }, false],
-		['number property with invalid range (type mismatch)', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [10, -10],
-			}] }, false],
-		['number property with empty range', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [],
-			}] }, false],
-		['boolean property with range', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.BOOLEAN,
-				range: [10, -10],
-			}] }, false],
-		['number property with default that satisfies the range condition', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [0, 10],
-				default: 0,
-			}] }, true],
-		['number property with default that does not satisfy the range condition', { name: generateRandomString(),
-			properties: [{
-				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
-				range: [0, 10],
-				default: -1,
-			}] }, false],
-
 	];
 
 	const createSkeleton = (modules) => ({ name: generateRandomString(), modules });
