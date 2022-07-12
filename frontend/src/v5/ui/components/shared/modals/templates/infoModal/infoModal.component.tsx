@@ -16,7 +16,7 @@
  */
 
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { ModalContainer, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
 import { formatMessage } from '@/v5/services/intl';
 
 interface IInfoModal {
@@ -42,7 +42,7 @@ export const InfoModal = ({
 	onClickClose,
 	onClickSecondary,
 }: IInfoModal) => (
-	<ModalContainer>
+	<DialogContainer>
 		<DialogTitle>
 			{ title }
 		</DialogTitle>
@@ -63,5 +63,5 @@ export const InfoModal = ({
 				{secondaryButtonLabel}
 			</Button>
 		</Actions>
-	</ModalContainer>
+	</DialogContainer>
 );

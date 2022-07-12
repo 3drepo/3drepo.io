@@ -24,6 +24,8 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
+	deleteProject: ['teamspace', 'projectId', 'onSuccess', 'onError'],
+	deleteProjectSuccess: ['teamspace', 'projectId'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
 export const INITIAL_STATE: IProjectsState = {
@@ -44,9 +46,18 @@ export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjec
 	currentProject: projectId,
 });
 
+export const deleteProjectSuccess = (state = INITIAL_STATE, { teamspace, projectId }): IProjectsState => ({
+	...state,
+	projectsByTeamspace: {
+		...state.projectsByTeamspace,
+		[teamspace]: state.projectsByTeamspace[teamspace].filter((project) => projectId !== project._id),
+	},
+});
+
 export const projectsReducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[ProjectsTypes.SET_CURRENT_PROJECT]: setCurrentProject,
+	[ProjectsTypes.DELETE_PROJECT_SUCCESS]: deleteProjectSuccess,
 }) as (state: IProjectsState, action: any) => IProjectsState;
 
 /**
@@ -62,4 +73,6 @@ export interface IProjectsActions {
 	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
 	fetchFailure: () => any;
 	setCurrentProject: (projectId: string) => any;
+	deleteProject: (teamspace: string, projectId: string, onSuccess: () => void, onError: (error) => void) => any;
+	deleteProjectSuccess: (teamspace: string, projectId: string) => any;
 }
