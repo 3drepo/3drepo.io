@@ -14,10 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isV5 } from '@/v4/helpers/isV5';
 import styled from 'styled-components';
+import { GroupsSetTreeListItemComponent } from './groupItem/groupSetItem.styles';
 
 export const GroupsTreeList = styled.ul`
     list-style-type: none;
     padding-inline-start: 0px;
+`;
 
+export const GroupsListContainer = styled.div`
+    height: 100%;
+    background-color: ${({ theme }) => (isV5() ? theme.palette.tertiary.lightest : '#EBEBEB')} ;
+
+    & > ${GroupsTreeList} > ${GroupsSetTreeListItemComponent} {
+        padding-top: 11px;
+    }
 `;

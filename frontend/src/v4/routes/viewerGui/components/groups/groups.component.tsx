@@ -53,7 +53,7 @@ import { PanelBarActions } from '../panelBarActions';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { GroupDetails } from './components/groupDetails';
-import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon, GroupActions } from './groups.styles';
+import { GroupsContainer, GroupIcon, StyledIcon, GroupActions, GroupsListContainer } from './groups.styles';
 
 interface IProps {
 	viewer: any;
@@ -86,7 +86,6 @@ interface IProps {
 	setShowStandardGroups: (enabled) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
-	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
 	exportGroups: (teamspace, model) => void;
 	importGroups: (teamspace, model, file) => void;
@@ -105,7 +104,6 @@ export class Groups extends PureComponent<IProps, IState> {
 	public state = {
 		collapse: {},
 	};
-
 
 	get type() {
 		return VIEWER_PANELS.GROUPS;
@@ -169,30 +167,6 @@ export class Groups extends PureComponent<IProps, IState> {
 		/>
 	);
 
-
-	// public renderGroupsList = renderWhenTrue(() => {
-	// 	const Items = this.props.groups.map((group) => (
-	// 			<GroupListItem
-	// 				{...group}
-	// 				created=""
-	// 				key={group._id}
-	// 				hideThumbnail
-	// 				statusColor={this.getOverriddenColor(group._id, group.color)}
-	// 				highlighted={this.isHighlighted(group)}
-	// 				roleColor={group.color}
-	// 				onItemClick={this.setActiveGroup(group)}
-	// 				onArrowClick={this.handleShowGroupDetails(group)}
-	// 				active={this.isActive(group)}
-	// 				modelLoaded={this.props.isModelLoaded}
-	// 				renderActions={this.renderGroupActions(group)}
-	// 				hasViewPermission={stubTrue}
-	// 				panelName={GROUP_PANEL_NAME}
-	// 				extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-	// 			/>
-	// 	));
-	// 	return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
-	// });
-
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No groups have been created yet</EmptyStateInfo>
 	));
@@ -204,11 +178,11 @@ export class Groups extends PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent onClick={this.resetActiveGroup}>
-				<div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+				<GroupsListContainer onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
 					{this.renderEmptyState(!this.props.searchEnabled && !this.props.groups.length)}
 					{this.renderNotFound(this.props.searchEnabled && !this.props.groups.length)}
 					{this.renderGroupsList(this.props.groups.length)}
-				</div>
+				</GroupsListContainer>
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justifyContent="space-between">
 				<Summary>
@@ -292,11 +266,6 @@ export class Groups extends PureComponent<IProps, IState> {
 		}
 	}
 
-	public getOverriddenColor = (groupId, color) => {
-		const overridden = this.isOverridden(groupId);
-		return overridden ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
-	}
-
 	public handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
@@ -378,8 +347,6 @@ export class Groups extends PureComponent<IProps, IState> {
 		this.props.showGroupDetails(group, this.props.revision);
 	}
 
-	public isOverridden = (groupId) => this.props.colorOverrides.includes(groupId);
-
 	public isHighlighted = (group) => {
 		return Boolean(this.props.highlightedGroups.has(group._id));
 	}
@@ -395,46 +362,6 @@ export class Groups extends PureComponent<IProps, IState> {
 		} else {
 			closeDetails();
 		}
-	}
-
-	public handleColorOverride = (group) => (e: SyntheticEvent) => {
-		e.stopPropagation();
-		this.props.toggleColorOverride(group._id);
-	}
-
-	public handleGroupIsolate = (group) => (e: SyntheticEvent) => {
-		e.stopPropagation();
-		this.props.isolateGroup(group);
-	}
-
-	public renderGroupActions = (group) => () => (
-		<GroupActions>
-			<TooltipButton
-				label="Toggle Colour Override"
-				action={this.handleColorOverride(group)}
-				Icon={this.renderTintIcon(group)}
-				disabled={!this.props.isModelLoaded}
-			/>
-			<TooltipButton
-				label="Isolate"
-				action={this.handleGroupIsolate(group)}
-				Icon={Visibility}
-				disabled={!this.props.isModelLoaded}
-			/>
-		</GroupActions>
-	)
-
-	public renderTintIcon = (group) => () => (
-		<StyledIcon color={this.getOverriddenColor(group._id, group.color)}>
-			<InvertColors color="inherit" fontSize="inherit" />
-		</StyledIcon>
-	)
-
-	public renderObjectsNumber = (objectsNumber) => {
-		if (objectsNumber === 1) {
-			return `${objectsNumber} object`;
-		}
-		return `${objectsNumber} objects`;
 	}
 
 	public handleFilterChange = (selectedFilters) => {

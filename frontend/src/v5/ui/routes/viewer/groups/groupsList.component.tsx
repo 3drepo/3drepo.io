@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { GroupsTreeList } from './groupLists.styles';
+import { GroupsListContainer, GroupsTreeList } from './groupLists.styles';
 
 import { GroupSetItem } from './groupItem/groupSetItem.component';
 import { GroupItem } from './groupItem/groupItem.component';
@@ -157,5 +157,9 @@ export const GroupsListComponent = ({ groups, collapse, disabled }:Props) => {
 		setTree(groupsToTree(groups));
 	}, [groups]);
 
-	return (<GroupTree tree={tree} collapse={collapse} disabled={disabled} />);
+	return (
+		<GroupsListContainer>
+			<GroupTree tree={tree} collapse={collapse} disabled={disabled} />
+		</GroupsListContainer>
+	);
 };

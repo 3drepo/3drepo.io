@@ -46,34 +46,10 @@ export const StyledIcon = styled.span`
 	display: flex;
 `;
 
-const highlightedGroupStyles = css`
-	background-color: ${COLOR.BLACK_6};
-
-	&:hover {
-		background-color: ${COLOR.BLACK_20};
-	}
-`;
-
-export const GroupListItem = styled(PreviewListItem).attrs({
-	panelType: VIEWER_PANELS.GROUPS,
-})`
-	&& {
-		cursor: inherit;
-		height: 73px;
-		${(props: any) => props.highlighted && highlightedGroupStyles}
-	}
-
-	${({ active }) => isV5() && active && css`
-		&& ${Actions} {
-			right: 38px !important;
-		}
-
-		&& ${Description} {
-			max-width: 320px;
-		}
-	`}
-`;
-
 export const GroupActions = styled.div`
 	display: contents;
+`;
+
+export const GroupsListContainer = styled.div`
+	height: 100%;
 `;

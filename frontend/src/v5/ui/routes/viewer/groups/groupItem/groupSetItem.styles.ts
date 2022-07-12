@@ -24,6 +24,7 @@ import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 export const GroupSetName = isV5() ? styled.h5`
     ${({ theme }) => theme.typography.h5};
     color: ${({ theme }) => theme.palette.secondary.main};
+    margin: 0;
     `
 	: styled.div`
     color: #757575;
@@ -34,9 +35,6 @@ export const GroupSetName = isV5() ? styled.h5`
 `;
 
 export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>` {
-    padding-top:  ${({ $padding }) => ($padding ? '11' : '0')}px;
-    background-color: #EBEBEB;
-
     ${ChevronStyledIconButton} {
         margin: 0;
     }
