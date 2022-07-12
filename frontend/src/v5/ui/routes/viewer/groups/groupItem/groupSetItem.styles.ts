@@ -21,28 +21,29 @@ import { ChevronStyledIconButton } from '@controls/chevronButton/chevronButton.s
 import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
-export const GroupSetName = isV5() ? styled.h5`
-    ${({ theme }) => theme.typography.h5};
-    color: ${({ theme }) => theme.palette.secondary.main};
-    margin: 0;
-    `
-	: styled.div`
-    color: #757575;
-    font-family: Roboto;
-    font-weight: 500;
-    font-size: 13px;
-    line-height: 16px;
+const GroupSetNameV5 = styled.h5`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 0;
+	${({ theme }) => theme.typography.h5};
 `;
 
-export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>` {
-    ${ChevronStyledIconButton} {
-        margin: 0;
-    }
+const GroupSetNameV4 = styled.div`
+	color: #757575;
+	font-family: Roboto;
+	font-weight: 500;
+	font-size: 13px;
+	line-height: 16px;
 `;
 
-export const CollapsibleIconV4 = styled(SmallChevron)<{$collapsed?: boolean}>` {
-    color: #757575;
+export const GroupSetName = isV5() ? GroupSetNameV5 : GroupSetNameV4;
 
-    ${({ $collapsed }) => (!$collapsed ? `
-    transform: rotate(90deg);` : '')};
+export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>`
+	${ChevronStyledIconButton} {
+		margin: 0;
+	}
+`;
+
+export const CollapsibleIconV4 = styled(SmallChevron)<{$collapsed?: boolean}>`
+	color: #757575;
+	${({ $collapsed }) => (!$collapsed ? 'transform: rotate(90deg);' : '')};
 `;

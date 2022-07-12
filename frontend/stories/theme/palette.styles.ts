@@ -18,17 +18,17 @@
 import styled from 'styled-components';
 
 export const PaletteName = styled.h1`
-    ${(({ theme }) => theme.typography.h1)}
+	${(({ theme }) => theme.typography.h1)}
 `;
 
 export const PaletteColourSampleContainer = styled.h5`
-    ${(({ theme }) => theme.typography.h5)}
+	${(({ theme }) => theme.typography.h5)}
 `;
 
 export const PaletteSampleContainer = styled.div`
-    margin: 20px;
+	margin: 20px;
 `;
 
 export const PaletteContainer = styled.div`
-    margin: 50px;
+	margin: 50px;
 `;

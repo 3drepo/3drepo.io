@@ -21,119 +21,112 @@ import styled, { css } from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
 
 export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
-    cursor: default;
-    position: relative;
+	cursor: default;
+	position: relative;
 `;
 
 const GroupsTreeListItemContainerV4 = css<{$highlighted?: boolean}>`
-    background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
-    border-bottom: 1px solid #DCDCDC;
+	background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
+	border-bottom: 1px solid #DCDCDC;
 `;
 
 const GroupsTreeListItemContainerV5 = css<{$highlighted?: boolean}>`
-    background-color: ${({ $highlighted, theme: { palette } }) => ($highlighted ? palette.base.lightest : palette.primary.contrast)};
-    border-bottom: 1px solid  ${({ theme: { palette } }) => palette.base.lightest};
+	background-color: ${({ $highlighted, theme: { palette } }) => ($highlighted ? palette.base.lightest : palette.primary.contrast)};
+	border-bottom: 1px solid  ${({ theme: { palette } }) => palette.base.lightest};
 `;
 
 export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
-    padding-left: ${({ $depth }) => $depth * 10}px;
-    min-height: 41px;
-    align-items: center;
-    display: flex;
-    ${() => (isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4)}
-`;
-
-export const GroupsListItemTitle = styled.div`
-    cursor: default;
-    weight: 500;
-    size: 12px;
-    color
+	padding-left: ${({ $depth }) => $depth * 10}px;
+	min-height: 41px;
+	align-items: center;
+	display: flex;
+	${() => (isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4)}
 `;
 
 const IconSize = css`
-    width: 30px;
-    height: 28px;
+	width: 30px;
+	height: 28px;
 `;
 
 const PseudoElement = css`
-    ${IconSize}
-    content: '';
-    position: absolute;
+	${IconSize}
+	content: '';
+	position: absolute;
 `;
 
 export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
-    ${IconSize}
-    padding: 0 0 px;
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    
-    ${({ $variant }) => ($variant === 'light' ? `
-        border: 1px solid #E0E5F0;
-        color: #6B778C;
-    ` : '')};
+	${IconSize}
+	padding: 0 0 px;
+	color: ${({ theme }) => (isV5() ? theme.palette.primary.contrast : '#fff')}?; 
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	
+	${({ $variant }) => ($variant === 'light' ? `
+		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')}; 
+		color: ${({ theme }) => (isV5() ? theme.palette.base.main : '#6B778C')};
+	` : '')};
 
-    & svg {
-        z-index: 2;
-    }
+	& svg {
+		z-index: 2;
+	}
 
-    &::after {
-        background-color: ${({ $color }) => $color};
-        ${PseudoElement}
-    }
+	&::after {
+		background-color: ${({ $color }) => $color};
+		${PseudoElement}
+	}
 
-    &::before {
-        background-image:url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
-        ${PseudoElement}
-    }
+	&::before {
+		background-image:url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
+		${PseudoElement}
+	}
 `;
 
 export const ButtonsContainer = styled.div`
-    position: absolute;
-    right: 30px;
-    color: #DCDCDC;
-    ${StyledIconButton} {
-        right: -10px;
-    }
+	position: absolute;
+	right: 30px;
+	color: #DCDCDC;
+	${StyledIconButton} {
+		right: -10px;
+	}
 `;
 
 export const GroupItemTextContainer = styled.div`
-    padding-left: 10px;
-    display: inline-flex;
-    flex-direction: column;
+	padding-left: 10px;
+	display: inline-flex;
+	flex-direction: column;
 `;
 
 const GroupItemNameV4 = css`
-    color: #757575;
-    font-family: Roboto;
-    font-weight: 500;
-    font-size: 12px;
-    line-height: 16px;
+	color: #757575;
+	font-family: Roboto;
+	font-weight: 500;
+	font-size: 12px;
+	line-height: 16px;
 `;
 
 const GroupItemNameV5 = css`
-    ${({ theme }) => theme.typography.body1};
-    color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 const GroupItemObjectsV4 = css`
-    color: #6B778C;
-    font-family: inter;
-    font-weight: 500;
-    font-size: 9px;
-    line-height: 16px;
+	color: #6B778C;
+	font-family: inter;
+	font-weight: 500;
+	font-size: 9px;
+	line-height: 16px;
 `;
 
 const GroupItemObjectsV5 = css`
-    ${({ theme }) => theme.typography.caption};
-    color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.caption};
+	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const GroupItemName = styled.div`
-    ${() => (isV5() ? GroupItemNameV5 : GroupItemNameV4)}
+	${() => (isV5() ? GroupItemNameV5 : GroupItemNameV4)}
 `;
 
 export const GroupItemObjects = styled.div`
-    ${() => (isV5() ? GroupItemObjectsV5 : GroupItemObjectsV4)}
+	${() => (isV5() ? GroupItemObjectsV5 : GroupItemObjectsV4)}
 `;

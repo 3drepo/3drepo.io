@@ -17,18 +17,18 @@
 import styled from 'styled-components';
 
 export const TypographyContainer = styled.div`
-    font-family: ${({ theme }) => theme.typography.fontFamily};
-    padding: 50px;
+	font-family: ${({ theme }) => theme.typography.fontFamily};
+	padding: 50px;
 `;
 
 export const TypographySampleContainer = styled.div<{ typography: any, variant: string }>`
-    ${({ typography }) => typography};
-    color: ${({ variant, theme }) => theme.palette[variant]?.mid};
-    margin-bottom: 20px;
+	${({ typography }) => typography};
+	color: ${({ variant, theme }) => theme.palette[variant]?.mid};
+	margin-bottom: 20px;
 `;
 
 export const TypographySampleText = styled.div<{ variant: string }>`
-    color: ${({ variant, theme }) => theme.palette[variant]?.main}
-    margin-bottom: 10px;
-    border: 1px solid #cacaca;
+	color: ${({ variant, theme }) => theme.palette[variant]?.main};
+	margin-bottom: 10px;
+	border: 1px solid #cacaca;
 `;

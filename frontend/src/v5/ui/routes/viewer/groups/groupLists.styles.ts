@@ -19,15 +19,16 @@ import styled from 'styled-components';
 import { GroupsSetTreeListItemComponent } from './groupItem/groupSetItem.styles';
 
 export const GroupsTreeList = styled.ul`
-    list-style-type: none;
-    padding-inline-start: 0px;
+	list-style-type: none;
+	padding-inline-start: 0;
 `;
 
 export const GroupsListContainer = styled.div`
-    height: 100%;
-    background-color: ${({ theme }) => (isV5() ? theme.palette.tertiary.lightest : '#EBEBEB')} ;
+	height: 100%;
+	background-color: ${({ theme }) => (isV5() ? theme.palette.tertiary.lightest : '#EBEBEB')} ;
 
-    & > ${GroupsTreeList} > ${GroupsSetTreeListItemComponent} {
-        padding-top: 11px;
-    }
+	/* stylelint-disable-next-line */
+	& > ${GroupsTreeList} > ${GroupsSetTreeListItemComponent} {
+		padding-top: 11px;
+	}
 `;
