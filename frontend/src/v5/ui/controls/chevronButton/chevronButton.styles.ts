@@ -24,6 +24,7 @@ export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean, $isLoading
 	margin: 0 10px 0 0;
 	display: flex;
 	align-items: center;
+	pointer-events: none;
 
 	svg {
 		height: 7px;
@@ -49,21 +50,6 @@ export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean, $isLoading
 	`}
 
 	border: 1px solid ${({ theme }) => theme.palette.secondary.main};
-
-	&:hover {
-		border-style: none;
-		background-color: ${({ theme }) => theme.palette.base.lightest};
-		
-		svg {
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
-		}
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.secondary.light};
-	}
 
 	&.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
