@@ -50,10 +50,10 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
-import { ListContainer, Summary } from '../risks/risks.styles';
+import {  Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { GroupDetails } from './components/groupDetails';
-import { GroupsContainer, GroupIcon, StyledIcon, GroupActions, GroupsListContainer } from './groups.styles';
+import { GroupsContainer, GroupIcon, GroupsListContainer } from './groups.styles';
 
 interface IProps {
 	viewer: any;

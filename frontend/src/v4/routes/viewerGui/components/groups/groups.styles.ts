@@ -40,16 +40,6 @@ export const GroupsContainer = styled(ViewerPanel).attrs({
 
 export const Container = styled.div``;
 
-export const StyledIcon = styled.span`
-	color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
-	font-size: 18px;
-	display: flex;
-`;
-
-export const GroupActions = styled.div`
-	display: contents;
-`;
-
 export const GroupsListContainer = styled.div`
 	height: 100%;
 `;
