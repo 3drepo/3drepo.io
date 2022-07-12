@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Display } from '@/v5/ui/themes/media';
-import { ScrollArea } from '@controls/scrollArea';
 
-export const DashboardScroll = styled(ScrollArea)`
-	>div {
-		display: flex;
-		flex-direction: column;
-	}
-`;
+import { Route, Switch } from 'react-router-dom';
+import { CookiesLegalPaper, PrivacyLegalPaper, TermsLegalPaper } from '@components/legal';
+import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
 
-export const Content = styled.div`
-	max-width: 1289px;
-	margin: 18px auto;
-	padding: 0 30px;
-	height: auto;
-	width: 90vw;
+type ILegalRoutes = {
+	path: string;
+};
 
-	@media (max-width: ${Display.Desktop}px) {
-		margin-top: 30px;
-	}
-`;
+export const LegalRoutes = ({ path }: ILegalRoutes) => (
+	<Switch>
+		<LegalLayout>
+			<Route exact path={`${path}/terms`}>
+				<TermsLegalPaper />
+			</Route>
+			<Route exact path={`${path}/cookies`}>
+				<CookiesLegalPaper />
+			</Route>
+			<Route exact path={`${path}/privacy`}>
+				<PrivacyLegalPaper />
+			</Route>
+		</LegalLayout>
+	</Switch>
+);
