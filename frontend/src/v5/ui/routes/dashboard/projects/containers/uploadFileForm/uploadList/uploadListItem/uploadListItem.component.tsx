@@ -98,7 +98,7 @@ export const UploadListItem = ({
 			<UploadListItemTitle
 				name={item.file.name}
 				filesize={filesize(item.file.size)}
-				selectedrow={isSelected}
+				isSelected={isSelected}
 				errorMessage={errors.file?.message}
 			/>
 			<Destination
