@@ -18,38 +18,31 @@
 import { GroupIcon } from '@/v5/ui/routes/viewer/groups/groupItem/groupItem.styles';
 import { theme } from '@/v5/ui/themes/theme';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { capitalise, paletteVariants } from './helper';
+import { PaletteColourSampleContainer, PaletteSampleContainer, PaletteName, PaletteContainer } from './palette.styles';
 
 const PaletteColourSample = ({ name, color }) => (
-	<h5>
+	<PaletteColourSampleContainer>
 		<GroupIcon $color={color} $variant="dark" /> {color} -  {name}
-	</h5>
+	</PaletteColourSampleContainer>
 );
 
 const PaletteSample = ({ palette, name }) => (
-	<div style={{ margin: 20 }}>
-		<h1>{name}</h1>{
+	<PaletteSampleContainer>
+		<PaletteName>{capitalise(name)}</PaletteName>{
 			Object.keys(palette).map((itemName) => (<PaletteColourSample name={itemName} color={palette[itemName]} />))
 		}
 		<hr />
-	</div>
+	</PaletteSampleContainer>
 );
 
-const NOT_COLORS = ['shadows',
-	'mode',
-	'gradient',
-	'contrastThreshold',
-	'getContrastText',
-	'augmentColor',
-	'tonalOffset'];
-
 const ThemePalette = () => (
-	<div style={{ padding: '50px' }}>
+	<PaletteContainer>
 		{
-			Object.keys(theme.palette)
-				.filter((paletteItem) => !NOT_COLORS.includes(paletteItem))
+			paletteVariants()
 				.map((paletteItem) => (<PaletteSample palette={theme.palette[paletteItem]} name={paletteItem} />))
 		}
-	</div>
+	</PaletteContainer>
 );
 
 export default {
@@ -63,4 +56,4 @@ export default {
 
 const Template: ComponentStory<typeof ThemePalette> = () => <ThemePalette />;
 
-export const TypographySample = Template.bind({});
+export const Palette = Template.bind({});

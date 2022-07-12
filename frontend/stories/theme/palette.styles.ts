@@ -14,21 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled from 'styled-components';
 
-export const TypographyContainer = styled.div`
-    font-family: ${({ theme }) => theme.typography.fontFamily};
-    padding: 50px;
+export const PaletteName = styled.h1`
+    ${(({ theme }) => theme.typography.h1)}
 `;
 
-export const TypographySampleContainer = styled.div<{ typography: any, variant: string }>`
-    ${({ typography }) => typography};
-    color: ${({ variant, theme }) => theme.palette[variant]?.mid};
-    margin-bottom: 20px;
+export const PaletteColourSampleContainer = styled.h5`
+    ${(({ theme }) => theme.typography.h5)}
 `;
 
-export const TypographySampleText = styled.div<{ variant: string }>`
-    color: ${({ variant, theme }) => theme.palette[variant]?.main}
-    margin-bottom: 10px;
-    border: 1px solid #cacaca;
+export const PaletteSampleContainer = styled.div`
+    margin: 20px;
+`;
+
+export const PaletteContainer = styled.div`
+    margin: 50px;
 `;

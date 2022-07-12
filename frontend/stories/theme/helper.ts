@@ -14,21 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import { theme } from '@/v5/ui/themes/theme';
 
-export const TypographyContainer = styled.div`
-    font-family: ${({ theme }) => theme.typography.fontFamily};
-    padding: 50px;
-`;
+export const capitalise = (str: string) => str[0].toUpperCase() + str.substr(1);
 
-export const TypographySampleContainer = styled.div<{ typography: any, variant: string }>`
-    ${({ typography }) => typography};
-    color: ${({ variant, theme }) => theme.palette[variant]?.mid};
-    margin-bottom: 20px;
-`;
+const NOT_COLORS = ['shadows',
+	'mode',
+	'gradient',
+	'contrastThreshold',
+	'getContrastText',
+	'augmentColor',
+	'tonalOffset'];
 
-export const TypographySampleText = styled.div<{ variant: string }>`
-    color: ${({ variant, theme }) => theme.palette[variant]?.main}
-    margin-bottom: 10px;
-    border: 1px solid #cacaca;
-`;
+export const paletteVariants = () => Object.keys(theme.palette)
+	.filter((paletteItem) => !NOT_COLORS.includes(paletteItem));

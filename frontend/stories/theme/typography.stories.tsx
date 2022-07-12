@@ -15,36 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable max-len */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Body1, Body2, Caption, Kicker, KickerTitle, Link, TypographyContainer } from './typography.styles';
+import { theme } from '@/v5/ui/themes/theme';
+import { TypographyContainer, TypographySampleContainer, TypographySampleText } from './typography.styles';
+import { capitalise, paletteVariants } from './helper';
 
-const TypographySampleComponent = () => (
+const TypographySample = ({ name, typography, variant }) => (
+	<TypographySampleContainer typography={typography} variant={variant}>
+		{capitalise(name)} - {Object.keys(typography).map((field) => `${field}: ${typography[field]}`).join(', ')}
+		<TypographySampleText variant={variant}> The quick brown fox jumps over the lazy dog</TypographySampleText>
+	</TypographySampleContainer>
+);
+
+const NOT_TYPOGRAPHY = ['fontFamily', 'htmlFontSize', 'pxToRem', 'fontSize', 'fontWeightLight', 'fontWeightRegular', 'fontWeightMedium'];
+
+const TypographyComponent = ({ variant }) => (
 	<TypographyContainer>
-		<h1>Header 1</h1>
-		<h2>Header 2</h2>
-		<h3>Header 3</h3>
-		<h4>Header 4</h4>
-		<h5>Header 5</h5>
-		<h6>Header 5</h6>
-		<Body1>Body 1</Body1>
-		<Body2>Body 2</Body2>
-		<Link>Link</Link>
-		<Caption>Caption</Caption>
-		<KickerTitle>KickerTitle</KickerTitle>
-		<Kicker>Kicker</Kicker>
+		{
+			Object.keys(theme.typography)
+				.filter((key) => !NOT_TYPOGRAPHY.includes(key))
+				.map((key) => (<TypographySample variant={variant} typography={theme.typography[key]} name={key} />))
+		}
 	</TypographyContainer>
 );
 
 export default {
 	title: 'Theme/Typography',
-	component: TypographySampleComponent,
+	component: TypographyComponent,
 	parameters: {
 		// More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
 		layout: 'fullscreen',
 	},
-} as ComponentMeta<typeof TypographySampleComponent>;
+	argTypes: {
+		variant: {
+			description: 'Color',
+			options: paletteVariants(),
+			control: { type: 'select' },
+		},
+	},
+} as ComponentMeta<typeof TypographyComponent>;
 
-const Template: ComponentStory<typeof TypographySampleComponent> = () => <TypographySampleComponent />;
+const Template: ComponentStory<typeof TypographyComponent> = (args) => <TypographyComponent {...args} />;
 
-export const TypographySample = Template.bind({});
+export const Typography = Template.bind({});
+Typography.args = {
+	variant: 'main',
+};

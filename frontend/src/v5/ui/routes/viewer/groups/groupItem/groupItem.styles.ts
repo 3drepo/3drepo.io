@@ -18,7 +18,6 @@ import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 import styled, { css } from 'styled-components';
-import { V4OverridesContainer } from '@/v5/ui/v4Adapter/v4Overrides.styles';
 import { isV5 } from '@/v4/helpers/isV5';
 
 export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
