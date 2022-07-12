@@ -56,7 +56,7 @@ const moduleSchema = Yup.object().shape({
 
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),
-	comments: Yup.boolean().required().default(true),
+	comments: Yup.boolean().required().default(false),
 	deprecated,
 	properties: Yup.array().of(fieldSchema),
 	modules: Yup.array().of(moduleSchema),
