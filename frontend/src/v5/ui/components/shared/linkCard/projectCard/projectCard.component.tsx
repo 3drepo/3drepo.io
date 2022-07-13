@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { projectRoute } from '@/v5/services/routing/routing';
+import { prefixBaseDomain, projectRoute } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
@@ -63,6 +63,19 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 	};
 
 	const onClickShare = () => {
+		const link = prefixBaseDomain(projectRoute(teamspace, project));
+		const subject = formatMessage({ id: 'shareModal.project.subject', defaultMessage: 'project' });
+		const title = formatMessage({
+			id: 'shareProject.title',
+			defaultMessage: 'Share Project',
+		});
+
+		DialogsActionsDispatchers.open('share', {
+			name: project.name,
+			subject,
+			title,
+			link,
+		});
 	};
 
 	return (

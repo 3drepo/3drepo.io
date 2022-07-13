@@ -15,10 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
+import CloseIcon from '@assets/icons/close.svg';
+import {
+	Title,
+	Header,
+	CloseButton,
+	Form,
+	FormDialogContent,
+} from '@controls/modal/formModal/formDialog.styles';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
@@ -28,37 +35,40 @@ type IShareModal = {
 	name: string;
 
 	subject: string;
-	openState: boolean;
 	link: string;
 	onClickClose: () => void;
 };
 
 export const ShareModal = ({
-	openState,
 	title,
 	name,
 	subject,
 	onClickClose,
 	link,
 }: IShareModal) => (
-	<FormModal
-		open={openState}
-		onClickClose={onClickClose}
-		title={title}
-		showButtons={false}
-	>
-		<ShareTextField
-			label={formatMessage({
-				id: 'shareModal.linkLabel',
-				defaultMessage: 'Link',
-			})}
-			value={link}
-		/>
-		<MailToButton href={`mailto:?subject=3D Repo ${subject} - ${name}&body=${link}`}>
-			<FormattedMessage
-				id="shareModal.mailTo"
-				defaultMessage="Send by email"
+	<Form>
+		<Header>
+			<Title>
+				{title}
+			</Title>
+			<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+				<CloseIcon />
+			</CloseButton>
+		</Header>
+		<FormDialogContent>
+			<ShareTextField
+				label={formatMessage({
+					id: 'shareModal.linkLabel',
+					defaultMessage: 'Link',
+				})}
+				value={link}
 			/>
-		</MailToButton>
-	</FormModal>
+			<MailToButton href={`mailto:?subject=3D Repo ${subject} - ${name}&body=${link}`}>
+				<FormattedMessage
+					id="shareModal.mailTo"
+					defaultMessage="Send by email"
+				/>
+			</MailToButton>
+		</FormDialogContent>
+	</Form>
 );

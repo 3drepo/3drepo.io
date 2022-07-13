@@ -22,7 +22,6 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 import { isFederation } from '@/v5/store/store.helpers';
-import { ShareModal } from '../shareModal.component';
 
 type IShareModalContainerOrFederation = {
 	openState: boolean;
@@ -40,6 +39,6 @@ export const ShareModalContainerOrFederation = ({
 	const subject = isFederation(containerOrFederation)
 		? formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' })
 		: formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
-
-	return <ShareModal subject={subject} link={link} {...props} name={containerOrFederation.name} />;
+	return <h1>{subject} - {link}</h1>;
+	// return <ShareModal subject={subject} link={link} {...props} name={containerOrFederation.name} />;
 };
