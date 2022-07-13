@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { DialogContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
-
-export const Container = styled(ContainerBase)`
-	min-width: 450px;
-	min-height: 248px;
-`;
+export default () => (
+	<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M13.5 8.5H15.375M4.125 15.375H1V5.375H18.5V15.375H15.375H4.125ZM4.125 11.625V18.5H15.375V11.625H4.125ZM15.375 5.375V1H4.125V5.375H15.375Z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+	</svg>
+);

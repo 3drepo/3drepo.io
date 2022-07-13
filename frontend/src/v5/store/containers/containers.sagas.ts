@@ -175,15 +175,13 @@ export function* createContainer({ teamspace, projectId, newContainer }: CreateC
 	}
 }
 
-export function* deleteContainer({ teamspace, projectId, containerId }: DeleteContainerAction) {
+export function* deleteContainer({ teamspace, projectId, containerId, onSuccess, onError }: DeleteContainerAction) {
 	try {
 		yield API.Containers.deleteContainer({ teamspace, projectId, containerId });
 		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'container.delete.error', defaultMessage: 'trying to delete container' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 
