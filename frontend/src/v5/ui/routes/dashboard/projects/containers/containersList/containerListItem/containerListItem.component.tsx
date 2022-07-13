@@ -33,12 +33,11 @@ import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import {
-	ShareModalContainerOrFederation as ShareModal,
-} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalContainerOrFederation/shareModalContainerOrFederation.component';
 import { enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
+import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
 
@@ -75,6 +74,19 @@ export const ContainerListItem = ({
 
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
+		const subject = formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
+		const title = formatMessage({ id: 'shareModal.container.title', defaultMessage: 'Share Container' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: container.name,
+			subject,
+			title,
+			link,
+		});
+	};
 
 	return (
 		<DashboardListItem
@@ -155,7 +167,7 @@ export const ContainerListItem = ({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={() => setOpenModal(MODALS.share)}
+						openShareModal={onClickShare}
 						openContainerSettings={() => setOpenModal(MODALS.containerSettings)}
 					/>
 				</DashboardListItemIcon>
@@ -167,15 +179,6 @@ export const ContainerListItem = ({
 					status={container.status}
 				/>
 			)}
-			<ShareModal
-				openState={openModal === MODALS.share}
-				onClickClose={closeModal}
-				title={formatMessage({
-					id: 'ShareModal.component.title',
-					defaultMessage: 'Share Container URL',
-				})}
-				containerOrFederation={container}
-			/>
 			<ContainerSettingsForm
 				open={openModal === MODALS.containerSettings}
 				container={container}

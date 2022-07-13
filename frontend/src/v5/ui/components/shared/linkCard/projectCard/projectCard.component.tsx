@@ -65,10 +65,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 	const onClickShare = () => {
 		const link = prefixBaseDomain(projectRoute(teamspace, project));
 		const subject = formatMessage({ id: 'shareModal.project.subject', defaultMessage: 'project' });
-		const title = formatMessage({
-			id: 'shareProject.title',
-			defaultMessage: 'Share Project',
-		});
+		const title = formatMessage({ id: 'shareModal.project.title', defaultMessage: 'Share Project' });
 
 		DialogsActionsDispatchers.open('share', {
 			name: project.name,
