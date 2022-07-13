@@ -1057,5 +1057,12 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiAccordionSummary: {
+			styleOverrides: {
+				content: {
+					marginBottom: 5,
+				},
+			},
+		},
 	},
 });
