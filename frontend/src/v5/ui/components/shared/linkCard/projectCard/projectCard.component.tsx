@@ -16,13 +16,15 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { IProject } from '@/v5/store/projects/projects.redux';
 import { projectRoute } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { IProject } from '@/v5/store/projects/projects.types';
 import { ProjectImage, EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -39,6 +41,30 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 
 	const preventNavigation = (e) => e.preventDefault();
 
+	const onClickDelete = () => {
+		DialogsActionsDispatchers.open('delete', {
+			name: project.name,
+			onClickConfirm: () => new Promise<void>(
+				(accept, reject) => {
+					ProjectsActionsDispatchers.deleteProject(
+						teamspace,
+						project._id,
+						accept,
+						reject,
+					);
+				},
+			),
+			message: formatMessage({
+				id: 'deleteModal.project.message',
+				defaultMessage: 'By deleting this Project your data will be lost permanently and will not be recoverable.',
+			}),
+			confidenceCheck: true,
+		});
+	};
+
+	const onClickShare = () => {
+	};
+
 	return (
 		<LinkCard
 			{...props}
@@ -53,12 +79,14 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							id: 'projectCard.ellipsisMenu.share',
 							defaultMessage: 'Share',
 						})}
+						onClick={onClickShare}
 					/>
 					<EllipsisMenuItem
 						title={formatMessage({
 							id: 'projectCard.ellipsisMenu.delete',
 							defaultMessage: 'Delete Project',
 						})}
+						onClick={onClickDelete}
 					/>
 				</EllipsisMenu>
 			</EllipsisMenuContainer>
