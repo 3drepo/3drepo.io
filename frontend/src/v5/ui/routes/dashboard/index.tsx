@@ -30,6 +30,7 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
@@ -58,7 +59,10 @@ export const MainRoute = () => {
 				<Route exact path={`${path}/password-change`}>
 					<PasswordChange />
 				</Route>
-				<AuthenticatedRoute exact path={`${path}/dashboard`}>
+				<Route exact path={`${path}/(terms|privacy|cookies)`}>
+					<LegalRoutes path={path} />
+				</Route>
+				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
 				</AuthenticatedRoute>
 				<AuthenticatedRoute exact path={`${path}/dashboard/:teamspace/(t|t/.*)?`}>

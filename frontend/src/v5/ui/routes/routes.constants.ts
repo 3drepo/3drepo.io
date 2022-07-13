@@ -25,12 +25,16 @@ export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederati
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
 export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
-
 export const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project/t`;
 
-export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE}/:tab`;
-export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE}/containers`;
-export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE}/federations`;
+const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
+export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
+export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
+export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
+
+export const PRIVACY_ROUTE = '/v5/privacy';
+export const COOKIES_ROUTE = '/v5/cookies';
+export const TERMS_ROUTE = '/v5/terms';
 
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));

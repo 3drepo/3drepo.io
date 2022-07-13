@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollArea } from '@controls/scrollArea';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { DashboardScroll } from '../dashboard/projects/projects.styles';
 
-export const ScrollBar = styled(ScrollArea).attrs({
+export const ScrollBar = styled(DashboardScroll).attrs({
 	variant: 'secondary',
 })`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
@@ -28,7 +28,7 @@ export const ScrollBar = styled(ScrollArea).attrs({
 `;
 
 export const HomeContent = styled.div`
-	padding-bottom: 150px;
+	padding-bottom: 130px;
 	box-sizing: border-box;
 	display: flex;
 	flex-flow: column;

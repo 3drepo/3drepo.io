@@ -16,10 +16,10 @@
  */
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
+import { IProject } from '@/v5/store/projects/projects.types';
 import { Route, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { IProject } from '@/v5/store/projects/projects.redux';
 import { LOGIN_PATH, VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
@@ -47,16 +47,16 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
-const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
+export const prefixBaseDomain = (uri: string) => `${window.location.protocol}//${window.location.hostname}${uri}`;
 
 type RevisionParam = IRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
 
-const relativeViewerRoute = (
+export const viewerRoute = (
 	teamspace: string,
 	project,
 	containerOrFederation: ContainerOrFederationParam,
-	revision: RevisionParam,
+	revision: RevisionParam = undefined,
 ) => {
 	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
 		|| (containerOrFederation as string);
@@ -71,17 +71,6 @@ const relativeViewerRoute = (
 	};
 
 	return generatePath(VIEWER_ROUTE, params);
-};
-
-export const viewerRoute = (
-	teamspace: string,
-	project: string,
-	containerOrFederation: ContainerOrFederationParam,
-	revision: RevisionParam = undefined,
-	withDomain: boolean = false,
-) => {
-	const domain = withDomain ? getBaseDomain() : '';
-	return `${domain}${relativeViewerRoute(teamspace, project, containerOrFederation, revision)}`;
 };
 
 interface RouteProps {
