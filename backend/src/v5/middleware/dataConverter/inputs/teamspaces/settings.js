@@ -16,17 +16,24 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { getTemplateByName } = require('../../../../models/tickets.templates');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
 
 const Settings = {};
 
 Settings.validateNewTicketSchema = async (req, res, next) => {
+	const { teamspace } = req.params;
 	const data = req.body;
 
 	try {
-		// check if the name is already used
 		req.body = validate(data);
+
+		const nameExists = await getTemplateByName(teamspace, data.name, { _id: 1 })
+			.then(() => true).catch(() => false);
+
+		if (nameExists) throw new Error('Name already in use');
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

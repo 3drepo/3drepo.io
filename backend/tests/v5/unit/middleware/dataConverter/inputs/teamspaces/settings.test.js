@@ -21,6 +21,9 @@ const { src } = require('../../../../../helper/path');
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
+jest.mock('../../../../../../../src/v5/models/tickets.templates');
+const TemplateModelSchema = require(`${src}/models/tickets.templates`);
+
 jest.mock('../../../../../../../src/v5/schemas/tickets/templates');
 const TicketTemplateSchema = require(`${src}/schemas/tickets/templates`);
 
@@ -35,11 +38,16 @@ const testValidateNewTicketSchema = () => {
 		test('Should cast the request body and call next if it is valid', async () => {
 			const expectedOutput = { [generateRandomString]: generateRandomString() };
 			TicketTemplateSchema.validate.mockReturnValueOnce(expectedOutput);
-			const req = { body: {} };
+			TemplateModelSchema.getTemplateByName.mockRejectedValueOnce({});
+			const name = generateRandomString();
+			const teamspace = generateRandomString();
+			const req = { body: { name }, params: { teamspace } };
 			const res = {};
 			const next = jest.fn();
 
 			await TeamspaceSettings.validateNewTicketSchema(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateByName).toHaveBeenCalledWith(teamspace, name, { _id: 1 });
 
 			expect(next).toHaveBeenCalledTimes(1);
 			expect(req.body).toEqual(expectedOutput);
@@ -49,7 +57,7 @@ const testValidateNewTicketSchema = () => {
 		test(`Should respond with ${templates.invalidArguments.code} if validation failed`, async () => {
 			const errMsg = generateRandomString();
 			TicketTemplateSchema.validate.mockImplementationOnce(() => { throw new Error(errMsg); });
-			const req = { body: {} };
+			const req = { body: {}, params: { teamspace: generateRandomString() } };
 			const res = {};
 			const next = jest.fn();
 
@@ -57,7 +65,24 @@ const testValidateNewTicketSchema = () => {
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(templates.invalidArguments, errMsg));
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, createResponseCode(templates.invalidArguments, errMsg),
+			);
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if name is already in use`, async () => {
+			TemplateModelSchema.getTemplateByName.mockResolvedValueOnce();
+			const req = { body: {}, params: { teamspace: generateRandomString() } };
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateNewTicketSchema(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, createResponseCode(templates.invalidArguments, 'Name already in use'),
+			);
 		});
 	});
 };
