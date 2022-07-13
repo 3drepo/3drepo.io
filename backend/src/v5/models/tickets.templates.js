@@ -21,13 +21,15 @@ const TEMPLATES_COL = 'templates';
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-Templates.getTemplateByName = async (teamspace, name, projection) => {
-	try {
-		const template = await db.findOne(teamspace, TEMPLATES_COL, { name }, projection);
-		return template;
-	} catch (err) {
+const findOne = async (teamspace, query, projection) => {
+	const template = await db.findOne(teamspace, TEMPLATES_COL, query, projection);
+	if (!template) {
 		throw templates.resourceNotFound;
 	}
 };
+
+Templates.getTemplateById = (teamspace, id, projection) => findOne(teamspace, { _id: id }, projection);
+
+Templates.getTemplateByName = (teamspace, name, projection) => findOne(teamspace, { name }, projection);
 
 module.exports = Templates;

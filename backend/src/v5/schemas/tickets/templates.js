@@ -52,10 +52,7 @@ const moduleSchema = Yup.object().shape({
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
 	properties: Yup.array().of(fieldSchema),
-}).test('Name and type', 'Only provide a name or a type for module, not both', ({ name, type }) => {
-	console.log(name, type);
-	return (name && !type) || (!name && type);
-});
+}).test('Name and type', 'Only provide a name or a type for module, not both', ({ name, type }) => (name && !type) || (!name && type));
 
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),

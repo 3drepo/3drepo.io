@@ -16,11 +16,14 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { getTemplateByName } = require('../../../../models/tickets.templates');
+const { getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
 
 const Settings = {};
+
+const nameExists = (teamspace, name) => getTemplateByName(teamspace, name, { _id: 1 })
+	.then(() => true).catch(() => false);
 
 Settings.validateNewTicketSchema = async (req, res, next) => {
 	const { teamspace } = req.params;
@@ -29,10 +32,59 @@ Settings.validateNewTicketSchema = async (req, res, next) => {
 	try {
 		req.body = validate(data);
 
-		const nameExists = await getTemplateByName(teamspace, data.name, { _id: 1 })
-			.then(() => true).catch(() => false);
+		if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
 
-		if (nameExists) throw new Error('Name already in use');
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+const mergeProperties = (newProps, oldProps) => {
+	const newDataFields = {};
+	newProps.forEach((field) => { newDataFields[field.name] = field; });
+	oldProps.forEach(({ name, type, ...others }) => {
+		if (newDataFields[name] && newDataFields[name].type !== type) {
+			throw new Error(`Cannot change the value type of existing property "${name}"`);
+		} else {
+			newProps.push({ name, type, deprecated: true, ...others });
+		}
+	});
+};
+
+const mergeModules = (newMods, oldMods) => {
+	const newModsLut = {};
+	newMods.forEach((field) => { newModsLut[field.name || field.type] = field; });
+	oldMods.forEach(({ name, type, ...others }) => {
+		const id = name || type;
+		if (newModsLut[id]) {
+			mergeProperties(newModsLut[id], others.properties);
+		} else {
+			newMods.push({ name, type, deprecated: true, ...others });
+		}
+	});
+};
+
+const processTemplateUpdate = (newData, oldData) => {
+	mergeProperties(newData.properties, oldData.properties);
+	mergeModules(newData.modules, oldData.modules);
+};
+
+Settings.validateUpdateTicketSchema = async (req, res, next) => {
+	const { teamspace, template } = req.params;
+
+	try {
+		const data = validate(req.body);
+
+		const oldTemplate = await getTemplateById(teamspace, template);
+
+		if (oldTemplate.name !== data.name) {
+			// if the name is changed, make sure it's not used by some other template
+			if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
+		}
+
+		processTemplateUpdate(data, oldTemplate);
+		req.body = data;
 
 		await next();
 	} catch (err) {
