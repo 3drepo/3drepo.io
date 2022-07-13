@@ -28,6 +28,7 @@ import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
 import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
 import { ModalsDispatcher } from '@components/shared/modals';
+import { Intercom } from '@components/intercom/intercom.component';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
@@ -57,6 +58,7 @@ export const Root = () => {
 						<V4Adapter>
 							<MainRoute />
 							<ModalsDispatcher />
+							<Intercom />
 						</V4Adapter>
 					</IntlProvider>
 				</StylesProvider>

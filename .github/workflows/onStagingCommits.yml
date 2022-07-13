@@ -1,10 +1,10 @@
-name: Tag merged issues
+name: On PR closed
 on:
   pull_request:
     types: [closed]
 jobs:
   tagOnPRMerge:
-    name: Tag merged issues as In staging
+    name: Tag merged issues as In staging if applicable
     runs-on: ubuntu-latest
     steps:
       - name: Is PR merged into staging
