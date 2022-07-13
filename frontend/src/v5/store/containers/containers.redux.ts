@@ -20,7 +20,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
-import { View } from '@/v5/store/store.types';
+import { SuccessAndErrorCallbacks, View } from '@/v5/store/store.types';
 import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
@@ -42,7 +42,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	updateContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
 	createContainer: ['teamspace', 'projectId', 'newContainer'],
 	createContainerSuccess: ['projectId', 'container'],
-	deleteContainer: ['teamspace', 'projectId', 'containerId'],
+	deleteContainer: ['teamspace', 'projectId', 'containerId', 'onSuccess', 'onError'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 	setContainerStatus: ['projectId', 'containerId', 'status'],
 	containerProcessingSuccess: ['projectId', 'containerId', 'revision'],
@@ -247,7 +247,7 @@ export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> 
 export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & { newContainer: NewContainer };
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
-export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
+export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
 export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
 export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
@@ -300,7 +300,12 @@ export interface IContainersActionCreators {
 		containerId: string,
 		settings: ContainerSettings,
 	) => UpdateContainerSettingsSuccessAction;
-	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
+	deleteContainer: (teamspace: string,
+		projectId: string,
+		containerId: string,
+		onSuccess: () => void,
+		onError: (error) => void,
+	) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 	setContainerStatus: (projectId: string, containerId: string, status: UploadStatuses) => SetContainerStatusAction;
 	containerProcessingSuccess: (

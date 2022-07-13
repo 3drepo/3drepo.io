@@ -16,9 +16,15 @@
  */
 
 import styled from 'styled-components';
-import { DialogContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Link } from 'react-router-dom';
 
-export const Container = styled(ContainerBase)`
-	min-width: 450px;
-	min-height: 248px;
+export const NavLinks = styled.div`
+	margin: 0 13px;
+`;
+
+export const NavLink = styled(Link)<{ selected: boolean }>`
+	margin: 0 12px;
+	${({ theme }) => theme.typography.h5}
+	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
+	cursor: pointer;
 `;

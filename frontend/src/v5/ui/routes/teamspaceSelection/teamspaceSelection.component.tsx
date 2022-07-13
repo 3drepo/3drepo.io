@@ -17,6 +17,7 @@
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AppBar } from '@components/shared/appBar';
+import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { useEffect, useRef, useState } from 'react';
@@ -57,6 +58,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 					</FadeMessageTrigger>
 					<TeamspaceList />
 				</HomeContent>
+				<DashboardFooter variant="dark" />
 			</ScrollBar>
 			<ModalsDispatcher />
 		</>

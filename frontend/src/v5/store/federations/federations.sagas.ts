@@ -177,15 +177,13 @@ export function* updateFederationSettings({
 	}
 }
 
-export function* deleteFederation({ teamspace, projectId, federationId }: DeleteFederationAction) {
+export function* deleteFederation({ teamspace, projectId, federationId, onSuccess, onError }: DeleteFederationAction) {
 	try {
 		yield API.Federations.deleteFederation({ teamspace, projectId, federationId });
 		yield put(FederationsActions.deleteFederationSuccess(projectId, federationId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'federation.delete.error', defaultMessage: 'trying to delete federation' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 
