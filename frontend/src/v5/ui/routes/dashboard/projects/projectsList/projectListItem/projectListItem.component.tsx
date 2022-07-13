@@ -14,21 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link, useRouteMatch } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useRouteMatch, useParams } from 'react-router-dom';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import {
 	DashboardListItemRow,
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { discardSlash } from '@/v5/services/routing/routing';
+import { FormattedMessage } from 'react-intl';
+import { Button } from '@controls/button';
+import { formatMessage } from '@/v5/services/intl';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { IProject } from '@/v5/store/projects/projects.types';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import {
 	ShareModalProject as ShareModal,
 } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalProject/shareModalProject.component';
-import { useState } from 'react';
-import { discardSlash } from '@/v5/services/routing/routing';
-import { formatMessage } from '@/v5/services/intl';
-import { IProject } from '@/v5/store/projects/projects.types';
-import { Button } from '@controls/button';
-import { FormattedMessage } from 'react-intl';
 
 type ProjectListItemProps = {
 	project: IProject,
@@ -36,7 +39,30 @@ type ProjectListItemProps = {
 
 export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
 	let { url } = useRouteMatch();
+	const { teamspace } = useParams<DashboardParams>();
 	url = discardSlash(url);
+
+	const onClickDelete = (e) => {
+		e.preventDefault();
+		DialogsActionsDispatchers.open('delete', {
+			name: project.name,
+			onClickConfirm: () => new Promise<void>(
+				(accept, reject) => {
+					ProjectsActionsDispatchers.deleteProject(
+						teamspace,
+						project._id,
+						accept,
+						reject,
+					);
+				},
+			),
+			message: formatMessage({
+				id: 'deleteModal.project.message',
+				defaultMessage: 'By deleting this Project your data will be lost permanently and will not be recoverable.',
+			}),
+			confidenceCheck: true,
+		});
+	};
 
 	const [openModal, setOpenModal] = useState(false);
 
@@ -51,6 +77,9 @@ export const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element 
 				<DashboardListItemRow>
 					<DashboardListItemText>
 						{project.name}
+						<Button onClick={onClickDelete}>
+							<FormattedMessage id="deleteProject.button" defaultMessage="Delete Project" />
+						</Button>
 						<Button onClick={openShareModal}>
 							<FormattedMessage id="shareProject.button" defaultMessage="Share Project" />
 						</Button>

@@ -14,48 +14,118 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Button, DialogContentText, DialogTitle } from '@mui/material';
 import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
-import { ModalContainer, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
+import {
+	DialogContainer,
+	Actions,
+	RetypeCheck,
+	ConfirmationPhrase,
+	RetypeCheckField,
+	Message,
+	TruncatableTitle,
+	Instruction,
+	ErrorMessage,
+} from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
+import { formatMessage } from '@/v5/services/intl';
+import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { isNetworkError } from '@/v5/validation/errors.helpers';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
-	onClickConfirm: () => void,
-	title: string,
+	onClickConfirm: () => Promise<void>,
+	name: string,
 	message?: string,
+	confidenceCheck?: boolean,
 }
 
-export const DeleteModal = ({ onClickConfirm, onClickClose, title, message }: IDeleteModal) => (
-	<ModalContainer>
-		<CircledIcon variant="error" size="large">
-			<DeleteIcon />
-		</CircledIcon>
-		<DialogTitle>
-			<FormattedMessage
-				id="deleteModal.header"
-				defaultMessage={title}
-			/>
-		</DialogTitle>
-		<DialogContent>
-			<DialogContentText>
-				{message}
-			</DialogContentText>
-		</DialogContent>
-		<Actions>
-			<Button autoFocus type="submit" onClick={() => { onClickClose(); onClickConfirm(); }} variant="contained" color="primary">
-				<FormattedMessage
-					id="deleteModal.action.confirm"
-					defaultMessage="Delete"
-				/>
-			</Button>
-			<Button onClick={onClickClose} variant="outlined" color="secondary">
-				<FormattedMessage
-					id="deleteModal.action.cancel"
-					defaultMessage="Cancel"
-				/>
-			</Button>
-		</Actions>
-	</ModalContainer>
-);
+export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confidenceCheck }: IDeleteModal) => {
+	const { control, watch, handleSubmit } = useForm({
+		mode: 'onChange',
+		defaultValues: { retypedName: '' },
+	});
+	const isValid = confidenceCheck ? (watch('retypedName') === name) : true;
+	const [errorMessage, setErrorMessage] = useState('');
+	const onError = (error) => {
+		if (isNetworkError(error)) {
+			setErrorMessage(
+				formatMessage({
+					id: 'editProfile.networkError',
+					defaultMessage: 'Network Error',
+				}),
+			);
+		} else {
+			setErrorMessage(error.response.data.message);
+		}
+	};
+
+	const onSubmit = async () => {
+		try {
+			await onClickConfirm();
+			onClickClose();
+		} catch (e) {
+			onError(e);
+		}
+	};
+
+	return (
+		<DialogContainer>
+			<CircledIcon variant="error" size="large">
+				<DeleteIcon />
+			</CircledIcon>
+			<DialogTitle>
+				<TruncatableTitle>
+					<FormattedMessage
+						id="deleteModal.header"
+						defaultMessage="Delete {name}?"
+						values={{ name }}
+					/>
+				</TruncatableTitle>
+			</DialogTitle>
+			<Message>
+				<DialogContentText>
+					{message}
+				</DialogContentText>
+				{ confidenceCheck && (
+					<RetypeCheck>
+						<Instruction>
+							<FormattedMessage
+								id="deleteModal.content.retypeCheck"
+								defaultMessage="Confirm by typing {confirmationPhrase} below:"
+								values={{
+									confirmationPhrase: <ConfirmationPhrase>{name}</ConfirmationPhrase>,
+								}}
+							/>
+						</Instruction>
+						<RetypeCheckField
+							control={control}
+							name="retypedName"
+						/>
+					</RetypeCheck>
+				)}
+				{errorMessage && (
+					<ErrorMessage>
+						{errorMessage}
+					</ErrorMessage>
+				)}
+			</Message>
+			<Actions>
+				<Button onClick={onClickClose} variant="contained" color="primary">
+					<FormattedMessage
+						id="deleteModal.action.cancel"
+						defaultMessage="Cancel"
+					/>
+				</Button>
+				<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
+					<FormattedMessage
+						id="deleteModal.action.confirm"
+						defaultMessage="Delete"
+					/>
+				</Button>
+			</Actions>
+		</DialogContainer>
+	);
+};
