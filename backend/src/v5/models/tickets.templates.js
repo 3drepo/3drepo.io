@@ -24,7 +24,7 @@ const { templates } = require('../utils/responseCodes');
 const findOne = async (teamspace, query, projection) => {
 	const template = await db.findOne(teamspace, TEMPLATES_COL, query, projection);
 	if (!template) {
-		throw templates.resourceNotFound;
+		throw templates.templateNotFound;
 	}
 
 	return template;

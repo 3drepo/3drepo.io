@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
@@ -88,7 +88,9 @@ Settings.validateUpdateTicketSchema = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		console.log(err);
+		const response = codeExists(err?.code) ? err : createResponseCode(templates.invalidArguments, err?.message);
+		respond(req, res, response);
 	}
 };
 

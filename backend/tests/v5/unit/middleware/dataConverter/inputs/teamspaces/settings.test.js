@@ -87,6 +87,110 @@ const testValidateNewTicketSchema = () => {
 	});
 };
 
+const testValidateUpdateTicketSchema = () => {
+	describe('Test update ticket schema', () => {
+		test(`Should respond with ${templates.invalidArguments.code} if validation failed`, async () => {
+			const errMsg = generateRandomString();
+			TicketTemplateSchema.validate.mockImplementationOnce(() => { throw new Error(errMsg); });
+			const req = { body: {}, params: { teamspace: generateRandomString(), template: generateRandomString() } };
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, createResponseCode(templates.invalidArguments, errMsg),
+			);
+		});
+
+		test(`Should respond with ${templates.templateNotFound.code} if template isn't found`, async () => {
+			TemplateModelSchema.getTemplateById.mockRejectedValueOnce(templates.templateNotFound);
+			const req = { body: {}, params: { teamspace: generateRandomString(), template: generateRandomString() } };
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.templateNotFound);
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the updated name is already taken`, async () => {
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce({ name: generateRandomString() });
+			TemplateModelSchema.getTemplateByName.mockResolvedValueOnce({ });
+
+			TicketTemplateSchema.validate.mockReturnValueOnce({ name: generateRandomString() });
+
+			const req = {
+				body: { name: generateRandomString() },
+				params: { teamspace: generateRandomString(), template: generateRandomString() },
+			};
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, createResponseCode(templates.invalidArguments, 'Name already in use'),
+			);
+		});
+
+		test('Should call next if there is no name clash', async () => {
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce({ name: generateRandomString(), properties: [], modules: [] });
+			TemplateModelSchema.getTemplateByName.mockRejectedValueOnce(templates.templateNotFound);
+
+			const expectedOutput = { name: generateRandomString(), properties: [], modules: [] };
+
+			const req = {
+				body: { ...expectedOutput },
+				params: { teamspace: generateRandomString(), template: generateRandomString() },
+			};
+
+			TicketTemplateSchema.validate.mockReturnValueOnce(req.body);
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(req.body).toEqual(expectedOutput);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('Should call next if the name has not been changed', async () => {
+			const name = generateRandomString();
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce({ name, properties: [], modules: [] });
+
+			const expectedOutput = { name, properties: [], modules: [] };
+
+			const req = {
+				body: { ...expectedOutput },
+				params: { teamspace: generateRandomString(), template: generateRandomString() },
+			};
+
+			TicketTemplateSchema.validate.mockReturnValueOnce(req.body);
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateByName).not.toHaveBeenCalled();
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(req.body).toEqual(expectedOutput);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces', () => {
 	testValidateNewTicketSchema();
+	testValidateUpdateTicketSchema();
 });
