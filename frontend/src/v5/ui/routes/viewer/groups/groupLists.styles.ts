@@ -21,6 +21,7 @@ import { GroupsSetTreeListItemComponent } from './groupItem/groupSetItem.styles'
 export const GroupsTreeList = styled.ul`
 	list-style-type: none;
 	padding-inline-start: 0;
+	margin: 0;
 `;
 
 export const GroupsListContainer = styled.div`
