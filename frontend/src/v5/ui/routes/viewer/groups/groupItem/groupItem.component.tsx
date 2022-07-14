@@ -18,6 +18,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import LightingIcon from '@assets/icons/lighting.svg';
 import { contrastColor } from 'contrast-color';
+import { getGroupNamePath } from '../groupList.helpers';
 import { GroupIcon, GroupItemTextContainer, GroupItemName, GroupItemObjects } from './groupItem.styles';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
@@ -55,7 +56,7 @@ export const GroupItem = ({ group, disabled }) => {
 		GroupsActionsDispatchers.showDetails(group);
 	};
 
-	const path = group.name.split('::');
+	const path = getGroupNamePath(group.name);
 	const depth = path.length;
 	const name = path.pop();
 

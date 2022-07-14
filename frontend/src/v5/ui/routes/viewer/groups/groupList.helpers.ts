@@ -17,19 +17,27 @@
 
 import _ from 'lodash';
 
+const splitPattern = /::+/g;
+const trimPattern = /(?=^)::+|::+(?=$)/g;
+
+export const getGroupNamePath = (str:string) => {
+	const trimmedStr = str.trim().replace(trimPattern, '');
+	return trimmedStr.split(splitPattern);
+};
+
+const getGroupNameParent = (group):string => {
+	const path = getGroupNamePath(group.name);
+	path.pop();
+	return path.join('::');
+};
+
 export const groupsToTree = (groups) => {
 	// eslint-disable-next-line no-param-reassign
 	groups = _.sortBy(groups, ({ name }) => name.toLowerCase());
 
-	const parentName = (group):string => {
-		const path = group.name.split('::');
-		path.pop();
-		return path.join('::');
-	};
-
 	groups.sort((groupA, groupB) => {
-		const parentA = parentName(groupA);
-		const parentB = parentName(groupB);
+		const parentA = getGroupNameParent(groupA);
+		const parentB = getGroupNameParent(groupB);
 		const isAncestorA = groupB.name.startsWith(parentA);
 		const isAncestorB = groupA.name.startsWith(parentB);
 
@@ -99,7 +107,7 @@ export const groupsToTree = (groups) => {
 
 	groups.forEach((group) => {
 		// The group path is given by the name like 'dad::child:grandchild'
-		const path = group.name.split('::');
+		const path = getGroupNamePath(group.name);
 		path.pop();
 		const parentNamed = path.join('::');
 

@@ -19,6 +19,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import { ChevronButton } from '@controls/chevronButton';
 import { SyntheticEvent } from 'react';
+import { getGroupNamePath } from '../groupList.helpers';
 import { CollapsibleIconV4, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
 const getGroupSetData = (groupSet) => {
@@ -91,7 +92,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 		GroupsActionsDispatchers.isolateGroups(descendants);
 	};
 
-	const depth = groupSet.pathName.split('::').length;
+	const depth = getGroupNamePath(groupSet.pathName).length;
 
 	return (
 		<GroupsSetTreeListItemComponent
