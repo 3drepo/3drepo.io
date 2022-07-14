@@ -24,7 +24,7 @@ import { GroupIcon, GroupItemTextContainer, GroupItemName, GroupItemObjects } fr
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
 const isSmart = (group) => (group.rules || []).length > 0;
-const isLight = (colour) => contrastColor({ bgColor: colour, threshold: 150 }) === '#FFFFFF';
+const isLight = (colour) => contrastColor({ bgColor: colour, threshold: 170 }) === '#FFFFFF';
 
 const GroupIconComponent = ({ group }) => (
 	<GroupIcon $color={group.color} $variant={isLight(group.color) ? 'dark' : 'light'}>
