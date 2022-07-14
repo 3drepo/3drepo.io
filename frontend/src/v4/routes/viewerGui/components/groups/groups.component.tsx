@@ -53,7 +53,7 @@ import { PanelBarActions } from '../panelBarActions';
 import {  Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { GroupDetails } from './components/groupDetails';
-import { GroupsContainer, GroupIcon, GroupsListContainer } from './groups.styles';
+import { GroupsContainer, GroupIcon } from './groups.styles';
 
 interface IProps {
 	viewer: any;
@@ -178,11 +178,11 @@ export class Groups extends PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent onClick={this.resetActiveGroup}>
-				<GroupsListContainer onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+				<div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
 					{this.renderEmptyState(!this.props.searchEnabled && !this.props.groups.length)}
 					{this.renderNotFound(this.props.searchEnabled && !this.props.groups.length)}
 					{this.renderGroupsList(this.props.groups.length)}
-				</GroupsListContainer>
+				</div>
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justifyContent="space-between">
 				<Summary>

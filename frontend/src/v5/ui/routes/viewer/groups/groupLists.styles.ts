@@ -25,9 +25,6 @@ export const GroupsTreeList = styled.ul`
 `;
 
 export const GroupsListContainer = styled.div`
-	height: 100%;
-	background-color: ${({ theme }) => (isV5() ? theme.palette.tertiary.lightest : '#EBEBEB')} ;
-
 	/* stylelint-disable-next-line */
 	& > ${GroupsTreeList} > ${GroupsSetTreeListItemComponent} {
 		padding-top: 11px;

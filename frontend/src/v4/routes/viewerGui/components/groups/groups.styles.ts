@@ -29,6 +29,7 @@ import {
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { Description } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 export const GroupIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.GROUPS];
 
@@ -36,10 +37,10 @@ export const GroupsContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.GROUPS],
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.GROUPS]}px;
+
+	${ViewerPanelContent} {
+		background-color: ${({ theme }) => (isV5() ? theme.palette.tertiary.lightest : '#EBEBEB')} ;
+	}
 `;
 
 export const Container = styled.div``;
-
-export const GroupsListContainer = styled.div`
-	height: 100%;
-`;
