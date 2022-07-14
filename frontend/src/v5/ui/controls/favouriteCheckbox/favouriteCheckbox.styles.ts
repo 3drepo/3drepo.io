@@ -26,27 +26,19 @@ const contrastStyles = css`
 
 	&:hover {
 		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: transparent;
 		}
 	}
 
 	&.Mui-focusVisible {
 		&& {
 			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-			path {
-				fill: ${({ theme }) => theme.palette.primary.main};
-			}
 		}
 	}
 
 	&:active {
 		&& {
-			background-color: ${({ theme }) => theme.palette.secondary.light};
-			border-color: ${({ theme }) => theme.palette.secondary.light};
-
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
+			background-color: transparent;
 		}
 	}
 `;
@@ -72,16 +64,19 @@ export const Checkbox = styled(CheckboxComponent)<{ selected?: boolean }>`
 			}
 		}
 
-		&.Mui-focusVisible {
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-		}
-
 		&:hover {
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			background-color: transparent;
+			path {
+				stroke: ${({ theme }) => theme.palette.favourite.main};
+			}
 		}
-
+		
 		&:active {
-			background-color: ${({ theme }) => theme.palette.base.lightest};
+			background-color: transparent;
+			path {
+				fill: ${({ theme }) => theme.palette.favourite.main};
+				stroke: ${({ theme }) => theme.palette.favourite.main};
+			}
 		}
 
 		&.Mui-disabled {
