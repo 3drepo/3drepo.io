@@ -26,9 +26,11 @@ const findOne = async (teamspace, query, projection) => {
 	if (!template) {
 		throw templates.resourceNotFound;
 	}
+
+	return template;
 };
 
-Templates.getTemplateById = (teamspace, id, projection) => findOne(teamspace, { _id: id }, projection);
+Templates.getTemplateById = (teamspace, _id, projection) => findOne(teamspace, { _id }, projection);
 
 Templates.getTemplateByName = (teamspace, name, projection) => findOne(teamspace, { name }, projection);
 
