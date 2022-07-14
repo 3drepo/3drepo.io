@@ -28,7 +28,6 @@ const getSizeInPixels = (size?: string) => {
 export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, size?: string }>`
 	padding: 0;
 	margin: 8px 7px;
-	/* pointer-events: none; */
 
 	cursor: ${({ $isButton }) => ($isButton ? 'pointer' : 'default')};
 

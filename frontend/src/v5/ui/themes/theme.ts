@@ -563,7 +563,7 @@ export const theme = createTheme({
 				},
 				colorDefault: {
 					color: COLOR.SECONDARY_MAIN,
-					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
+					backgroundColor: COLOR.BASE_LIGHTEST,
 				},
 			},
 		},
