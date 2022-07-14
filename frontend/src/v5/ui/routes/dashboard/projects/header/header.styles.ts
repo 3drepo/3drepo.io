@@ -23,4 +23,7 @@ export const Wrapper = styled.div`
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	padding-left: 79px;
+	box-shadow: 0 0px 13px -7px;
+	position: relative;
+	z-index: 1;
 `;
