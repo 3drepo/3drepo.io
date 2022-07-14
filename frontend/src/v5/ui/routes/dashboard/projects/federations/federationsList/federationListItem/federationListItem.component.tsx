@@ -94,6 +94,7 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
 						}
+						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.issues"
@@ -111,6 +112,7 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
 						}
+						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.risks"
