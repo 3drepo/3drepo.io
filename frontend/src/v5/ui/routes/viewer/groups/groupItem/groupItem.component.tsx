@@ -18,6 +18,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import LightingIcon from '@assets/icons/lighting.svg';
 import { contrastColor } from 'contrast-color';
+import { FormattedMessage } from 'react-intl';
 import { getGroupNamePath } from '../groupList.helpers';
 import { GroupIcon, GroupItemTextContainer, GroupItemName, GroupItemObjects } from './groupItem.styles';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
@@ -78,7 +79,11 @@ export const GroupItem = ({ group, disabled }) => {
 					{name}
 				</GroupItemName>
 				<GroupItemObjects>
-					Objects: {group.objects.length}
+					<FormattedMessage
+						id="groups.item.numberOfMeshes"
+						defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
+						values={{ count: group.totalSavedMeshes }}
+					/>
 				</GroupItemObjects>
 			</GroupItemTextContainer>
 		</GroupsTreeListItemComponent>
