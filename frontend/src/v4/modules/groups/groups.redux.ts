@@ -188,8 +188,6 @@ export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
 export const setColorOverrides = (state = INITIAL_STATE, { groupIds, on }) => {
 	const overridesLeft = state.colorOverrides.filter((groupId) => !groupIds.includes(groupId));
 	const colorOverrides = on ? overridesLeft.concat(groupIds) : overridesLeft;
-	// what happends with the highlighted groups?
-
 	return {...state, colorOverrides };
 };
 

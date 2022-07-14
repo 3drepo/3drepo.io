@@ -23,8 +23,6 @@ import { getGroupNamePath } from '../groupList.helpers';
 import { CollapsibleIconV4, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
 const getGroupSetData = (groupSet, overrides, highlights) => {
-	// eslint-disable-next-line no-param-reassign
-
 	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
 		// eslint-disable-next-line prefer-const
 		let { overriden, descendants, highlighted } = partialData;

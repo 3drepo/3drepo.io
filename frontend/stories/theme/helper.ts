@@ -24,7 +24,9 @@ const NOT_COLORS = ['shadows',
 	'contrastThreshold',
 	'getContrastText',
 	'augmentColor',
-	'tonalOffset'];
+	'tonalOffset',
+	'divider',
+];
 
 export const paletteVariants = () => Object.keys(theme.palette)
 	.filter((paletteItem) => !NOT_COLORS.includes(paletteItem));

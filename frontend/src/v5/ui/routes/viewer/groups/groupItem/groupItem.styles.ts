@@ -20,7 +20,7 @@ import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButto
 import styled, { css } from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
 
-export const GroupsTreeListItem = styled.li<{$highlighted?: boolean}>`
+export const GroupsTreeListItem = styled.li`
 	cursor: default;
 	position: relative;
 `;
