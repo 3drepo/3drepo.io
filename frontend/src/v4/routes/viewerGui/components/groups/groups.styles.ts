@@ -39,7 +39,7 @@ export const GroupsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.GROUPS]}px;
 
 	${ViewerPanelContent} {
-		background-color: ${({ theme }) => (isV5() ? theme.palette.tertiary.lightest : '#EBEBEB')} ;
+		background-color: #EBEBEB;
 	}
 `;
 

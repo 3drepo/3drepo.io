@@ -50,6 +50,7 @@ import {
 	StyledLinkableField,
 } from '@/v4/routes/components/textField/textField.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 
 const previewGroupItem = css`
 	${PreviewListItemContainer} {
@@ -293,6 +294,9 @@ const expandedGroupItem = css`
 export default css`
 	#groups-card {
 		${previewGroupItem}
+		${ViewerPanelContent} {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		}
 	}
 
 	#groups-card-details {
