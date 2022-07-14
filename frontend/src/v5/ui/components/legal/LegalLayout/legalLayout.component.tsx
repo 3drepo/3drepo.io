@@ -15,10 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { DialogContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { useRouteMatch } from 'react-router-dom';
 
-export const Container = styled(ContainerBase)`
-	min-width: 450px;
-	min-height: 248px;
-`;
+import { ScrollArea } from '@controls/scrollArea';
+import { LegalContent } from './legalLayout.styles';
+import { LegalAppBar } from './legalAppBar/legalAppBar.component';
+
+type ILegalLayout = {
+	children: any;
+};
+
+export const LegalLayout = ({ children }: ILegalLayout) => {
+	const { params: { legalPage } } = useRouteMatch('/v5/:legalPage');
+	return (
+		<>
+			<LegalAppBar activePage={legalPage} />
+			<ScrollArea>
+				<LegalContent>
+					{children}
+				</LegalContent>
+			</ScrollArea>
+		</>
+	);
+};
