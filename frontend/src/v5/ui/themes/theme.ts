@@ -307,9 +307,9 @@ export const theme = createTheme({
 		MuiCheckbox: {
 			defaultProps: {
 				color: 'primary',
-				icon: createElement(CheckboxIcon),
+				icon: createElement(CheckboxIcon, { borderColor: COLOR.BASE_LIGHT }),
 				checkedIcon: createElement(CheckboxCheckedIcon),
-				indeterminateIcon: createElement(CheckboxIndeterminatedIcon),
+				indeterminateIcon: createElement(CheckboxIndeterminatedIcon, { borderColor: COLOR.BASE_LIGHT }),
 			},
 			styleOverrides: {
 				colorPrimary: {
