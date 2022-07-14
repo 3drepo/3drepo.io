@@ -308,7 +308,7 @@ export const theme = createTheme({
 			defaultProps: {
 				color: 'primary',
 				icon: createElement(CheckboxIcon, { borderColor: COLOR.BASE_LIGHT }),
-				checkedIcon: createElement(CheckboxCheckedIcon),
+				checkedIcon: createElement(CheckboxCheckedIcon, { tickColor: COLOR.PRIMARY_MAIN_CONTRAST }),
 				indeterminateIcon: createElement(CheckboxIndeterminatedIcon, { borderColor: COLOR.BASE_LIGHT }),
 			},
 			styleOverrides: {
