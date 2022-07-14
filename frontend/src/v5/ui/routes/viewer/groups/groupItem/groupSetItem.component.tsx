@@ -22,11 +22,8 @@ import { SyntheticEvent } from 'react';
 import { getGroupNamePath } from '../groupList.helpers';
 import { CollapsibleIconV4, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
-const getGroupSetData = (groupSet) => {
+const getGroupSetData = (groupSet, overrides, highlights) => {
 	// eslint-disable-next-line no-param-reassign
-
-	const overrides = GroupsHooksSelectors.selectGroupsColourOverridesSet();
-	const highlights = GroupsHooksSelectors.selectHighlightedGroups();
 
 	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
 		// eslint-disable-next-line prefer-const
@@ -35,7 +32,7 @@ const getGroupSetData = (groupSet) => {
 		let childHighlight = null;
 
 		if (groupOrGroupSet.children) {
-			childGroupSetData = getGroupSetData(groupOrGroupSet);
+			childGroupSetData = getGroupSetData(groupOrGroupSet, overrides, highlights);
 			childHighlight = childGroupSetData.highlight;
 			Array.prototype.push.apply(descendants, childGroupSetData.descendants);
 		} else {
@@ -73,9 +70,13 @@ const CollapsibleIcon = ({ $collapsed }) => (isV5()
 	: <CollapsibleIconV4 $collapsed={$collapsed} />);
 
 export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
+	const overrides = GroupsHooksSelectors.selectGroupsColourOverridesSet();
+	const highlights = GroupsHooksSelectors.selectHighlightedGroups();
+
 	const [collapseDict, setCollapse] = collapse;
 	const hidden = collapseDict[groupSet.pathName] ?? true;
-	const { overriden, descendants, highlighted } = getGroupSetData(groupSet);
+
+	const { overriden, descendants, highlighted } = getGroupSetData(groupSet, overrides, highlights);
 
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
