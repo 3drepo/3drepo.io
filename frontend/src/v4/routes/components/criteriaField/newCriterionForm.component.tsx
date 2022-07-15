@@ -47,6 +47,7 @@ import {
 	SelectField,
 	SelectFieldValue
 } from './criteriaField.styles';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -176,7 +177,9 @@ class NewCreaterionFormComponent extends PureComponent<IProps, IState> {
 							displayEmpty
 							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
 						>
-							{this.renderOperators()}
+							<ViewerScrollArea autoHeightMax={400} autoHeight={true}>
+								{this.renderOperators()}
+							</ViewerScrollArea>
 						</SelectField>
 					)} />
 				</FormControl>
