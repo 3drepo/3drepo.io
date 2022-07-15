@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { defaultProperties, fieldTypes, presetModules } = require('./templates.constants');
+const { defaultProperties, fieldTypes, presetModules, presetModulesProperties } = require('./templates.constants');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { toCamelCase } = require('../../utils/helper/strings');
@@ -44,7 +44,7 @@ const fieldSchema = Yup.object().shape({
 		return schema.strip();
 	}),
 
-	default: Yup.mixed().when(['type'], (type) => typeNameToType[type]),
+	default: Yup.mixed().when('type', (type) => typeNameToType[type]),
 
 });
 
@@ -67,8 +67,17 @@ const moduleSchema = Yup.object().shape({
 	name: types.strings.title.notOneOf(Object.values(presetModules)).transform(toCamelCase),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
-	properties: propertyArray,
-}).test('Name and type', 'Only provide a name or a type for module, not both', ({ name, type }) => (name && !type) || (!name && type));
+	properties: propertyArray.when('type', (type, schema) => {
+		if (type) {
+			const propertiesToCheck = presetModulesProperties[type];
+			return schema.test('No name clash', 'Cannot have the same name as a default property',
+				(val) => val.every(({ name }) => !propertiesToCheck.includes(name)));
+		}
+
+		return schema;
+	}),
+}).test('Name and type', 'Only provide a name or a type for module, not both',
+	({ name, type }) => (name && !type) || (!name && type));
 
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
 const schema = Yup.object().shape({

@@ -29,6 +29,11 @@ TemplateConstants.fieldTypes = {};
 	'number',
 	'oneOf',
 	'manyOf',
+	'image',
+	'viewState',
+	'measurements',
+	'attachments',
+	'safetibase',
 ].forEach((type) => {
 	TemplateConstants.fieldTypes[toConstantCase(type)] = type;
 });
@@ -45,6 +50,33 @@ TemplateConstants.presetModules = {};
 ].forEach((mod) => {
 	TemplateConstants.presetModules[toConstantCase(mod)] = mod;
 });
+
+TemplateConstants.presetModulesProperties = {
+	[TemplateConstants.presetModules.VIEWPOINT]: [
+		{ name: 'screenshot', type: TemplateConstants.fieldTypes.IMAGE },
+		{ name: 'view', type: TemplateConstants.fieldTypes.VIEW_STATE },
+	],
+	[TemplateConstants.presetModules.ISSUES]: [
+		{ name: 'priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
+		{ name: 'status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
+		{ name: 'assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: 'jobs' },
+		{ name: 'dueDate', type: TemplateConstants.fieldTypes.DATE },
+	],
+	[TemplateConstants.presetModules.SEQUENCING]: [
+		{ name: 'startTime', type: TemplateConstants.fieldTypes.DATE },
+		{ name: 'endTime', type: TemplateConstants.fieldTypes.DATE },
+	],
+	[TemplateConstants.presetModules.SHAPES]: [
+		{ name: 'shapes', type: TemplateConstants.fieldTypes.MEASUREMENTS },
+	],
+	[TemplateConstants.presetModules.ATTACHMENTS]: [
+		{ name: 'resources', type: TemplateConstants.fieldTypes.ATTACHMENTS },
+	],
+	[TemplateConstants.presetModules.SAFETIBASE]: [
+		{ name: 'safetibase', type: TemplateConstants.fieldTypes.SAFETIBASE },
+	],
+
+};
 
 TemplateConstants.defaultProperties = [
 	{ name: 'description', type: TemplateConstants.fieldTypes.LONG_TEXT },

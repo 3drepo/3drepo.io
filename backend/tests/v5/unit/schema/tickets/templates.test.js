@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { fieldTypes, presetModules, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 const { toCamelCase } = require(`${src}/utils/helper/strings`);
 
 const testValidate = () => {
@@ -110,6 +110,10 @@ const testValidate = () => {
 		['module with all required fields filled in (preset module)', createSkeleton([{ type: presetModules.SEQUENCING }]), true],
 		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString() }]), false],
 		['module with a name that is the same as a preset module', createSkeleton([{ name: presetModules.SEQUENCING }]), false],
+		['module trying to redefine a predefined property', {
+			...createSkeleton([{ type: presetModules.SEQUENCING }]),
+			properties: presetModulesProperties[presetModules.SEQUENCING][0],
+		}, false],
 		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
 		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: fieldTypes.TEXT }] }]), properties: [{ name: 'a', type: fieldTypes.TEXT }] }, true],
 		['all modules provided are valid', createSkeleton([
