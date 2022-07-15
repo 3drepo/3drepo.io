@@ -18,7 +18,7 @@ import { FC } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { ModalContainer, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
 import { AxiosError } from 'axios';
 
 interface IAlertModal {
@@ -46,7 +46,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const errorStatus = status && code ? `${status} - ${code}` : '';
 
 	return (
-		<ModalContainer>
+		<DialogContainer>
 			<WarningIcon />
 			<DialogTitle>
 				<FormattedMessage
@@ -76,6 +76,6 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 				</Button>
 			</Actions>
 			{details && <Details>{details}</Details>}
-		</ModalContainer>
+		</DialogContainer>
 	);
 };

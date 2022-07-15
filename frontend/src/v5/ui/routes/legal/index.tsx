@@ -15,10 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { DialogContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Route, Switch } from 'react-router-dom';
+import { CookiesLegalPaper, PrivacyLegalPaper, TermsLegalPaper } from '@components/legal';
+import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
 
-export const Container = styled(ContainerBase)`
-	min-width: 450px;
-	min-height: 248px;
-`;
+type ILegalRoutes = {
+	path: string;
+};
+
+export const LegalRoutes = ({ path }: ILegalRoutes) => (
+	<Switch>
+		<LegalLayout>
+			<Route exact path={`${path}/terms`}>
+				<TermsLegalPaper />
+			</Route>
+			<Route exact path={`${path}/cookies`}>
+				<CookiesLegalPaper />
+			</Route>
+			<Route exact path={`${path}/privacy`}>
+				<PrivacyLegalPaper />
+			</Route>
+		</LegalLayout>
+	</Switch>
+);
