@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AlertModal } from './alertModal/alertModal.component';
-import { DeleteModal } from './deleteModal/deleteModal.component';
-import { InfoModal } from './infoModal/infoModal.component';
-import { ShareModal } from './shareModal/shareModal.component';
-import { WarningModal } from './warningModal/warningModal.component';
+import { Card } from '@mui/material';
+import styled from 'styled-components';
+import AddCircleIcon from '@assets/icons/add_circle_filled.svg';
 
-export const MODAL_TEMPLATES = {
-	alert: AlertModal,
-	warning: WarningModal,
-	delete: DeleteModal,
-	info: InfoModal,
-	share: ShareModal,
-};
+export const Container = styled(Card)`
+	color: ${({ theme }) => theme.palette.primary.main};
+	${({ theme }) => theme.typography.h3};
+	background-color: rgb(255 255 255 / 5%);
+	width: 246px;
+	height: 253px;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+`;
+
+export const AddTeamspaceIcon = styled(AddCircleIcon).attrs(({ theme }) => ({
+	fillColour: theme.palette.primary.contrast,
+}))`
+	width: 37px;
+	height: 37px;
+`;

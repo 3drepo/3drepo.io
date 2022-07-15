@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Card } from '@mui/material';
 import styled from 'styled-components';
+import AddCircleIcon from '@assets/icons/add_circle_filled.svg';
 
-export const CardList = styled.ul`
-	flex-direction: row;
-	justify-content: center;
-	padding: 0;
+export const Container = styled(Card)`
+	color: ${({ theme }) => theme.palette.primary.main};
+	${({ theme }) => theme.typography.h3};
+	width: 246px;
+	height: 190px;
 	display: flex;
-	flex-wrap: wrap;
-	width: clamp(40px, 85vw, 798px);
-	margin-bottom: auto;
-	margin-top: 150px;
+	flex-flow: column;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	border: none;
+`;
+
+export const AddProjectIcon = styled(AddCircleIcon).attrs(({ theme }) => ({
+	fillColour: theme.palette.primary.contrast,
+}))`
+	width: 37px;
+	height: 37px;
 `;
