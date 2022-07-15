@@ -18,7 +18,7 @@ import { useParams, generatePath, matchPath } from 'react-router-dom';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
-import { IProject } from '@/v5/store/projects/projects.redux';
+import { IProject } from '@/v5/store/projects/projects.types';
 import { DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_LIST_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectCurrentModel, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
