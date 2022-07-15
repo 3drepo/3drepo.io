@@ -43,8 +43,7 @@ export default css`
 
 		.MuiInputBase-root {
 			svg {
-				/* TODO: fix after new palette is released */
-				color: #C1C8D5;
+				color: ${({ theme }) => theme.palette.base.lightest};
 				margin-top: -15px;
 			}
 		}
