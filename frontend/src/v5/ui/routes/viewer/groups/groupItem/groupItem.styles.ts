@@ -53,6 +53,7 @@ const PseudoElement = css`
 	content: '';
 	position: absolute;
 	border-radius: ${() => (isV5() ? '3px' : '0')};
+	box-sizing: border-box;
 `;
 
 export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
@@ -62,6 +63,7 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
 	align-items: center;
 	justify-content: center;
 	border-radius: ${() => (isV5() ? '3px' : '0')};
+	box-sizing: border-box;
 	
 	${({ $variant }) => ($variant === 'light' ? css`
 		color: ${({ theme }) => (isV5() ? theme.palette.base.main : '#6B778C')};
