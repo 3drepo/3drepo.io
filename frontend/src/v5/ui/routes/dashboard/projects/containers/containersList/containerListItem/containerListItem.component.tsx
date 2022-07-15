@@ -41,12 +41,6 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dial
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
 
-const MODALS = {
-	share: 'share',
-	containerSettings: 'containerSettings',
-	none: 'none',
-};
-
 interface IContainerListItem {
 	index: number;
 	isSelected: boolean;
@@ -72,8 +66,7 @@ export const ContainerListItem = ({
 
 	useEffect(() => enableRealtimeContainerUpdateSettings(teamspace, project, container._id), [container._id]);
 
-	const [openModal, setOpenModal] = useState(MODALS.none);
-	const closeModal = () => setOpenModal(MODALS.none);
+	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
 
 	const onClickShare = () => {
 		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
@@ -168,7 +161,7 @@ export const ContainerListItem = ({
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
 						openShareModal={onClickShare}
-						openContainerSettings={() => setOpenModal(MODALS.containerSettings)}
+						openContainerSettings={() => setContainerSettingsOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -180,9 +173,9 @@ export const ContainerListItem = ({
 				/>
 			)}
 			<ContainerSettingsForm
-				open={openModal === MODALS.containerSettings}
+				open={containerSettingsOpen}
 				container={container}
-				onClose={closeModal}
+				onClose={() => setContainerSettingsOpen(false)}
 			/>
 		</DashboardListItem>
 	);

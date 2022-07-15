@@ -44,7 +44,6 @@ import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
-	share: 'share',
 	editFederation: 'editFederation',
 	federationSettings: 'federationSettings',
 	none: 'none',
