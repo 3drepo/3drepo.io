@@ -23,7 +23,7 @@ const Aad = {};
 let clientApplication;
 
 Aad.getClientApplication = () => {
-	const clientAppConfig = { auth: config.sso.aad.authOptions };
+	const clientAppConfig = { auth: config.sso.aad };
 
 	if (!clientApplication) {
 		clientApplication = new msal.ConfidentialClientApplication(clientAppConfig);
