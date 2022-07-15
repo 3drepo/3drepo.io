@@ -88,7 +88,6 @@ Settings.validateUpdateTicketSchema = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
-		console.log(err);
 		const response = codeExists(err?.code) ? err : createResponseCode(templates.invalidArguments, err?.message);
 		respond(req, res, response);
 	}
