@@ -40,7 +40,7 @@ export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $
 	min-height: 41px;
 	align-items: center;
 	display: flex;
-	${() => (isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4)}
+	${isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4}
 `;
 
 const IconSize = css`
@@ -52,7 +52,7 @@ const PseudoElement = css`
 	${IconSize}
 	content: '';
 	position: absolute;
-	border-radius: ${() => (isV5() ? '3px' : '0')};
+	border-radius: ${isV5() ? '3px' : '0'};
 	box-sizing: border-box;
 `;
 
@@ -62,7 +62,7 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: ${() => (isV5() ? '3px' : '0')};
+	border-radius: ${isV5() ? '3px' : '0'};
 	box-sizing: border-box;
 	
 	${({ $variant }) => ($variant === 'light' ? css`
@@ -130,9 +130,9 @@ const GroupItemObjectsV5 = css`
 `;
 
 export const GroupItemName = styled.div`
-	${() => (isV5() ? GroupItemNameV5 : GroupItemNameV4)}
+	${isV5() ? GroupItemNameV5 : GroupItemNameV4}
 `;
 
 export const GroupItemObjects = styled.div`
-	${() => (isV5() ? GroupItemObjectsV5 : GroupItemObjectsV4)}
+	${isV5() ? GroupItemObjectsV5 : GroupItemObjectsV4}
 `;
