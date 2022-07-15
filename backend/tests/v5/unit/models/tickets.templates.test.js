@@ -39,12 +39,12 @@ const testGetTemplateByName = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { name }, projection);
 		});
 
-		test(`should error with ${templates.resourceNotFound} if there's no matching name`, async () => {
+		test(`should error with ${templates.templateNotFound} if there's no matching name`, async () => {
 			const teamspace = generateRandomString();
 			const name = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			await expect(TicketTemplates.getTemplateByName(teamspace, name))
-				.rejects.toEqual(templates.resourceNotFound);
+				.rejects.toEqual(templates.templateNotFound);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { name }, undefined);
@@ -67,12 +67,12 @@ const testGetTemplateById = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { _id }, projection);
 		});
 
-		test(`should error with ${templates.resourceNotFound} if there's no matching name`, async () => {
+		test(`should error with ${templates.templateNotFound} if there's no matching name`, async () => {
 			const teamspace = generateRandomString();
 			const _id = generateUUID();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			await expect(TicketTemplates.getTemplateById(teamspace, _id))
-				.rejects.toEqual(templates.resourceNotFound);
+				.rejects.toEqual(templates.templateNotFound);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { _id }, undefined);
