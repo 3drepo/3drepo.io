@@ -39,6 +39,4 @@ export const StyledTextField = styled(TextField)`
 	width: 100%;
 `;
 
-export const Container = styled(ViewerPanelContent)`
-	padding: 24px;
-`;
+export const Container = styled(ViewerPanelContent)``;
