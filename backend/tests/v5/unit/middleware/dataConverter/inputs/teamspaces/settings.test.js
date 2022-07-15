@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { cloneDeep } = require('lodash');
+
 const { generateRandomString } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
+const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
 jest.mock('../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 
@@ -87,6 +90,74 @@ const testValidateNewTicketSchema = () => {
 	});
 };
 
+const checkMergedData = () => {
+	describe('Checking merged template output', () => {
+		const runTest = (desc, newData, oldData, succeed, expectedOutput) => {
+			test(desc, async () => {
+				TemplateModelSchema.getTemplateById.mockResolvedValueOnce(oldData);
+
+				const req = {
+					body: newData,
+					params: { teamspace: generateRandomString(), template: generateRandomString() },
+				};
+
+				TicketTemplateSchema.validate.mockReturnValueOnce(cloneDeep(req.body));
+
+				const res = {};
+				const next = jest.fn();
+
+				await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+				if (succeed) {
+					expect(TemplateModelSchema.getTemplateByName).not.toHaveBeenCalled();
+
+					expect(next).toHaveBeenCalledTimes(1);
+					expect(req.body).toEqual(expectedOutput);
+					expect(Responder.respond).not.toHaveBeenCalled();
+				} else {
+					expect(next).not.toHaveBeenCalled();
+					expect(Responder.respond).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedOutput);
+				}
+			});
+		};
+
+		const data = { name: generateRandomString(), properties: [], modules: [] };
+		const fieldName = generateRandomString();
+		const propertyTests = [
+			['A field that did not used to exist should just get copied over ',
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+				data,
+				true,
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] }],
+			['A field that used to exist should now be marked deprecated',
+				data,
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+				true,
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] }],
+
+			['A field that used to exist with a different type should throw an error',
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.NUMBER }] },
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+				false,
+				createResponseCode(templates.invalidArguments, `Cannot change the value type of existing property "${fieldName}"`)],
+
+		];
+
+		propertyTests.forEach((testData) => { runTest(...testData); });
+		propertyTests.forEach(([desc, { properties: propertiesNew, ...newData },
+			{ properties: propertiesOld, ...oldData }, success, expectedOutput]) => {
+			const moduleNew = { name: generateRandomString(), properties: propertiesNew };
+			const moduleOld = { ...moduleNew, properties: propertiesOld };
+			const moduleExpected = success ? { ...moduleNew, properties: expectedOutput.properties } : undefined;
+			runTest(`Module property: ${desc}`,
+				{ ...newData, properties: [], modules: [moduleNew] },
+				{ ...oldData, properties: [], modules: [moduleOld] },
+				success,
+				success ? { ...expectedOutput, properties: [], modules: [moduleExpected] } : expectedOutput);
+		});
+	});
+};
+
 const testValidateUpdateTicketSchema = () => {
 	describe('Test update ticket schema', () => {
 		test(`Should respond with ${templates.invalidArguments.code} if validation failed`, async () => {
@@ -141,7 +212,9 @@ const testValidateUpdateTicketSchema = () => {
 		});
 
 		test('Should call next if there is no name clash', async () => {
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce({ name: generateRandomString(), properties: [], modules: [] });
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(
+				{ name: generateRandomString(), properties: [], modules: [] },
+			);
 			TemplateModelSchema.getTemplateByName.mockRejectedValueOnce(templates.templateNotFound);
 
 			const expectedOutput = { name: generateRandomString(), properties: [], modules: [] };
@@ -187,6 +260,8 @@ const testValidateUpdateTicketSchema = () => {
 			expect(req.body).toEqual(expectedOutput);
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
+
+		checkMergedData();
 	});
 };
 

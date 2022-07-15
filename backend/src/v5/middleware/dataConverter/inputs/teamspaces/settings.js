@@ -58,7 +58,7 @@ const mergeModules = (newMods, oldMods) => {
 	oldMods.forEach(({ name, type, ...others }) => {
 		const id = name || type;
 		if (newModsLut[id]) {
-			mergeProperties(newModsLut[id], others.properties);
+			mergeProperties(newModsLut[id].properties, others.properties);
 		} else {
 			newMods.push({ name, type, deprecated: true, ...others });
 		}
@@ -88,7 +88,6 @@ Settings.validateUpdateTicketSchema = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
-		console.log(err);
 		const response = codeExists(err?.code) ? err : createResponseCode(templates.invalidArguments, err?.message);
 		respond(req, res, response);
 	}
