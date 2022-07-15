@@ -31,6 +31,8 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const container2 = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+const containerRevision = ServiceHelper.generateRevisionEntry();
+const federationRevision = ServiceHelper.generateRevisionEntry();
 
 let agent;
 const setupData = async () => {
@@ -59,6 +61,8 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id]),
+		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, federation._id, { ...federationRevision, author: user.user }),
 	]);
 };
 
@@ -188,33 +192,60 @@ const queueFinishedTest = () => {
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
+			const newRevisionPromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
 			const content = { value: 0, database: teamspace, project: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
-			const results = await modelUpdatePromise;
-			expect(results?.data?.timestamp).not.toBeUndefined();
-			expect(results).toEqual(expect.objectContaining({ ...data, data: { status: 'ok', timestamp: results.data.timestamp } }));
+			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
+
+			const modelUpdateResults = await modelUpdatePromise;
+			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
+			expect(modelUpdateResults).toEqual(expect.objectContaining({ ...data,
+				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp } }));
+
+			const newRevisionResults = await newRevisionPromise;
+			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
+			expect(newRevisionResults).toEqual(expect.objectContaining({ ...data,
+				data: {
+					_id: containerRevision._id,
+					author: user.user,
+					tag: containerRevision.tag,
+					timestamp: newRevisionResults.data.timestamp,
+				} }));
 
 			socket.close();
 		});
+
 		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event if a federation revision has finished`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 			const data = { teamspace, project: project.id, model: federation._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
 			const content = { value: 0, database: teamspace, project: federation._id };
-			const corId = ServiceHelper.generateRandomString();
 			const fileContent = { subProjects: [{ project: container._id }] };
-			mkdirSync(`${queueConfig.shared_storage}/${corId}`);
-			writeFileSync(`${queueConfig.shared_storage}/${corId}/obj.json`, JSON.stringify(fileContent));
+			mkdirSync(`${queueConfig.shared_storage}/${federationRevision._id}`);
+			writeFileSync(`${queueConfig.shared_storage}/${federationRevision._id}/obj.json`, JSON.stringify(fileContent));
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
+			const newRevisionPromise = waitForEvent(socket, EVENTS.FEDERATION_NEW_REVISION);
 
-			await queueMessage(queueConfig.callback_queue, corId, JSON.stringify(content));
-			const results = await modelUpdatePromise;
-			expect(results?.data?.timestamp).not.toBeUndefined();
-			expect(results).toEqual({ ...data, data: { containers: [container._id], status: 'ok', timestamp: results.data.timestamp } });
+			await queueMessage(queueConfig.callback_queue, federationRevision._id, JSON.stringify(content));
+
+			const modelUpdateResults = await modelUpdatePromise;
+			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
+			expect(modelUpdateResults).toEqual({ ...data,
+				data: { containers: [container._id], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
+
+			const newRevisionResults = await newRevisionPromise;
+			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
+			expect(newRevisionResults).toEqual(expect.objectContaining({ ...data,
+				data: {
+					_id: federationRevision._id,
+					author: user.user,
+					tag: federationRevision.tag,
+					timestamp: newRevisionResults.data.timestamp,
+				} }));
 
 			socket.close();
 		});

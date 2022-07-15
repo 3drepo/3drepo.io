@@ -44,6 +44,7 @@ export function* createFederation({ teamspace, projectId, newFederation, contain
 		if (containers.length) {
 			yield put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, containers));
 		}
+		yield put(FederationsActions.fetchFederationStats(teamspace, projectId, federationId));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
@@ -109,7 +110,6 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 		const stats: FederationStats = yield API.Federations.fetchFederationStats({
 			teamspace, projectId, federationId,
 		});
-
 		yield put(FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -177,15 +177,13 @@ export function* updateFederationSettings({
 	}
 }
 
-export function* deleteFederation({ teamspace, projectId, federationId }: DeleteFederationAction) {
+export function* deleteFederation({ teamspace, projectId, federationId, onSuccess, onError }: DeleteFederationAction) {
 	try {
 		yield API.Federations.deleteFederation({ teamspace, projectId, federationId });
 		yield put(FederationsActions.deleteFederationSuccess(projectId, federationId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'federation.delete.error', defaultMessage: 'trying to delete federation' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 
