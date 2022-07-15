@@ -16,7 +16,7 @@
  */
 
 import { flatten, partition } from 'lodash';
-import { AddTeamspaceCard, TeamspaceCard, PlaceholderCard } from '@components/shared/teamspaceCard';
+import { AddTeamspaceCard, TeamspaceCard, TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
@@ -40,20 +40,19 @@ export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 					sortedTeamspaces.map((teamspace) => (
 						<TeamspaceCard
 							key={teamspace.name}
-							variant="secondary"
 							teamspaceName={teamspace.name}
 							imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
 						/>
 					))
 				) : (
 					<>
-						<PlaceholderCard variant="secondary" />
-						<PlaceholderCard variant="secondary" />
-						<PlaceholderCard variant="secondary" />
+						<TeamspacePlaceholderCard />
+						<TeamspacePlaceholderCard />
+						<TeamspacePlaceholderCard />
 					</>
 				)
 			}
-			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
+			{ !!teamspaces.length && (<AddTeamspaceCard />) }
 		</CardList>
 	);
 };

@@ -25,7 +25,7 @@ import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
 import { TeamspaceSelection } from '../teamspaceSelection';
-import { TeamspaceContent } from './teamspaces';
+import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
 import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
@@ -33,6 +33,7 @@ import { VIEWER_ROUTE } from '../routes.constants';
 import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
+import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -64,15 +65,24 @@ export const MainRoute = () => {
 				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project?`}>
-					<DashboardLayout>
-						<Route path={`${path}/dashboard/:teamspace/`}>
-							<TeamspaceContent />
-						</Route>
+				<AuthenticatedRoute exact path={`${path}/dashboard/:teamspace/(t|t/.*)?`}>
+					<TeamspaceLayout>
 						<Switch>
-							<Route exact path={`${path}/dashboard/:teamspace/t/settings`}>
+							<Route exact path={`${path}/dashboard/:teamspace`}>
+								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
+							</Route>
+							<Route exact path={`${path}/dashboard/:teamspace/t`}>
+								<Redirect to={`${discardSlash(pathname)}/projects`} />
+							</Route>
+							<Route path={`${path}/dashboard/:teamspace/`}>
 								<TeamspaceContent />
 							</Route>
+						</Switch>
+					</TeamspaceLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project`}>
+					<DashboardLayout>
+						<Switch>
 							<Route exact path={`${path}/dashboard/:teamspace/:project`}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
 							</Route>
