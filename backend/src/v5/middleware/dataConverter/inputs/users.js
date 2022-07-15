@@ -207,6 +207,10 @@ const generateSignUpSchema = () => {
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
+		sso: Yup.object({
+			type: Yup.string().oneOf(['aad']),
+			id: types.id,
+		}).optional().default(undefined),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
 	})
 		.noUnknown().required();

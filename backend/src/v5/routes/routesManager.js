@@ -16,6 +16,7 @@
  */
 
 const RoutesManager = {};
+const AadRoutes = require('./sso/aad/aad');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
@@ -28,13 +29,12 @@ const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const UserRoutes = require('./users');
-const AadRoutes = require('./sso/aad/aad');
 
 RoutesManager.init = (app) => {
 	// Auth
 	app.use('/v5/', UserRoutes);
 
-	//Single Sign On
+	// Single Sign On
 	app.use('/v5/sso/aad', AadRoutes);
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
@@ -52,8 +52,6 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/groups', FederationGroupsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/views', FederationViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
-
-	
 };
 
 module.exports = RoutesManager;

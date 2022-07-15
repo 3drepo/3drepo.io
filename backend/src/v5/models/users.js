@@ -225,6 +225,10 @@ User.addUser = async (newUserData) => {
 		permissions: [],
 	};
 
+	if (newUserData.sso) {
+		customData.sso = newUserData.sso;
+	}
+
 	const expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
 	customData.emailVerifyToken = {
