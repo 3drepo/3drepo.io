@@ -44,8 +44,8 @@ const mergeProperties = (newProps, oldProps) => {
 	const newDataFields = {};
 	newProps.forEach((field) => { newDataFields[field.name] = field; });
 	oldProps.forEach(({ name, type, ...others }) => {
-		if (newDataFields[name] && newDataFields[name].type !== type) {
-			throw new Error(`Cannot change the value type of existing property "${name}"`);
+		if (newDataFields[name]) {
+			if (newDataFields[name].type !== type) throw new Error(`Cannot change the value type of existing property "${name}"`);
 		} else {
 			newProps.push({ name, type, deprecated: true, ...others });
 		}
@@ -88,6 +88,7 @@ Settings.validateUpdateTicketSchema = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
+		console.log(err);
 		const response = codeExists(err?.code) ? err : createResponseCode(templates.invalidArguments, err?.message);
 		respond(req, res, response);
 	}

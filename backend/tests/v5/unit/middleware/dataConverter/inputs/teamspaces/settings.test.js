@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep } = require('lodash');
+const { cloneDeep, times } = require('lodash');
 
 const { generateRandomString } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
@@ -23,7 +23,7 @@ const { src } = require('../../../../../helper/path');
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 jest.mock('../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 
@@ -123,6 +123,11 @@ const checkMergedData = () => {
 
 		const data = { name: generateRandomString(), properties: [], modules: [] };
 		const fieldName = generateRandomString();
+		const fieldList = [];
+		times(3, () => {
+			fieldList.push({ name: generateRandomString(), type: fieldTypes.NUMBER });
+		});
+
 		const propertyTests = [
 			['A field that did not used to exist should just get copied over ',
 				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
@@ -135,6 +140,16 @@ const checkMergedData = () => {
 				true,
 				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] }],
 
+			['A field that used to exist but now deprecated should be marked deprecated',
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] },
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+				true,
+				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] }],
+			['Order of fields should be preserved',
+				{ ...data, properties: fieldList },
+				{ ...data, properties: [] },
+				true,
+				{ ...data, properties: fieldList }],
 			['A field that used to exist with a different type should throw an error',
 				{ ...data, properties: [{ name: fieldName, type: fieldTypes.NUMBER }] },
 				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
@@ -144,16 +159,43 @@ const checkMergedData = () => {
 		];
 
 		propertyTests.forEach((testData) => { runTest(...testData); });
-		propertyTests.forEach(([desc, { properties: propertiesNew, ...newData },
-			{ properties: propertiesOld, ...oldData }, success, expectedOutput]) => {
-			const moduleNew = { name: generateRandomString(), properties: propertiesNew };
-			const moduleOld = { ...moduleNew, properties: propertiesOld };
-			const moduleExpected = success ? { ...moduleNew, properties: expectedOutput.properties } : undefined;
-			runTest(`Module property: ${desc}`,
-				{ ...newData, properties: [], modules: [moduleNew] },
-				{ ...oldData, properties: [], modules: [moduleOld] },
-				success,
-				success ? { ...expectedOutput, properties: [], modules: [moduleExpected] } : expectedOutput);
+
+		describe.each([
+			['Preset module', { type: presetModules.ISSUE, properties: [] }],
+			['Custom module', { name: generateRandomString(), properties: [] }],
+		])('Modules', (moduleType, module) => {
+			describe(moduleType, () => {
+				runTest('Module that used to be in the template should be marked deprecated',
+					data,
+					{ ...data, modules: [module] },
+					true,
+					{ ...data, modules: [{ ...module, deprecated: true }] });
+
+				runTest('Module that did not used to exist should just get copied over',
+					{ ...data, modules: [module] },
+					data,
+					true,
+					{ ...data, modules: [module] });
+
+				runTest('Module that used to exist but now deprecated should be marked deprecated',
+					{ ...data, modules: [{ ...module, deprecated: true }] },
+					{ ...data, modules: [module] },
+					true,
+					{ ...data, modules: [{ ...module, deprecated: true }] });
+
+				propertyTests.forEach(([desc, { properties: propertiesNew, ...newData },
+					{ properties: propertiesOld, ...oldData }, success, expectedOutput]) => {
+					const moduleNew = { ...module, properties: propertiesNew };
+					const moduleOld = { ...moduleNew, properties: propertiesOld };
+					const moduleExpected = success
+						? { ...moduleNew, properties: expectedOutput.properties } : undefined;
+					runTest(desc,
+						{ ...newData, properties: [], modules: [moduleNew] },
+						{ ...oldData, properties: [], modules: [moduleOld] },
+						success,
+						success ? { ...expectedOutput, properties: [], modules: [moduleExpected] } : expectedOutput);
+				});
+			});
 		});
 	});
 };
