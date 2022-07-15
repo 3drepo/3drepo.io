@@ -22,7 +22,7 @@ export const numberField = Yup.number()
 	.default(0)
 	.typeError(formatMessage({
 		id: 'settings.surveyPoint.error.number',
-		defaultMessage: 'Must be a decimal number or integer',
+		defaultMessage: 'Must be a number',
 	}));
 
 export const name = Yup.string()
