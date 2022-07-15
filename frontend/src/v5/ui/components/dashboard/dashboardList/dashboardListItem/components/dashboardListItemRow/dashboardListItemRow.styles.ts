@@ -17,7 +17,6 @@
 import styled, { css } from 'styled-components';
 import { alpha } from '@mui/material/styles';
 import * as ButtonStyles from '@controls/button/button.styles';
-import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
 import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
 export const Container = styled.div<{ selected?: boolean }>`
@@ -47,16 +46,6 @@ export const Container = styled.div<{ selected?: boolean }>`
 		${ButtonStyles.LabelButton} {
 			${ButtonStyles.labelButtonSecondaryStyles};
 			background-color: ${alpha(theme.palette.tertiary.lightest, 0.8)};
-		}
-
-		${FavouriteCheckboxStyles.Checkbox} {
-			&:hover {
-				background-color: ${theme.palette.secondary.light};
-			}
-
-			&:active {
-				background-color: ${theme.palette.base.lightest};
-			}
 		}
 	`}
 `;

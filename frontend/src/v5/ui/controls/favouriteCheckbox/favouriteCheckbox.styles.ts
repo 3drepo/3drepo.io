@@ -19,72 +19,47 @@ import styled, { css } from 'styled-components';
 import { Checkbox as CheckboxComponent } from '@mui/material';
 
 const contrastStyles = css`
-	path {
-		fill: none;
+	svg path {
 		stroke: ${({ theme }) => theme.palette.secondary.light};
-	}
-
-	&:hover {
-		&& {
-			background-color: transparent;
-		}
-	}
-
-	&.Mui-focusVisible {
-		&& {
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-		}
-	}
-
-	&:active {
-		&& {
-			background-color: transparent;
-		}
 	}
 `;
 
 export const Checkbox = styled(CheckboxComponent)<{ selected?: boolean }>`
-	&& {
-		padding: 10px;
+	padding: 10px;
 
-		svg {
-			height: 16px;
-			width: 16px;
+	svg {
+		height: 16px;
+		width: 16px;
 
-			path {
-				fill: none;
-				stroke: ${({ theme }) => theme.palette.secondary.light};
-			}
+		path {
+			fill: none;
+			stroke: ${({ theme }) => theme.palette.secondary.light};
 		}
+	}
 
-		&.Mui-checked {
-			path {
-				fill: ${({ theme }) => theme.palette.favourite.main};
-				stroke: ${({ theme }) => theme.palette.favourite.main};
-			}
-		}
+	&.Mui-checked  path {
+		fill: ${({ theme }) => theme.palette.favourite.main};
+		stroke: ${({ theme }) => theme.palette.favourite.main};
+	}
 
-		&:hover {
-			background-color: transparent;
-			path {
-				stroke: ${({ theme }) => theme.palette.favourite.main};
-			}
+	&:hover, &.Mui-focusVisible {
+		background-color: transparent;
+		path {
+			stroke: ${({ theme }) => theme.palette.favourite.main};
 		}
-		
-		&:active {
-			background-color: transparent;
-			path {
-				fill: ${({ theme }) => theme.palette.favourite.main};
-				stroke: ${({ theme }) => theme.palette.favourite.main};
-			}
+	}
+	
+	&:active {
+		background-color: transparent;
+		path {
+			fill: ${({ theme }) => theme.palette.favourite.main};
+			stroke: ${({ theme }) => theme.palette.favourite.main};
 		}
+	}
 
-		&.Mui-disabled {
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.lightest};
-				stroke: ${({ theme }) => theme.palette.secondary.lightest};
-			}
-		}
+	&.Mui-disabled path {
+		fill: ${({ theme }) => theme.palette.secondary.lightest};
+		stroke: ${({ theme }) => theme.palette.secondary.lightest};
 	}
 
 	${({ selected }) => selected && contrastStyles}
