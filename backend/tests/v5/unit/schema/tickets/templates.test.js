@@ -81,7 +81,7 @@ const testValidate = () => {
 			}] }, false],
 		['more than one property has the same name', { name: generateRandomString(),
 			properties: [{
-				name: 'a',
+				name: 'A',
 				type: fieldTypes.TEXT,
 			}, {
 				name: 'a',

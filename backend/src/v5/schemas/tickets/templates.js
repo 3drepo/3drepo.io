@@ -51,10 +51,11 @@ const propertyArray = Yup.array().of(fieldSchema).default([]).test('Property nam
 	const fieldNames = new Set();
 	let res = true;
 	arr.forEach(({ name }) => {
-		if (fieldNames.has(name)) {
+		const id = name.toUpperCase();
+		if (fieldNames.has(id)) {
 			res = false;
 		} else {
-			fieldNames.add(name);
+			fieldNames.add(id);
 		}
 	});
 
@@ -77,7 +78,7 @@ const schema = Yup.object().shape({
 		const modNames = new Set();
 		let res = true;
 		arr.forEach(({ name, type }) => {
-			const id = name || type;
+			const id = (name || type).toUpperCase();
 			if (modNames.has(id)) {
 				res = false;
 			} else {
