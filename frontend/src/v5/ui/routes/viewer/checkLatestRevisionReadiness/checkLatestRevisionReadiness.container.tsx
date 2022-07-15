@@ -22,7 +22,7 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federati
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { useEffect } from 'react';
 import { useHistory, generatePath, useParams } from 'react-router-dom';
-import { PROJECTS_LIST_ROUTE, ViewerParams } from '../../routes.constants';
+import { TEAMSPACE_ROUTE_BASE, ViewerParams } from '../../routes.constants';
 
 export const CheckLatestRevisionReadiness = (): JSX.Element => {
 	const history = useHistory();
@@ -47,7 +47,7 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 					defaultMessage: 'Go to viewer',
 				}),
 				onClickSecondary: () => {
-					history.push(generatePath(PROJECTS_LIST_ROUTE, { teamspace }));
+					history.push(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));
 				},
 			});
 		}
