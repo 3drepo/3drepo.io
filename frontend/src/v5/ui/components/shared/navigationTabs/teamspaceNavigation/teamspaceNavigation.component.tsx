@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useRouteMatch } from 'react-router-dom';
+import { discardTab } from '@/v5/services/routing/routing';
+import { FormattedMessage } from 'react-intl';
+import { Container, Link } from '../navigationTabs.styles';
 
-import { AlertModal } from './alertModal/alertModal.component';
-import { DeleteModal } from './deleteModal/deleteModal.component';
-import { InfoModal } from './infoModal/infoModal.component';
-import { ShareModal } from './shareModal/shareModal.component';
-import { WarningModal } from './warningModal/warningModal.component';
+export const TeamspaceNavigation = (): JSX.Element => {
+	let { url } = useRouteMatch();
+	url = discardTab(url);
 
-export const MODAL_TEMPLATES = {
-	alert: AlertModal,
-	warning: WarningModal,
-	delete: DeleteModal,
-	info: InfoModal,
-	share: ShareModal,
+	return (
+		<Container>
+			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
+		</Container>
+	);
 };

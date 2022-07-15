@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AlertModal } from './alertModal/alertModal.component';
-import { DeleteModal } from './deleteModal/deleteModal.component';
-import { InfoModal } from './infoModal/infoModal.component';
-import { ShareModal } from './shareModal/shareModal.component';
-import { WarningModal } from './warningModal/warningModal.component';
+import styled from 'styled-components';
+import { Avatar } from '@controls/avatar';
 
-export const MODAL_TEMPLATES = {
-	alert: AlertModal,
-	warning: WarningModal,
-	delete: DeleteModal,
-	info: InfoModal,
-	share: ShareModal,
-};
+export const MyTeamspaceImage = styled(Avatar)`
+	width: 100%;
+	margin: 0;
+	
+	.MuiAvatar-root {
+		cursor: pointer;
+		border-radius: 0;
+		width: 100%;
+		height: 175px;
+		margin: 0;
+		font-size: 40px;
+		color: ${({ theme }) => theme.palette.tertiary.dark};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;
+
+export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
+	position: relative;
+	height: 175px;
+	width: 222px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	object-fit: cover;
+	margin-bottom: -5px;
+`;

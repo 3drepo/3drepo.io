@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,21 +17,23 @@
 
 import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { AppBar } from '@components/shared/appBar';
-import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Container, Content } from './dashboardLayout.styles';
+import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
+import { FormattedMessage } from 'react-intl';
+import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceAvatar } from './teamspaceLayout.styles';
 
-interface IDashboardLayout {
+interface ITeamspaceLayout {
 	children: ReactNode;
 	className?: string;
 }
 
-export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.Element => {
-	const { teamspace, project, containerOrFederation } = useParams<DashboardParams>();
+export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
+	const { teamspace } = useParams<TeamspaceParams>();
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	useEffect(() => {
 		if (teamspace) {
@@ -40,16 +42,22 @@ export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.
 		}
 	}, [teamspace]);
 
-	useEffect(() => {
-		if (project) {
-			ProjectsActionsDispatchers.setCurrentProject(project);
-		}
-	}, [project]);
-
 	return (
 		<Container className={className}>
 			<AppBar />
-			{project && !containerOrFederation && <ProjectNavigation />}
+			<TopBar>
+				<TeamspaceAvatar user={user} isButton={false} />
+				<TeamspaceInfo>
+					<TeamspaceName>
+						<FormattedMessage
+							id="teamspace.definition"
+							defaultMessage="{teamspace} Teamspace"
+							values={{ teamspace }}
+						/>
+					</TeamspaceName>
+				</TeamspaceInfo>
+			</TopBar>
+			<TeamspaceNavigation />
 			<Content>
 				{children}
 			</Content>
