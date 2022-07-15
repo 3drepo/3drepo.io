@@ -25,7 +25,7 @@ import { CollapsibleIconV4, GroupSetName, GroupsSetTreeListItemComponent } from 
 const getGroupSetData = (groupSet, overrides, highlights) => {
 	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
 		// eslint-disable-next-line prefer-const
-		let { overriden, descendants, highlighted } = partialData;
+		let { overridden, descendants, highlighted } = partialData;
 		let childGroupSetData = null;
 		let childHighlight = null;
 
@@ -44,21 +44,21 @@ const getGroupSetData = (groupSet, overrides, highlights) => {
 
 		highlighted = highlighted && childHighlight;
 
-		if (overriden !== undefined) {
+		if (overridden !== undefined) {
 			let childOverride = null;
 
 			if (!groupOrGroupSet.children) {
 				const groupId = (groupOrGroupSet)._id;
 				childOverride = overrides.has(groupId);
 			} else {
-				childOverride = childGroupSetData.overriden;
+				childOverride = childGroupSetData.overridden;
 			}
 
-			overriden = overriden === null || overriden === childOverride ? childOverride : undefined;
+			overridden = overridden === null || overridden === childOverride ? childOverride : undefined;
 		}
 
-		return { overriden, descendants, highlight: highlighted };
-	}, { overriden: null, descendants: [], highlighted: null });
+		return { overridden, descendants, highlight: highlighted };
+	}, { overridden: null, descendants: [], highlighted: null });
 
 	return data;
 };
@@ -74,7 +74,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const [collapseDict, setCollapse] = collapse;
 	const hidden = collapseDict[groupSet.pathName] ?? true;
 
-	const { overriden, descendants, highlighted } = getGroupSetData(groupSet, overrides, highlights);
+	const { overridden, descendants, highlighted } = getGroupSetData(groupSet, overrides, highlights);
 
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
@@ -83,7 +83,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 
 	const onClickOverride = (event: SyntheticEvent) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.setColorOverrides(descendants, (overriden === false));
+		GroupsActionsDispatchers.setColorOverrides(descendants, (overridden === false));
 	};
 
 	const onClickIsolate = (event) => {
@@ -98,7 +98,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 			onClick={onClickItem}
 			onClickIsolate={onClickIsolate}
 			onClickOverride={onClickOverride}
-			overriden={overriden}
+			overridden={overridden}
 			highlighted={highlighted}
 			disabled={disabled}
 			depth={depth}

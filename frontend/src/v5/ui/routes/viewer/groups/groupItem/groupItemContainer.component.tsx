@@ -29,7 +29,7 @@ interface Props {
 	onClickOverride: (event: any) => void;
 	disabled: boolean;
 	highlighted: boolean;
-	overriden: boolean;
+	overridden: boolean;
 	depth: number;
 	active?: boolean;
 	children: any;
@@ -45,7 +45,7 @@ export const GroupsTreeListItemComponent = (
 		onClickOverride,
 		disabled,
 		highlighted,
-		overriden,
+		overridden,
 		depth,
 		active,
 		children,
@@ -58,7 +58,7 @@ export const GroupsTreeListItemComponent = (
 			{children}
 			<ButtonsContainer>
 				{!isV5() && <TooltipButton action={onClickIsolate} label="Isolate" Icon={Visibility} disabled={disabled} />}
-				<Checkbox onClick={onClickOverride} checked={overriden} indeterminate={overriden === undefined} />
+				<Checkbox onClick={onClickOverride} checked={overridden} indeterminate={overridden === undefined} />
 			</ButtonsContainer>
 			{active
 			&& (

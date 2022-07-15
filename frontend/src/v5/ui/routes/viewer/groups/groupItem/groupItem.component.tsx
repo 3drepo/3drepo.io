@@ -33,13 +33,13 @@ const GroupIconComponent = ({ group }) => (
 );
 
 export const GroupItem = ({ group, disabled }) => {
-	const overriden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
+	const overridden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
 	const highlighted = GroupsHooksSelectors.selectHighlightedGroups().has(group._id);
 	const active = GroupsHooksSelectors.selectActiveGroupId() === group._id;
 
 	const onClickOverride = (event) => {
 		event.stopPropagation();
-		GroupsActionsDispatchers.setColorOverrides([group._id], !overriden);
+		GroupsActionsDispatchers.setColorOverrides([group._id], !overridden);
 	};
 
 	const onClickIsolate = (event) => {
@@ -67,7 +67,7 @@ export const GroupItem = ({ group, disabled }) => {
 			onClickGotoDetails={onClickGotoDetails}
 			onClickIsolate={onClickIsolate}
 			onClickOverride={onClickOverride}
-			overriden={overriden}
+			overridden={overridden}
 			highlighted={highlighted}
 			active={active}
 			disabled={disabled}
