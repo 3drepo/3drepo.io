@@ -79,6 +79,14 @@ const testValidate = () => {
 				type: fieldTypes.NUMBER,
 				default: generateRandomString(),
 			}] }, false],
+		['more than one property has the same name', { name: generateRandomString(),
+			properties: [{
+				name: 'a',
+				type: fieldTypes.TEXT,
+			}, {
+				name: 'a',
+				type: fieldTypes.NUMBER,
+			}] }, false],
 		['property default value type matches', { name: generateRandomString(),
 			properties: [{
 				name: generateRandomString(),
@@ -99,9 +107,18 @@ const testValidate = () => {
 		['module with a name that is too long', createSkeleton([{ name: generateRandomString(121) }]), false],
 		['module with all required fields filled in (preset module)', createSkeleton([{ type: presetModules.SEQUENCING }]), true],
 		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString() }]), false],
+		['module with a name that is the same as a preset module', createSkeleton([{ name: presetModules.SEQUENCING }]), false],
 		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
+		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: fieldTypes.TEXT }] }]), properties: [{ name: 'a', type: fieldTypes.TEXT }] }, true],
 		['all modules provided are valid', createSkeleton([
 			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
+		['2 modules with same property name', createSkeleton([
+			{ type: presetModules.SEQUENCING, properties: [{ name: 'a', type: fieldTypes.TEXT }] },
+			{ name: generateRandomString(), properties: [{ name: 'a', type: fieldTypes.TEXT }] }]), true],
+		['all modules names must be unique', createSkeleton([
+			{ name: 'same' }, { name: 'same' }]), false],
+		['all modules types must be unique', createSkeleton([
+			{ name: 'same' }, { name: 'same' }]), false],
 		['one of the modules are invalid', createSkeleton([
 			{ type: generateRandomString() }, { name: generateRandomString() }]), false],
 		// copy over the properties test and test it with module
@@ -155,6 +172,7 @@ const testValidate = () => {
 		};
 		const expectedData = { ...cloneDeep(data) };
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
+		expectedData.modules = expectedData.modules.map((mod) => ({ ...mod, properties: [] }));
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

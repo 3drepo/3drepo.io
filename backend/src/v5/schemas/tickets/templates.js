@@ -47,19 +47,46 @@ const fieldSchema = Yup.object().shape({
 
 });
 
+const propertyArray = Yup.array().of(fieldSchema).default([]).test('Property names', 'must be unique', (arr) => {
+	const fieldNames = new Set();
+	let res = true;
+	arr.forEach(({ name }) => {
+		if (fieldNames.has(name)) {
+			res = false;
+		} else {
+			fieldNames.add(name);
+		}
+	});
+
+	return res;
+});
+
 const moduleSchema = Yup.object().shape({
-	name: types.strings.title,
+	name: types.strings.title.notOneOf(Object.values(presetModules)),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
-	properties: Yup.array().of(fieldSchema),
+	properties: propertyArray,
 }).test('Name and type', 'Only provide a name or a type for module, not both', ({ name, type }) => (name && !type) || (!name && type));
 
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),
 	comments: defaultFalse,
 	deprecated: defaultFalse,
-	properties: Yup.array().of(fieldSchema),
-	modules: Yup.array().of(moduleSchema),
+	properties: propertyArray,
+	modules: Yup.array().default([]).of(moduleSchema).test('Module names', 'must be unique', (arr) => {
+		const modNames = new Set();
+		let res = true;
+		arr.forEach(({ name, type }) => {
+			const id = name || type;
+			if (modNames.has(id)) {
+				res = false;
+			} else {
+				modNames.add(id);
+			}
+		});
+
+		return res;
+	}),
 
 }).noUnknown();
 
