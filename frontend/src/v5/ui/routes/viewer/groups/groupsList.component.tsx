@@ -16,10 +16,10 @@
  */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from 'react';
-import { GroupsListContainer, GroupsTreeList } from './groupLists.styles';
+import { GroupsListContainer, GroupsTreeList } from './groupsLists.styles';
 import { GroupSetItem } from './groupItem/groupSetItem.component';
 import { GroupItem } from './groupItem/groupItem.component';
-import { groupsToTree } from './groupList.helpers';
+import { groupsToTree } from './groupsList.helpers';
 
 interface Props {
 	groups: any [];

@@ -19,7 +19,7 @@ import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelecto
 import LightingIcon from '@assets/icons/lighting.svg';
 import { contrastColor } from 'contrast-color';
 import { FormattedMessage } from 'react-intl';
-import { getGroupNamePath } from '../groupList.helpers';
+import { getGroupNamePath } from '../groupsList.helpers';
 import { GroupIcon, GroupItemTextContainer, GroupItemName, GroupItemObjects } from './groupItem.styles';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 

@@ -19,7 +19,7 @@ import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/group
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
 import { ChevronButton } from '@controls/chevronButton';
 import { SyntheticEvent } from 'react';
-import { getGroupNamePath } from '../groupList.helpers';
+import { getGroupNamePath } from '../groupsList.helpers';
 import { CollapsibleIconV4, GroupSetName, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
 const getGroupSetData = (groupSet, overrides, highlights) => {
@@ -32,7 +32,7 @@ const getGroupSetData = (groupSet, overrides, highlights) => {
 		if (groupOrGroupSet.children) {
 			childGroupSetData = getGroupSetData(groupOrGroupSet, overrides, highlights);
 			childHighlight = childGroupSetData.highlight;
-			Array.prototype.push.apply(descendants, childGroupSetData.descendants);
+			descendants.push(...childGroupSetData.descendants);
 		} else {
 			descendants.push(groupOrGroupSet._id);
 			childHighlight = highlights.has(groupOrGroupSet._id);
@@ -71,18 +71,19 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const overrides = GroupsHooksSelectors.selectGroupsColourOverridesSet();
 	const highlights = GroupsHooksSelectors.selectHighlightedGroups();
 
-	const [collapseDict, setCollapse] = collapse;
+	const [collapseDict, setCollapseDict] = collapse;
 	const hidden = collapseDict[groupSet.pathName] ?? true;
 
 	const { overridden, descendants, highlighted } = getGroupSetData(groupSet, overrides, highlights);
 
 	const onClickItem = (event: SyntheticEvent) => {
 		event.stopPropagation();
-		setCollapse({ ...collapseDict, [groupSet.pathName]: !hidden });
+		setCollapseDict({ ...collapseDict, [groupSet.pathName]: !hidden });
 	};
 
 	const onClickOverride = (event: SyntheticEvent) => {
 		event.stopPropagation();
+		// Comparing with false because overriden == undefined is used for indeterminate status on the checkbox
 		GroupsActionsDispatchers.setColorOverrides(descendants, (overridden === false));
 	};
 

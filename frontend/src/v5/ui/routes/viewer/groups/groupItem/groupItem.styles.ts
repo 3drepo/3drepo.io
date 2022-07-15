@@ -67,10 +67,8 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
 	
 	${({ $variant }) => ($variant === 'light' ? css`
 		color: ${({ theme }) => (isV5() ? theme.palette.base.main : '#6B778C')};
-		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')}; 
-	` : css`
-		color: ${({ theme }) => (isV5() ? theme.palette.primary.contrast : '#fff')}; 
-	`)};
+		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')};`
+		: css` color: ${({ theme }) => (isV5() ? theme.palette.primary.contrast : '#fff')};`)};
 
 	& svg {
 		z-index: 2;
@@ -80,8 +78,8 @@ export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark
 		background-color: ${({ $color }) => $color};
 		${PseudoElement}
 		${({ $variant }) => ($variant === 'light' ? css`
-		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')}; 
-	` : 'border: 0')};
+		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')};`
+		: 'border: 0')};
 	}
 
 	&::before {
