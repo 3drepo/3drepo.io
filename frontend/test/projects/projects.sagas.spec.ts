@@ -20,33 +20,62 @@ import { expectSaga } from 'redux-saga-test-plan';
 import * as ProjectsSaga from '@/v5/store/projects/projects.sagas';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { mockServer } from '../../internals/testing/mockServer';
+import { alertAction } from '../test.helpers';
 
 describe('Teamspaces: sagas', () => {
+	const teamspace = 'teamspaceName';
+	const projectId = 'projectId';
 	describe('fetch', () => {
-		const teamspace = 'teamspaceName'
-
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
 			const projects = [];
 
 			mockServer
-					.get(`/teamspaces/${teamspace}/projects`)
-					.reply(200, { projects })
+				.get(`/teamspaces/${teamspace}/projects`)
+				.reply(200, { projects })
 
 			await expectSaga(ProjectsSaga.default)
-					.dispatch(ProjectsActions.fetch(teamspace))
-					.put(ProjectsActions.fetchSuccess(teamspace, projects))
-					.silentRun();
+				.dispatch(ProjectsActions.fetch(teamspace))
+				.put(ProjectsActions.fetchSuccess(teamspace, projects))
+				.silentRun();
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
 			mockServer
-					.get(`/teamspaces/${teamspace}/projects`)
-					.reply(404)
+				.get(`/teamspaces/${teamspace}/projects`)
+				.reply(404)
 
 			await expectSaga(ProjectsSaga.default)
-					.dispatch(ProjectsActions.fetch(teamspace))
-					.put(ProjectsActions.fetchFailure())
-					.silentRun();
+				.dispatch(ProjectsActions.fetch(teamspace))
+				.put.like(alertAction('trying to fetch projects'))
+				.put(ProjectsActions.fetchFailure())
+				.silentRun();
+		});
+	});
+	describe('delete Project', () => {
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
+		it('should call deleteProject endpoint', async () => {
+			mockServer
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
+				.reply(200)
+
+			await expectSaga(ProjectsSaga.default)
+				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
+				.put(ProjectsActions.deleteProjectSuccess(teamspace, projectId))
+				.silentRun();
+
+			expect(onSuccess).toBeCalled();
+		});
+		it('should call deleteProject endpoint with 404 and open alert modal', async () => {
+			mockServer
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
+				.reply(400)
+
+			await expectSaga(ProjectsSaga.default)
+				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
+				.silentRun();
+
+			expect(onError).toBeCalled();
 		});
 	});
 });

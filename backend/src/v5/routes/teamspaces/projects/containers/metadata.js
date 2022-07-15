@@ -46,31 +46,27 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: updateCustomMetadata
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - container:
-	 *         name: container
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - metadata:
-	 *         name: metadata
+	 *       - name: metadata
 	 *         description: Metadata ID
 	 *         in: path
 	 *         required: true

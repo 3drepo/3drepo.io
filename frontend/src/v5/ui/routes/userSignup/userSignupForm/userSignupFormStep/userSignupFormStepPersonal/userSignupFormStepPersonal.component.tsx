@@ -21,7 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { UserSignupSchemaPersonal } from '@/v5/validation/schemes';
+import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';

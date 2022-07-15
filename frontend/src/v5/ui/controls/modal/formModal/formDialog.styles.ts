@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import { Typography } from '@controls/typography';
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
 import { DialogActions, DialogContent, IconButton, Paper } from '@mui/material';
 
 export const RemoveWhiteCorners = styled(Paper)`
@@ -71,13 +72,16 @@ export const Subtitle = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
 
-export const FormDialogContent = styled(DialogContent)<{ $zeromargin?: boolean }>`
-	margin: ${({ $zeromargin }) => ($zeromargin ? '0' : '20px 34px 43px')};
+export const FormDialogContent = styled(DialogContent)<{ $smallPadding?: boolean }>`
+	padding: 27px 58px 65px;
 	display: block;
-	flex-flow: row wrap;
 `;
 
 export const FormDialogActions = styled(DialogActions)`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
+`;
+
+export const SubmitButton = styled(SubmitButtonBase)`
+	margin: 8px;
 `;

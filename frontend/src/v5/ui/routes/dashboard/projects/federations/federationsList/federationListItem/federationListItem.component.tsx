@@ -24,8 +24,8 @@ import {
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
-	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { DashboardListItemFederationTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { Highlight } from '@controls/highlight';
 import { Tooltip } from '@mui/material';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
@@ -34,11 +34,12 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
-import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import {
+	ShareModalContainerOrFederation as ShareModal,
+} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalContainerOrFederation/shareModalContainerOrFederation.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
-import { useParams, Link } from 'react-router-dom';
-import { viewerRoute } from '@/v5/services/routing/routing';
+import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
@@ -78,19 +79,11 @@ export const FederationListItem = ({
 				key={federation._id}
 			>
 				<DashboardListItemRow>
-					<DashboardListItemTitle
-						tooltipTitle={
-							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
-						}
-						subtitle={federation.desc}
+					<DashboardListItemFederationTitle
 						minWidth={90}
-					>
-						<Link to={viewerRoute(teamspace, project, federation)}>
-							<Highlight search={filterQuery}>
-								{federation.name}
-							</Highlight>
-						</Link>
-					</DashboardListItemTitle>
+						federation={federation}
+						filterQuery={filterQuery}
+					/>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
 						onClick={() => {

@@ -41,19 +41,19 @@ module.exports.createApp = function () {
 	app.use(compression());
 	app.use("/config", configRoute);
 
-	const publicDir = __dirname + "/../../../../public";
-
 	app.use(compress({ level: 9 }));
 	app.use(cors({ origin: true, credentials: true }));
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(favicon(publicDir + "/assets/images/favicon.ico"));
+	app.use(favicon(`${__dirname}/../../../resources/images/favicon.ico`));
 
 	docsService(app);
 
 	app.locals.pretty = true;
+
+	const publicDir =  __dirname + "/../../../../public";
 
 	app.use(express.static(publicDir));
 

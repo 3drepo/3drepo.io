@@ -20,6 +20,9 @@ export type ProjectId = { projectId: string };
 export type ContainerId = { containerId: string };
 export type FederationId = { federationId: string };
 
+export type OnSuccess = { onSuccess: () => void };
+export type OnError = { onError: (error) => void };
+
 export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
 
 export type TeamspaceProjectAndContainerId = TeamspaceId & ProjectId & ContainerId;
@@ -29,6 +32,8 @@ export type TeamspaceProjectAndFederationId= TeamspaceId & ProjectId & Federatio
 export type ProjectAndContainerId = ProjectId & ContainerId;
 
 export type ProjectAndFederationId = ProjectId & FederationId;
+
+export type SuccessAndErrorCallbacks = OnSuccess & OnError;
 
 export type SurveyPoint = {
 	latLong: [number, number];

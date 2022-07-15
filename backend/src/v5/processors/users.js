@@ -25,6 +25,7 @@ const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
+const { generateUserHash } = require('../services/intercom');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
@@ -72,6 +73,8 @@ Users.getProfileByUsername = async (username) => {
 
 	const hasAvatar = await fileExists(username);
 
+	const intercomRef = generateUserHash(customData.email);
+
 	return {
 		username: user.user,
 		firstName: customData.firstName,
@@ -81,6 +84,7 @@ Users.getProfileByUsername = async (username) => {
 		apiKey: customData.apiKey,
 		company: customData.billing?.billingInfo?.company,
 		countryCode: customData.billing?.billingInfo?.countryCode,
+		...(intercomRef ? { intercomRef } : {}),
 	};
 };
 

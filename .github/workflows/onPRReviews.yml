@@ -1,0 +1,23 @@
+name: On review update
+on:
+  pull_request:
+    types: [review_requested, review_request_removed]
+  pull_request_review:
+    types: [edited, dismissed, submitted]
+jobs:
+  checkMergeReady:
+    name: Ensure all reviewers have approved the PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: haya14busa/action-cond@v1
+        id: condval
+        with:
+          cond: ${{ github.event_name == 'pull_request' }}
+          if_true: ${{ github.event.number }}
+          if_false: ${{ github.event.pull_request.number }}
+      - name: Check reviews
+        uses: carmenfan/all-reviewers-approved@v1.0
+        with:
+          pr: ${{ steps.condval.outputs.value }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
