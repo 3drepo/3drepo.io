@@ -29,6 +29,8 @@ const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : 
 
 export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0, -1) : uri);
 
+export const discardTab = (uri) => discardSlash(uri).split('/').slice(0, -1).join('/');
+
 export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(component, ''));
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {

@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useRouteMatch } from 'react-router-dom';
-import { discardSlash } from '@/v5/services/routing/routing';
+import { discardTab } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const TeamspaceNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
-	url = discardSlash(url);
+	url = discardTab(url);
 
 	return (
 		<Container>
