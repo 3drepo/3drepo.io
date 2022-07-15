@@ -18,7 +18,6 @@ import styled, { css } from 'styled-components';
 import { alpha } from '@mui/material/styles';
 import * as ButtonStyles from '@controls/button/button.styles';
 import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
-import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
 export const Container = styled.div<{ selected?: boolean }>`
@@ -57,20 +56,6 @@ export const Container = styled.div<{ selected?: boolean }>`
 
 			&:active {
 				background-color: ${theme.palette.base.lightest};
-			}
-		}
-
-		${EllipsisButtonStyles.StyledIconButton} {
-			&:hover {
-				background-color: ${theme.palette.secondary.light} !important;
-
-				circle {
-					fill: ${theme.palette.primary.contrast} !important;
-				}
-			}
-
-			&:active {
-				background-color: ${theme.palette.base.lightest} !important;
 			}
 		}
 	`}

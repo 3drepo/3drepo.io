@@ -18,60 +18,46 @@
 import { IconButton } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean }>`
+const PrimaryStyles = ($isOn: boolean) => css`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	svg circle {
+		fill: ${({ theme }) => theme.palette.tertiary.darkest};
+	}
+	${$isOn && css`
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	`}
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
+	:disabled {
+		svg circle {
+			fill: ${({ theme }) => theme.palette.secondary.lightest};
+		}
+	}
+`;
+
+const SecondaryStyles = ($isOn: boolean) => css`
+	background-color: ${({ theme }) => theme.palette.tertiary.darkest};
+	svg circle {
+		fill: ${({ theme }) => theme.palette.primary.contrast};
+	}
+	${$isOn && css`
+		background-color: ${({ theme }) => theme.palette.secondary.light};
+	`}
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.secondary.light};
+	}
+	:disabled {
+		svg circle {
+			fill: ${({ theme }) => theme.palette.secondary.light};
+		}
+	}
+`;
+
+export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean; variant?: 'primary' | 'secondary' }>`
 	height: 36px;
 	width: 36px;
 	display: flex;
 	align-items: center;
-
-	${({ $isOn }) => $isOn && css`
-			background-color: ${({ theme }) => theme.palette.tertiary.main};
-
-			circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
-			}
-	`}
-	
-	&:hover {
-		&& {
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-
-			circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
-		}
-	}
-
-	&:active {
-		&& {
-			background-color: ${({ theme }) => theme.palette.base.lightest};
-
-			circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
-		}
-	}
-
-	&.Mui-focusVisible {
-		&& {
-
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-
-			circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
-		}
-	}
-
-	:disabled {
-		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-
-			svg {
-				circle {
-					fill: ${({ theme }) => theme.palette.secondary.lightest};
-				}
-			}
-		}
-	}
+	${({ variant, $isOn }) => (variant === 'primary' ? PrimaryStyles($isOn) : SecondaryStyles($isOn))};
 `;
