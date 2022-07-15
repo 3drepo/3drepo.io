@@ -20,7 +20,8 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { toCamelCase } = require(`${src}/utils/helper/strings`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -38,6 +39,7 @@ const testValidate = () => {
 		}, true],
 		['properties is an empty array', { name: generateRandomString(), properties: [] }, true],
 		['properties is of the wrong type', { name: generateRandomString(), properties: 'a' }, false],
+		['property name is used by a default property', { name: generateRandomString(), properties: [defaultProperties[0]] }, false],
 		['modules is an empty array', { name: generateRandomString(), modules: [] }, true],
 		['modules is of the wrong type', { name: generateRandomString(), modules: 'a' }, false],
 	];
@@ -149,7 +151,7 @@ const testValidate = () => {
 		const data = {
 			name: generateRandomString(),
 			properties: [{
-				name: generateRandomString(),
+				name: 'I am an apple',
 				type: fieldTypes.NUMBER,
 			},
 			{
@@ -166,13 +168,20 @@ const testValidate = () => {
 			modules: [{
 				name: generateRandomString(),
 			}, {
+				name: 'ANOTHER CASE CHECK',
+			}, {
 				type: presetModules.SAFETIBASE,
 				deprecated: true,
 			}],
 		};
 		const expectedData = { ...cloneDeep(data) };
+		expectedData.properties.forEach((prop) => {
+			// eslint-disable-next-line no-param-reassign
+			prop.name = toCamelCase(prop.name);
+		});
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
-		expectedData.modules = expectedData.modules.map((mod) => ({ ...mod, properties: [] }));
+		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
+			{ ...mod, name: name ? toCamelCase(name) : undefined, properties: [] }));
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

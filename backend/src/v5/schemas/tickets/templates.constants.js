@@ -36,14 +36,20 @@ TemplateConstants.fieldTypes = {};
 TemplateConstants.presetModules = {};
 
 [
-	'Viewpoint',
-	'Issues',
-	'Sequencing',
-	'Shapes',
-	'Attachments',
-	'Safetibase',
+	'viewpoint',
+	'issues',
+	'sequencing',
+	'shapes',
+	'attachments',
+	'safetibase',
 ].forEach((mod) => {
 	TemplateConstants.presetModules[toConstantCase(mod)] = mod;
 });
+
+TemplateConstants.defaultProperties = [
+	{ name: 'description', type: TemplateConstants.fieldTypes.LONG_TEXT },
+	{ name: 'owner', type: TemplateConstants.fieldTypes.TEXT, required: true },
+	{ name: 'createdAt', type: TemplateConstants.fieldTypes.DATE, required: true },
+];
 
 module.exports = TemplateConstants;
