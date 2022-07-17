@@ -17,15 +17,12 @@
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const axios = require('axios');
-const config = require('../../../../../utils/config');
 const { generateHashString } = require('../../../../../utils/helper/strings');
 const { getClientApplication, checkAadConfig } = require('../../../../../services/sso/aad');
 const { respond } = require('../../../../../utils/responder');
+const { signupRedirectUri, msGraphUserDetailsUri } = require('../../../../../services/sso/aad/aad.constants')
 
 const Aad = {};
-
-const signupRedirectUri = 'http://localhost/api/v5/sso/aad/signup-post';
-const msGraphUserDetailsUri = 'https://graph.microsoft.com/v1.0/me';
 
 Aad.checkAadConfig = async (req, res, next) => {
 	checkAadConfig();

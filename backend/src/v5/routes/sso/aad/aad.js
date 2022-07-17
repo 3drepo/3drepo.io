@@ -21,7 +21,7 @@ const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSignUpData } = require('../../../middleware/dataConverter/inputs/users');
-const { authenticateRedirectUri, sigupUri } = require('./aad.constants');
+const { authenticateRedirectUri, sigupUri } = require('../../../services/sso/aad/aad.constants');
 
 const authenticate = async (req, res) => {
 	try {
