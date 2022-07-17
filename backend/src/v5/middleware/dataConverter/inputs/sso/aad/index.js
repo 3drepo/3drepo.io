@@ -16,40 +16,27 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const axios = require('axios');
 const { generateHashString } = require('../../../../../utils/helper/strings');
-const { getClientApplication, checkAadConfig } = require('../../../../../services/sso/aad');
+const { getUserDetails } = require('../../../../../services/sso/aad');
 const { respond } = require('../../../../../utils/responder');
-const { signupRedirectUri, msGraphUserDetailsUri } = require('../../../../../services/sso/aad/aad.constants')
+const { signupRedirectUri, msGraphUserDetailsUri } = require('../../../../../services/sso/aad/aad.constants');
+const { aad } = require('../../../../../services/sso/sso.constants');
 
 const Aad = {};
 
-Aad.checkAadConfig = async (req, res, next) => {
-	checkAadConfig();
-	await next();
-};
-
 Aad.getUserDetailsAndValidateEmail = async (req, res, next) => {
 	try {
-		const tokenRequest = { redirectUri: signupRedirectUri, code: req.query.code };
-		const clientApplication = getClientApplication();
-		const response = await clientApplication.acquireTokenByCode(tokenRequest);
-
-		const user = await axios.default.get(msGraphUserDetailsUri, {
-			headers: {
-				Authorization: `Bearer ${response.accessToken}`,
-			},
-		});
+		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code, signupRedirectUri);
 
 		req.body = {
 			...JSON.parse(req.query.state),
-			email: user.data.mail,
-			firstName: user.data.givenName,
-			lastName: user.data.surname,
+			email: mail,
+			firstName: givenName,
+			lastName: surname,
 			password: generateHashString(),
 			sso: {
-				type: 'aad',
-				id: user.data.id,
+				type: aad,
+				id,
 			},
 		};
 

@@ -25,6 +25,7 @@ const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
+const { aad } = require('../../../services/sso/sso.constants');
 
 const Users = {};
 
@@ -208,8 +209,8 @@ const generateSignUpSchema = () => {
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
 		sso: Yup.object({
-			type: Yup.string().oneOf(['aad']),
-			id: types.id,
+			type: Yup.string().oneOf([aad]),
+			id: types.id
 		}).optional().default(undefined),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
 	})

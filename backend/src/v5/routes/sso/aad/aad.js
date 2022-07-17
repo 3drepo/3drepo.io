@@ -14,18 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { checkAadConfig, getUserDetailsAndValidateEmail } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { getUserDetailsAndValidateEmail } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSignUpData } = require('../../../middleware/dataConverter/inputs/users');
-const { authenticateRedirectUri, sigupUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticateRedirectUri } = require('../../../services/sso/aad/aad.constants');
 
 const authenticate = async (req, res) => {
 	try {
-		const params = { redirectUri: authenticateRedirectUri, state: sigupUri};        
+		const params = { redirectUri: authenticateRedirectUri, state: red.query.signupUri };        
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
 		res.redirect(authenticationCodeUrl);
 	} catch (err) {
@@ -85,17 +85,9 @@ const establishRoutes = () => {
 	*     tags: [Aad]
 	*     operationId: authenticate
 	*/
-	router.get('/authenticate', checkAadConfig, authenticate);
+	router.get('/authenticate', authenticate);
 
-	/**
-	 * @openapi
-	 * /sso/aad/authenticate-post:
-	 *   get:
-	 *     description: Redirects the user to 3D Repo's SSO signup page
-	 *     tags: [Aad]
-	 *     operationId: authenticatePost
-	 */
-	router.get('/authenticate-post', checkAadConfig, authenticatePost);
+	router.get('/authenticate-post', authenticatePost);
 
 	/**
 	 * @openapi
@@ -138,22 +130,9 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 */
-	router.post('/signup', checkAadConfig, signup);
+	router.post('/signup', signup);
 
-	/**
-	 * @openapi
-	 * /sso/aad/signup-post:
-	 *   get:
-	 *     description: Retrieves user email, firstname and lastname from Microsoft Graph API, signs a user up and sends a verification email to the email address provided
-	 *     tags: [Aad]
-	 *     operationId: signup-post
-	 *     responses:
-	 *       400:
-	 *         $ref: "#/components/responses/invalidArguments"
-	 *       200:
-	 *         description: Retrieves user email, firstname and lastname from Microsoft Graph API, signs a user up and sends a verification email to the email address provided
-	 */
-	router.get('/signup-post', checkAadConfig, getUserDetailsAndValidateEmail, validateSignUpData, signupPost);
+	router.get('/signup-post', getUserDetailsAndValidateEmail, validateSignUpData, signupPost);
 
 	return router;
 };
