@@ -167,4 +167,12 @@ module.exports = {
 		},
 		sender: '"3D Repo" <dummyEmail@3drepo.org>'
 	},
+
+	sso: {
+		aad: {
+			clientId: "4caba479-bfa6-46bc-9214-a0dc1dcbf8c7",
+			authority: "https://login.microsoftonline.com/common",
+			clientSecret: "Zt08Q~BtW~iuw.UBtkG7BQ53Gv0.gpqUSCfbcbWk"
+		}
+	}
 }

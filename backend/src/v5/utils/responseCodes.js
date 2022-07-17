@@ -22,6 +22,7 @@ const ResponseCodes = {};
 
 ResponseCodes.templates = {
 	ok: { message: 'OK', status: 200 },
+	found: { message: 'Found', status: 302 },
 
 	// Auth
 	notLoggedIn: { message: 'You are not logged in', status: 401 },

@@ -21,16 +21,12 @@ const { getAuthenticationCodeUrl } = require('../../../utils/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSignUpData } = require('../../../middleware/dataConverter/inputs/users');
+const { authenticateRedirectUri, sigupUri } = require('./aad.constants');
 
-const authenticateRedirectUri = 'http://localhost/api/v5/sso/aad/authenticate-post';
-const signupRedirectUri = 'http://localhost/api/v5/sso/aad/signup-post';
-// Frontend uri for signup form
-const sigupUri = '';
-
-const authenticate = (req, res) => {
+const authenticate = async (req, res) => {
 	try {
-		const params = { redirectUri: authenticateRedirectUri, state: sigupUri };
-		const authenticationCodeUrl = getAuthenticationCodeUrl(params);
+		const params = { redirectUri: authenticateRedirectUri, state: sigupUri};        
+		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
 		res.redirect(authenticationCodeUrl);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -47,7 +43,7 @@ const authenticatePost = (req, res) => {
 	}
 };
 
-const signup = (req, res) => {
+const signup = async (req, res) => {
 	try {
 		const { body } = req;
 		const params = {
@@ -60,7 +56,7 @@ const signup = (req, res) => {
 			}),
 		};
 
-		const authenticationCodeUrl = getAuthenticationCodeUrl(params);
+		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
 		res.redirect(authenticationCodeUrl);
 	} catch (err) {
 		/* istanbul ignore next */
