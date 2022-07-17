@@ -17,7 +17,7 @@
 const { checkAadConfig, getUserDetailsAndValidateEmail } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { getAuthenticationCodeUrl } = require('../../../utils/sso/aad');
+const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSignUpData } = require('../../../middleware/dataConverter/inputs/users');

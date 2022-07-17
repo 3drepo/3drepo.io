@@ -2,8 +2,6 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const session = require('supertest-session');
-const AadConstants = require('../../../../../../src/v5/routes/sso/aad/aad.constants');
-const { getAuthenticationCodeUrl } = require('../../../../../../src/v5/utils/sso/aad');
 const { generateRandomString } = require('../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
