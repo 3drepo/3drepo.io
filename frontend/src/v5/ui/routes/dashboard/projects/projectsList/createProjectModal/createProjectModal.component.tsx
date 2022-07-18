@@ -67,6 +67,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	});
 
 	const onSubmissionError = (error) => {
+		setHasUnexpectedError(false);
 		if (isNetworkError(error)) return;
 		if (projectAlreadyExists(error)) {
 			const { projectName, teamspace } = getValues();
@@ -84,13 +85,15 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 
 	const onSubmit: SubmitHandler<IFormInput> = () => {
 		setIsSubmitting(true);
-		setHasUnexpectedError(false);
 		const { teamspace, projectName } = getValues();
 		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};
 
-	useEffect(() => { reset(DEFAULT_VALUES); }, [open]);
+	useEffect(() => {
+		reset(DEFAULT_VALUES);
+		setExistingProjectsByTeamspace({});
+	}, [open]);
 
 	useEffect(() => {
 		if (Object.keys(existingProjectsByTeamspace).length) trigger('projectName');
