@@ -96,7 +96,7 @@ describe('Teamspaces: sagas', () => {
 					.reply(200, { _id });
 
 			await expectSaga(ProjectsSaga.default)
-					.dispatch(ProjectsActions.createProject(teamspace, name, onError, onSuccess))
+					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
 					.put(ProjectsActions.createProjectSuccess(teamspace, newProject))
 					.silentRun();
 
@@ -109,7 +109,7 @@ describe('Teamspaces: sagas', () => {
 					.reply(404)
 
 			await expectSaga(ProjectsSaga.default)
-					.dispatch(ProjectsActions.createProject(teamspace, name, onError, onSuccess))
+					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
 					.silentRun();
 			
 			expect(onError).toBeCalled();
