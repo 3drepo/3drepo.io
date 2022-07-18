@@ -34,18 +34,16 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
-import {
-	ShareModalContainerOrFederation as ShareModal,
-} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalContainerOrFederation/shareModalContainerOrFederation.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
-	share: 'share',
 	editFederation: 'editFederation',
 	federationSettings: 'federationSettings',
 	none: 'none',
@@ -70,6 +68,19 @@ export const FederationListItem = ({
 	}
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, federation));
+		const subject = formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' });
+		const title = formatMessage({ id: 'shareModal.federation.title', defaultMessage: 'Share Federation' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: federation.name,
+			subject,
+			title,
+			link,
+		});
+	};
 
 	useEffect(() => enableRealtimeFederationUpdateSettings(teamspace, project, federation._id), [federation._id]);
 
@@ -163,21 +174,12 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
 							federation={federation}
-							openShareModal={() => setOpenModal(MODALS.share)}
+							openShareModal={onClickShare}
 							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
 							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
-				<ShareModal
-					openState={openModal === MODALS.share}
-					onClickClose={closeModal}
-					title={formatMessage({
-						id: 'ShareModal.federation.title',
-						defaultMessage: 'Share Federation URL',
-					})}
-					containerOrFederation={federation}
-				/>
 				<EditFederationModal
 					openState={openModal === MODALS.editFederation}
 					federation={federation}
