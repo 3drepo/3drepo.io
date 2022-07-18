@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export default ({ className = '', borderColor }) => (
-	<svg width="16" height="16" className={className} style={{ borderRadius: 0 }} viewBox="0 0 16 16" stroke="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-		<path
-			d="M 2,0 C 0.90064972,0 0,0.90064972 0,2 v 12 c 0,1.09935 0.90064972,2 2,2 h 12 c 1.09935,0 2,-0.90065 2,-2 V 2 C 16,0.90064972 15.09935,0 14,0 Z m 0,1 h 12 c 0.562648,0 1,0.4373519 1,1 v 12 c 0,0.562648 -0.437352,1 -1,1 H 2 C 1.4373519,15 1,14.562648 1,14 V 2 C 1,1.4373519 1.4373519,1 2,1 Z"
-			fill={borderColor}
-		/>
-	</svg>
-);
+import styled from 'styled-components';
+
+export const TypographyContainer = styled.div`
+	font-family: ${({ theme }) => theme.typography.fontFamily};
+	padding: 50px;
+`;
+
+export const TypographySampleContainer = styled.div<{ typography: any, variant: string }>`
+	${({ typography }) => typography};
+	color: ${({ variant, theme }) => theme.palette[variant]?.mid};
+	margin-bottom: 20px;
+`;
+
+export const TypographySampleText = styled.div<{ variant: string }>`
+	color: ${({ variant, theme }) => theme.palette[variant]?.main};
+	margin-bottom: 10px;
+	border: 1px solid #cacaca;
+`;
