@@ -32,7 +32,8 @@ export const EditProfileIntegrationsTab = () => {
 	const [unexpectedError, setUnexpectedError] = useState(false);
 
 	const handleApiError = (apiError) => {
-		if (!isNetworkError(apiError)) setUnexpectedError(true);
+		if (isNetworkError(apiError)) return;
+		setUnexpectedError(true);
 	};
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;

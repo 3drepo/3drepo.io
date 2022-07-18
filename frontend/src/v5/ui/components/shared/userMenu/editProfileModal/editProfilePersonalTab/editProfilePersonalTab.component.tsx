@@ -98,6 +98,7 @@ export const EditProfilePersonalTab = ({
 	const getTrimmedNonEmptyValues = () => pickBy(trimPersonalValues(getValues()));
 
 	const onSubmissionError = (apiError) => {
+		if (isNetworkError(apiError)) return;
 		if (emailAlreadyExists(apiError)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
 			trigger('email');
@@ -113,7 +114,7 @@ export const EditProfilePersonalTab = ({
 			});
 			return;
 		}
-		if (!isNetworkError(apiError)) setUnexpectedError(true);
+		setUnexpectedError(true);
 	};
 
 	const onSubmit = () => {

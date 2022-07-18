@@ -67,10 +67,9 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	});
 
 	const onSubmissionError = (error) => {
-		setIsSubmitting(false);
-		setHasUnexpectedError(false);
-		const { projectName, teamspace } = getValues();
+		if (isNetworkError(error)) return;
 		if (projectAlreadyExists(error)) {
+			const { projectName, teamspace } = getValues();
 			setExistingProjectsByTeamspace({
 				...existingProjectsByTeamspace,
 				[teamspace]: [
@@ -78,14 +77,17 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 					projectName,
 				],
 			});
+			return;
 		}
-		if (!isNetworkError(error)) setHasUnexpectedError(true);
+		setHasUnexpectedError(true);
 	};
 
 	const onSubmit: SubmitHandler<IFormInput> = () => {
 		setIsSubmitting(true);
+		setHasUnexpectedError(false);
 		const { teamspace, projectName } = getValues();
-		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onSubmissionError, onClickClose);
+		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onClickClose, onSubmissionError);
+		setIsSubmitting(false);
 	};
 
 	useEffect(() => { reset(DEFAULT_VALUES); }, [open]);

@@ -80,11 +80,12 @@ export const EditProfilePasswordTab = ({
 	};
 
 	const onSubmitError = (apiError) => {
+		if (isNetworkError(apiError)) return;
 		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
 			return;
 		}
-		if (!isNetworkError(apiError)) setUnexpectedError(true);
+		setUnexpectedError(true);
 	};
 
 	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
