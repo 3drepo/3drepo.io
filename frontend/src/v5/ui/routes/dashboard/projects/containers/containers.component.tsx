@@ -26,12 +26,7 @@ import { DashboardListEmptySearchResults } from '@components/dashboard/dashboard
 import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { FormattedMessage } from 'react-intl';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
-import { IContainer } from '@/v5/store/containers/containers.types';
-import {
-	enableRealtimeContainerUpdateSettings,
-	enableRealtimeContainerRemoved,
-	enableRealtimeNewContainer,
-} from '@/v5/services/realtime/container.events';
+import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -55,15 +50,7 @@ export const Containers = (): JSX.Element => {
 
 	const onClickClose = () => setUploadModalOpen(false);
 
-	useEffect(() => {
-		if (!isListPending) {
-			enableRealtimeNewContainer(teamspace, project);
-			containers.forEach((container: IContainer) => {
-				enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
-				enableRealtimeContainerRemoved(teamspace, project, container._id);
-			});
-		}
-	}, [isListPending]);
+	useEffect(() => enableRealtimeNewContainer(teamspace, project), []);
 
 	return (
 		<>
