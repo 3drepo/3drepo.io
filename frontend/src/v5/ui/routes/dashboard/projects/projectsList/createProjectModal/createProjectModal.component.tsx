@@ -93,6 +93,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	useEffect(() => {
 		reset(DEFAULT_VALUES);
 		setExistingProjectsByTeamspace({});
+		setHasUnexpectedError(false);
 	}, [open]);
 
 	useEffect(() => {
