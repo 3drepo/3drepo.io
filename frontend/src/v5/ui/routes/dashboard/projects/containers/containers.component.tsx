@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { createContext, useState } from 'react';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -26,17 +25,13 @@ import { DashboardListEmptySearchResults } from '@components/dashboard/dashboard
 import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { FormattedMessage } from 'react-intl';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
-import { IContainer } from '@/v5/store/containers/containers.types';
-import { enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
-import { enableRealtimeContainerRevisionUpdate, enableRealtimeNewRevisionUpdate } from '@/v5/services/realtime/revision.events';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
-import { DashboardParams } from '../../../routes.constants';
 
+export const IsMainList = createContext(false);
 export const Containers = (): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
 		containers,
@@ -51,16 +46,6 @@ export const Containers = (): JSX.Element => {
 	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	const onClickClose = () => setUploadModalOpen(false);
-
-	useEffect(() => {
-		if (!isListPending) {
-			containers.forEach((container: IContainer) => {
-				enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
-				enableRealtimeContainerRevisionUpdate(teamspace, project, container._id);
-				enableRealtimeNewRevisionUpdate(teamspace, project, container._id);
-			});
-		}
-	}, [isListPending]);
 
 	return (
 		<>
@@ -99,6 +84,46 @@ export const Containers = (): JSX.Element => {
 						}
 					/>
 					<Divider />
+					<IsMainList.Provider value>
+						<ContainersList
+							filterQuery={allFilterQuery}
+							onFilterQueryChange={setAllFilterQuery}
+							hasContainers={hasContainers.all}
+							containers={filterContainers(containers, allFilterQuery)}
+							title={(
+								<FormattedMessage
+									id="containers.all.collapseTitle"
+									defaultMessage="All containers"
+								/>
+							)}
+							titleTooltips={{
+								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+							}}
+							showBottomButton
+							onClickCreate={() => setCreateContainerOpen(true)}
+							onClickUpload={() => setUploadModalOpen(true)}
+							emptyMessage={
+								allFilterQuery && hasContainers.all ? (
+									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
+								) : (
+									<>
+										<DashboardListEmptyText>
+											<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
+										</DashboardListEmptyText>
+										<Button
+											startIcon={<AddCircleIcon />}
+											variant="contained"
+											color="primary"
+											onClick={() => setCreateContainerOpen(true)}
+										>
+											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+										</Button>
+									</>
+								)
+							}
+						/>
+					</IsMainList.Provider>
 					<ContainersList
 						filterQuery={allFilterQuery}
 						onFilterQueryChange={setAllFilterQuery}

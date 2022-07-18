@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import {
@@ -29,6 +29,10 @@ import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import {
+	enableRealtimeContainerRevisionUpdate,
+	enableRealtimeNewRevisionUpdate,
+} from '@/v5/services/realtime/revision.events';
 import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
@@ -40,6 +44,7 @@ import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
+import { IsMainList } from '../../containers.component';
 
 interface IContainerListItem {
 	index: number;
@@ -62,7 +67,15 @@ export const ContainerListItem = ({
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
 	const { teamspace, project } = useParams<DashboardParams>();
-	useEffect(() => enableRealtimeContainerUpdateSettings(teamspace, project, container._id), [container._id]);
+	const isMainList = useContext(IsMainList);
+
+	useEffect(() => {
+		if (isMainList) {
+			enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
+			enableRealtimeContainerRevisionUpdate(teamspace, project, container._id);
+			enableRealtimeNewRevisionUpdate(teamspace, project, container._id);
+		}
+	}, [container._id]);
 
 	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
 
