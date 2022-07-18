@@ -25,7 +25,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
-	createProject: ['teamspace', 'projectName', 'onError', 'onSuccess'],
+	createProject: ['teamspace', 'projectName', 'onSuccess', 'onError'],
 	createProjectSuccess: ['teamspace', 'project'],
 	deleteProject: ['teamspace', 'projectId', 'onSuccess', 'onError'],
 	deleteProjectSuccess: ['teamspace', 'projectId'],
