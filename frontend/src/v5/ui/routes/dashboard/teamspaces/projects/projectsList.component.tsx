@@ -65,7 +65,7 @@ export const ProjectsList = () => {
 						project={project}
 					/>
 				))}
-				<AddProjectCard onClick={() => setNewProjectOpen(true)}/>
+				<AddProjectCard onClick={() => setNewProjectOpen(true)} />
 			</ProjectCardsList>
 			<CreateProjectForm
 				open={newProjectOpen}
