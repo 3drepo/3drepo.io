@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.25.0",
+  "version": "4.25.1",
   "engines": {
     "node": "14.x.x"
   },
@@ -56,6 +56,7 @@
     "mongodb": "3.6.12",
     "multer": "1.4.1",
     "nodemailer": "6.6.3",
+    "openapi-schema-validator": "12.0.0",
     "paypal-rest-sdk": "1.8.1",
     "pug": "3.0.2",
     "serialize-javascript": "4.0.0",

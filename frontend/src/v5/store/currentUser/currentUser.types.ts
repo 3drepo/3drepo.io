@@ -25,6 +25,7 @@ export interface ICurrentUser {
 	company?: string,
 	countryCode?: string,
 	avatarUrl?: string,
+	intercomRef?: string,
 	personalDataIsUpdating?: boolean,
 	apiKeyIsUpdating?: boolean,
 }

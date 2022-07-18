@@ -54,6 +54,7 @@ export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
 					aria-haspopup="true"
 					onClick={(event) => {
 						event.stopPropagation();
+						event.preventDefault();
 						handleClickDropdown(event);
 					}}
 					isOn={Boolean(anchorEl)}

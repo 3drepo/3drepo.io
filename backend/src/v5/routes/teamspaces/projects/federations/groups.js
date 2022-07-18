@@ -59,27 +59,24 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: ExportFederationGroups
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - federation:
-	 *         name: federation
+	 *           type: string
+	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       description: List of group ids to export
 	 *       content:
@@ -98,18 +95,13 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/federationsNotFound"
+	 *         $ref: "#/components/responses/federationNotFound"
 	 *       200:
 	 *         description: returns list of federations
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/group"
-	 *     links:
-	 *       importGroups:
-	 *         operationId: ImportFederationGroups
-	 *         requestBody:
-	 *           groups: "$response.body#/groups"
 	 *
 	 */
 	router.post('/export', hasReadAccessToFederation, validateGroupsExportData, exportGroups, serialiseGroupArray);
@@ -121,27 +113,24 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: ImportFederationGroups
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - federation:
-	 *         name: federation
+	 *           type: string
+	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       description: List of group ids to import
 	 *       content:

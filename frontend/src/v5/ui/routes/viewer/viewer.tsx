@@ -17,21 +17,52 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { ViewerParams } from '../routes.constants';
+import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
 import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
 export const Viewer = () => {
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+
+	useContainersData();
+	useFederationsData();
+
+	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
+	const isListPending = FederationsHooksSelectors.selectIsListPending();
+	const isLoading = areStatsPending || isListPending;
+
+	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
+	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
+	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
+	const federationIsEmpty = selectedFederation?.containers?.length === 0
+		|| federationsContainers.every((container) => container?.revisionsCount === 0);
+
+	if (isLoading) return (<></>);
+
+	if (selectedContainer?.revisionsCount === 0) {
+		return <InvalidContainerOverlay status={selectedContainer.status} />;
+	}
+
+	if (selectedFederation && federationIsEmpty) {
+		return <InvalidFederationOverlay containers={federationsContainers} />;
+	}
+
 	const v4Match = {
 		params: {
 			model: containerOrFederation,
 			teamspace,
 			revision,
-		} };
+		},
+	};
 
-	useFederationsData();
-	useContainersData();
-
-	return <ViewerGui match={v4Match} />;
+	return (
+		<>
+			<CheckLatestRevisionReadiness />
+			<ViewerGui match={v4Match} />;
+		</>
+	);
 };

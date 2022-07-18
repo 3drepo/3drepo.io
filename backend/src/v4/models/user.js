@@ -754,7 +754,7 @@ async function _createAccounts(roles, userName) {
 				// Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-				const hasAvatar = await fileExists("admin", "avatars.ref" , userName);
+				const hasAvatar = await fileExists("admin", "avatars.ref" , user.user);
 				const account = {
 					account: user.user,
 					firstName: user.customData.firstName,

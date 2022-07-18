@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.25.0",
+	"version": "4.25.1",
 	"description": "The frontend for 3drepo.io",
 	"main": "index.js",
 	"directories": {
@@ -48,6 +48,7 @@
 		"@webscopeio/react-textarea-autocomplete": "4.6.3",
 		"axios": "0.26.1",
 		"connected-react-router": "6.9.1",
+		"contrast-color": "1.0.1",
 		"copy-to-clipboard": "3.2.0",
 		"countries-and-timezones": "3.3.0",
 		"dayjs": "1.8.11",
@@ -132,6 +133,7 @@
 		"@storybook/manager-webpack5": "6.4.19",
 		"@storybook/react": "6.4.19",
 		"@storybook/testing-library": "0.0.9",
+		"@types/contrast-color": "1.0.0",
 		"@types/faker": "5.5.8",
 		"@types/jest": "26.0.24",
 		"@types/lodash": "4.14.171",

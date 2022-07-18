@@ -80,7 +80,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
-			zeroMargin
 			onClickClose={onClose}
 			confirmLabel={CONFIRM_LABELS[activeTab]}
 			onSubmit={getTabSubmitFunction()}

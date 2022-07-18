@@ -161,8 +161,8 @@ module.exports = {
 		    host: 'smtp.ethereal.email',
 		    port: 587,
     		auth: {
-	    	    user: 'sasha.schamberger88@ethereal.email',
-	    	    pass: 'Q1HWezrpk1SH9XyC5S'
+	    	    user: 'delaney.koch69@ethereal.email',
+	    	    pass: '1GxDbgfgQEygb2Ts7W'
 		    }
 		},
 		sender: '"3D Repo" <dummyEmail@3drepo.org>'
