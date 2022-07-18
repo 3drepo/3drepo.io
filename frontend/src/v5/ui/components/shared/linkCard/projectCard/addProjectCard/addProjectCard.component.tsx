@@ -15,27 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { CreateProjectForm } from '@/v5/ui/routes/dashboard/projects/projectsList/createProjectModal/createProjectModal.component';
 import { AddProjectIcon, Container } from './addProjectCard.styles';
 import { CardListItem } from '../../linkCard.styles';
 
-export const AddProjectCard = () => {
-	const [modalOpen, setModalOpen] = useState(false);
+type AddProjectCardProps = {
+	onClick: () => void,
+};
+
+export const AddProjectCard = ({ onClick }: AddProjectCardProps) => {
 
 	return (
 		<>
-			<CardListItem onClick={() => setModalOpen(true)}>
+			<CardListItem onClick={onClick}>
 				<Container>
 					<AddProjectIcon />
 					<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />
 				</Container>
 			</CardListItem>
-			<CreateProjectForm
-				open={modalOpen}
-				onClickClose={() => setModalOpen(false)}
-			/>
 		</>
 	);
 };
