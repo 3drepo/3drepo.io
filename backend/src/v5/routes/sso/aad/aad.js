@@ -25,7 +25,10 @@ const { authenticateRedirectUri, signupRedirectUri } = require('../../../service
 
 const authenticate = async (req, res) => {
 	try {
-		const params = { redirectUri: authenticateRedirectUri, state: req.query.signupUri };        
+		const params = { 
+			redirectUri: authenticateRedirectUri, 
+			state: JSON.stringify({ redirecturi: req.query.signupUri })
+		};        
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
 		res.redirect(authenticationCodeUrl);
 	} catch (err) {
@@ -36,7 +39,7 @@ const authenticate = async (req, res) => {
 
 const authenticatePost = (req, res) => {
 	try {
-		res.redirect(req.query.state);
+		res.redirect(JSON.parse(req.query.state).redirecturi);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -81,7 +84,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /sso/aad/authenticate:
 	*   get:
-	*     description: Redirects the user to Microsoft's authentication page and calls authenticate-post endpoint upon successful authentication
+	*     description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	*     tags: [Aad]
 	*     operationId: authenticate
 	*/
@@ -93,7 +96,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and calls signup-post endpoint upon successful authentication
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
 	 *     tags: [Aad]
 	 *     operationId: signup
 	 *     requestBody:
@@ -120,7 +123,7 @@ const establishRoutes = () => {
 	 *                 example: 3D Repo
 	 *               mailListAgreed:
 	 *                 type: boolean
-	 *                 description: Whether the user has signed yp for the latest news and tutorials
+	 *                 description: Whether the user has signed up for the latest news and tutorials
 	 *                 example: true
 	 *               captcha:
 	 *                 type: string
