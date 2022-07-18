@@ -38,7 +38,7 @@ import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './grou
 import {
 	selectActiveGroupDetails,
 	selectActiveGroupId,
-	selectColorOverrides,
+	selectGroupsColourOverrides,
 	selectEditingGroupDetails,
 	selectFilteredGroups,
 	selectGroups,
@@ -116,7 +116,7 @@ function* dehighlightGroup({ group }) {
 
 function* clearSelectionHighlights({ shouldClearTree = true }) {
 	try {
-		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
+		yield put(GroupsActions.setComponentState({ highlightedGroups: new Set() }));
 		if (shouldClearTree) {
 			yield put(TreeActions.clearCurrentlySelected());
 		}
@@ -147,27 +147,12 @@ function* selectGroup({ group = {} }) {
 	}
 }
 
-function* toggleColorOverride({ groupId }) {
-	try {
-		const colorOverrides = yield select(selectColorOverrides);
-		const hasColorOverride = colorOverrides.includes(groupId);
-
-		if (!hasColorOverride) {
-			yield put(GroupsActions.addColorOverride(groupId));
-		} else {
-			yield put(GroupsActions.removeColorOverride(groupId));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
-	}
-}
-
 function* deleteGroups({ teamspace, modelId, groups }) {
 	try {
 		yield API.deleteGroups(teamspace, modelId, groups);
 
 		const groupsToDelete = groups.split(',');
-		const colorOverrides = yield select(selectColorOverrides);
+		const colorOverrides = yield select(selectGroupsColourOverrides);
 		const groupsMap = yield select(selectGroupsMap);
 		const isShowDetails = yield select(selectShowDetails);
 		const activeGroupId = yield select(selectActiveGroupId);
@@ -197,12 +182,19 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 	}
 }
 
-function* isolateGroup({ group }) {
+function* isolateGroups({ groupIds }) {
 	try {
+		const groupsMap = yield select(selectGroupsMap);
+
+		const objects = groupIds.reduce((accumObjects, id) => {
+			const group = groupsMap[id] || {objects: []};
+			return [...accumObjects, ...group.objects];
+		}, []);
+
 		yield put(GroupsActions.clearSelectionHighlights(true));
-		yield put(TreeActions.isolateNodesBySharedIds(group.objects));
+		yield put(TreeActions.isolateNodesBySharedIds(objects));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
+		yield put(DialogActions.showErrorDialog('isolate', 'groups', error));
 	}
 }
 
@@ -470,9 +462,8 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.HIGHLIGHT_GROUP, highlightGroup);
 	yield takeLatest(GroupsTypes.DEHIGHLIGHT_GROUP, dehighlightGroup);
 	yield takeLatest(GroupsTypes.CLEAR_SELECTION_HIGHLIGHTS, clearSelectionHighlights);
-	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE, toggleColorOverride);
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
-	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
+	yield takeLatest(GroupsTypes.ISOLATE_GROUPS, isolateGroups);
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
 	yield takeLatest(GroupsTypes.EXPORT_GROUPS, exportGroups);
 	yield takeLatest(GroupsTypes.IMPORT_GROUPS, importGroups);
