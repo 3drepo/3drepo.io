@@ -18,70 +18,21 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { numberField } from './validators';
+import { numberField, name, unit, desc, code } from './validators';
 
 export const SettingsSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'settings.name.error.min',
-				defaultMessage: 'Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'settings.name.error.max',
-				defaultMessage: 'Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'settings.name.error.required',
-				defaultMessage: 'Name is a required field',
-			}),
-		),
-	desc: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'settings.desc.error.min',
-						defaultMessage: 'Description must be at least 1 character',
-					}))
-				.max(600,
-					formatMessage({
-						id: 'settings.desc.error.max',
-						defaultMessage: 'Description is limited to 600 characters',
-					}))
-	)),
-	unit: Yup.string().required().default('mm'),
-	code: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'settings.code.error.min',
-						defaultMessage: 'Code must be at least 1 character',
-					}))
-				.max(50,
-					formatMessage({
-						id: 'settings.code.error.max',
-						defaultMessage: 'Code is limited to 50 characters',
-					}))
-				.matches(/^[\w|_|-]*$/,
-					formatMessage({
-						id: 'settings.code.error.characters',
-						defaultMessage: 'Code can only consist of letters and numbers',
-					}))
-	)),
+	name,
+	desc,
+	unit,
+	code,
 });
 
 export const SettingsSchemaWithGeoPosition = SettingsSchema.shape({
 	defaultView: Yup.string()
 		.nullable()
 		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
-	latitude: numberField.required().default(0),
-	longitude: numberField.required().default(0),
+	latitude: numberField.required(),
+	longitude: numberField.required(),
 	angleFromNorth: numberField
 		.min(0,
 			formatMessage({
@@ -94,7 +45,7 @@ export const SettingsSchemaWithGeoPosition = SettingsSchema.shape({
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
 		.transform((value) => value ?? 0),
-	x: numberField.required().default(0),
-	y: numberField.required().default(0),
-	z: numberField.required().default(0),
+	x: numberField.required(),
+	y: numberField.required(),
+	z: numberField.required(),
 });
