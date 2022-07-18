@@ -19,26 +19,12 @@ const { codeExists, createResponseCode, templates } = require('../../../../utils
 const { getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
+const { validateMany } = require('../../../common');
 
 const Settings = {};
 
 const nameExists = (teamspace, name) => getTemplateByName(teamspace, name, { _id: 1 })
 	.then(() => true).catch(() => false);
-
-Settings.validateNewTicketSchema = async (req, res, next) => {
-	const { teamspace } = req.params;
-	const data = req.body;
-
-	try {
-		req.body = validate(data);
-
-		if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
-
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
 
 const mergeProperties = (newProps, oldProps) => {
 	const newDataFields = {};
@@ -70,13 +56,13 @@ const processTemplateUpdate = (newData, oldData) => {
 	mergeModules(newData.modules, oldData.modules);
 };
 
-Settings.validateUpdateTicketSchema = async (req, res, next) => {
-	const { teamspace, template } = req.params;
+const validateUpdateTemplateSchema = async (req, res, next) => {
+	const { teamspace } = req.params;
 
 	try {
 		const data = validate(req.body);
 
-		const oldTemplate = await getTemplateById(teamspace, template);
+		const oldTemplate = req.templateData;
 
 		if (oldTemplate.name !== data.name) {
 			// if the name is changed, make sure it's not used by some other template
@@ -92,5 +78,33 @@ Settings.validateUpdateTicketSchema = async (req, res, next) => {
 		respond(req, res, response);
 	}
 };
+
+Settings.validateNewTicketSchema = async (req, res, next) => {
+	const { teamspace } = req.params;
+	const data = req.body;
+
+	try {
+		req.body = validate(data);
+
+		if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
+
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Settings.checkTicketTemplateExists = async (req, res, next) => {
+	const { teamspace, template } = req.params;
+	try {
+		req.templateData = await getTemplateById(teamspace, template);
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Settings.validateUpdateTicketSchema = validateMany([Settings.checkTicketTemplateExists, validateUpdateTemplateSchema]);
 
 module.exports = Settings;
