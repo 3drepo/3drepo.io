@@ -19,6 +19,7 @@ const Templates = {};
 
 const TEMPLATES_COL = 'templates';
 const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const findOne = async (teamspace, query, projection) => {
@@ -30,8 +31,16 @@ const findOne = async (teamspace, query, projection) => {
 	return template;
 };
 
+Templates.addTemplate = async (teamspace, template) => {
+	const _id = generateUUID();
+	await db.insertOne(teamspace, TEMPLATES_COL, { ...template, _id });
+	return _id;
+};
+
 Templates.getTemplateById = (teamspace, _id, projection) => findOne(teamspace, { _id }, projection);
 
 Templates.getTemplateByName = (teamspace, name, projection) => findOne(teamspace, { name }, projection);
+
+Templates.updateTemplate = (teamspace, _id, data) => db.replaceOne(teamspace, TEMPLATES_COL, { _id }, data);
 
 module.exports = Templates;

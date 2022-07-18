@@ -283,34 +283,6 @@ const establishRoutes = () => {
 	*/
 	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, removeTeamspaceMember);
 
-	/**
-	* @openapi
-	* /teamspaces/{teamspace}/settings/tickets/templates:
-	*   post:
-	*     description: Add a new ticket tempate to the teamspace
-	*     tags: [Teamspaces]
-	*     parameters:
-	*       - name: teamspace
-	*         description: name of teamspace
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*     operationId: addTicketTemplate
-	*     requestBody:
-	*       content:
-	*         application/json:
-	*           schema:
-	*             $ref: "#/components/schemas/ticketTemplate"
-	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
-	*       200:
-	*         description: template has been successfully added
-	*
-	*/
-	router.post('/:teamspace/settings/tickets/templates', isTeamspaceAdmin);
-
 	return router;
 };
 
