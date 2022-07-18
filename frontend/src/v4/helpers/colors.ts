@@ -48,8 +48,8 @@ export const GLToHexColor = (glColors) => '#' + glColors.map((c) => componentToH
 export const hexToArray = (hex): number[] => Object.values(parseHex(hex));
 
 export const hexToRgba = (hex, alpha = 1) => {
-	const {red, green, blue} = parseHex(hex);
-	return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+	const {red, green, blue, alpha: alphaColor} = parseHex(hex);
+	return `rgba(${red}, ${green}, ${blue}, ${alphaColor || alpha})`;
 };
 
 export const rgbaToHex = memoize((rgbaColor): string => {
