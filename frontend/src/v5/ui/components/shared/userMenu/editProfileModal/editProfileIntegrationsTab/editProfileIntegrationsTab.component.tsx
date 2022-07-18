@@ -23,7 +23,7 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { isNetworkError } from '@/v5/validation/errors.helpers';
-import { NETWORK_ERROR_MESSAGE } from '@controls/errorMessage/networkError/networkError.component';
+import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
 export const EditProfileIntegrationsTab = () => {
@@ -32,11 +32,7 @@ export const EditProfileIntegrationsTab = () => {
 	const [unexpectedError, setUnexpectedError] = useState(false);
 
 	const handleApiError = (apiError) => {
-		if (isNetworkError(apiError)) {
-			setError(NETWORK_ERROR_MESSAGE);
-		} else {
-			setUnexpectedError(true);
-		}
+		if (!isNetworkError(apiError)) setUnexpectedError(true);
 	};
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
@@ -76,6 +72,7 @@ export const EditProfileIntegrationsTab = () => {
 					/>
 				</Button>
 			</ButtonsContainer>
+			<NetworkError />
 			{unexpectedError && <UnexpectedError />}
 			{error && <ErrorMessage>{error}</ErrorMessage>}
 		</>

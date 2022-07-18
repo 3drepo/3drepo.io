@@ -27,8 +27,8 @@ import { SuccessMessage } from '@controls/successMessage/successMessage.componen
 import * as API from '@/v5/services/api';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
 import { isNetworkError, isPasswordIncorrect } from '@/v5/validation/errors.helpers';
-import { NETWORK_ERROR_MESSAGE } from '@controls/errorMessage/networkError/networkError.component';
 
 interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -80,15 +80,11 @@ export const EditProfilePasswordTab = ({
 	};
 
 	const onSubmitError = (apiError) => {
-		if (isNetworkError(apiError)) {
-			setExpectedError(NETWORK_ERROR_MESSAGE);
-			return;
-		}
 		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
 			return;
 		}
-		setUnexpectedError(true);
+		if (!isNetworkError(apiError)) setUnexpectedError(true);
 	};
 
 	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
@@ -152,6 +148,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
+			<NetworkError />
 			{unexpectedError && <UnexpectedError />}
 			{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
 			{isSubmitSuccessful && (

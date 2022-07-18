@@ -25,8 +25,9 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { projectAlreadyExists, isNetworkError } from '@/v5/validation/errors.helpers';
+import { isNetworkError, projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
+import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 
 interface ICreateProject {
 	open: boolean;
@@ -43,8 +44,8 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 
 	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
-	const [networkError, setNetworkError] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [hasUnexpectedError, setHasUnexpectedError] = useState(false);
 
 	const DEFAULT_VALUES = {
 		teamspace: currentTeamspace,
@@ -67,6 +68,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 
 	const onSubmissionError = (error) => {
 		setIsSubmitting(false);
+		setHasUnexpectedError(false);
 		const { projectName, teamspace } = getValues();
 		if (projectAlreadyExists(error)) {
 			setExistingProjectsByTeamspace({
@@ -77,9 +79,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 				],
 			});
 		}
-		if (isNetworkError(error)) {
-			setNetworkError(true);
-		}
+		if (!isNetworkError(error)) setHasUnexpectedError(true);
 	};
 
 	const onSubmit: SubmitHandler<IFormInput> = () => {
@@ -101,7 +101,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'projects.creation.ok', defaultMessage: 'Create Project' })}
-			isValid={formState.isValid && !networkError}
+			isValid={formState.isValid && !hasUnexpectedError}
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
@@ -126,7 +126,8 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 				control={control}
 				formError={errors.projectName}
 			/>
-			{networkError && <NetworkError />}
+			<NetworkError />
+			{hasUnexpectedError && <UnexpectedError />}
 		</FormModal>
 	);
 };

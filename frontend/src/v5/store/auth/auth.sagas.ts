@@ -75,7 +75,7 @@ export function* login({ username, password }: LoginAction) {
 					yield put(AuthActions.loginFailed(error.message));
 					break;
 			}
-		} else yield put(AuthActions.loginFailed(error.message));
+		}
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }
