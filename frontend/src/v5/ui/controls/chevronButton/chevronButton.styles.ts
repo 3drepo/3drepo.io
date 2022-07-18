@@ -17,9 +17,16 @@
 import { IconButton } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean, $isLoading?: boolean }>`
+const SCALE_SIZES = {
+	small: 0.6,
+	medium: 1,
+	large: 2,
+};
+
+export const ChevronStyledIconButton = styled(IconButton)<{ $isOn?: boolean, $isLoading?: boolean, $size: 'small' | 'medium' | 'large' }>`
 	height: 28px;
 	width: 28px;
+	transform: scale(${({ $size }) => SCALE_SIZES[$size]});
 	padding: 0;
 	margin: 0 10px 0 0;
 	display: flex;
