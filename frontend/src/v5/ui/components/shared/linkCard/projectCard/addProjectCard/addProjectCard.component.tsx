@@ -23,16 +23,11 @@ type AddProjectCardProps = {
 	onClick: () => void,
 };
 
-export const AddProjectCard = ({ onClick }: AddProjectCardProps) => {
-
-	return (
-		<>
-			<CardListItem onClick={onClick}>
-				<Container>
-					<AddProjectIcon />
-					<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />
-				</Container>
-			</CardListItem>
-		</>
-	);
-};
+export const AddProjectCard = ({ onClick }: AddProjectCardProps) => (
+	<CardListItem onClick={onClick}>
+		<Container>
+			<AddProjectIcon />
+			<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />
+		</Container>
+	</CardListItem>
+);
