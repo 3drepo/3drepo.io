@@ -39,9 +39,6 @@ export const GisContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.GIS]
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.GIS]}px;
-	& > :last-child {
-		padding: 24px;
-	}
 `;
 
 export const StyledSelect = styled(Select)`
@@ -95,4 +92,8 @@ export const MapName = styled.div`
 	margin-left: 24px;
 `;
 
-export const MapLayers = styled(ViewerPanelContent)``;
+export const MapLayers = styled(ViewerPanelContent)`
+	& > div {
+		padding: 24px;
+	}
+`;
