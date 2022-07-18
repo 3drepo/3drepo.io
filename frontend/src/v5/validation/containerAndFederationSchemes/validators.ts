@@ -18,6 +18,11 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 
+const stripIfBlankString = (value) => (
+	value === ''
+		? Yup.string().strip()
+		: Yup.string());
+
 export const numberField = Yup.number()
 	.default(0)
 	.typeError(formatMessage({
@@ -42,30 +47,26 @@ export const unit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft'])
 export const type = Yup.string().required().default('Uncategorised');
 
 export const code = Yup.lazy((value) => (
-	value === ''
-		? Yup.string().strip()
-		: Yup.string()
-			.max(50,
-				formatMessage({
-					id: 'validation.model.code.error.max',
-					defaultMessage: 'Code is limited to 50 characters',
-				}))
-			.matches(/^[\w|_|-]*$/,
-				formatMessage({
-					id: 'validation.model.code.error.characters',
-					defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
-				}))
+	stripIfBlankString(value)
+		.max(50,
+			formatMessage({
+				id: 'validation.model.code.error.max',
+				defaultMessage: 'Code is limited to 50 characters',
+			}))
+		.matches(/^[\w|_|-]*$/,
+			formatMessage({
+				id: 'validation.model.code.error.characters',
+				defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
+			}))
 ));
 
 export const desc = Yup.lazy((value) => (
-	value === ''
-		? Yup.string().strip()
-		: Yup.string()
-			.max(660,
-				formatMessage({
-					id: 'validation.model.description.error.max',
-					defaultMessage: 'Description is limited to 660 characters',
-				}))
+	stripIfBlankString(value)
+		.max(660,
+			formatMessage({
+				id: 'validation.model.description.error.max',
+				defaultMessage: 'Description is limited to 660 characters',
+			}))
 ));
 
 export const revisionTag = Yup.string()
@@ -87,12 +88,10 @@ export const revisionTag = Yup.string()
 	);
 
 export const revisionDesc = Yup.lazy((value) => (
-	value === ''
-		? Yup.string().strip()
-		: Yup.string()
-			.max(660,
-				formatMessage({
-					id: 'validation.revisions.desc.error.max',
-					defaultMessage: 'Revision Description is limited to 660 characters',
-				}))
+	stripIfBlankString(value)
+		.max(660,
+			formatMessage({
+				id: 'validation.revisions.desc.error.max',
+				defaultMessage: 'Revision Description is limited to 660 characters',
+			}))
 ));
