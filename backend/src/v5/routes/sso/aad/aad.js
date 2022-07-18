@@ -20,12 +20,12 @@ const Users = require('../../../processors/users');
 const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
-const { validateSignUpData } = require('../../../middleware/dataConverter/inputs/users');
-const { authenticateRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
+const { authenticateRedirectUri, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 
 const authenticate = async (req, res) => {
 	try {
-		const params = { redirectUri: authenticateRedirectUri, state: red.query.signupUri };        
+		const params = { redirectUri: authenticateRedirectUri, state: req.query.signupUri };        
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
 		res.redirect(authenticationCodeUrl);
 	} catch (err) {
@@ -66,7 +66,7 @@ const signup = async (req, res) => {
 
 const signupPost = async (req, res) => {
 	try {
-		await Users.signUp(req.body);
+		await Users.signUp(req.body, true);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -132,7 +132,7 @@ const establishRoutes = () => {
 	 */
 	router.post('/signup', signup);
 
-	router.get('/signup-post', getUserDetailsAndValidateEmail, validateSignUpData, signupPost);
+	router.get('/signup-post', getUserDetailsAndValidateEmail, validateSsoSignUpData, signupPost);
 
 	return router;
 };

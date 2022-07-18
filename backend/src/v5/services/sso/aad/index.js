@@ -1,7 +1,8 @@
 const axios = require('axios');
-const config = require('../config');
+const config = require('../../../utils/config');
 const msal = require('@azure/msal-node');
 const { templates } = require('../../../utils/responseCodes');
+const { msGraphUserDetailsUri } = require('./aad.constants');
 
 const Aad = {};
 

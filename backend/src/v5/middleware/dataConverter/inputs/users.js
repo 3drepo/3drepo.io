@@ -208,13 +208,8 @@ const generateSignUpSchema = () => {
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
-		sso: Yup.object({
-			type: Yup.string().oneOf([aad]),
-			id: types.id
-		}).optional().default(undefined),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
-	})
-		.noUnknown().required();
+	}).noUnknown().required();
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
@@ -232,6 +227,28 @@ const generateSignUpSchema = () => {
 Users.validateSignUpData = async (req, res, next) => {
 	try {
 		const schema = generateSignUpSchema();
+		req.body = await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+const generateSsoSignUpSchema = () => {
+	const schema = generateSignUpSchema();
+
+	return schema.shape({
+		sso: Yup.object({
+			type: Yup.string().oneOf([aad]),
+			id: types.id
+		}).optional().default(undefined),
+		password: types.strings.password.optional().default(undefined)
+	})
+};
+
+Users.validateSsoSignUpData = async (req, res, next) => {
+	try {
+		const schema = generateSsoSignUpSchema();
 		req.body = await schema.validate(req.body);
 		await next();
 	} catch (err) {

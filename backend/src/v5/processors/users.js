@@ -29,9 +29,15 @@ const { generateUserHash } = require('../services/intercom');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
+const { generateUUIDString } = require('../utils/helper/uuids');
 
-Users.signUp = async (newUserData) => {
+Users.signUp = async (newUserData, generatePassword) => {
 	const token = generateHashString();
+
+	if(generatePassword){
+		newUserData.password = generateUUIDString();
+	}
+
 	await addUser({ ...newUserData, token });
 	await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
 		token,

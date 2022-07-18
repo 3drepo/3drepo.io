@@ -16,10 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { generateHashString } = require('../../../../../utils/helper/strings');
 const { getUserDetails } = require('../../../../../services/sso/aad');
 const { respond } = require('../../../../../utils/responder');
-const { signupRedirectUri, msGraphUserDetailsUri } = require('../../../../../services/sso/aad/aad.constants');
+const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { aad } = require('../../../../../services/sso/sso.constants');
 
 const Aad = {};
@@ -33,11 +32,7 @@ Aad.getUserDetailsAndValidateEmail = async (req, res, next) => {
 			email: mail,
 			firstName: givenName,
 			lastName: surname,
-			password: generateHashString(),
-			sso: {
-				type: aad,
-				id,
-			},
+			sso: { type: aad, id, },
 		};
 
 		await next();
