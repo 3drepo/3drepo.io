@@ -63,7 +63,7 @@ export const createFederationSuccess = (state = INITIAL_STATE, {
 	...state,
 	federationsByProject: {
 		...state.federationsByProject,
-		[projectId]: uniqueIds([
+		[projectId]: uniqueIds<IFederation>([
 			...state.federationsByProject[projectId],
 			{
 				...prepareNewFederation(newFederation, federationId),
