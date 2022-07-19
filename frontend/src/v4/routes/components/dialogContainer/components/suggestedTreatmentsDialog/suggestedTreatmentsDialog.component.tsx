@@ -26,7 +26,7 @@ import { LabelButton } from '../../../../viewerGui/components/labelButton/labelB
 import { EmptyStateInfo } from '../../../components.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
 import {
-	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
+	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography, ViewerScrollArea,
 } from './suggestedTreatmentsDialog.styles';
 import { SuggestionDetails } from './suggestionDetails/suggestionDetails.component';
 
@@ -146,10 +146,12 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 					/>
 				</Grid>
 			</StyledGrid>
-			<StyledDialogContent>
-				{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
-				{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
-			</StyledDialogContent>
+			<ViewerScrollArea>
+				<StyledDialogContent>
+					{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
+					{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
+				</StyledDialogContent>
+			</ViewerScrollArea>
 		</Container>
 	);
 };

@@ -35,9 +35,8 @@ import {
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { ISelectedFilter } from '../../../components/filterPanel/filterPanel';
 import { PanelBarActions } from '../panelBarActions';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
-import { Container, Tabs } from './bim.styles';
+import { Container, Tabs, ViewerPanel } from './bim.styles';
 import { MetaRecord } from './components/metaRecord/';
 
 interface IProps {
@@ -178,7 +177,7 @@ export class Bim extends PureComponent<IProps, any> {
 					<Tab label={isV5() ? 'All data' : 'All'} />
 					<Tab label="Starred" />
 				</Tabs>
-				<ViewerPanelContent>
+				<ViewerPanelContent autoHeight autoHeightMax={'100%'}>
 					<Container>
 						{this.renderMetadata()}
 						{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
