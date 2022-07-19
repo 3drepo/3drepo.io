@@ -129,8 +129,7 @@ const expandedGroupItem = css`
 					font-size: 10px;
 				}
 				${TextFieldContainer} {
-					/* TODO - fix after new palette is released */
-					border: 1px solid #C1C8D5;
+					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					border-radius: 5px;
 					background-color: ${({ theme }) => theme.palette.primary.constrast};
 					label {
@@ -170,10 +169,6 @@ const expandedGroupItem = css`
 					}
 				}
 				${StyledFormControl} {
-					fieldset {
-						/* TODO - fix after new palette is released */
-						border-color: #C1C8D5;
-					}
 					.MuiSelect-select {
 						margin-top: 0;
 						height: 26px;
