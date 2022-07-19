@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { fieldTypes, presetModules, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 const { toCamelCase } = require(`${src}/utils/helper/strings`);
 
 const testValidate = () => {
@@ -58,6 +58,51 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: fieldTypes.TEXT,
 			}] }, true],
+		['property with enum type without values', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.ONE_OF,
+			}] }, false],
+		['property with enum type with values', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.ONE_OF,
+				values: [generateRandomString(), generateRandomString()],
+			}] }, true],
+		['property with enum type with values where default value is not within the values provided', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.ONE_OF,
+				values: [generateRandomString(), generateRandomString()],
+				default: generateRandomString(),
+			}] }, true],
+		['property with enum type with values where default values are valid', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.MANY_OF,
+				values: ['a', 'b'],
+				default: ['a', 'b'],
+			}] }, true],
+		['property with enum type with values being the a preset list', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.MANY_OF,
+				values: presetEnumValues.JOBS,
+			}] }, true],
+		['property with enum type with values is the wrong type', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.ONE_OF,
+				values: [generateRandomString(), generateRandomString(), 'a'],
+				default: ['a'],
+			}] }, false],
+		['property with enum type with values where default values are duplicated', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.MANY_OF,
+				values: [generateRandomString(), generateRandomString(), 'a'],
+				default: ['a', 'a'],
+			}] }, false],
 		['property name is too long', { name: generateRandomString(),
 			properties: [{
 				name: generateRandomString(121),

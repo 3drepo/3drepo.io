@@ -51,6 +51,14 @@ TemplateConstants.presetModules = {};
 	TemplateConstants.presetModules[toConstantCase(mod)] = mod;
 });
 
+TemplateConstants.presetEnumValues = {};
+
+[
+	'jobs',
+].forEach((val) => {
+	TemplateConstants.presetEnumValues[toConstantCase(val)] = val;
+});
+
 TemplateConstants.presetModulesProperties = {
 	[TemplateConstants.presetModules.VIEWPOINT]: [
 		{ name: 'screenshot', type: TemplateConstants.fieldTypes.IMAGE },

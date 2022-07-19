@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { defaultProperties, fieldTypes, presetModules, presetModulesProperties } = require('./templates.constants');
+const { defaultProperties, fieldTypes, presetEnumValues, presetModules, presetModulesProperties } = require('./templates.constants');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { toCamelCase } = require('../../utils/helper/strings');
+const { isString } = require('../../utils/helper/typeCheck');
 
 const typeNameToType = {
 	[fieldTypes.TEXT]: types.strings.title,
@@ -37,14 +38,48 @@ const fieldSchema = Yup.object().shape({
 	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
-	values: Yup.mixed().when('type', (val, schema) => {
-		if (val === fieldTypes.MANY_OF || val === fieldTypes.ANY_OF) {
-			return typeNameToType[val];
+	values: Yup.mixed().when(['type'], (val, schema) => {
+		if (val === fieldTypes.MANY_OF || val === fieldTypes.ONE_OF) {
+			return schema.test('Values check', 'must of be an array of values or the name of a preset', (value) => {
+				console.log(value);
+				if (value === undefined) return false;
+				let typeToCheck;
+				if (isString(value)) {
+					typeToCheck = Yup.string().oneOf(Object.values(presetEnumValues)).required();
+				} else {
+					typeToCheck = Yup.array().of(typeNameToType[fieldTypes.ONE_OF]).min(1).required()
+						.strict(true);
+				}
+
+				try {
+					typeToCheck.validateSync(value);
+					return true;
+				} catch (err) {
+					return false;
+				}
+			});
 		}
 		return schema.strip();
 	}),
 
-	default: Yup.mixed().when('type', (type) => typeNameToType[type]),
+	default: Yup.mixed().when(['type', 'values'], (type, values) => {
+		const res = typeNameToType[type];
+		if (type === fieldTypes.MANY_OF) {
+			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
+				if (defaultValues?.length) {
+					const seenValues = new Set();
+					return defaultValues.every((val) => {
+						const validVal = values.includes(val) && !seenValues.has(val);
+						seenValues.add(val);
+						return validVal;
+					});
+				}
+				return true;
+			});
+		} if (type === fieldTypes.ANY_OF) return res.oneOf(values);
+
+		return res;
+	}),
 
 });
 

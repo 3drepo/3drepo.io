@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTemplate } = require('../../models/tickets.templates');
+const { addTemplate, updateTemplate } = require('../../models/tickets.templates');
 
 const Settings = {};
 
 Settings.addTicketTemplate = addTemplate;
+Settings.updateTicketTemplate = updateTemplate;
 
 module.exports = Settings;
