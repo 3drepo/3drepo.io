@@ -8,9 +8,9 @@
 	},
 	"scripts": {
 		"build:base:development": "webpack --watch --progress --config ./internals/webpack/webpack.dev.config.js",
-		"build:base:production": "webpack --progress --config ./internals/webpack/webpack.prod.config.js",
+		"build:base:production": "yarn build-storybook && webpack --progress --config ./internals/webpack/webpack.prod.config.js",
 		"watch": "yarn build:base:development --devtool source-map --env noTypeChecking",
-		"build": "yarn build-storybook && yarn compile && yarn build:base:production --env noTypeChecking",
+		"build": "yarn compile && yarn build:base:production --env noTypeChecking",
 		"build:test": "cross-env NODE_OPTIONS='--max-old-space-size=4096' yarn build:base:production",
 		"build:dev": "yarn build --config ./internals/webpack/webpack.dev.config.js",
 		"wdm": "yarn run wdm:update && yarn run wdm:start",
