@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { uniqWith } from 'lodash';
 import { IContainer } from './containers/containers.types';
 import { IFederation } from './federations/federations.types';
 import { View } from './store.types';
@@ -27,3 +28,6 @@ export const EMPTY_VIEW: View = {
 export const isFederation = (containerOrFederation: IContainer | IFederation) => (
 	'containers' in containerOrFederation
 );
+
+// @ts-ignore
+export const uniqueIds = (listItems: IContainer[] | IFederation[]) => uniqWith(listItems, (a, b) => a._id === b._id);
