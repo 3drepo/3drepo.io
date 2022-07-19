@@ -178,7 +178,6 @@ const expandedGroupItem = css`
 						margin-top: 0;
 						height: 26px;
 						color: ${({ theme }) => theme.palette.secondary.main};
-						font-size: 14px;
 						~ svg {
 							margin-top: 0;
 						}
@@ -229,7 +228,7 @@ const expandedGroupItem = css`
 					/* TODO - fix after new palette is released */
 					background-color: #F7F8FA;
 					color: #C1C8D5;
-					border-top: 1px solid #E0E5F0;
+					border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					padding: 12px 15px;
 
 					.MuiButton-contained {
@@ -274,8 +273,6 @@ const expandedGroupItem = css`
 									padding-left: 12px;
 									~ svg {
 										margin-top: 0;
-										/* TODO - fix after new palette is released */
-										color: #C1C8D5;
 									}
 								}
 							}
