@@ -32,10 +32,15 @@ Aad.getAuthenticationCodeUrl = (params) => {
     return clientApp.getAuthCodeUrl(params);
 };
 
-Aad.getUserDetails = async (authCode, redirectUri) => {
+Aad.getUserDetails = async (authCode, redirectUri, codeVerifier) => {
     checkAadConfig();
     
-    const tokenRequest = { code: authCode, redirectUri };
+    const tokenRequest = { 
+        code: authCode,
+        redirectUri,
+        codeVerifier
+    };
+    
     const clientApplication = getClientApplication();
     const response = await clientApplication.acquireTokenByCode(tokenRequest);
 

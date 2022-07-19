@@ -25,7 +25,8 @@ const Aad = {};
 
 Aad.getUserDetailsAndValidateEmail = async (req, res, next) => {
 	try {
-		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code, signupRedirectUri);
+		const { data: { mail, givenName, surname, id } } = 
+			await getUserDetails(req.query.code, signupRedirectUri, req.session.pkceCodes.verifier);
 
 		req.body = {
 			...JSON.parse(req.query.state),

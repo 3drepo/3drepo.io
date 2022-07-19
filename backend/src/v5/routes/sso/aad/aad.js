@@ -21,13 +21,16 @@ const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
-const { authenticateRedirectUri, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticateRedirectUri, signupRedirectUri, authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
+const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
 
 const authenticate = async (req, res) => {
 	try {
 		const params = { 
 			redirectUri: authenticateRedirectUri, 
-			state: JSON.stringify({ redirecturi: req.query.signupUri })
+			state: JSON.stringify({ redirecturi: req.query.signupUri }),
+			codeChallenge: req.session.pkceCodes.challenge, 
+            codeChallengeMethod: req.session.pkceCodes.challengeMethod 
 		};        
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
 		res.redirect(authenticationCodeUrl);
@@ -57,6 +60,8 @@ const signup = async (req, res) => {
 				company: body.company,
 				mailListAgreed: body.mailListAgreed,
 			}),
+			codeChallenge: req.session.pkceCodes.challenge, 
+            codeChallengeMethod: req.session.pkceCodes.challengeMethod 			
 		};
 
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
@@ -88,9 +93,9 @@ const establishRoutes = () => {
 	*     tags: [Aad]
 	*     operationId: authenticate
 	*/
-	router.get('/authenticate', authenticate);
+	router.get('/authenticate', addPkceProtection, authenticate);
 
-	router.get('/authenticate-post', authenticatePost);
+	router.get(`/${authenticateRedirectEndpoint}`, authenticatePost);
 
 	/**
 	 * @openapi
@@ -133,9 +138,9 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 */
-	router.post('/signup', signup);
+	router.post('/signup', addPkceProtection, signup);
 
-	router.get('/signup-post', getUserDetailsAndValidateEmail, validateSsoSignUpData, signupPost);
+	router.get(`/${signupRedirectEndpoint}`, getUserDetailsAndValidateEmail, validateSsoSignUpData, signupPost);
 
 	return router;
 };
