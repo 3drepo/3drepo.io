@@ -83,6 +83,13 @@ const testValidate = () => {
 				values: ['a', 'b'],
 				default: ['a', 'b'],
 			}] }, true],
+		['property with enum type with values being the wrong type', { name: generateRandomString(),
+			properties: [{
+				name: generateRandomString(),
+				type: fieldTypes.MANY_OF,
+				values: [123, 12354],
+			}] }, false],
+
 		['property with enum type with values being the a preset list', { name: generateRandomString(),
 			properties: [{
 				name: generateRandomString(),

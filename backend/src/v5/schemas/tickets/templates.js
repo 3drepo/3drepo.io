@@ -18,8 +18,8 @@
 const { defaultProperties, fieldTypes, presetEnumValues, presetModules, presetModulesProperties } = require('./templates.constants');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
-const { toCamelCase } = require('../../utils/helper/strings');
 const { isString } = require('../../utils/helper/typeCheck');
+const { toCamelCase } = require('../../utils/helper/strings');
 
 const typeNameToType = {
 	[fieldTypes.TEXT]: types.strings.title,
@@ -41,7 +41,6 @@ const fieldSchema = Yup.object().shape({
 	values: Yup.mixed().when(['type'], (val, schema) => {
 		if (val === fieldTypes.MANY_OF || val === fieldTypes.ONE_OF) {
 			return schema.test('Values check', 'must of be an array of values or the name of a preset', (value) => {
-				console.log(value);
 				if (value === undefined) return false;
 				let typeToCheck;
 				if (isString(value)) {
