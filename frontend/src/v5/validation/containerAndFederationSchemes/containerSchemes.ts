@@ -17,36 +17,28 @@
 
 import * as Yup from 'yup';
 import { SettingsSchemaWithGeoPosition } from './settingsSchemes';
-import {
-	containerName,
-	containerType,
-	containerUnit,
-	containerCode,
-	containerDesc,
-	revisionDesc,
-	revisionTag,
-} from './validators';
+import { name, type, unit, code, desc, revisionDesc, revisionTag } from './validators';
 
 export const ContainerSettingsSchema = SettingsSchemaWithGeoPosition.shape({ type: Yup.string() });
 
 export const CreateContainerSchema = Yup.object().shape({
-	name: containerName,
-	unit: containerUnit,
-	type: containerType,
-	code: containerCode,
-	desc: containerDesc,
+	name,
+	unit,
+	type,
+	code,
+	desc,
 });
 
 export const ListItemSchema = Yup.object().shape({
 	revisionTag,
-	containerName,
+	containerName: name,
 });
 
 export const SidebarSchema = Yup.object().shape({
-	containerUnit,
-	containerType,
-	containerCode,
-	containerDesc,
+	containerUnit: unit,
+	containerType: type,
+	containerCode: code,
+	containerDesc: desc,
 	revisionDesc,
 });
 

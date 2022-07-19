@@ -17,13 +17,14 @@
 
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { DashboardScroll } from '../dashboard/projects/projects.styles';
 
 export const ScrollBar = styled(DashboardScroll).attrs({
 	variant: 'secondary',
 })`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
-	border-top: 1px solid rgb(255 255 255 / 10%);
+	border-top: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.main, 10)};
 `;
 
 export const HomeContent = styled.div`

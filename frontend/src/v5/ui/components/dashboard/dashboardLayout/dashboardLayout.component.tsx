@@ -19,7 +19,7 @@ import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
-import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
+import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -49,7 +49,7 @@ export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.
 	return (
 		<Container className={className}>
 			<AppBar />
-			{project && !containerOrFederation && <ProjectHeader />}
+			{project && !containerOrFederation && <ProjectNavigation />}
 			<Content>
 				{children}
 			</Content>
