@@ -20,26 +20,30 @@ const { getUserDetails } = require('../../../../../services/sso/aad');
 const { respond } = require('../../../../../utils/responder');
 const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { aad } = require('../../../../../services/sso/sso.constants');
+const { getUserByQuery } = require('../../../../../models/users');
 
 const Aad = {};
 
-Aad.getUserDetailsAndValidateEmail = async (req, res, next) => {
+Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
+	const { data: { mail, givenName, surname, id } } =
+		await getUserDetails(req.query.code, signupRedirectUri);
+
 	try {
-		const { data: { mail, givenName, surname, id } } = 
-			await getUserDetails(req.query.code, signupRedirectUri, req.session.pkceCodes.verifier);
-
-		req.body = {
-			...JSON.parse(req.query.state),
-			email: mail,
-			firstName: givenName,
-			lastName: surname,
-			sso: { type: aad, id, },
-		};
-
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		await getUserByQuery({ 'customData.email': mail }, { _id: 1 });
+		return respond(req, res, createResponseCode(templates.invalidArguments, 'Email already exists'));
+	} catch {
+		//do nothing
 	}
+
+	req.body = {
+		...JSON.parse(req.query.state),
+		email: mail,
+		firstName: givenName,
+		lastName: surname,
+		sso: { type: aad, id, },
+	};
+
+	await next();
 };
 
 module.exports = Aad;

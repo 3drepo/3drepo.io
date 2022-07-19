@@ -1,8 +1,10 @@
 const axios = require('axios');
 const config = require('../../../utils/config');
 const msal = require('@azure/msal-node');
-const { templates } = require('../../../utils/responseCodes');
 const { msGraphUserDetailsUri } = require('./aad.constants');
+const ssoLabel = require('../../../utils/logger').labels.sso;
+const logger = require('../../../utils/logger').logWithLabel(ssoLabel);
+const { templates } = require('../../../utils/responseCodes');
 
 const Aad = {};
 
@@ -18,7 +20,13 @@ const getClientApplication = () => {
     checkAadConfig();
 
     if (!clientApplication) {
-        const clientAppConfig = { auth: config.sso.aad };
+        const loggerOptions = {
+            loggerCallback: (loglevel, message) => { 
+                logger.logInfo(message);
+            },
+            logLevel: msal.LogLevel.Verbose,
+        }
+        const clientAppConfig = { auth: config.sso.aad, system: { loggerOptions } };
         clientApplication = new msal.ConfidentialClientApplication(clientAppConfig);
     }
 
@@ -34,13 +42,13 @@ Aad.getAuthenticationCodeUrl = (params) => {
 
 Aad.getUserDetails = async (authCode, redirectUri, codeVerifier) => {
     checkAadConfig();
-    
-    const tokenRequest = { 
+
+    const tokenRequest = {
         code: authCode,
         redirectUri,
         codeVerifier
     };
-    
+
     const clientApplication = getClientApplication();
     const response = await clientApplication.acquireTokenByCode(tokenRequest);
 

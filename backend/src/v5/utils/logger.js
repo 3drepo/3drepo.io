@@ -39,6 +39,7 @@ Logger.labels = {
 	queue: 'AMQP',
 	chat: 'CHAT',
 	modelProcessing: 'MODPRO',
+	sso: 'SSO'
 };
 
 module.exports = Logger;

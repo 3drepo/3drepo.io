@@ -175,7 +175,7 @@ Users.validateResetPasswordData = async (req, res, next) => {
 	}
 };
 
-const generateSignUpSchema = () => {
+const generateBaseSignUpSchema = () => {
 	const captchaEnabled = config.auth.captcha;
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
@@ -185,26 +185,11 @@ const generateSignUpSchema = () => {
 						await getUserByUsername(value, { _id: 1 });
 						return false;
 					} catch {
-					// do nothing
-					}
-				}
-				return true;
-			}).required(),
-		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
-			async (value) => {
-				if (value) {
-					try {
-						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
-						return false;
-					} catch {
 						// do nothing
 					}
 				}
 				return true;
 			}).required(),
-		password: types.strings.password.required(),
-		firstName: types.strings.name.required().transform(formatPronouns),
-		lastName: types.strings.name.required().transform(formatPronouns),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
@@ -224,9 +209,30 @@ const generateSignUpSchema = () => {
 		: schema;
 };
 
+const generate3DRepoSignUpSchema = () => {
+	const schema = generateBaseSignUpSchema();
+	return schema.shape({
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		password: types.strings.password.required(),
+		firstName: types.strings.name.required().transform(formatPronouns),
+		lastName: types.strings.name.required().transform(formatPronouns),
+	}).noUnknown().required();
+};
+
 Users.validateSignUpData = async (req, res, next) => {
 	try {
-		const schema = generateSignUpSchema();
+		const schema = generate3DRepoSignUpSchema();
 		req.body = await schema.validate(req.body);
 		await next();
 	} catch (err) {
@@ -234,21 +240,9 @@ Users.validateSignUpData = async (req, res, next) => {
 	}
 };
 
-const generateSsoSignUpSchema = () => {
-	const schema = generateSignUpSchema();
-
-	return schema.shape({
-		sso: Yup.object({
-			type: Yup.string().oneOf([aad]),
-			id: types.id
-		}).optional().default(undefined),
-		password: types.strings.password.optional().default(undefined)
-	})
-};
-
 Users.validateSsoSignUpData = async (req, res, next) => {
 	try {
-		const schema = generateSsoSignUpSchema();
+		const schema = generateBaseSignUpSchema();
 		req.body = await schema.validate(req.body);
 		await next();
 	} catch (err) {

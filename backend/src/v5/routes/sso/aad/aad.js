@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { getUserDetailsAndValidateEmail } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { getUserDetailsAndCheckEmailAvailability } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
@@ -61,7 +61,7 @@ const signup = async (req, res) => {
 				mailListAgreed: body.mailListAgreed,
 			}),
 			codeChallenge: req.session.pkceCodes.challenge, 
-            codeChallengeMethod: req.session.pkceCodes.challengeMethod 			
+            codeChallengeMethod: req.session.pkceCodes.challengeMethod    
 		};
 
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
@@ -138,9 +138,9 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 */
-	router.post('/signup', addPkceProtection, signup);
+	router.post('/signup', validateSsoSignUpData, addPkceProtection, signup);
 
-	router.get(`/${signupRedirectEndpoint}`, getUserDetailsAndValidateEmail, validateSsoSignUpData, signupPost);
+	router.get(`/${signupRedirectEndpoint}`, getUserDetailsAndCheckEmailAvailability, signupPost);
 
 	return router;
 };
