@@ -47,7 +47,8 @@ import {
 	StyledChip,
 	StyledIconButton,
 	StyledTextField,
-	SuggestionsList
+	SuggestionsList,
+	ViewerScrollArea,
 } from './filterPanel.styles';
 import { FILTER_TYPES, IDataType, IFilter, ISelectedFilter } from './filterPanel';
 
@@ -391,10 +392,11 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		>
 			<Paper
 				square
-				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
-				{options.children}
+				<ViewerScrollArea {...options.containerProps}>
+					{options.children}
+				</ViewerScrollArea>
 			</Paper>
 		</SuggestionsList>
 	)

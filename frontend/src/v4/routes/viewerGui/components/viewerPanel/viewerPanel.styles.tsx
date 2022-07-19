@@ -17,6 +17,7 @@
 
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
@@ -106,7 +107,7 @@ export const TitleIcon = styled.div`
 	}
 `;
 
-export const ViewerPanelContent = styled.div<IViewerPanelContent>`
+export const ViewerPanelContent = styled(ViewerScrollArea)<IViewerPanelContent>`
 	overflow: ${({ scrollDisabled }) => scrollDisabled ? 'hidden' : 'auto'};
 	display: ${({ scrollDisabled }) => scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${({ scrollDisabled }) => scrollDisabled ? 'column' : 'unset'};
@@ -115,8 +116,11 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 `;
 
 export const LoaderContainer = styled(ViewerPanelContent)<IPanel>`
-	padding: 24px;
-	${({ flexHeight }) => flexHeight ? '' : css`height: 100%;`};
+	& > :first-child {
+		padding: 24px;
+		width: unset !important;
+		${({ flexHeight }) => flexHeight ? '' : css`height: 100%;`};
+	}
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({

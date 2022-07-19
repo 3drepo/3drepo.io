@@ -22,6 +22,8 @@ import { css } from 'styled-components';
 export default css`
 	${Tabs} {
 		height: 43px;
+		overflow: unset;
+		
 		button {
 			height: 43px;
  			box-sizing: content-box;
