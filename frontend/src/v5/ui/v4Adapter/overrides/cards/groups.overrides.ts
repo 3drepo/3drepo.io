@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupActions, GroupListItem } from '@/v4/routes/viewerGui/components/groups/groups.styles';
 import { Container as GroupDetails,
 	Actions as BottomLeftButtons,
 	Description as DetailsDescription,
@@ -27,7 +26,6 @@ import {
 	Content as PreviewListItemContent,
 	RoleIndicator,
 	Description,
-	Actions,
 } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 import { Status, ExtraInfo } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { css } from 'styled-components';
@@ -52,6 +50,7 @@ import {
 	StyledLinkableField,
 } from '@/v4/routes/components/textField/textField.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 
 const previewGroupItem = css`
 	${PreviewListItemContainer} {
@@ -92,27 +91,6 @@ const previewGroupItem = css`
 
 	${ExtraInfo} {
 		font-size: 9px;
-	}
-
-	${GroupListItem} {
-		${Actions} {
-			right: 10px;
-		}
-
-		${GroupActions} {
-			button {
-				margin: 0;
-				padding: 8px;
-				
-				svg path {
-					fill: currentColor;
-				}
-
-				&, &:hover {
-					background-color: transparent;
-				}
-			}
-		}
 	}
 `;
 
@@ -316,6 +294,9 @@ const expandedGroupItem = css`
 export default css`
 	#groups-card {
 		${previewGroupItem}
+		${ViewerPanelContent} {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		}
 	}
 
 	#groups-card-details {

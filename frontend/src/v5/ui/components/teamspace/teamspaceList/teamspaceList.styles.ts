@@ -17,10 +17,6 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	margin: 16px;
-`;
-
 export const CardList = styled.ul`
 	flex-direction: row;
 	justify-content: center;

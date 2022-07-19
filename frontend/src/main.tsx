@@ -31,8 +31,9 @@ import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { initializeIntl } from '@/v5/services/intl';
+import { getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { IntlProvider } from 'react-intl';
 import { Version, VersionContext } from './versionContext';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocketIdHeader } from './v4/services/api';
@@ -55,18 +56,20 @@ const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
-				<Switch>
-					<Route path="/v5">
-						<VersionContext.Provider value={Version.V5}>
-							<V5Root />
-						</VersionContext.Provider>
-					</Route>
-					<Route>
-						<VersionContext.Provider value={Version.V4}>
-							<V4Root />
-						</VersionContext.Provider>
-					</Route>
-				</Switch>
+				<IntlProvider {...getIntlProviderProps()}>
+					<Switch>
+						<Route path="/v5">
+							<VersionContext.Provider value={Version.V5}>
+								<V5Root />
+							</VersionContext.Provider>
+						</Route>
+						<Route>
+							<VersionContext.Provider value={Version.V4}>
+								<V4Root />
+							</VersionContext.Provider>
+						</Route>
+					</Switch>
+				</IntlProvider>
 			</ConnectedRouter>
 		</Provider>,
 		document.getElementById('app'),

@@ -23,20 +23,25 @@ export const SIGN_UP_PATH = '/v5/signup';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
 export const DASHBOARD_ROUTE = '/v5/dashboard';
-export const PROJECTS_LIST_ROUTE = `${DASHBOARD_ROUTE}/:teamspace`;
-export const PROJECT_ROUTE_BASE = `${PROJECTS_LIST_ROUTE}/:project`;
+export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
+export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
+export const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project`;
+
 const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
+export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
+export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
+export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 
 export const PRIVACY_ROUTE = '/v5/privacy';
 export const COOKIES_ROUTE = '/v5/cookies';
 export const TERMS_ROUTE = '/v5/terms';
 
-export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
-export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
-export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
-
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
+
+export interface TeamspaceParams {
+	teamspace?: string;
+}
 
 export interface DashboardParams {
 	teamspace?: string;

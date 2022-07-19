@@ -21,8 +21,9 @@ import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
+import { IGroupState } from './groups.redux';
 
-export const selectGroupsDomain = (state) => (state.groups);
+export const selectGroupsDomain = (state): IGroupState => (state.groups);
 
 export const selectGroups = createSelector(
 	selectGroupsDomain, (state) => values(state.groupsMap)
@@ -100,11 +101,17 @@ export const selectFilteredGroups = createSelector(
 	}
 );
 
-export const selectColorOverrides = createSelector(
-	selectGroupsDomain, (state) => {
-		return state.colorOverrides;
-	}
+export const selectGroupsColourOverrides = createSelector(
+	selectGroupsDomain, (state): string[] => state.colorOverrides
 );
+
+export const selectGroupsColourOverridesSet = createSelector(
+	selectGroupsColourOverrides, (colorOverrides) =>
+		colorOverrides.reduce(
+			(overrides, groupId) => overrides.add(groupId)
+		 , new Set<string>())
+);
+
 
 export const selectTotalMeshes = createSelector(
 	selectComponentState, (state) => state.totalMeshes
@@ -113,9 +120,8 @@ export const selectTotalMeshes = createSelector(
 export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
-
 export const selectAllOverridesDict = createSelector(
-	selectColorOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
+	selectGroupsColourOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
 	(groupOverrides, filteredGroups, componentState, issuesGroups) => {
 		const issuesOverrides = issuesGroups.map(({_id}) => _id);
 
