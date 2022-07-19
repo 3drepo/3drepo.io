@@ -15,16 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import generalDialogStyles from './generalDialogStyling.overrides';
-import attachResourcesDialog from './attachResourcesDialog.overrides';
-import screenshotDialog from './screenshotDialog.overrides';
-import suggestedTreatmentsDialog from './suggestedTreatmentsDialog.overrides';
+import { Content as ContentBase } from '../riskDetails/riskDetails.styles';
 
-export const V4DialogsOverridesContainer = styled.div`
-	display: contents;
-	
-	${generalDialogStyles}
-	${attachResourcesDialog}
-	${screenshotDialog}
-	${suggestedTreatmentsDialog}
-`;
+export const Content = styled(ContentBase)``;
