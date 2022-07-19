@@ -35,9 +35,7 @@ Settings.castTicketSchemaOutput = (req, res) => {
 
 	template.properties.forEach(convertDate);
 	template.modules.forEach(({ properties }) => {
-		if (properties?.length) {
-			properties.forEach(convertDate);
-		}
+		properties.forEach(convertDate);
 	});
 
 	respond(req, res, template);
