@@ -24,3 +24,9 @@ export const enableRealtimeFederationUpdateSettings = (teamspace:string, project
 	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationSettingsUpdate',
 		(settings: FederationSettings) =>
 			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, settings));
+
+export const enableRealtimeFederationRemoved = (teamspace:string, project:string, federationId:string) => {
+	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationRemoved',
+		() =>
+			FederationsActionsDispatchers.deleteFederationSuccess(project, federationId));
+};
