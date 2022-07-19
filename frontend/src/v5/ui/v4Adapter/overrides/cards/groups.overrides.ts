@@ -34,6 +34,7 @@ import { Container as PreviewDetailsContainer,
 	CollapsableContent,
 	NotCollapsableContent,
 	ToggleButtonContainer,
+	MainInfoContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
 	ChipsContainer,
@@ -95,8 +96,12 @@ const previewGroupItem = css`
 `;
 
 const expandedGroupItem = css`
-	${TitleTextField} {
+	${MainInfoContainer} ${TitleTextField} {
 		margin: 1px 0;
+	}
+
+	${TitleTextField} {
+		margin: 7px 0 -8px;
 	}
 
 	.MuiChip-root {
@@ -241,6 +246,12 @@ const expandedGroupItem = css`
 					${FormControl} {
 						margin: 0 0 11px;
 
+						& ::placeholder {
+							// TODO - fix after new palette is released
+							-webkit-text-fill-color: #C1C8D5;
+							font-weight: 400;
+						}
+
 						&:last-of-type {
 							margin-bottom: 0;
 						}
@@ -256,12 +267,11 @@ const expandedGroupItem = css`
 							color: ${({ theme }) => theme.palette.secondary.main};
 						}
 						&.operation {
-							margin-top: -16px;
 							.MuiInputBase-root {
 								margin-top: 16px;
 								.MuiSelect-select {
 									margin-top: 0;
-									padding-left: 8px;
+									padding-left: 12px;
 									~ svg {
 										margin-top: 0;
 										/* TODO - fix after new palette is released */
