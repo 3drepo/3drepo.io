@@ -126,7 +126,7 @@ export default css`
 			// user + status + clone button
 			${Details} {
 				${StyledButton} {
-					margin-right: 5px;
+					margin: 9px 5px 9px 0;
 				}
 			}
 
