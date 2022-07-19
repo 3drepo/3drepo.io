@@ -29,10 +29,10 @@ import {
 	ErrorMessage,
 } from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
-import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { isNetworkError } from '@/v5/validation/errors.helpers';
+import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -50,16 +50,8 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 	const isValid = confidenceCheck ? (watch('retypedName') === name) : true;
 	const [errorMessage, setErrorMessage] = useState('');
 	const onError = (error) => {
-		if (isNetworkError(error)) {
-			setErrorMessage(
-				formatMessage({
-					id: 'editProfile.networkError',
-					defaultMessage: 'Network Error',
-				}),
-			);
-		} else {
-			setErrorMessage(error.response.data.message);
-		}
+		if (isNetworkError(error)) return;
+		setErrorMessage(error.response.data.message);
 	};
 
 	const onSubmit = async () => {
@@ -106,6 +98,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						/>
 					</RetypeCheck>
 				)}
+				<NetworkError />
 				{errorMessage && (
 					<ErrorMessage>
 						{errorMessage}

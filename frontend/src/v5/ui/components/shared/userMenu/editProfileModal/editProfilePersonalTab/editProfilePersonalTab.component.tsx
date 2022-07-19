@@ -32,6 +32,7 @@ import { defaults, pick, pickBy, isEmpty, isMatch } from 'lodash';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
 import { emailAlreadyExists, isFileFormatUnsupported, isNetworkError } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
@@ -97,13 +98,7 @@ export const EditProfilePersonalTab = ({
 	const getTrimmedNonEmptyValues = () => pickBy(trimPersonalValues(getValues()));
 
 	const onSubmissionError = (apiError) => {
-		if (isNetworkError(apiError)) {
-			setExpectedError(formatMessage({
-				id: 'editProfile.networkError',
-				defaultMessage: 'Network Error',
-			}));
-			return;
-		}
+		if (isNetworkError(apiError)) return;
 		if (emailAlreadyExists(apiError)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
 			trigger('email');
@@ -218,6 +213,7 @@ export const EditProfilePersonalTab = ({
 							/>
 						</SuccessMessage>
 					)}
+					<NetworkError />
 					{unexpectedError && <UnexpectedError />}
 					{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
 				</FormProvider>
