@@ -124,44 +124,6 @@ export const Containers = (): JSX.Element => {
 							}
 						/>
 					</IsMainList.Provider>
-					<ContainersList
-						filterQuery={allFilterQuery}
-						onFilterQueryChange={setAllFilterQuery}
-						hasContainers={hasContainers.all}
-						containers={filterContainers(containers, allFilterQuery)}
-						title={(
-							<FormattedMessage
-								id="containers.all.collapseTitle"
-								defaultMessage="All containers"
-							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
-							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
-						}}
-						showBottomButton
-						onClickCreate={() => setCreateContainerOpen(true)}
-						onClickUpload={() => setUploadModalOpen(true)}
-						emptyMessage={
-							allFilterQuery && hasContainers.all ? (
-								<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
-							) : (
-								<>
-									<DashboardListEmptyText>
-										<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
-									</DashboardListEmptyText>
-									<Button
-										startIcon={<AddCircleIcon />}
-										variant="contained"
-										color="primary"
-										onClick={() => setCreateContainerOpen(true)}
-									>
-										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-									</Button>
-								</>
-							)
-						}
-					/>
 				</>
 			)}
 			<CreateContainerForm
