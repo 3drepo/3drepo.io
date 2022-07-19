@@ -339,6 +339,14 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiFormHelperText: {
+					styleOverrides: {
+						contained: {
+							top: 24,
+							right: 1,
+						},
+					},
+				},
 			},
 		},
 	),

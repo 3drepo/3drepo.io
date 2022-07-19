@@ -131,7 +131,7 @@ export default css`
 			}
 
 			${IssueDetails} {
-				margin-top: 8px;
+				margin-top: -1px;
 				justify-content: space-between;
 			}
 		}
