@@ -80,7 +80,61 @@ const testGetTemplateById = () => {
 	});
 };
 
+const testAddTemplate = () => {
+	describe('Add template', () => {
+		test('Should return the id if the template is added successfully', async () => {
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce();
+			const data = { [generateRandomString()]: generateRandomString() };
+			const teamspace = generateRandomString();
+
+			const result = await TicketTemplates.addTemplate(teamspace, data);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			const id = fn.mock.calls[0][2]._id;
+
+			expect(result).toEqual(id);
+			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { ...data, _id: id });
+		});
+
+		test('Should throw with whatever error insertOne errored with', async () => {
+			const errMsg = new Error(generateRandomString());
+			jest.spyOn(db, 'insertOne').mockRejectedValueOnce(errMsg);
+			const data = { [generateRandomString()]: generateRandomString() };
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.addTemplate(teamspace, data)).rejects.toEqual(errMsg);
+		});
+	});
+};
+
+const testUpdateTemplate = () => {
+	describe('Update template', () => {
+		test('Should update successfully', async () => {
+			const fn = jest.spyOn(db, 'replaceOne').mockResolvedValueOnce();
+			const _id = generateUUID();
+			const data = { [generateRandomString()]: generateRandomString() };
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.updateTemplate(teamspace, _id, data)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { _id }, { ...data, _id });
+		});
+
+		test('Should throw with whatever error insertOne errored with', async () => {
+			const errMsg = new Error(generateRandomString());
+			jest.spyOn(db, 'replaceOne').mockRejectedValueOnce(errMsg);
+			const data = { [generateRandomString()]: generateRandomString() };
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.updateTemplate(teamspace, data)).rejects.toEqual(errMsg);
+		});
+	});
+};
+
 describe('models/tickets.templates', () => {
 	testGetTemplateByName();
 	testGetTemplateById();
+	testAddTemplate();
+	testUpdateTemplate();
 });

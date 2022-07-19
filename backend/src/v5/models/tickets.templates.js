@@ -41,6 +41,8 @@ Templates.getTemplateById = (teamspace, _id, projection) => findOne(teamspace, {
 
 Templates.getTemplateByName = (teamspace, name, projection) => findOne(teamspace, { name }, projection);
 
-Templates.updateTemplate = (teamspace, _id, data) => db.replaceOne(teamspace, TEMPLATES_COL, { _id }, data);
+Templates.updateTemplate = async (teamspace, _id, data) => {
+	await db.replaceOne(teamspace, TEMPLATES_COL, { _id }, { ...data, _id });
+};
 
 module.exports = Templates;
