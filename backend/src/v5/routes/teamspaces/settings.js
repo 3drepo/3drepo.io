@@ -79,18 +79,17 @@ const establishRoutes = () => {
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: template has been successfully added
-	*         returns the id of the newly created template
+	*         description: template has been successfully added, returns the id of the newly created template
 	*         content:
 	*           application/json:
 	*             schema:
 	*               type: object
-	*                 properties:
-	*                   _id:
-	*                     type: string
-	*                     format: uuid
+	*               properties:
+	*                 _id:
+	*                   type: string
+	*                   format: uuid
 	*/
-	router.post('/:teamspace/settings/tickets/templates', isTeamspaceAdmin, validateNewTicketSchema, addTicketTemplate);
+	router.post('/tickets/templates', isTeamspaceAdmin, validateNewTicketSchema, addTicketTemplate);
 
 	/**
 	* @openapi
@@ -125,12 +124,12 @@ const establishRoutes = () => {
 	*         description: template has been successfully updated
 	*
 	*/
-	router.put('/:teamspace/settings/tickets/templates/:template', isTeamspaceAdmin, validateUpdateTicketSchema, updateTicketTemplate);
+	router.put('/tickets/templates/:template', isTeamspaceAdmin, validateUpdateTicketSchema, updateTicketTemplate);
 
 	/**
 	* @openapi
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
-	*   put:
+	*   get:
 	*     description: Get a ticket template
 	*     tags: [Teamspaces]
 	*     parameters:
@@ -158,7 +157,7 @@ const establishRoutes = () => {
 	*             schema:
 	*               $ref: "#/components/schemas/ticketTemplate"
 	*/
-	router.get('/:teamspace/settings/tickets/templates/:template', isTeamspaceAdmin, checkTicketTemplateExists, castTicketSchemaOutput);
+	router.get('/tickets/templates/:template', isTeamspaceAdmin, checkTicketTemplateExists, castTicketSchemaOutput);
 
 	return router;
 };
