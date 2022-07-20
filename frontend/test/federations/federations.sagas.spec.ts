@@ -113,7 +113,7 @@ describe('Federations: sagas', () => {
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
-				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites`)
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites?ids=${federationId}`)
 				.reply(200)
 
 			await expectSaga(FederationsSaga.default)
