@@ -42,7 +42,7 @@ Models.addModel = async (teamspace, project, data) => {
 
 	const eventData = { code: data.properties?.code, name: data.name, unit: data.properties?.unit };
 	if (data.federate) {
-		eventData.description = data.desc;
+		eventData.desc = data.desc;
 	} else {
 		eventData.type = data.type;
 	}

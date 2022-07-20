@@ -259,7 +259,7 @@ const testAddModel = () => {
 				model: fn.mock.calls[0][2]._id,
 				data: {
 					code: data.properties.code,
-					description: data.desc,
+					desc: data.desc,
 					unit: data.properties.unit,
 					name: data.name,
 				},
