@@ -39,7 +39,7 @@ const fieldSchema = Yup.object().shape({
 	required: defaultFalse,
 	values: Yup.mixed().when(['type'], (val, schema) => {
 		if (val === fieldTypes.MANY_OF || val === fieldTypes.ONE_OF) {
-			return schema.test('Values check', 'must of be an array of values or the name of a preset', (value) => {
+			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {
 				if (value === undefined) return false;
 				let typeToCheck;
 				if (isString(value)) {
@@ -81,7 +81,7 @@ const fieldSchema = Yup.object().shape({
 
 });
 
-const propertyArray = Yup.array().of(fieldSchema).default([]).test('Property names', 'must be unique', (arr) => {
+const propertyArray = Yup.array().of(fieldSchema).default([]).test('Property names', 'Property names must be unique inside the same context', (arr) => {
 	const fieldNames = new Set();
 	let res = true;
 	arr.forEach(({ name }) => {
@@ -103,13 +103,13 @@ const moduleSchema = Yup.object().shape({
 	properties: propertyArray.when('type', (type, schema) => {
 		if (type) {
 			const propertiesToCheck = presetModulesProperties[type];
-			return schema.test('No name clash', 'Cannot have the same name as a default property',
+			return schema.test('No name clash', 'Properties cannot have the same name as a default property',
 				(val) => val.every(({ name }) => !propertiesToCheck.includes(name)));
 		}
 
 		return schema;
 	}),
-}).test('Name and type', 'Only provide a name or a type for module, not both',
+}).test('Name and type', 'Only provide a name or a type for a module, not both',
 	({ name, type }) => (name && !type) || (!name && type));
 
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
@@ -119,7 +119,7 @@ const schema = Yup.object().shape({
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
 		(val) => val.every(({ name }) => !defaultPropertyNames.includes(name))),
-	modules: Yup.array().default([]).of(moduleSchema).test('Module names', 'must be unique', (arr) => {
+	modules: Yup.array().default([]).of(moduleSchema).test('Module names', 'Module names must be unique', (arr) => {
 		const modNames = new Set();
 		let res = true;
 		arr.forEach(({ name, type }) => {
