@@ -36,9 +36,7 @@ export const addFavourites = (
 export const removeFavourites = (
 	{ teamspace, projectId, containerId }: TeamspaceProjectAndContainerId,
 ): Promise<AxiosResponse<void>> => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
-		containers: [containerId],
-	})
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 );
 
 export const fetchContainers = async ({
