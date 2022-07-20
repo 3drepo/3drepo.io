@@ -22,9 +22,10 @@ import { UnexpectedError } from '../unexpectedError/unexpectedError.component';
 
 type UnhandledErrorProps = {
 	expectedErrorValidators?: Array<(err) => boolean>;
+	className?: string;
 };
 
-export const UnhandledError = ({ expectedErrorValidators = [] }: UnhandledErrorProps) => {
+export const UnhandledError = ({ expectedErrorValidators = [], className }: UnhandledErrorProps) => {
 	const [showNetworkError, setShowNetworkError] = useState(false);
 	const [showUnexpectedError, setShowUnexpectedError] = useState(false);
 	const [interceptor, setInterceptor] = useState(null);
@@ -49,7 +50,7 @@ export const UnhandledError = ({ expectedErrorValidators = [] }: UnhandledErrorP
 		return onUnmount;
 	}, []);
 
-	if (showNetworkError) return (<NetworkError />);
-	if (showUnexpectedError) return (<UnexpectedError />);
+	if (showNetworkError) return (<NetworkError className={className} />);
+	if (showUnexpectedError) return (<UnexpectedError className={className} />);
 	return (<></>);
 };

@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { NetworkError as NetworkErrorBase } from '@controls/errorMessage/networkError/networkError.component';
+import { UnhandledError as UnhandledErrorBase } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
 export const OtherOptions = styled.div`
 	display: flex;
@@ -41,6 +41,6 @@ export const ForgotPasswordPrompt = styled(StyledTypography)`
 	margin-left: auto;
 `;
 
-export const NetworkError = styled(NetworkErrorBase)`
+export const UnhandledError = styled(UnhandledErrorBase)`
 	margin-top: 5px;
 `;
