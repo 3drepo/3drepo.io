@@ -17,7 +17,6 @@
 
 const { camelCase, snakeCase } = require('lodash');
 const crypto = require('crypto');
-const { types } = require('./yup');
 
 const StringHelper = {};
 // Turns thisIsUs to THIS_IS_US

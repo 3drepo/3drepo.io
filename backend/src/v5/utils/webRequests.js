@@ -16,20 +16,19 @@
  */
 
 const axios = require('axios');
+
 const WebRequests = {};
 
 WebRequests.get = (uri, headers) => {
-    const options = {};
+	const options = {};
 
-    if(headers){
-        options.headers = headers;
-    }
+	if (headers) {
+		options.headers = headers;
+	}
 
-    return axios.default.get(uri, options);
-}
+	return axios.default.get(uri, options);
+};
 
-WebRequests.post = (uri, data) => {
-    return axios.default.post(uri, data);
-}
+WebRequests.post = (uri, data) => axios.default.post(uri, data);
 
 module.exports = WebRequests;

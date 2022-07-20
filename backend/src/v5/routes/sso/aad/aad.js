@@ -14,16 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { getUserDetailsAndCheckEmailAvailability, setSignupAuthParams, setAuthenticateAuthParams, getAuthenticationCodeUrl } = require('../../../middleware/dataConverter/inputs/sso/aad');
+
+const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
+const { getAuthenticationCodeUrl, getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setSignupAuthParams } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
+const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
-const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
-const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
 
-const authenticate = async (req, res) => {
+const authenticate = (req, res) => {
 	try {
 		res.redirect(req.authenticationCodeUrl);
 	} catch (err) {
@@ -41,8 +42,8 @@ const authenticatePost = (req, res) => {
 	}
 };
 
-const signup = async (req, res) => {
-	try {	
+const signup = (req, res) => {
+	try {
 		res.redirect(req.authenticationCodeUrl);
 	} catch (err) {
 		/* istanbul ignore next */

@@ -14,28 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { respond } = require('../../../../../utils/responder');
+const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
 const { aad } = require('../../../../../services/sso/sso.constants');
 const { getUserByQuery } = require('../../../../../models/users');
-const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
-const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
+const { respond } = require('../../../../../utils/responder');
 
 const Aad = {};
 
 Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
-	const { data: { mail, givenName, surname, id } } =
-		await getUserDetails(req.query.code, signupRedirectUri, req.session.pkceCodes.verifier);
+	const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
+		signupRedirectUri, req.session.pkceCodes.verifier);
 
 	try {
 		const user = await getUserByQuery({ 'customData.email': mail }, { 'customData.sso': 1 });
-		if (user.customData.sso){
+		if (user.customData.sso) {
 			return respond(req, res, createResponseCode(templates.invalidArguments, 'Email already exists from SSO user'));
 		}
 		return respond(req, res, createResponseCode(templates.invalidArguments, 'Email already exists'));
 	} catch {
-		//do nothing
+		// do nothing
 	}
 
 	req.body = {
@@ -43,51 +42,50 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 		email: mail,
 		firstName: givenName,
 		lastName: surname,
-		sso: { type: aad, id, },
+		sso: { type: aad, id },
 	};
 
 	await next();
 };
 
-Aad.setAuthenticateAuthParams = async (req, res, next) => {		
-    const params = { 
-        redirectUri: authenticateRedirectUri, 
-        state: JSON.stringify({ redirecturi: req.query.signupUri }),
-        codeChallenge: req.session.pkceCodes.challenge, 
-        codeChallengeMethod: req.session.pkceCodes.challengeMethod 
-    };   
+Aad.setAuthenticateAuthParams = async (req, res, next) => {
+	const params = {
+		redirectUri: authenticateRedirectUri,
+		state: JSON.stringify({ redirecturi: req.query.signupUri }),
+		codeChallenge: req.session.pkceCodes.challenge,
+		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+	};
 
-    req.authParams = params;
+	req.authParams = params;
 
-    await next();
+	await next();
 };
 
 Aad.setSignupAuthParams = async (req, res, next) => {
-    const { body } = req;
-		
-    const params = {
-        redirectUri: signupRedirectUri,
-        state: JSON.stringify({
-            username: body.username,
-            countryCode: body.countryCode,
-            company: body.company,
-            mailListAgreed: body.mailListAgreed,
-        }),
-        codeChallenge: req.session.pkceCodes.challenge, 
-        codeChallengeMethod: req.session.pkceCodes.challengeMethod    
-    };
+	const { body } = req;
 
-    req.authParams = params;
+	const params = {
+		redirectUri: signupRedirectUri,
+		state: JSON.stringify({
+			username: body.username,
+			countryCode: body.countryCode,
+			company: body.company,
+			mailListAgreed: body.mailListAgreed,
+		}),
+		codeChallenge: req.session.pkceCodes.challenge,
+		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+	};
 
-    await next();
+	req.authParams = params;
+
+	await next();
 };
 
 Aad.getAuthenticationCodeUrl = async (req, res, next) => {
-    const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
-    req.authenticationCodeUrl = authenticationCodeUrl;
+	const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
+	req.authenticationCodeUrl = authenticationCodeUrl;
 
-    await next();
-}
-
+	await next();
+};
 
 module.exports = Aad;

@@ -25,17 +25,17 @@ const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
+const { generateUUIDString } = require('../utils/helper/uuids');
 const { generateUserHash } = require('../services/intercom');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
-const { generateUUIDString } = require('../utils/helper/uuids');
 
 Users.signUp = async (newUserData, generatePassword) => {
 	const token = generateHashString();
 
-	if(generatePassword){
-		newUserData.password = generateUUIDString();
+	if (generatePassword) {
+		newUserData = { ...newUserData, password: generateUUIDString() };
 	}
 
 	await addUser({ ...newUserData, token });
