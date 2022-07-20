@@ -14,17 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import generalDialogStyles from './generalDialogStyling.overrides';
-import attachResourcesDialog from './attachResourcesDialog.overrides';
-import screenshotDialog from './screenshotDialog.overrides';
-import suggestedTreatmentsDialog from './suggestedTreatmentsDialog.overrides';
+import { forwardRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { ScrollbarProps } from 'react-custom-scrollbars';
+import { ViewerScrollAreaBase } from './viewerScrollArea.styles';
 
-export const V4DialogsOverridesContainer = styled.div`
-	display: contents;
-	
-	${generalDialogStyles}
-	${attachResourcesDialog}
-	${screenshotDialog}
-	${suggestedTreatmentsDialog}
-`;
+export const ViewerScrollArea = forwardRef(({ children, ...props }: ScrollbarProps, ref: any) => {
+	const { pathname } = useLocation();
+	const isViewer = pathname.startsWith('/viewer') || pathname.startsWith('/v5/viewer');
+	return isViewer
+		? <ViewerScrollAreaBase {...props} ref={ref}>{children}</ViewerScrollAreaBase>
+		: <div ref={ref}>{children}</div>;
+});

@@ -22,6 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import {
 	emailAlreadyExists,
 	isInvalidArguments,
+	isNetworkError,
 	usernameAlreadyExists,
 } from '@/v5/validation/errors.helpers';
 import { INewUser } from '@/v5/store/auth/auth.types';
@@ -53,6 +54,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [hasUnexpectedError, setHasUnexpectedError] = useState(false);
 	const [erroredStep, setErroredStep] = useState<number>();
+	const [formIsSubmitting, setFormIsSubmitting] = useState(false);
 
 	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
 
@@ -110,12 +112,15 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const createAccount = async () => {
 		try {
+			setFormIsSubmitting(true);
 			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
 			if (!fields.company) delete newUser.company;
 			await registerNewUser(newUser);
 			const { email, firstName } = fields;
 			completeRegistration({ email, firstName });
 		} catch (error) {
+			setFormIsSubmitting(false);
+			if (isNetworkError(error)) return;
 			if (isInvalidArguments(error)) {
 				handleInvalidArgumentsError(error);
 			} else {
@@ -197,6 +202,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
+							formIsSubmitting={formIsSubmitting}
 							hasUnexpectedError={hasUnexpectedError}
 							isActiveStep={activeStep === LAST_STEP}
 						/>
