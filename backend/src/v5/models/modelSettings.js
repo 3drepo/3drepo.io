@@ -40,11 +40,11 @@ Models.addModel = async (teamspace, project, data) => {
 	const _id = generateUUIDString();
 	await insertOneModel(teamspace, { ...data, _id });
 
-	const eventData = { code: data.properties?.code, name: data.name };
+	const eventData = { code: data.properties?.code, name: data.name, unit: data.properties?.unit };
 	if (data.federate) {
 		eventData.description = data.desc;
 	} else {
-		eventData.category = data.type;
+		eventData.type = data.type;
 	}
 
 	publish(events.NEW_MODEL, { teamspace,
