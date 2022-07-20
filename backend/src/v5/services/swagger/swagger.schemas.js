@@ -44,25 +44,31 @@ Schemas.schemas.roles = {
 
 const ticketTemplatePropSchema = {
 	description: 'Properties within a ticket or module',
-	type: 'object',
-	required: ['name', 'type'],
-	properties: {
-		name: helpers.stringDef('Name of the field', 'Floor'),
-		type: helpers.stringDef('Field type', fieldTypes.ONE_OF, Object.values(fieldTypes)),
-		deprecated: helpers.boolDef('Denotes if this field is no longer in use', false),
-		required: helpers.boolDef('If this field is required (default: false)', true),
-		values: helpers.arrayDef(`list of possible values (only applicable if type is ${fieldTypes.ONE_OF} or ${fieldTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+	type: 'array',
+	items: {
+		type: 'object',
+		required: ['name', 'type'],
+		properties: {
+			name: helpers.stringDef('Name of the field', 'Floor'),
+			type: helpers.stringDef('Field type', fieldTypes.ONE_OF, Object.values(fieldTypes)),
+			deprecated: helpers.boolDef('Denotes if this field is no longer in use', false),
+			required: helpers.boolDef('If this field is required (default: false)', true),
+			values: helpers.arrayDef(`list of possible values (only applicable if type is ${fieldTypes.ONE_OF} or ${fieldTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+		},
 	},
 };
 
 const ticketTemplateModSchema = {
 	description: 'Configure a custom or preset module',
-	type: 'object',
-	properties: {
-		name: helpers.stringDef('Name of the module', 'BCF Reference'),
-		type: helpers.stringDef('Preset module name', undefined, undefined, Object.values(presetModules)),
-		deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
-		properties: ticketTemplatePropSchema,
+	type: 'array',
+	items: {
+		type: 'object',
+		properties: {
+			name: helpers.stringDef('Name of the module', 'BCF Reference'),
+			type: helpers.stringDef('Preset module name', undefined, undefined, Object.values(presetModules)),
+			deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
+			properties: ticketTemplatePropSchema,
+		},
 	},
 };
 
