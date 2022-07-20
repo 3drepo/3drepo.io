@@ -69,9 +69,8 @@ export function* generateApiKey() {
 	try {
 		const apiKey = yield API.CurrentUser.generateApiKey();
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
-	} finally {
-		yield put(CurrentUserActions.setApiKeyIsUpdating(false));
-	}
+	} catch(error) { } // eslint-disable-line
+	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
 export function* deleteApiKey() {
@@ -79,9 +78,8 @@ export function* deleteApiKey() {
 	try {
 		yield API.CurrentUser.deleteApiKey();
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
-	} finally {
-		yield put(CurrentUserActions.setApiKeyIsUpdating(false));
-	}
+	} catch(error) { } // eslint-disable-line
+	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
 export default function* AuthSaga() {

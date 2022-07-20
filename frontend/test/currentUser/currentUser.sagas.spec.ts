@@ -156,10 +156,10 @@ describe('Current User: sagas', () => {
 				.run();
 		})
 
-		it('should call error callback when API call errors', async () => {
+		it('should not generate an API key when API call errors', async () => {
 			mockServer
 				.post('/user/key')
-				.reply(400, Error);
+				.reply(400);
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.generateApiKey())
@@ -170,7 +170,7 @@ describe('Current User: sagas', () => {
 	})
 
 	describe('deleteApiKey', () => {
-		it('should delete an API key and update user data', async () => {
+		it('should delete the API key and update user data', async () => {
 			mockServer
 				.delete('/user/key')
 				.reply(200, null);
@@ -183,12 +183,10 @@ describe('Current User: sagas', () => {
 				.run();
 		})
 
-		it('should call error callback when API call errors', async () => {
-			const error = 'Error: Request failed with status code 400';
-
+		it('should delete the API key when API call errors', async () => {
 			mockServer
 				.delete('/user/key')
-				.reply(400, error);
+				.reply(400);
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.deleteApiKey())
