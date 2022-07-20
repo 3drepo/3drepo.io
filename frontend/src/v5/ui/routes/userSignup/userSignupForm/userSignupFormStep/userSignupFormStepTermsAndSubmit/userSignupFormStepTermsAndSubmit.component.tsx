@@ -24,8 +24,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -49,10 +48,10 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	hasUnexpectedError: boolean;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
 	formIsSubmitting: boolean;
+	expectedErrorValidators: Array<(err) => boolean>;
 };
 
 export const UserSignupFormStepTermsAndSubmit = ({
@@ -60,10 +59,10 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	hasUnexpectedError,
 	fields,
 	isActiveStep,
 	formIsSubmitting,
+	expectedErrorValidators,
 }: UserSignupFormStepTermsAndSubmitProps) => {
 	const DEFAULT_FIELDS: MinimalTermsAndSubmitFormInput = {
 		termsAgreed: false,
@@ -177,12 +176,11 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			<NetworkError />
-			{ hasUnexpectedError && <UnexpectedError />}
+			<UnhandledError expectedErrorValidators={expectedErrorValidators} />
 			<CreateAccountButton
 				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
-				disabled={!formIsValid || !fields.captcha || hasUnexpectedError}
+				disabled={!formIsValid || !fields.captcha}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage
