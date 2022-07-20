@@ -17,6 +17,8 @@
 
 import { Tabs as TabsComponent } from '@mui/material';
 import styled from 'styled-components';
+import { Chips } from '@/v4/routes/components/filterPanel/filterPanel.styles';
+import { ViewerPanel as ViewerPanelBase } from '../viewerPanel/viewerPanel.component';
 
 import { COLOR } from '../../../../styles';
 
@@ -28,5 +30,11 @@ export const Tabs = styled(TabsComponent)`
 	&& {
 		background: ${COLOR.WHITE_87};
 		border-bottom: 1px solid ${COLOR.BLACK_6};
+	}
+`;
+
+export const ViewerPanel = styled(ViewerPanelBase)`
+	${Chips} {
+		width: 450px;
 	}
 `;

@@ -19,8 +19,12 @@ import { FormattedMessage } from 'react-intl';
 import { AddProjectIcon, Container } from './addProjectCard.styles';
 import { CardListItem } from '../../linkCard.styles';
 
-export const AddProjectCard = () => (
-	<CardListItem>
+type AddProjectCardProps = {
+	onClick: () => void,
+};
+
+export const AddProjectCard = ({ onClick }: AddProjectCardProps) => (
+	<CardListItem onClick={onClick}>
 		<Container>
 			<AddProjectIcon />
 			<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />

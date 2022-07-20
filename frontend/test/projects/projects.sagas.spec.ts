@@ -78,4 +78,41 @@ describe('Teamspaces: sagas', () => {
 			expect(onError).toBeCalled();
 		});
 	});
+
+	describe('createProject', () => {
+		const name = 'newProject';
+		const _id = '123';
+		const newProject = {
+			name,
+			_id,
+			isAdmin: true,
+		};
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
+
+		it('should create a project', async () => {
+			mockServer
+					.post(`/teamspaces/${teamspace}/projects`, { name })
+					.reply(200, { _id });
+
+			await expectSaga(ProjectsSaga.default)
+					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
+					.put(ProjectsActions.createProjectSuccess(teamspace, newProject))
+					.silentRun();
+
+			expect(onSuccess).toBeCalled();
+		});
+
+		it('should call error callback when API call errors', async () => {
+			mockServer
+					.post(`/teamspaces/${teamspace}/projects`, { name })
+					.reply(404)
+
+			await expectSaga(ProjectsSaga.default)
+					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
+					.silentRun();
+			
+			expect(onError).toBeCalled();
+		});
+	});
 });

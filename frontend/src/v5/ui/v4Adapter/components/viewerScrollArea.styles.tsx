@@ -14,17 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import generalDialogStyles from './generalDialogStyling.overrides';
-import attachResourcesDialog from './attachResourcesDialog.overrides';
-import screenshotDialog from './screenshotDialog.overrides';
-import suggestedTreatmentsDialog from './suggestedTreatmentsDialog.overrides';
 
-export const V4DialogsOverridesContainer = styled.div`
-	display: contents;
-	
-	${generalDialogStyles}
-	${attachResourcesDialog}
-	${screenshotDialog}
-	${suggestedTreatmentsDialog}
+import Scrollbars from 'react-custom-scrollbars';
+import styled from 'styled-components';
+import { COLOR } from '@/v5/ui/themes/theme';
+import { isV5 } from '@/v4/helpers/isV5';
+
+const ThumbVertical = styled.div`
+	background-color: ${COLOR.BASE_LIGHTEST};
+	right: ${isV5() ? 3 : 2}px;
+	bottom: 6px;
+	top: 0px;
+	border-radius: 3px;
+	width: 6px;
+	z-index: 10;
 `;
+
+const ThumbHorizontal = styled.div`
+	display: none;
+`;
+
+export const ViewerScrollAreaBase = styled(Scrollbars).attrs({
+	autoHideTimeout: 1000,
+	autoHideDuration: 300,
+	autoHide: true,
+	renderThumbVertical: ({ style }) => <ThumbVertical style={style} />,
+	renderThumbHorizontal: ({ style }) => <ThumbHorizontal style={style} />,
+})`` as any;

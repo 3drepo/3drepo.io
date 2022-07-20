@@ -49,6 +49,33 @@ describe('Projects: redux', () => {
 			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual(resultState);
 		});
 	});
+
+	describe('on createProjectSuccess action', () => {
+		it('should add the project', () => {
+			const newProject = {
+				_id: '123',
+				name: 'proj 1',
+				isAdmin: true,
+			};
+
+			const initialState = {
+				...defaultState,
+				projectsByTeamspace: {
+					[teamspaceName]: [],
+				},
+			}
+
+			const resultState: IProjectsState = {
+				...initialState,
+				projectsByTeamspace: {
+					[teamspaceName]: [newProject],
+				},
+			};
+
+			expect(projectsReducer(initialState, ProjectsActions.createProjectSuccess(teamspaceName, newProject))).toEqual(resultState);
+		});	
+	});
+
 	describe('on deleteProjectSuccess action', () => {
 		it('should remove deleted project from list', () => {
 			const defaultStateWithProjects: IProjectsState = {
