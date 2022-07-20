@@ -17,6 +17,7 @@
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
+const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
 const { validateMany } = require('../../../common');
@@ -46,7 +47,7 @@ const mergeModules = (newMods, oldMods) => {
 		if (newModsLut[id]) {
 			mergeProperties(newModsLut[id].properties, others.properties);
 		} else {
-			newMods.push({ name, type, deprecated: true, ...others });
+			newMods.push(deleteIfUndefined({ name, type, deprecated: true, ...others }));
 		}
 	});
 };
