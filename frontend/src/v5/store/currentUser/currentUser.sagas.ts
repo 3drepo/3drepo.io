@@ -24,7 +24,6 @@ import { DialogsActions } from '../dialogs/dialogs.redux';
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
-	UpdateApiKeyAction,
 	UpdatePersonalDataAction,
 } from './currentUser.redux';
 
@@ -65,26 +64,24 @@ export function* updatePersonalData({
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
 
-export function* generateApiKey({ onError }: UpdateApiKeyAction) {
+export function* generateApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		const apiKey = yield API.CurrentUser.generateApiKey();
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
-	} catch (error) {
-		onError(error);
+	} finally {
+		yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 	}
-	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
-export function* deleteApiKey({ onError }: UpdateApiKeyAction) {
+export function* deleteApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		yield API.CurrentUser.deleteApiKey();
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
-	} catch (error) {
-		onError(error);
+	} finally {
+		yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 	}
-	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
 export default function* AuthSaga() {
