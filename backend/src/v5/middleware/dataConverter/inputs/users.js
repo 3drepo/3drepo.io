@@ -25,7 +25,6 @@ const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
-const { aad } = require('../../../services/sso/sso.constants');
 
 const Users = {};
 

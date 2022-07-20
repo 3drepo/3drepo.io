@@ -18,8 +18,18 @@
 const axios = require('axios');
 const WebRequests = {};
 
-WebRequests.get = async (uri, headers) => {
-    const response = await axios.default.get()
+WebRequests.get = (uri, headers) => {
+    const options = {};
+
+    if(headers){
+        options.headers = headers;
+    }
+
+    return axios.default.get(uri, options);
+}
+
+WebRequests.post = (uri, data) => {
+    return axios.default.post(uri, data);
 }
 
 module.exports = WebRequests;

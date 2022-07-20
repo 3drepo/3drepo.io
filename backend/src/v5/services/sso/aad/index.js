@@ -5,6 +5,7 @@ const { msGraphUserDetailsUri } = require('./aad.constants');
 const ssoLabel = require('../../../utils/logger').labels.sso;
 const logger = require('../../../utils/logger').logWithLabel(ssoLabel);
 const { templates } = require('../../../utils/responseCodes');
+const { get } = require('../../../utils/webRequests');
 
 const Aad = {};
 
@@ -52,10 +53,8 @@ Aad.getUserDetails = async (authCode, redirectUri, codeVerifier) => {
     const clientApplication = getClientApplication();
     const response = await clientApplication.acquireTokenByCode(tokenRequest);
 
-    const user = await axios.default.get(msGraphUserDetailsUri, {
-        headers: {
-            Authorization: `Bearer ${response.accessToken}`,
-        },
+    const user = await get(msGraphUserDetailsUri, {
+        Authorization: `Bearer ${response.accessToken}`,
     });
 
     return user;
