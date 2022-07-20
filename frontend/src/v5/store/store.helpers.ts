@@ -30,11 +30,6 @@ export const isFederation = (containerOrFederation: CF) => (
 	'containers' in containerOrFederation
 );
 
-<<<<<<< HEAD
-// @ts-ignore
-export const uniqueIds = (listItems: IContainer[] | IFederation[]) => uniqWith(listItems, (a, b) => a._id === b._id);
-=======
 export const uniqueIds = <T>(listItems: T[]) =>
 	// eslint-disable-next-line implicit-arrow-linebreak
 	uniqWith(listItems, (a, b) => (a as unknown as CF)._id === (b as unknown as CF)._id);
->>>>>>> staging
