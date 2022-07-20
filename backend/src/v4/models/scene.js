@@ -85,7 +85,6 @@ Scene.findNodesByType = async function (account, model, branch, revision, type, 
 	return findNodes(account, model, branch, revision, query, projection);
 };
 
-
 Scene.findStashNodesByType = async function (account, model, branch, revision, type, searchString, projection) {
 	const query = {
 		type
@@ -96,7 +95,7 @@ Scene.findStashNodesByType = async function (account, model, branch, revision, t
 	}
 
 	return findStashNodes(account, model, branch, revision, query, projection);
-}
+};
 
 Scene.findMetadataNodesByFields = async function (account, model, branch, revision, fieldNames = [], projection = {}) {
 	const history = await History.getHistory(account, model, branch, revision);
