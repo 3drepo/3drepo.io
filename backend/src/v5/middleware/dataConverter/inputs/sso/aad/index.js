@@ -16,11 +16,11 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { getUserDetails } = require('../../../../../services/sso/aad');
 const { respond } = require('../../../../../utils/responder');
-const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { aad } = require('../../../../../services/sso/sso.constants');
 const { getUserByQuery } = require('../../../../../models/users');
+const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
+const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 
 const Aad = {};
 
@@ -48,5 +48,46 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 
 	await next();
 };
+
+Aad.setAuthenticateAuthParams = async (req, res, next) => {		
+    const params = { 
+        redirectUri: authenticateRedirectUri, 
+        state: JSON.stringify({ redirecturi: req.query.signupUri }),
+        codeChallenge: req.session.pkceCodes.challenge, 
+        codeChallengeMethod: req.session.pkceCodes.challengeMethod 
+    };   
+
+    req.authParams = params;
+
+    await next();
+};
+
+Aad.setSignupAuthParams = async (req, res, next) => {
+    const { body } = req;
+		
+    const params = {
+        redirectUri: signupRedirectUri,
+        state: JSON.stringify({
+            username: body.username,
+            countryCode: body.countryCode,
+            company: body.company,
+            mailListAgreed: body.mailListAgreed,
+        }),
+        codeChallenge: req.session.pkceCodes.challenge, 
+        codeChallengeMethod: req.session.pkceCodes.challengeMethod    
+    };
+
+    req.authParams = params;
+
+    await next();
+};
+
+Aad.getAuthenticationCodeUrl = async (req, res, next) => {
+    const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
+    req.authenticationCodeUrl = authenticationCodeUrl;
+
+    await next();
+}
+
 
 module.exports = Aad;
