@@ -203,7 +203,7 @@ export const EditProfilePersonalTab = ({
 							/>
 						</SuccessMessage>
 					)}
-					<UnhandledError expectedErrors={[emailAlreadyExists, isFileFormatUnsupported]} />
+					<UnhandledError expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]} />
 				</FormProvider>
 			</ScrollAreaPadding>
 		</ScrollArea>

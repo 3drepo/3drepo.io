@@ -140,7 +140,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			<UnhandledError expectedErrors={[isPasswordIncorrect]} />
+			<UnhandledError expectedErrorValidators={[isPasswordIncorrect]} />
 			{isSubmitSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
