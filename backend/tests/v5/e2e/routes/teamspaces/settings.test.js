@@ -92,25 +92,30 @@ const testAddTemplate = () => {
 const testUpdateTemplate = () => {
 	const templateToUse = generateTemplate();
 	let _id;
-	const updateTemplateRoute = (key, ts = teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/templates/${_id}${key ? `?key=${key}` : ''}`;
+	const nameClash = generateRandomString();
+	const updateTemplateRoute = (key, ts = teamspace.name, id = _id) => `/v5/teamspaces/${ts}/settings/tickets/templates/${id}${key ? `?key=${key}` : ''}`;
 	describe('Update template', () => {
 		beforeAll(async () => {
 			const res = await agent.post(addTemplateRoute(tsAdmin.apiKey)).send(templateToUse);
 			_id = res.body._id;
+
+			await agent.post(addTemplateRoute(tsAdmin.apiKey)).send({ ...templateToUse, name: nameClash });
 		});
 		describe.each([
-			['user does not have a valid session', undefined, undefined, templateToUse, false, templates.notLoggedIn],
-			['user is not a teamspace admin', normalUser.apiKey, undefined, templateToUse, false, templates.notAuthorized],
-			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), templateToUse, false, templates.teamspaceNotFound],
-			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, templateToUse, false, templates.teamspaceNotFound],
-			['user is a ts admin and there is a valid template', tsAdmin.apiKey, undefined, { ...templateToUse, name: 'abc' }, true, { ...templateToUse, name: 'abc' }],
-			['updated template should retain old properties as deprecated', tsAdmin.apiKey, undefined,
+			['user does not have a valid session', undefined, undefined, undefined, templateToUse, false, templates.notLoggedIn],
+			['user is not a teamspace admin', normalUser.apiKey, undefined, undefined, templateToUse, false, templates.notAuthorized],
+			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), undefined, templateToUse, false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, undefined, templateToUse, false, templates.teamspaceNotFound],
+			['user is a ts admin and there is a valid template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: 'abc' }, true, { ...templateToUse, name: 'abc' }],
+			['updated template should retain old properties as deprecated', tsAdmin.apiKey, undefined, undefined,
 				{ ...templateToUse, properties: [{ name: 'newProp', type: fieldTypes.NUMBER }] }, true, { ...templateToUse, properties: [{ name: 'newProp', type: fieldTypes.NUMBER }, { ...templateToUse.properties[0], deprecated: true }] }],
-			['template is invalid', tsAdmin.apiKey, undefined, {}, false, templates.invalidArguments],
-		])('', (desc, key, ts, data, success, expectedRes) => {
+			['template is invalid', tsAdmin.apiKey, undefined, undefined, {}, false, templates.invalidArguments],
+			['template name is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: nameClash }, false, templates.invalidArguments],
+			['template id is invalid', tsAdmin.apiKey, undefined, generateRandomString(), templateToUse, false, templates.templateNotFound],
+		])('', (desc, key, ts, id, data, success, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
-				const res = await agent.put(updateTemplateRoute(key, ts)).send(data).expect(expectedStatus);
+				const res = await agent.put(updateTemplateRoute(key, ts, id)).send(data).expect(expectedStatus);
 				if (success) {
 					const getRes = await agent.get(getTemplateRoute(key, _id, ts)).expect(templates.ok.status);
 					expect(getRes.body).toEqual({ _id, ...expectedRes });
@@ -131,15 +136,16 @@ const testGetTemplate = () => {
 			_id = res.body._id;
 		});
 		describe.each([
-			['user does not have a valid session', undefined, undefined, false, templates.notLoggedIn],
-			['user is not a teamspace admin', normalUser.apiKey, undefined, false, templates.notAuthorized],
-			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
-			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, false, templates.teamspaceNotFound],
-			['user is a ts admin and there is a valid template', tsAdmin.apiKey, undefined, true, templateToUse],
-		])('', (desc, key, ts, success, expectedRes) => {
+			['user does not have a valid session', undefined, undefined, _id, false, templates.notLoggedIn],
+			['user is not a teamspace admin', normalUser.apiKey, undefined, _id, false, templates.notAuthorized],
+			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), _id, false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, _id, false, templates.teamspaceNotFound],
+			['user is a ts admin and there is a valid template', tsAdmin.apiKey, undefined, _id, true, templateToUse],
+			['template id does not exist', tsAdmin.apiKey, undefined, generateRandomString(), false, templates.templateNotFound],
+		])('', (desc, key, ts, id, success, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
-				const res = await agent.get(getTemplateRoute(key, _id, ts)).expect(expectedStatus);
+				const res = await agent.get(getTemplateRoute(key, id || _id, ts)).expect(expectedStatus);
 				if (success) {
 					expect(res.body).toEqual({ _id, ...expectedRes });
 				} else {
