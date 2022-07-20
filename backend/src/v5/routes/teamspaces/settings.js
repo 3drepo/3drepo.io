@@ -40,6 +40,7 @@ const addTicketTemplate = async (req, res) => {
 		const _id = UUIDToString(await TeamspaceSettings.addTicketTemplate(teamspace, template));
 		respond(req, res, templates.ok, { _id });
 	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
@@ -52,6 +53,7 @@ const updateTicketTemplate = async (req, res) => {
 		await TeamspaceSettings.updateTicketTemplate(teamspace, template, newData);
 		respond(req, res, templates.ok);
 	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
