@@ -148,7 +148,7 @@ export const SettingsForm = ({
 		watch,
 		control,
 		formState,
-		formState: { errors },
+		formState: { errors, dirtyFields },
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(settingsSchema),
@@ -167,8 +167,10 @@ export const SettingsForm = ({
 	}, [open]);
 
 	useEffect(() => {
-		reset(getDefaultValues(containerOrFederation, isContainer));
-	}, [containerOrFederation]);
+		if (open) {
+			reset(getDefaultValues(containerOrFederation, isContainer));
+		}
+	}, [open]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
@@ -191,6 +193,8 @@ export const SettingsForm = ({
 		onClose();
 	};
 
+	const fieldsHaveChanged = Object.keys(dirtyFields).length > 0;
+
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 
 	return (
@@ -200,7 +204,7 @@ export const SettingsForm = ({
 			onClickClose={onClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'settings.ok', defaultMessage: 'Save Changes' })}
-			isValid={formState.isValid}
+			isValid={formState.isValid && fieldsHaveChanged}
 		>
 			<SectionTitle>
 				<FormattedMessage

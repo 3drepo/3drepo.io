@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { IContainer } from './containers/containers.types';
+import { IFederation } from './federations/federations.types';
 import { View } from './store.types';
 
 export const EMPTY_VIEW: View = {
@@ -21,3 +23,7 @@ export const EMPTY_VIEW: View = {
 	name: 'None',
 	hasThumbnail: false,
 };
+
+export const isFederation = (containerOrFederation: IContainer | IFederation) => (
+	'containers' in containerOrFederation
+);

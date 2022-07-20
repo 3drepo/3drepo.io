@@ -26,7 +26,7 @@ import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
-	PRIMARY_MAIN_CONTRAST: '#fff',
+	PRIMARY_MAIN_CONTRAST: '#FFFFFF',
 	PRIMARY_MAIN: '#00C1D4',
 	PRIMARY_DARK: '#01ACBD',
 	PRIMARY_DARKEST: '#009BAA',
@@ -48,7 +48,7 @@ export const COLOR = {
 	BASE_DARK: '#3D3E4A',
 	BASE_MID: '#565768',
 	BASE_LIGHT: '#BCBECA',
-	BASE_LIGHTEST: '#D0D9EB',
+	BASE_LIGHTEST: '#E0E5F0',
 	ERROR_MAIN: '#BE4343',
 	ERROR_DARK: '#A33232',
 	ERROR_DARKEST: '#8E2A2A',
@@ -307,9 +307,9 @@ export const theme = createTheme({
 		MuiCheckbox: {
 			defaultProps: {
 				color: 'primary',
-				icon: createElement(CheckboxIcon),
-				checkedIcon: createElement(CheckboxCheckedIcon),
-				indeterminateIcon: createElement(CheckboxIndeterminatedIcon),
+				icon: createElement(CheckboxIcon, { borderColor: COLOR.BASE_LIGHT }),
+				checkedIcon: createElement(CheckboxCheckedIcon, { tickColor: COLOR.PRIMARY_MAIN_CONTRAST }),
+				indeterminateIcon: createElement(CheckboxIndeterminatedIcon, { borderColor: COLOR.BASE_LIGHT }),
 			},
 			styleOverrides: {
 				colorPrimary: {
@@ -549,6 +549,7 @@ export const theme = createTheme({
 					alignItems: 'center',
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
+					zIndex: 10,
 				},
 			},
 		},
@@ -870,7 +871,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				contained: {
 					position: 'absolute',
-					bottom: '-16px',
+					top: '35px',
 					margin: 0,
 				},
 			},

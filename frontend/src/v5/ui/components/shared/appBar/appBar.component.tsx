@@ -16,7 +16,6 @@
  */
 import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
-import IntercomIcon from '@assets/icons/intercom.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
@@ -37,9 +36,6 @@ export const AppBar = (): JSX.Element => {
 				<BreadcrumbsRouting />
 			</Items>
 			<Items>
-				<CircleButton variant="contrast" aria-label="intercom">
-					<IntercomIcon />
-				</CircleButton>
 				<CircleButton variant="contrast" aria-label="notifications">
 					<NotificationsIcon />
 				</CircleButton>

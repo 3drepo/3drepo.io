@@ -26,7 +26,7 @@ import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useContainersData } from '../../../containers/containers.hooks';
-import { IconContainer, IncludeIcon, RemoveIcon } from '../editFederationModal.styles';
+import { IconContainer, IncludeIcon, RemoveIcon } from './editFederation.styles';
 import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
 
 type EditFederationProps = {

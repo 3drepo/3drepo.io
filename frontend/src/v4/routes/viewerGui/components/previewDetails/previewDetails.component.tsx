@@ -18,6 +18,7 @@ import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
+import { Scrollbars } from 'react-custom-scrollbars';
 import { isV5 } from '@/v4/helpers/isV5';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
@@ -87,7 +88,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 
 	public headerRef = createRef<any>();
 	public textFieldRef = createRef<any>();
-	public scrollableContainerRef = createRef<HTMLDivElement>();
+	public scrollableContainerRef = createRef<Scrollbars>();
 
 	public renderName = renderWhenTrue(() => (
 		<Tooltip title={this.props.name}>
@@ -191,7 +192,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 			if (this.scrollableContainerRef.current) {
 				if (this.state.expanded) {
 					setTimeout(() => {
-						this.scrollableContainerRef.current.scrollTop = 0;
+						this.scrollableContainerRef.current.scrollTop(0);
 					}, 50);
 					this.setState({ collapsed: false });
 				} else {
@@ -275,7 +276,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 					</MainInfoContainer>
 				</Header>
 
-				<ScrollableContainer ref={this.scrollableContainerRef} expanded={!this.state.collapsed}>
+				<ScrollableContainer expanded={!this.state.collapsed} ref={this.scrollableContainerRef}>
 					<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 						<Summary />
 						<Details>

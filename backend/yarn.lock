@@ -882,6 +882,13 @@ agentkeepalive@^4.2.1:
     depd "^1.1.2"
     humanize-ms "^1.2.1"
 
+ajv-formats@^2.0.2:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-2.1.1.tgz#6e669400659eb74973bbf2e33327180a0996b520"
+  integrity sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==
+  dependencies:
+    ajv "^8.0.0"
+
 ajv@^6.10.0, ajv@^6.11.0, ajv@^6.12.4:
   version "6.12.6"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
@@ -892,7 +899,7 @@ ajv@^6.10.0, ajv@^6.11.0, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.1:
+ajv@^8.0.0, ajv@^8.0.1, ajv@^8.1.0:
   version "8.11.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.11.0.tgz#977e91dd96ca669f54a11e23e378e33b884a565f"
   integrity sha512-wGgprdCvMalC0BztXvitD2hC04YffAvtsUn93JbGXYLAtCUO4xd17mCCZQxUOItiBwZvJScWo8NIvQMQ71rdpg==
@@ -4559,6 +4566,11 @@ lodash.mapvalues@^4.6.0:
   resolved "https://registry.yarnpkg.com/lodash.mapvalues/-/lodash.mapvalues-4.6.0.tgz#1bafa5005de9dd6f4f26668c30ca37230cc9689c"
   integrity sha1-G6+lAF3p3W9PJmaMMMo3IwzJaJw=
 
+lodash.merge@^4.6.1:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
+  integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
 lodash.mergewith@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/lodash.mergewith/-/lodash.mergewith-4.6.2.tgz#617121f89ac55f59047c7aec1ccd6654c6590f55"
@@ -5261,6 +5273,21 @@ onetime@^5.1.2:
   integrity sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==
   dependencies:
     mimic-fn "^2.1.0"
+
+openapi-schema-validator@12.0.0:
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/openapi-schema-validator/-/openapi-schema-validator-12.0.0.tgz#c5ebd357970fa5c515f77368598e81f31001b5be"
+  integrity sha512-dtQ5iCiCluL/SXmd5LWqfPXvN/WbVJeCp+3+exF6BHBN3fry5tNAhFllZICYHQ2kTfQxrfwbQcy0fqaw9wOb+w==
+  dependencies:
+    ajv "^8.1.0"
+    ajv-formats "^2.0.2"
+    lodash.merge "^4.6.1"
+    openapi-types "^12.0.0"
+
+openapi-types@^12.0.0:
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/openapi-types/-/openapi-types-12.0.0.tgz#458a99d048f9eae1c067e15d56a8bfb3726041f1"
+  integrity sha512-6Wd9k8nmGQHgCbehZCP6wwWcfXcvinhybUTBatuhjRsCxUIujuYFZc9QnGeae75CyHASewBtxs0HX/qwREReUw==
 
 optional-js@^2.0.0:
   version "2.3.0"

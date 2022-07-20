@@ -948,6 +948,12 @@ export class ViewerService {
 		UnityUtil.mapStop();
 	}
 
+	public async setBackgroundColor(color) {
+		await this.isViewerReady();
+		UnityUtil.setBackgroundColor(color);
+	}
+
+
 	/**
 	 * MultiSelect
 	 */

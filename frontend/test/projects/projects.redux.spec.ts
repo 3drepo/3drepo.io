@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, projectsReducer, ProjectsActions, IProjectsState } from "@/v5/store/projects/projects.redux";
+import { INITIAL_STATE, projectsReducer, ProjectsActions, IProjectsState } from '@/v5/store/projects/projects.redux';
+import faker from 'faker';
 
 describe('Projects: redux', () => {
 	const defaultState: IProjectsState = {
 		...INITIAL_STATE,
 	};
+	const teamspaceName = 'teamspaceName';
+	const projects = [{
+		_id: '123',
+		name: 'teamspace 1',
+		isAdmin: true,
+	}, {
+		_id: '1234',
+		name: 'teamspace 2',
+		isAdmin: true,
+	}, {
+		_id: '1235',
+		name: 'teamspace 3',
+		isAdmin: false,
+	}];
 
 	describe('on fetchSuccess action', () => {
 		it('should set teamspaces', () => {
-			const teamspaceName = 'teamspaceName';
-			const projects = [{
-				_id: '123',
-				name: 'teamspace 1',
-				isAdmin: true,
-			}, {
-				_id: '1234',
-				name: 'teamspace 2',
-				isAdmin: true,
-			}, {
-				_id: '1235',
-				name: 'teamspace 3',
-				isAdmin: false,
-			}];
-
 			const resultState: IProjectsState = {
 				...defaultState,
 				projectsByTeamspace: {
@@ -47,6 +47,56 @@ describe('Projects: redux', () => {
 			};
 
 			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual(resultState);
+		});
+	});
+
+	describe('on createProjectSuccess action', () => {
+		it('should add the project', () => {
+			const newProject = {
+				_id: '123',
+				name: 'proj 1',
+				isAdmin: true,
+			};
+
+			const initialState = {
+				...defaultState,
+				projectsByTeamspace: {
+					[teamspaceName]: [],
+				},
+			}
+
+			const resultState: IProjectsState = {
+				...initialState,
+				projectsByTeamspace: {
+					[teamspaceName]: [newProject],
+				},
+			};
+
+			expect(projectsReducer(initialState, ProjectsActions.createProjectSuccess(teamspaceName, newProject))).toEqual(resultState);
+		});	
+	});
+
+	describe('on deleteProjectSuccess action', () => {
+		it('should remove deleted project from list', () => {
+			const defaultStateWithProjects: IProjectsState = {
+				...defaultState,
+				projectsByTeamspace: {
+					[teamspaceName]: projects,
+				},
+			};
+			const idToDelete = faker.random.arrayElement(projects)._id;
+			const resultState: IProjectsState = {
+				...INITIAL_STATE,
+				projectsByTeamspace: {
+					[teamspaceName]: projects.filter((proj) => proj._id !== idToDelete),
+				},
+			};
+			expect(
+				projectsReducer(
+					defaultStateWithProjects,
+					ProjectsActions.deleteProjectSuccess(teamspaceName, idToDelete),
+				),
+			).toEqual(resultState);
 		});
 	});
 });

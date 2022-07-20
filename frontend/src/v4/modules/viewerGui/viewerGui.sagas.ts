@@ -86,7 +86,6 @@ function* fetchData({ teamspace, model }) {
 		]);
 
 		const revision = yield select(selectCurrentRevisionId);
-
 		yield all([
 			put(ViewerGuiActions.loadModel()),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
