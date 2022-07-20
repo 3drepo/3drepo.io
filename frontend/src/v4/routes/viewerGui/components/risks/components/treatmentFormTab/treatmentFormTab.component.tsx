@@ -32,13 +32,13 @@ import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
 	Container,
-	Content,
 	FieldsContainer,
 	FieldsRow,
 	StyledFormControl,
 	SuggestionButtonWrapper,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
+import { Content } from './treatmentFormTab.styles';
 
 const FIELDS_FOR_MITIGATION_SUGGESTIONS = [
 	'associated_activity', 'category', 'element', 'location_desc', 'risk_factor', 'scope',

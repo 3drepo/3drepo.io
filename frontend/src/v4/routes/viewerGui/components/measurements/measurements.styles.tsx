@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -33,7 +33,7 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASUREMENTS]}px;
 `;
 
-export const Container = styled.div`
+export const Container = styled(ViewerScrollArea)`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;

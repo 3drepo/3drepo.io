@@ -19,9 +19,9 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { getPasswordStrength } from '@/v4/services/validation';
 import { avatarFileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
+import { trimmedString } from '../shared/validators';
 
-export const username = (alreadyExistingUsernames) => Yup.string()
-	.transform((value) => value.trim(''))
+export const username = (alreadyExistingUsernames) => trimmedString
 	.required(
 		formatMessage({
 			id: 'userSignupForm.username.error.required',
@@ -77,8 +77,7 @@ export const password = (passwordName = 'Password') => Yup.string()
 		async (passwordValue) => await getPasswordStrength(passwordValue) >= 2,
 	);
 
-export const firstName = Yup.string()
-	.transform((value) => value.trim(''))
+export const firstName = trimmedString
 	.min(1, formatMessage({
 		id: 'validation.firstName.error.min',
 		defaultMessage: 'First name must be at least 1 characters',
@@ -92,8 +91,7 @@ export const firstName = Yup.string()
 		defaultMessage: 'First name is a required field',
 	}));
 
-export const lastName = Yup.string()
-	.transform((value) => value.trim(''))
+export const lastName = trimmedString
 	.min(1, formatMessage({
 		id: 'validation.lastName.error.min',
 		defaultMessage: 'Last name must be at least 1 characters',
@@ -107,8 +105,7 @@ export const lastName = Yup.string()
 		defaultMessage: 'Last name is a required field',
 	}));
 
-export const company = Yup.string()
-	.transform((value) => value.trim(''))
+export const company = trimmedString
 	.max(120, formatMessage({
 		id: 'validation.company.error.max',
 		defaultMessage: 'Company is limited to 120 characters',
