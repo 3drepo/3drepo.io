@@ -26,7 +26,7 @@ const Aad = {};
 
 Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 	const { data: { mail, givenName, surname, id } } =
-		await getUserDetails(req.query.code, signupRedirectUri);
+		await getUserDetails(req.query.code, signupRedirectUri, req.session.pkceCodes.verifier);
 
 	try {
 		const user = await getUserByQuery({ 'customData.email': mail }, { 'customData.sso': 1 });

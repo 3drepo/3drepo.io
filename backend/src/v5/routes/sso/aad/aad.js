@@ -17,23 +17,15 @@
 const { getUserDetailsAndCheckEmailAvailability } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { getAuthenticationCodeUrl } = require('../../../services/sso/aad');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
-const { authenticateRedirectUri, signupRedirectUri, authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
-const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
+const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
+const { addPkceProtection, setSignupAuthParams, setAuthenticateAuthParams, getAuthenticationCodeUrl } = require('../../../middleware/dataConverter/inputs/sso');
 
 const authenticate = async (req, res) => {
 	try {
-		const params = { 
-			redirectUri: authenticateRedirectUri, 
-			state: JSON.stringify({ redirecturi: req.query.signupUri }),
-			codeChallenge: req.session.pkceCodes.challenge, 
-            codeChallengeMethod: req.session.pkceCodes.challengeMethod 
-		};        
-		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
-		res.redirect(authenticationCodeUrl);
+		res.redirect(req.authenticationCodeUrl);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -50,22 +42,8 @@ const authenticatePost = (req, res) => {
 };
 
 const signup = async (req, res) => {
-	try {
-		const { body } = req;
-		const params = {
-			redirectUri: signupRedirectUri,
-			state: JSON.stringify({
-				username: body.username,
-				countryCode: body.countryCode,
-				company: body.company,
-				mailListAgreed: body.mailListAgreed,
-			}),
-			codeChallenge: req.session.pkceCodes.challenge, 
-            codeChallengeMethod: req.session.pkceCodes.challengeMethod    
-		};
-
-		const authenticationCodeUrl = await getAuthenticationCodeUrl(params);
-		res.redirect(authenticationCodeUrl);
+	try {	
+		res.redirect(req.authenticationCodeUrl);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -93,7 +71,7 @@ const establishRoutes = () => {
 	*     tags: [Aad]
 	*     operationId: authenticate
 	*/
-	router.get('/authenticate', addPkceProtection, authenticate);
+	router.get('/authenticate', addPkceProtection, setAuthenticateAuthParams, getAuthenticationCodeUrl, authenticate);
 
 	router.get(`/${authenticateRedirectEndpoint}`, authenticatePost);
 
@@ -138,7 +116,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 */
-	router.post('/signup', validateSsoSignUpData, addPkceProtection, signup);
+	router.post('/signup', validateSsoSignUpData, addPkceProtection, setSignupAuthParams, getAuthenticationCodeUrl, signup);
 
 	router.get(`/${signupRedirectEndpoint}`, getUserDetailsAndCheckEmailAvailability, signupPost);
 
