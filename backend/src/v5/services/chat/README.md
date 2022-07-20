@@ -180,7 +180,7 @@ The following events will be emitted if the user has subscribed to [Project noti
 
 #### New Container
   - Event name: `newContainer`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "container id", name: "container name", code: "container code", category: "container category" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "container id", name: "container name", code: "container code", type: "container type" }}`
   - Description: Used to notify the user of a container creation. This will be triggered when a container has been added from a project
 
 #### New Federation
