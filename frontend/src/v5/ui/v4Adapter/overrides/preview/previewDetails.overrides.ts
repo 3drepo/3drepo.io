@@ -20,6 +20,7 @@ import { Details, Container as IssueDetails } from '@/v4/routes/viewerGui/compon
 import { Container, Header, TitleNumber, Grid, Details as Accordion } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
+import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
 
 export default css`
 	${Accordion} {
@@ -126,13 +127,21 @@ export default css`
 			// user + status + clone button
 			${Details} {
 				${StyledButton} {
-					margin-right: 5px;
+					margin: 9px 5px 0 0;
 				}
 			}
 
 			${IssueDetails} {
-				margin-top: 8px;
+				margin-top: -1px;
 				justify-content: space-between;
+
+				${Details} {
+					align-items: flex-end;
+					
+					${UserIndicator} {
+						margin-bottom: 4px;
+					}
+				}
 			}
 		}
 	}
