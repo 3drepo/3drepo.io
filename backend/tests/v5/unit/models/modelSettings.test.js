@@ -255,7 +255,7 @@ const testAddModel = () => {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
 				project,
 				model: fn.mock.calls[0][2]._id,
-				data: { code: data.properties.code, description: data.desc, name: data.name },
+				data: { code: data.properties.code, desc: data.desc, name: data.name },
 				isFederation: true });
 		});
 	});

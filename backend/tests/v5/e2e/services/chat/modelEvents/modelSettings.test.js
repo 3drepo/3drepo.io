@@ -165,7 +165,7 @@ const modelAddedTest = () => {
 				data: {
 					_id: res.body._id,
 					code: payload.code,
-					description: payload.desc,
+					desc: payload.desc,
 					name: payload.name,
 				},
 			});
