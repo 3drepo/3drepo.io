@@ -212,7 +212,7 @@ const testAddModel = () => {
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const data = { properties: { code: generateRandomString() },
+			const data = { properties: { code: generateRandomString(), unit: generateRandomString() },
 				name: generateRandomString(),
 				type: generateRandomString(),
 				federate: false };
@@ -229,8 +229,9 @@ const testAddModel = () => {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
 				project,
 				model: fn.mock.calls[0][2]._id,
-				data: { code: data.properties.code, category: data.type, name: data.name },
-				isFederation: false });
+				data: { code: data.properties.code, type: data.type, unit: data.properties.unit, name: data.name },
+				isFederation: false,
+			});
 		});
 
 		test('should return inserted ID on success when a federation is added', async () => {
@@ -238,7 +239,7 @@ const testAddModel = () => {
 
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const data = { properties: { code: generateRandomString() },
+			const data = { properties: { code: generateRandomString(), unit: generateRandomString() },
 				desc: generateRandomString(),
 				name: generateRandomString(),
 				federate: true };
@@ -252,10 +253,16 @@ const testAddModel = () => {
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, {
+				teamspace,
 				project,
 				model: fn.mock.calls[0][2]._id,
-				data: { code: data.properties.code, desc: data.desc, name: data.name },
+				data: {
+					code: data.properties.code,
+					desc: data.desc,
+					unit: data.properties.unit,
+					name: data.name,
+				},
 				isFederation: true });
 		});
 	});
