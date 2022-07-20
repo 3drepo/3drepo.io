@@ -23,6 +23,8 @@ const {
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
 
+const { UUIDToString } = require('../../utils/helper/uuids');
+
 const { castTicketSchemaOutput } = require('../../middleware/dataConverter/outputs/teamspaces/settings');
 
 const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
@@ -35,7 +37,7 @@ const addTicketTemplate = async (req, res) => {
 		const { teamspace } = req.params;
 		const template = req.body;
 
-		const _id = await TeamspaceSettings.addTicketTemplate(teamspace, template);
+		const _id = UUIDToString(await TeamspaceSettings.addTicketTemplate(teamspace, template));
 		respond(req, res, templates.ok, { _id });
 	} catch (err) {
 		respond(req, res, err);

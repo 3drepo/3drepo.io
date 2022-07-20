@@ -22,6 +22,7 @@ const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -35,7 +36,7 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 const testCastTicketSchemaOutput = () => {
 	describe('Casting ticket schema output', () => {
 		test('should convert all appropriate fields', () => {
-			const output = {
+			const templateData = {
 				_id: generateUUID(),
 				properties: [
 					{
@@ -75,10 +76,10 @@ const testCastTicketSchemaOutput = () => {
 				],
 
 			};
-			const req = { output };
+			const req = { templateData };
 
-			const expectedOutput = cloneDeep(output);
-			expectedOutput._id = UUIDToString(output._id);
+			const expectedOutput = cloneDeep(templateData);
+			expectedOutput._id = UUIDToString(templateData._id);
 			expectedOutput.properties[1].default = expectedOutput.properties[1].default.getTime();
 			expectedOutput.modules[0].properties[1].default = expectedOutput.modules[0].properties[1].default.getTime();
 
@@ -87,7 +88,7 @@ const testCastTicketSchemaOutput = () => {
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, expectedOutput);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, expectedOutput);
 		});
 	});
 };

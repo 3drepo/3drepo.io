@@ -19,7 +19,6 @@ const { defaultProperties, fieldTypes, presetEnumValues, presetModules, presetMo
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { isString } = require('../../utils/helper/typeCheck');
-const { toCamelCase } = require('../../utils/helper/strings');
 
 const typeNameToType = {
 	[fieldTypes.TEXT]: types.strings.title,
@@ -34,7 +33,7 @@ const typeNameToType = {
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 
 const fieldSchema = Yup.object().shape({
-	name: types.strings.title.required().transform(toCamelCase),
+	name: types.strings.title.required().min(1),
 	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
@@ -98,7 +97,7 @@ const propertyArray = Yup.array().of(fieldSchema).default([]).test('Property nam
 });
 
 const moduleSchema = Yup.object().shape({
-	name: types.strings.title.notOneOf(Object.values(presetModules)).transform(toCamelCase),
+	name: types.strings.title.notOneOf(Object.values(presetModules)),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
 	properties: propertyArray.when('type', (type, schema) => {

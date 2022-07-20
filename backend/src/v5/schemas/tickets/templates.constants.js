@@ -61,35 +61,35 @@ TemplateConstants.presetEnumValues = {};
 
 TemplateConstants.presetModulesProperties = {
 	[TemplateConstants.presetModules.VIEWPOINT]: [
-		{ name: 'screenshot', type: TemplateConstants.fieldTypes.IMAGE },
-		{ name: 'view', type: TemplateConstants.fieldTypes.VIEW_STATE },
+		{ name: 'Screenshot', type: TemplateConstants.fieldTypes.IMAGE },
+		{ name: 'View', type: TemplateConstants.fieldTypes.VIEW_STATE },
 	],
 	[TemplateConstants.presetModules.ISSUES]: [
-		{ name: 'priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-		{ name: 'status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
-		{ name: 'assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: 'jobs' },
-		{ name: 'dueDate', type: TemplateConstants.fieldTypes.DATE },
+		{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
+		{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
+		{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: 'jobs' },
+		{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE },
 	],
 	[TemplateConstants.presetModules.SEQUENCING]: [
-		{ name: 'startTime', type: TemplateConstants.fieldTypes.DATE },
-		{ name: 'endTime', type: TemplateConstants.fieldTypes.DATE },
+		{ name: 'Start Time', type: TemplateConstants.fieldTypes.DATE },
+		{ name: 'End Time', type: TemplateConstants.fieldTypes.DATE },
 	],
 	[TemplateConstants.presetModules.SHAPES]: [
-		{ name: 'shapes', type: TemplateConstants.fieldTypes.MEASUREMENTS },
+		{ name: 'Shapes', type: TemplateConstants.fieldTypes.MEASUREMENTS },
 	],
 	[TemplateConstants.presetModules.ATTACHMENTS]: [
-		{ name: 'resources', type: TemplateConstants.fieldTypes.ATTACHMENTS },
+		{ name: 'Resources', type: TemplateConstants.fieldTypes.ATTACHMENTS },
 	],
 	[TemplateConstants.presetModules.SAFETIBASE]: [
-		{ name: 'safetibase', type: TemplateConstants.fieldTypes.SAFETIBASE },
+		{ name: 'Safetibase', type: TemplateConstants.fieldTypes.SAFETIBASE },
 	],
 
 };
 
 TemplateConstants.defaultProperties = [
-	{ name: 'description', type: TemplateConstants.fieldTypes.LONG_TEXT },
-	{ name: 'owner', type: TemplateConstants.fieldTypes.TEXT, required: true },
-	{ name: 'createdAt', type: TemplateConstants.fieldTypes.DATE, required: true },
+	{ name: 'Description', type: TemplateConstants.fieldTypes.LONG_TEXT },
+	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, required: true },
+	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, required: true },
 ];
 
 module.exports = TemplateConstants;

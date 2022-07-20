@@ -21,7 +21,6 @@ const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { fieldTypes, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
-const { toCamelCase } = require(`${src}/utils/helper/strings`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -231,13 +230,9 @@ const testValidate = () => {
 			}],
 		};
 		const expectedData = { ...cloneDeep(data) };
-		expectedData.properties.forEach((prop) => {
-			// eslint-disable-next-line no-param-reassign
-			prop.name = toCamelCase(prop.name);
-		});
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
-			{ ...mod, name: name ? toCamelCase(name) : undefined, properties: [] }));
+			{ ...mod, name, properties: [] }));
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

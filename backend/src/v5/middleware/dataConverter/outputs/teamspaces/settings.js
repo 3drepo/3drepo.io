@@ -18,11 +18,12 @@
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { fieldTypes } = require('../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../utils/responder');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Settings = {};
 
 Settings.castTicketSchemaOutput = (req, res) => {
-	const template = req.output;
+	const template = req.templateData;
 	template._id = UUIDToString(template._id);
 
 	const convertDate = (prop) => {
@@ -38,7 +39,7 @@ Settings.castTicketSchemaOutput = (req, res) => {
 		properties.forEach(convertDate);
 	});
 
-	respond(req, res, template);
+	respond(req, res, templates.ok, template);
 };
 
 module.exports = Settings;
