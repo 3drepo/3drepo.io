@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const HttpsReq = require(`${v4Path}/libs/httpsReq`);
+const axios = require('axios');
+const WebRequests = {};
 
-module.exports = HttpsReq;
+WebRequests.get = async (uri, headers) => {
+    const response = await axios.default.get()
+}
+
+module.exports = WebRequests;

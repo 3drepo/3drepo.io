@@ -19,7 +19,7 @@ const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmai
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const httpsPost = require('../../../utils/httpsReq').post;
+const httpsPost = require('../../../utils/webRequests').post;
 const { formatPronouns } = require('../../../utils/helper/strings');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
