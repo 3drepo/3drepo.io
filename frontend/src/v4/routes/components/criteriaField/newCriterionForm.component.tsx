@@ -24,6 +24,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import { connect, withFormik, Field, Form } from 'formik';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 
 import {
 	CRITERIA_LIST,
@@ -176,7 +177,9 @@ class NewCreaterionFormComponent extends PureComponent<IProps, IState> {
 							displayEmpty
 							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
 						>
-							{this.renderOperators()}
+							<ViewerScrollArea autoHeightMax={400} autoHeight>
+								{this.renderOperators()}
+							</ViewerScrollArea>
 						</SelectField>
 					)} />
 				</FormControl>

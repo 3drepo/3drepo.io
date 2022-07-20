@@ -22,9 +22,11 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
+import { CreateProjectForm } from '../../projects/projectsList/createProjectModal/createProjectModal.component';
 
 export const ProjectsList = () => {
 	const [filterQuery, setFilterQuery] = useState('');
+	const [newProjectOpen, setNewProjectOpen] = useState(false);
 
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
@@ -47,7 +49,10 @@ export const ProjectsList = () => {
 						value={filterQuery}
 						placeholder={formatMessage({ id: 'projectsList.search.placeholder', defaultMessage: 'Search projects...' })}
 					/>
-					<NewProjectButton startIcon={<AddCircleIcon />}>
+					<NewProjectButton
+						startIcon={<AddCircleIcon />}
+						onClick={() => setNewProjectOpen(true)}
+					>
 						<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
 					</NewProjectButton>
 				</ActionComponents>
@@ -60,8 +65,12 @@ export const ProjectsList = () => {
 						project={project}
 					/>
 				))}
-				<AddProjectCard />
+				<AddProjectCard onClick={() => setNewProjectOpen(true)} />
 			</ProjectCardsList>
+			<CreateProjectForm
+				open={newProjectOpen}
+				onClickClose={() => setNewProjectOpen(false)}
+			/>
 		</Container>
 	);
 };
