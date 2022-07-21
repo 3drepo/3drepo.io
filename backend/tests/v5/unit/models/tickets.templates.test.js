@@ -39,7 +39,7 @@ const testGetTemplateByName = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { name }, projection);
 		});
 
-		test(`should error with ${templates.templateNotFound} if there's no matching name`, async () => {
+		test(`should error with ${templates.templateNotFound.code} if there's no matching name`, async () => {
 			const teamspace = generateRandomString();
 			const name = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
