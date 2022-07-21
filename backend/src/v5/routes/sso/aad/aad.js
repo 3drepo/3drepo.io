@@ -35,7 +35,7 @@ const authenticate = (req, res) => {
 
 const authenticatePost = (req, res) => {
 	try {
-		res.redirect(JSON.parse(req.query.state).redirecturi);
+		res.redirect(JSON.parse(req.query.state).redirectUri);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);

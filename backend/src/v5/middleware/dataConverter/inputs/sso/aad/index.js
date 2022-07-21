@@ -25,14 +25,13 @@ const Aad = {};
 
 Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 	const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
-		signupRedirectUri, req.session.pkceCodes.verifier);
+		signupRedirectUri, req.session.pkceCodes?.verifier);
 
 	try {
 		const user = await getUserByQuery({ 'customData.email': mail }, { 'customData.sso': 1 });
-		if (user.customData.sso) {
-			return respond(req, res, createResponseCode(templates.invalidArguments, 'Email already exists from SSO user'));
-		}
-		return respond(req, res, createResponseCode(templates.invalidArguments, 'Email already exists'));
+		const message = user.customData.sso ? 'Email already exists from SSO user' : 'Email already exists';		
+		respond(req, res, createResponseCode(templates.invalidArguments, message));
+		return;
 	} catch {
 		// do nothing
 	}
@@ -51,7 +50,7 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 Aad.setAuthenticateAuthParams = async (req, res, next) => {
 	const params = {
 		redirectUri: authenticateRedirectUri,
-		state: JSON.stringify({ redirecturi: req.query.signupUri }),
+		state: JSON.stringify({ redirectUri: req.query.signupUri }),
 		codeChallenge: req.session.pkceCodes.challenge,
 		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 	};

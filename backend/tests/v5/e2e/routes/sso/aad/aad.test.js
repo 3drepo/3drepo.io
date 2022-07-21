@@ -18,23 +18,47 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
-const session = require('supertest-session');
 const { generateRandomString } = require('../../../../helper/services');
+const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../../src/v5/services/sso/aad/aad.constants');
+jest.mock('../../../../../../src/v5/services/sso/aad', () => ({
+	...jest.requireActual('../../../../../../src/v5/services/sso/aad'),
+	getUserDetails: jest.fn(),
+  }));
+ const Aad = require('../../../../../../src/v5/services/sso/aad');
+const { aad } = require('../../../../../../src/v5/services/sso/sso.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
-let testSession;
 let server;
 let agent;
+
+const userEmail = 'example@email.com';
+const testUser = ServiceHelper.generateUserCredentials();
+const userEmailSso = 'example2@email.com';
+const testUserSso = ServiceHelper.generateUserCredentials();
+const newUserEmail = 'newUserEmail@email.com';
+
+const setupData = async () => {
+	await ServiceHelper.db.createUser(testUser, [], { email: userEmail });
+	await ServiceHelper.db.createUser(testUserSso, [], { email: userEmailSso, sso: { type: aad, id: generateRandomString() } });
+};
 
 const testAuthenticate = () => {
 	describe('Sign Up Authenticate', () => {
 		test('should redirect the user to Microsoft authentication page', async () => {
-			const res = await agent.get('/v5/sso/aad/authenticate')
+			const signupUri = generateRandomString();
+			const res = await agent.get(`/v5/sso/aad/authenticate?signupUri=${signupUri}`)
 				.expect(templates.found.status);
 
-			expect(res.headers.location).toEqual(
+			const redirectUri = res.headers.location;
+			expect(redirectUri).toEqual(
 				expect.stringContaining('https://login.microsoftonline.com/common/oauth2/v2.0/authorize'),
+			);
+			expect(redirectUri).toEqual(
+				expect.stringContaining(`redirect_uri=${encodeURIComponent(authenticateRedirectUri)}`),
+			);
+			expect(redirectUri).toEqual(
+				expect.stringContaining(`state=${encodeURIComponent(JSON.stringify({ redirectUri: signupUri }))}`),
 			);
 		});
 	});
@@ -43,11 +67,98 @@ const testAuthenticate = () => {
 const testAuthenticatePost = () => {
 	describe('Sign Up Authenticate Post', () => {
 		test('should redirect the user to ', async () => {
-			const randomUrl = generateRandomString();
-			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${randomUrl}`)
+			const state = { redirectUri: generateRandomString() };
+			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(templates.found.status);
-			expect(res.headers.location).toEqual(expect.stringMatching(randomUrl));
+			expect(res.headers.location).toEqual(expect.stringMatching(state.redirectUri));
 		});
+	});
+};
+
+const signup = () => {
+	describe('Sign Up', () => {
+		const newUserData = {
+			username: generateRandomString(),
+			countryCode: 'GB',
+			company: generateRandomString(),
+			mailListAgreed: true,
+		};
+
+		test('should fail if the username already exists', async () => {
+			const res = await agent.post('/v5/sso/aad/signup').send({ ...newUserData, username: testUser.user })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if there are missing body params', async () => {
+			const res = await agent.post('/v5/sso/aad/signup').send({ ...newUserData, username: undefined })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should validate signup data and redirect the user to Microsoft authentication page', async () => {
+			const res = await agent.post('/v5/sso/aad/signup').send(newUserData)
+				.expect(templates.found.status);
+
+			const redirectUri = res.headers.location;
+			expect(redirectUri).toEqual(
+				expect.stringContaining('https://login.microsoftonline.com/common/oauth2/v2.0/authorize'),
+			);
+			expect(redirectUri).toEqual(
+				expect.stringContaining(`redirect_uri=${encodeURIComponent(signupRedirectUri)}`),
+			);
+			expect(redirectUri).toEqual(
+				expect.stringContaining(`state=${encodeURIComponent(JSON.stringify({
+					username: newUserData.username,
+					countryCode: newUserData.countryCode,
+					company: newUserData.company,
+					mailListAgreed: newUserData.mailListAgreed,
+				}))}`),
+			);
+		});
+	});
+};
+
+const signupPost = () => {
+	describe('Sign Up', () => {	
+		const newUserData = {
+			username: generateRandomString(),
+			countryCode: 'GB',
+			company: generateRandomString(),
+			mailListAgreed: true,
+		};
+
+		const newUserDataFromAad =  { 
+			mail: newUserEmail,
+			givenName: generateRandomString(), 
+			surname: generateRandomString(), 
+			id: generateRandomString()
+		}
+
+		test('should fail if the email already exists', async () => {
+			const state = { ...newUserData };
+			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmail }});		
+			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+			expect(res.body.message).toEqual('Email already exists');
+		});
+
+		test('should fail if the email already exists (SSO user)', async () => {
+			const state = { ...newUserData };
+			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmailSso }});		
+			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+			expect(res.body.message).toEqual('Email already exists from SSO user');
+		});
+
+		test('should sign a new user up', async () => {
+			const state = { ...newUserData };
+			Aad.getUserDetails.mockResolvedValueOnce({ data: newUserDataFromAad});		
+			await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+				.expect(templates.ok.status);				
+			});
 	});
 };
 
@@ -57,11 +168,13 @@ describe('E2E routes/sso/aad', () => {
 	beforeAll(async () => {
 		server = app;
 		agent = await SuperTest(server);
-		testSession = session(app);
+		await setupData();
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));
 
 	testAuthenticate();
 	testAuthenticatePost();
+	signup();
+	signupPost();
 });

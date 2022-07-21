@@ -34,11 +34,13 @@ const { templates } = require('../services/mailer/mailer.constants');
 Users.signUp = async (newUserData, generatePassword) => {
 	const token = generateHashString();
 
+	const formattedNewUserData = { ...newUserData, token };
 	if (generatePassword) {
-		newUserData = { ...newUserData, password: generateUUIDString() };
+		formattedNewUserData.password = generateUUIDString();
 	}
 
-	await addUser({ ...newUserData, token });
+	await addUser(formattedNewUserData);
+
 	await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
 		token,
 		email: newUserData.email,
