@@ -39,6 +39,7 @@ import {
 	enableRealtimeNewRevisionUpdate,
 } from '@/v5/services/realtime/revision.events';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
@@ -74,11 +75,14 @@ export const ContainerListItem = ({
 
 	useEffect(() => {
 		if (isMainList) {
-			enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
-			enableRealtimeContainerRevisionUpdate(teamspace, project, container._id);
-			enableRealtimeNewRevisionUpdate(teamspace, project, container._id);
-			enableRealtimeContainerRemoved(teamspace, project, container._id);
+			return combineSubscriptions(
+				enableRealtimeContainerRemoved(teamspace, project, container._id),
+				enableRealtimeContainerUpdateSettings(teamspace, project, container._id),
+				enableRealtimeContainerRevisionUpdate(teamspace, project, container._id),
+				enableRealtimeNewRevisionUpdate(teamspace, project, container._id),
+			);
 		}
+		return null;
 	}, [container._id]);
 
 	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
