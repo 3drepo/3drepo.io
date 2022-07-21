@@ -24,7 +24,7 @@ import { subscribeToRoomEvent } from './realtime.service';
 export const enableRealtimeContainerRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerRevisionUpdate',
 		(updatedStats: IRevisionUpdate) =>
-			RevisionsActionsDispatchers.fetchRevisionStatsSuccess(containerId, updatedStats));
+			RevisionsActionsDispatchers.updateRevisionSuccess(containerId, updatedStats));
 
 export const enableRealtimeNewRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerNewRevision',
