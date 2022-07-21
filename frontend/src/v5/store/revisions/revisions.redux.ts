@@ -20,7 +20,6 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { TeamspaceProjectAndContainerId, ContainerId } from '../store.types';
 import { IRevision, IRevisionUpdate, IUploadStatus } from './revisions.types';
-import { prepareRevisionData } from './revisions.helpers';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
