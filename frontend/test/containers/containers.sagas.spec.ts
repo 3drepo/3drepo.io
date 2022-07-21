@@ -61,7 +61,7 @@ describe('Containers: sagas', () => {
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
@@ -72,7 +72,7 @@ describe('Containers: sagas', () => {
 
 		it('should call removeFavourite endpoint with 404 and revert change', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)

@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -25,13 +26,16 @@ import { DashboardListEmptySearchResults } from '@components/dashboard/dashboard
 import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { FormattedMessage } from 'react-intl';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
+import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
+import { DashboardParams } from '../../../routes.constants';
 
 export const IsMainList = createContext(false);
 export const Containers = (): JSX.Element => {
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
 		containers,
@@ -46,6 +50,8 @@ export const Containers = (): JSX.Element => {
 	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	const onClickClose = () => setUploadModalOpen(false);
+
+	useEffect(() => enableRealtimeNewContainer(teamspace, project), []);
 
 	return (
 		<>

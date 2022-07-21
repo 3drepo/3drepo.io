@@ -25,6 +25,7 @@ import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
 import { IRevision } from '../revisions/revisions.types';
+import { uniqueIds } from '../store.helpers';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
@@ -154,14 +155,14 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 	...state,
 	containersByProject: {
 		...state.containersByProject,
-		[projectId]: [
+		[projectId]: uniqueIds([
 			...state.containersByProject[projectId],
 			{
 				...container,
 				revisionsCount: 0,
 				status: UploadStatuses.OK,
 			},
-		],
+		]),
 	},
 });
 
@@ -271,7 +272,7 @@ export interface IContainersActionCreators {
 	) => CreateContainerAction;
 	createContainerSuccess: (
 		projectId: string,
-		container: NewContainer & { _id: string},
+		container: NewContainer,
 	) => CreateContainerSuccessAction;
 	fetchContainerViews: (teamspace: string, projectId: string, containerId: string) => FetchContainerViewsAction;
 	fetchContainerViewsSuccess: (
