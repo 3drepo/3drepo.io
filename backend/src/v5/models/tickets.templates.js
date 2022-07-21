@@ -31,6 +31,8 @@ const findOne = async (teamspace, query, projection) => {
 	return template;
 };
 
+const find = (teamspace, query, projection) => db.find(teamspace, TEMPLATES_COL, query, projection);
+
 Templates.addTemplate = async (teamspace, template) => {
 	const _id = generateUUID();
 	await db.insertOne(teamspace, TEMPLATES_COL, { ...template, _id });
@@ -43,6 +45,11 @@ Templates.getTemplateByName = (teamspace, name, projection) => findOne(teamspace
 
 Templates.updateTemplate = async (teamspace, _id, data) => {
 	await db.replaceOne(teamspace, TEMPLATES_COL, { _id }, { ...data, _id });
+};
+
+Templates.getAllTemplates = (teamspace, includeDeprecated, projection) => {
+	const query = includeDeprecated ? { } : { deprecated: { $ne: true } };
+	return find(teamspace, query, projection);
 };
 
 module.exports = Templates;

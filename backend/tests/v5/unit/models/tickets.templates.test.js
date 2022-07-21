@@ -80,6 +80,31 @@ const testGetTemplateById = () => {
 	});
 };
 
+const testGetAllTemplates = () => {
+	describe('Get all templates', () => {
+		test('should get all templates that are not deprecated if includeDeprecated is set to false', async () => {
+			const teamspace = generateRandomString();
+			const expectedOutput = [generateRandomString(), generateRandomString()];
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+			await expect(TicketTemplates.getAllTemplates(teamspace)).resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { deprecated: { $ne: true } }, undefined);
+		});
+
+		test('should get all templates that are not deprecated if includeDeprecated is set to false', async () => {
+			const teamspace = generateRandomString();
+			const expectedOutput = [generateRandomString(), generateRandomString()];
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+			await expect(TicketTemplates.getAllTemplates(teamspace, true, projection)).resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { }, projection);
+		});
+	});
+};
+
 const testAddTemplate = () => {
 	describe('Add template', () => {
 		test('Should return the id if the template is added successfully', async () => {
@@ -135,6 +160,7 @@ const testUpdateTemplate = () => {
 describe('models/tickets.templates', () => {
 	testGetTemplateByName();
 	testGetTemplateById();
+	testGetAllTemplates();
 	testAddTemplate();
 	testUpdateTemplate();
 });
