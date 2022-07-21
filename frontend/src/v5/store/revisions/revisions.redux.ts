@@ -63,7 +63,7 @@ export const fetchSuccess = (state = INITIAL_STATE, {
 	...state,
 	revisionsByContainer: {
 		...state.revisionsByContainer,
-		[containerId]: revisions.map((revision) => prepareRevisionData(revision)),
+		[containerId]: revisions,
 	},
 });
 
