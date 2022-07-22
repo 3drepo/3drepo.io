@@ -645,7 +645,7 @@ export const theme = createTheme({
 					},
 
 					'& > *': {
-						padding: '20px 24px',
+						padding: '10px 24px',
 						borderBottom: `1px solid ${COLOR.TERTIARY_LIGHTEST}`,
 						'&:last-child': {
 							borderBottom: 'none',
