@@ -20,6 +20,7 @@ import styled from 'styled-components';
 
 export const DashboardListItemTitle = styled(ListItemTitle)`
 	.MuiButton-root {
+		cursor: default;
 		text-decoration-line: none;
 	}
 `;

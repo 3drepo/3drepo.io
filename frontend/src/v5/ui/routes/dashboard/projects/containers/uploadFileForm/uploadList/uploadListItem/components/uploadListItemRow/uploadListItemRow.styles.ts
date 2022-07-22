@@ -21,4 +21,5 @@ import styled from 'styled-components';
 export const Content = styled(DashboardListItemRow)`
 	padding: 8px 15px 8px 5px;
 	height: auto;
+	cursor: default;
 `;
