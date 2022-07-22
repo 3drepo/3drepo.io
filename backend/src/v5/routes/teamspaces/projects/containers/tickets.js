@@ -22,11 +22,11 @@ const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
 const getAllTemplates = async (req, res) => {
-	const { teamspace, project, container } = req.params;
+	const { teamspace, project } = req.params;
 	const showDeprecated = req.query.showDeprecated === 'true';
 
 	try {
-		const data = await getAllTemplatesInProject(teamspace, project, container, showDeprecated);
+		const data = await getAllTemplatesInProject(teamspace, project, showDeprecated);
 
 		respond(req, res, templates.ok, { templates: data });
 	} catch (err) {
