@@ -25,6 +25,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -51,6 +52,7 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	hasUnexpectedError: boolean;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
+	formIsSubmitting: boolean;
 };
 
 export const UserSignupFormStepTermsAndSubmit = ({
@@ -61,6 +63,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	hasUnexpectedError,
 	fields,
 	isActiveStep,
+	formIsSubmitting,
 }: UserSignupFormStepTermsAndSubmitProps) => {
 	const DEFAULT_FIELDS: MinimalTermsAndSubmitFormInput = {
 		termsAgreed: false,
@@ -85,18 +88,17 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	});
 
 	const captchaRef = useRef<ReCAPTCHA>();
-	const [submitButtonIsPending, setSubmitButtonIsPending] = useState(false);
+	const [captchaIsPending, setCaptchaIsPending] = useState(false);
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		setSubmitButtonIsPending(true);
 		onSubmitStep();
 	};
 
 	const handleCaptchaChange = async (captcha) => {
 		if (!fields.captcha && captcha) {
-			setSubmitButtonIsPending(true);
+			setCaptchaIsPending(true);
 			updateFields({ captcha });
-			setSubmitButtonIsPending(false);
+			setCaptchaIsPending(false);
 		}
 	};
 
@@ -125,8 +127,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			updateFields(formValues);
 		}
 	}, [formState]);
-
-	useEffect(() => setSubmitButtonIsPending(false), [hasUnexpectedError]);
 
 	return (
 		<>
@@ -177,9 +177,10 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
+			<NetworkError />
 			{ hasUnexpectedError && <UnexpectedError />}
 			<CreateAccountButton
-				isPending={submitButtonIsPending}
+				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
 				disabled={!formIsValid || !fields.captcha || hasUnexpectedError}
 				onClick={handleSubmit(createAccount)}

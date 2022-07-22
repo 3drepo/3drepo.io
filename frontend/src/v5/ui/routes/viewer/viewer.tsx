@@ -62,7 +62,7 @@ export const Viewer = () => {
 	return (
 		<>
 			<CheckLatestRevisionReadiness />
-			<ViewerGui match={v4Match} />;
+			<ViewerGui match={v4Match} />
 		</>
 	);
 };

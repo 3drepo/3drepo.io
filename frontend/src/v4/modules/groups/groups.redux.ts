@@ -39,8 +39,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeColorOverride: ['groupId'],
 	clearColorOverrides: [],
 	clearColorOverridesSuccess: [],
-	setColorOverrides: ['groupIds'],
-	toggleColorOverride: ['groupId'],
+	replaceColorOverrides: ['groupIds'],
+	setColorOverrides: ['groupIds', 'on'],
 	setOverrideAll: ['overrideAll'],
 	setOverrideAllSuccess: [],
 	setShowSmartGroups: ['enabled'],
@@ -52,7 +52,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
-	isolateGroup: ['group'],
+	isolateGroups: ['groupIds'],
 	downloadGroups: ['teamspace', 'modelId'],
 	exportGroups: ['teamspace', 'modelId'],
 	importGroups: ['teamspace', 'modelId', 'file'],
@@ -87,7 +87,7 @@ export interface IGroupComponentState {
 	editingGroup: any;
 	updatedGroup: any;
 	selectedFilters: any[];
-	highlightedGroups: any;
+	highlightedGroups: Set<string>;
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
@@ -121,7 +121,7 @@ export const INITIAL_STATE: IGroupState = {
 	isPending: true,
 	componentState: {
 		activeGroup: null,
-		highlightedGroups: {},
+		highlightedGroups: new Set(),
 		showDetails: false,
 		expandDetails: true,
 		editingGroup: {},
@@ -165,23 +165,19 @@ export const setCriteriaFieldState = (state = INITIAL_STATE, { criteriaFieldStat
 };
 
 export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
-	const highlightedGroups = { ...state.componentState.highlightedGroups };
-	highlightedGroups[groupId] = true;
+	const highlightedGroups = new Set(state.componentState.highlightedGroups);
+	highlightedGroups.add(groupId);
 	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
 export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
-	const highlightedGroups = { ...state.componentState.highlightedGroups };
-	highlightedGroups[groupId] = false;
+	const highlightedGroups = new Set(state.componentState.highlightedGroups);
+	highlightedGroups.delete(groupId);
 	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
 export const addColorOverride = (state = INITIAL_STATE, { groupId }) => {
-	if (state.colorOverrides.includes(groupId)) {
-		return state;
-	}
-
-	return {...state, colorOverrides: state.colorOverrides.concat(groupId)};
+	return setColorOverrides(state, { groupIds: [groupId], on: true});
 };
 
 export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
@@ -189,12 +185,18 @@ export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
 	return {...state, componentState, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
 };
 
-export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
+export const setColorOverrides = (state = INITIAL_STATE, { groupIds, on }) => {
+	const overridesLeft = state.colorOverrides.filter((groupId) => !groupIds.includes(groupId));
+	const colorOverrides = on ? overridesLeft.concat(groupIds) : overridesLeft;
+	return {...state, colorOverrides };
+};
+
+export const replaceColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 	// This is done to keep the relative override order
-	const overridesLeft = state.colorOverrides.filter((groupId) => groupIds.includes(groupId));
+	const overridesFound = state.colorOverrides.filter((groupId) => groupIds.includes(groupId));
 	const newOverrides = groupIds.filter((groupId) =>  !state.colorOverrides.includes(groupId));
 
-	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
+	return {...state, colorOverrides: newOverrides.concat(overridesFound)};
 };
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
@@ -267,7 +269,7 @@ export const setOverrideAllSuccess = (state = INITIAL_STATE) => {
 	groupIds = Object.keys(state.groupsMap);
 
 	const componentState = { ...state.componentState, allOverridden: true };
-	return setColorOverrides({...state, componentState}, { groupIds });
+	return replaceColorOverrides({...state, componentState}, { groupIds });
 };
 
 const clearColorOverridesSuccess = (state = INITIAL_STATE) => {
@@ -304,6 +306,7 @@ const updateEditingGroup = (state = INITIAL_STATE, {properties}) => {
 	return { ...state, componentState};
 };
 export const reducer = createReducer(INITIAL_STATE, {
+	[GroupsTypes.SET_COLOR_OVERRIDES]: setColorOverrides,
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[GroupsTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
@@ -312,7 +315,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_COLOR_OVERRIDE]: addColorOverride,
 	[GroupsTypes.REMOVE_COLOR_OVERRIDE]: removeColorOverride,
-	[GroupsTypes.SET_COLOR_OVERRIDES]: setColorOverrides,
+	[GroupsTypes.REPLACE_COLOR_OVERRIDES]: replaceColorOverrides,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,

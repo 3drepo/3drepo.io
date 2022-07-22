@@ -17,6 +17,7 @@
 
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { useParams } from 'react-router-dom';
 import { Tooltip } from '@mui/material';
 import {
 	DashboardListItemButton,
@@ -27,26 +28,21 @@ import {
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import {
+	enableRealtimeContainerRemoved,
+	enableRealtimeContainerUpdateSettings,
+} from '@/v5/services/realtime/container.events';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import {
-	ShareModalContainerOrFederation as ShareModal,
-} from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModalContainerOrFederation/shareModalContainerOrFederation.component';
-import { enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
+import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
-
-const MODALS = {
-	share: 'share',
-	containerSettings: 'containerSettings',
-	none: 'none',
-};
 
 interface IContainerListItem {
 	index: number;
@@ -65,16 +61,30 @@ export const ContainerListItem = ({
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
 
-	useEffect(() => enableRealtimeContainerUpdateSettings(teamspace, project, container._id), [container._id]);
+	const { teamspace, project } = useParams<DashboardParams>();
+	useEffect(() => {
+		enableRealtimeContainerUpdateSettings(teamspace, project, container._id);
+		enableRealtimeContainerRemoved(teamspace, project, container._id);
+	}, [container._id]);
 
-	const [openModal, setOpenModal] = useState(MODALS.none);
-	const closeModal = () => setOpenModal(MODALS.none);
+	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
+		const subject = formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
+		const title = formatMessage({ id: 'shareModal.container.title', defaultMessage: 'Share Container' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: container.name,
+			subject,
+			title,
+			link,
+		});
+	};
 
 	return (
 		<DashboardListItem
@@ -155,8 +165,8 @@ export const ContainerListItem = ({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={() => setOpenModal(MODALS.share)}
-						openContainerSettings={() => setOpenModal(MODALS.containerSettings)}
+						openShareModal={onClickShare}
+						openContainerSettings={() => setContainerSettingsOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -167,19 +177,10 @@ export const ContainerListItem = ({
 					status={container.status}
 				/>
 			)}
-			<ShareModal
-				openState={openModal === MODALS.share}
-				onClickClose={closeModal}
-				title={formatMessage({
-					id: 'ShareModal.component.title',
-					defaultMessage: 'Share Container URL',
-				})}
-				containerOrFederation={container}
-			/>
 			<ContainerSettingsForm
-				open={openModal === MODALS.containerSettings}
+				open={containerSettingsOpen}
 				container={container}
-				onClose={closeModal}
+				onClose={() => setContainerSettingsOpen(false)}
 			/>
 		</DashboardListItem>
 	);
