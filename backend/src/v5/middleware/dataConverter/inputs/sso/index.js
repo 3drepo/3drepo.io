@@ -23,12 +23,7 @@ Sso.addPkceProtection = async (req, res, next) => {
 	const cryptoProvider = new CryptoProvider();
 	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
 
-	if (!req.session.pkceCodes) {
-		req.session.pkceCodes = { challengeMethod: 'S256' };
-	}
-
-	req.session.pkceCodes.verifier = verifier;
-	req.session.pkceCodes.challenge = challenge;
+	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge }
 
 	await next();
 };
