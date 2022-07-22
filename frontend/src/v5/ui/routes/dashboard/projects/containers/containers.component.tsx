@@ -51,7 +51,7 @@ export const Containers = (): JSX.Element => {
 
 	const onClickClose = () => setUploadModalOpen(false);
 
-	useEffect(() => enableRealtimeNewContainer(teamspace, project), []);
+	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
 
 	return (
 		<>
