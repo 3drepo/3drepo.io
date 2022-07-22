@@ -51,6 +51,10 @@ export const TabList = styled(TabListBase)`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	transition: none;
 	padding-left: 17px;
+
+	box-shadow: 0 0px 13px -7px;
+	position: relative;
+	z-index: 1;
 `;
 
 export const TabPanel = styled('div')<{ $zeroPadding?: boolean }>`
