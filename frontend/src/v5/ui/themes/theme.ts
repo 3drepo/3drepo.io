@@ -155,8 +155,9 @@ const typography: TypographyOptions = {
 };
 
 export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
-	const formattedOpacity = (opacityInPercentage / 100) * 255;
-	return hex + Math.floor(formattedOpacity).toString(16);
+	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
+		.toLocaleString(undefined, { minimumIntegerDigits: 2 });
+	return hex + formattedOpacity;
 };
 
 export const theme = createTheme({

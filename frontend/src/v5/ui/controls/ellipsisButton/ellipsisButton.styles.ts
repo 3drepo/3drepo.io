@@ -17,17 +17,19 @@
 
 import { IconButton } from '@mui/material';
 import styled, { css } from 'styled-components';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
+
 
 const PrimaryStyles = ($isOn: boolean) => css`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: transparent;
 	svg circle {
 		fill: ${({ theme }) => theme.palette.tertiary.darkest};
 	}
 	${$isOn && css`
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) => hexToOpacity(theme.palette.base.main, 5)};
 	`}
 	&:hover, &.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) => hexToOpacity(theme.palette.base.main, 5)};
 	}
 	:disabled {
 		svg circle {
@@ -37,7 +39,7 @@ const PrimaryStyles = ($isOn: boolean) => css`
 `;
 
 const SecondaryStyles = ($isOn: boolean) => css`
-	background-color: ${({ theme }) => theme.palette.tertiary.darkest};
+	background-color: transparent;
 	svg circle {
 		fill: ${({ theme }) => theme.palette.primary.contrast};
 	}
