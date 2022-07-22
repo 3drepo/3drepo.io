@@ -61,6 +61,7 @@ export type FederationBackendSettings = {
 	angleFromNorth: number;
 	code?: string;
 	unit?: string;
+	author?: string;
 	defaultView?: string;
 	errorReason?: {
 		message: string;
@@ -75,7 +76,7 @@ export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'>
 
 export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
 
-export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' >;
+export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' > & {tag: string};
 
 export type FederationStats = {
 	code: string;
