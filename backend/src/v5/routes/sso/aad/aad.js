@@ -71,6 +71,9 @@ const establishRoutes = () => {
 	*     description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	*     tags: [Aad]
 	*     operationId: authenticate
+	*     responses:
+	*       302:
+	*         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	*/
 	router.get('/authenticate', addPkceProtection, setAuthenticateAuthParams, getAuthenticationCodeUrl, authenticate);
 
@@ -115,7 +118,9 @@ const establishRoutes = () => {
 	 *                 example: 5LcN0ysfAAAAAHpnld1tAweI7DKU7dswmwnHWYcB
 	 *     responses:
 	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
+	 *         $ref: "#/components/responses/invalidArguments"
+	 *       200:
+	 *         description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
 	 */
 	router.post('/signup', validateSsoSignUpData, addPkceProtection, setSignupAuthParams, getAuthenticationCodeUrl, signup);
 

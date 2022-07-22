@@ -29,7 +29,7 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 
 	try {
 		const user = await getUserByQuery({ 'customData.email': mail }, { 'customData.sso': 1 });
-		const message = user.customData.sso ? 'Email already exists from SSO user' : 'Email already exists';		
+		const message = user.customData.sso ? 'Email already exists from SSO user' : 'Email already exists'
 		respond(req, res, createResponseCode(templates.invalidArguments, message));
 		return;
 	} catch {

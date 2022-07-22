@@ -208,7 +208,7 @@ const generateBaseSignUpSchema = () => {
 		: schema;
 };
 
-const generate3DRepoSignUpSchema = () => {
+const generateSignUpSchema = () => {
 	const schema = generateBaseSignUpSchema();
 	return schema.shape({
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
@@ -231,7 +231,7 @@ const generate3DRepoSignUpSchema = () => {
 
 Users.validateSignUpData = async (req, res, next) => {
 	try {
-		const schema = generate3DRepoSignUpSchema();
+		const schema = generateSignUpSchema();
 		req.body = await schema.validate(req.body);
 		await next();
 	} catch (err) {
