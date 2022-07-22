@@ -19,7 +19,6 @@ import { IconButton } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 
-
 const PrimaryStyles = ($isOn: boolean) => css`
 	background-color: transparent;
 	svg circle {

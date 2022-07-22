@@ -156,7 +156,7 @@ const typography: TypographyOptions = {
 
 export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
 	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
-		.toLocaleString(undefined, { minimumIntegerDigits: 2 });
+		.toString(16).padStart(2, '0');
 	return hex + formattedOpacity;
 };
 
