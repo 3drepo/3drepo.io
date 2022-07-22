@@ -117,6 +117,15 @@ export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callbac
 	};
 };
 
+/**
+ * This function combines all functions passed as parameter and return a function that when called will
+ * execute all functions.
+ * @param unsubscribeFunctions The functions used for unsubscribe to an event
+ * @returns A function that when executed will call of the functions to unsubscribe
+ */
+// eslint-disable-next-line max-len
+export const combineSubscriptions = (...unsubscribeFunctions: (() => void)[]) => () => unsubscribeFunctions.forEach((f) => f());
+
 interface IDirectMessage {
 	event: string;
 	data: any;

@@ -25,14 +25,11 @@ export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:
 		(settings: ContainerSettings) =>
 			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));
 
-export const enableRealtimeNewContainer = (teamspace:string, project:string) => {
+export const enableRealtimeNewContainer = (teamspace:string, project:string) =>
 	subscribeToRoomEvent({ teamspace, project }, 'newContainer',
 		(container: NewContainer) =>
 			ContainersActionsDispatchers.createContainerSuccess(project, container));
-};
 
-export const enableRealtimeContainerRemoved = (teamspace:string, project:string, containerId:string) => {
+export const enableRealtimeContainerRemoved = (teamspace:string, project:string, containerId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerRemoved',
-		() =>
-			ContainersActionsDispatchers.deleteContainerSuccess(project, containerId));
-};
+		() => ContainersActionsDispatchers.deleteContainerSuccess(project, containerId));
