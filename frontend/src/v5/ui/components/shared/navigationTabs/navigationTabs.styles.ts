@@ -22,7 +22,7 @@ import { NavLink } from 'react-router-dom';
 export const Container = styled.nav`
 	display: flex;
 	padding-left: 79px;
-	box-shadow: 0 0px 13px -7px;
+	box-shadow: 0 0 13px -7px;
 	position: relative;
 	z-index: 1;
 `;

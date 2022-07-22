@@ -52,7 +52,7 @@ export const TabList = styled(TabListBase)`
 	transition: none;
 	padding-left: 17px;
 
-	box-shadow: 0 0px 13px -7px;
+	box-shadow: 0 0 13px -7px;
 	position: relative;
 	z-index: 1;
 `;
