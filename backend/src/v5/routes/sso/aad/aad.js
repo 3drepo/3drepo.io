@@ -16,7 +16,7 @@
  */
 
 const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
-const { getAuthenticationCodeUrl, getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setSignupAuthParams } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { setAuthenticationCodeUrl, getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setSignupAuthParams } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
@@ -75,7 +75,7 @@ const establishRoutes = () => {
 	*       302:
 	*         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	*/
-	router.get('/authenticate', addPkceProtection, setAuthenticateAuthParams, getAuthenticationCodeUrl, authenticate);
+	router.get('/authenticate', addPkceProtection, setAuthenticateAuthParams, setAuthenticationCodeUrl, authenticate);
 
 	router.get(`/${authenticateRedirectEndpoint}`, authenticatePost);
 
@@ -122,7 +122,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
 	 */
-	router.post('/signup', validateSsoSignUpData, addPkceProtection, setSignupAuthParams, getAuthenticationCodeUrl, signup);
+	router.post('/signup', validateSsoSignUpData, addPkceProtection, setSignupAuthParams, setAuthenticationCodeUrl, signup);
 
 	router.get(`/${signupRedirectEndpoint}`, getUserDetailsAndCheckEmailAvailability, signupPost);
 

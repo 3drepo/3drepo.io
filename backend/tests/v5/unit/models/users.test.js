@@ -499,6 +499,10 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 		permissions: newUserData.permissions,
 	};
 
+	if(newUserData.sso){
+		formattedData.sso = newUserData.sso;
+	}
+
 	return formattedData;
 };
 
@@ -515,6 +519,34 @@ const testAddUser = () => {
 				countryCode: 'GB',
 				company: generateRandomString(),
 				permissions: [],
+			};
+
+			const fn = jest.spyOn(db, 'createUser');
+			await User.addUser(newUserData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			const userCustomData = fn.mock.calls[0][2];
+			expect(userCustomData).toHaveProperty('createdAt');
+			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
+				userCustomData.emailVerifyToken.expiredAt);
+			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
+		});
+
+		test('should add a new user created with SSO', async () => {
+			const newUserData = {
+				username: generateRandomString(),
+				email: 'example@email.com',
+				password: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+				mailListAgreed: true,
+				countryCode: 'GB',
+				company: generateRandomString(),
+				permissions: [],
+				sso: {
+					type: generateRandomString(),
+					id: generateRandomString(),
+				}
 			};
 
 			const fn = jest.spyOn(db, 'createUser');

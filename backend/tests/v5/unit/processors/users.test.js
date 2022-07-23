@@ -237,6 +237,19 @@ const testSignUp = () => {
 				username: newUserData.username,
 			});
 		});
+
+		test('should generate a password and sign a user up', async () => {
+			await Users.signUp(newUserData, true);
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, password: exampleHashString, token: exampleHashString });
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
+				token: exampleHashString,
+				email: newUserData.email,
+				firstName: newUserData.firstName,
+				username: newUserData.username,
+			});
+		});
 	});
 };
 

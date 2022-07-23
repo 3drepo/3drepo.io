@@ -28,7 +28,7 @@ const Aad = {};
 let clientApplication;
 
 const checkAadConfig = () => {
-	if (!config.sso?.aad?.authority || !config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret) {
+	if (!config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret) {
 		throw templates.ssoNotAvailable;
 	}
 };
@@ -60,12 +60,7 @@ Aad.getAuthenticationCodeUrl = (params) => {
 Aad.getUserDetails = async (authCode, redirectUri, codeVerifier) => {
 	checkAadConfig();
 
-	const tokenRequest = {
-		code: authCode,
-		redirectUri,
-		codeVerifier,
-	};
-
+	const tokenRequest = { code: authCode, redirectUri, codeVerifier };
 	const clientApp = getClientApplication();
 	const response = await clientApp.acquireTokenByCode(tokenRequest);
 

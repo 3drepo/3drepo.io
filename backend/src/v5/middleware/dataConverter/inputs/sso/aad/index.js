@@ -80,7 +80,7 @@ Aad.setSignupAuthParams = async (req, res, next) => {
 	await next();
 };
 
-Aad.getAuthenticationCodeUrl = async (req, res, next) => {
+Aad.setAuthenticationCodeUrl = async (req, res, next) => {
 	const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
 	req.authenticationCodeUrl = authenticationCodeUrl;
 
