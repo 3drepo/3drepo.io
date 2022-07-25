@@ -26,13 +26,10 @@ import {
 	Message,
 	TruncatableTitle,
 	Instruction,
-	ErrorMessage,
 } from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { isNetworkError } from '@/v5/validation/errors.helpers';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
+import { UnhandledError } from './deleteModal.styles';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -48,18 +45,13 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 		defaultValues: { retypedName: '' },
 	});
 	const isValid = confidenceCheck ? (watch('retypedName') === name) : true;
-	const [errorMessage, setErrorMessage] = useState('');
-	const onError = (error) => {
-		if (isNetworkError(error)) return;
-		setErrorMessage(error.response.data.message);
-	};
 
 	const onSubmit = async () => {
 		try {
 			await onClickConfirm();
 			onClickClose();
 		} catch (e) {
-			onError(e);
+			// do nothing
 		}
 	};
 
@@ -98,12 +90,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						/>
 					</RetypeCheck>
 				)}
-				<NetworkError />
-				{errorMessage && (
-					<ErrorMessage>
-						{errorMessage}
-					</ErrorMessage>
-				)}
+				<UnhandledError />
 			</Message>
 			<Actions>
 				<Button onClick={onClickClose} variant="contained" color="primary">

@@ -17,32 +17,16 @@
 
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
-import { useState } from 'react';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { isNetworkError } from '@/v5/validation/errors.helpers';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
+
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
 export const EditProfileIntegrationsTab = () => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
-	const [error, setError] = useState(null);
-	const [unexpectedError, setUnexpectedError] = useState(false);
-
-	const handleApiError = (apiError) => {
-		if (isNetworkError(apiError)) return;
-		setUnexpectedError(true);
-	};
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
-
-	const handleApiKeyCall = (apiKeyActionDispatcher) => {
-		setError(null);
-		setUnexpectedError(false);
-		apiKeyActionDispatcher(handleApiError);
-	};
 
 	return (
 		<>
@@ -60,22 +44,20 @@ export const EditProfileIntegrationsTab = () => {
 				disabled={!apiKey}
 			/>
 			<ButtonsContainer>
-				<Button variant="outlined" color="primary" onClick={() => handleApiKeyCall(generateApiKey)}>
+				<Button variant="outlined" color="primary" onClick={generateApiKey}>
 					<FormattedMessage
 						id="editProfile.generateApiKey"
 						defaultMessage="Generate"
 					/>
 				</Button>
-				<Button variant="outlined" color="secondary" onClick={() => handleApiKeyCall(deleteApiKey)} disabled={!apiKey}>
+				<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!apiKey}>
 					<FormattedMessage
 						id="editProfile.deleteApiKey"
 						defaultMessage="Delete"
 					/>
 				</Button>
 			</ButtonsContainer>
-			<NetworkError />
-			{unexpectedError && <UnexpectedError />}
-			{error && <ErrorMessage>{error}</ErrorMessage>}
+			<UnhandledError />
 		</>
 	);
 };

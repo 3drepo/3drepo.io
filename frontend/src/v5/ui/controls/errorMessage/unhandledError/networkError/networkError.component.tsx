@@ -14,35 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { Gap } from '@controls/gap';
 import { FormattedMessage } from 'react-intl';
-import { Link } from './unexpectedError.styles';
+import { ErrorMessage } from '../../errorMessage.component';
 
-type UnexpectedErrorProps = {
+type NetworkErrorProps = {
 	className?: string;
 };
 
-export const UnexpectedError = ({ className }: UnexpectedErrorProps) => (
+export const NetworkError = ({ className }: NetworkErrorProps) => (
 	<ErrorMessage className={className}>
-		<FormattedMessage
-			id="form.unexpectedError.mainMessage"
-			defaultMessage="An unexpected error has occurred. Please try again later."
-		/>
-		<Gap $height="10px" />
-		<FormattedMessage
-			id="form.unexpectedError.contactSupport.message"
-			defaultMessage="If the error persists, please {contactSupport}."
-			values={{
-				contactSupport: (
-					<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-						<FormattedMessage
-							id="form.unexpectedError.contactSupport.link"
-							defaultMessage="contact the support"
-						/>
-					</Link>
-				),
-			}}
-		/>
+		<FormattedMessage id="errorMessage.networkError" defaultMessage="Network Error" />
 	</ErrorMessage>
 );
