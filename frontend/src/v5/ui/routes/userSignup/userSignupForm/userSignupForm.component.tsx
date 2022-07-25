@@ -22,7 +22,6 @@ import { formatMessage } from '@/v5/services/intl';
 import {
 	emailAlreadyExists,
 	isInvalidArguments,
-	isNetworkError,
 	usernameAlreadyExists,
 } from '@/v5/validation/errors.helpers';
 import { INewUser } from '@/v5/store/auth/auth.types';
@@ -52,14 +51,13 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [hasUnexpectedError, setHasUnexpectedError] = useState(false);
 	const [erroredStep, setErroredStep] = useState<number>();
 	const [formIsSubmitting, setFormIsSubmitting] = useState(false);
 
 	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
 
 	const addCompletedStep = (stepIndex: number) => {
-		if (stepIndex === LAST_STEP && hasUnexpectedError) return;
+		if (stepIndex === LAST_STEP) return;
 		completedSteps.add(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
 	};
@@ -67,11 +65,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const removeCompletedStep = (stepIndex: number) => {
 		completedSteps.delete(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
-	};
-
-	const updateUnexpectedError = () => {
-		setHasUnexpectedError(true);
-		removeCompletedStep(LAST_STEP);
 	};
 
 	const canReachStep = (stepToReach: number): boolean => {
@@ -97,12 +90,12 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const moveToNextStep = () => moveToStep(activeStep + 1);
 
 	const handleInvalidArgumentsError = (error) => {
-		setHasUnexpectedError(false);
 		if (usernameAlreadyExists(error)) {
 			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
 		} else if (emailAlreadyExists(error)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, fields.email]);
-		}
+		} else return;
+
 		updateFields({ password: '', confirmPassword: '' });
 		setActiveStep(0);
 		setErroredStep(0);
@@ -120,11 +113,10 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			completeRegistration({ email, firstName });
 		} catch (error) {
 			setFormIsSubmitting(false);
-			if (isNetworkError(error)) return;
 			if (isInvalidArguments(error)) {
 				handleInvalidArgumentsError(error);
 			} else {
-				updateUnexpectedError();
+				removeCompletedStep(LAST_STEP);
 			}
 		}
 	};
@@ -203,7 +195,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
 							formIsSubmitting={formIsSubmitting}
-							hasUnexpectedError={hasUnexpectedError}
 							isActiveStep={activeStep === LAST_STEP}
 						/>
 					</UserSignupFormStep>
