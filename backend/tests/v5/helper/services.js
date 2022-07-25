@@ -34,8 +34,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../../../src/v5/models/users.constants');
+
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
 const queue = {};
@@ -130,6 +133,18 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	});
 
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
+};
+
+db.createTemplates = (teamspace, data = []) => {
+	const toInsert = data.map((entry) => {
+		const converted = {
+			...entry,
+			_id: stringToUUID(entry._id),
+		};
+		return converted;
+	});
+
+	return DbHandler.insertMany(teamspace, 'templates', toInsert);
 };
 
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
@@ -263,6 +278,39 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	angleFromNorth: 123,
 	defaultView: ServiceHelper.generateUUIDString(),
 	defaultLegend: ServiceHelper.generateUUIDString(),
+});
+
+ServiceHelper.generateTemplate = (deprecated) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	properties: [
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: fieldTypes.TEXT,
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: fieldTypes.NUMBER,
+			default: ServiceHelper.generateRandomNumber(),
+		},
+	],
+	modules: [
+		{
+			name: ServiceHelper.generateRandomString(),
+			properties: [
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: fieldTypes.TEXT,
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: fieldTypes.NUMBER,
+					default: ServiceHelper.generateRandomNumber(),
+				},
+			],
+		},
+	],
+	...deleteIfUndefined({ deprecated }),
 });
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {

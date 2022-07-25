@@ -16,6 +16,7 @@
  */
 
 const { Router } = require('express');
+const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
 const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
@@ -28,7 +29,8 @@ const getAllTemplates = async (req, res) => {
 	try {
 		const data = await getAllTemplatesInProject(teamspace, project, showDeprecated);
 
-		respond(req, res, templates.ok, { templates: data });
+		respond(req, res, templates.ok,
+			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
