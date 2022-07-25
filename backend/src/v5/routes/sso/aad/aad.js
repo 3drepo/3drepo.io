@@ -16,7 +16,7 @@
  */
 
 const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
-const { setAuthenticationCodeUrl, getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setSignupAuthParams } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setAuthenticationCodeUrl, setSignupAuthParams } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');

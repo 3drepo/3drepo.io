@@ -20,6 +20,7 @@ const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../../src/v5/services/sso/aad/aad.constants');
+
 jest.mock('../../../../../../src/v5/services/sso/aad', () => ({
 	...jest.requireActual('../../../../../../src/v5/services/sso/aad'),
 	getUserDetails: jest.fn(),

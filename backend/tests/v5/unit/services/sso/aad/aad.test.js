@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,106 +15,103 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder, objModel } = require('../../../../helper/path');
+const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
-var url = require('url');
-jest.mock('../../../../../../src/v5/handler/queue');
-const Queue = require(`${src}/handler/queue`);
 
 const config = require(`${src}/utils/config`);
-
 const { templates } = require(`${src}/utils/responseCodes`);
-
 const Aad = require(`${src}/services/sso/aad`);
 
+jest.mock('../../../../../../src/v5/utils/webRequests');
+const WebRequests = require(`${src}/utils/webRequests`);
+
+jest.mock('@azure/msal-node');
+const msal = require('@azure/msal-node');
+
+const { msGraphUserDetailsUri } = require(`${src}/services/sso/aad/aad.constants`);
+
+const authCodeUrl = generateRandomString();
+const accessToken = generateRandomString();
+
+msal.ConfidentialClientApplication.mockImplementation(() => ({
+	getAuthCodeUrl: () => authCodeUrl,
+	acquireTokenByCode: () => ({ accessToken }),
+}));
+
 const testGetAuthenticationCodeUrl = () => {
-    describe('Get authentication code url', () => {
-        //  test(`should fail with ${templates.ssoNotAvailable.code} if sso is not set`, async () => {
-        //      const initialConfig = config.sso;
-        //      config.sso = undefined;
+	describe('Get authentication code url', () => {
+		test(`should fail with ${templates.ssoNotAvailable.code} if sso is not set`, () => {
+			const initialConfig = config.sso;
+			config.sso = undefined;
+			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
+			config.sso = initialConfig;
+		});
 
-        //      const params = { redirectUri: generateRandomString() };
-        //      await expect(Aad.getAuthenticationCodeUrl(params))
-        // 		.rejects.toEqual(templates.ssoNotAvailable);
+		test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad is not set`, () => {
+			const initialConfig = config.sso;
+			config.sso = {};
+			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
+			config.sso = initialConfig;
+		});
 
-        //      config.sso = initialConfig;
-        //  }); 
+		test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.clientId is not set`, () => {
+			const initialConfig = config.sso;
+			config.sso = { clientSecret: generateRandomString() };
+			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
+			config.sso = initialConfig;
+		});
 
-        //  test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad is not set`, async () => {
-        //     const initialConfig = config.sso;
-        //     config.sso = {};
+		test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.clientSecret is not set`, () => {
+			const initialConfig = config.sso;
+			config.sso = { clientId: generateRandomString() };
+			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
+			config.sso = initialConfig;
+		});
 
-        //     const params = { redirectUri: generateRandomString() };
-        //     await expect(Aad.getAuthenticationCodeUrl(params))
-        //        .rejects.toEqual(templates.ssoNotAvailable);
+		test('should return authentication code url if all config values are set', async () => {
+			const initialConfig = config.sso;
+			config.sso = {
+				aad: {
+					clientId: generateRandomString(),
+					clientSecret: generateRandomString(),
+				},
+			};
 
-        //     config.sso = initialConfig;
-        // }); 
+			const params = { redirectUri: generateRandomString() };
+			const res = await Aad.getAuthenticationCodeUrl(params);
 
-        // test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.clientId is not set`, async () => {
-        //     const initialConfig = config.sso;
-        //     config.sso = { clientSecret: generateRandomString()};
-
-        //     const params = { redirectUri: generateRandomString() };
-        //     await expect(Aad.getAuthenticationCodeUrl(params))
-        //        .rejects.toEqual(templates.ssoNotAvailable);
-
-        //     config.sso = initialConfig;
-        // }); 
-
-        // test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.clientSecret is not set`, async () => {
-        //     const initialConfig = config.sso;
-        //     config.sso = { clientId: generateRandomString() };
-
-        //     const params = { redirectUri: generateRandomString() };
-        //     await expect(Aad.getAuthenticationCodeUrl(params))
-        //        .rejects.toEqual(templates.ssoNotAvailable);
-
-        //     config.sso = initialConfig;
-        // }); 
-
-        test(`should return authentication code url if all config values are set`, async () => {
-            const initialConfig = config.sso;
-            config.sso = {
-                aad: {
-                    clientId: generateRandomString(),
-                    clientSecret: generateRandomString()
-                }
-            }
-
-            const params = { redirectUri: generateRandomString() };
-            const res = await Aad.getAuthenticationCodeUrl(params);
-            const parsedUrl = url.parse(res, true);
-            expect(parsedUrl.query.redirect_uri).toEqual(params.redirectUri);
-            config.sso = initialConfig;
-        });
-    });
+			expect(res).toEqual(authCodeUrl);
+			config.sso = initialConfig;
+		});
+	});
 };
 
 const testGetUserDetails = () => {
-    describe('Get user details', () => {
-        test(`should get user details`, async () => {
-            const initialConfig = config.sso;
-            config.sso = {
-                aad: {
-                    clientId: generateRandomString(),
-                    clientSecret: generateRandomString()
-                }
-            }
+	describe('Get user details', () => {
+		test('should get user details', async () => {
+			const initialConfig = config.sso;
+			config.sso = {
+				aad: {
+					clientId: generateRandomString(),
+					clientSecret: generateRandomString(),
+				},
+			};
 
-            const authCode = generateRandomString();
-            const redirectUri = generateRandomString();
-            const codeVerifier = generateRandomString();
+			const userDetails = { mail: generateRandomString() };
+			const fn = jest.spyOn(WebRequests, 'get').mockResolvedValue(userDetails);
 
-            const res = await Aad.getUserDetails(authCode, redirectUri, codeVerifier);
-            expect(res).toEqual(1);
-            config.sso = initialConfig;
-        });
-    });
+			const res = await Aad.getUserDetails(generateRandomString(),
+				generateRandomString(), generateRandomString());
+			expect(res).toEqual(userDetails);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(msGraphUserDetailsUri, { Authorization: `Bearer ${accessToken}` });
+
+			config.sso = initialConfig;
+		});
+	});
 };
 
-
 describe('services/sso/aad', () => {
-    testGetAuthenticationCodeUrl();
-    testGetUserDetails();
+	testGetAuthenticationCodeUrl();
+	testGetUserDetails();
 });

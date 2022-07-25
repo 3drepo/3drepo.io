@@ -325,7 +325,7 @@ const testValidateSignUpData = () => {
 
 const testValidateSsoSignUpData = () => {
 	const newUserData = {
-		username: availableUsername,		
+		username: availableUsername,
 		countryCode: 'GB',
 		company: generateRandomString(),
 		mailListAgreed: true,
@@ -336,7 +336,7 @@ const testValidateSsoSignUpData = () => {
 		[{ body: { ...newUserData, company: undefined } }, true, 'with empty company'],
 		[{ body: { ...newUserData, username: existingUsername } }, false, 'with username that already exists', templates.invalidArguments],
 		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
-		[{ body: { ...newUserData, username: generateRandomString(64) } }, false, 'with too large username', templates.invalidArguments],		
+		[{ body: { ...newUserData, username: generateRandomString(64) } }, false, 'with too large username', templates.invalidArguments],
 		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],

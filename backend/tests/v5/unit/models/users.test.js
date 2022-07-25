@@ -499,7 +499,7 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 		permissions: newUserData.permissions,
 	};
 
-	if(newUserData.sso){
+	if (newUserData.sso) {
 		formattedData.sso = newUserData.sso;
 	}
 
@@ -546,7 +546,7 @@ const testAddUser = () => {
 				sso: {
 					type: generateRandomString(),
 					id: generateRandomString(),
-				}
+				},
 			};
 
 			const fn = jest.spyOn(db, 'createUser');
