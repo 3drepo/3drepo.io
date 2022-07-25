@@ -74,6 +74,6 @@ export const getIntlProviderProps = () => ({
 			return;
 		}
 
-//		console.error(error);
+		console.error(error);
 	},
 });
