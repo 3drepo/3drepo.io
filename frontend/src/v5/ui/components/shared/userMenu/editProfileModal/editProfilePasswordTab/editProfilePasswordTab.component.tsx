@@ -25,10 +25,8 @@ import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
 import * as API from '@/v5/services/api';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
-import { isNetworkError, isPasswordIncorrect } from '@/v5/validation/errors.helpers';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 
 interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -50,8 +48,6 @@ export const EditProfilePasswordTab = ({
 		newPassword: '',
 		confirmPassword: '',
 	};
-	const [unexpectedError, setUnexpectedError] = useState(false);
-	const [expectedError, setExpectedError] = useState(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 
 	const {
@@ -73,19 +69,14 @@ export const EditProfilePasswordTab = ({
 
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
-		setUnexpectedError(false);
-		setExpectedError(null);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
 		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 	};
 
 	const onSubmitError = (apiError) => {
-		if (isNetworkError(apiError)) return;
 		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
-			return;
 		}
-		setUnexpectedError(true);
 	};
 
 	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
@@ -149,9 +140,7 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			<NetworkError />
-			{unexpectedError && <UnexpectedError />}
-			{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
+			<UnhandledError expectedErrorValidators={[isPasswordIncorrect]} />
 			{isSubmitSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />

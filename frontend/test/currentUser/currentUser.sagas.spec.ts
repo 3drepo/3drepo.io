@@ -141,8 +141,6 @@ describe('Current User: sagas', () => {
 	})
 
 	describe('generateApiKey', () => {
-		const onError = jest.fn();
-
 		it('should generate an API key and update user data', async () => {
 			const apiKey = generateFakeApiKey();
 
@@ -151,62 +149,50 @@ describe('Current User: sagas', () => {
 				.reply(200, apiKey);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey(onError))
+				.dispatch(CurrentUserActions.generateApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess(apiKey))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call error callback when API call errors', async () => {
+		it('should not generate an API key when API call errors', async () => {
 			mockServer
 				.post('/user/key')
-				.reply(400, Error);
+				.reply(400);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey(onError))
+				.dispatch(CurrentUserActions.generateApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-				expect(onError).toHaveBeenCalled();
 		})
 	})
 
 	describe('deleteApiKey', () => {
-		const onError = jest.fn();
-
-		it('should delete an API key and update user data', async () => {
+		it('should delete the API key and update user data', async () => {
 			mockServer
 				.delete('/user/key')
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey(onError))
+				.dispatch(CurrentUserActions.deleteApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ apiKey: null }))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call error callback when API call errors', async () => {
-			const error = 'Error: Request failed with status code 400';
-
+		it('should delete the API key when API call errors', async () => {
 			mockServer
 				.delete('/user/key')
-				.reply(400, error);
+				.reply(400);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey(onError))
+				.dispatch(CurrentUserActions.deleteApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-			expect(onError).toHaveBeenCalled();
 		})
 	})
 });

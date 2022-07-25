@@ -25,9 +25,8 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { isNetworkError, projectAlreadyExists } from '@/v5/validation/errors.helpers';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
 interface ICreateProject {
 	open: boolean;
@@ -45,7 +44,6 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 
 	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [hasUnexpectedError, setHasUnexpectedError] = useState(false);
 
 	const DEFAULT_VALUES = {
 		teamspace: currentTeamspace,
@@ -67,8 +65,6 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	});
 
 	const onSubmissionError = (error) => {
-		setHasUnexpectedError(false);
-		if (isNetworkError(error)) return;
 		if (projectAlreadyExists(error)) {
 			const { projectName, teamspace } = getValues();
 			setExistingProjectsByTeamspace({
@@ -78,9 +74,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 					projectName,
 				],
 			});
-			return;
 		}
-		setHasUnexpectedError(true);
 	};
 
 	const onSubmit: SubmitHandler<IFormInput> = () => {
@@ -93,7 +87,6 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	useEffect(() => {
 		reset(DEFAULT_VALUES);
 		setExistingProjectsByTeamspace({});
-		setHasUnexpectedError(false);
 	}, [open]);
 
 	useEffect(() => {
@@ -107,7 +100,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'projects.creation.ok', defaultMessage: 'Create Project' })}
-			isValid={formState.isValid && !hasUnexpectedError}
+			isValid={formState.isValid}
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
@@ -117,13 +110,11 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 				label={formatMessage({ id: 'projects.creation.form.teamspace', defaultMessage: 'Teamspace' })}
 				control={control}
 			>
-				{
-					teamspaces.map((ts) => (
-						<MenuItem key={ts.name} value={ts.name}>
-							{ts.name}
-						</MenuItem>
-					))
-				}
+				{teamspaces.map((ts) => (
+					<MenuItem key={ts.name} value={ts.name}>
+						{ts.name}
+					</MenuItem>
+				))}
 			</FormSelect>
 			<FormTextField
 				required
@@ -132,8 +123,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 				control={control}
 				formError={errors.projectName}
 			/>
-			<NetworkError />
-			{hasUnexpectedError && <UnexpectedError />}
+			<UnhandledError expectedErrorValidators={[projectAlreadyExists]} />
 		</FormModal>
 	);
 };
