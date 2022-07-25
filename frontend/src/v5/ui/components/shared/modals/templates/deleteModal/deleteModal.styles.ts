@@ -16,31 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@controls/typography';
 import { UnhandledError as UnhandledErrorBase } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
-export const OtherOptions = styled.div`
-	display: flex;
-	padding: 14px 0 14px;
-	color: ${({ theme }) => theme.palette.base.main};
-	a {
-		color: ${({ theme }) => theme.palette.primary.main};
-		text-decoration: none;
-	}
-`;
-
-const StyledTypography = styled(Typography).attrs({
-	variant: 'body1',
-})``;
-
-export const SignUpPrompt = styled(StyledTypography)`
-	margin-right: auto;
-`;
-
-export const ForgotPasswordPrompt = styled(StyledTypography)`
-	margin-left: auto;
-`;
-
 export const UnhandledError = styled(UnhandledErrorBase)`
-	margin-top: 5px;
+	justify-content: center;
 `;
