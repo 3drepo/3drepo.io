@@ -27,8 +27,8 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updateUserSuccess: ['userData'],
 	updatePersonalData: ['personalData', 'onError'],
 	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
-	generateApiKey: ['onError'],
-	deleteApiKey: ['onError'],
+	generateApiKey: [],
+	deleteApiKey: [],
 	setApiKeyIsUpdating: ['apiKeyIsUpdating'],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
@@ -84,7 +84,7 @@ export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
 export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
 export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData, onError: (error: Error) => void };
-export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'> & { onError: (error: Error) => void };
+export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'>;
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 
@@ -94,7 +94,7 @@ export interface ICurrentUserActionCreators {
 	updateUserSuccess: (userData: UpdateUserSuccess) => UpdateUserSuccessAction;
 	updatePersonalData: (personalData: UpdatePersonalData, onError: (error) => void) => UpdatePersonalDataAction;
 	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
-	generateApiKey: (onError: (error) => void) => UpdateApiKeyAction;
-	deleteApiKey: (onError: (error) => void) => UpdateApiKeyAction;
+	generateApiKey: () => UpdateApiKeyAction;
+	deleteApiKey: () => UpdateApiKeyAction;
 	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => SetApiKeyIsUpdatingAction;
 }

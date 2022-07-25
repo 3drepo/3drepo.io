@@ -24,8 +24,8 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -49,7 +49,6 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	hasUnexpectedError: boolean;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
 	formIsSubmitting: boolean;
@@ -60,7 +59,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	hasUnexpectedError,
 	fields,
 	isActiveStep,
 	formIsSubmitting,
@@ -177,12 +175,11 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			<NetworkError />
-			{ hasUnexpectedError && <UnexpectedError />}
+			<UnhandledError expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
 			<CreateAccountButton
 				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
-				disabled={!formIsValid || !fields.captcha || hasUnexpectedError}
+				disabled={!formIsValid || !fields.captcha}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage

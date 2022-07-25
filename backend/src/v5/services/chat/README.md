@@ -147,15 +147,15 @@ The following events will be emitted if the user has subscribed to [Container/Fe
 
 #### Container New Revision
   - Event name: `containerNewRevision`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  owner: "owner name" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  author: "author name" }}`
   - Description: Used to notify the user of a new container revision addition. This will be triggered when a new container revision has been processed successfully
 
-#### Revision Updated
+#### Container Revision Update
   - Event name: `containerRevisionUpdate`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", void: "true" }}`
   - Description: Used to notify the user of any changes on a revision. This will be triggered when some data has changed within a revision (currently only void status can be changed)
 
-#### Delete Container
+#### Container Removed
   - Event name: `containerRemoved`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { }}`
   - Description: Used to notify the user of a container deletion. This will be triggered when a container has been removed from a project
@@ -170,7 +170,7 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  owner: "owner name" }}`
   - Description: Used to notify the user of a new federation revision addition. This will be triggered when a new federation revision has been processed successfully
  
-#### Delete Federation
+#### Federation Removed
   - Event name: `federationRemoved`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { }}`
   - Description: Used to notify the user of a federation deletion. This will be triggered when a federation has been removed from a project
@@ -180,10 +180,10 @@ The following events will be emitted if the user has subscribed to [Project noti
 
 #### New Container
   - Event name: `newContainer`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "container id", name: "container name", code: "container code", category: "container category" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "container id", name: "container name", code: "container code", type: "container type" }}`
   - Description: Used to notify the user of a container creation. This will be triggered when a container has been added from a project
 
 #### New Federation
   - Event name: `newFederation`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "federation id", name: "federaion name", code: "federation code", description: "federation description" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "federation id", name: "federation name", code: "federation code", desc: "federation description" }}`
   - Description: Used to notify the user of a federation creation. This will be triggered when a federation has been added from a project

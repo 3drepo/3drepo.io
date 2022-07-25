@@ -14,22 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { uniqWith } from 'lodash';
-import { IContainer } from './containers/containers.types';
-import { IFederation } from './federations/federations.types';
-import { View } from './store.types';
 
-type CF = IContainer | IFederation;
-export const EMPTY_VIEW: View = {
-	_id: ' ',
-	name: 'None',
-	hasThumbnail: false,
-};
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import { IRevision } from './revisions.types';
 
-export const isFederation = (containerOrFederation: CF) => (
-	'containers' in containerOrFederation
-);
-
-export const uniqueIds = <T>(listItems: T[]) =>
-	// eslint-disable-next-line implicit-arrow-linebreak
-	uniqWith(listItems, (a, b) => (a as unknown as CF)._id === (b as unknown as CF)._id);
+export const prepareRevisionData = (revision): IRevision => ({
+	...revision,
+	timestamp: getNullableDate(revision.timestamp),
+	tag: revision?.tag || '',
+	author: revision?.author || '',
+	desc: revision?.desc || '',
+	void: revision?.void || false,
+});

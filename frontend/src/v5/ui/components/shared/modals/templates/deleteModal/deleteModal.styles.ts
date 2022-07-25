@@ -14,22 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { uniqWith } from 'lodash';
-import { IContainer } from './containers/containers.types';
-import { IFederation } from './federations/federations.types';
-import { View } from './store.types';
 
-type CF = IContainer | IFederation;
-export const EMPTY_VIEW: View = {
-	_id: ' ',
-	name: 'None',
-	hasThumbnail: false,
-};
+import styled from 'styled-components';
+import { UnhandledError as UnhandledErrorBase } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
-export const isFederation = (containerOrFederation: CF) => (
-	'containers' in containerOrFederation
-);
-
-export const uniqueIds = <T>(listItems: T[]) =>
-	// eslint-disable-next-line implicit-arrow-linebreak
-	uniqWith(listItems, (a, b) => (a as unknown as CF)._id === (b as unknown as CF)._id);
+export const UnhandledError = styled(UnhandledErrorBase)`
+	justify-content: center;
+`;

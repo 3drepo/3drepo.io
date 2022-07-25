@@ -91,9 +91,7 @@ const CustomLogo = styled.img.attrs({
 	width: 100px;
 `;
 
-export const Logo = styled(customLogoPath ? CustomLogo : DefaultLogo)`
-	margin-bottom: 28px;
-`;
+export const Logo = styled(customLogoPath ? CustomLogo : DefaultLogo)``;
 
 export const BlueLogo = styled(Logo)`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -103,6 +101,8 @@ export const LoginLink = styled(Link).attrs({
 	to: LOGIN_PATH,
 })`
 	width: fit-content;
+	margin-bottom: 28px;
+	position: relative;
 `;
 
 export const LogoContainer = styled(LoginLink)`
