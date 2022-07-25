@@ -26,6 +26,7 @@ import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/fe
 import { Action } from 'redux';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
+import { uniqueIds } from '../store.helpers';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
@@ -62,12 +63,12 @@ export const createFederationSuccess = (state = INITIAL_STATE, {
 	...state,
 	federationsByProject: {
 		...state.federationsByProject,
-		[projectId]: [
+		[projectId]: uniqueIds<IFederation>([
 			...state.federationsByProject[projectId],
 			{
 				...prepareNewFederation(newFederation, federationId),
 			},
-		],
+		]),
 	},
 });
 

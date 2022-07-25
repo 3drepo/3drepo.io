@@ -46,6 +46,10 @@ export type NewFederation = {
 	code?: string;
 };
 
+export type NewFederationRealtime = NewFederation & {
+	_id: string;
+};
+
 export type FederationBackendSettings = {
 	_id?: string;
 	desc?: string;
