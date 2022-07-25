@@ -76,7 +76,7 @@ export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'>
 
 export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
 
-export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' > & {tag: string};
+export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
 
 export type FederationStats = {
 	code: string;
