@@ -17,6 +17,7 @@
 
 import { INITIAL_STATE, containersReducer, ContainersActions, IContainersState } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
+import { revisionsMockFactory } from '../revisions/revisions.fixtures';
 import { containerMockFactory } from './containers.fixtures';
 
 describe('Containers: redux', () => {
@@ -57,4 +58,28 @@ describe('Containers: redux', () => {
 		expect(resultContainers[0].isFavourite).toEqual(false);
 		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);
 	});
+
+	describe('on revisionProcessingSuccess action', () => {
+		const newRevision = revisionsMockFactory();
+		const container = mockContainers[0];
+
+		const defaultState: IContainersState = {
+			...INITIAL_STATE,
+			containersByProject: {
+				[projectId]: [
+					container,
+				]
+			}
+		};
+
+		const resultState = containersReducer(
+			defaultState,
+			ContainersActions.containerProcessingSuccess(projectId, container._id, newRevision)
+		);
+
+		const resultContainer = resultState.containersByProject[projectId][0];
+		expect(resultContainer.revisionsCount).toEqual(container.revisionsCount + 1);
+		expect(resultContainer.latestRevision).toEqual(newRevision.tag);
+		expect(resultContainer.lastUpdated).toEqual(newRevision.timestamp);
+	})
 })
