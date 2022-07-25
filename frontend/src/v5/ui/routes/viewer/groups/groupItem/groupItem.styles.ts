@@ -130,7 +130,11 @@ const GroupItemObjectsV5 = css`
 `;
 
 export const GroupItemName = styled.div`
-	${isV5() ? GroupItemNameV5 : GroupItemNameV4}
+	${isV5() ? GroupItemNameV5 : GroupItemNameV4}	
+	max-width: 233px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 `;
 
 export const GroupItemObjects = styled.div`
