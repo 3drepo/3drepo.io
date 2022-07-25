@@ -224,9 +224,9 @@ export const ScrollableContainer = styled(ViewerScrollArea)`
 `;
 
 export const TextField = styled(TextFieldBase)<{ mutable: boolean }>`
-    ${({ mutable }) => mutable && css`
+	${({ mutable }) => mutable && css`
 		input {
-			max-width: calc(100% - 58px);
+			max-width: calc(100% - ${isV5() ? 66 : 58}px);
 		}
 	`}
 `;
