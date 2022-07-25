@@ -39,7 +39,6 @@ const getClientApplication = () => {
 	if (!clientApplication) {
 		const loggerOptions = {
 			loggerCallback: (loglevel, message) => {
-				// istanbul ignore next
 				logger.logInfo(message);
 			},
 			logLevel: msal.LogLevel.Verbose,

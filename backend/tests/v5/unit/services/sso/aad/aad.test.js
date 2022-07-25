@@ -33,8 +33,11 @@ const { msGraphUserDetailsUri } = require(`${src}/services/sso/aad/aad.constants
 const authCodeUrl = generateRandomString();
 const accessToken = generateRandomString();
 
-msal.ConfidentialClientApplication.mockImplementation(() => ({
-	getAuthCodeUrl: () => authCodeUrl,
+msal.ConfidentialClientApplication.mockImplementation((clientAppConfig) => ({
+	getAuthCodeUrl: () => {
+		clientAppConfig.system?.loggerOptions?.loggerCallback();
+		return authCodeUrl;
+	},
 	acquireTokenByCode: () => ({ accessToken }),
 }));
 
