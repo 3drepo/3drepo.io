@@ -29,11 +29,9 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { defaults, pick, pickBy, isEmpty, isMatch } from 'lodash';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
 import { ScrollArea } from '@controls/scrollArea';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { NetworkError } from '@controls/errorMessage/networkError/networkError.component';
-import { emailAlreadyExists, isFileFormatUnsupported, isNetworkError } from '@/v5/validation/errors.helpers';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
 
@@ -59,8 +57,6 @@ export const EditProfilePersonalTab = ({
 }: EditProfilePersonalTabProps) => {
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [unexpectedError, setUnexpectedError] = useState(false);
-	const [expectedError, setExpectedError] = useState(null);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 
 	const trimPersonalValues = (personalValues: IUpdatePersonalInputs): IUpdatePersonalInputs => {
@@ -98,11 +94,9 @@ export const EditProfilePersonalTab = ({
 	const getTrimmedNonEmptyValues = () => pickBy(trimPersonalValues(getValues()));
 
 	const onSubmissionError = (apiError) => {
-		if (isNetworkError(apiError)) return;
 		if (emailAlreadyExists(apiError)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
 			trigger('email');
-			return;
 		}
 		if (isFileFormatUnsupported(apiError)) {
 			setFormError('avatarFile', {
@@ -112,14 +106,10 @@ export const EditProfilePersonalTab = ({
 					defaultMessage: 'The file format is not supported',
 				}),
 			});
-			return;
 		}
-		setUnexpectedError(true);
 	};
 
 	const onSubmit = () => {
-		setExpectedError('');
-		setUnexpectedError(false);
 		setSubmitWasSuccessful(false);
 		const values = getTrimmedNonEmptyValues();
 		CurrentUserActionsDispatchers.updatePersonalData(values, onSubmissionError);
@@ -213,9 +203,7 @@ export const EditProfilePersonalTab = ({
 							/>
 						</SuccessMessage>
 					)}
-					<NetworkError />
-					{unexpectedError && <UnexpectedError />}
-					{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
+					<UnhandledError expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]} />
 				</FormProvider>
 			</ScrollAreaPadding>
 		</ScrollArea>
