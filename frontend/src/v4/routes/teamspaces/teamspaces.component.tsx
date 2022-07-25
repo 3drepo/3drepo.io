@@ -66,6 +66,7 @@ import {
 	List,
 	LoaderContainer,
 	MenuButton,
+	MenuButtonContainer,
 	OtherTeamspacesLabel,
 	StyledTab,
 } from './teamspaces.styles';
@@ -498,6 +499,7 @@ export class Teamspaces extends PureComponent<IProps, IState> {
 			size="small"
 			onClick={props.onClick}
 			disabled={isPending}
+			id="_____MENU_BUTTON"
 		>
 			<Add />
 		</MenuButton>
@@ -589,7 +591,7 @@ export class Teamspaces extends PureComponent<IProps, IState> {
 						<StyledTab label="All" />
 						<StyledTab label="Favourites" />
 					</Tabs>
-					<ButtonMenu
+					<MenuButtonContainer
 						renderButton={this.renderMenuButton.bind(this, isPending)}
 						renderContent={this.renderMenu}
 						PopoverProps={ {
