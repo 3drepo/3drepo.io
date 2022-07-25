@@ -22,7 +22,7 @@ import Button from '@mui/material/Button';
 import { COLOR } from '../../../../styles';
 
 export const StyledButton = styled(Button)<{ squeezed?: number }>`
-	&& {
+	& {
 		background-color: ${COLOR.SOFT_BLUE};
 		padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};
 		min-width: 56px;
@@ -31,7 +31,7 @@ export const StyledButton = styled(Button)<{ squeezed?: number }>`
 		text-transform: none;
 	}
 
-	&& > :first-child {
+	& > :first-child {
 		width: 15px;
 		font-size: 13px;
 		margin-right: 2px;
