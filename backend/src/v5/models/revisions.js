@@ -64,14 +64,16 @@ Revisions.getRevisionByIdOrTag = (teamspace, model, revision, projection = {}) =
 	model, { $or: [{ _id: revision }, { tag: revision }] }, projection);
 
 Revisions.updateRevisionStatus = async (teamspace, project, model, revision, status) => {
-	const query = { $or: [{ _id: revision }, { tag: revision }] };
-	const res = await db.updateOne(teamspace, collectionName(model), query, { $set: { void: status } });
+	const res = await db.findOneAndUpdate(teamspace, collectionName(model),
+		{ $or: [{ _id: revision }, { tag: revision }] },
+		{ $set: { void: status } },
+		{ _id: 1 });
 
-	if (!res || res.matchedCount === 0) {
+	if (!res) {
 		throw templates.revisionNotFound;
 	}
 
-	publish(events.REVISION_UPDATED, { teamspace, project, model, data: { _id: revision, void: status } });
+	publish(events.REVISION_UPDATED, { teamspace, project, model, data: { _id: res._id, void: status } });
 };
 
 Revisions.isTagUnique = async (teamspace, model, tag) => {
