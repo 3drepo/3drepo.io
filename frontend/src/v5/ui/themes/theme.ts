@@ -411,6 +411,7 @@ export const theme = createTheme({
 					width: '20px',
 					height: '20px',
 					margin: '8px 0px',
+					color: COLOR.SECONDARY_MAIN,
 				},
 				clearIndicator: {
 					width: '20px',

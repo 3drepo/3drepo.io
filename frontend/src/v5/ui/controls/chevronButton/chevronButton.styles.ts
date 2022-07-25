@@ -37,6 +37,9 @@ export const ChevronStyledIconButton = styled(IconButton)<{ $isOn?: boolean, $is
 		height: 7px;
 		width: 100%;
 		margin-top: 2px;
+		path {
+			fill: ${({ theme }) => theme.palette.secondary.main};
+		}
 	}
 
 	${({ $isOn }) => $isOn && css`
