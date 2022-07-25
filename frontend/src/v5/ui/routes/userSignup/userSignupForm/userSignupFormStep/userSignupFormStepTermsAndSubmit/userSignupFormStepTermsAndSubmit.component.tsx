@@ -25,6 +25,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -51,7 +52,6 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
 	formIsSubmitting: boolean;
-	expectedErrorValidators: Array<(err) => boolean>;
 };
 
 export const UserSignupFormStepTermsAndSubmit = ({
@@ -62,7 +62,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	fields,
 	isActiveStep,
 	formIsSubmitting,
-	expectedErrorValidators,
 }: UserSignupFormStepTermsAndSubmitProps) => {
 	const DEFAULT_FIELDS: MinimalTermsAndSubmitFormInput = {
 		termsAgreed: false,
@@ -176,7 +175,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			<UnhandledError expectedErrorValidators={expectedErrorValidators} />
+			<UnhandledError expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
 			<CreateAccountButton
 				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}

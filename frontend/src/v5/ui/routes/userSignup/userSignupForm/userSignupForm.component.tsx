@@ -195,7 +195,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
 							formIsSubmitting={formIsSubmitting}
-							expectedErrorValidators={[usernameAlreadyExists, emailAlreadyExists]}
 							isActiveStep={activeStep === LAST_STEP}
 						/>
 					</UserSignupFormStep>
