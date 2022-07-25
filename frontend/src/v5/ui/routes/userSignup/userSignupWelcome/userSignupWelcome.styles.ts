@@ -53,6 +53,7 @@ export const ActionMessage = styled.div`
 export const EmailAddress = styled(ActionMessage)`
 	font-weight: 700;
 	margin-top: 0;
+	word-break: break-word;
 `;
 
 export const InfoMessage = styled.div`
