@@ -32,7 +32,12 @@ export default css`
 	#views-card {
 		${ViewerContainer} {
 			${SearchField} {
-				fieldset {
+				border: 2px solid green;
+				.MuiInputBase-notchedOutline, .Mui-focused .MuiInputBase-notchedOutline {
+					box-sizing: border-box;
+					box-shadow: none;
+					border: 0;
+					border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					border-radius: 0;
 				}
 			}

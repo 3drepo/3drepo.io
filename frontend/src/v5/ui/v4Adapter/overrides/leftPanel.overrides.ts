@@ -33,7 +33,7 @@ export default css`
 		color: ${({ theme }) => theme.palette.secondary.main};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		${({ theme }) => theme.typography.h3};
-		border-bottom: 1px solid #E0E5F0; // TODO - fix after new palette is released
+		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 		height: 48px;
 		font-size: 17px;
 
@@ -80,12 +80,16 @@ export default css`
 	}
 
 	${FilterPanelContainer} {
-		.MuiOutlinedInput-notchedOutline {
+		.Mui-focused .MuiOutlinedInput-notchedOutline, .MuiOutlinedInput-notchedOutline {
+			box-sizing: border-box;
+			box-shadow: none;
+			border: 0;
+			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 			border-radius: 0;
-			border-right: 0;
-			border-left: 0;
-			border-top: 0;
 		}
+		/* .MuiOutlinedInput-notchedOutline {
+			border: 0;
+		} */
 
 		${Placeholder} {
 			.MuiSvgIcon-root {
@@ -119,10 +123,15 @@ export default css`
 		${({ theme }) => theme.typography.caption};
 		color: ${({ theme }) => theme.palette.base.light} !important;
 		box-sizing: border-box;
-		border-color: #E0E5F0; // TODO - fix after new palette is released
+		border-color: ${({ theme }) => theme.palette.base.lightest};
 
 		${StyledIconButton} {
 			height: 26px;
+		}
+
+		.Mui-focused .MuiInputBase-input {
+			border: 0;
+			box-shadow: none;
 		}
 
 		button {

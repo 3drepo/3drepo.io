@@ -48,6 +48,7 @@ export const COLOR = {
 	BASE_DARK: '#3D3E4A',
 	BASE_MID: '#565768',
 	BASE_LIGHT: '#BCBECA',
+	BASE_LIGHTER: '#C1C8D5',
 	BASE_LIGHTEST: '#E0E5F0',
 	ERROR_MAIN: '#BE4343',
 	ERROR_DARK: '#A33232',
@@ -193,6 +194,7 @@ export const theme = createTheme({
 			dark: COLOR.BASE_DARK,
 			mid: COLOR.BASE_MID,
 			light: COLOR.BASE_LIGHT,
+			lighter: COLOR.BASE_LIGHTER,
 			lightest: COLOR.BASE_LIGHTEST,
 			contrastText: COLOR.BASE_LIGHTEST,
 		},
@@ -253,8 +255,8 @@ export const theme = createTheme({
 							color: COLOR.BASE_LIGHT,
 						},
 
-						'&:not(.Mui-error).Mui-focused': {
-							color: COLOR.TERTIARY_MAIN,
+						'&.Mui-focused': {
+							color: COLOR.BASE_MAIN,
 						},
 					},
 					'.Mui-error': {
@@ -375,16 +377,14 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				root: {
-					height: '31px',
-					'.MuiFormControl-root .MuiInputBase-root': {
-						'&.MuiAutocomplete-inputRoot ': {
-							padding: '0 0 0 10px',
-							height: '31px',
-							lineHeight: '31px',
-						},
+					'.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot': {
+						padding: '0 0 0 15px',
 					},
 					'&.Mui-focused .MuiAutocomplete-inputRoot .MuiOutlinedInput-notchedOutline': {
 						borderWidth: 1,
+					},
+					'>*': {
+						height: '100%',
 					},
 				},
 				input: {
@@ -392,6 +392,7 @@ export const theme = createTheme({
 					padding: 0,
 				},
 				inputRoot: {
+					height: '100%',
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 						'.MuiAutocomplete-endAdornment': {
@@ -739,31 +740,26 @@ export const theme = createTheme({
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
+					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
+					borderRadius: 5,
 					'& input': {
 						padding: '0px 15px',
 						height: 35,
-						color: COLOR.BASE_MAIN,
+						color: COLOR.SECONDARY_MAIN,
 						...typography.body1,
 						lineHeight: '35px',
 					},
-					notchedOutline: {
-						borderWidth: 10,
-					},
-					[`& .MuiOutlinedInput-notchedOutline,
-					  &.Mui-disabled .MuiOutlinedInput-notchedOutline,
-					  &.Mui-disabled:hover:not(.Mui-error) .MuiOutlinedInput-notchedOutline`]: {
-						borderColor: COLOR.BASE_LIGHTEST,
+					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
+						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
 						borderRadius: 5,
-						borderWidth: 1,
+						boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 					},
-					[`&:hover:not(.Mui-error) .MuiOutlinedInput-notchedOutline, 
-					  &.Mui-focused:not(.Mui-error) .MuiOutlinedInput-notchedOutline`]: {
-						borderColor: COLOR.TERTIARY_MAIN,
-						borderWidth: 1,
-					},
-					'&.Mui-focused input': {
-						color: COLOR.SECONDARY_MAIN,
+					'&, &:focus, &:active, &:hover': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderRadius: 5,
+							border: `1px solid ${COLOR.BASE_LIGHTER}`,
+						},
 					},
 					'&.Mui-disabled': {
 						'& input': {
@@ -775,6 +771,13 @@ export const theme = createTheme({
 					},
 					'&.Mui-error': {
 						backgroundColor: COLOR.ERROR_LIGHTEST,
+						'.MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.ERROR_MAIN,
+						},
+						'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.ERROR_MAIN,
+							boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
+						},
 						'& input': {
 							color: COLOR.ERROR_MAIN,
 						},
@@ -791,6 +794,17 @@ export const theme = createTheme({
 						},
 					},
 				},
+				notchedOutline: {
+					height: 35,
+					bottom: 0,
+					position: 'absolute',
+					top: 'unset',
+					boxSizing: 'border-box',
+					border: `1px solid ${COLOR.BASE_LIGHTER}`,
+					legend: {
+						display: 'none',
+					},
+				},
 			},
 		},
 		MuiSelect: {
@@ -800,7 +814,6 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				select: {
-					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 					borderRadius: 5,
 					color: COLOR.BASE_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -812,9 +825,6 @@ export const theme = createTheme({
 					width: '100%',
 					boxSizing: 'border-box',
 					pointerEvents: 'auto',
-					'& fieldset, &:focus fieldset, &:active fieldset': {
-						border: 0,
-					},
 					'& ~ svg': {
 						position: 'absolute',
 						right: 14,
@@ -833,13 +843,12 @@ export const theme = createTheme({
 					position: 'absolute',
 					...typography.body1,
 					fontSize: '12px',
-					color: COLOR.BASE_MAIN,
 
-					'&:not(.Mui-error).Mui-focused': {
-						color: COLOR.TERTIARY_MAIN,
+					'&, &.Mui-focused': {
+						color: COLOR.BASE_MAIN,
 					},
 
-					'&.Mui-disabled.MuiInputLabel-asterisk': {
+					'&.Mui-disabled .MuiInputLabel-asterisk': {
 						display: 'none',
 					},
 				},
@@ -871,7 +880,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				contained: {
 					position: 'absolute',
-					top: '35px',
+					top: 37,
 					margin: 0,
 				},
 			},

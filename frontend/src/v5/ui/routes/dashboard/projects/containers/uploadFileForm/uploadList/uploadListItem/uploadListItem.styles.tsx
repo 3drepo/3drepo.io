@@ -33,14 +33,15 @@ export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () 
 	}
 `;
 
-const ListItemInputWidth = css`
+const DestinationAndTagDimensions = css`
+	height: 35px;
 	width: 340px;
 `;
 
 export const Destination = styled(UploadListItemDestination)`
-	${ListItemInputWidth}
+	${DestinationAndTagDimensions}
 `;
 
 export const RevisionTag = styled(UploadListItemRevisionTag)`
-	${ListItemInputWidth}
+	${DestinationAndTagDimensions}
 `;

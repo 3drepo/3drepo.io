@@ -124,8 +124,7 @@ const expandedGroupItem = css`
 					font-size: 10px;
 				}
 				${TextFieldContainer} {
-					/* TODO - fix after new palette is released */
-					border: 1px solid #C1C8D5;
+					border: 1px solid ${({ theme }) => theme.palette.base.lighter};
 					border-radius: 5px;
 					background-color: ${({ theme }) => theme.palette.primary.constrast};
 					label {
@@ -166,8 +165,7 @@ const expandedGroupItem = css`
 				}
 				${StyledFormControl} {
 					fieldset {
-						/* TODO - fix after new palette is released */
-						border-color: #C1C8D5;
+						border-color: ${({ theme }) => theme.palette.base.lighter};
 					}
 					.MuiSelect-select {
 						margin-top: 0;
@@ -223,8 +221,8 @@ const expandedGroupItem = css`
 					border: none;
 					/* TODO - fix after new palette is released */
 					background-color: #F7F8FA;
-					color: #C1C8D5;
-					border-top: 1px solid #E0E5F0;
+					color: ${({ theme }) => theme.palette.base.lighter};
+					border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					padding: 12px 15px;
 
 					.MuiButton-contained {
@@ -264,8 +262,7 @@ const expandedGroupItem = css`
 									padding-left: 8px;
 									~ svg {
 										margin-top: 0;
-										/* TODO - fix after new palette is released */
-										color: #C1C8D5;
+										color: ${({ theme }) => theme.palette.base.lighter};
 									}
 								}
 							}
