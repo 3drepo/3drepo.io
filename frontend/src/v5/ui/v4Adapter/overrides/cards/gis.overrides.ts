@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Buffer } from 'buffer';
-import api from '../services/api/';
+import { css } from 'styled-components';
+import { StyledTextField } from '@/v4/routes/viewerGui/components/gis/components/settingsForm/settingsForm.styles';
 
-export const imageUrlToBase64 = (url: string) => api
-	.get((url.split('/api/')[1]), {
-		responseType: 'arraybuffer'
-	})
-	.then((response) =>
-		Buffer.from(response.data, 'binary').toString('base64'));
+export default css`
+	#gis-card {
+		${StyledTextField} {
+			margin: 16px 0;
+
+			.MuiFormHelperText-root {
+				top: 22px;
+			}
+		}
+	}
+`;
