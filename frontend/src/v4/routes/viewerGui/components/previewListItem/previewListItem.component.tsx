@@ -85,13 +85,21 @@ export class PreviewListItem extends PureComponent<IProps, any> {
 	));
 
 	public renderNameWithCounter = renderWhenTrue(() => (
-		<Name as="div">
+		<Name as="div" onClick={this.props.onArrowClick}>
 			<Truncate lines={1}>
 				{`${this.props.number} ${this.props.name}`}
 			</Truncate>
 		</Name>
 	));
-	public renderName = renderWhenTrue(() => <Name as="div"><Truncate lines={1}>{this.props.name}</Truncate></Name>);
+
+	public renderName = renderWhenTrue(() => (
+		<Name as="div" onClick={this.props.onArrowClick}>
+			<Truncate lines={1}>
+				{this.props.name}
+			</Truncate>
+		</Name>
+	));
+
 	public renderClosedMessage = renderWhenTrue(() =>
 		<ActionMessage content={`This ${(this.props.panelName || 'item').slice(0, -1)} is now closed`} />);
 
