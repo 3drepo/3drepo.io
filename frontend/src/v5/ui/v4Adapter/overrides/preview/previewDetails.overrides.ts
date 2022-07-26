@@ -134,6 +134,10 @@ export default css`
 			${IssueDetails} {
 				margin-top: -1px;
 				justify-content: space-between;
+				
+				& > div {
+					min-height: 33px;
+				}
 
 				${Details} {
 					align-items: flex-end;
