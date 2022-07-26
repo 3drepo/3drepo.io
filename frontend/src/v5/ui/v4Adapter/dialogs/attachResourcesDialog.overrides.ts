@@ -117,8 +117,7 @@ const AttachResourcesFile = css`
 	${StyledDropZone} {
 		padding: 27px 0 28px;
 		margin: 0 23px;
-		// TODO - fix after new palette is released
-		border-top: solid 1px #e0e5f0;
+		border-top: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
 
 	// style the icon 
