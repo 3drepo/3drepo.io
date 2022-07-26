@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
@@ -23,8 +23,8 @@ import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/pro
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceAvatar } from './teamspaceLayout.styles';
+import { getTeamspaceAvatarUrl } from '@/v5/store/teamspaces/teamspaces.helpers';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
@@ -33,7 +33,7 @@ interface ITeamspaceLayout {
 
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
-	const user = CurrentUserHooksSelectors.selectCurrentUser();
+	const [user, setUser] = useState<any>({});
 
 	useEffect(() => {
 		if (teamspace) {
@@ -41,6 +41,13 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
 		}
 	}, [teamspace]);
+
+	useEffect(() => {
+		getTeamspaceAvatarUrl(teamspace).then((avatarUrl) => setUser({
+			avatarUrl,
+			hasAvatar: true,
+		}));
+	}, []);
 
 	return (
 		<Container className={className}>
