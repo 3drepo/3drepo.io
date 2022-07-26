@@ -23,7 +23,6 @@ import { isV5 } from '@/v4/helpers/isV5';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
-import { TextField } from '../../../components/textField/textField.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
@@ -38,6 +37,7 @@ import {
 	StyledForm,
 	Summary,
 	TitleNumber,
+	TextField,
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,

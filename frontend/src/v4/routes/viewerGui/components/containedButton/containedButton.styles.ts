@@ -22,16 +22,14 @@ import Button from '@mui/material/Button';
 import { COLOR } from '../../../../styles';
 
 export const StyledButton = styled(Button)<{ squeezed?: number }>`
-	&& {
-		background-color: ${COLOR.SOFT_BLUE};
-		padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};
-		min-width: 56px;
-		min-height: 18px;
-		font-size: 12px;
-		text-transform: none;
-	}
+	background-color: ${COLOR.SOFT_BLUE};
+	padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};
+	min-width: 56px;
+	min-height: 18px;
+	font-size: 12px;
+	text-transform: none;
 
-	&& > :first-child {
+	& > :first-child {
 		width: 15px;
 		font-size: 13px;
 		margin-right: 2px;
