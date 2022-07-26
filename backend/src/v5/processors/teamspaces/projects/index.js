@@ -51,6 +51,7 @@ Projects.deleteProject = async (teamspace, projectId) => {
 	await deleteProject(teamspace, projectId);
 };
 
+// passing project in to future proof this - the list will be filtered by project settings configurations
 Projects.getAllTemplates = (teamspace, project, showDeprecated) => getAllTemplates(
 	teamspace, showDeprecated, { name: 1 },
 );

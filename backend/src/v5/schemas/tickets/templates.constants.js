@@ -88,8 +88,8 @@ TemplateConstants.presetModulesProperties = {
 
 TemplateConstants.defaultProperties = [
 	{ name: 'Description', type: TemplateConstants.fieldTypes.LONG_TEXT },
-	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, required: true },
-	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, required: true },
+	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, readOnly: true },
+	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
 ];
 
 module.exports = TemplateConstants;

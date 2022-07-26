@@ -17,6 +17,7 @@
 
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
+const { checkTicketTemplateExists } = require('../../../../middleware/dataConverter/inputs/teamspaces/settings');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
 const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
@@ -88,6 +89,53 @@ const establishRoutes = () => {
 	 *                     example: Risk
 	 */
 	router.get('/templates', hasReadAccessToContainer, getAllTemplates);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/templates/{template}:
+	 *   get:
+	 *     description: Get the full definition of a template
+	 *     tags: [Containers]
+	 *     operationId: getTicketTemplateDetails
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - name: template
+	 *         description: Template ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the definition of a template
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: "#/components/schemas/ticketTemplate"
+	 */
+	router.get('/templates/:template', hasReadAccessToContainer, checkTicketTemplateExists);
 
 	return router;
 };

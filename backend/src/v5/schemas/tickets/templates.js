@@ -18,6 +18,7 @@
 const { defaultProperties, fieldTypes, presetEnumValues, presetModules, presetModulesProperties } = require('./templates.constants');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
+const { cloneDeep } = require('../../utils/helper/objects');
 const { isString } = require('../../utils/helper/typeCheck');
 
 const typeNameToType = {
@@ -139,5 +140,10 @@ const schema = Yup.object().shape({
 const TemplateSchema = {};
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
+
+TemplateSchema.generateFullSchema = (template) => {
+	const result = cloneDeep(template);
+	result.properties = [...defaultProperties, ...result.properties];
+};
 
 module.exports = TemplateSchema;
