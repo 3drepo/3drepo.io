@@ -49,6 +49,7 @@ import {
 	Container as TextFieldContainer,
 	FieldWrapper,
 	StyledLinkableField,
+	ActionsLine,
 } from '@/v4/routes/components/textField/textField.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
@@ -146,7 +147,7 @@ const expandedGroupItem = css`
 						padding: 0;
 						& > textarea {
 							min-height: 2rem;
-							padding: 5px 10px;
+							padding: 5px 10px 0;
 						}
 						fieldset {
 							border: none;
@@ -155,7 +156,6 @@ const expandedGroupItem = css`
 					}
 
 					${FieldWrapper} {
-						height: 24px;
 						-webkit-text-fill-color: none;
 
 						:after {
@@ -186,10 +186,34 @@ const expandedGroupItem = css`
 				${DetailsDescription} {
 					margin-top: 30px;
 					background-color: ${({ theme }) => theme.palette.primary.contrast};
+					
 					> div {
-						height: 42px !important;
+						min-height: 42px !important;
+						margin: 0;
+					}
+					
+					span {
+						display: table;
+						word-break: break-all;
+						height: 24px;
+						line-height: unset !important;
+					}
+
+					.MuiFormHelperText-root {
+						top: unset;
+						bottom: -21px;
+					}
+
+					${ActionsLine} {
+						top: -5px;
+						bottom: unset;
+						
+						svg {
+							font-size: 1rem;
+						}
 					}
 				}
+
 				${StyledTextField} {
 					margin: 0 10px 0 0;
 					background-color: ${({ theme }) => theme.palette.primary.contrast};
