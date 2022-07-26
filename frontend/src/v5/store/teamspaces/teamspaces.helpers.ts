@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './default';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { fetchTeamspaceAvatar } from '@/v5/services/api/teamspaces'
 
-export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
-
-export const fetchTeamspaceAvatar = (teamspace: string) => api.get(`teamspaces/${teamspace}/avatar`);
+export const getTeamspaceAvatarUrl = async (teamspace) => {
+	const DEFAULT_AVATAR_URL = 'assets/images/teamspace_placeholder.svg';
+	try {
+		await fetchTeamspaceAvatar(teamspace);
+		return generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API);
+	} catch (e) {
+		return DEFAULT_AVATAR_URL;
+	}
+};
