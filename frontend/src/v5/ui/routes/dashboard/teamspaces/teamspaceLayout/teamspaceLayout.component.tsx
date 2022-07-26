@@ -23,8 +23,8 @@ import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/pro
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
-import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceAvatar } from './teamspaceLayout.styles';
 import { getTeamspaceAvatarUrl } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceAvatar } from './teamspaceLayout.styles';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
