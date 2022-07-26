@@ -25,7 +25,6 @@ export const Container = styled.span`
 `;
 
 export const Content = styled.div`
-	overflow: hidden;
 	margin: 30px;
 	width: 340px;
 `;
