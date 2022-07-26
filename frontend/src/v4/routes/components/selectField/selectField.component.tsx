@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PureComponent } from 'react';
-
 import Select, { SelectProps } from '@mui/material/Select';
 import { MuiTheme } from '../../../styles/theme';
 
@@ -30,115 +28,117 @@ function findLabel(children, value) {
 	});
 }
 
-export class SelectField extends PureComponent<SelectProps, any> {
-	public menuWrapper;
-	public menuItems;
-	public query = '';
-	public searchTimeout;
-	public selectedItem;
+export const SelectField = ({
+	MenuProps,
+	children,
+	onOpen,
+	className,
+	renderValue: renderValueProp,
+	...selectProps
+}: SelectProps) => {
+	let menuWrapper;
+	let menuItems;
+	let query = '';
+	let searchTimeout;
+	let selectedItem;
 
-	public findMenuItem = (pressedKey) => {
-		return this.menuItems.find((item) => {
+	const findMenuItem = (pressedKey) => {
+		return menuItems.find((item) => {
 			return item.innerText.toLowerCase().startsWith(pressedKey.toLowerCase());
 		});
 	}
 
-	public focusOnItem = (selectedItem) => {
-		selectedItem.focus();
-		selectedItem.style.backgroundColor = MuiTheme.palette.action.hover;
-		selectedItem.tabindex = 0;
+	const focusOnItem = (newSelectedItem) => {
+		newSelectedItem.focus();
+		newSelectedItem.style.backgroundColor = MuiTheme.palette.action.hover;
+		newSelectedItem.tabindex = 0;
 
-		const scrollTop = selectedItem.offsetTop;
-		this.menuWrapper.scrollTop = scrollTop;
-		this.selectedItem = selectedItem;
+		const scrollTop = newSelectedItem.offsetTop;
+		menuWrapper.scrollTop = scrollTop;
+		selectedItem = newSelectedItem;
 	}
 
-	public blurItem = (selectedItem) => {
-		if (selectedItem) {
-			selectedItem.style.backgroundColor = '';
+	const blurItem = (newSelectedItem) => {
+		if (newSelectedItem) {
+			newSelectedItem.style.backgroundColor = '';
 			selectedItem = null;
 		}
 	}
 
-	public handleMouseMove = () => {
-		this.blurItem(this.selectedItem);
+	const handleMouseMove = () => {
+		blurItem(selectedItem);
 	}
 
-	public handleKeyPress = (event) => {
-		clearTimeout(this.searchTimeout);
-		this.blurItem(this.selectedItem);
+	const handleKeyPress = (event) => {
+		clearTimeout(searchTimeout);
+		blurItem(selectedItem);
 
 		const { key: pressedKey } = event;
 		if (pressedKey.length === 1) {
-			this.query += pressedKey;
+			query += pressedKey;
 
-			const currentItem = this.menuWrapper.querySelector('[tabindex="0"]');
-			const selectedItem = this.findMenuItem(this.query);
+			const currentItem = menuWrapper.querySelector('[tabindex="0"]');
+			const selectedMenuItem = findMenuItem(query);
 
-			if (selectedItem) {
+			if (selectedMenuItem) {
 				event.preventDefault();
 
 				if (currentItem) {
 					currentItem.tabindex = -1;
 				}
 
-				this.focusOnItem(selectedItem);
+				focusOnItem(selectedMenuItem);
 			}
 
-			this.searchTimeout = setTimeout(() => {
-				this.query = '';
+			searchTimeout = setTimeout(() => {
+				query = '';
 			}, 220);
 		}
 	}
 
-	public handleOpen = (menuWrapper, isAppearing) => {
-		this.menuWrapper = menuWrapper;
-		this.menuItems = Array.from(this.menuWrapper.querySelectorAll('[data-value]'));
-		this.menuWrapper.addEventListener('keypress', this.handleKeyPress);
-		this.menuWrapper.addEventListener('mousemove', this.handleMouseMove);
+	const handleOpen = (newMenuWrapper, isAppearing) => {
+		menuWrapper = newMenuWrapper;
+		menuItems = Array.from(menuWrapper.querySelectorAll('[data-value]'));
+		newMenuWrapper.addEventListener('keypress', handleKeyPress);
+		newMenuWrapper.addEventListener('mousemove', handleMouseMove);
 
-		if (this.props.MenuProps?.TransitionProps?.onEntered) {
-			this.props.MenuProps.TransitionProps.onEntered(menuWrapper, isAppearing);
+		if (MenuProps?.TransitionProps?.onEntered) {
+			MenuProps.TransitionProps.onEntered(newMenuWrapper, isAppearing);
 		}
 	}
 
-	public handleClose = (node) => {
-		if (this.menuWrapper) {
-			this.menuWrapper.removeEventListener('keypress', this.handleKeyPress);
-			this.menuWrapper.removeEventListener('mousemove', this.handleMouseMove);
+	const handleClose = (node) => {
+		if (menuWrapper) {
+			menuWrapper.removeEventListener('keypress', handleKeyPress);
+			menuWrapper.removeEventListener('mousemove', handleMouseMove);
 		}
-		this.menuItems = null;
-		this.menuWrapper = null;
-		this.selectedItem = null;
+		menuItems = null;
+		menuWrapper = null;
+		selectedItem = null;
 
-		if (this.props.MenuProps?.TransitionProps?.onExit) {
-			this.props.MenuProps.TransitionProps.onExit(node);
+		if (MenuProps?.TransitionProps?.onExit) {
+			MenuProps.TransitionProps.onExit(node);
 		}
 	}
+	const customMenuProps = {
+		...MenuProps,
+		TransitionProps: {
+			...MenuProps?.TransitionProps,
+			onEntered: handleOpen,
+			onExit: handleClose
+		}
+	};
 
-	public render() {
-		const { MenuProps, children, onOpen, className, ...selectProps } = this.props;
-
-		const customMenuProps = {
-			...MenuProps,
-			TransitionProps: {
-				...MenuProps?.TransitionProps,
-				onEntered: this.handleOpen,
-				onExit: this.handleClose
-			}
-		};
-
-		const hasLabel = Boolean(findLabel(this.props.children, selectProps.value));
-		const renderValue = this.props.renderValue || (hasLabel ? null : (value) => value);
-		return (
-			<Select
-				className={className}
-				{...selectProps}
-				MenuProps={customMenuProps}
-				displayEmpty
-				renderValue={renderValue}>
-				{children}
-			</Select>
-		);
-	}
-}
+	const hasLabel = Boolean(findLabel(children, selectProps.value));
+	const renderValue = renderValueProp || (hasLabel ? null : (value) => value);
+	return (
+		<Select
+			className={className}
+			{...selectProps}
+			MenuProps={customMenuProps}
+			displayEmpty
+			renderValue={renderValue}>
+			{children}
+		</Select>
+	);
+};
