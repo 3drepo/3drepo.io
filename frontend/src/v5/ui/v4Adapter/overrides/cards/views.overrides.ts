@@ -32,8 +32,7 @@ export default css`
 	#views-card {
 		${ViewerContainer} {
 			${SearchField} {
-				border: 2px solid green;
-				.MuiInputBase-notchedOutline, .Mui-focused .MuiInputBase-notchedOutline {
+				.MuiOutlinedInput-notchedOutline, .Mui-focused .MuiOutlinedInput-notchedOutline {
 					box-sizing: border-box;
 					box-shadow: none;
 					border: 0;
