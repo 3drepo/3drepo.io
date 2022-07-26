@@ -30,7 +30,7 @@ const COLL_NAME = 'system.users';
 const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
 const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
 
-const recordSuccessfulAuthAttempt = async (user) => {
+User.recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
 
 	await updateUser(user, {
@@ -103,7 +103,7 @@ User.authenticate = async (user, password) => {
 		throw err;
 	}
 
-	return recordSuccessfulAuthAttempt(user);
+	return User.recordSuccessfulAuthAttempt(user);
 };
 
 User.getUserByQuery = async (query, projection) => {

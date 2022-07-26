@@ -16,13 +16,14 @@
  */
 
 const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
-const { getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setAuthenticationCodeUrl, setSignupAuthParams } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setAuthenticationCodeUrl, setSignupAuthParams, checkIfMsAccountIsLinkedTo3DRepo } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
+const { createSessionSso } = require('../../../middleware/sessions');
 
 const authenticate = (req, res) => {
 	try {
@@ -77,7 +78,7 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', addPkceProtection, setAuthenticateAuthParams, setAuthenticationCodeUrl, authenticate);
 
-	router.get(`/${authenticateRedirectEndpoint}`, authenticatePost);
+	router.get(`/${authenticateRedirectEndpoint}`, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, authenticatePost);
 
 	/**
 	 * @openapi

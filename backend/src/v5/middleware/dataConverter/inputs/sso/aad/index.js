@@ -18,7 +18,7 @@ const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../s
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
 const { aad } = require('../../../../../services/sso/sso.constants');
-const { getUserByQuery } = require('../../../../../models/users');
+const { getUserByQuery, recordSuccessfulAuthAttempt } = require('../../../../../models/users');
 const { respond } = require('../../../../../utils/responder');
 
 const Aad = {};
@@ -86,5 +86,27 @@ Aad.setAuthenticationCodeUrl = async (req, res, next) => {
 
 	await next();
 };
+
+Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
+	const { data: { id, mail } } = await getUserDetails(req.query.code,
+		authenticateRedirectUri);
+
+	try {
+		const user = await getUserByQuery({ 'customData.email': mail }, 
+			{ _id : 0, user: 1, 'customData.sso.id': 1 });
+
+		if (user.customData.sso?.id != id){
+			throw templates.containerIsSubModel;
+		}
+
+		const loginData = await recordSuccessfulAuthAttempt(user.user);
+		req.loginData = loginData;
+	} catch {
+
+	}
+
+	await next();
+};
+
 
 module.exports = Aad;
