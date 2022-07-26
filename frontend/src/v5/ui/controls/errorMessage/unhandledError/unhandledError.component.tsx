@@ -14,28 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isNetworkError } from '@/v5/validation/errors.helpers';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
-import { isNetworkError } from '@/v5/validation/errors.helpers';
-import { ErrorMessage } from '../errorMessage.component';
+import { NetworkError } from './networkError/networkError.component';
+import { UnexpectedError } from '../unexpectedError/unexpectedError.component';
 
-type NetworkErrorProps = {
+type UnhandledErrorProps = {
+	expectedErrorValidators?: Array<(err) => boolean>;
 	className?: string;
 };
 
-export const NetworkError = ({ className }: NetworkErrorProps) => {
-	const [showError, setShowError] = useState(false);
+export const UnhandledError = ({ expectedErrorValidators = [], className }: UnhandledErrorProps) => {
+	const [showNetworkError, setShowNetworkError] = useState(false);
+	const [showUnexpectedError, setShowUnexpectedError] = useState(false);
 	const [interceptor, setInterceptor] = useState(null);
+
+	const isExpectedError = (err) => expectedErrorValidators.some((test) => test(err));
 
 	const onMount = () => {
 		setInterceptor(axios.interceptors.response.use(
-			(res) => {
-				setShowError(false);
-				return res;
-			},
+			(res) => res,
 			(err) => {
-				setShowError(isNetworkError(err));
+				setShowNetworkError(isNetworkError(err));
+				setShowUnexpectedError(!isExpectedError(err));
 				return Promise.reject(err);
 			},
 		));
@@ -48,9 +50,7 @@ export const NetworkError = ({ className }: NetworkErrorProps) => {
 		return onUnmount;
 	}, []);
 
-	return showError && (
-		<ErrorMessage className={className}>
-			<FormattedMessage id="errorMessage.networkError" defaultMessage="Network Error" />
-		</ErrorMessage>
-	);
+	if (showNetworkError) return (<NetworkError className={className} />);
+	if (showUnexpectedError) return (<UnexpectedError className={className} />);
+	return (<></>);
 };

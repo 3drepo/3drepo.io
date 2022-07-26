@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import { IRevision } from './revisions.types';
 
-export const DashboardListItemIcon = styled.div<{ selected?: boolean }>`
-	width: 36px;
-	margin-right: 10px;
-
-	> * {
-		margin: 0;
-	}
-`;
+export const prepareRevisionData = (revision): IRevision => ({
+	...revision,
+	timestamp: getNullableDate(revision.timestamp),
+	tag: revision?.tag || '',
+	author: revision?.author || '',
+	desc: revision?.desc || '',
+	void: revision?.void || false,
+});

@@ -21,7 +21,7 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSel
 import { IProject } from '@/v5/store/projects/projects.types';
 import { DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE, VIEWER_ROUTE, TEAMSPACE_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
-import { selectCurrentModel, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
+import { selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
@@ -31,7 +31,7 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
-	const { teamspace, revision } = params;
+	const { teamspace, revision, containerOrFederation: containerOrFederationId } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
@@ -39,10 +39,10 @@ export const BreadcrumbsRouting = () => {
 	const federations = FederationsHooksSelectors.selectFederations();
 	const containers = ContainersHooksSelectors.selectContainers();
 
-	// Because we are using v4 viewer for now, we use the v4 selectors.
-	const isFederation = useSelector(selectIsFederation);
-	const federationOrContainerId = useSelector(selectCurrentModel);
+	// Because we are using v4 viewer for now, we use the v4 selector.
 	const revisions = useSelector(selectRevisions);
+
+	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
 
 	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
 	let options: BreadcrumbItem[];
@@ -93,7 +93,7 @@ export const BreadcrumbsRouting = () => {
 			options = federations.map(({ _id, name }) => ({
 				title: name,
 				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
-				selected: _id === federationOrContainerId,
+				selected: _id === containerOrFederationId,
 			}));
 
 			breadcrumbs.push({ options });
@@ -101,7 +101,7 @@ export const BreadcrumbsRouting = () => {
 			options = containers.map(({ _id, name }) => ({
 				title: name,
 				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
-				selected: _id === federationOrContainerId,
+				selected: _id === containerOrFederationId,
 			}));
 			breadcrumbs.push({ options });
 

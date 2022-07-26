@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,8 @@
  */
 
 import styled from 'styled-components';
+import { UnhandledError as UnhandledErrorBase } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
-export const DashboardListItemIcon = styled.div<{ selected?: boolean }>`
-	width: 36px;
-	margin-right: 10px;
-
-	> * {
-		margin: 0;
-	}
+export const UnhandledError = styled(UnhandledErrorBase)`
+	justify-content: center;
 `;

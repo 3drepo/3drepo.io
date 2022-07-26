@@ -23,8 +23,9 @@ import { UploadListItemDestination } from './components/uploadListItemDestinatio
 export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () => void; }>`
 	margin: 0;
 	&&&&& {
-		:hover { 
-			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.secondary.lightest)}
+		:hover, &.Mui-focusVisible { 
+			box-shadow: none;
+			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.tertiary.lightest)}
 		}
 	}
 	&& {
@@ -34,8 +35,8 @@ export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () 
 `;
 
 const DestinationAndTagDimensions = css`
-	height: 35px;
 	width: 340px;
+	height: 35px;
 `;
 
 export const Destination = styled(UploadListItemDestination)`

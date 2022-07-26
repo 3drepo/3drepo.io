@@ -43,7 +43,7 @@ export const ContainerEllipsisMenu = ({
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	return (
-		<EllipsisMenu>
+		<EllipsisMenu selected={selected}>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.loadContainer',
