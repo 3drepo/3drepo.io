@@ -119,7 +119,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 							placeholder={placeholder}
 							onChange={this.handleNameChange(field)}
 							error={Boolean(form.errors.name) && !this.props.name}
-							helperText={form.errors.name}
+							helperText={isV5() ? '' : form.errors.name}
 							inputProps={{
 								maxLength: 120,
 								onFocus: () => this.handleFocusName(field, form),

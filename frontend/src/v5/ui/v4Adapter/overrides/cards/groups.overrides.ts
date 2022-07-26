@@ -34,6 +34,7 @@ import { Container as PreviewDetailsContainer,
 	CollapsableContent,
 	NotCollapsableContent,
 	ToggleButtonContainer,
+	MainInfoContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
 	ChipsContainer,
@@ -48,6 +49,7 @@ import {
 	Container as TextFieldContainer,
 	FieldWrapper,
 	StyledLinkableField,
+	ActionsLine,
 } from '@/v4/routes/components/textField/textField.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
@@ -95,8 +97,12 @@ const previewGroupItem = css`
 `;
 
 const expandedGroupItem = css`
-	${TitleTextField} {
+	${MainInfoContainer} ${TitleTextField} {
 		margin: 1px 0;
+	}
+
+	${TitleTextField} {
+		margin: 7px 0 -8px;
 	}
 
 	.MuiChip-root {
@@ -117,7 +123,6 @@ const expandedGroupItem = css`
 			background-color: #F7F8FA;
 		}
 		.MuiAccordionDetails-root {
-			background-color: ${({ theme }) => theme.palette.primary.constrast};
 			${CollapsableContent} {
 				padding: 10px;
 				label {
@@ -126,7 +131,8 @@ const expandedGroupItem = css`
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lighter};
 					border-radius: 5px;
-					background-color: ${({ theme }) => theme.palette.primary.constrast};
+					background-color: ${({ theme }) => theme.palette.primary.contrast};
+
 					label {
 						transform: scale(1);
 						left: 1px;
@@ -143,14 +149,17 @@ const expandedGroupItem = css`
 							min-height: 2rem;
 							padding: 5px 10px;
 						}
+						&.Mui-focused fieldset {
+							border: 1px solid ${({ theme }) => theme.palette.primary.main};
+							box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
+						}
 						fieldset {
 							border: none;
+							box-shadow: none;
 						}
-
 					}
 
 					${FieldWrapper} {
-						height: 24px;
 						-webkit-text-fill-color: none;
 
 						:after {
@@ -164,14 +173,10 @@ const expandedGroupItem = css`
 					}
 				}
 				${StyledFormControl} {
-					fieldset {
-						border-color: ${({ theme }) => theme.palette.base.lighter};
-					}
 					.MuiSelect-select {
 						margin-top: 0;
 						height: 26px;
 						color: ${({ theme }) => theme.palette.secondary.main};
-						font-size: 14px;
 						~ svg {
 							margin-top: 0;
 						}
@@ -184,19 +189,40 @@ const expandedGroupItem = css`
 				}
 				${DetailsDescription} {
 					margin-top: 30px;
-					background-color: ${({ theme }) => theme.palette.primary.contrast};
+					
 					> div {
-						height: 42px !important;
+						min-height: 42px !important;
+						margin: 0;
+					}
+					
+					span {
+						display: table;
+						word-break: break-all;
+						height: 24px;
+						line-height: unset !important;
+						padding-top: 5px;
+					}
+
+					.MuiFormHelperText-root {
+						top: unset;
+						bottom: -21px;
+					}
+
+					${ActionsLine} {
+						top: -5px;
+						bottom: unset;
+						
+						svg {
+							font-size: 1rem;
+						}
 					}
 				}
+
 				${StyledTextField} {
 					margin: 0 10px 0 0;
 					background-color: ${({ theme }) => theme.palette.primary.contrast};
 				}
 			}
-		}
-		${ToggleButtonContainer} {
-			background-color: ${({ theme }) => theme.palette.primary.constrast};
 		}
 		${NotCollapsableContent} {
 			padding: 15px 0 0;
@@ -239,6 +265,12 @@ const expandedGroupItem = css`
 					${FormControl} {
 						margin: 0 0 11px;
 
+						& ::placeholder {
+							// TODO - fix after new palette is released
+							-webkit-text-fill-color: ${({ theme }) => theme.palette.base.lighter};
+							font-weight: 400;
+						}
+
 						&:last-of-type {
 							margin-bottom: 0;
 						}
@@ -254,12 +286,11 @@ const expandedGroupItem = css`
 							color: ${({ theme }) => theme.palette.secondary.main};
 						}
 						&.operation {
-							margin-top: -16px;
 							.MuiInputBase-root {
 								margin-top: 16px;
 								.MuiSelect-select {
 									margin-top: 0;
-									padding-left: 8px;
+									padding-left: 12px;
 									~ svg {
 										margin-top: 0;
 										color: ${({ theme }) => theme.palette.base.lighter};
