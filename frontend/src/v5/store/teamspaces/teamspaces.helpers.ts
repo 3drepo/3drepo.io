@@ -17,7 +17,7 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { fetchTeamspaceAvatar } from '@/v5/services/api/teamspaces'
+import { fetchTeamspaceAvatar } from '@/v5/services/api/teamspaces';
 
 export const getTeamspaceAvatarUrl = async (teamspace) => {
 	const DEFAULT_AVATAR_URL = 'assets/images/teamspace_placeholder.svg';
