@@ -134,7 +134,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 	private renderOpenModelAction = renderWhenTrue(() => (
 		<SmallIconButton
 			Icon={OpenInNewIcon}
-			tooltip="Open model in new tab"
+			tooltip={`Open ${isV5() ? 'Container' : 'model' } in new tab`}
 			onClick={this.handleOpenModelClick}
 		/>
 	));
