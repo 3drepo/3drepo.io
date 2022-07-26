@@ -155,6 +155,10 @@ export const theme = createTheme(
 							},
 							'&.color-picker__panel': { // Colour picker modal
 								'.MuiInput-root': {
+									'&.Mui-focused': {
+										border: `1px solid ${COLOR.PRIMARY_MAIN}`,
+										boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
+									},
 									border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 									borderRadius: 5,
 									padding: '0 7px',
