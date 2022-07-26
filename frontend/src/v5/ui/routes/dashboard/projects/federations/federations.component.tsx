@@ -47,7 +47,7 @@ export const Federations = (): JSX.Element => {
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 	const [createFedOpen, setCreateFedOpen] = useState(false);
 
-	useEffect(() => enableRealtimeNewFederation(teamspace, project), []);
+	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
 
 	return (
 		<>

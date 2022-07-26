@@ -50,7 +50,8 @@ interface IChatConfig {
 export const joinRoom = (roomType : IRoomType) => {
 	const joinedCount = (roomsJoined[roomTypeToId(roomType)] || 0);
 	roomsJoined[roomTypeToId(roomType)] = joinedCount + 1;
-	if (joinedCount > 0) return;
+
+	if (joinedCount > 0 || !socket.connected) return;
 
 	socket.emit('join', roomType);
 };
