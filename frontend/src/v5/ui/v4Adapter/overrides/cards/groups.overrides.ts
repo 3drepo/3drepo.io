@@ -197,6 +197,7 @@ const expandedGroupItem = css`
 						word-break: break-all;
 						height: 24px;
 						line-height: unset !important;
+						padding-top: 5px;
 					}
 
 					.MuiFormHelperText-root {
