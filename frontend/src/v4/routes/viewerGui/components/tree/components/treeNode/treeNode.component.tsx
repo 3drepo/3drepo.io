@@ -42,6 +42,7 @@ interface IProps {
 	index: number;
 	data: any;
 	settings: any;
+	match: any;
 	isSearchResult?: boolean;
 	visibilityMap: any;
 	selectionMap: any;
@@ -237,9 +238,12 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	private handleOpenModelClick = () => {
+		const { project } = this.props.match.params;
 		const [teamspace, name] = this.node.name.split(':');
 		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === name);
-		const url = `${window.location.origin}/viewer/${teamspace}/${model}`;
+
+		const url = isV5() ? `${window.location.origin}/v5/viewer/${teamspace}/${project}/${model}`
+			: `${window.location.origin}/viewer/${teamspace}/${model}`;
 		const newWindow = window.open() as any;
 		newWindow.opener = null;
 		newWindow.location = url;
