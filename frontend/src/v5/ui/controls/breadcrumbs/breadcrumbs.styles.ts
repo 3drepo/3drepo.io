@@ -49,6 +49,7 @@ export const Breadcrumb: typeof Link = styled(Button).attrs({
 
 export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 	variant: 'text',
+	to: '',
 })`
 	&& {
 		${({ theme }) => theme.typography.h3};

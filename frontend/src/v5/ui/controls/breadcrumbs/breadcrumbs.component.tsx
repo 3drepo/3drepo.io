@@ -58,7 +58,7 @@ export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 					title = (options.find(({ selected }) => selected) || options[0])?.title;
 
 					return (
-						<div key={title}>
+						<div key={`${title}-${index}`}>
 							<InteractiveBreadcrumb
 								secondary={secondary}
 								onClick={handleClick(index)}
@@ -78,10 +78,10 @@ export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 					);
 				}
 
-				const { to } = item as BreadcrumbItem;
+				const { to = '' } = item as BreadcrumbItem;
 
 				return (
-					<Breadcrumb key={title} color="inherit" to={to}>
+					<Breadcrumb key={`${title}-${index}`} color="inherit" to={to}>
 						{title}
 					</Breadcrumb>
 				);
