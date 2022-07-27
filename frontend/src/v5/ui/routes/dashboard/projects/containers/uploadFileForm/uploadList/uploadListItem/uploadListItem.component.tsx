@@ -75,6 +75,7 @@ export const UploadListItem = ({
 			setValue(key, conversion[key]);
 			updateValue(key);
 		});
+		trigger('containerName');
 	};
 
 	useEffect(() => {
