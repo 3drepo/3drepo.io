@@ -51,8 +51,8 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 
 	const downloadRevision = (e: SyntheticEvent) => {
 		e.preventDefault();
-		location.href = getRevisionFileUrl(teamspace, project, containerId, revision._id);
-	}
+		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revision._id);
+	};
 
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
