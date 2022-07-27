@@ -16,7 +16,7 @@
  */
 
 import ExpandIcon from '@assets/icons/expand_panel.svg';
-import { Container, Content, Button } from './sidebar.styles';
+import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
 
 interface ISidebar {
 	open: boolean;
@@ -35,14 +35,14 @@ export const Sidebar = ({
 	hidden = false,
 	children,
 }: ISidebar): JSX.Element => (
-	<Container className={className} open={open} hidden={hidden}>
+	<SidebarContainer className={className} open={open} hidden={hidden}>
 		{!noButton && (
-			<Button onClick={onClick} variant="main">
+			<ExpandButton onClick={onClick} variant="main">
 				<ExpandIcon />
-			</Button>
+			</ExpandButton>
 		)}
-		<Content>
+		<SidebarContent>
 			{children}
-		</Content>
-	</Container>
+		</SidebarContent>
+	</SidebarContainer>
 );
