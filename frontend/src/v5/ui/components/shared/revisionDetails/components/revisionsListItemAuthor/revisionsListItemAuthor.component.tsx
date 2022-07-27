@@ -22,6 +22,7 @@ import { Popover } from '@/v4/routes/components/messagesList/components/message/
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { IUser } from '@/v5/store/users/users.redux';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
@@ -42,7 +43,7 @@ export const RevisionsListItemAuthor = ({
 	active = false,
 }: IRevisionsListItemAuthor): JSX.Element => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-	const { teamspace } = useParams();
+	const { teamspace } = useParams<DashboardParams>();
 	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
 
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {

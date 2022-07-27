@@ -17,7 +17,7 @@
 
 import { useContext } from 'react';
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 
 import { Version, VersionContext } from '@/versionContext';
 import { Highlight } from '../highlight/highlight.component';

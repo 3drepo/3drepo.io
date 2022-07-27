@@ -43,9 +43,7 @@ describe("Implied permission::", function () {
 		"creator_role":"jobA",
 		"assigned_roles":["jobB"]
 	};
-
-	const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
-
+	
 	const baseView = {
 		"viewpoint":{
 			"up":[0,1,0],
@@ -54,9 +52,7 @@ describe("Implied permission::", function () {
 			"view_dir":[0,0,-1],
 			"right":[1,0,0]
 		}
-	};
-
-	const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
+	};	
 
 	before(function(done) {
 		server = app.listen(8080, function () {
@@ -83,6 +79,8 @@ describe("Implied permission::", function () {
 		const project2 = "project2";
 		const modelId = "40e6a14c-29b9-4ce1-a04c-86eb7d8d261a";
 		const modeltoDelete = "7de7b6b3-a3c8-4121-987f-9d12d2dc241b";
+		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
+		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "22328320-e2da-11ea-bcdf-cfbbc3211111";
 
 		before(function(done) {
@@ -311,9 +309,11 @@ describe("Implied permission::", function () {
 		const projectHaveAccess = "project3";
 		const project2 = "project2";
 		const projectNoAccess = "project4";
-		const modelId = "40e6a14c-29b9-4ce1-a04c-86eb7d8d261a";
+		const modelId = "5c93cabf-c6c3-43e9-b9f0-e46a4f13a9bd";
 		const modeltoDelete = "5a55347a-11c7-439f-ac41-4fda1c1c89a6";
 		const modelNoAccess = "c92b9a11-c13b-40aa-b2a6-16cfea99d78e";
+		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca9";
+		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae8";
 		const viewToDelete = "33328320-e2da-11ea-bcdf-cfbbc3222222";
 
 		before(function(done) {
@@ -679,6 +679,8 @@ describe("Implied permission::", function () {
 		const modelId = "168da6a8-f3ed-42db-b625-af4db27ce6e7";
 		const modelToDelete = "d39fc3ef-f6b0-4aac-9468-a2f975509593";
 		const modelNoAccess = "15a54758-ccf1-4fc4-8ec7-20e94791f856";
+		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
+		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "44448320-e2da-11ea-bcdf-cfbbc3333333";
 
 		before(function(done) {
@@ -1000,6 +1002,8 @@ describe("Implied permission::", function () {
 		const modelId = "67a50060-a6cd-45e2-91f1-7d262bba5971";
 		const modelToDelete = "42ece336-8719-4ce0-a375-3493cbdf6712";
 		const modelNoAccess = "26c69864-1630-4d02-bde3-46b14d1c6455";
+		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
+		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "55548320-e2da-11ea-bcdf-cfbbc3334444";
 
 		before(function(done) {
@@ -1312,6 +1316,8 @@ describe("Implied permission::", function () {
 		const modelId = "48706168-9f4a-479a-a2b8-100b653ad71a";
 		const modelToDelete = "b0b503b0-a063-4565-b957-ad5eb8320cc2";
 		const modelNoAccess = "f2f8b651-323e-4371-bdac-c15bbe1a4f12";
+		const issueId = "b3e52b50-6330-11e7-a610-939d55d9fca8";
+		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "66668320-e2da-11ea-bcdf-cfbbc3355555";
 
 		before(function(done) {

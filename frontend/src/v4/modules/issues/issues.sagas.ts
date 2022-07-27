@@ -21,6 +21,7 @@ import { isEmpty, isEqual, map, omit, take } from 'lodash';
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
+import { generatePath } from 'react-router';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -62,6 +63,7 @@ import {
 	selectIssuesMap,
 	selectMeasureMode,
 } from './issues.selectors';
+
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -309,11 +311,13 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 }
 
 function* goToIssue({ issue }) {
-	const { teamspace, model, revision } = yield select(selectUrlParams);
+	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
 	const issueId = (issue || {})._id;
-	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
+
+	const route = params.v5 ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER;
+	const path = generatePath(route, params);
 
 	queryParams = issueId ?  {... queryParams, issueId} : omit(queryParams, 'issueId');
 	let query = queryString.stringify(queryParams);

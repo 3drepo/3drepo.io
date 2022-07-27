@@ -108,3 +108,4 @@ package-lock.json
 backend/globalConfig.json
 *.swn
 .vs/
+*.swm

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,17 +17,16 @@
 
 import { DialogContainer } from '@/v4/routes/components/dialogContainer';
 import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DayJsUtils from '@date-io/dayjs';
+import AdapterDayjs from '@mui/lab/AdapterDayjs';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { V4OverridesContainer } from './v4Overrides.styles';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer id="v4Overrides">
-		<MuiPickersUtilsProvider utils={DayJsUtils}>
-
+		<LocalizationProvider dateAdapter={AdapterDayjs}>
 			{children}
 			<DialogContainer />
 			<SnackbarContainer />
-		</MuiPickersUtilsProvider>
+		</LocalizationProvider>
 	</V4OverridesContainer>
 );

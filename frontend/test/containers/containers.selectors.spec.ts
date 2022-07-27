@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { INITIAL_STATE } from '@/v5/store/containers/containers.redux';
+import { IContainersState, INITIAL_STATE } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 import {
@@ -23,7 +23,6 @@ import {
 	selectAreStatsPending,
 	selectHasContainers
 } from '@/v5/store/containers/containers.selectors';
-import { IContainersState } from '@/v5/store/containers/containers.types';
 
 const searchPhrase = 'test phrase';
 const projectId = 'projectId';

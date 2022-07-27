@@ -17,9 +17,9 @@
 import { PureComponent, ChangeEvent } from 'react';
 import { debounce } from 'lodash';
 
-import IconButton from '@material-ui/core/IconButton';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import ActivitiesIcon from '@material-ui/icons/Movie';
+import IconButton from '@mui/material/IconButton';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import ActivitiesIcon from '@mui/icons-material/Movie';
 import { isEqual } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
@@ -90,10 +90,10 @@ export class Activities extends PureComponent<IProps, IState> {
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
-				<IconButton onClick={this.handleBackArrowClick}>
+                <IconButton onClick={this.handleBackArrowClick} size="large">
 					<ArrowBack />
 				</IconButton>
-			);
+            );
 		}
 
 		return <ActivitiesIcon />;

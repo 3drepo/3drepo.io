@@ -28,8 +28,15 @@ export function* fetch() {
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'teamspaces.fetch.error', defaultMessage: 'trying to fetch teamspaces' }),
+			currentActions: formatMessage({
+				id: 'teamspaces.fetch.error.action',
+				defaultMessage: 'loading your Teamspaces',
+			}),
 			error,
+			details: formatMessage({
+				id: 'teamspaces.fetch.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
 		}));
 	}
 }

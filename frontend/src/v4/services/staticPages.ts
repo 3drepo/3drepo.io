@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import SupportIcon from '@material-ui/icons/ContactSupportOutlined';
-import ContactIcon from '@material-ui/icons/MailOutline';
-import PricingIcon from '@material-ui/icons/MonetizationOnOutlined';
+import SupportIcon from '@mui/icons-material/ContactSupportOutlined';
+import ContactIcon from '@mui/icons-material/MailOutline';
+import PricingIcon from '@mui/icons-material/MonetizationOnOutlined';
 import axios from 'axios';
 import { kebabCase, memoize } from 'lodash';
 

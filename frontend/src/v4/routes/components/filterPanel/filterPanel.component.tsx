@@ -15,15 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import ExpandIcon from '@material-ui/icons/ChevronRight';
-import CollapseIcon from '@material-ui/icons/ExpandMore';
-import SearchIcon from '@material-ui/icons/Search';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import ExpandIcon from '@mui/icons-material/ChevronRight';
+import CollapseIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
@@ -46,38 +48,11 @@ import {
 	StyledChip,
 	StyledIconButton,
 	StyledTextField,
-	SuggestionsList
+	SuggestionsList,
+	SuggestionsScrollArea,
 } from './filterPanel.styles';
+import { FILTER_TYPES, IDataType, IFilter, ISelectedFilter } from './filterPanel';
 
-export const FILTER_TYPES = {
-	UNDEFINED: 1,
-	DATE: 2,
-	QUERY: 3
-};
-
-export const DATA_TYPES = {
-	MODELS: 1,
-	FEDERATIONS: 2,
-	PROJECTS: 3
-};
-
-export interface IFilter {
-	values: any;
-	label?: string;
-	type?: number;
-}
-
-export interface ISelectedFilter {
-	value: any;
-	label: string;
-	relatedField: string;
-	type?: number;
-}
-
-export interface IDataType {
-	label?: string;
-	type?: number;
-}
 
 const filterItemSchema = yup.object().shape({
 	label: yup.string(),
@@ -199,23 +174,49 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		</CopyToClipboard>
 	));
 
-	public renderFiltersMenuButton = renderWhenTrue(() => (
-		<ButtonContainer>
-			<ButtonMenu
-				renderButton={FilterButton}
-				renderContent={this.renderFiltersMenu}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		</ButtonContainer>
-	));
+	public renderFiltersMenuButton = renderWhenTrue(() => {
+		const v5Props = {
+			PopoverProps: {
+				anchorOrigin: {
+					vertical: 'bottom',
+					horizontal: 'center',
+				},
+				transformOrigin: {
+					vertical: 'top',
+					horizontal: 'right',
+				},
+				sx: {
+					marginLeft: '-25px',
+					marginTop: '-15px',
+				}
+			}
+		};
+		const v4Props = {
+			PopoverProps: {
+				anchorOrigin: {
+					vertical: 'center',
+					horizontal: 'left',
+				},
+			},
+		};
+		return (
+			<ButtonContainer>
+				<ButtonMenu
+					renderButton={FilterButton}
+					renderContent={this.renderFiltersMenu}
+					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+					{...(isV5() ? v5Props : v4Props)}
+					ButtonProps={{ disabled: false }}
+				/>
+			</ButtonContainer>
+		);
+	});
 
 	public renderPlaceholder = renderWhenTrue(() => (
 		<Placeholder onClick={this.handlePlaceholderClick}>
 			<SearchIcon />
 			<PlaceholderText>
-				Search
+				{isV5() ? 'Search...' : 'Search'}
 			</PlaceholderText>
 		</Placeholder>
 	));
@@ -392,10 +393,11 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		>
 			<Paper
 				square
-				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
-				{options.children}
+				<SuggestionsScrollArea {...options.containerProps}>
+					{options.children}
+				</SuggestionsScrollArea>
 			</Paper>
 		</SuggestionsList>
 	)
@@ -514,25 +516,31 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 	public renderSelectedFilters = () => {
 		const { selectedFilters, filtersOpen, removableFilterIndex } = this.state;
 		return (
-			<SelectedFilters
-				empty={!selectedFilters.length}
-				filtersOpen={selectedFilters.length && filtersOpen}
+			<ViewerScrollArea
+				autoHeight
+				autoHeightMax={240}
+				autoHeightMin={!selectedFilters.length ? 0 : 45}
 			>
-				{selectedFilters.length ? this.renderFilterButton() : null}
-				<Chips filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
-					{selectedFilters.map(
-						(filter, index) => (
-							<StyledChip
-								key={index}
-								color={index === removableFilterIndex ? 'primary' : 'default'}
-								label={getSelectedFilterLabel(filter)}
-								onDelete={() => this.onDeselectFilter(filter)}
-							/>
+				<SelectedFilters
+					empty={!selectedFilters.length}
+					filtersOpen={selectedFilters.length && filtersOpen}
+				>
+					{selectedFilters.length ? this.renderFilterButton() : null}
+					<Chips filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
+						{selectedFilters.map(
+							(filter, index) => (
+								<StyledChip
+									key={index}
+									color={index === removableFilterIndex ? 'primary' : 'default'}
+									label={getSelectedFilterLabel(filter)}
+									onDelete={() => this.onDeselectFilter(filter)}
+								/>
+							)
 						)
-					)
-					}
-				</Chips>
-			</SelectedFilters>
+						}
+					</Chips>
+				</SelectedFilters>
+			</ViewerScrollArea>
 		);
 	}
 

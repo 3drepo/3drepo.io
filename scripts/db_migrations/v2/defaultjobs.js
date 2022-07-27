@@ -13,7 +13,7 @@ var jobs = [
 
 print('Default jobs:');
 // generate default permission templates 
-db.getSiblingDB('admin').system.users.update({}, { '$addToSet': {
+db.getSiblingDB('admin').system.users.updateMany({}, { '$addToSet': {
         'customData.jobs': { '$each': jobs }
     } 
 }, { multi: true});

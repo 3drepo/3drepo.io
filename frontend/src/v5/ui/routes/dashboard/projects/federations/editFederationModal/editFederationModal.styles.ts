@@ -16,65 +16,11 @@
  */
 
 import styled from 'styled-components';
-import IncludeIconBase from '@assets/icons/include_element.svg';
-import RemoveIconBase from '@assets/icons/remove_element.svg';
+import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
+import { FormDialogContent } from '@controls/modal/formModal/formDialog.styles';
 
-export const IconContainer = styled.div`
-	display: grid;
-	min-width: 46px;
-`;
-
-export const IncludeIcon = styled(IncludeIconBase)`
-	&:hover {
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.dark};
-		}
-	}
-
-	&:active {
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.darkest};
-		}
-	}
-
-	${({ theme, isSelected }) => isSelected && `
-		circle {
-			fill: ${theme.palette.primary.lightest};
-		}
-		path {
-			fill: ${theme.palette.primary.dark};
-		}
-
-		&:hover {
-			circle {
-				fill: ${theme.palette.primary.dark};
-			}
-			path {
-				fill: ${theme.palette.primary.lightest};
-			}
-		}
-
-		&:active {
-			circle {
-				fill: ${theme.palette.primary.darkest};
-			}
-			path {
-				fill: ${theme.palette.primary.lightest};
-			}
-		}
-	`}
-`;
-
-export const RemoveIcon = styled(RemoveIconBase)`
-	&:hover {
-		circle {
-			fill: ${({ theme }) => theme.palette.error.dark};
-		}
-	}
-
-	&:active {
-		circle {
-			fill: ${({ theme }) => theme.palette.error.darkest};
-		}
+export const FormModal = styled(FormModalBase)`
+	${FormDialogContent} {
+		padding: 7px 24px 22px;
 	}
 `;

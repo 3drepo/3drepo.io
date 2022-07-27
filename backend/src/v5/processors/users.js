@@ -14,11 +14,44 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updatePassword, updateProfile, uploadAvatar } = require('../models/users');
 
 const Users = {};
+
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
+const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
+	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
+const { fileExists, getFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
+const config = require('../utils/config');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateHashString } = require('../utils/helper/strings');
+const { generateUserHash } = require('../services/intercom');
+const { publish } = require('../services/eventsManager/eventsManager');
+const { sendEmail } = require('../services/mailer');
+const { templates } = require('../services/mailer/mailer.constants');
+
+Users.signUp = async (newUserData) => {
+	const token = generateHashString();
+	await addUser({ ...newUserData, token });
+	await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
+		token,
+		email: newUserData.email,
+		firstName: newUserData.firstName,
+		username: newUserData.username,
+	});
+};
+
+Users.verify = async (username, token) => {
+	const customData = await verify(username, token);
+
+	publish(events.USER_VERIFIED, {
+		username,
+		email: customData.email,
+		fullName: `${customData.firstName} ${customData.lastName}`,
+		company: customData.billing.billingInfo.company,
+		mailListOptOut: customData.mailListOptOut,
+	});
+};
 
 Users.login = async (username, password) => {
 	await canLogIn(username);
@@ -31,7 +64,6 @@ Users.getProfileByUsername = async (username) => {
 		'customData.firstName': 1,
 		'customData.lastName': 1,
 		'customData.email': 1,
-		'customData.avatar': 1,
 		'customData.apiKey': 1,
 		'customData.billing.billingInfo.company': 1,
 		'customData.billing.billingInfo.countryCode': 1,
@@ -39,15 +71,20 @@ Users.getProfileByUsername = async (username) => {
 
 	const { customData } = user;
 
+	const hasAvatar = await fileExists(username);
+
+	const intercomRef = generateUserHash(customData.email);
+
 	return {
 		username: user.user,
 		firstName: customData.firstName,
 		lastName: customData.lastName,
 		email: customData.email,
-		hasAvatar: !!customData.avatar,
+		hasAvatar,
 		apiKey: customData.apiKey,
 		company: customData.billing?.billingInfo?.company,
 		countryCode: customData.billing?.billingInfo?.countryCode,
+		...(intercomRef ? { intercomRef } : {}),
 	};
 };
 
@@ -68,8 +105,26 @@ Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
 
-Users.getAvatar = getAvatar;
+Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
 
-Users.uploadAvatar = uploadAvatar;
+Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
+
+Users.generateResetPasswordToken = async (username) => {
+	const expiredAt = new Date();
+	expiredAt.setHours(expiredAt.getHours() + config.tokenExpiry.forgotPassword);
+	const resetPasswordToken = { token: generateHashString(), expiredAt };
+
+	await updateResetPasswordToken(username, resetPasswordToken);
+
+	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1,
+		'customData.email': 1,
+		'customData.firstName': 1 });
+	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token,
+		email,
+		username,
+		firstName });
+};
+
+Users.updatePassword = updatePassword;
 
 module.exports = Users;

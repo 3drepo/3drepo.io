@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { DEFAULT_VIEWPOINTS } from './presetViews.constants';
 import { StyledSvgIcon } from './presetViews.styles';
 

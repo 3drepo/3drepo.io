@@ -15,25 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 
 import { Constants } from '../../helpers/actions.helper';
-
-interface IDialogActions {
-	open: (type?: string, props?: any) => any;
-	close: (id: string) => any;
-}
-
-export interface IDialogConfig {
-	id: string;
-	modalType?: 'error' | 'info' | 'alert';
-	props: any;
-}
-
-export interface IDialogState {
-	dialogs: IDialogConfig[];
-}
 
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
@@ -42,7 +28,7 @@ export const INITIAL_STATE: IDialogState = {
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	open: ['modalType', 'props'],
 	close: ['dialogId'],
-}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogActions>; Creators: IDialogActions };
+}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
 export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {
 	const dialog = {
@@ -60,7 +46,28 @@ export const closeHandler = (state = INITIAL_STATE, { dialogId }): IDialogState 
 	return { ...state, dialogs };
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const dialogsReducer = createReducer(INITIAL_STATE, {
 	[DialogsTypes.OPEN]: openHandler,
 	[DialogsTypes.CLOSE]: closeHandler,
 });
+
+/**
+ * Types
+ */
+type OpenAction<T> = Action<'OPEN'> & { modalType: string, props: T };
+type CloseAction = Action<'CLOSE'> & { dialogId: string };
+
+export interface IDialogsActionCreators {
+	open: <T>(type?: string, props?: T) => OpenAction<T>;
+	close: (id: string) => CloseAction;
+}
+
+export interface IDialogConfig {
+	id: string;
+	modalType?: 'delete' | 'warning' | 'alert' | 'info';
+	props: any;
+}
+
+export interface IDialogState {
+	dialogs: IDialogConfig[];
+}

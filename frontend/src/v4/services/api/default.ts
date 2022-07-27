@@ -36,7 +36,7 @@ axios.interceptors.response.use(
 			switch (error.response.status) {
 				case 401:
 					if (error.response.data) {
-						const notLogin = error.response.data.place !== 'GET /login';
+						const notLogin = !error.response.data.place.includes('/login');
 						const unauthorized = invalidMessages.includes(error.response.data.message);
 
 						const sessionHasExpired = unauthorized && notLogin;

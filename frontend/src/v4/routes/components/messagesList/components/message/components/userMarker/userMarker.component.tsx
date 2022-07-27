@@ -70,9 +70,11 @@ export const UserMarker = ({ name, children, currentUser, urlParams }: IProps): 
 				onClose={handlePopoverClose}
 				disableRestoreFocus
 			>
-				{currentUser && <UserPopover user={currentUser}>
-					<UserAvatar name={name} currentUser={currentUser} />
-				</UserPopover>}
+				{currentUser && (
+					<UserPopover user={currentUser}>
+						<UserAvatar name={name} currentUser={currentUser} />
+					</UserPopover>
+				)}
 			</Popover>
 		</>
 	);

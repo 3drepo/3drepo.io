@@ -17,15 +17,16 @@
 
 import {
 	INITIAL_STATE,
-	reducer as revisionsReducer,
+	revisionsReducer,
 	RevisionsActions,
+	IRevisionsState,
 } from '@/v5/store/revisions/revisions.redux';
-import { IRevisionsState } from '@/v5/store/revisions/revisions.types';
 import { times } from 'lodash';
 import { revisionsMockFactory } from './revisions.fixtures';
 
 describe('Revisions: redux', () => {
 	const containerId = 'containerId';
+	const uploadId = 'uploadId';
 	const mockRevisions = times(5, () => revisionsMockFactory());
 	const defaultState:IRevisionsState = {
 		...INITIAL_STATE,
@@ -62,4 +63,67 @@ describe('Revisions: redux', () => {
 			expect(resultRevisions.length).toEqual(mockRevisionsLength);
 		});
 	});
+
+	describe('on setUploadProgress action', () => {
+		const newProgressValue = 15;
+		const defaultState: IRevisionsState = {
+			...INITIAL_STATE,
+			revisionsUploadStatus: {
+				[uploadId]: {
+					isComplete: false,
+					progress: 0,
+				},
+			},
+		};
+
+		const resultState = revisionsReducer(
+			defaultState,
+			RevisionsActions.setUploadProgress(uploadId, newProgressValue)
+		);
+
+		const resultRevisions = resultState.revisionsUploadStatus[uploadId];
+		expect(resultRevisions.progress).toEqual(newProgressValue);
+	})
+
+	describe('on setUploadComplete action', () => {
+		const errorMessage = 'ERROR!!!';
+
+		const defaultState: IRevisionsState = {
+			...INITIAL_STATE,
+			revisionsUploadStatus: {
+				[uploadId]: {
+					isComplete: false,
+					progress: 100,
+				},
+			},
+		};
+
+		const resultState = revisionsReducer(
+			defaultState,
+			RevisionsActions.setUploadComplete(uploadId, true, errorMessage)
+		);
+
+		const resultRevisions = resultState.revisionsUploadStatus[uploadId];
+		expect(resultRevisions.isComplete).toEqual(true);
+		expect(resultRevisions.errorMessage).toEqual(errorMessage);
+	})
+
+	describe('on revisionProcessingSuccess action', () => {
+		const newRevision = mockRevisions[0];
+
+		const defaultState: IRevisionsState = {
+			...INITIAL_STATE,
+			revisionsByContainer: {
+				[containerId]: [],
+			},
+		};
+
+		const resultState = revisionsReducer(
+			defaultState,
+			RevisionsActions.revisionProcessingSuccess(containerId, newRevision)
+		);
+
+		const resultRevisions = resultState.revisionsByContainer[containerId];
+		expect(resultRevisions).toEqual([newRevision]);
+	})
 })

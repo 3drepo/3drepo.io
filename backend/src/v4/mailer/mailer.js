@@ -16,20 +16,30 @@
  */
 
 "use strict";
+const { createTestAccount } = require("nodemailer");
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
+const { systemLogger } = require("../logger");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
-function sendEmail(template, to, data, attachments) {
-
-	if(!config.mail || !config.mail.smtpConfig) {
-		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
+async function sendEmail(template, to, data, attachments) {
+	if (!config?.mail?.sender) {
+		throw { message: "config.mail.sender is not set" };
 	}
 
-	if(!config.mail || !config.mail.smtpConfig) {
-		return Promise.reject({ message: "config.mail.sender is not set"});
+	if (!config?.mail?.smtpConfig) {
+		if (config?.mail?.generateCredentials) {
+			const { user, pass } = await createTestAccount();
+			config.mail.smtpConfig = {
+				host: "smtp.ethereal.email",
+				port: 587,
+				auth: { user, pass }
+			};
+		} else {
+			throw { message: "config.mail.smtpConfig is not set" };
+		}
 	}
 
 	const mailOptions = {
@@ -39,15 +49,16 @@ function sendEmail(template, to, data, attachments) {
 		html: template.html(data)
 	};
 
-	if(attachments) {
+	if (attachments) {
 		mailOptions.attachments = attachments;
 	}
 
 	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
 	return new Promise((resolve, reject) => {
-		transporter.sendMail(mailOptions, function(err, info) {
-			if(err) {
+		transporter.sendMail(mailOptions, function (err, info) {
+			if (err) {
+				systemLogger.logDebug(`Email error - ${err.message}`);
 				reject(err);
 			} else {
 				resolve(info);
@@ -57,12 +68,12 @@ function sendEmail(template, to, data, attachments) {
 }
 
 function rejectNoUrl(name) {
-	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`});
+	return Promise.reject({ message: `config.mails.urls[${name}] is not defined` });
 }
 
 function getURL(urlName, params) {
 
-	if(!C.MAIL_URLS || !C.MAIL_URLS[urlName]) {
+	if (!C.MAIL_URLS || !C.MAIL_URLS[urlName]) {
 		return null;
 	}
 
@@ -70,24 +81,31 @@ function getURL(urlName, params) {
 }
 
 function sendQueueFailedEmail(err) {
-	if(config.contact) {
+	if (config.contact) {
 		const template = require("./templates/queueFailed");
-		return sendEmail(template, config.contact.email, {domain: config.host, err: JSON.stringify(err)});
-	} else{
-		return Promise.reject({ message: "config.contact is not set"});
+		return sendEmail(template, config.contact.email, { domain: config.host, err: JSON.stringify(err) });
+	} else {
+		return Promise.reject({ message: "config.contact is not set" });
 	}
 }
 
-function sendVerifyUserEmail(to, data) {
+async function sendVerifyUserEmail(to, data) {
+	try {
+		data.url = getURL("verify", { token: data.token, username: data.username, pay: data.pay });
 
-	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
+		if (!data.url) {
+			return rejectNoUrl("verify");
+		}
 
-	if(!data.url) {
-		return rejectNoUrl("verify");
+		const template = require("./templates/verifyUser");
+		const emailRes = await sendEmail(template, to, data);
+
+		systemLogger.logInfo(`Email info - ${JSON.stringify(emailRes)}`);
+
+		return emailRes;
+	} catch (err) {
+		systemLogger.logError(`Email error - ${err.message}`);
 	}
-
-	const template = require("./templates/verifyUser");
-	return sendEmail(template, to, data);
 }
 
 function sendWelcomeUserEmail(to, data) {
@@ -97,9 +115,9 @@ function sendWelcomeUserEmail(to, data) {
 
 function sendResetPasswordEmail(to, data) {
 
-	data.url = getURL("forgotPassword", {token: data.token, username: data.username});
+	data.url = getURL("forgotPassword", { token: data.token, username: data.username });
 
-	if(!data.url) {
+	if (!data.url) {
 		return rejectNoUrl("forgotPassword");
 	}
 	const template = require("./templates/forgotPassword");
@@ -117,18 +135,18 @@ function sendPaymentReceivedEmailToSales(data, attachments) {
 
 	let template = require("./templates/paymentReceived");
 
-	if(data.type === "refund") {
+	if (data.type === "refund") {
 		template = require("./templates/paymentRefunded");
 	}
 
 	const salesTemplate = {
 		html: template.html,
-		subject: function(_data) {
+		subject: function (_data) {
 			return `[${_data.type}] [${_data.invoiceNo}] ${_data.email}`;
 		}
 	};
 
-	if(config.contact && config.contact.sales) {
+	if (config.contact && config.contact.sales) {
 		// console.log(config.contact.sales);
 		return sendEmail(salesTemplate, config.contact.sales, data, attachments);
 	} else {
@@ -143,7 +161,7 @@ function sendNewUser(data) {
 
 	data.url = getBaseURL();
 
-	if(config.contact && config.contact.sales) {
+	if (config.contact && config.contact.sales) {
 		// console.log(config.contact.sales);
 		return sendEmail(template, config.contact.sales, data);
 	} else {
@@ -190,7 +208,7 @@ function sendModelInvitation(to, data) {
 
 	data.url = getURL("model", { account: data.account, model: data.model });
 
-	if(!data.url) {
+	if (!data.url) {
 		return rejectNoUrl("model");
 	}
 
@@ -200,22 +218,22 @@ function sendModelInvitation(to, data) {
 
 function sendImportError(data) {
 
-	if(config.contact) {
+	if (config.contact) {
 		const template = require("./templates/importError");
 		data.domain = config.host;
 		return sendEmail(template, config.contact.email, data, data.attachments);
 	} else {
-		return Promise.reject({ message: "config.mail.sender is not set"});
+		return Promise.reject({ message: "config.mail.sender is not set" });
 	}
 }
 
 function sendFileMissingError(data) {
-	if(config.contact) {
+	if (config.contact) {
 		const template = require("./templates/fileMissingError");
 		data.domain = config.host;
 		return sendEmail(template, config.contact.email, data);
 	} else {
-		return Promise.reject({ message: "config.mail.sender is not set"});
+		return Promise.reject({ message: "config.mail.sender is not set" });
 	}
 }
 

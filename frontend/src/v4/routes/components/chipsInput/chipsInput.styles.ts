@@ -17,38 +17,28 @@
 
 import styled from 'styled-components';
 
-import ChipInput from 'material-ui-chip-input';
+import { Autocomplete } from '@mui/material';
 
-export const StyledChipInput = styled(ChipInput)`
+export const StyledChipInput = styled(Autocomplete)`
 	&& {
 		margin-top: 10px;
-
-		> div {
-			min-height: 32px;
-
-			&::before  {
-				border-bottom-color: rgba(0, 0, 0, .12) !important;
-			}
-		}
-
-		div[role="button"] {
+		padding-right: 0;
+		
+		& .MuiAutocomplete-tag {
 			height: 24px;
+			margin: 4px 8px 4px 0;
 
-			> span {
+			& span {
 				padding-left: 8px;
 				padding-right: 8px;
 			}
-
-			> svg {
-				width: 16px;
-				height: 16px;
-				margin-left: -4px;
-				margin-right: 4px;
-			}
 		}
 
-		div > input {
-			transform: translateY(-3px);
+		& svg {
+			width: 16px;
+			height: 16px;
+			margin-left: -4px;
+			margin-right: 4px;
 		}
 	}
 `;

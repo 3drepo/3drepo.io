@@ -16,10 +16,9 @@
  */
 
 import { ComponentType, createRef, PureComponent, ReactNode } from 'react';
-import { IconProps as IIconProps } from '@material-ui/core/Icon';
-import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
-
-import { StyledPopover } from './buttonMenu.styles';
+import { IconProps as IIconProps } from '@mui/material/Icon';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import { StyledPopover, Container } from './buttonMenu.styles';
 
 interface IProps {
 	Icon?: ComponentType;
@@ -30,6 +29,7 @@ interface IProps {
 	PopoverProps?: any;
 	PaperProps?: any;
 	container?: any;
+	className?: string;
 	renderButton?: (props?) => ReactNode;
 	renderContent?: (props?) => ReactNode;
 	onClose?: () => void;
@@ -45,6 +45,7 @@ const DefaultButton = ({IconProps, Icon, ...props}) => (
 		{...props}
 		aria-label="Toggle menu"
 		aria-haspopup="true"
+		size="large"
 	>
 		<Icon {...IconProps} />
 	</IconButton>
@@ -60,7 +61,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 		activeMenu: false
 	};
 
-	public buttonRef = createRef<HTMLElement>();
+	public ref = createRef<HTMLDivElement>();
 
 	public toggleMenu = (forceHide) => (event) => {
 		event.stopPropagation();
@@ -95,7 +96,17 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { Icon, renderButton, renderContent, ButtonProps, PopoverProps, PaperProps, IconProps, ripple } = this.props;
+		const {
+			Icon,
+			renderButton,
+			renderContent,
+			ButtonProps,
+			PopoverProps,
+			PaperProps,
+			IconProps,
+			ripple,
+			className,
+		} = this.props;
 		const { activeMenu } = this.state;
 
 		const buttonProps = {
@@ -103,23 +114,23 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 			IconProps,
 			Icon,
 			onClick: this.toggleMenu(null),
-			buttonRef: this.buttonRef,
+			...(ripple ? { isMenuOpen: activeMenu } : {}),
 		};
-
-		const additionalButtonProps = ripple ? { isMenuOpen: activeMenu } : {};
 
 		const popoverProps = { ...PopoverProps };
 
 		return (
 			<>
-				{renderButton({...buttonProps, ...additionalButtonProps})}
+				<Container ref={this.ref} className={className}>
+					{renderButton(buttonProps)}
+				</Container>
 				<StyledPopover
 					{...popoverProps}
 					PaperProps={...PaperProps}
 					open={activeMenu}
-					anchorEl={this.buttonRef.current}
+					anchorEl={this.ref.current}
 					onClose={this.toggleMenu(false)}
-					onEntering={this.handleOnOpen}
+					TransitionProps={{onEntering: this.handleOnOpen}}
 					disableRestoreFocus
 				>
 					{renderContent({ close: this.toggleMenu(false) })}

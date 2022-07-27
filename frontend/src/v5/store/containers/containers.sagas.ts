@@ -18,23 +18,23 @@
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
+	AddFavouriteAction,
 	ContainersActions,
 	ContainersTypes,
+	CreateContainerAction,
+	DeleteContainerAction,
+	FetchContainersAction,
+	FetchContainerSettingsAction,
+	FetchContainerStatsAction,
+	FetchContainerViewsAction,
+	RemoveFavouriteAction,
+	UpdateContainerSettingsAction,
 } from '@/v5/store/containers/containers.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import {
-	AddFavouriteAction,
-	RemoveFavouriteAction,
-	FetchContainersResponse,
-	FetchContainerStatsResponse,
-	CreateContainerAction,
-	FetchContainersAction,
-	FetchContainerStatsAction,
-	DeleteContainerAction,
-
-} from './containers.types';
-import { prepareContainersData } from './containers.helpers';
+import { FetchContainersResponse } from '@/v5/services/api/containers';
+import { FetchContainerViewsResponseView } from './containers.types';
+import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -84,7 +84,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats: FetchContainerStatsResponse = yield API.Containers.fetchContainerStats({
+		const stats = yield API.Containers.fetchContainerStats({
 			teamspace, projectId, containerId,
 		});
 
@@ -92,6 +92,67 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchStats.error', defaultMessage: 'trying to fetch containers details' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainerViews({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerViewsAction) {
+	try {
+		const { views }: FetchContainerViewsResponseView = yield API.Containers.fetchContainerViews({
+			teamspace,
+			projectId,
+			containerId,
+		});
+		yield put(ContainersActions.fetchContainerViewsSuccess(projectId, containerId, views));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchViews.error', defaultMessage: 'trying to fetch container views' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainerSettings({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerSettingsAction) {
+	try {
+		const rawSettings = yield API.Containers.fetchContainerSettings({
+			teamspace,
+			projectId,
+			containerId,
+		});
+		const settings = prepareContainerSettingsForFrontend(rawSettings);
+		yield put(ContainersActions.fetchContainerSettingsSuccess(projectId, containerId, settings));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchSettings.error', defaultMessage: 'trying to fetch container settings' }),
+			error,
+		}));
+	}
+}
+
+export function* updateContainerSettings({
+	teamspace,
+	projectId,
+	containerId,
+	settings,
+}: UpdateContainerSettingsAction) {
+	try {
+		const rawSettings = prepareContainerSettingsForBackend(settings);
+		yield API.Containers.updateContainerSettings({
+			teamspace, projectId, containerId, settings: rawSettings,
+		});
+		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.updateSettings.error', defaultMessage: 'trying to update container settings' }),
 			error,
 		}));
 	}
@@ -114,15 +175,13 @@ export function* createContainer({ teamspace, projectId, newContainer }: CreateC
 	}
 }
 
-export function* deleteContainer({ teamspace, projectId, containerId }: DeleteContainerAction) {
+export function* deleteContainer({ teamspace, projectId, containerId, onSuccess, onError }: DeleteContainerAction) {
 	try {
 		yield API.Containers.deleteContainer({ teamspace, projectId, containerId });
 		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'container.delete.error', defaultMessage: 'trying to delete container' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 
@@ -131,6 +190,9 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
-	yield takeLatest(ContainersTypes.CREATE_CONTAINER, createContainer);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_VIEWS, fetchContainerViews);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_SETTINGS, fetchContainerSettings);
+	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
+	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 }

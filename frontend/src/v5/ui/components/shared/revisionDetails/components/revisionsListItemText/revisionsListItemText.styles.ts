@@ -16,10 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 
 export const Text = styled(Typography).attrs({
 	variant: 'body1',
-})`
+})<{ $active: boolean }>`
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 `;

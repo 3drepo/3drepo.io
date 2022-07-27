@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useCallback } from 'react';
-import CopyIcon from '@material-ui/icons/FileCopy';
-import ShareIcon from '@material-ui/icons/Share';
+import CopyIcon from '@mui/icons-material/FileCopy';
+import ShareIcon from '@mui/icons-material/Share';
 
 import copy from 'copy-to-clipboard';
 

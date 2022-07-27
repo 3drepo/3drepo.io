@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 
 const hiddenStyles = css`
 	pointer-events: none;
@@ -30,7 +30,7 @@ const widenedStyles = css`
 	}
 `;
 
-export const StyledIconButton = styled(({ disableGutters, ...props}) => <IconButton {...props}  />)`
+export const StyledIconButton = styled(({ disableGutters, ...props}) => <IconButton {...props} size="large" />)`
 	${({ hidden }) => hidden && hiddenStyles};
 	${({ widened }) => widened && widenedStyles};
 `;

@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import MenuList from '@material-ui/core/MenuList';
+import MenuList from '@mui/material/MenuList';
 
 import { Name } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
 import { Loader } from '../loader/loader.component';

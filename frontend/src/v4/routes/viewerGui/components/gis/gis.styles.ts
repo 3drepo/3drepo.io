@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
-import Select from '@material-ui/core/Select';
-import MapIcon from '@material-ui/icons/Map';
+import IconButton from '@mui/material/IconButton';
+import Select from '@mui/material/Select';
+import MapIcon from '@mui/icons-material/Map';
 
 import { COLOR } from '../../../../styles';
 
@@ -65,6 +65,7 @@ export const VisibilityButton = styled(IconButton)`
 		color: '${COLOR.BLACK_60}';
 		position: absolute;
 		right: -12px;
+		z-index: 1;
 	}
 `;
 
@@ -93,5 +94,7 @@ export const MapName = styled.div`
 `;
 
 export const MapLayers = styled(ViewerPanelContent)`
-	padding: 24px;
+	& > div {
+		padding: 24px;
+	}
 `;

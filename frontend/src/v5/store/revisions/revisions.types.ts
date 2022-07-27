@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Action } from 'redux';
-
 export interface IRevision {
 	_id: string;
 	timestamp: Date;
 	tag: string;
 	author: string;
-	desc: string;
+	desc?: string;
 	void?: boolean;
 }
 
-export interface IRevisionsState {
-	revisionsByContainer: Record<string, IRevision[]>;
-	isPending: Record<string, boolean>;
+export interface IUploadStatus {
+	isComplete: boolean;
+	errorMessage?: string;
+	progress: number;
 }
 
 export type FetchRevisionsPayload = {
@@ -45,18 +44,28 @@ export type RevisionVoidStatusPayload = {
 	isVoid: boolean;
 };
 
-export type SetRevisionVoidStatusAction = Action<'SET_REVISION_VOID_STATUS'> & RevisionVoidStatusPayload;
-export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATUS_SUCCESS'> & { projectId: string, containerId: string; revisionId: string, isVoid: boolean };
-export type FetchAction = Action<'FETCH'> & FetchRevisionsPayload;
-export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { containerId: string, revisions: IRevision[] };
-export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { containerId: string, isPending: boolean };
+export type CreateRevisionBody = {
+	revisionTag: string;
+	revisionDesc?: string;
+	file: File;
+	importAnimations?: boolean;
+	timezone?: string;
 
-export interface IRevisionsActionCreators {
-	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
-	SetRevisionVoidStatusAction;
-	setVoidStatusSuccess: (containerId: string, revisionId: string, isVoid: boolean) =>
-	SetRevisionVoidStatusSuccessAction;
-	fetch: (teamspace: string, projectId: string, containerId: string) => FetchAction;
-	fetchSuccess: (containerId: string, revisions: IRevision[]) => FetchSuccessAction;
-	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
-}
+	containerId?: string;
+	containerName: string;
+	containerType: string;
+	containerUnit: string;
+	containerDesc?: string;
+	containerCode?: string;
+};
+
+export type CreateRevisionPayload = {
+	teamspace: string;
+	projectId: string;
+	uploadId: string;
+	body: CreateRevisionBody;
+};
+
+export type IRevisionUpdate = Partial<Omit<IRevision, '_id'>> & {
+	_id: string;
+};

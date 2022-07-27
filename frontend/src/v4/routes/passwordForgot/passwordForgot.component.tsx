@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
 import { Field, Form, Formik } from 'formik';
 import { Link } from 'react-router-dom';
 
@@ -77,7 +77,7 @@ export class PasswordForgot extends PureComponent<IProps, IState> {
 												fullWidth
 											/>
 										)} />
-										<Buttons container justify="space-between">
+										<Buttons container justifyContent="space-between">
 											<StyledButton
 												color="secondary"
 												component={Link}

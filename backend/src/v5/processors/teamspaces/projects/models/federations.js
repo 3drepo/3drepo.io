@@ -24,7 +24,7 @@ const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRisksCount } = require('../../../../models/risks');
-const { queueFederationUpdate } = require('../../../../services/queue');
+const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
 const Federations = { ...Groups, ...Views };
 

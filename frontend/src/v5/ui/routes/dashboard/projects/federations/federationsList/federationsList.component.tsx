@@ -39,6 +39,7 @@ import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -51,6 +52,7 @@ type IFederationsList = {
 	},
 	hasFederations: boolean;
 	showBottomButton?: boolean;
+	onClickCreate: () => void;
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
 };
@@ -62,10 +64,11 @@ export const FederationsList = ({
 	titleTooltips,
 	filterQuery,
 	onFilterQueryChange,
+	onClickCreate,
 	showBottomButton = false,
 	hasFederations,
 }: IFederationsList): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
 
@@ -100,6 +103,7 @@ export const FederationsList = ({
 							startIcon={<AddCircleIcon />}
 							variant="contained"
 							color="primary"
+							onClick={onClickCreate}
 						>
 							<FormattedMessage id="federations.newFederation" defaultMessage="New Federation" />
 						</Button>
@@ -148,10 +152,7 @@ export const FederationsList = ({
 				{showBottomButton && !isListPending && hasFederations && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add federation');
-						}}
+						onClick={onClickCreate}
 					>
 						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
 					</DashboardListButton>

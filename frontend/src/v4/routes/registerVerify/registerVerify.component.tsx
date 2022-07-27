@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import * as queryString from 'query-string';
 import { Link } from 'react-router-dom';
 
@@ -82,7 +82,7 @@ export class RegisterVerify extends PureComponent<IProps, IState> {
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
 						{message && <Paragraph> {message} </Paragraph>}
-						<Buttons container justify="space-between">
+						<Buttons container justifyContent="space-between">
 							<StyledButton
 								color="secondary"
 								component={Link}

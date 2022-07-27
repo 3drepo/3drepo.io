@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Icon from '@material-ui/core/Icon';
+import Icon from '@mui/material/Icon';
 import styled from 'styled-components';
 import { MuiTheme } from '../../../styles';
 

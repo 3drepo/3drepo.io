@@ -49,6 +49,13 @@ const getProjectByQuery = async (ts, query, projection) => {
 	return res;
 };
 
+Projects.findProjectByModelId = async (teamspace, modelId, projection) => {
+	const data = await findOneProject(teamspace, { models: modelId }, projection);
+	if (!data) {
+		throw templates.projectNotFound;
+	}
+	return data;
+};
 Projects.getProjectByName = (ts, name, projection) => getProjectByQuery(ts, { name }, projection);
 
 Projects.getProjectById = (ts, id, projection) => getProjectByQuery(ts, { _id: id }, projection);
@@ -85,6 +92,15 @@ Projects.updateProject = async (teamspace, projectId, updatedProject) => {
 	if (matchedCount === 0) {
 		throw templates.projectNotFound;
 	}
+};
+
+Projects.removeUserFromAllProjects = async (teamspace, user) => {
+	await db.updateMany(
+		teamspace,
+		COL_NAME,
+		{ 'permissions.user': user },
+		{ $pull: { permissions: { user } } },
+	);
 };
 
 module.exports = Projects;

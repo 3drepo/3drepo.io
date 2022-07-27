@@ -14,11 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
-import Check from '@material-ui/icons/Check';
-import TreeIcon from '@material-ui/icons/DeviceHub';
+import { PureComponent, createRef, useCallback, forwardRef } from 'react';
+import Check from '@mui/icons-material/Check';
+import TreeIcon from '@mui/icons-material/DeviceHub';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -64,6 +65,25 @@ interface IState {
 	isScrollToActive: boolean;
 }
 
+const CustomScrollArea = ({ forwardedRef, style, children, onScroll }) => {
+	const refSetter = useCallback(scrollbarRef => forwardedRef(scrollbarRef?.view || null), [forwardedRef]);
+
+	return (
+		<ViewerScrollArea
+			ref={refSetter}
+			style={{ ...style, overflow: "hidden" }}
+			autoHide
+			onScroll={onScroll}
+		>
+			{children}
+		</ViewerScrollArea>
+	);
+};
+
+const CustomScrollAreaForVirtualList = forwardRef((props: any, ref) => (
+  <CustomScrollArea {...props} forwardedRef={ref} />
+));
+
 export class Tree extends PureComponent<IProps, IState> {
 
 	get type() {
@@ -102,6 +122,7 @@ export class Tree extends PureComponent<IProps, IState> {
 	};
 
 	public nodeListRef = createRef() as any;
+	private scrollbarRef = createRef() as any;
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
@@ -134,6 +155,8 @@ export class Tree extends PureComponent<IProps, IState> {
 							itemSize={TREE_ITEM_SIZE}
 							itemKey={this.getNodeId}
 							className="tree-list"
+							outerElementType={CustomScrollAreaForVirtualList}
+							outerRef={this.scrollbarRef}
 						>
 							{this.renderTreeNode}
 						</List>
@@ -247,7 +270,7 @@ export class Tree extends PureComponent<IProps, IState> {
 	private renderActionsMenu = () => (
 		<MenuList>
 			{TREE_ACTIONS_MENU.map(({ name, Icon, label }) => (
-				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+				<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>
 						{label}

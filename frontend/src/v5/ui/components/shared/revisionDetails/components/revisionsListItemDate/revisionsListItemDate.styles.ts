@@ -16,11 +16,11 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 
-export const Text = styled(Typography)`
+export const Text = styled(Typography)<{ $active: boolean }>`
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 	${({ theme }) => theme && css`
-    ${theme.typography.kicker};
+    	${theme.typography.kicker};
 	`}
 `;

@@ -21,7 +21,7 @@ import { PresentationMode } from '../../modules/presentation/presentation.consta
 import { COLOR } from '../../styles';
 
 interface IContainer {
-	visibility: boolean;
+	visibility?: boolean;
 	presentationMode?: PresentationMode;
 	isPresentationPaused?: boolean;
 }
@@ -39,7 +39,7 @@ const getAdditionalStyles = ({ presentationMode, isPresentationPaused }) => {
 	}
 };
 
-export const Container = styled.div<IContainer>`
+export const Container = styled.div<{ visible?: boolean }>`
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -52,5 +52,5 @@ export const Border = styled.div<IContainer>`
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	${(props) => getAdditionalStyles(props)};
+	${({ presentationMode, isPresentationPaused }) => getAdditionalStyles({ presentationMode, isPresentationPaused })};
 `;

@@ -17,9 +17,9 @@
 
 import styled, { css } from 'styled-components';
 
-import { Grid, IconButton, Input, ListItem } from '@material-ui/core';
-import Slider from '@material-ui/core/Slider';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
+import { Grid, IconButton, Input } from '@mui/material';
+import Slider from '@mui/material/Slider';
+import DotIcon from '@mui/icons-material/FiberManualRecord';
 
 import {
 	VIEWER_PANELS,
@@ -58,7 +58,7 @@ export const SequenceSlider = styled(Slider)`
 
 export const SequencePlayerContainer = styled.div`
 	display: block;
-	height: 165px
+	height: 165px;
 `;
 
 export const SequenceTasksListContainer = styled(ViewerPanelContent)`
@@ -121,11 +121,11 @@ export const Task = styled.div`
 	display: flex;
 ` as any;
 
-export const TaskItemLabel = styled.div`
+export const TaskItemLabel = styled.div<{ clickable?: boolean }>`
 	margin-top: 3px;
 	line-height: 1.3;
 	margin-bottom: 2px;
-	${(props: any) => props.clickable && css`
+	${({ clickable }) => clickable && css`
 		&:hover {
 			cursor: pointer;
 		}
@@ -188,7 +188,7 @@ export const StepInput = styled(Input).attrs({
 		margin-left: 2px;
 		outline: none;
 		color: ${COLOR.BLACK_60};
-		padding-bottom: 4px;
+		padding-bottom: 5px;
 		text-align: right;
 	}
 `;

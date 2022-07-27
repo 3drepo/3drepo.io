@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Checkbox } from '@material-ui/core';
+import { Checkbox } from '@mui/material';
 import { capitalize } from 'lodash';
 import { PureComponent } from 'react';
 

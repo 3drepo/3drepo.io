@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import Checkbox from '@material-ui/core/Checkbox';
-import Divider from '@material-ui/core/Divider';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
 import * as Yup from 'yup';
@@ -198,12 +198,8 @@ export class SignUp extends PureComponent<IProps, IState> {
 		const defaultValues = { ...RegistrationInitialValues, email: defaultEmail, emailConfirm: defaultEmail};
 
 		return (
-			<Container
-				container
-				direction="column"
-				alignItems="center"
-				wrap="nowrap">
-				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
+			<Container>
+				<StyledGrid item xs={9} sm={6}>
 					<Panel title="Sign up" hiddenScrollbars>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
@@ -373,26 +369,30 @@ export class SignUp extends PureComponent<IProps, IState> {
 											/>}
 									/>
 								}
-								<Field name="mailListAgreed" render={({ field }) => (
-										<FormControlLabel
-											{...field}
-											value={field.value ? '1' : '0'}
-											control={<Checkbox color="secondary" checked={field.value} />}
-											label="Sign up for the latest news and tutorials!"
-											disabled={isPending}
-										/>
-									)}
-								/>
-								<Field name="termsAgreed" required render={({ field }) => (
-										<FormControlLabel
-											{...field}
-											value={field.value ? '1' : '0'}
-											disabled={isPending}
-											control={<Checkbox color="secondary" checked={field.value} />}
-											label={<TermsLabel />}
-										/>
-									)}
-								/>
+								<FieldsRow>
+									<Field name="mailListAgreed" render={({ field }) => (
+											<FormControlLabel
+												{...field}
+												value={field.value ? '1' : '0'}
+												control={<Checkbox color="secondary" checked={field.value} />}
+												label="Sign up for the latest news and tutorials!"
+												disabled={isPending}
+											/>
+										)}
+									/>
+								</FieldsRow>
+								<FieldsRow>
+									<Field name="termsAgreed" required render={({ field }) => (
+											<FormControlLabel
+												{...field}
+												value={field.value ? '1' : '0'}
+												disabled={isPending}
+												control={<Checkbox color="secondary" checked={field.value} />}
+												label={<TermsLabel />}
+											/>
+										)}
+									/>
+								</FieldsRow>
 								<ButtonContainer>
 									<Field render={({ form }) => (
 										<SubmitButton

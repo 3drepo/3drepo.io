@@ -21,9 +21,7 @@ const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 
-UserAgentHelper.isUserAgentFromPlugin.mockImplementation((userAgent) => userAgent.split(' ')[0] === 'PLUGIN:');
-UserAgentHelper.getUserAgentInfoFromBrowser.mockImplementation(() => ({ data: 'browser ua data' }));
-UserAgentHelper.getUserAgentInfoFromPlugin.mockImplementation(() => ({ data: 'plugin ua data' }));
+UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua data' }));
 
 const sessionId = '123456';
 const username = 'someUsername';
@@ -61,27 +59,34 @@ const testSaveLoginRecord = () => {
 
 		test('Should save a new login record if user agent is from plugin', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, pluginUserAgent, referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromPlugin(),
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 				referrer);
 			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if user agent is from browser', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent, referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser(),
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
+				referrer);
+			checkResults(fn, username, formattedLoginRecord);
+		});
+
+		test('Should save a new login record if user agent empty', async () => {
+			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, '', referrer);
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 				referrer);
 			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if there is no referrer', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser());
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo());
 			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if there is no location', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, '0.0.0.0', browserUserAgent);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser(),
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 				undefined, '0.0.0.0');
 			checkResults(fn, username, formattedLoginRecord);
 		});

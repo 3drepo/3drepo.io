@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton, MenuItem, TextField } from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
-import ShareIcon from '@material-ui/icons/Share';
+import { IconButton, MenuItem, TextField, Button } from '@mui/material';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import ShareIcon from '@mui/icons-material/Share';
 
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
@@ -36,13 +37,16 @@ export const IconStyles = css`
 	}
 `;
 
-export const ViewpointItem = styled(MenuItem)`
+export const ViewpointItem = styled(MenuItem)<{ active?: boolean }>`
 	&& {
-		height: 80px;
 		padding: 8px;
-		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
+		background-color: ${({ active }) => active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
-		box-sizing: content-box;
+		box-sizing: border-box;
+
+		${({ active }) => isV5() && `
+			padding: ${active ? '12px 15px' : '12px 40px 12px 15px'};
+		`}
 	}
 ` as any;
 
@@ -53,7 +57,7 @@ export const StyledForm = styled(Form)`
 	justify-content: space-between;
 `;
 
-export const IconsGroup = styled.div<{ disabled: boolean }>`
+export const IconsGroup = styled.div<{ disabled?: boolean }>`
 	display: flex;
 	align-items: center;
 	margin-right: 0;
@@ -131,9 +135,9 @@ export const NameRow = styled.div`
 	justify-content: space-between;
 `;
 
-export const Name = styled.h3`
+export const Name = styled.h3<{ active?: boolean }>`
 	margin-left: 16px;
-	max-width: ${(props: any) => props.active ? '150px' : '260px'};
+	max-width: ${({ active }) => active ? '150px' : '260px'};
 	font-weight: ${FONT_WEIGHT.NORMAL};
 	font-size: 14px;
 	color: ${COLOR.BLACK};
@@ -165,5 +169,27 @@ export const HamburgerIconButton = styled(IconButton)`
 
 	&&:hover {
 		background-color: ${COLOR.TRANSPARENT}
+	}
+`;
+
+export const SaveButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+})`
+	position: relative;
+	left: 17px;
+	height: 23px;
+	min-width: 44px;
+	font-size: 10px;
+	padding: 5px 7px;
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.main} !important;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	&:active {
+		background-color: ${({ theme }) => theme.palette.secondary.dark} !important;
+		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;

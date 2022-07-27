@@ -20,9 +20,9 @@ import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { Highlight } from '../../../components/highlight/highlight.component';
 import { StarIcon as StarIconComponent } from '../../../components/starIcon/starIcon.component';
 
-export const Container = styled.div`
+export const Container = styled.div<{ federate?: any }>`
 	box-shadow: 0 2px 4px 0 ${COLOR.BLACK_20};
-	background-color: ${(props) => props.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
+	background-color: ${({ federate }) => federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
 	color: ${COLOR.TUNDORA};
 	display: flex;
 	flex-direction: column;
@@ -39,10 +39,10 @@ export const Header = styled.div`
 	margin: 0 0 5px;
 `;
 
-export const Name = styled(Highlight)`
+export const Name = styled(Highlight)<{ isPending?: boolean }>`
 	margin: 1px 0 0 2px;
 	word-break: break-all;
-	cursor: ${(props) => props.isPending ? 'inherit' : 'pointer'};
+	cursor: ${({ isPending }) => isPending ? 'inherit' : 'pointer'};
 
 	&, mark {
 		font-weight: ${FONT_WEIGHT.BOLD};

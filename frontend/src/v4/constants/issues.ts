@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AdjustIcon from '@material-ui/icons/Adjust';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import Download from '@material-ui/icons/CloudDownload';
-import Upload from '@material-ui/icons/CloudUpload';
-import HighlightOff from '@material-ui/icons/HighlightOff';
-import LensIcon from '@material-ui/icons/Lens';
-import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
-import Pins from '@material-ui/icons/PinDrop';
-import Print from '@material-ui/icons/Print';
-import ViewModule from '@material-ui/icons/ViewModule';
+import AdjustIcon from '@mui/icons-material/Adjust';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Download from '@mui/icons-material/CloudDownload';
+import Upload from '@mui/icons-material/CloudUpload';
+import HighlightOff from '@mui/icons-material/HighlightOff';
+import LensIcon from '@mui/icons-material/Lens';
+import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
+import Pins from '@mui/icons-material/PinDrop';
+import Print from '@mui/icons-material/Print';
+import ViewModule from '@mui/icons-material/ViewModule';
 
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
-import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';
@@ -36,12 +36,18 @@ export const ISSUE_PROPERTIES_TAB = 'issue';
 export const ISSUE_SEQUENCING_TAB = 'sequencing';
 export const ATTACHMENTS_ISSUE_TAB = 'attachments';
 export const ISSUE_SHAPES_TAB = 'shapes';
+export const V5_ISSUE_SEQUENCING_TAB = '4D';
 
 export const ISSUE_TABS = {
 	ISSUE: 'Properties',
 	SEQUENCING: 'Sequencing',
 	SHAPES: 'Shapes',
 	ATTACHMENTS: 'Attachments',
+};
+
+export const V5_ISSUE_TABS = {
+	...ISSUE_TABS,
+	SEQUENCING: '4D',
 };
 
 export const STATUSES = {

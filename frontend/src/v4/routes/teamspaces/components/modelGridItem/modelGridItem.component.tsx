@@ -341,7 +341,7 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	return (
 		<Container federate={isFederation}>
-			<ModelLink onClick={handleClick} isPending={isPending} />
+			<ModelLink onClick={handleClick} />
 			<Header>
 				<NameWrapper>
 					<StarIcon

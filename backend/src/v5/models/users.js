@@ -16,6 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
+const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -25,8 +27,8 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const User = {};
 const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
-const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
+const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
+const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
@@ -53,7 +55,7 @@ const recordFailedAuthAttempt = async (user) => {
 
 	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
-	await db.updateOne('admin', COLL_NAME, { user }, {
+	await db.updateOne(USERS_DB_NAME, COLL_NAME, { user }, {
 		$set: {
 			'customData.loginInfo.lastFailedLoginAt': currentTime,
 			'customData.loginInfo.failedLoginCount': newCount,
@@ -114,6 +116,11 @@ User.getUserByQuery = async (query, projection) => {
 
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
 
+User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
+	$or: [{ user: usernameOrEmail },
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }] }, projection);
+
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
 	const favs = customData.starredModels || {};
@@ -122,7 +129,7 @@ User.getFavourites = async (user, teamspace) => {
 
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.map((role) => role.db);
+	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== USERS_DB_NAME ? [roleDB] : []));
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
@@ -148,10 +155,15 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	const favourites = userProfile.customData.starredModels || {};
 
 	if (favourites[teamspace]) {
-		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
-		if (updatedFav.length) {
-			favourites[teamspace] = updatedFav;
-			await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+		if (favouritesToRemove?.length) {
+			const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
+			if (updatedFav.length) {
+				favourites[teamspace] = updatedFav;
+				await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+			} else {
+				const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+				await updateUser(username, action);
+			}
 		} else {
 			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 			await updateUser(username, action);
@@ -167,7 +179,7 @@ User.updatePassword = async (username, newPassword) => {
 		pwd: newPassword,
 	};
 
-	await db.runCommand('admin', updateUserCmd);
+	await db.runCommand(USERS_DB_NAME, updateUserCmd);
 	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
@@ -194,17 +206,58 @@ User.generateApiKey = async (username) => {
 
 User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
 
-User.getAvatar = async (username) => {
-	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
-	const avatar = user.customData?.avatar;
+User.addUser = async (newUserData) => {
+	const customData = {
+		createdAt: new Date(),
+		inactive: true,
+		firstName: newUserData.firstName,
+		lastName: newUserData.lastName,
+		email: newUserData.email,
+		mailListOptOut: !newUserData.mailListAgreed,
+		billing: {
+			billingInfo: {
+				firstName: newUserData.firstName,
+				lastName: newUserData.lastName,
+				countryCode: newUserData.countryCode,
+				company: newUserData.company,
+			},
+		},
+		permissions: [],
+	};
 
-	if (!avatar) {
-		throw templates.userDoesNotHaveAvatar;
-	}
+	const expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
+	customData.emailVerifyToken = {
+		token: newUserData.token,
+		expiredAt: expiryAt,
+	};
 
-	return avatar;
+	await db.createUser(newUserData.username, newUserData.password, customData);
 };
 
-User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
+User.verify = async (username) => {
+	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, COLL_NAME, { user: username },
+		{
+			$unset: {
+				'customData.inactive': 1,
+				'customData.emailVerifyToken': 1,
+			},
+		},
+		{
+			'customData.firstName': 1,
+			'customData.lastName': 1,
+			'customData.email': 1,
+			'customData.billing.billingInfo.company': 1,
+			'customData.mailListOptOut': 1,
+		});
+
+	return customData;
+};
+
+User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
+	{ $push: { 'customData.permissions': { user: username, permissions: [TEAMSPACE_ADMIN] } } });
+
+User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
+	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
 module.exports = User;

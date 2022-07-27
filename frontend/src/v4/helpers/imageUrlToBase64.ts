@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Buffer } from 'buffer';
 import api from '../services/api/';
 
 export const imageUrlToBase64 = (url: string) => api

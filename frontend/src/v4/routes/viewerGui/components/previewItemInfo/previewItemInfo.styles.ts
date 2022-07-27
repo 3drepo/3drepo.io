@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { COLOR } from '../../../../styles';
@@ -58,11 +58,15 @@ export const Date = styled.span`
 	color: ${COLOR.BLACK_60};
 `;
 
-export const Details = styled.div`
+export const Details = styled.div<{ panelType: string }>`
 	align-items: center;
 	display: flex;
 	justify-content: ${({ panelType }) => panelType === VIEWER_PANELS.GROUPS ? `flex-start` : `space-between`};
 	height: 21px;
+`;
+
+export const UserAndModelDetails = styled.div`
+	display: contents;
 `;
 
 export const Icon = styled.div`

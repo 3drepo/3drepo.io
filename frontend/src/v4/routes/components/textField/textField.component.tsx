@@ -17,17 +17,17 @@
 
 import { createRef, PureComponent } from 'react';
 
-import { StandardTextFieldProps } from '@material-ui/core/TextField';
-import CancelIcon from '@material-ui/icons/Cancel';
-import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
+import { StandardTextFieldProps } from '@mui/material/TextField';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
-import CopyIcon from '@material-ui/icons/FileCopy';
+import { isV5 } from '@/v4/helpers/isV5';
+import CopyIcon from '@mui/icons-material/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	ActionsLine,
 	Container,
@@ -39,6 +39,7 @@ import {
 	StyledLinkableField,
 	StyledMarkdownField,
 	StyledTextField,
+	ExpandAction,
 } from './textField.styles';
 
 interface IProps extends StandardTextFieldProps {
@@ -81,7 +82,7 @@ export class TextField extends PureComponent<IProps, IState> {
 	};
 
 	private inputLocalRef = createRef();
-	private markdownFieldRef = createRef();
+	private markdownFieldRef = createRef<HTMLSpanElement>();
 
 	get isExpandable() {
 		return this.props.expandable && this.state.isLongContent && !this.state.edit;
@@ -310,6 +311,7 @@ export class TextField extends PureComponent<IProps, IState> {
 			mutable,
 			disableShowDefaultUnderline,
 			enableMarkdown,
+			placeholder,
 		} = this.props;
 		const { initialValue } = this.state;
 		const shouldRenderActions = mutable && this.isEditMode;
@@ -330,8 +332,12 @@ export class TextField extends PureComponent<IProps, IState> {
 						<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 							<FieldLabel shrink>{this.props.label}</FieldLabel>
 							{enableMarkdown &&
-							<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
-								{this.fieldValue}
+							<StyledMarkdownField
+								ref={this.markdownFieldRef}
+								$isPlaceholder={!this.fieldValue && isV5()}
+								{...this.additionalProps()}
+							>
+								{isV5() ? (this.fieldValue || placeholder) : this.fieldValue }
 							</StyledMarkdownField>
 							}
 							{!enableMarkdown &&

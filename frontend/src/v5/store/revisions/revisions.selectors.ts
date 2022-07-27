@@ -16,7 +16,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { IRevisionsState } from './revisions.types';
+import { prepareRevisionData } from './revisions.helpers';
+import { IRevisionsState } from './revisions.redux';
 
 const selectRevisionsDomain = (state): IRevisionsState => state.revisions;
 const selectContainerIdParam = (_, containerId: string) => containerId;
@@ -24,11 +25,34 @@ const selectContainerIdParam = (_, containerId: string) => containerId;
 export const selectRevisions = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
-	(state, containerId) => state.revisionsByContainer[containerId] || [],
+	(state, containerId) => state.revisionsByContainer[containerId]?.map((revision) => prepareRevisionData(revision))
+		|| [],
 );
 
 export const selectIsPending: (any, string) => boolean = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
 	(state, containerId) => state.isPending[containerId],
+);
+
+export const selectUploads = createSelector(
+	selectRevisionsDomain,
+	(revisionsState) => revisionsState.revisionsUploadStatus,
+);
+
+export const selectUploadIsComplete = createSelector(
+	selectUploads,
+	(uploadStates) => Object.keys(uploadStates).every((id) => uploadStates[id].isComplete),
+);
+
+export const selectUploadError: (any, string) => string = createSelector(
+	selectUploads,
+	selectContainerIdParam,
+	(uploadStates, containerId) => uploadStates[containerId]?.errorMessage || null,
+);
+
+export const selectUploadProgress: (any, string) => number = createSelector(
+	selectUploads,
+	selectContainerIdParam,
+	(uploadStates, containerId) => uploadStates[containerId]?.progress || 0,
 );

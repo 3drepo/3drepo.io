@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
+import Grid from '@mui/material/Grid';
+import Tooltip from '@mui/material/Tooltip';
 import { Link } from 'react-router-dom';
 
 import { clientConfigService } from '../../../services/clientConfig';
@@ -25,8 +25,8 @@ import { FooterContainer, StyledButton, Version } from '../login.styles';
 const APP_VERSION = clientConfigService.VERSION;
 
 export const Footer = () => (
-	<FooterContainer container alignItems="center" justify="space-between">
-		<Version flex-direction="row">
+	<FooterContainer>
+		<Version>
 			Version:
 			<Tooltip title="Release notes">
 				<StyledButton

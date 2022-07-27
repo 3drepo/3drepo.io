@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MenuItem, MenuList, TextField } from '@material-ui/core';
+import { MenuItem, MenuList, TextField } from '@mui/material';
 import styled from 'styled-components';
+import { ScrollArea } from '@controls/scrollArea';
 
 import { COLOR } from '../../../../styles';
 
@@ -36,7 +37,7 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.VIEWS]}px;
 `;
 
-export const Container = styled.div`
+export const Container = styled(ScrollArea).attrs({ autoHide: true })`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;

@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-
 import { Form } from 'formik';
 
 import {
@@ -24,13 +23,18 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	IconButton,
-	Typography as TypographyComponent
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
+	Typography as TypographyComponent,
+	Grid as GridBase
+
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { isV5 } from '@/v4/helpers/isV5';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import {GROUP_PANEL_NAME} from '../../../../constants/groups';
+import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
 import { COLOR } from '../../../../styles';
-import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
+import { Container as MessageListContainer } from '../../../components/messagesList/messagesList.styles';
 
 const SUMMARY_HEIGHT = 78;
 
@@ -119,6 +123,8 @@ export const StyledForm = styled(Form)`
 	}
 `;
 
+export const Grid = styled(GridBase)``;
+
 export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
 `;
@@ -185,18 +191,6 @@ export const MainInfoContainer = styled.div`
 	padding-right: 0 !important;
 `;
 
-const unexpandedStyles  = css`
-	height: calc(100% - ${SUMMARY_HEIGHT}px);
-
-	${NotCollapsableContent} {
-		height: calc(100% - 40px);
-	}
-
-	${MessageListContainer} {
-		height: calc(100% - 40px);
-	}
-`;
-
 const expandedStyles = css`
 	overflow: auto;
 	position: static;
@@ -204,11 +198,35 @@ const expandedStyles = css`
 	${MessageListContainer} {
 		height: auto;
 	}
-
 `;
 
-export const ScrollableContainer = styled.div`
+const unexpandedStyles  = css`
+	height: calc(100% - ${SUMMARY_HEIGHT}px);
+
+	${isV5()
+		? expandedStyles
+		: `
+			${NotCollapsableContent} {
+				height: calc(100% - 40px);
+			}
+
+			${MessageListContainer} {
+				height: calc(100% - 40px);
+			}
+		`
+	}
+`;
+
+export const ScrollableContainer = styled(ViewerScrollArea)`
 	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
+`;
+
+export const TextField = styled(TextFieldBase)<{ mutable: boolean }>`
+	${({ mutable }) => mutable && css`
+		input {
+			max-width: calc(100% - ${isV5() ? 66 : 58}px);
+		}
+	`}
 `;

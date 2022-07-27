@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,131 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BodyWrapper as CustomTableBody, Cell, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
-import styled, { css } from 'styled-components';
-import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
-import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
-import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTable/permissionsTable.styles';
-import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton, TableHeadingRadioTooltip } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
-import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
+import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
+import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
+import bottomToolbar from './overrides/bottomToolbar.overrides';
+import panelsMenu from './overrides/panelsMenu.overrides';
+import leftPanel from './overrides/leftPanel.overrides';
+import customTable from './overrides/customTable.overrides';
+import previewDetails from './overrides/preview/previewDetails.overrides';
+import previewItem from './overrides/preview/previewItem.overrides';
+import previewComments from './overrides/preview/previewComments.overrides';
+import bim from './overrides/bim.overrides';
+import avatarPopover from './overrides/avatarPopover.overrides';
 
-// all the .simplebar-... stuff is to disable simplebar
-const customTableStyling = css`
-	${CustomTableBody} {
-		position: relative;
-		height: auto;
-
-		div {
-			position: relative;
-			height: auto;
-		}
-
-		.simplebar-content {
-			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-			border-radius: 5px;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-		}
-
-		.simplebar-content-wrapper {
-			height: auto !important;
-			max-height: initial;
-		}
-
-		.simplebar-placeholder {
-			display: none;
-		}
-	}
-
-	${Head} {
-		border: 0;
-
-		${Cell} {
-			padding-top: 22px;
-		}
-	}
-
-	${UserNameCell} {
-		${({ theme }) => theme.typography.h5};
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-	${Row} {
-		min-height: 80px;
-	}
-
-	${SortLabel} {
-		margin: 0;
-		padding-left: 10px;
-		${({ theme }) => theme.typography.kicker};
-		flex-direction: row;
-		svg {
-			fill: transparent;
-			width: 10px;
-			margin-left: 2px;
-		}
-
-		::before {
-			background: transparent;
-		}
-
-		&.MuiTableSortLabel-active {
-			svg {
-				fill: ${({ theme }) => theme.palette.base.main};
-			}
-		}
-	}
-
-	${PermissionsCellContainer} {
-		justify-content: flex-start;
-	}
-
-	${TableHeadingRadioContainer} {
-		justify-content: flex-start;
-		align-items: baseline;
-		margin-top: -22px;
-	}
-
-	${TableHeadingRadioTooltip} {
-		margin-left: -50px;
-	}
-
-	${TableHeadingRadioButton} {
-		height: 20px;
-	}
-
-	${SearchField} {
-		label {
-			${({ theme }) => theme.typography.kicker};
-		}
-
-		input {
-			padding-bottom: 5px;
-			padding-left: 0;
-			padding-top: 0;
-			${({ theme }) => theme.typography.body1};
-		}
-
-		.search-field__label {
-			margin-top: 3px;
-			transform: translate(13px,39px) scale(1);
-
-			&[data-shrink='true'] {
-				transform: translate(13px, 20px) scale(1) !important;
-			}
-		}
-	}
-`;
+import issueSequences from './overrides/cards/issues/sequences.overrides';
+import issueProperties from './overrides/cards/issues/properties.overrides';
+import issueShapes from './overrides/cards/issues/shapes.overrides';
+import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
+import colorPicker from './overrides/colorPicker.overrides';
+import groups from './overrides/cards/groups.overrides';
+import issueAttachments from './overrides/cards/issues/attachments.overrides';
+import measurements from './overrides/cards/measurements.overrides';
+import tree from './overrides/cards/tree.overrides';
+import views from './overrides/cards/views.overrides';
+import gis from './overrides/cards/gis.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 
-	${customTableStyling}
+	${customTable}
+
+	${avatarPopover}
 
 	${HighlighterMark} {
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
+	}
+
+	${leftPanel}
+	${panelsMenu}
+	${bottomToolbar}
+
+	${previewItem}
+	${previewDetails}
+	${previewComments}
+
+	${colorPicker}
+
+	${bim}
+	
+	${groups}
+	${tree}
+	${views}
+	${measurements}
+	
+	${issueProperties}
+	${issueSequences}
+	${issueShapes}
+	${issueAttachments}
+
+	${safetiBase}
+
+	${views}
+	${gis}
+
+	${RevisionsSwitchContainer} {
+		display: none;
 	}
 `;

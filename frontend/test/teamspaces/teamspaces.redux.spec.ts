@@ -17,7 +17,7 @@
 
 import {
 	INITIAL_STATE,
-	reducer as teamspaceReducer,
+	teamspacesReducer,
 	TeamspacesActions
 } from '@/v5/store/teamspaces/teamspaces.redux';
 
@@ -39,7 +39,7 @@ describe('Teamspace: redux', () => {
 				isAdmin: false,
 			}];
 
-			expect(teamspaceReducer(defaultState, TeamspacesActions.fetchSuccess(teamspaces))).toEqual({
+			expect(teamspacesReducer(defaultState, TeamspacesActions.fetchSuccess(teamspaces))).toEqual({
 				...defaultState,
 				teamspaces,
 			});

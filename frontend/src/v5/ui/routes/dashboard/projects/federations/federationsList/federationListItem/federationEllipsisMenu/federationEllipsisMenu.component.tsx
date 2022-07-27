@@ -16,12 +16,13 @@
  */
 import { useParams } from 'react-router';
 import { formatMessage } from '@/v5/services/intl';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
@@ -36,8 +37,7 @@ export const FederationEllipsisMenu = ({
 	openShareModal,
 	openEditFederationModal,
 }: FederationEllipsisMenuProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	const dispatch = useDispatch();
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	return (
 		<EllipsisMenu>
@@ -46,7 +46,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.loadFederation',
 					defaultMessage: 'Load Federation in 3D Viewer',
 				})}
-				to={`/${federation._id}`}
+				to={viewerRoute(teamspace, project, federation)}
 			/>
 
 			<EllipsisMenuItem
@@ -104,21 +104,24 @@ export const FederationEllipsisMenu = ({
 					defaultMessage: 'Delete',
 				})}
 				onClick={() => {
-					dispatch(DialogsActions.open('delete', {
-						title: formatMessage(
-							{ id: 'deleteFederation.federation.title', defaultMessage: 'Delete {name}?' },
-							{ name: federation.name },
-						),
-						onClickConfirm: () => FederationsActionsDispatchers.deleteFederation(
-							teamspace,
-							project,
-							federation._id,
+					DialogsActionsDispatchers.open('delete', {
+						name: federation.name,
+						onClickConfirm: () => new Promise<void>(
+							(accept, reject) => {
+								FederationsActionsDispatchers.deleteFederation(
+									teamspace,
+									project,
+									federation._id,
+									accept,
+									reject,
+								);
+							},
 						),
 						message: formatMessage({
 							id: 'deleteFederation.federation.message',
 							defaultMessage: 'By deleting this Federation your data will be lost permanently and will not be recoverable.',
 						}),
-					}));
+					});
 				}}
 			/>
 		</EllipsisMenu>

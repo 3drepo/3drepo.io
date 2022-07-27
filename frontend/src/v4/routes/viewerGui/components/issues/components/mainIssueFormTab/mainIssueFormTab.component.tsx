@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent } from 'react';
-import InputLabel from '@material-ui/core/InputLabel';
+import { InputAdornment, InputLabel } from '@mui/material';
 import { Field } from 'formik';
 
+import { isV5 } from '@/v4/helpers/isV5';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { LONG_TEXT_CHAR_LIM } from '../../../../../../constants/viewerGui';
 import { canChangeStatus } from '../../../../../../helpers/issues';
@@ -33,6 +35,7 @@ import {
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { Content, DescriptionImage } from '../issueDetails/issueDetails.styles';
 import { IssueSchema } from '../issueDetails/issueDetailsForm.component';
+import { DateFieldContainer } from './mainIssueFormTab.styles';
 
 interface IProps {
 	active: boolean;
@@ -60,6 +63,11 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned,
 	canEditBasicProperty, canEditViewpoint, jobs, disableViewer, ...props
 }) => {
+	const v5Props = {
+		InputProps: {
+			endAdornment: <InputAdornment position="end"><KeyboardArrowDownIcon /></InputAdornment>,
+		}
+	}
 	return (
 		<Content active={active}>
 			<Container>
@@ -75,6 +83,12 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNew}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
+						{...(isV5() && ({
+							placeholder: 'Type a description',
+							disableShowDefaultUnderline: true,
+							className: 'description',
+						}
+						))}
 					/>
 				)} />
 			</Container>
@@ -86,7 +100,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 				/>
 			)}
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<UpdateButtons
 					isNew={isNew}
 					disableViewer={disableViewer}
@@ -102,7 +116,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 				/>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="priority">Priority</InputLabel>
 					<Field name="priority" render={({ field }) => (
@@ -126,7 +140,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 			</FieldsRow>
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="assigned_roles">Assign</InputLabel>
 					<Field name="assigned_roles" render={({ field }) => (
@@ -150,16 +164,20 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 			</FieldsRow>
-			<FieldsRow container justify="space-between" flex={0.5}>
+			<FieldsRow container justifyContent="space-between" flex={0.5}>
 				<StyledFormControl>
 					<InputLabel shrink>Due date</InputLabel>
-					<Field name="due_date" render={({ field }) =>
-						<DateField
-							{...field}
-							format={NAMED_MONTH_DATE_FORMAT}
-							disabled={!canEditBasicProperty}
-							placeholder="Choose a due date" />}
-					/>
+					<Field name="due_date" render={({ field }) => (
+						<DateFieldContainer>
+							<DateField
+								{...field}
+								inputFormat={NAMED_MONTH_DATE_FORMAT}
+								disabled={!canEditBasicProperty}
+								placeholder="Choose a due date"
+								{...(isV5() && v5Props)}
+							/>
+						</DateFieldContainer>
+					)} />
 				</StyledFormControl>
 			</FieldsRow>
 		</Content>
