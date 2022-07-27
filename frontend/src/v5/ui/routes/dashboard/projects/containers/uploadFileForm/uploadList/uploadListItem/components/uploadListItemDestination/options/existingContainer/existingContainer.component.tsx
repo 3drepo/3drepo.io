@@ -31,7 +31,7 @@ export const ExistingContainer = ({ container, latestRevision, inUse, ...props }
 		{container.name}
 		<LatestRevision
 			hasRevisions={!!container.revisionsCount}
-			name={container.name}
+			name={container.latestRevision}
 			status={container.status}
 		/>
 		<ErrorText hidden={!inUse}>
