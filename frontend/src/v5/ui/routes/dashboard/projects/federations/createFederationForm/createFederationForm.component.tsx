@@ -35,7 +35,9 @@ interface ICreateFederation {
 
 const defaultValues = {
 	name: '',
+	desc: '',
 	unit: 'mm',
+	code: '',
 };
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
