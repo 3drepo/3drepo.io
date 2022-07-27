@@ -24,7 +24,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Sidebar } from '@controls/sideBar';
-import { ScrollArea } from '@controls/scrollArea';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
@@ -37,7 +36,7 @@ import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsS
 import { isEmpty } from 'lodash';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
+import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -179,48 +178,52 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				maxWidth="xl"
 				isValid={(isValid && isEmpty(errors) && !isUploading) || (isUploading && allUploadsComplete)}
 			>
-				<Container>
-					<ScrollArea>
+				<UploadsContainer>
+					<UploadsListScroll>
 						<Padding>
-							<div hidden={!fields.length}>
-								<UploadsListHeader
-									onSortingChange={setSortConfig}
-									defaultSortConfig={DEFAULT_SORT_CONFIG}
-								>
-									<DashboardListHeaderLabel key="file" name="file.name" hideWhenSmallerThan={Display.Desktop}>
-										<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="destination" width={352}>
-										<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
-										<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
-										<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-									</DashboardListHeaderLabel>
-								</UploadsListHeader>
-							</div>
 							{!!fields.length && (
-								<UploadList
-									values={sortedList}
-									selectedIndex={selectedIndex}
-									isUploading={isUploading}
-									onClickEdit={(id) => onClickEdit(id)}
-									onClickDelete={(id) => onClickDelete(id)}
-									getOriginalIndex={getOriginalIndex}
-								/>
+								<>
+									<UploadsListHeader
+										onSortingChange={setSortConfig}
+										defaultSortConfig={DEFAULT_SORT_CONFIG}
+									>
+										<DashboardListHeaderLabel key="file" name="file.name" hideWhenSmallerThan={Display.Desktop}>
+											<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="destination" width={352}>
+											<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
+											<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
+											<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+										</DashboardListHeaderLabel>
+									</UploadsListHeader>
+									<UploadList
+										values={sortedList}
+										selectedIndex={selectedIndex}
+										isUploading={isUploading}
+										onClickEdit={(id) => onClickEdit(id)}
+										onClickDelete={(id) => onClickDelete(id)}
+										getOriginalIndex={getOriginalIndex}
+									/>
+								</>
 							)}
 							<DropZone
 								message={formatMessage(
 									{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-									{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+									{ MoreLink:
+										(child: string) => (
+											<a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a>
+										),
+									},
 								)}
 								processFiles={(files) => { processFiles(files); }}
 								hidden={isUploading}
 							/>
 						</Padding>
-					</ScrollArea>
+					</UploadsListScroll>
 					<Sidebar
 						open={Number.isInteger(selectedIndex) && !isUploading}
 						onClick={() => setSelectedIndex(null)}
@@ -252,7 +255,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								: <></>
 						}
 					</Sidebar>
-				</Container>
+				</UploadsContainer>
 			</Modal>
 		</FormProvider>
 	);
