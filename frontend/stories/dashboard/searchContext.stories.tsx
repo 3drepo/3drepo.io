@@ -38,6 +38,14 @@ const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
 					<h1>The query is: <b>{value.query}</b></h1>
 					<ul>
 						{value.filteredItems.map((item) => (<ListItem item={item} />))}
+						{
+							(value.filteredItems.length === 0 && value.items.length > 0)
+							&& (<h5> No item matches the search criteria.</h5>)
+						}
+						{
+							(value.items.length === 0)
+							&& (<h5> No items. </h5>)
+						}
 					</ul>
 				</>
 			)}
