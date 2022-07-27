@@ -57,7 +57,7 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 		max-width: 100%;
 		padding-right: 9px;
 		margin-right: 0;
-		${({ secondary }) => secondary && css`
+		${({ $secondary }) => $secondary && css`
 		font-weight: ${FONT_WEIGHT.SLIM}
 		`};
 	}

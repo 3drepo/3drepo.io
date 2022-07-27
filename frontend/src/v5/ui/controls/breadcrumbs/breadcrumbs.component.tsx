@@ -60,7 +60,7 @@ export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 					return (
 						<div key={`${title}-${index}`}>
 							<InteractiveBreadcrumb
-								secondary={secondary}
+								$secondary={secondary}
 								onClick={handleClick(index)}
 								endIcon={<DownArrowIcon />}
 							>
