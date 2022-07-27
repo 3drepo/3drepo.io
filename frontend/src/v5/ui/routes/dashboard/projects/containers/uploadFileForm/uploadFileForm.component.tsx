@@ -39,11 +39,11 @@ import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
-	openState: boolean;
+	open: boolean;
 	onClickClose: () => void;
 };
 
-export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
+export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
@@ -59,7 +59,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		getValues,
 		setValue,
 		watch,
-		reset,
 		setError,
 		clearErrors,
 	} = methods;
@@ -70,12 +69,14 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	});
 
 	useEffect(() => {
-		if (!isUploading) reset();
-	}, [isUploading]);
+		remove();
+		setSelectedIndex(null);
+		setIsUploading(false);
+	}, [open]);
 
 	useEffect(() => {
-		if (fields.some((field) => filesizeTooLarge(field.file))) {
-			setError('uploads', { type: 'custom', message: '' });
+		if (fields.some(({ file }) => filesizeTooLarge(file))) {
+			setError('uploads', { type: 'custom', message: '' }); // Otherwise submit button not disabled
 		} else {
 			clearErrors('uploads');
 		}
@@ -123,9 +124,11 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		append(filesToAppend);
 	};
 
+	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
+
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = Number.isInteger(selectedIndex) && getOriginalIndex(selectedIndex);
+	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
 
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
@@ -156,7 +159,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	return (
 		<FormProvider {...methods}>
 			<Modal
-				open={openState}
+				open={open}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
 				confirmLabel={
@@ -225,18 +228,16 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						</Padding>
 					</UploadsListScroll>
 					<Sidebar
-						open={Number.isInteger(selectedIndex) && !isUploading}
+						open={sidebarOpen}
 						onClick={() => setSelectedIndex(null)}
-						noButton={!(Number.isInteger(selectedIndex))}
+						noButton={!sidebarOpen}
 					>
 						{
-							Number.isInteger(selectedIndex)
+							sidebarOpen
 								? (
 									<span key={watch(`uploads.${origIndex}.containerName`)}>
 										<SidebarForm
-											value={
-												getValues(`uploads.${origIndex}`)
-											}
+											value={getValues(`uploads.${origIndex}`)}
 											key={sortedList[selectedIndex].uploadId}
 											isNewContainer={
 												!getValues(`uploads.${origIndex}.containerId`)
