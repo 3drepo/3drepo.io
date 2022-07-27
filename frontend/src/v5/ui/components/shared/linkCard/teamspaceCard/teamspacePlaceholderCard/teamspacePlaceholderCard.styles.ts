@@ -30,10 +30,10 @@ export const ListItem = styled.li`
 `;
 
 export const ImagePlaceholder = styled.img`
+	${PlaceholderStyle}
 	position: relative;
 	height: 175px;
 	width: 222px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	object-fit: cover;
 	margin-bottom: -5px;
 `;
