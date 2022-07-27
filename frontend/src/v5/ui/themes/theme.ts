@@ -155,8 +155,9 @@ const typography: TypographyOptions = {
 };
 
 export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
-	const formattedOpacity = (opacityInPercentage / 100) * 255;
-	return hex + Math.floor(formattedOpacity).toString(16);
+	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
+		.toString(16).padStart(2, '0');
+	return hex + formattedOpacity;
 };
 
 export const theme = createTheme({
@@ -375,16 +376,11 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				root: {
-					height: '31px',
-					'.MuiFormControl-root .MuiInputBase-root': {
-						'&.MuiAutocomplete-inputRoot ': {
-							padding: '0 0 0 10px',
-							height: '31px',
-							lineHeight: '31px',
-						},
+					'.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot': {
+						padding: '0 0 0 10px',
 					},
-					'&.Mui-focused .MuiAutocomplete-inputRoot .MuiOutlinedInput-notchedOutline': {
-						borderWidth: 1,
+					'>*': {
+						height: '100%',
 					},
 				},
 				input: {
@@ -392,6 +388,7 @@ export const theme = createTheme({
 					padding: 0,
 				},
 				inputRoot: {
+					height: '100%',
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 						'.MuiAutocomplete-endAdornment': {
@@ -414,6 +411,7 @@ export const theme = createTheme({
 					width: '20px',
 					height: '20px',
 					margin: '8px 0px',
+					color: COLOR.SECONDARY_MAIN,
 				},
 				clearIndicator: {
 					width: '20px',
@@ -496,6 +494,9 @@ export const theme = createTheme({
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
+					'.MuiPaper-root': {
+						boxShadow: 'none',
+					},
 				},
 				paperFullWidth: {
 					width: 'calc(100% - 100px)',
@@ -546,16 +547,19 @@ export const theme = createTheme({
 		MuiAppBar: {
 			styleOverrides: {
 				root: {
+					height: 62,
 					boxShadow: 'none',
 					paddingLeft: 20,
 					paddingRight: 20,
-					minHeight: 65,
 					display: 'flex',
 					flexDirection: 'row',
 					alignItems: 'center',
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
 					zIndex: 10,
+					'>*': {
+						maxHeight: '100%',
+					},
 				},
 			},
 		},
@@ -563,13 +567,11 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					margin: '8px 7px',
-					color: COLOR.PRIMARY_MAIN_CONTRAST,
-					backgroundColor: COLOR.TERTIARY_MAIN,
 					...typography.body1,
 				},
 				colorDefault: {
-					color: null,
-					backgroundColor: null,
+					color: COLOR.SECONDARY_MAIN,
+					backgroundColor: COLOR.BASE_LIGHTEST,
 				},
 			},
 		},
@@ -651,7 +653,7 @@ export const theme = createTheme({
 					},
 
 					'& > *': {
-						padding: '20px 24px',
+						padding: '10px 24px',
 						borderBottom: `1px solid ${COLOR.TERTIARY_LIGHTEST}`,
 						'&:last-child': {
 							borderBottom: 'none',
@@ -1060,6 +1062,13 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					textTransform: 'none',
+				},
+			},
+		},
+		MuiAccordionSummary: {
+			styleOverrides: {
+				content: {
+					marginBottom: 5,
 				},
 			},
 		},

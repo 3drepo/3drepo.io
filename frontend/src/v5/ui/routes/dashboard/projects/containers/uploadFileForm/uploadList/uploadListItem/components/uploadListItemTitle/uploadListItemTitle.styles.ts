@@ -15,37 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DashboardListItemTitle as ListItemTitle } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	width: fit-content;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	user-select: none;
-	${({ theme }) => theme.typography.h5};
-	font-weight: 600;
-	font-size: 14px;
-`;
-
-export const FlexContainer = styled.div<{ '$selectedrow': boolean; error?: string }>`
-	max-width: 100%;
-	color: ${({ $selectedrow, error, theme }) => {
-		if (error) return theme.palette.error.main;
-		return $selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main;
-	}};
-	user-select: none;
-	align-items: center;
-	display: flex;
-`;
-
-export const Filename = styled.span`
-	text-overflow: ellipsis;
-	overflow: hidden;
-	white-space: nowrap;
-`;
-
-export const Filesize = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 12px;
+export const DashboardListItemTitle = styled(ListItemTitle)`
+	.MuiButton-root {
+		cursor: default;
+		text-decoration-line: none;
+	}
 `;
