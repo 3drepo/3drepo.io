@@ -31,11 +31,9 @@ export const TeamspaceSelection = (): JSX.Element => {
 
 	useEffect(() => {
 		if (welcomeRef.current) {
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach((entry) => setIsVisible(entry.isIntersecting));
-			});
+			const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting));
 			observer.observe(welcomeRef.current);
-			return () => observer.unobserve(welcomeRef.current);
+			return () => observer.disconnect();
 		}
 		return null;
 	}, []);
