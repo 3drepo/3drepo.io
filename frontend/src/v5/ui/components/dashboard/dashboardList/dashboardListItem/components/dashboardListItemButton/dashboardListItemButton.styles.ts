@@ -23,6 +23,7 @@ export const Button = styled(ButtonComponent).attrs({
 })`
 	margin: 0;
 	width: 135px;
+	
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	}
