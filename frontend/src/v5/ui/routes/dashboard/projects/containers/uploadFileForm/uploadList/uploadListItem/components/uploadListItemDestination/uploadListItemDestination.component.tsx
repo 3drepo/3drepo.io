@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { useFormContext } from 'react-hook-form';
@@ -44,14 +44,14 @@ const emptyOption = prepareSingleContainerData({
 });
 const filter = createFilterOptions<IContainer>();
 
-export const UploadListItemDestination: React.FC<IUploadListItemDestination> = ({
+export const UploadListItemDestination = ({
 	errorMessage,
 	disabled = false,
 	className,
 	onChange,
 	defaultValue,
 	...props
-}) => {
+}: IUploadListItemDestination): JSX.Element => {
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(true);
 	const containers = ContainersHooksSelectors.selectContainers();
@@ -66,7 +66,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 
 	const [containersInUse, setContainersInUse] = useState(processingContainers);
 	const { getValues } = useFormContext();
-	const forceUpdate = React.useCallback(() => {
+	const forceUpdate = useCallback(() => {
 		const containerIdsInModal = getValues().uploads.map((upload) => upload.containerId).filter(Boolean);
 		if (containerIdsInModal) {
 			const containersInModal = containerIdsInModal.map((idInUse) => containers
@@ -84,6 +84,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					setValue(emptyOption);
 					setNewOrExisting('unset');
 					onChange(emptyOption);
+					forceUpdate();
 				} else {
 					setValue(newValue);
 					setNewOrExisting(!newValue._id.length ? 'new' : 'existing');
