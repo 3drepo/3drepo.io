@@ -34,16 +34,25 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 	const { query, setQuery } = useContext(SearchContext);
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-		console.log(event);
 		setQuery(event.currentTarget.value);
 		if (props.onChange) {
 			props.onChange(event);
 		}
 	};
 
+	const onClickClear = () => {
+		if (onClear) {
+			onClear();
+		}
+
+		setQuery('');
+	};
+
+	const val = query || value || '';
+
 	return (
 		<TextField
-			value={query || value}
+			value={val}
 			InputProps={{
 				startAdornment: (
 					<StartAdornment>
@@ -51,8 +60,8 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 					</StartAdornment>
 				),
 				endAdornment: (
-					<EndAdornment $isVisible={Boolean(value)}>
-						<IconButton onClick={() => onClear()} size="large">
+					<EndAdornment $isVisible={Boolean(val)}>
+						<IconButton onClick={onClickClear} size="large">
 							<CloseIcon />
 						</IconButton>
 					</EndAdornment>

@@ -27,12 +27,19 @@ export default {
 	},
 } as ComponentMeta<typeof SearchContextComponent>;
 
+const ListItem = ({ item }) => <li>{ Object.keys(item).map((key) => (<div>{item[key]}</div>))}</li>;
+
 const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
 	<SearchContextComponent {...args}>
 		<SearchInput placeholder="Enter here the filter term" />
 		<SearchContext.Consumer>
 			{(value) => (
-				<h1>{JSON.stringify(value)}</h1>
+				<>
+					<h1>The query is: <b>{value.query}</b></h1>
+					<ul>
+						{value.filteredItems.map((item) => (<ListItem item={item} />))}
+					</ul>
+				</>
 			)}
 		</SearchContext.Consumer>
 	</SearchContextComponent>
