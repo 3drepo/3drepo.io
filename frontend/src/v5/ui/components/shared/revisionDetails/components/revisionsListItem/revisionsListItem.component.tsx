@@ -49,6 +49,11 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
+	const downloadRevision = (e: SyntheticEvent) => {
+		e.preventDefault();
+		location.href = getRevisionFileUrl(teamspace, project, containerId, revision._id);
+	}
+
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
 			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
@@ -76,11 +81,11 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 					/>
 				)}
 			>
-				<a href={getRevisionFileUrl(teamspace, project, containerId, revision._id)}>
-					<DownloadButton>
-						<DownloadIcon />
-					</DownloadButton>
-				</a>
+				<DownloadButton
+					onClick={downloadRevision}
+				>
+					<DownloadIcon />
+				</DownloadButton>
 			</Tooltip>
 		</Container>
 	);
