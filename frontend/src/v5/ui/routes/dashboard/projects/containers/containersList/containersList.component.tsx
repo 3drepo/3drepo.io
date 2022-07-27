@@ -30,7 +30,7 @@ import {
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { SearchInput } from '@controls/searchInput';
+import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
@@ -40,6 +40,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { SearchContextComponent } from '@controls/search/searchContext';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -91,85 +92,87 @@ export const ContainersList = ({
 
 	return (
 		<Container>
-			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${containers.length})`}</>}
-				tooltipTitles={titleTooltips}
-				isLoading={areStatsPending}
-				sideElement={(
-					<CollapseSideElementGroup>
-						<SearchInput
-							onClear={() => onFilterQueryChange('')}
-							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
-							value={filterQuery}
-							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
-						/>
-						<Button
+			<SearchContextComponent>
+				<DashboardListCollapse
+					title={<>{title} {!isListPending && `(${containers.length})`}</>}
+					tooltipTitles={titleTooltips}
+					isLoading={areStatsPending}
+					sideElement={(
+						<CollapseSideElementGroup>
+							<SearchInput
+								onClear={() => onFilterQueryChange('')}
+								onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
+								value={filterQuery}
+								placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
+							/>
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="outlined"
+								color="secondary"
+								onClick={onClickCreate}
+							>
+								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+							</Button>
+							<Button
+								startIcon={<ArrowUpCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={onClickUpload}
+							>
+								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+							</Button>
+						</CollapseSideElementGroup>
+					)}
+				>
+					<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+						<DashboardListHeaderLabel name="name" minWidth={90}>
+							<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
+							<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel name="code" width={160}>
+							<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
+							<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel name="lastUpdated" width={188}>
+							<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
+						</DashboardListHeaderLabel>
+					</DashboardListHeader>
+					<DashboardList>
+						{!isEmpty(sortedList) ? (
+							sortedList.map((container, index) => (
+								<ContainerListItem
+									index={index}
+									key={container._id}
+									isSelected={container._id === selectedItemId}
+									container={container}
+									filterQuery={filterQuery}
+									onFavouriteChange={setFavourite}
+									onSelectOrToggleItem={selectOrToggleItem}
+								/>
+							))
+						) : (
+							<DashboardListEmptyContainer>
+								{filterQuery && hasContainers ? (
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+								) : emptyMessage}
+							</DashboardListEmptyContainer>
+						)}
+					</DashboardList>
+					{showBottomButton && !isListPending && hasContainers && (
+						<DashboardListButton
 							startIcon={<AddCircleIcon />}
-							variant="outlined"
-							color="secondary"
 							onClick={onClickCreate}
 						>
-							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-						</Button>
-						<Button
-							startIcon={<ArrowUpCircleIcon />}
-							variant="contained"
-							color="primary"
-							onClick={onClickUpload}
-						>
-							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-						</Button>
-					</CollapseSideElementGroup>
-				)}
-			>
-				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name" minWidth={90}>
-						<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
-						<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" width={160}>
-						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
-						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={188}>
-						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
-					</DashboardListHeaderLabel>
-				</DashboardListHeader>
-				<DashboardList>
-					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (
-							<ContainerListItem
-								index={index}
-								key={container._id}
-								isSelected={container._id === selectedItemId}
-								container={container}
-								filterQuery={filterQuery}
-								onFavouriteChange={setFavourite}
-								onSelectOrToggleItem={selectOrToggleItem}
-							/>
-						))
-					) : (
-						<DashboardListEmptyContainer>
-							{filterQuery && hasContainers ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-							) : emptyMessage}
-						</DashboardListEmptyContainer>
+							<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
+						</DashboardListButton>
 					)}
-				</DashboardList>
-				{showBottomButton && !isListPending && hasContainers && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={onClickCreate}
-					>
-						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
-					</DashboardListButton>
-				)}
 
-			</DashboardListCollapse>
+				</DashboardListCollapse>
+			</SearchContextComponent>
 		</Container>
 	);
 };

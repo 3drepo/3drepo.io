@@ -14,35 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
 import { SearchInput } from '@controls/search/searchInput';
-import { useState } from 'react';
 
 export default {
-	title: 'Inputs/SearchInput',
-	component: SearchInput,
-	parameters: { controls: { exclude: ['ref', 'hiddenLabel'] } },
-} as ComponentMeta<typeof SearchInput>;
+	title: 'Dashboard/SearchContext',
+	component: SearchContextComponent,
+	argTypes: {
+		items: { control: 'object' },
+	},
+} as ComponentMeta<typeof SearchContextComponent>;
 
-const Template: ComponentStory<typeof SearchInput> = (args) => <SearchInput {...args} />;
+const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
+	<SearchContextComponent {...args}>
+		<SearchInput placeholder="Enter here the filter term" />
+		<SearchContext.Consumer>
+			{(value) => (
+				<h1>{JSON.stringify(value)}</h1>
+			)}
+		</SearchContext.Consumer>
+	</SearchContextComponent>
+);
 
-export const Default = Template.bind({});
-Default.args = {
-	label: 'Search input',
-};
-
-const Controlled: ComponentStory<typeof SearchInput> = (args) => {
-	const [val, setVal] = useState('');
-
-	const onChange = (event) => {
-		setVal(event.target.value);
-	};
-
-	return (<SearchInput {...args} onChange={onChange} value={val} />);
-};
-
-export const ControlledSearchInput = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledSearchInput.args = {
-	label: 'Controlled Search input',
+export const ListWithFilteredItems = Template.bind({});
+ListWithFilteredItems.args = {
+	items: [{ name: 'winona' }, { name: 'David' }, { name: 'millie' }],
 };

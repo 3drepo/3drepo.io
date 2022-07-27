@@ -18,33 +18,48 @@
 import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/search.svg';
 import CloseIcon from '@assets/icons/close_rounded.svg';
+import { ChangeEvent, useContext } from 'react';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
+import { SearchContext } from '../searchContext';
 
 type ISearchInput = {
 	/**
 	 * Callback when the clear button is clicked.
 	 * Note: the clear button only appears when the controls is controlled (read more https://reactjs.org/docs/forms.html#controlled-components)
 	 */
-	onClear: () => void;
+	onClear?: () => void;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Element => (
-	<TextField
-		value={value}
-		InputProps={{
-			startAdornment: (
-				<StartAdornment>
-					<SearchIcon />
-				</StartAdornment>
-			),
-			endAdornment: (
-				<EndAdornment $isVisible={Boolean(value)}>
-					<IconButton onClick={() => onClear()} size="large">
-						<CloseIcon />
-					</IconButton>
-				</EndAdornment>
-			),
-		}}
-		{...props}
-	/>
-);
+export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Element => {
+	const { query, setQuery } = useContext(SearchContext);
+
+	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+		console.log(event);
+		setQuery(event.currentTarget.value);
+		if (props.onChange) {
+			props.onChange(event);
+		}
+	};
+
+	return (
+		<TextField
+			value={query || value}
+			InputProps={{
+				startAdornment: (
+					<StartAdornment>
+						<SearchIcon />
+					</StartAdornment>
+				),
+				endAdornment: (
+					<EndAdornment $isVisible={Boolean(value)}>
+						<IconButton onClick={() => onClear()} size="large">
+							<CloseIcon />
+						</IconButton>
+					</EndAdornment>
+				),
+			}}
+			{...props}
+			onChange={onChange}
+		/>
+	);
+};
