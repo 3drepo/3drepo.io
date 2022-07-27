@@ -46,7 +46,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 			<ScrollBar>
 				<HomeContent>
 					<FadeMessageTrigger ref={welcomeRef}>
-						<WelcomeMessage visible={isVisible}>
+						<WelcomeMessage $visible={isVisible}>
 							{
 								firstName ? (
 									<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
