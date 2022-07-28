@@ -115,6 +115,7 @@ const moduleSchema = Yup.object().shape({
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),
+	code: Yup.string().length(3).required(),
 	comments: defaultFalse,
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
