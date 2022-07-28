@@ -78,6 +78,7 @@ Schemas.schemas.ticketTemplate = {
 	required: ['name'],
 	properties: {
 		name: helpers.stringDef('Name of the ticket', 'Risk'),
+		code: { ...helpers.stringDef('A 3 character code for the template', 'RSK'), minLength: 3, maxLength: 3 },
 		comments: helpers.boolDef('Comments enabled (default: false)'),
 		deprecated: helpers.boolDef('Denotes if this template is no longer in used', false),
 		properties: ticketTemplatePropSchema,
