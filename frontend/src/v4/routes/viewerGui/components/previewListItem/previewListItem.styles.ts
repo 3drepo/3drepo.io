@@ -114,6 +114,9 @@ export const Name = styled(Typography)`
 		text-overflow: ellipsis;
 		line-height: 1;
 	}
+	&:hover {
+		text-decoration: underline;
+	}
 `;
 
 export const Container = styled.div`

@@ -64,11 +64,7 @@ export const Chips = styled.div<IChips>`
 	}
 `;
 
-export const SelectedFilters = styled(ViewerScrollAreaBase).attrs(({ empty }: ISelectedFilters) => ({
-	autoHeight: true,
-	autoMaxHeight: 240,
-	autoMinHeight: isV5() ? 38 : (empty ? 0 : 45),
-}))<ISelectedFilters>`
+export const SelectedFilters = styled.div<ISelectedFilters>`
 	display: flex;
 	flex-wrap: wrap;
 	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'};
@@ -149,7 +145,7 @@ export const SuggestionsList = styled(Popper)`
 	}
 `;
 
-export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
+export const SuggestionsScrollArea = styled(ViewerScrollAreaBase).attrs({
 	autoHeight: true,
 	autoHeightMax: 250,
 })`

@@ -44,19 +44,9 @@ export const labelButtonSecondaryStyles = css`
 	color: ${({ theme }) => theme.palette.tertiary.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
-	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
-
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.main};
+	&:hover, &:active {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 		text-decoration-line: none;
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.tertiary.dark};
-		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;
 

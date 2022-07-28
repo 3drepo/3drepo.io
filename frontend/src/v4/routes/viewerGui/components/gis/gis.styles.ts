@@ -65,6 +65,7 @@ export const VisibilityButton = styled(IconButton)`
 		color: '${COLOR.BLACK_60}';
 		position: absolute;
 		right: -12px;
+		z-index: 1;
 	}
 `;
 
