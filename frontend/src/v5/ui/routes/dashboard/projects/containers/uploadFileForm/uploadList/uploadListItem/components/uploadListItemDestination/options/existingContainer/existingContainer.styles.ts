@@ -30,7 +30,7 @@ export const ExistingContainerOption = styled.div`
 `;
 
 export const Name = styled.div`
-	width: 100%;
+	width: calc(100% - 10px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

@@ -53,7 +53,7 @@ export const UploadListItemDestination = ({
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
-	const [disableClearable, setDisableClearable] = useState(true);
+	const [disableClearable, setDisableClearable] = useState(!value.name);
 	const containers = ContainersHooksSelectors.selectContainers();
 	const processingContainers = containers
 		.filter((container) => !canUploadToBackend(container.status));
@@ -98,7 +98,6 @@ export const UploadListItemDestination = ({
 				let filtered: IContainer[] = filter(options, params);
 				const { inputValue } = params;
 
-				setDisableClearable(!(value.name || inputValue));
 				const isExisting = options.some((option: IContainer) => inputValue === option.name);
 				filtered = filtered.filter((x) => x.name !== value.name);
 				if (containersInUse.length === containers.length && !inputValue) {
@@ -141,7 +140,7 @@ export const UploadListItemDestination = ({
 						{...optionProps}
 					/>
 				))}
-			ListboxComponent={(listboxProps) => <OptionsBox {...listboxProps} />}
+			ListboxComponent={OptionsBox}
 			noOptionsText={formatMessage({
 				id: 'uploads.destination.noOptions',
 				defaultMessage: 'Start typing to create a new Container.',
