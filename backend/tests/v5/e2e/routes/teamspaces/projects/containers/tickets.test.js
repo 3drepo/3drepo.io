@@ -20,6 +20,7 @@ const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
 let server;
 let agent;
@@ -99,6 +100,45 @@ const testGetAllTemplates = () => {
 	});
 };
 
+const testGetTemplateDetails = () => {
+	const route = (key, projectId = project.id, modelId = modelWithTemplates._id, templateId = ticketTemplates[0]._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${templateId}${key ? `?key=${key}` : ''}`;
+	const pruneDeprecated = (template) => {
+		// eslint-disable-next-line no-param-reassign
+		template.properties = template.properties.filter(({ deprecated }) => !deprecated);
+		// eslint-disable-next-line no-param-reassign
+		template.modules = template.modules.filter((mod) => {
+			// eslint-disable-next-line no-param-reassign
+			mod.properties = mod.properties.filter(({ deprecated }) => !deprecated);
+			return !mod.deprecated;
+		});
+
+		return template;
+	};
+	describe.each([
+		['the user does not have a valid session', false, templates.notLoggedIn],
+		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
+		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+		['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+		['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, undefined, users.tsAdmin.apiKey],
+		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+		['the template id is invalid', false, templates.templateNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
+		['should return the full template', true, generateFullSchema(ticketTemplates[0]), undefined, undefined, undefined, users.tsAdmin.apiKey, true],
+		['should return the full template without deprecated fields', true, pruneDeprecated(generateFullSchema(ticketTemplates[0])), undefined, undefined, undefined, users.tsAdmin.apiKey],
+	])('Get template details', (desc, success, expectedOutput, projectId, modelId, templateId, key, showDeprecated) => {
+		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+			const endpoint = route(key, projectId, modelId, templateId);
+			const res = await agent.get(`${endpoint}${showDeprecated ? '&showDeprecated=true' : ''}`).expect(expectedStatus);
+
+			if (success) {
+				expect(res.body).toEqual(expectedOutput);
+			} else {
+				expect(res.body.code).toEqual(expectedOutput.code);
+			}
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers/tickets', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -108,4 +148,5 @@ describe('E2E routes/teamspaces/projects/containers/tickets', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 
 	testGetAllTemplates();
+	testGetTemplateDetails();
 });

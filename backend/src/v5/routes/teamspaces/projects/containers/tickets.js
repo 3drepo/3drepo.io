@@ -21,6 +21,7 @@ const { checkTicketTemplateExists } = require('../../../../middleware/dataConver
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
 const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
+const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
 
 const getAllTemplates = async (req, res) => {
@@ -147,7 +148,7 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/ticketTemplate"
 	 */
-	router.get('/templates/:template', hasReadAccessToContainer, checkTicketTemplateExists);
+	router.get('/templates/:template', hasReadAccessToContainer, checkTicketTemplateExists, serialiseFullTicketTemplate);
 
 	return router;
 };

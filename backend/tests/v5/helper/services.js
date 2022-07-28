@@ -38,7 +38,7 @@ const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
 const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
 const queue = {};
@@ -290,17 +290,33 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 		},
 		{
 			name: ServiceHelper.generateRandomString(),
+			type: fieldTypes.TEXT,
+			deprecated: true,
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
 			type: fieldTypes.NUMBER,
 			default: ServiceHelper.generateRandomNumber(),
 		},
 	],
 	modules: [
 		{
+			type: presetModules.SHAPES,
+			deprecated: true,
+			properties: [],
+		},
+		{
 			name: ServiceHelper.generateRandomString(),
 			properties: [
 				{
 					name: ServiceHelper.generateRandomString(),
 					type: fieldTypes.TEXT,
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: fieldTypes.NUMBER,
+					default: ServiceHelper.generateRandomNumber(),
+					deprecated: true,
 				},
 				{
 					name: ServiceHelper.generateRandomString(),
