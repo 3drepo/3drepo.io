@@ -21,3 +21,4 @@ jobs:
           issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
           label: 'in staging'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+  
