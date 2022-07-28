@@ -67,6 +67,12 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: showDeprecated
+	 *         description: Indicate if the response should return deprecated schemas (default is false)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -123,6 +129,12 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
+ 	 *       - name: showDeprecated
+	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

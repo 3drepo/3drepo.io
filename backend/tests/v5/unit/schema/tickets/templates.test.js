@@ -243,6 +243,70 @@ const testValidate = () => {
 	});
 };
 
+const testGenerateFullSchema = () => {
+	describe('Generating a full schema', () => {
+		test('should fill properties with default properties', () => {
+			const template = {
+				name: generateRandomString(),
+				properties: [
+					{
+						name: generateRandomString(),
+						type: fieldTypes.TEXT,
+					},
+				],
+				modules: [],
+			};
+
+			const output = TemplateSchema.generateFullSchema(template);
+
+			const expectedOutput = cloneDeep(template);
+			expectedOutput.properties = [...defaultProperties, ...expectedOutput.properties];
+			expect(output).toEqual(expectedOutput);
+		});
+		test('should fill preset modules with default properties', () => {
+			const template = {
+				name: generateRandomString(),
+				properties: [
+					{
+						name: generateRandomString(),
+						type: fieldTypes.TEXT,
+					},
+				],
+				modules: [
+					{
+						type: presetModules.SEQUENCING,
+						properties: [{
+							name: generateRandomString(),
+							type: fieldTypes.TEXT,
+						}],
+					},
+					{
+						name: generateRandomString(),
+						properties: [{
+							name: generateRandomString(),
+							type: fieldTypes.TEXT,
+						}],
+					},
+				],
+			};
+
+			const output = TemplateSchema.generateFullSchema(template);
+
+			const expectedOutput = cloneDeep(template);
+			expectedOutput.properties = [...defaultProperties, ...expectedOutput.properties];
+			expectedOutput.modules.forEach((module) => {
+				if (module.type) {
+					// eslint-disable-next-line no-param-reassign
+					module.properties = [...presetModulesProperties[module.type], ...module.properties];
+				}
+			});
+
+			expect(output).toEqual(expectedOutput);
+		});
+	});
+};
+
 describe('schema/tickets/templates', () => {
 	testValidate();
+	testGenerateFullSchema();
 });

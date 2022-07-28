@@ -15,31 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { fieldTypes } = require('../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../utils/responder');
+const { serialiseTicketSchema } = require('../common/tickets.templates');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Settings = {};
 
 Settings.castTicketSchemaOutput = (req, res) => {
-	const template = req.templateData;
-	template._id = UUIDToString(template._id);
+	try {
+		const template = serialiseTicketSchema(req.templateData);
 
-	const convertDate = (prop) => {
-		if (prop.type === fieldTypes.DATE && prop.default) {
-			// Convert date to ms since epoch
-			// eslint-disable-next-line no-param-reassign
-			prop.default = new Date(prop.default).getTime();
-		}
-	};
-
-	template.properties.forEach(convertDate);
-	template.modules.forEach(({ properties }) => {
-		properties.forEach(convertDate);
-	});
-
-	respond(req, res, templates.ok, template);
+		respond(req, res, templates.ok, template);
+	} catch (err) {
+		respond(req, res, templates.unknown);
+	}
 };
 
 module.exports = Settings;

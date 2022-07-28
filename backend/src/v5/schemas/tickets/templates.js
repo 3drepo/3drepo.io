@@ -144,6 +144,14 @@ TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnk
 TemplateSchema.generateFullSchema = (template) => {
 	const result = cloneDeep(template);
 	result.properties = [...defaultProperties, ...result.properties];
+	result.modules.forEach((module) => {
+		if (module.type && presetModulesProperties[module.type]) {
+			// eslint-disable-next-line no-param-reassign
+			module.properties = [...presetModulesProperties[module.type], ...module.properties];
+		}
+	});
+
+	return result;
 };
 
 module.exports = TemplateSchema;

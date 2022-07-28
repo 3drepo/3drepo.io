@@ -15,18 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep } = require('lodash');
-
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateTemplate } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
+const TicketTemplateUtils = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
-
-const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
-
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TeamspaceSettings = require(`${src}/middleware/dataConverter/outputs/teamspaces/settings`);
 
@@ -36,59 +34,32 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 const testCastTicketSchemaOutput = () => {
 	describe('Casting ticket schema output', () => {
 		test('should convert all appropriate fields', () => {
-			const templateData = {
-				_id: generateUUID(),
-				properties: [
-					{
-						name: generateRandomString(),
-						type: fieldTypes.TEXT,
-						default: generateRandomString(),
-					},
-					{
-						name: generateRandomString(),
-						type: fieldTypes.DATE,
-						default: new Date(),
-					},
-					{
-						name: generateRandomString(),
-						type: fieldTypes.DATE,
-					},
-
-				],
-				modules: [{
-					name: generateRandomString(),
-					properties: [
-						{
-							name: generateRandomString(),
-							type: fieldTypes.TEXT,
-							default: generateRandomString(),
-						},
-						{
-							name: generateRandomString(),
-							type: fieldTypes.DATE,
-							default: new Date(),
-						},
-						{
-							name: generateRandomString(),
-							type: fieldTypes.DATE,
-						},
-					] },
-				],
-
-			};
+			const templateData = generateTemplate();
+			const castedTemplate = generateTemplate();
 			const req = { templateData };
 
-			const expectedOutput = cloneDeep(templateData);
-			expectedOutput._id = UUIDToString(templateData._id);
-			expectedOutput.properties[1].default = expectedOutput.properties[1].default.getTime();
-			expectedOutput.modules[0].properties[1].default = expectedOutput.modules[0].properties[1].default.getTime();
+			TicketTemplateUtils.serialiseTicketSchema.mockReturnValueOnce(castedTemplate);
 
 			const next = jest.fn();
 			TeamspaceSettings.castTicketSchemaOutput(req, {}, next);
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, expectedOutput);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, castedTemplate);
+		});
+
+		test('should catch errors gracefully', () => {
+			const templateData = generateTemplate();
+			const req = { templateData };
+
+			TicketTemplateUtils.serialiseTicketSchema.mockImplementationOnce(() => { throw new Error(); });
+
+			const next = jest.fn();
+			TeamspaceSettings.castTicketSchemaOutput(req, {}, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
 	});
 };

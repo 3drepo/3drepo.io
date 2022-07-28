@@ -15,15 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { castSchema } = require('../../../../../../../schemas/groups');
+const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { respond } = require('../../../../../../../utils/responder');
+const { serialiseTicketSchema } = require('../../../../common/tickets.templates');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
-const Groups = {};
+const Tickets = {};
 
-Groups.serialiseGroupArray = (req, res) => {
-	const groups = req.outputData.map(castSchema);
-	respond(req, res, templates.ok, { groups });
+Tickets.serialiseFullTicketTemplate = (req, res) => {
+	try {
+		const { templateData, query } = req;
+		const showDeprecated = query?.showDeprecated === 'true';
+		const fullTemplate = generateFullSchema(templateData);
+
+		respond(req, res, templates.ok, serialiseTicketSchema(fullTemplate, !showDeprecated));
+	} catch (err) {
+		respond(req, res, templates.unknown);
+	}
 };
 
-module.exports = Groups;
+module.exports = Tickets;
