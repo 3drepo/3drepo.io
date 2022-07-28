@@ -18,6 +18,10 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
 import { SearchInput } from '@controls/search/searchInput';
+import { DashboardListCollapse, DashboardListEmptyContainer, DashboardListEmptySearchResults, DashboardListHeader, DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
+import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
+import { DashboardListItemRow, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { useContext } from 'react';
 
 export default {
 	title: 'Dashboard/SearchContext',
@@ -27,33 +31,67 @@ export default {
 	},
 } as ComponentMeta<typeof SearchContextComponent>;
 
-const ListItem = ({ item }) => <li>{ Object.keys(item).map((key) => (<div>{item[key]}</div>))}</li>;
+const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
+	<DashboardListHeader onSortingChange={setSortConfig}>
+		{(columnNames as string[]).map((columnName) => (
+			<DashboardListHeaderLabel name={columnName}>{columnName}</DashboardListHeaderLabel>
+		))}
+	</DashboardListHeader>
+);
 
-const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
-	<SearchContextComponent {...args}>
-		<SearchInput placeholder="Enter here the filter term" />
-		<SearchContext.Consumer>
-			{(value) => (
+const ObjectsList = () => {
+	const { items, filteredItems, query } = useContext(SearchContext);
+
+	return (
+		<DashboardListCollapse
+			title={<>Searchable list</>}
+			sideElement={(
+				<CollapseSideElementGroup>
+					<SearchInput
+						placeholder="Search containers..."
+					/>
+				</CollapseSideElementGroup>
+			)}
+		>
+			{items.length > 0
+			&& (
 				<>
-					<h1>The query is: <b>{value.query}</b></h1>
-					<ul>
-						{value.filteredItems.map((item) => (<ListItem item={item} />))}
-						{
-							(value.filteredItems.length === 0 && value.items.length > 0)
-							&& (<h5> No item matches the search criteria.</h5>)
-						}
-						{
-							(value.items.length === 0)
-							&& (<h5> No items. </h5>)
-						}
-					</ul>
+					<ObjectsListHeader setSortConfig={() => { }} columnNames={Object.keys(items[0])} />
+					{
+						filteredItems.map((item) => (
+							<DashboardListItem
+								key={JSON.stringify(item)}
+							>
+								<DashboardListItemRow>
+									{Object.keys(item).map((key) => (
+										<DashboardListItemText>
+											{item[key]}
+										</DashboardListItemText>
+									))}
+								</DashboardListItemRow>
+							</DashboardListItem>
+						))
+					}
 				</>
 			)}
-		</SearchContext.Consumer>
+
+			{filteredItems.length === 0
+			&& (
+				<DashboardListEmptyContainer>
+					<DashboardListEmptySearchResults searchPhrase={query} />
+				</DashboardListEmptyContainer>
+			)}
+
+		</DashboardListCollapse>
+	);
+};
+const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
+	<SearchContextComponent {...args}>
+		<ObjectsList />
 	</SearchContextComponent>
 );
 
 export const ListWithFilteredItems = Template.bind({});
 ListWithFilteredItems.args = {
-	items: [{ name: 'winona' }, { name: 'David' }, { name: 'millie' }],
+	items: [{ name: 'Winona' }, { name: 'David' }, { name: 'Millie' }],
 };
