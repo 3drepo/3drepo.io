@@ -34,4 +34,4 @@ jobs:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'destroy'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-        azure-pipeline-variables:  '{"branchName": "issue-${{needs.tagOnPRMerge.outputs.issue-number}}"}'
+        azure-pipeline-variables:  '{"branchName": "issue-${{ needs.tagOnPRMerge.outputs.issue-number }}"}'
