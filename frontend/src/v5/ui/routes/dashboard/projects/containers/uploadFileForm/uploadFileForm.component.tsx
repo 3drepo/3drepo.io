@@ -190,7 +190,7 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 										onSortingChange={setSortConfig}
 										defaultSortConfig={DEFAULT_SORT_CONFIG}
 									>
-										<DashboardListHeaderLabel key="file" name="file.name" hideWhenSmallerThan={Display.Desktop}>
+										<DashboardListHeaderLabel key="file" name="file.name" minWidth={122}>
 											<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 										</DashboardListHeaderLabel>
 										<DashboardListHeaderLabel key="destination" width={352}>
