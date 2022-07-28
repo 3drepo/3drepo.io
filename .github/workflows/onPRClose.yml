@@ -34,6 +34,7 @@ jobs:
     needs: extractIssueNumber
     steps:
     - name: Azure Pipelines Action
+      if: needs.extractIssueNumber.outputs.issue-number
       uses: Azure/pipelines@v1
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
