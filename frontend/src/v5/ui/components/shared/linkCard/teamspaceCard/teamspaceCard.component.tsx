@@ -17,12 +17,12 @@
 
 import { uriCombine } from '@/v5/services/routing/routing';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { getTeamspaceAvatarUrl } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { CoverImage } from '@controls/coverImage/coverImage.component';
 import { LinkCard } from '../linkCard.component';
-import { TeamspaceImage } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	teamspaceName?: string;
@@ -30,19 +30,13 @@ interface ITeamspaceCard {
 }
 
 export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX.Element => {
+	const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
+	const teamspaceImgSrc = generateV5ApiUrl(`teamspaces/${teamspaceName}/avatar?${Date.now()}`, clientConfigService.GET_API);
+
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isPersonalTeamspace = teamspaceName === currentUser.username;
 	const { url } = useRouteMatch();
 	const to = uriCombine(url, teamspaceName || '');
-
-	const [user, setUser] = useState<any>({});
-
-	useEffect(() => {
-		getTeamspaceAvatarUrl(teamspaceName).then((avatarUrl) => setUser({
-			avatarUrl,
-			hasAvatar: true,
-		}));
-	}, []);
 
 	return (
 		<LinkCard
@@ -56,7 +50,7 @@ export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX
 					: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
 			}
 		>
-			<TeamspaceImage user={user} isButton={false} />
+			<CoverImage imgSrc={teamspaceImgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
 		</LinkCard>
 	);
 };

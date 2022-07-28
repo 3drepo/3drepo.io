@@ -14,22 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useState } from 'react';
+import { Image } from './coverImage.styles';
 
-import styled from 'styled-components';
-import { Avatar } from '@controls/avatar';
+type CoverImageProps = {
+	className?: string;
+	defaultImgSrc: string;
+	imgSrc?: string;
+};
 
-export const TeamspaceImage = styled(Avatar)`
-	width: 100%;
-	margin: 0;
-	
-	.MuiAvatar-root {
-		cursor: pointer;
-		border-radius: 0;
-		width: 100%;
-		height: 175px;
-		margin: 0;
-		font-size: 40px;
-		color: ${({ theme }) => theme.palette.tertiary.dark};
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
+export const CoverImage = ({ className, defaultImgSrc, imgSrc }: CoverImageProps) => {
+	const [src, setSrc] = useState(imgSrc);
+	const onError = () => { setSrc(defaultImgSrc); };
+
+	return (<Image onError={onError} className={className} src={src} />);
+};

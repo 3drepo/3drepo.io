@@ -14,17 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import { clientConfigService } from '@/v4/services/clientConfig';
-import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { fetchTeamspaceAvatar } from '@/v5/services/api/teamspaces';
-
-export const getTeamspaceAvatarUrl = async (teamspace) => {
-	const DEFAULT_AVATAR_URL = 'assets/images/teamspace_placeholder.svg';
-	try {
-		await fetchTeamspaceAvatar(teamspace);
-		return generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API);
-	} catch (e) {
-		return DEFAULT_AVATAR_URL;
-	}
-};
+export const Image = styled.img`
+	width: 100%;
+	height: 175px;
+	margin: 0;
+	object-fit: cover;
+`;

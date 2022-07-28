@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
@@ -23,8 +23,9 @@ import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/pro
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
-import { getTeamspaceAvatarUrl } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceAvatar } from './teamspaceLayout.styles';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceImage } from './teamspaceLayout.styles';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
@@ -33,7 +34,8 @@ interface ITeamspaceLayout {
 
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
-	const [user, setUser] = useState<any>({});
+	const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
+	const teamspaceImgSrc = generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API);
 
 	useEffect(() => {
 		if (teamspace) {
@@ -42,18 +44,11 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 		}
 	}, [teamspace]);
 
-	useEffect(() => {
-		getTeamspaceAvatarUrl(teamspace).then((avatarUrl) => setUser({
-			avatarUrl,
-			hasAvatar: true,
-		}));
-	}, []);
-
 	return (
 		<Container className={className}>
 			<AppBar />
 			<TopBar>
-				<TeamspaceAvatar user={user} isButton={false} />
+				<TeamspaceImage imgSrc={teamspaceImgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
 				<TeamspaceInfo>
 					<TeamspaceName>
 						<FormattedMessage
