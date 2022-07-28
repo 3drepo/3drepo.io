@@ -6,6 +6,8 @@ jobs:
   tagOnPRMerge:
     name: Tag merged issues as In staging if applicable
     runs-on: ubuntu-latest
+    outputs: 
+      issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
     steps:
       - name: Is PR merged into staging
         uses: carmenfan/extract-issue-number-from-PR-merge@v1.1
@@ -24,6 +26,7 @@ jobs:
   destroy:
     name: Call Azure Pipeline
     runs-on: ubuntu-latest
+    needs: tagOnPRMerge
     steps:
     - name: Azure Pipelines Action
       uses: Azure/pipelines@v1
@@ -31,4 +34,4 @@ jobs:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'destroy'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-        azure-pipeline-variables:  '{"branchName": "issue-${{ steps.commitMsgParser.outputs.issue-number }}"}'
+        azure-pipeline-variables:  '{"branchName": "issue-${{needs.tagOnPRMerge.outputs.issue-number}}"}'
