@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isString } from 'lodash';
 import { createContext, useEffect, useState } from 'react';
 
 export interface SearchContextType {
@@ -31,14 +32,20 @@ SearchContext.displayName = 'SearchContext';
 
 export const SearchContextComponent = ({ items, children }) => {
 	const [query, setQuery] = useState('');
-	const [filteredItems, setFilteredItems] = useState([]);
+	const [contextValue, setContextValue] = useState({ items, filteredItems: items, query, setQuery });
 
 	useEffect(() => {
-		setFilteredItems(items.filter((item) => Object.keys(item).some((key) => item[key].includes(query))));
+		const filteredItems = (items || []).filter((item) => Object.keys(item).some(
+			(key) => {
+				if (!isString(item[key])) return false;
+				return item[key].toLowerCase().includes(query.toLowerCase());
+			},
+		));
+		setContextValue({ items, filteredItems, query, setQuery });
 	}, [query, items]);
 
 	return (
-		<SearchContext.Provider value={{ items, filteredItems, query, setQuery }}>
+		<SearchContext.Provider value={contextValue}>
 			{children}
 		</SearchContext.Provider>
 	);

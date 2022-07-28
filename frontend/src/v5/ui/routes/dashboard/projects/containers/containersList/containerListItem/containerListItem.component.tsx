@@ -26,7 +26,6 @@ import {
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import {
 	enableRealtimeContainerRemoved,
@@ -132,18 +131,14 @@ export const ContainerListItem = ({
 					selected={isSelected}
 					width={160}
 				>
-					<Highlight search={filterQuery}>
-						{container.code}
-					</Highlight>
+					{container.code}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={188}
 					hideWhenSmallerThan={Display.Tablet}
 					selected={isSelected}
 				>
-					<Highlight search={filterQuery}>
-						{container.type}
-					</Highlight>
+					{container.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={78}
