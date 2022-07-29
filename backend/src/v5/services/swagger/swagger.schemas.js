@@ -72,6 +72,17 @@ const ticketTemplateModSchema = {
 	},
 };
 
+const ticketTemplateConfigSchema = {
+	type: 'object',
+	properties: {
+		comments: helpers.boolDef('Comments enabled (default: false)'),
+		issueProperties: helpers.boolDef('Include issue properties (default: false)'),
+		defaultView: helpers.boolDef('Include a default view with image (default: false)'),
+		defaultImage: helpers.boolDef('Include a default image - this will be ignored if defaultView is set to true (default: false)'),
+		pin: helpers.boolDef('Include a pin (default: false)'),
+	},
+};
+
 Schemas.schemas.ticketTemplate = {
 	description: 'Custom ticket Template',
 	type: 'object',
@@ -79,7 +90,7 @@ Schemas.schemas.ticketTemplate = {
 	properties: {
 		name: helpers.stringDef('Name of the ticket', 'Risk'),
 		code: { ...helpers.stringDef('A 3 character code for the template', 'RSK'), minLength: 3, maxLength: 3 },
-		comments: helpers.boolDef('Comments enabled (default: false)'),
+		config: ticketTemplateConfigSchema,
 		deprecated: helpers.boolDef('Denotes if this template is no longer in used', false),
 		properties: ticketTemplatePropSchema,
 		modules: ticketTemplateModSchema,

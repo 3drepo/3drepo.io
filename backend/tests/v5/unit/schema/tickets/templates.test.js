@@ -39,7 +39,12 @@ const testValidate = () => {
 		['all optional fields provided', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
-			comments: false,
+			config: {
+				comments: false,
+				issueProperties: true,
+				defaultView: true,
+				defaultImage: false,
+			},
 			deprecated: true,
 			properties: undefined,
 			modules: undefined,
@@ -243,6 +248,10 @@ const testValidate = () => {
 		const data = {
 			name: generateRandomString(),
 			code: generateRandomString(3),
+			config: {
+				defaultView: true,
+				defaultImage: true,
+			},
 			properties: [{
 				name: 'I am an apple',
 				type: fieldTypes.NUMBER,
@@ -271,6 +280,7 @@ const testValidate = () => {
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
+		expectedData.config = { defaultView: true };
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

@@ -53,6 +53,7 @@ const setupData = async () => {
 const generateTemplate = () => ({
 	name: generateRandomString(),
 	code: generateRandomString(3),
+	config: {},
 	properties: [
 		{
 			name: generateRandomString(),
