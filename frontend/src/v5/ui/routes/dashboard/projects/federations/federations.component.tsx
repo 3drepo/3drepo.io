@@ -28,13 +28,12 @@ import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashb
 import { Button } from '@controls/button';
 import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
+import { FEDERATION_SEARCH_FIELDS } from '@/v5/store/federations/federations.helpers';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 import { CreateFederationForm } from './createFederationForm';
 import { useFederationsData } from './federations.hooks';
 import { DashboardParams } from '../../../routes.constants';
-
-const SEARCH_FIELDS = ['code', 'name', 'desc', 'category'];
 
 export const Federations = (): JSX.Element => {
 	const {
@@ -54,63 +53,61 @@ export const Federations = (): JSX.Element => {
 
 	return (
 		<>
-			<>
-				<SearchContextComponent items={favouriteFederations} fieldsToFilter={SEARCH_FIELDS}>
-					<FederationsList
-						onClickCreate={() => setCreateFedOpen(true)}
-						title={(
+			<SearchContextComponent items={favouriteFederations} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
+				<FederationsList
+					onClickCreate={() => setCreateFedOpen(true)}
+					title={(
+						<FormattedMessage
+							id="federations.favourites.collapseTitle"
+							defaultMessage="Favourites"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="federations.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+						visible: <FormattedMessage id="federations.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+					}}
+					emptyMessage={(
+						<DashboardListEmptyText>
 							<FormattedMessage
-								id="federations.favourites.collapseTitle"
-								defaultMessage="Favourites"
+								id="federations.favourites.emptyMessage"
+								defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
 							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="federations.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
-							visible: <FormattedMessage id="federations.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
-						}}
-						emptyMessage={(
+						</DashboardListEmptyText>
+					)}
+				/>
+			</SearchContextComponent>
+			<Divider />
+			<SearchContextComponent items={federations} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
+				<FederationsList
+					onClickCreate={() => setCreateFedOpen(true)}
+					title={(
+						<FormattedMessage
+							id="federations.all.collapseTitle"
+							defaultMessage="All Federations"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
+						visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
+					}}
+					showBottomButton
+					emptyMessage={(
+						<>
 							<DashboardListEmptyText>
-								<FormattedMessage
-									id="federations.favourites.emptyMessage"
-									defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
-								/>
+								<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
 							</DashboardListEmptyText>
-						)}
-					/>
-				</SearchContextComponent>
-				<Divider />
-				<SearchContextComponent items={federations} fieldsToFilter={SEARCH_FIELDS}>
-					<FederationsList
-						onClickCreate={() => setCreateFedOpen(true)}
-						title={(
-							<FormattedMessage
-								id="federations.all.collapseTitle"
-								defaultMessage="All Federations"
-							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
-							visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
-						}}
-						showBottomButton
-						emptyMessage={(
-							<>
-								<DashboardListEmptyText>
-									<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
-								</DashboardListEmptyText>
-								<Button
-									startIcon={<AddCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => setCreateFedOpen(true)}
-								>
-									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
-								</Button>
-							</>
-						)}
-					/>
-				</SearchContextComponent>
-			</>
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={() => setCreateFedOpen(true)}
+							>
+								<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
+							</Button>
+						</>
+					)}
+				/>
+			</SearchContextComponent>
 			<CreateFederationForm
 				open={createFedOpen}
 				onClickClose={() => setCreateFedOpen(false)}

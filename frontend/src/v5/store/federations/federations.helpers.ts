@@ -26,6 +26,8 @@ import {
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
+export const FEDERATION_SEARCH_FIELDS = ['code', 'name', 'desc', 'category'];
+
 export const prepareNewFederation = (
 	newFederation: NewFederation,
 	federationId?: string,
