@@ -283,6 +283,7 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 ServiceHelper.generateTemplate = (deprecated) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
+	config: {},
 	properties: [
 		{
 			name: ServiceHelper.generateRandomString(),

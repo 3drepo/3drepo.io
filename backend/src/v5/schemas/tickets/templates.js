@@ -15,7 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { defaultProperties, fieldTypes, presetEnumValues, presetModules, presetModulesProperties } = require('./templates.constants');
+const {
+	defaultProperties,
+	fieldTypes,
+	getApplicableDefaultProperties,
+	presetEnumValues,
+	presetModules,
+	presetModulesProperties } = require('./templates.constants');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
@@ -152,7 +158,7 @@ TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnk
 
 TemplateSchema.generateFullSchema = (template) => {
 	const result = cloneDeep(template);
-	result.properties = [...defaultProperties, ...result.properties];
+	result.properties = [...getApplicableDefaultProperties(template.config), ...result.properties];
 	result.modules.forEach((module) => {
 		if (module.type && presetModulesProperties[module.type]) {
 			// eslint-disable-next-line no-param-reassign

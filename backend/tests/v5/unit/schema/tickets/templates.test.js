@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { fieldTypes, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -296,6 +296,9 @@ const testGenerateFullSchema = () => {
 		test('should fill properties with default properties', () => {
 			const template = {
 				name: generateRandomString(),
+				config: {
+					issueProperties: true,
+				},
 				properties: [
 					{
 						name: generateRandomString(),
@@ -308,12 +311,14 @@ const testGenerateFullSchema = () => {
 			const output = TemplateSchema.generateFullSchema(template);
 
 			const expectedOutput = cloneDeep(template);
-			expectedOutput.properties = [...defaultProperties, ...expectedOutput.properties];
+			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
+				...expectedOutput.properties];
 			expect(output).toEqual(expectedOutput);
 		});
 		test('should fill preset modules with default properties', () => {
 			const template = {
 				name: generateRandomString(),
+				config: {},
 				properties: [
 					{
 						name: generateRandomString(),
@@ -341,7 +346,8 @@ const testGenerateFullSchema = () => {
 			const output = TemplateSchema.generateFullSchema(template);
 
 			const expectedOutput = cloneDeep(template);
-			expectedOutput.properties = [...defaultProperties, ...expectedOutput.properties];
+			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
+				...expectedOutput.properties];
 			expectedOutput.modules.forEach((module) => {
 				if (module.type) {
 					// eslint-disable-next-line no-param-reassign

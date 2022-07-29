@@ -34,6 +34,7 @@ TemplateConstants.fieldTypes = {};
 	'measurements',
 	'attachments',
 	'safetibase',
+	'coords',
 ].forEach((type) => {
 	TemplateConstants.fieldTypes[toConstantCase(type)] = type;
 });
@@ -79,12 +80,17 @@ TemplateConstants.defaultProperties = [
 	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, readOnly: true },
 	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
 	{ name: 'Updated at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
-	{ name: 'Default Image', type: TemplateConstants.fieldTypes.IMAGE },
-	{ name: 'Default View', type: TemplateConstants.fieldTypes.VIEW },
-	{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-	{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
-	{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
-	{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE },
+	{ name: 'Default Image', type: TemplateConstants.fieldTypes.IMAGE, availableIf: ({ defaultImage }) => defaultImage },
+	{ name: 'Default View', type: TemplateConstants.fieldTypes.VIEW, availableIf: ({ defaultView }) => defaultView },
+	{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None', availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open', availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS, availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Pin', type: TemplateConstants.fieldTypes.COORDS, availableIf: ({ pin }) => pin },
 ];
+
+TemplateConstants.getApplicableDefaultProperties = (config) => TemplateConstants.defaultProperties.flatMap(
+	({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),
+);
 
 module.exports = TemplateConstants;
