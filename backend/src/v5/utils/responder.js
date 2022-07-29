@@ -48,53 +48,62 @@ const createErrorResponse = (req, res, resCode) => {
 Responder.mimeTypes = {
 	src: 'text/plain',
 	gltf: 'application/json',
-	bin: 'text/plain',
+	bin: 'application/octet-stream',
 	json: 'application/json',
 	png: 'image/png',
 	jpg: 'image/jpg',
 };
 
 Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType = Responder.mimeTypes.json } = {}) => {
-	const finalResCode = createResponseCode(resCode);
+	try {
+		const finalResCode = createResponseCode(resCode);
 
-	if (finalResCode.status > 200) {
-		createErrorResponse(req, res, finalResCode);
-		return;
-	}
-
-	let contentLength = 0;
-
-	if (cache) {
-		res.setHeader('Cache-Control', `private, max-age=${cachePolicy.maxAge}`);
-	}
-
-	if (customHeaders) {
-		res.writeHead(resCode.status, customHeaders);
-	}
-
-	if (isBuffer(body)) {
-		const contentType = Responder.mimeTypes[req.params.format] || mimeType;
-		res.setHeader('Content-Type', contentType);
-		res.status(finalResCode.status);
-		contentLength = body.length;
-		res.write(body, 'binary');
-		res.flush();
-		res.end();
-	} else {
-		if (body) {
-			contentLength = isString(body) ? body.length : JSON.stringify(body).length;
+		if (finalResCode.status > 200) {
+			createErrorResponse(req, res, finalResCode);
+			return;
 		}
-		res.status(finalResCode.status).send(body);
+
+		let contentLength = 0;
+
+		if (cache) {
+			res.setHeader('Cache-Control', `private, max-age=${cachePolicy.maxAge}`);
+		}
+
+		if (customHeaders) {
+			res.writeHead(finalResCode.status, customHeaders);
+		} else {
+			res.status(finalResCode.status);
+		}
+
+		if (isBuffer(body)) {
+			const contentType = Responder.mimeTypes[req.params.format] || mimeType;
+			res.setHeader('Content-Type', contentType);
+			contentLength = body.length;
+			res.write(body, 'binary');
+			res.flush();
+			res.end();
+		} else {
+			if (body) {
+				contentLength = isString(body) ? body.length : JSON.stringify(body).length;
+			}
+			res.send(body);
+		}
+		logger.logInfo(genResponseLogging(resCode, contentLength, req));
+	} catch (err) {
+		logger.logError(`Unexpected error when sending a response ${err.message}`);
 	}
-	logger.logInfo(genResponseLogging(resCode, contentLength, req));
 };
 
-Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize) => {
+Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize, { mimeType } = {}) => {
 	const headers = {
 		'Content-Length': fileSize,
 		'Content-Disposition': `attachment;filename=${fileName}`,
 	};
 
+	const contentType = Responder.mimeTypes[req.params.format] || mimeType;
+	if (contentType) {
+		headers['Content-Type'] = contentType;
+	}
 	let response = createResponseCode(resCode);
 
 	readStream.on('error', (error) => {

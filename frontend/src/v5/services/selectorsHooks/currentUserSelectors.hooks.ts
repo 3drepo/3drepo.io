@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as CurrentUserSelectors from '@/v4/modules/currentUser/currentUser.selectors';
+import * as CurrentUserSelectors from '@/v5/store/currentUser/currentUser.selectors';
 import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);

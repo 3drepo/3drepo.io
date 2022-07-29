@@ -1717,7 +1717,6 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  *
  */
 router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
-
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel

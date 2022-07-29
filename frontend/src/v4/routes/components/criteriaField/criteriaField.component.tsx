@@ -65,9 +65,10 @@ interface IState {
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton
-		{...props}
-		aria-label="Show criteria menu"
-		aria-haspopup="true"
+        {...props}
+        aria-label="Show criteria menu"
+        aria-haspopup="true"
+        size="large"
 	>
 		<StyledMoreIcon {...IconProps} />
 	</IconButton>

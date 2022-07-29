@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TableSortLabel from '@material-ui/core/TableSortLabel';
+import TableSortLabel from '@mui/material/TableSortLabel';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 

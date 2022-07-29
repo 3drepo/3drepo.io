@@ -16,7 +16,11 @@
  */
 
 const _ = require('lodash');
+
+const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
+const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../../src/v5/models/users.constants');
+const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -29,8 +33,29 @@ const JobsModel = require(`${src}/models/jobs`);
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspacesModel = require(`${src}/models/teamspaces`);
 
+jest.mock('../../../../../src/v5/models/roles');
+const RolesModel = require(`${src}/models/roles`);
+
+jest.mock('../../../../../src/v5/models/projectSettings');
+const ProjectSettings = require(`${src}/models/projectSettings`);
+
+jest.mock('../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
+
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
+
+jest.mock('../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../../src/v5/utils/quota');
+const Quota = require(`${src}/utils/quota`);
+
+const invalidUsername = 'invalid';
+const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation((username) => {
+	if (username === invalidUsername) {
+		throw templates.unknown;
+	}
+});
 
 const testGetTeamspaceListByUser = () => {
 	describe('Get Teamspace list by user', () => {
@@ -93,7 +118,120 @@ const testGetTeamspaceMembersInfo = () => {
 	});
 };
 
+const testInitTeamspace = () => {
+	describe('Initialize teamspace', () => {
+		test('should initialize a teamspace', async () => {
+			const username = generateRandomString();
+			await Teamspaces.initTeamspace(username);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledTimes(1);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledWith(username);
+			expect(RolesModel.grantTeamspaceRoleToUser).toHaveBeenCalledTimes(1);
+			expect(RolesModel.grantTeamspaceRoleToUser).toHaveBeenCalledWith(username, username);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledTimes(1);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(username);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(username);
+		});
+
+		test('should initialize a teamspace even if an error is thrown ', async () => {
+			await Teamspaces.initTeamspace(invalidUsername);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledTimes(1);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledWith(invalidUsername);
+		});
+	});
+};
+
+const testGetQuotaInfo = () => {
+	describe('Get quota info', () => {
+		test('should return quota info', async () => {
+			const quotaInfo = {
+				freeTier: false,
+				expiryDate: generateRandomNumber(0),
+				data: generateRandomNumber(),
+				collaborators: generateRandomNumber(0),
+			};
+			const spaceUsed = generateRandomNumber(0);
+			const collabsUsed = generateRandomNumber(0);
+			Quota.getQuotaInfo.mockResolvedValueOnce(quotaInfo);
+			Quota.getSpaceUsed.mockResolvedValueOnce(spaceUsed);
+			Quota.getCollaboratorsAssigned.mockResolvedValueOnce(collabsUsed);
+			const teamspace = generateRandomString();
+			const res = await Teamspaces.getQuotaInfo(teamspace);
+			expect(res).toEqual(
+				{
+					freeTier: quotaInfo.freeTier,
+					expiryDate: quotaInfo.expiryDate,
+					data: {
+						available: quotaInfo.data,
+						used: spaceUsed,
+					},
+					seats: {
+						available: quotaInfo.collaborators,
+						used: collabsUsed,
+					},
+				},
+			);
+			expect(Quota.getQuotaInfo).toHaveBeenCalledTimes(1);
+			expect(Quota.getQuotaInfo).toHaveBeenCalledWith(teamspace, true);
+			expect(Quota.getSpaceUsed).toHaveBeenCalledTimes(1);
+			expect(Quota.getSpaceUsed).toHaveBeenCalledWith(teamspace, true);
+			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledTimes(1);
+			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledWith(teamspace);
+		});
+
+		test('should return error if a method called throws an exception', async () => {
+			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => {
+				throw templates.licenceExpired;
+			});
+			const teamspace = generateRandomString();
+			await expect(Teamspaces.getQuotaInfo(teamspace)).rejects.toEqual(templates.licenceExpired);
+			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
+			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
+		});
+	});
+};
+
+const testRemoveTeamspaceMember = () => {
+	describe('Remove user from teamspace', () => {
+		test('should all possible permissions then remove the user from the teamspace', async () => {
+			const user = generateRandomString();
+			const teamspace = generateRandomString();
+
+			await expect(Teamspaces.removeTeamspaceMember(teamspace, user)).resolves.toBeUndefined();
+
+			expect(ModelSettings.removeUserFromAllModels).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.removeUserFromAllModels).toHaveBeenCalledWith(teamspace, user);
+
+			expect(ProjectSettings.removeUserFromAllProjects).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.removeUserFromAllProjects).toHaveBeenCalledWith(teamspace, user);
+
+			expect(TeamspacesModel.removeUserFromAdminPrivilege).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.removeUserFromAdminPrivilege).toHaveBeenCalledWith(teamspace, user);
+
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(1);
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user);
+		});
+	});
+};
+
+const testGetAvatarStream = () => {
+	describe('Get avatar stream', () => {
+		test('should get avatar stream', async () => {
+			const teamspace = generateRandomString();
+			const stream = generateRandomString();
+			FilesManager.getFile.mockResolvedValueOnce(stream);
+			await expect(Teamspaces.getAvatar(teamspace)).resolves.toEqual(stream);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
+	testInitTeamspace();
+	testRemoveTeamspaceMember();
+	testGetAvatarStream();
+	testGetQuotaInfo();
 });

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent } from 'react';
-import InputLabel from '@material-ui/core/InputLabel';
+import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -29,6 +30,9 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
+import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { DateField } from '../../../../../components/dateField/dateField.component';
+
 import {
 	Container,
 	Content,
@@ -39,6 +43,7 @@ import {
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 import { RisksIcon } from '../riskIcon/riskIcon.component';
+import { DateFieldContainer } from './mainRiskFormTab.styles';
 
 interface IProps {
 	risk: any;
@@ -84,6 +89,12 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNewRisk}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
+						{...(isV5() && ({
+							placeholder: 'Type a description',
+							disableShowDefaultUnderline: true,
+							className: 'description',
+							}))
+						}
 					/>
 				)} />
 			</Container>
@@ -95,7 +106,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 				/>
 			)}
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<UpdateButtons
 					isNew={isNewRisk}
 					disableViewer={disableViewer}
@@ -111,7 +122,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 				/>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<FieldsContainer size={'wide'}>
 					<StyledFormControl>
 						<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
@@ -155,7 +166,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 				</FieldsContainer>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="assigned_roles">Risk owner</InputLabel>
 					<Field name="assigned_roles" render={({ field }) => (
@@ -181,7 +192,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 				</StyledFormControl>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<Field name="associated_activity" render={({ field, form }) => (
 						<AutoSuggestField
@@ -208,7 +219,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 				</StyledFormControl>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<FieldsContainer>
 					<Field name="risk_factor" render={({ field, form }) => (
 						<AutoSuggestField
@@ -242,6 +253,19 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 							saveOnChange={isNewRisk}
 						/>
 					)} />
+					<StyledFormControl>
+						<InputLabel shrink>Due date</InputLabel>
+						<Field name="due_date" render={({ field }) => (
+							<DateFieldContainer>
+								<DateField
+									{...field}
+									inputFormat={NAMED_MONTH_DATE_FORMAT}
+									disabled={!canEditBasicProperty}
+									placeholder="Choose a due date"
+								/>
+							</DateFieldContainer>
+						)} />
+					</StyledFormControl>
 				</FieldsContainer>
 				<Field name="safetibase_id" render={({ field }) => (
 					<input {...field} type="hidden" name="safetibase_id" disabled />

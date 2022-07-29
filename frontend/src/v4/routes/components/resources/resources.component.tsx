@@ -16,7 +16,7 @@
  */
 import { PureComponent } from 'react';
 
-import { LinearProgress } from '@material-ui/core';
+import { LinearProgress } from '@mui/material';
 import { isEmpty } from 'lodash';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -26,9 +26,21 @@ import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetai
 import { EmptyStateInfo } from '../components.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {
-	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer,
-	ResourcesList, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, UploadSizeLabel,
+	ActionContainer,
+	IconButton,
+	QuoteIcon,
+	ResourcesContainer,
+	ResourcesList,
+	ResourceItemContainer,
+	ResourceItemRightColumn,
+	ResourceLabel,
+	ResourceLink,
+	UploadSizeLabel,
+	Size,
+	ResourceItemLeftColumn,
 } from './resources.styles';
+import { RemoveButton } from './removeButton.component';
+import { ResourceIcon } from './resourceIcon';
 
 interface IResource {
 	_id: string;
@@ -52,44 +64,23 @@ interface IState {
 	value: any;
 }
 
-export const RemoveButton = (props) => (
-	<IconButton
-		{...props}
-		aria-label="Toggle menu"
-		aria-haspopup="true"
-	>
-		<RemoveIcon />
-	</IconButton>
-);
-
 export const QuoteButton = (props) => (
-	<IconButton
-		{...props}
-		aria-label="Quote resource"
-	>
+	<IconButton {...props} aria-label="Quote resource" size="large">
 		<QuoteIcon />
 	</IconButton>
 );
 
-const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
-
-const ResourceIcon = ({type}) =>
-	(type === 'http') ?
-		(<LinkIcon />) :
-	(imageExtensions.indexOf(type) >= 0) ?
-		(<PhotoIcon />) :
-		(<DocumentIcon />)
-;
-
 const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit, onClickQuote}) => {
 	return (
 		<ResourceItemContainer>
-			<ResourceIcon type={type} />
-			<ResourceLink href={link} target="_blank" rel="noopener">
-				{name}
-			</ResourceLink>
+			<ResourceItemLeftColumn>
+				<ResourceIcon type={type} />
+				<ResourceLink href={link} target="_blank" rel="noopener">
+					{name}
+				</ResourceLink>
+			</ResourceItemLeftColumn>
 			<ResourceItemRightColumn>
-				{size}
+				{size && <Size>{size}</Size>}
 				<ActionContainer>
 					{canEdit &&
 					<>
@@ -169,7 +160,7 @@ export class Resources extends PureComponent<IProps, IState> {
 			<ResourcesContainer>
 				{this.renderResources(!isEmpty(resources))}
 				{isEmpty(resources) && <EmptyStateInfo>No resources have been attached yet</EmptyStateInfo>}
-				<FieldsRow container justify="flex-end">
+				<FieldsRow container justifyContent="flex-end">
 					<ContainedButton onClick={this.onClickAttach} disabled={!canEdit}>
 						Add Resource
 					</ContainedButton>

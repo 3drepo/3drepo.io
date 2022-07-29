@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MuiButtonBase from '@material-ui/core/Button';
+import MuiButtonBase from '@mui/material/Button';
 import styled, { css } from 'styled-components';
 
 export const MuiButton = styled(MuiButtonBase)`
@@ -44,19 +44,9 @@ export const labelButtonSecondaryStyles = css`
 	color: ${({ theme }) => theme.palette.tertiary.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
-	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
-
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.main};
+	&:hover, &:active {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 		text-decoration-line: none;
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.tertiary.dark};
-		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;
 
@@ -102,7 +92,7 @@ export const labelOutlinedButtonSecondaryStyles = css`
 	}
 `;
 
-export const LabelButton = styled(MuiButton)`
+export const LabelButton = styled(MuiButton)<{ color?: string, outlined?: any }>`
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 
@@ -152,6 +142,7 @@ export const ErrorButton = styled(MuiButton).attrs({
 	&:hover {
 		color: ${({ theme }) => theme.palette.error.contrastText};
 		background-color: ${({ theme }) => theme.palette.error.main};
+		border-color: ${({ theme }) => theme.palette.error.main};
 		text-decoration-line: none;
 	}
 

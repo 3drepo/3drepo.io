@@ -71,7 +71,12 @@ export class RevisionsSelect extends PureComponent<IProps, IState> {
 					disabled={disabled}
 					renderValue={this.renderValue}
 					onChange={this.handleChange}
-					MenuProps={({onEntered: this.handleOpen, onExit: this.handleClose})}
+					MenuProps={{
+						TransitionProps: {
+							onEntered: this.handleOpen,
+							onExit: this.handleClose
+						}
+					}}
 				>
 					{revisions.map((revision) => (
 						<MenuItem key={revision._id} value={revision}>

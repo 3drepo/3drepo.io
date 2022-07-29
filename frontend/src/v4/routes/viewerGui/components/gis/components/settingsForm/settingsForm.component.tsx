@@ -16,7 +16,7 @@
  */
 
 import { Field } from 'formik';
-import SaveIcon from '@material-ui/icons/Save';
+import SaveIcon from '@mui/icons-material/Save';
 
 import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container, Header, Headline, StyledForm, StyledTextField } from './settingsForm.styles';
@@ -98,7 +98,7 @@ export const SettingsForm = (props) => {
 					/>
 				)} />
 			</Container>
-			<ViewerPanelFooter container alignItems="center" justify="flex-end">
+			<ViewerPanelFooter container alignItems="center" justifyContent="flex-end">
 				<Field render={({ form }) => (
 					<ViewerPanelButton
 						type="submit"

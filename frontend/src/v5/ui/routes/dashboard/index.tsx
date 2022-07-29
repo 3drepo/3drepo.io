@@ -17,33 +17,72 @@
 
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { discardSlash } from '@/v5/services/routing/routing';
+import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
-import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
-import { TeamspaceContent } from './teamspaces';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
+import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
+import { PasswordForgot } from '../login/passwordForgot';
+import { PasswordChange } from '../login/passwordChange';
+import { TeamspaceSelection } from '../teamspaceSelection';
+import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
 import { ProjectContent } from './projects';
+import { Login } from '../login';
+import { Viewer } from '../viewer/viewer';
+import { VIEWER_ROUTE } from '../routes.constants';
+import { LegalRoutes } from '../legal';
+import { UserSignup } from '../userSignup/userSignup.component';
+import { UserVerification } from '../userVerification/userVerification.component';
+import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 
-export const Dashboard = () => {
+export const MainRoute = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
 
 	return (
 		<>
 			<GlobalStyle />
+			<ViewerCanvas location={{ pathname }} />
 			<Switch>
-				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
-					<DashboardLayout>
-						<Route exact path={`${path}/dashboard/`}>
-							<TeamspacesList />
-						</Route>
-						<Route path={`${path}/dashboard/:teamspace/`}>
-							<TeamspaceContent />
-						</Route>
+				<Route exact path={`${path}/login`}>
+					<Login />
+				</Route>
+				<Route exact path={`${path}/signup`}>
+					<UserSignup />
+				</Route>
+				<Route exact path={`${path}/register-verify`}>
+					<UserVerification />
+				</Route>
+				<Route exact path={`${path}/password-forgot`}>
+					<PasswordForgot />
+				</Route>
+				<Route exact path={`${path}/password-change`}>
+					<PasswordChange />
+				</Route>
+				<Route exact path={`${path}/(terms|privacy|cookies)`}>
+					<LegalRoutes path={path} />
+				</Route>
+				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
+					<TeamspaceSelection />
+				</AuthenticatedRoute>
+				<AuthenticatedRoute exact path={`${path}/dashboard/:teamspace/(t|t/.*)?`}>
+					<TeamspaceLayout>
 						<Switch>
-							<Route exact path={`${path}/dashboard/:teamspace/t/settings`}>
+							<Route exact path={`${path}/dashboard/:teamspace`}>
+								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
+							</Route>
+							<Route exact path={`${path}/dashboard/:teamspace/t`}>
+								<Redirect to={`${discardSlash(pathname)}/projects`} />
+							</Route>
+							<Route path={`${path}/dashboard/:teamspace/`}>
 								<TeamspaceContent />
 							</Route>
+						</Switch>
+					</TeamspaceLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project`}>
+					<DashboardLayout>
+						<Switch>
 							<Route exact path={`${path}/dashboard/:teamspace/:project`}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
 							</Route>
@@ -55,12 +94,17 @@ export const Dashboard = () => {
 							</Route>
 						</Switch>
 					</DashboardLayout>
-				</Route>
-				<Route path="*">
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={VIEWER_ROUTE}>
+					<DashboardViewerLayout>
+						<Viewer />
+					</DashboardViewerLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path="*">
 					<DashboardLayout>
 						<NotFound />
 					</DashboardLayout>
-				</Route>
+				</AuthenticatedRoute>
 			</Switch>
 		</>
 	);

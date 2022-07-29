@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SvgIcon } from '@material-ui/core';
+import { SvgIcon } from '@mui/material';
 
 export default () => (
 	<SvgIcon viewBox="0 0 16 16">

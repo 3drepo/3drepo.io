@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, Ref, forwardRef, FC } from 'react';
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 
 import { VIEWER_EVENTS, VIEWER_MEASURING_MODE } from '../../../../constants/viewer';
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';

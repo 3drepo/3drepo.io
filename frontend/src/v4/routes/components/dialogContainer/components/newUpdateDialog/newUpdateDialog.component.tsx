@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@mui/material/Button';
+import DialogContent from '@mui/material/DialogContent';
 
 import { DialogActions, Link } from './newUpdateDialog.styles';
 

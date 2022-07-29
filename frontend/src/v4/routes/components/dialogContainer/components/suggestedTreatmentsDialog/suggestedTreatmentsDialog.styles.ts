@@ -17,17 +17,21 @@
 
 import styled from 'styled-components';
 
-import DialogContent from '@material-ui/core/DialogContent';
-import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import Typography from '@material-ui/core/Typography';
+import DialogContent from '@mui/material/DialogContent';
+import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Typography from '@mui/material/Typography';
+import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../../styles';
 
-export const StyledTypography = styled(Typography)`
+export const StyledTypography = styled(Typography).attrs({
+	component: 'span'
+})<{ inline: boolean }>`
 	&& {
-		display: ${(props: { inline: boolean }) => props.inline ? 'inline' : 'inherit'};
+		display: ${({ inline }) => inline ? 'inline' : 'inherit'};
 	}
 `;
 
@@ -75,10 +79,17 @@ export const Container = styled.div`
 	min-height: 40vh;
 `;
 
+export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
+	autoHeight: true,
+	autoHeightMax: isV5() ? 'calc(100vh - 205px)' : '60vh',
+})`
+	margin-top: 66px;
+`;
+
 export const StyledDialogContent = styled(DialogContent)`
 	&& {
-		margin-top: 54px;
 		padding-top: 0;
+		overflow: unset;
 	}
 `;
 

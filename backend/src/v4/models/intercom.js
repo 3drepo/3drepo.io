@@ -24,6 +24,7 @@ const accessToken = get(intercom, "accessToken");
 const secretKey = get(intercom, "secretKey");
 const config = require("../config");
 const { v5Path } = require("../../interop");
+const { systemLogger } = require("../logger");
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 
@@ -96,6 +97,14 @@ Intercom.subscribeToV5Events = () => {
 			} catch (err) {
 				// Do nothing
 			}
+		}
+	});
+
+	EventsManager.subscribe(EventsV5.USER_VERIFIED, async ({username, email, fullName, company, mailListOptOut}) => {
+		try{
+			await Intercom.createContact (username, fullName, email, !mailListOptOut, company);
+		} catch (err) {
+			systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 		}
 	});
 };

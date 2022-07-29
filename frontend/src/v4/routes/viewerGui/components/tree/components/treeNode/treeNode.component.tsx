@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { Tooltip } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import UpIcon from '@material-ui/icons/KeyboardArrowUp';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import RemoveIcon from '@material-ui/icons/Remove';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
+import { Tooltip } from '@mui/material';
+import { isV5 } from '@/v4/helpers/isV5';
+import AddIcon from '@mui/icons-material/Add';
+import UpIcon from '@mui/icons-material/KeyboardArrowUp';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import RemoveIcon from '@mui/icons-material/Remove';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import IsolateIcon from '@mui/icons-material/VisibilityOutlined';
 
 import {
 	SELECTION_STATES,
@@ -71,7 +72,7 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 );
 
 const ParentOfVisibleIcon = () => <ParentOfVisible><VisibilityIcon color="inherit" /></ParentOfVisible>;
-const VisibleIcon = () => <VisibilityIcon color="primary" />;
+const VisibleIcon = () => <VisibilityIcon color={isV5() ? 'secondary' : 'primary'} />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
 export class TreeNode extends PureComponent<IProps, any> {

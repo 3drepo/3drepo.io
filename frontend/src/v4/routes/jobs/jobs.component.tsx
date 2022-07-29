@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import RemoveCircle from '@material-ui/icons/RemoveCircle';
+import RemoveCircle from '@mui/icons-material/RemoveCircle';
 import ReactDOM from 'react-dom';
 
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';

@@ -17,11 +17,15 @@
 
 import {
 	UploadStatuses,
-	FetchContainersContainerItemResponse,
-	FetchContainerStatsResponse,
 	IContainer,
+	ContainerStats,
+	MinimumContainer,
+	ContainerBackendSettings,
+	ContainerSettings,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import filesize from 'filesize';
+import { formatMessage } from '@/v5/services/intl';
 
 export const filterContainers = (federations: IContainer[], filterQuery: string) => (
 	federations.filter((
@@ -29,9 +33,18 @@ export const filterContainers = (federations: IContainer[], filterQuery: string)
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
 );
 
+export const canUploadToBackend = (status?: UploadStatuses): boolean => {
+	const statusesForUpload = [
+		UploadStatuses.OK,
+		UploadStatuses.FAILED,
+	];
+
+	return statusesForUpload.includes(status);
+};
+
 export const prepareSingleContainerData = (
-	container: FetchContainersContainerItemResponse,
-	stats?: FetchContainerStatsResponse,
+	container: MinimumContainer,
+	stats?: ContainerStats,
 ): IContainer => ({
 	...container,
 	revisionsCount: stats?.revisions.total ?? 0,
@@ -49,9 +62,33 @@ export const prepareSingleContainerData = (
 });
 
 export const prepareContainersData = (
-	containers: Array<FetchContainersContainerItemResponse>,
-	stats?: FetchContainerStatsResponse[],
+	containers: Array<MinimumContainer>,
+	stats?: ContainerStats[],
 ) => containers.map<IContainer>((container, index) => {
 	const containerStats = stats?.[index];
 	return prepareSingleContainerData(container, containerStats);
 });
+
+export const prepareContainerSettingsForFrontend = ({
+	surveyPoints,
+	...otherProps
+}: ContainerBackendSettings) => ({
+	surveyPoint: surveyPoints?.[0],
+	...otherProps,
+});
+
+export const prepareContainerSettingsForBackend = ({
+	surveyPoint,
+	...otherProps
+}: ContainerSettings) => ({
+	surveyPoints: [surveyPoint],
+	...otherProps,
+});
+
+export const filesizeTooLarge = (file: File): string => {
+	const { uploadSizeLimit } = ClientConfig;
+	return (file.size > uploadSizeLimit) && formatMessage({
+		id: 'validation.revisions.file.error.tooLarge',
+		defaultMessage: 'File exceeds size limit of {sizeLimit}',
+	}, { sizeLimit: filesize(uploadSizeLimit) });
+};

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControlBase from '@material-ui/core/FormControl';
+import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControlBase from '@mui/material/FormControl';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';

@@ -16,3 +16,5 @@
  */
 
 export { DashboardListItemTitle } from './dashboardListItemTitle.component';
+export { DashboardListItemContainerTitle } from './dashboardListItemContainerTitle/dashboardListItemContainerTitle.component';
+export { DashboardListItemFederationTitle } from './dashboardListItemFederationTitle/dashboardListItemFederationTitle.component';

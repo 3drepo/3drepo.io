@@ -8,7 +8,7 @@ db.getSiblingDB('admin').getCollection('system.users').find().forEach(function(u
 	var msg = 'User: ' + user.user;
 
 	if (!dryRun) {
-		var res = db.getSiblingDB('admin').getCollection('system.users').update({ _id: user._id }, { $unset: { "customData.billing.billingInfo.jobTitle": "", "customData.billing.billingInfo.phoneNo": "" } });
+		var res = db.getSiblingDB('admin').getCollection('system.users').updateOne({ _id: user._id }, { $unset: { "customData.billing.billingInfo.jobTitle": "", "customData.billing.billingInfo.phoneNo": "" } });
 		if (res.nModified > 0) {
 			msg += ' <== updated';
 		}

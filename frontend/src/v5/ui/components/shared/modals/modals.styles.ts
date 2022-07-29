@@ -15,30 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 
-export const Container = styled.div`
+export const DialogContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	min-width: 633px;
-	min-height: 295px;
-	padding-top: 43px;
+	padding: 43px 0 25px;
 `;
 
 export const Actions = styled.div`
 	display: flex;
-	${({ bottomMargin }) => bottomMargin && css`
-		margin-bottom: 25px;
-	`}
+`;
+
+export const Message = styled(DialogContent)`
+	width: 450px;
 `;
 
 export const Details = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	margin-top: 5px;
-	margin-bottom: 25px;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
@@ -50,4 +54,39 @@ export const Status = styled(Typography).attrs({
 	margin-top: 8px;
 	margin-bottom: 0;
 	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const TruncatableTitle = styled(Truncate).attrs({
+	lines: 1,
+	width: 400,
+})``;
+
+export const RetypeCheck = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 22px;
+`;
+
+export const Instruction = styled.div`
+	${({ theme }) => theme.typography.body1}
+	color: ${({ theme }) => theme.palette.base.main};
+	text-align: center;
+	overflow-wrap: break-word;
+	width: auto;
+	max-width: 450px;
+`;
+
+export const RetypeCheckField = styled(FormTextField)`
+	margin-top: 10px;
+	width: 296px;
+`;
+
+export const ConfirmationPhrase = styled.span`
+	font-weight: ${FONT_WEIGHT.BOLDER};
+	color: ${({ theme }) => theme.palette.error.main};
+`;
+
+export const ErrorMessage = styled(ErrorMessageBase)`
+	justify-content: center;
 `;

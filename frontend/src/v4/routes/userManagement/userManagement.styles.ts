@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Tab from '@material-ui/core/Tab';
+import Tab from '@mui/material/Tab';
 
 import { media, COLOR } from '../../styles';
 import { LoaderContainer as
@@ -43,7 +43,7 @@ export const LoaderContainer = styled(DialogLoaderContainer)`
 	height: calc(100% - 65px);
 `;
 
-export const StyledTab = styled(Tab)`
+export const StyledTab = styled(Tab)<{ component?: string }>`
 	&& {
 		padding-left: 24px;
 		padding-right: 24px;

@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
 import { COLOR } from '../../../../../../styles';
@@ -33,7 +33,6 @@ import {
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
-import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
 `;
@@ -50,13 +49,13 @@ export const MessageContainer = styled.div`
 
 export const PreviewDetails = styled(PreviewDetailsBase)``;
 
-export const Container = styled.div`
+export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
 	display: flex;
 	flex-direction: column;
 	position: relative;
 	overflow: hidden;
-	flex: ${(props: { fill: boolean; }) => props.fill ? 1 : 'auto'};
-	padding-top: ${(props: { top: boolean; }) => props.top ? '16px' : 'auto'};
+	flex: ${({ fill }) => fill ? 1 : 'auto'};
+	padding-top: ${({ top }) => top ? '16px' : 'auto'};
 
 	${TextFieldStyles.StyledTextField} {
 		margin: 1px 0;
@@ -74,7 +73,7 @@ const getFieldsContainerSize = cond([
 	[stubTrue, constant(47)]
 ]);
 
-export const FieldsContainer = styled.div`
+export const FieldsContainer = styled.div<{ size?: string }>`
 	display: flex;
 	flex-direction: column;
 	margin-bottom: auto;
@@ -184,22 +183,14 @@ export const StyledTabs = styled(Tabs)`
 	}
 `;
 
-export const Content = styled.div`
-	display: ${(props) => props.active ? 'block' : 'none'};
+export const Content = styled.div<{ active: boolean }>`
+	display: ${({ active }) => active ? 'block' : 'none'};
 	width: 100%;
 	margin-bottom: 5px;
 
-	${TabContainer} {
+	${Container} {
 		margin-top: 6px;
 	}
-`;
-
-export const ExpandAction = styled.span`
-	font-size: 11px;
-	cursor: pointer;
-	display: block;
-	text-align: center;
-	margin-top: ${(props) => props.top ? '5px' : 0};
 `;
 
 export const SuggestionButtonWrapper = styled.div`

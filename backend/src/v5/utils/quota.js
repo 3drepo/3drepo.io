@@ -15,38 +15,50 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('./responseCodes');
+const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaces');
 const DBHandler = require('../handler/db');
 const config = require('./config');
-const { getSubscriptions } = require('../models/teamspaces');
+const { getInvitationsByTeamspace } = require('../models/invitations');
 const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
 
-const calculateQuota = async (teamspace) => {
-	const subs = await getSubscriptions(teamspace);
-	let quotaSize = 0;
-	let hasExpiredQuota = false;
+Quota.getQuotaInfo = async (teamspace) => {
+	let freeTier = true;
+	let userHasHadPaidPlan = false;
+	let closestExpiryDate = null;
+	let dataSize = config.subscriptions?.basic?.data ?? 0;
+	let collaborators = config.subscriptions?.basic?.collaborators ?? 0;
 
+	const subs = await getSubscriptions(teamspace);
 	Object.keys(subs).forEach((key) => {
 		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
 		if (key !== 'paypal') {
-			const { expiryDate, data } = subs[key];
+			userHasHadPaidPlan = true;
+			const { expiryDate, data, collaborators: subCollaborators } = subs[key];
 
-			if (expiryDate && expiryDate < Date.now()) {
-				hasExpiredQuota = true;
-			} else {
-				quotaSize += data;
+			if (!expiryDate || expiryDate > Date.now()) {
+				freeTier = false;
+				dataSize += data;
+
+				if (expiryDate && (!closestExpiryDate || expiryDate < closestExpiryDate)) {
+					closestExpiryDate = expiryDate;
+				}
+
+				if (collaborators !== 'unlimited') {
+					collaborators = subCollaborators === 'unlimited' ? 'unlimited' : collaborators + subCollaborators;
+				}
 			}
 		}
 	});
 
-	if (hasExpiredQuota && quotaSize === 0) throw templates.licenceExpired;
+	// if the user is currently on the free tier but had a paid plan before
+	if (freeTier && userHasHadPaidPlan) throw templates.licenceExpired;
 
-	const basicQuota = config.subscriptions?.basic?.data;
-	return (quotaSize + basicQuota) * 1024 * 1024; // data in MB, returning in Bytes.
+	return { data: dataSize * 1024 * 1024, collaborators, freeTier, expiryDate: closestExpiryDate };
 };
 
-const calculateSpaceUsed = async (teamspace) => {
+Quota.getSpaceUsed = async (teamspace) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
@@ -62,8 +74,16 @@ const calculateSpaceUsed = async (teamspace) => {
 	});
 
 	const sizes = await Promise.all(promises);
-
 	return sizes.reduce((accum, val) => accum + val, 0);
+};
+
+Quota.getCollaboratorsAssigned = async (teamspace) => {
+	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
+		getAllUsersInTeamspace(teamspace),
+		getInvitationsByTeamspace(teamspace, { _id: 1 }),
+	]);
+
+	return teamspaceUsers.length + teamspaceInvitations.length;
 };
 
 Quota.sufficientQuota = async (teamspace, size) => {
@@ -71,12 +91,12 @@ Quota.sufficientQuota = async (teamspace, size) => {
 		throw createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
 	}
 
-	const [quotaTotal, dataUsed] = await Promise.all([
-		calculateQuota(teamspace),
-		calculateSpaceUsed(teamspace),
+	const [quotaInfo, dataUsed] = await Promise.all([
+		Quota.getQuotaInfo(teamspace),
+		Quota.getSpaceUsed(teamspace),
 	]);
 
-	if ((dataUsed + size) > quotaTotal) {
+	if ((dataUsed + size) > quotaInfo.data) {
 		throw templates.quotaLimitExceeded;
 	}
 };

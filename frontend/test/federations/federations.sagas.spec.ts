@@ -19,7 +19,7 @@ import * as FederationsSaga from '@/v5/store/federations/federations.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { omit, pick, times } from 'lodash';
+import { omit, times } from 'lodash';
 import {
 	federationMockFactory,
 	prepareMockRawSettingsReply,
@@ -27,9 +27,10 @@ import {
 	prepareMockViewsReply,
 } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
-import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { FederationStats, IFederation } from '@/v5/store/federations/federations.types';
 import { prepareMockContainers } from './federations.fixtures';
 import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { alertAction } from '../test.helpers';
 
 // TODO: review this
 // There is something weird as how the tests are setup
@@ -41,6 +42,60 @@ describe('Federations: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'projectId';
 	const federationId = 'federationId';
+
+	beforeAll(() => {
+		// Silence console.log here becouse faker throws an irrelevant warning
+		jest.spyOn(console, 'log').mockImplementation(jest.fn());
+		jest.spyOn(console, 'debug').mockImplementation(jest.fn());
+	})
+
+	afterAll(() => {
+		jest.spyOn(console, 'log').mockRestore();
+		jest.spyOn(console, 'debug').mockRestore();
+	})
+
+	describe('createFederation', () => {
+		const newFederation = {
+			name: 'New Federation',
+			code: 'FED123',
+			desc: 'This is a test federation',
+			unit: 'cm',
+		};
+		const newFederationContainers = ['containerIdOne', 'containerIdTwo'];
+
+		it('should successfully create a new federation', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(200, { _id: federationId });
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation, newFederationContainers))
+				.put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId))
+				.put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, newFederationContainers))
+				.put(FederationsActions.fetchFederationStats(teamspace, projectId, federationId))
+				.silentRun();
+		});
+		it('should successfully create a new federation with no containers', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(200, { _id: federationId });
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation))
+				.put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId))
+				.silentRun();
+		});
+		it('should call error dialog when create federation errors', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(400);
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.createFederation(teamspace, projectId, newFederation))
+				.put.like(alertAction('trying to create federation'))
+				.silentRun();
+		});
+	});
 
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint', async () => {
@@ -58,7 +113,7 @@ describe('Federations: sagas', () => {
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
-				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites`)
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites?ids=${federationId}`)
 				.reply(200)
 
 			await expectSaga(FederationsSaga.default)
@@ -90,7 +145,7 @@ describe('Federations: sagas', () => {
 		})
 
 		it('should fetch stats', async () => {
-			const prepareMockStatsReply = (federation: IFederation): FetchFederationStatsResponse => ({
+			const prepareMockStatsReply = (federation: IFederation): FederationStats => ({
 				containers: federation.containers,
 				tickets: {
 					issues: federation.issues,
@@ -100,6 +155,7 @@ describe('Federations: sagas', () => {
 				category: federation.category,
 				status: federation.status,
 				code: federation.code,
+				desc: federation.desc,
 			})
 
 			mockFederations.forEach((federation) => {
@@ -137,7 +193,6 @@ describe('Federations: sagas', () => {
 				.put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, mockContainers))
 				.silentRun();
 		})
-	
 
 		it('should fetch federation views', async () => {
 			mockFederations.forEach((federation) => {
@@ -207,20 +262,24 @@ describe('Federations: sagas', () => {
 				federationId,
 				mockSettings,
 			))
-			.silentRun();	
+			.silentRun();
 		})
 	})
 
 	describe('deleteFederation', () => {
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
 		it('should call deleteFederation endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 				.reply(200);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId, onSuccess, onError))
 				.put(FederationsActions.deleteFederationSuccess(projectId, federationId))
 				.silentRun();
+			
+			expect(onSuccess).toBeCalled();
 		})
 
 		it('should call deleteFederation endpoint with 404 and open alert modal', async () => {
@@ -229,8 +288,10 @@ describe('Federations: sagas', () => {
 				.reply(404);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId, onSuccess, onError))
 				.silentRun();
+
+			expect(onSuccess).toBeCalled();
 		})
 	})
 })

@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isV5 } from '@/v4/helpers/isV5';
 import { PureComponent, ReactNode } from 'react';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../services/formatting/formatDate';
+import { NAMED_MONTH_DATE_FORMAT, SHORT_DATE_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
-import { Author, Container, Date, Details, ExtraInfo, Icon, Status, OpenInViewerButton } from './previewItemInfo.styles';
+import { Author, Container, Date, Details, ExtraInfo, Icon, Status, OpenInViewerButton, UserAndModelDetails } from './previewItemInfo.styles';
 
 interface IProps {
 	author: string;
@@ -52,7 +53,7 @@ export class PreviewItemInfo extends PureComponent<IProps, any> {
 
 	public renderDateTime = renderWhenTrue(() => (
 		<Date>
-			<DateTime value={this.props.createdAt} format={NAMED_MONTH_DATE_FORMAT} />
+			<DateTime value={this.props.createdAt} format={isV5() ? SHORT_DATE_FORMAT : NAMED_MONTH_DATE_FORMAT} />
 		</Date>
 	));
 
@@ -91,15 +92,17 @@ export class PreviewItemInfo extends PureComponent<IProps, any> {
 		return(
 			<Container>
 				<Details panelType={panelType}>
-					<UserMarker name={author}>
-						<Status color={statusColor}>
-							{this.renderStatusIcon(StatusIconComponent)}
-							<Author>{author}</Author>
-						</Status>
-					</UserMarker>
-					{this.renderExtraInfo(extraInfo)}
-					{this.renderDateTime(createdAt)}
-					{this.renderViewModel(showModelButton && urlParams)}
+					<UserAndModelDetails>
+						<UserMarker name={author}>
+							<Status color={statusColor}>
+								{this.renderStatusIcon(StatusIconComponent)}
+								<Author>{author}</Author>
+							</Status>
+						</UserMarker>
+						{this.renderExtraInfo(extraInfo)}
+						{this.renderDateTime(createdAt)}
+						{this.renderViewModel(showModelButton && urlParams)}
+					</UserAndModelDetails>
 					{this.renderActionButton(actionButton)}
 				</Details>
 			</Container>

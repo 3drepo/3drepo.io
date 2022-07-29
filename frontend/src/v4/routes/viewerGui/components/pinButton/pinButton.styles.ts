@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Place from '@material-ui/icons/Place';
+import Place from '@mui/icons-material/Place';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';

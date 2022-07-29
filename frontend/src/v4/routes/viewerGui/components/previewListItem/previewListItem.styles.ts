@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import MenuItem from '@material-ui/core/MenuItem';
-import Typography from '@material-ui/core/Typography';
-import ArrowIcon from '@material-ui/icons/ArrowForward';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
+import ArrowIcon from '@mui/icons-material/ArrowForward';
 import styled, { css } from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../styles/colors';
 import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
@@ -36,25 +37,6 @@ export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
 	}
 `;
 
-export const MenuItemContainer = styled(MenuItem)`
-	position: relative;
-
-	&& {
-		background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
-		height: 94px;
-		border-bottom: 1px solid ${COLOR.BLACK_6};
-		padding: 0;
-
-		&:hover {
-			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
-
-			${OpenInViewerButton} {
-				display: block;
-			}
-		}
-	}
-` as any;
-
 export const ArrowButton = styled(Button)`
 	&& {
 		background-color: ${COLOR.PRIMARY_DARK};
@@ -62,7 +44,7 @@ export const ArrowButton = styled(Button)`
 		right: 0;
 		top: 0;
 		width: 28px;
-		min-width: 28px;
+		min-width: 37px;
 		height: 100%;
 		display: flex;
 		align-items: center;
@@ -79,6 +61,48 @@ export const ArrowButton = styled(Button)`
 	}
 `;
 
+export const MenuItemContainer = styled(MenuItem)<{ expired?: boolean }>`
+	position: relative;
+
+	&& {
+		background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
+		height: 94px;
+		border-bottom: 1px solid ${COLOR.BLACK_6};
+		padding: 0;
+
+		&:hover {
+			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
+
+			${OpenInViewerButton} {
+				display: block;
+			}
+		}
+	}
+
+	${({ theme, expired }) => isV5() && css`
+		&&:hover {
+			// TODO - fix after new palette is released
+			${!expired && 'background-color: #F7F8FA'}; // TODO - fix after new palette is released
+		}
+		
+		${expired && css`
+			${ArrowButton}:not(:disabled) {
+				background-color: #ffcac6; // TODO - fix after new palette is released
+				svg {
+					color: #ff3646; // TODO - fix after new palette is released
+				}
+
+				&:hover {
+					background-color: #ff3646; // TODO - fix after new palette is released
+					svg {
+						color: ${theme.palette.primary.contrast};
+					}
+				}
+			}
+		`}
+	`}
+` as any;
+
 export const StyledArrowIcon = styled(ArrowIcon)`
 	color: ${COLOR.WHITE};
 `;
@@ -90,6 +114,9 @@ export const Name = styled(Typography)`
 		text-overflow: ellipsis;
 		line-height: 1;
 	}
+	&:hover {
+		text-decoration: underline;
+	}
 `;
 
 export const Container = styled.div`
@@ -97,7 +124,9 @@ export const Container = styled.div`
 	height: inherit;
 	overflow: hidden;
 	flex: 1;
-	box-sizing: border-box;padding: 7px 40px 7px 7px;position: relative;
+	box-sizing: border-box;
+	padding: 7px 40px 7px 7px;
+	position: relative;
 `;
 
 const ThumbnailStyles = css`

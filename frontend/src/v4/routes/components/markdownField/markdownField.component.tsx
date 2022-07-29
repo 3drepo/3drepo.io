@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactChild, FC, forwardRef, Ref } from 'react';
+import { ReactChild, forwardRef, Ref } from 'react';
 import linkify from 'markdown-linkify';
 
 // eslint-disable-next-line max-len
@@ -25,7 +25,7 @@ interface IProps {
 	className?: string;
 }
 
-export const MarkdownField: FC<IProps> = forwardRef(
+export const MarkdownField = forwardRef(
 	({ className, children }: IProps, ref: Ref<HTMLSpanElement>) => (
 		<span ref={ref}>
 			<MarkdownMessage className={className}>{linkify(children)}</MarkdownMessage>

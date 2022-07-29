@@ -16,10 +16,11 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { getContainers, getModelById } = require('../../../../../../../models/modelSettings');
 const Path = require('path');
+const { STATUSES } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
-const { getContainers } = require('../../../../../../../models/modelSettings');
 const { isTagUnique } = require('../../../../../../../models/revisions');
 const { modelsExistInProject } = require('../../../../../../../models/projectSettings');
 const { respond } = require('../../../../../../../utils/responder');
@@ -80,7 +81,12 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 			(value) => value === undefined || !!tz.getTimezone(value)),
 	};
 
-	const schema = Yup.object().noUnknown().required().shape(schemaBase);
+	const schema = Yup.object().noUnknown().required().shape(schemaBase)
+		.test('check-model-status', 'A revision is already being processed.', async () => {
+			const { teamspace, container } = req.params;
+			const { status } = await getModelById(teamspace, container, { _id: 0, status: 1 });
+			return status === STATUSES.OK || status === STATUSES.FAILED || !status;
+		});
 
 	try {
 		req.body = await schema.validate(req.body);

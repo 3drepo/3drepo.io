@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { TextField } from '@material-ui/core';
-import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
+import { TextField } from '@mui/material';
+import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
-import tick from '@assets/icons/tick';
+import tick from '@assets/icons/tick.svg';
 
 const SVG_PADDING_IN_PX = 9;
 
@@ -43,7 +43,9 @@ export const LinkBar = styled(TextField)`
 	}
 
 	.MuiInputBase-root {
-		cursor: pointer;
+		${({ disabled }) => !disabled && `
+			cursor: pointer;
+		`}
 		margin-top: 0;
 		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 

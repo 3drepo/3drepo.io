@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ListSubheader from '@material-ui/core/ListSubheader';
-import Toolbar from '@material-ui/core/Toolbar';
+import ListSubheader from '@mui/material/ListSubheader';
+import Toolbar from '@mui/material/Toolbar';
 import styled from 'styled-components';
 
 export const StyledToolbar = styled(Toolbar)`

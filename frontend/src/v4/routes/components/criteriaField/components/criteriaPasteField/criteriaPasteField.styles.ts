@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButtonComponent from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import SaveIcon from '@material-ui/icons/Save';
+import IconButtonComponent from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
 import styled, { css } from 'styled-components';
 
 import { TextField } from '../../../textField/textField.component';

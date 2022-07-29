@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as AuthSelectors from '@/v4/modules/auth/auth.selectors';
+import * as AuthSelectors from '@/v5/store/auth/auth.selectors';
+
 import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);

@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import {
@@ -25,15 +26,15 @@ import {
 } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
+import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
 import { filterFederations } from '@/v5/store/federations/federations.helpers';
-import { useParams } from 'react-router';
-import { enableRealtimeFederationUpdates } from '@/v5/services/realtime/federation.events';
-import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
+import { CreateFederationForm } from './createFederationForm';
+import { useFederationsData } from './federations.hooks';
+import { DashboardParams } from '../../../routes.constants';
 
 export const Federations = (): JSX.Element => {
-	const { teamspace, project } = useParams();
 	const {
 		federations,
 		favouriteFederations,
@@ -41,13 +42,12 @@ export const Federations = (): JSX.Element => {
 		isListPending,
 	} = useFederationsData();
 
-	useEffect(() => {
-		if (isListPending) return undefined;
-		return enableRealtimeFederationUpdates(teamspace, project);
-	}, [isListPending]);
-
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
+	const [createFedOpen, setCreateFedOpen] = useState(false);
+
+	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
 
 	return (
 		<>
@@ -60,6 +60,7 @@ export const Federations = (): JSX.Element => {
 						filterQuery={favouritesFilterQuery}
 						onFilterQueryChange={setFavouritesFilterQuery}
 						federations={filterFederations(favouriteFederations, favouritesFilterQuery)}
+						onClickCreate={() => setCreateFedOpen(true)}
 						title={(
 							<FormattedMessage
 								id="federations.favourites.collapseTitle"
@@ -85,6 +86,7 @@ export const Federations = (): JSX.Element => {
 						filterQuery={allFilterQuery}
 						onFilterQueryChange={setAllFilterQuery}
 						federations={filterFederations(federations, allFilterQuery)}
+						onClickCreate={() => setCreateFedOpen(true)}
 						title={(
 							<FormattedMessage
 								id="federations.all.collapseTitle"
@@ -105,6 +107,7 @@ export const Federations = (): JSX.Element => {
 									startIcon={<AddCircleIcon />}
 									variant="contained"
 									color="primary"
+									onClick={() => setCreateFedOpen(true)}
 								>
 									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
 								</Button>
@@ -113,6 +116,10 @@ export const Federations = (): JSX.Element => {
 					/>
 				</>
 			)}
+			<CreateFederationForm
+				open={createFedOpen}
+				onClickClose={() => setCreateFedOpen(false)}
+			/>
 		</>
 	);
 };

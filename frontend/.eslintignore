@@ -1,3 +1,5 @@
+/*.*
+**/src/locales/**
 internals/
 test/
 unity/
@@ -8,3 +10,4 @@ serviceWorkerExtras.js
 plopfile.js
 eslint-rules/
 globals/globals.d.ts
+.eslintrc.js

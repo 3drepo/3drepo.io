@@ -20,10 +20,10 @@ import { isEmpty } from 'lodash';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { UsersActions, UsersTypes } from './users.redux';
+import { FetchUsersAction, UsersActions, UsersTypes } from './users.redux';
 import { selectUsersByTeamspace } from './users.selectors';
 
-export function* fetchUsers({ teamspace }) {
+export function* fetchUsers({ teamspace }: FetchUsersAction) {
 	try {
 		const users = yield select(selectUsersByTeamspace, teamspace);
 

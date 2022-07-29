@@ -17,18 +17,17 @@
 import { createSelector } from 'reselect';
 import { IUser, IUsersState } from './users.redux';
 
-const selectUsersDomain = (state): IUsersState => state.users;
+const selectUsersDomain = (state): IUsersState => state?.users || {};
 
 export const selectUsersByTeamspace = createSelector(
 	selectUsersDomain,
 	(_, teamspace) => teamspace,
-	(state, teamspace) => state.usersByTeamspace[teamspace] || [],
+	(state, teamspace) => (state.usersByTeamspace || {})[teamspace] || [],
 );
 
 export const selectUser = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(_, userName) => userName,
-	(state, teamspace, userName): IUser | null => (state.usersByTeamspace[teamspace] || [])
+	selectUsersByTeamspace,
+	(_, teamspace, userName) => userName,
+	(usersInTeamspace, userName): IUser | null => usersInTeamspace
 		.find((teamspaceUser) => teamspaceUser.user === userName),
 );

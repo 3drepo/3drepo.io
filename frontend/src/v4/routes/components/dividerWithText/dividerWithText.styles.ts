@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Divider from '@material-ui/core/Divider';
+import Divider from '@mui/material/Divider';
 
 import { COLOR } from '../../../styles';
 

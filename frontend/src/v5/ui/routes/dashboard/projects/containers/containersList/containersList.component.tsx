@@ -29,7 +29,6 @@ import {
 } from '@components/dashboard/dashboardList';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
 import { Button } from '@controls/button';
@@ -40,6 +39,7 @@ import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -55,6 +55,7 @@ interface IContainersList {
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
 	onClickCreate: () => void;
+	onClickUpload: () => void;
 }
 
 export const ContainersList = ({
@@ -65,10 +66,11 @@ export const ContainersList = ({
 	onClickCreate,
 	filterQuery,
 	onFilterQueryChange,
+	onClickUpload,
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 
@@ -101,23 +103,22 @@ export const ContainersList = ({
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						<HeaderButtonsGroup>
-							<Button
-								startIcon={<AddCircleIcon />}
-								variant="outlined"
-								color="secondary"
-								onClick={onClickCreate}
-							>
-								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-							</Button>
-							<Button
-								startIcon={<ArrowUpCircleIcon />}
-								variant="contained"
-								color="primary"
-							>
-								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-							</Button>
-						</HeaderButtonsGroup>
+						<Button
+							startIcon={<AddCircleIcon />}
+							variant="outlined"
+							color="secondary"
+							onClick={onClickCreate}
+						>
+							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+						</Button>
+						<Button
+							startIcon={<ArrowUpCircleIcon />}
+							variant="contained"
+							color="primary"
+							onClick={onClickUpload}
+						>
+							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+						</Button>
 					</CollapseSideElementGroup>
 				)}
 			>

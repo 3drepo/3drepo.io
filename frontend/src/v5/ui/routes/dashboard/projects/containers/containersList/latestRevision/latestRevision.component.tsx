@@ -27,8 +27,8 @@ interface ILatestRevision extends IRevisionStatus {
 }
 
 export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
-	<Container>
-		{hasRevisions || status === UploadStatuses.UPLOADING ? (
+	<Container disabled={!hasRevisions}>
+		{hasRevisions || status !== UploadStatuses.OK ? (
 			<>
 				<Label>
 					<FormattedMessage

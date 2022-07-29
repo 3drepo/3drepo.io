@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { Field, Form, Formik } from 'formik';
 import { PureComponent } from 'react';
 import * as Yup from 'yup';

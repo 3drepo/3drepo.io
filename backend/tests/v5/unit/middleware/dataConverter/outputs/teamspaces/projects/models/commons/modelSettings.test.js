@@ -16,7 +16,9 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { generateRandomModelProperties } = require('../../../../../../../../helper/services');
+const { generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -29,6 +31,8 @@ const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/
 const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testFormatModelSettings = () => {
+	const withoutDefaultView = { ...generateRandomModelProperties() };
+	delete withoutDefaultView.defaultView;
 	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };
 	const withErrorReason = { ...generateRandomModelProperties(),
 		errorReason: {
@@ -43,11 +47,17 @@ const testFormatModelSettings = () => {
 			errorCode: 1,
 		},
 	};
+	const withUuidDefaultView = { ...generateRandomModelProperties(),
+		defaultView: generateUUID(),
+	};
+
 	describe.each([
 		[generateRandomModelProperties(), 'no timestamp, no errorReason'],
+		[withoutDefaultView, 'no defaultView'],
 		[withTimestamp, 'timestamp'],
 		[withErrorReason, 'errorReason'],
 		[withErrorReasonNoTimestamp, 'errorReason without timestamp'],
+		[withUuidDefaultView, 'with defaultView that is UUID'],
 	])('Format model settings data', (data, desc) => {
 		test(`should format correctly with ${desc}`,
 			() => {
@@ -58,6 +68,7 @@ const testFormatModelSettings = () => {
 
 				const formattedSettings = {
 					...data,
+					defaultView: UUIDToString(data.defaultView),
 					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
 					code: data.properties.code,
 					unit: data.properties.unit,

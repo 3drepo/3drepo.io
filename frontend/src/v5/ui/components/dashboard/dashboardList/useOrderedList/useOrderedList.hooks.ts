@@ -17,6 +17,7 @@
 
 import { useMemo, useState } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { get } from 'lodash';
 import { ISortConfig } from './useOrderedList.types';
 
 export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
@@ -26,16 +27,19 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 		const { column, direction } = sortConfig;
 
 		const sortingFunction = (a: T, b: T): number => {
-			if (typeof a[column] === 'string') {
-				return a[column].localeCompare(b[column]);
+			const aValue = get(a, column);
+			const bValue = get(b, column);
+
+			if (typeof aValue === 'string') {
+				return aValue.localeCompare(bValue);
 			}
 
-			if (typeof a[column] === 'number') {
-				return a[column] - b[column];
+			if (typeof aValue === 'number') {
+				return aValue - bValue;
 			}
 
-			if (a[column] instanceof Date) {
-				return a[column].getTime() - b[column].getTime();
+			if (aValue instanceof Date) {
+				return aValue.getTime() - bValue.getTime();
 			}
 
 			return 0;

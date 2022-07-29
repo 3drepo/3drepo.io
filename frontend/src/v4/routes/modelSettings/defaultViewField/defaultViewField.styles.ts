@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { StyledDeleteIcon, StyledEditIcon } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';

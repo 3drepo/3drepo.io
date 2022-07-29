@@ -18,7 +18,7 @@
 import { PureComponent } from 'react';
 import { snakeCase } from 'lodash';
 
-import { Chip, Input } from '@material-ui/core';
+import { Chip, Input } from '@mui/material';
 import { ENTER_KEY } from '../../../constants/keys';
 import { ChipsContainer, ChipsGrid } from './chips.styles';
 

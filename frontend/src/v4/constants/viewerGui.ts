@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CompareIcon from '@material-ui/icons/Compare';
-import TreeIcon from '@material-ui/icons/DeviceHub';
-import GroupsIcon from '@material-ui/icons/GroupWork';
-import GisIcon from '@material-ui/icons/Layers';
-import SequencesIcon from '@material-ui/icons/Movie';
-import ViewsIcon from '@material-ui/icons/PhotoCamera';
-import IssuesIcon from '@material-ui/icons/Place';
-import MeasureIcon from '@material-ui/icons/Straighten';
+import CompareIcon from '@mui/icons-material/Compare';
+import TreeIcon from '@mui/icons-material/DeviceHub';
+import GroupsIcon from '@mui/icons-material/GroupWork';
+import GisIcon from '@mui/icons-material/Layers';
+import SequencesIcon from '@mui/icons-material/Movie';
+import ViewsIcon from '@mui/icons-material/PhotoCamera';
+import IssuesIcon from '@mui/icons-material/Place';
+import MeasureIcon from '@mui/icons-material/Straighten';
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 
 import { clientConfigService } from '../services/clientConfig';

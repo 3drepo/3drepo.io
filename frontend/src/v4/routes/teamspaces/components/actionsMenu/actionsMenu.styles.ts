@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles';
 
 interface IStyledGrid {
-	theme: {
+	options: {
 		forceOpen: boolean,
 		federate: boolean
 	};
@@ -39,16 +39,18 @@ export const StyledGrid = styled(Grid)<IStyledGrid>`
 		position: absolute;
 		right: 0;
 		top: 0;
-		background: ${(props) => props.theme.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
+		background: ${(props) => props.options.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
 		z-index: 2;
 		height: 100%;
+		align-items: center;
+		justify-content: flex-start;
 	}
 
 	transition: opacity 200ms ease-in-out;
 	opacity: 0;
 	pointer-events: none;
 
-	${(props) => props.theme.forceOpen ? openMenuStyles : ''};
+	${(props) => props.options.forceOpen ? openMenuStyles : ''};
 	&:hover {
 		${openMenuStyles}
 	}

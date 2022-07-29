@@ -28,11 +28,11 @@ const previewStateStyles = css`
 	}
 `;
 
-export const Container = styled.div`
+export const Container = styled.div<{ enablePreview?: boolean }>`
 	cursor: pointer;
 	position: relative;
-	${(props: any) => props.enablePreview && previewStateStyles};
-	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
+	${({ enablePreview }) => enablePreview && previewStateStyles};
+	display: ${({ enablePreview }) => enablePreview ? 'block' : 'flex'};
 `;
 
 const fadeIn = keyframes`
@@ -46,10 +46,10 @@ const imageLoadingStyles = css`
 	top: 0;
 `;
 
-export const StyledImage = styled.img`
+export const StyledImage = styled.img<{ loading? }>`
 	width: 100%;
 	object-fit: cover;
-	${(props: any) => props.loading && imageLoadingStyles};
+	${({ loading }) => loading && imageLoadingStyles};
 
 	.new-comment & {
 		max-height: 150px;

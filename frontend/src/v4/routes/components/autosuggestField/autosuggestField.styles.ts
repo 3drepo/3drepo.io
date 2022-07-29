@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Popper from '@material-ui/core/Popper';
+import Popper from '@mui/material/Popper';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 import { TextField } from '../textField/textField.component';

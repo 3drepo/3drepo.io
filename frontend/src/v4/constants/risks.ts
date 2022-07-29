@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import Download from '@material-ui/icons/CloudDownload';
-import ErrorSolid from '@material-ui/icons/Error';
-import ErrorOutline from '@material-ui/icons/ErrorOutline';
-import HighlightOff from '@material-ui/icons/HighlightOff';
-import NewReleases from '@material-ui/icons/NewReleases';
-import Pins from '@material-ui/icons/PinDrop';
-import Print from '@material-ui/icons/Print';
-import SyncProblem from '@material-ui/icons/SyncProblem';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Download from '@mui/icons-material/CloudDownload';
+import ErrorSolid from '@mui/icons-material/Error';
+import ErrorOutline from '@mui/icons-material/ErrorOutline';
+import HighlightOff from '@mui/icons-material/HighlightOff';
+import NewReleases from '@mui/icons-material/NewReleases';
+import Pins from '@mui/icons-material/PinDrop';
+import Print from '@mui/icons-material/Print';
+import SyncProblem from '@mui/icons-material/SyncProblem';
+import { isV5 } from '../helpers/isV5';
 
-import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 import { COLOR, PIN_COLORS } from '../styles';
 
@@ -41,7 +42,7 @@ export const LEVELS = {
 };
 
 export const LEVELS_LIST = [
-	{ value: LEVELS.UNSET, name: 'UNSET' },
+	{ value: LEVELS.UNSET, name: isV5() ? 'Unset' : 'UNSET' },
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
 	{ value: LEVELS.LOW, name: 'Low' },
 	{ value: LEVELS.MODERATE, name: 'Moderate' },
@@ -67,6 +68,11 @@ export const RISK_TABS = {
 	SEQUENCING: 'Sequencing',
 	SHAPES: 'Shapes',
 	ATTACHMENTS: 'Attachments',
+};
+
+export const V5_RISK_TABS = {
+	...RISK_TABS,
+	SEQUENCING: '4D',
 };
 
 export const RISK_LEVELS = {
@@ -137,6 +143,7 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CATEGORY: 'category',
 	ELEMENT: 'element',
 	LOCATION: 'location_desc',
+	DUE_DATE: 'due_date',
 	RISK_CONSEQUENCE: 'consequence',
 	RISK_FACTOR: 'risk_factor',
 	ASSOCIATED_ACTIVITY: 'associated_activity',
@@ -247,7 +254,12 @@ export const RISK_FILTERS = [
 		label: 'Starting Date',
 		relatedField: RISK_FILTER_RELATED_FIELDS.START_DATETIME,
 		type: FILTER_TYPES.DATE
-	}
+	},
+	{
+		label: 'Due Date',
+		relatedField: RISK_FILTER_RELATED_FIELDS.DUE_DATE,
+		type: FILTER_TYPES.DATE
+	},
 ] as any;
 
 export const ACTIONS_TYPES = {

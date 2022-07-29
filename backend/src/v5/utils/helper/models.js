@@ -17,7 +17,8 @@
 
 const db = require('../../handler/db');
 const { deleteModel } = require('../../models/modelSettings');
-const { removeAllFilesFromModel } = require('../../models/fileRefs');
+const { removeAllFilesFromModel } = require('../../services/filesManager');
+const { templates } = require('../responseCodes');
 
 const ModelHelper = {};
 
@@ -30,13 +31,15 @@ const removeModelCollections = async (ts, model) => {
 	return Promise.all(promises);
 };
 
-ModelHelper.removeModelData = async (teamspace, model) => {
+ModelHelper.removeModelData = async (teamspace, project, model) => {
 	// This needs to be done before removeModelCollections or we risk the .ref col being deleted before we check it
 	await removeAllFilesFromModel(teamspace, model);
 
 	return Promise.all([
 		removeModelCollections(teamspace, model),
-		deleteModel(teamspace, model),
+		deleteModel(teamspace, project, model).catch((err) => {
+			if (err.code !== templates.modelNotFound.code) throw err;
+		}),
 	]);
 };
 

@@ -31,7 +31,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
                     updateObj['$set']['subModels'] = subModels;
                 }
 
-                myDb.getCollection('settings').update({ _id: setting._id }, updateObj);
+                myDb.getCollection('settings').updateOne({ _id: setting._id }, updateObj);
             }
                 
         }

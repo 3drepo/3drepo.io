@@ -16,54 +16,47 @@
  */
 
 import { useEffect } from 'react';
-import { isNull } from 'lodash';
-import { useHistory } from 'react-router-dom';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
-import { getIntlProviderProps } from '@/v5/services/intl';
-import { IntlProvider } from 'react-intl';
-import { Dashboard } from './dashboard';
+import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
+import { ModalsDispatcher } from '@components/shared/modals';
+import { Intercom } from '@components/intercom/intercom.component';
+import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
-	const history = useHistory();
-	const userName: string = CurrentUserHooksSelectors.selectUsername();
-	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
+	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
 
 	useEffect(() => {
-		AuthActionsDispatchers.authenticate();
-	}, []);
-
-	useEffect(() => {
-		if (userName) {
-			CurrentUserActionsDispatchers.fetchUser(userName);
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
 		}
+	}, [authenticationFetched]);
 
+	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
 		}
+	}, [isAuthenticated]);
 
-		if (!isNull(isAuthenticated) && !isAuthenticated) {
-			history.push('/');
-		}
-	}, [userName, isAuthenticated]);
+	useEffect(enableKickedOutEvent);
 
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
 				<StylesProvider injectFirst>
-					<IntlProvider {...getIntlProviderProps()}>
-						<V4Adapter>
-							<Dashboard />
-						</V4Adapter>
-					</IntlProvider>
+					<V4Adapter>
+						<MainRoute />
+						<ModalsDispatcher />
+						<Intercom />
+					</V4Adapter>
 				</StylesProvider>
 			</MuiThemeProvider>
 		</ThemeProvider>

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
 
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';

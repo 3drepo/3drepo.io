@@ -14,7 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { canDeleteContainer, validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const {
+	canDeleteContainer,
+	validateAddModelData,
+	validateUpdateSettingsData,
+} = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
@@ -22,10 +27,10 @@ const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
 
 const addContainer = (req, res) => {
 	const { teamspace, project } = req.params;
+
 	Containers.addContainer(teamspace, project, req.body).then((containerId) => {
 		respond(req, res, templates.ok, { _id: containerId });
 	}).catch(
@@ -36,6 +41,7 @@ const addContainer = (req, res) => {
 
 const deleteContainer = (req, res) => {
 	const { teamspace, project, container } = req.params;
+
 	Containers.deleteContainer(teamspace, project, container).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
@@ -73,10 +79,13 @@ const getContainerStats = (req, res) => {
 const deleteFavourites = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToRemove = req.body.containers;
-
-	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+	if (req.query.ids?.length) {
+		const favouritesToRemove = req.query.ids.split(',');
+		Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
+			.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+	} else {
+		respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
+	}
 };
 
 const appendFavourites = (req, res) => {
@@ -88,17 +97,17 @@ const appendFavourites = (req, res) => {
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
-const updateSettings = (req, res) => {
-	const { teamspace, container } = req.params;
+const updateContainerSettings = (req, res) => {
+	const { teamspace, project, container } = req.params;
 
-	Containers.updateSettings(teamspace, container, req.body)
+	Containers.updateSettings(teamspace, project, container, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),
 		);
 };
 
-const getSettings = (req, res, next) => {
+const getContainerSettings = (req, res, next) => {
 	const { teamspace, container } = req.params;
 	Containers.getSettings(teamspace, container)
 		.then((settings) => {
@@ -122,15 +131,13 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: addContainer
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
@@ -223,20 +230,18 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: getContainerList
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -263,7 +268,7 @@ const establishRoutes = () => {
 	 *                         description: name of the container
 	 *                         example: Structure
 	 *                       role:
-	 *                         $ref: "#/components/roles"
+	 *                         $ref: "#/components/schemas/roles"
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the container is a favourited item for the user
@@ -280,22 +285,19 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: getContainerStats
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - container:
-	 *         name: container
+   	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
@@ -361,15 +363,13 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: appendContainers
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: ID of project
 	 *         in: path
 	 *         required: true
@@ -404,31 +404,24 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: deleteContainers
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: ID of project
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               containers:
-	 *                 type: array
-	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
+	 *       - name: ids
+	 *         description: list of container ids to remove (comma separated)
+	 *         in: query
+	 *         schema:
+	 *           type: string
+	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -447,22 +440,19 @@ const establishRoutes = () => {
 	 *     tags: [Containers]
 	 *     operationId: deleteContainer
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - container:
-	 *         name: container
+   	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
@@ -484,24 +474,21 @@ const establishRoutes = () => {
 	 *   patch:
 	 *     description: Updates the settings of a container
 	 *     tags: [Containers]
-	 *     operationId: updateSettings
+	 *     operationId: updateContainerSettings
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: ID of project
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - container:
-	 *         name: container
+	 *       - name: container
 	 *         description: ID of container
 	 *         in: path
 	 *         required: true
@@ -514,13 +501,13 @@ const establishRoutes = () => {
 	 *             type: object
 	 *             properties:
 	 *               name:
-	 *                 type: String
+	 *                 type: string
 	 *                 example: container1
 	 *               desc:
-	 *                 type: String
+	 *                 type: string
 	 *                 example: description1
 	 *               type:
-	 *                 type: String
+	 *                 type: string
 	 *                 example: type1
 	 *               surveyPoints:
 	 *                 type: array
@@ -559,7 +546,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the settings of the container
 	 */
-	router.patch('/:container', hasAdminAccessToContainer, validateUpdateSettingsData, updateSettings);
+	router.patch('/:container', hasAdminAccessToContainer, validateUpdateSettingsData, updateContainerSettings);
 
 	/**
 	 * @openapi
@@ -567,24 +554,21 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the model settings of container
 	 *     tags: [Containers]
-	 *     operationId: getSettings
+	 *     operationId: getContainerSettings
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - container:
-	 *         name: container
+	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
@@ -602,7 +586,7 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:container', hasReadAccessToContainer, getSettings, formatModelSettings);
+	router.get('/:container', hasReadAccessToContainer, getContainerSettings, formatModelSettings);
 
 	return router;
 };

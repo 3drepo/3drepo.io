@@ -17,7 +17,7 @@
 
 import { useRef } from 'react';
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { Formik } from 'formik';
 
 import { StyledForm, StyledTextField, TextFieldWrapper } from './sequenceForm.styles';

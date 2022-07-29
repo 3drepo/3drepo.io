@@ -22,7 +22,11 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
 import { prepareContainersData } from '@/v5/store/containers/containers.helpers';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { containerMockFactory } from './containers.fixtures';
+import { containerMockFactory, prepareMockSettingsReply } from './containers.fixtures';
+import { omit } from 'lodash';
+import { prepareMockViewsReply } from './containers.fixtures';
+import { prepareMockRawSettingsReply } from './containers.fixtures';
+import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -57,7 +61,7 @@ describe('Containers: sagas', () => {
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
@@ -68,7 +72,7 @@ describe('Containers: sagas', () => {
 
 		it('should call removeFavourite endpoint with 404 and revert change', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
@@ -82,7 +86,9 @@ describe('Containers: sagas', () => {
 	describe('fetchContainers', () => {
 		const mockContainers = times(2, () => containerMockFactory());
 		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']));
-		const mockContainersWithoutStats = prepareContainersData(mockContainers);
+		const mockContainersWithoutStats = prepareContainersData(mockContainers).map(
+			(container) => omit(container, ['views', 'defaultView', 'surveyPoint', 'angleFromNorth', 'desc'])
+		);
 
 		it('should fetch containers data', async () => {
 			mockServer
@@ -133,6 +139,62 @@ describe('Containers: sagas', () => {
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.silentRun();
 		})
+
+		it('should fetch container views', async () => {
+			mockContainers.forEach((container) => {
+				mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/views`)
+				.reply(200, prepareMockViewsReply(container));
+			});
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[0]._id))
+			.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[1]._id))
+			.put(ContainersActions.fetchContainerViewsSuccess(
+				projectId,
+				mockContainers[0]._id,
+				prepareMockViewsReply(mockContainers[0]).views)
+			).put(ContainersActions.fetchContainerViewsSuccess(
+				projectId,
+				mockContainers[1]._id,
+				prepareMockViewsReply(mockContainers[1]).views)
+			)
+			.silentRun();
+		})
+
+		it('should fetch container settings', async () => {
+			mockContainers.forEach((container) => {
+				mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}`)
+				.reply(200, prepareMockRawSettingsReply(container));
+			});
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[0]._id))
+			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[1]._id))
+			.put(ContainersActions.fetchContainerSettingsSuccess(
+				projectId,
+				mockContainers[0]._id,
+				prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[0])),
+			))
+			.put(ContainersActions.fetchContainerSettingsSuccess(
+				projectId,
+				mockContainers[1]._id,
+				prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[1])),
+			))
+			.silentRun();
+		})
+
+		it('should call container settings endpoint with 404', async () => {
+			const containerId = mockContainers[0]._id;
+			mockServer
+			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId))
+			.silentRun();
+		})
 	})
 
 	describe('createContainer', () => {
@@ -166,27 +228,70 @@ describe('Containers: sagas', () => {
 				.silentRun();
 		})
 	})
-	
-	describe('deleteContainer', () => {
-		it('should call deleteContainer endpoint', async () => {
+
+	describe('updateContainerSettings', () => {
+		const mockContainer = containerMockFactory();
+		const mockSettings = prepareMockSettingsReply(mockContainer);
+
+
+		it('should call updateContainerSettings endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 			.reply(200);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
-			.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
+			.dispatch(ContainersActions.updateContainerSettings(
+				teamspace,
+				projectId,
+				containerId,
+				mockSettings,
+			))
+			.put(ContainersActions.updateContainerSettingsSuccess(
+				projectId,
+				containerId,
+				mockSettings,
+			))
+			.silentRun();	
+		})
+
+		it('should call container settings endpoint with 404', async () => {
+			const containerId = mockContainer._id;
+			mockServer
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.updateContainerSettings(teamspace, projectId, containerId, mockSettings))
 			.silentRun();
+		})
+	})
+	
+	const onSuccess = jest.fn();
+	const onError = jest.fn();
+	describe('deleteContainer', () => {
+		it('should call deleteContainer endpoint', async () => {
+			mockServer
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(200);
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
+				.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
+				.silentRun();
+				
+			expect(onSuccess).toBeCalled();
 		})
 
 		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-			.reply(404);
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(404);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
-			.silentRun();
+				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
+				.silentRun();
+
+			expect(onError).toBeCalled();
 		})
 	})
 })

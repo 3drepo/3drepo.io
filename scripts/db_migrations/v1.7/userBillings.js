@@ -52,7 +52,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 		updateAttrs['customData.billing'].lastAnniversaryDate = user.customData.lastAnniversaryDate;
 	}
 
-	db.getSiblingDB('admin').getCollection('system.users').update({ _id: user._id }, {
+	db.getSiblingDB('admin').getCollection('system.users').updateOne({ _id: user._id }, {
 		'$set': updateAttrs,
 		'$unset': removeAttrs
 	});
