@@ -53,7 +53,6 @@ interface IContainerListItem {
 	index: number;
 	isSelected: boolean;
 	container: IContainer;
-	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
 	onSelectOrToggleItem: (id: string) => void;
 }
@@ -62,7 +61,6 @@ export const ContainerListItem = ({
 	index,
 	isSelected,
 	container,
-	filterQuery,
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
@@ -111,7 +109,6 @@ export const ContainerListItem = ({
 				<DashboardListItemContainerTitle
 					container={container}
 					isSelected={isSelected}
-					filterQuery={filterQuery}
 				/>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(container._id)}

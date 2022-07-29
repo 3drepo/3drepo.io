@@ -143,7 +143,6 @@ export const ContainersList = ({
 								key={container._id}
 								isSelected={container._id === selectedItemId}
 								container={container}
-								filterQuery={filterQuery}
 								onFavouriteChange={setFavourite}
 								onSelectOrToggleItem={selectOrToggleItem}
 							/>

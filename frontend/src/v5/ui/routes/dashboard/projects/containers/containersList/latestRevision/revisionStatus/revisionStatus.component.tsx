@@ -22,7 +22,7 @@ import { formatDate } from '@/v5/services/intl';
 import { Name, ProcessingStatus, QueuedStatus } from './revisionStatus.styles';
 
 export interface IRevisionStatus {
-	name: string;
+	name: React.ReactElement | string;
 	status: UploadStatuses;
 	error?: {
 		date: Date | null;

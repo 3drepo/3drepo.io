@@ -33,6 +33,8 @@ import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
 import { DashboardParams } from '../../../routes.constants';
 
 export const IsMainList = createContext(false);
+const SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
+
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -54,7 +56,7 @@ export const Containers = (): JSX.Element => {
 
 	return (
 		<>
-			<SearchContextComponent items={favouriteContainers}>
+			<SearchContextComponent items={favouriteContainers} fieldsToFilter={SEARCH_FIELDS}>
 				<ContainersList
 					title={(
 						<FormattedMessage
@@ -80,7 +82,7 @@ export const Containers = (): JSX.Element => {
 			</SearchContextComponent>
 			<Divider />
 			<IsMainList.Provider value>
-				<SearchContextComponent items={containers}>
+				<SearchContextComponent items={containers} fieldsToFilter={SEARCH_FIELDS}>
 					<ContainersList
 						title={(
 							<FormattedMessage

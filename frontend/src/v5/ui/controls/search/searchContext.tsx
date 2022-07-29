@@ -26,22 +26,33 @@ export interface SearchContextType {
 }
 
 const defaultValue: SearchContextType = { items: [], filteredItems: [], query: '', setQuery: () => {} };
-
 export const SearchContext = createContext(defaultValue);
 SearchContext.displayName = 'SearchContext';
 
-export const SearchContextComponent = ({ items, children }) => {
+export interface Props {
+	items: any[];
+	children: any;
+	fieldsToFilter?: string[];
+	filteringFunction?: <T>(items: T[], query: string) => T[];
+}
+
+export const SearchContextComponent = ({ items, children, fieldsToFilter, filteringFunction }: Props) => {
 	const [query, setQuery] = useState('');
 	const [contextValue, setContextValue] = useState({ items, filteredItems: items, query, setQuery });
 
 	useEffect(() => {
-		// TODO: add a fields prop to specify which fields I want to search for
-		const filteredItems = (items || []).filter((item) => Object.keys(item).some(
-			(key) => {
-				if (!isString(item[key])) return false;
-				return item[key].toLowerCase().includes(query.toLowerCase());
-			},
-		));
+		let filteredItems = items;
+		if (filteringFunction) {
+			filteredItems = filteringFunction(items || [], query);
+		} else {
+			filteredItems = (items || []).filter((item) => (fieldsToFilter || Object.keys(item)).some(
+				(key) => {
+					if (!isString(item[key])) return false;
+					return item[key].toLowerCase().includes(query.toLowerCase());
+				},
+			));
+		}
+
 		setContextValue({ items, filteredItems, query, setQuery });
 	}, [query, items]);
 
