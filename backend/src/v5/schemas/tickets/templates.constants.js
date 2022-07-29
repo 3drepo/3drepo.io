@@ -30,7 +30,7 @@ TemplateConstants.fieldTypes = {};
 	'oneOf',
 	'manyOf',
 	'image',
-	'viewState',
+	'view',
 	'measurements',
 	'attachments',
 	'safetibase',
@@ -41,8 +41,6 @@ TemplateConstants.fieldTypes = {};
 TemplateConstants.presetModules = {};
 
 [
-	'viewpoint',
-	'issues',
 	'sequencing',
 	'shapes',
 	'attachments',
@@ -54,22 +52,12 @@ TemplateConstants.presetModules = {};
 TemplateConstants.presetEnumValues = {};
 
 [
-	'jobs',
+	'jobsAndUsers',
 ].forEach((val) => {
 	TemplateConstants.presetEnumValues[toConstantCase(val)] = val;
 });
 
 TemplateConstants.presetModulesProperties = {
-	[TemplateConstants.presetModules.VIEWPOINT]: [
-		{ name: 'Screenshot', type: TemplateConstants.fieldTypes.IMAGE },
-		{ name: 'View', type: TemplateConstants.fieldTypes.VIEW_STATE },
-	],
-	[TemplateConstants.presetModules.ISSUES]: [
-		{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-		{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
-		{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: 'jobs' },
-		{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE },
-	],
 	[TemplateConstants.presetModules.SEQUENCING]: [
 		{ name: 'Start Time', type: TemplateConstants.fieldTypes.DATE },
 		{ name: 'End Time', type: TemplateConstants.fieldTypes.DATE },
@@ -90,6 +78,13 @@ TemplateConstants.defaultProperties = [
 	{ name: 'Description', type: TemplateConstants.fieldTypes.LONG_TEXT },
 	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, readOnly: true },
 	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
+	{ name: 'Updated at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
+	{ name: 'Default Image', type: TemplateConstants.fieldTypes.IMAGE },
+	{ name: 'Default View', type: TemplateConstants.fieldTypes.VIEW },
+	{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
+	{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
+	{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
+	{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE },
 ];
 
 module.exports = TemplateConstants;

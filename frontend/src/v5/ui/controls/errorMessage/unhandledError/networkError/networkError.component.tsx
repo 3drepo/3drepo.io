@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FormattedMessage } from 'react-intl';
+import { ErrorMessage } from '../../errorMessage.component';
 
-import styled from 'styled-components';
+type NetworkErrorProps = {
+	className?: string;
+};
 
-export const DashboardListItemIcon = styled.div<{ selected?: boolean }>`
-	width: 36px;
-	margin-right: 10px;
-
-	> * {
-		margin: 0;
-	}
-`;
+export const NetworkError = ({ className }: NetworkErrorProps) => (
+	<ErrorMessage className={className}>
+		<FormattedMessage id="errorMessage.networkError" defaultMessage="Network Error" />
+	</ErrorMessage>
+);

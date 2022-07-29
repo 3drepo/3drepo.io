@@ -19,8 +19,12 @@ import { Gap } from '@controls/gap';
 import { FormattedMessage } from 'react-intl';
 import { Link } from './unexpectedError.styles';
 
-export const UnexpectedError = () => (
-	<ErrorMessage>
+type UnexpectedErrorProps = {
+	className?: string;
+};
+
+export const UnexpectedError = ({ className }: UnexpectedErrorProps) => (
+	<ErrorMessage className={className}>
 		<FormattedMessage
 			id="form.unexpectedError.mainMessage"
 			defaultMessage="An unexpected error has occurred. Please try again later."

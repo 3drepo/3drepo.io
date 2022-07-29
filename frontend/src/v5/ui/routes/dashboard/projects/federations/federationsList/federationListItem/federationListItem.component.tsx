@@ -38,9 +38,10 @@ import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federatio
 
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
+import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
@@ -82,10 +83,11 @@ export const FederationListItem = ({
 		});
 	};
 
-	useEffect(() => {
-		enableRealtimeFederationUpdateSettings(teamspace, project, federation._id);
-		enableRealtimeFederationRemoved(teamspace, project, federation._id);
-	}, [federation._id]);
+	useEffect(() => combineSubscriptions(
+		enableRealtimeFederationUpdateSettings(teamspace, project, federation._id),
+		enableRealtimeFederationRemoved(teamspace, project, federation._id),
+		enableRealtimeFederationNewRevision(teamspace, project, federation._id),
+	), [federation._id]);
 
 	return (
 		<>
@@ -108,6 +110,7 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
 						}
+						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.issues"
@@ -125,6 +128,7 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
 						}
+						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.risks"

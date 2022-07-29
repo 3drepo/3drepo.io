@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
@@ -33,6 +33,7 @@ import { useContainersData } from './containers.hooks';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
 import { DashboardParams } from '../../../routes.constants';
 
+export const IsMainList = createContext(false);
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -50,7 +51,7 @@ export const Containers = (): JSX.Element => {
 
 	const onClickClose = () => setUploadModalOpen(false);
 
-	useEffect(() => enableRealtimeNewContainer(teamspace, project), []);
+	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
 
 	return (
 		<>
@@ -89,44 +90,46 @@ export const Containers = (): JSX.Element => {
 						}
 					/>
 					<Divider />
-					<ContainersList
-						filterQuery={allFilterQuery}
-						onFilterQueryChange={setAllFilterQuery}
-						hasContainers={hasContainers.all}
-						containers={filterContainers(containers, allFilterQuery)}
-						title={(
-							<FormattedMessage
-								id="containers.all.collapseTitle"
-								defaultMessage="All containers"
-							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
-							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
-						}}
-						showBottomButton
-						onClickCreate={() => setCreateContainerOpen(true)}
-						onClickUpload={() => setUploadModalOpen(true)}
-						emptyMessage={
-							allFilterQuery && hasContainers.all ? (
-								<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
-							) : (
-								<>
-									<DashboardListEmptyText>
-										<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
-									</DashboardListEmptyText>
-									<Button
-										startIcon={<AddCircleIcon />}
-										variant="contained"
-										color="primary"
-										onClick={() => setCreateContainerOpen(true)}
-									>
-										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-									</Button>
-								</>
-							)
-						}
-					/>
+					<IsMainList.Provider value>
+						<ContainersList
+							filterQuery={allFilterQuery}
+							onFilterQueryChange={setAllFilterQuery}
+							hasContainers={hasContainers.all}
+							containers={filterContainers(containers, allFilterQuery)}
+							title={(
+								<FormattedMessage
+									id="containers.all.collapseTitle"
+									defaultMessage="All containers"
+								/>
+							)}
+							titleTooltips={{
+								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+							}}
+							showBottomButton
+							onClickCreate={() => setCreateContainerOpen(true)}
+							onClickUpload={() => setUploadModalOpen(true)}
+							emptyMessage={
+								allFilterQuery && hasContainers.all ? (
+									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
+								) : (
+									<>
+										<DashboardListEmptyText>
+											<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
+										</DashboardListEmptyText>
+										<Button
+											startIcon={<AddCircleIcon />}
+											variant="contained"
+											color="primary"
+											onClick={() => setCreateContainerOpen(true)}
+										>
+											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+										</Button>
+									</>
+								)
+							}
+						/>
+					</IsMainList.Provider>
 				</>
 			)}
 			<CreateContainerForm

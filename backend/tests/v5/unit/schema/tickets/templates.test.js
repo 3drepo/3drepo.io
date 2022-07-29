@@ -24,97 +24,130 @@ const { fieldTypes, presetModules, presetEnumValues, presetModulesProperties, de
 
 const testValidate = () => {
 	const nameTests = [
-		['the name is too long', { name: generateRandomString(121) }, false],
-		['the name is an empty string', { name: '' }, false],
+		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],
+		['the name is an empty string', { name: '', code: generateRandomString(3) }, false],
+		['the name is not defined', { code: generateRandomString(3) }, false],
+	];
+
+	const codeTests = [
+		['code is not defined', { name: generateRandomString() }, false],
+		['code is too long', { name: '', code: generateRandomString(4) }, false],
+		['code is too short', { name: '', code: generateRandomString(2) }, false],
 	];
 
 	const schemaFieldsTest = [
 		['all optional fields provided', {
 			name: generateRandomString(),
-			comments: false,
+			code: generateRandomString(3),
+			config: {
+				comments: false,
+				issueProperties: true,
+				defaultView: true,
+				defaultImage: false,
+			},
 			deprecated: true,
 			properties: undefined,
 			modules: undefined,
 		}, true],
-		['properties is an empty array', { name: generateRandomString(), properties: [] }, true],
-		['properties is of the wrong type', { name: generateRandomString(), properties: 'a' }, false],
-		['property name is used by a default property', { name: generateRandomString(), properties: [defaultProperties[0]] }, false],
-		['modules is an empty array', { name: generateRandomString(), modules: [] }, true],
-		['modules is of the wrong type', { name: generateRandomString(), modules: 'a' }, false],
+		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
+		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
+		['property name is used by a default property', { name: generateRandomString(), code: generateRandomString(3), properties: [defaultProperties[0]] }, false],
+		['modules is an empty array', { name: generateRandomString(), code: generateRandomString(3), modules: [] }, true],
+		['modules is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), modules: 'a' }, false],
 	];
 
 	const propertiesTest = [
-		['property is undefined', { name: generateRandomString(), properties: [undefined] }, false],
-		['property is not an object', { name: generateRandomString(), properties: ['a'] }, false],
-		['property is an empty object', { name: generateRandomString(), properties: [{}] }, false],
+		['property is undefined', { name: generateRandomString(), code: generateRandomString(3), properties: [undefined] }, false],
+		['property is not an object', { name: generateRandomString(), code: generateRandomString(3), properties: ['a'] }, false],
+		['property is an empty object', { name: generateRandomString(), code: generateRandomString(3), properties: [{}] }, false],
 		['property has an unknown type', { name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: 'abc',
 			}] }, false],
 		['property has all required fields', { name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.TEXT,
 			}] }, true],
 		['property with enum type without values', { name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.ONE_OF,
 			}] }, false],
 		['property with enum type with values', { name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString()],
 			}] }, true],
-		['property with enum type with values where default value is not within the values provided', { name: generateRandomString(),
+		['property with enum type with values where default value is not within the values provided', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString()],
 				default: generateRandomString(),
 			}] }, true],
-		['property with enum type with values where default values are valid', { name: generateRandomString(),
+		['property with enum type with values where default values are valid', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.MANY_OF,
 				values: ['a', 'b'],
 				default: ['a', 'b'],
 			}] }, true],
-		['property with enum type with values being the wrong type', { name: generateRandomString(),
+		['property with enum type with values being the wrong type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.MANY_OF,
 				values: [123, 12354],
 			}] }, false],
 
-		['property with enum type with values being the a preset list', { name: generateRandomString(),
+		['property with enum type with values being the a preset list', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.MANY_OF,
-				values: presetEnumValues.JOBS,
+				values: presetEnumValues.JOBS_AND_USERS,
 			}] }, true],
-		['property with enum type with values is the wrong type', { name: generateRandomString(),
+		['property with enum type with values is the wrong type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString(), 'a'],
 				default: ['a'],
 			}] }, false],
-		['property with enum type with values where default values are duplicated', { name: generateRandomString(),
+		['property with enum type with values where default values are duplicated', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString(), 'a'],
 				default: ['a', 'a'],
 			}] }, false],
-		['property name is too long', { name: generateRandomString(),
+		['property name is too long', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(121),
 				type: fieldTypes.TEXT,
 			}] }, false],
-		['all properties has all required fields', { name: generateRandomString(),
+		['all properties has all required fields', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.TEXT,
@@ -123,7 +156,9 @@ const testValidate = () => {
 				type: fieldTypes.NUMBER,
 				default: 10,
 			}] }, true],
-		['one of the properties doesn\'t match the schema', { name: generateRandomString(),
+		['one of the properties doesn\'t match the schema', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.TEXT,
@@ -132,7 +167,9 @@ const testValidate = () => {
 				type: fieldTypes.NUMBER,
 				default: generateRandomString(),
 			}] }, false],
-		['more than one property has the same name', { name: generateRandomString(),
+		['more than one property has the same name', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: 'A',
 				type: fieldTypes.TEXT,
@@ -140,13 +177,17 @@ const testValidate = () => {
 				name: 'a',
 				type: fieldTypes.NUMBER,
 			}] }, false],
-		['property default value type matches', { name: generateRandomString(),
+		['property default value type matches', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.TEXT,
 				default: generateRandomString(),
 			}] }, true],
-		['property default value type mismatches', { name: generateRandomString(),
+		['property default value type mismatches', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: fieldTypes.NUMBER,
@@ -154,7 +195,7 @@ const testValidate = () => {
 			}] }, false],
 	];
 
-	const createSkeleton = (modules) => ({ name: generateRandomString(), modules });
+	const createSkeleton = (modules) => ({ name: generateRandomString(), code: generateRandomString(3), modules });
 	const moduleSchemaTest = [
 		['module with all required fields filled in (custom module)', createSkeleton([{ name: generateRandomString() }]), true],
 		['module with a name that is too long', createSkeleton([{ name: generateRandomString(121) }]), false],
@@ -188,8 +229,9 @@ const testValidate = () => {
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
-		['the template has all the required fields', { name: generateRandomString() }, true],
+		['the template has all the required fields', { name: generateRandomString(), code: generateRandomString(3) }, true],
 		...nameTests,
+		...codeTests,
 		...schemaFieldsTest,
 		...propertiesTest,
 		...moduleSchemaTest,
@@ -205,6 +247,11 @@ const testValidate = () => {
 	test('Any unknown fields should be stripped from the schema and necessary fields filled in', () => {
 		const data = {
 			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				defaultView: true,
+				defaultImage: true,
+			},
 			properties: [{
 				name: 'I am an apple',
 				type: fieldTypes.NUMBER,
@@ -233,6 +280,7 @@ const testValidate = () => {
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
+		expectedData.config = { defaultView: true };
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

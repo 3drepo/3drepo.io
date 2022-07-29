@@ -113,10 +113,19 @@ const moduleSchema = Yup.object().shape({
 }).test('Name and type', 'Only provide a name or a type for a module, not both',
 	({ name, type }) => (name && !type) || (!name && type));
 
+const configSchema = Yup.object().shape({
+	comments: defaultFalse,
+	issueProperties: defaultFalse,
+	defaultView: defaultFalse,
+	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
+	pin: defaultFalse,
+}).default({});
+
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
 const schema = Yup.object().shape({
 	name: types.strings.title.required(),
-	comments: defaultFalse,
+	code: Yup.string().length(3).required(),
+	config: configSchema,
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
 		(val) => val.every(({ name }) => !defaultPropertyNames.includes(name))),

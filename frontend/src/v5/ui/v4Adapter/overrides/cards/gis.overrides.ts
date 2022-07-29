@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { css } from 'styled-components';
+import { StyledTextField } from '@/v4/routes/viewerGui/components/gis/components/settingsForm/settingsForm.styles';
 
-export const DashboardListItemIcon = styled.div<{ selected?: boolean }>`
-	width: 36px;
-	margin-right: 10px;
+export default css`
+	#gis-card {
+		${StyledTextField} {
+			margin: 16px 0;
 
-	> * {
-		margin: 0;
+			.MuiFormHelperText-root {
+				top: 22px;
+			}
+		}
 	}
 `;
