@@ -26,6 +26,7 @@ import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/container
 import { FormattedMessage } from 'react-intl';
 import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
+import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -33,7 +34,6 @@ import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
 import { DashboardParams } from '../../../routes.constants';
 
 export const IsMainList = createContext(false);
-const SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -56,7 +56,7 @@ export const Containers = (): JSX.Element => {
 
 	return (
 		<>
-			<SearchContextComponent items={favouriteContainers} fieldsToFilter={SEARCH_FIELDS}>
+			<SearchContextComponent items={favouriteContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 				<ContainersList
 					title={(
 						<FormattedMessage
@@ -82,7 +82,7 @@ export const Containers = (): JSX.Element => {
 			</SearchContextComponent>
 			<Divider />
 			<IsMainList.Provider value>
-				<SearchContextComponent items={containers} fieldsToFilter={SEARCH_FIELDS}>
+				<SearchContextComponent items={containers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 					<ContainersList
 						title={(
 							<FormattedMessage

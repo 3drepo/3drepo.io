@@ -16,8 +16,8 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { FEDERATION_SEARCH_FIELDS } from '@/v5/store/federations/federations.helpers';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Button } from '@controls/button';
@@ -67,7 +67,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 
 	return (
 		<>
-			<SearchContextComponent items={includedContainers} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
+			<SearchContextComponent items={includedContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 				<EditFederationContainers
 					title={
 						formatMessage({
@@ -119,7 +119,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 				/>
 			</SearchContextComponent>
 			<Divider />
-			<SearchContextComponent items={availableContainers} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
+			<SearchContextComponent items={availableContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 				<EditFederationContainers
 					title={
 						formatMessage({
