@@ -35,6 +35,7 @@ export const SearchContextComponent = ({ items, children }) => {
 	const [contextValue, setContextValue] = useState({ items, filteredItems: items, query, setQuery });
 
 	useEffect(() => {
+		// TODO: add a fields prop to specify which fields I want to search for
 		const filteredItems = (items || []).filter((item) => Object.keys(item).some(
 			(key) => {
 				if (!isString(item[key])) return false;
