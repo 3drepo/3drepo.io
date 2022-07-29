@@ -40,7 +40,7 @@ const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
 );
 
 const ObjectsList = () => {
-	const { items, filteredItems, query } = useContext(SearchContext);
+	const { items, filteredItems } = useContext(SearchContext);
 
 	return (
 		<DashboardListCollapse
@@ -78,7 +78,7 @@ const ObjectsList = () => {
 			{filteredItems.length === 0
 			&& (
 				<DashboardListEmptyContainer>
-					<DashboardListEmptySearchResults searchPhrase={query} />
+					<DashboardListEmptySearchResults />
 				</DashboardListEmptyContainer>
 			)}
 
