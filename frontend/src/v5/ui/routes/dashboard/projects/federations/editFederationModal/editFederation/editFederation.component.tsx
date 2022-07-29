@@ -53,15 +53,15 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 		setIncludedContainers([...includedContainers, container]);
 	};
 
-	const includeAllContainers = (containersToInclude: IContainer[]) => {
-		setIncludedContainers([...includedContainers, ...containersToInclude]);
-	};
-
 	const removeContainer = (containerToRemove: IContainer) => {
 		setIncludedContainers(includedContainers.filter((container) => container !== containerToRemove));
 	};
 
-	const removeAllContainers = (containersToRemove: IContainer[]) => {
+	const includeContainers = (containersToInclude: IContainer[]) => {
+		setIncludedContainers([...includedContainers, ...containersToInclude]);
+	};
+
+	const removeContainers = (containersToRemove: IContainer[]) => {
 		setIncludedContainers(includedContainers.filter((container) => !containersToRemove.includes(container)));
 	};
 
@@ -90,7 +90,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 					actionButton={({ children, disabled, filteredContainers }: ActionButtonProps) => (
 						<Button
 							errorButton
-							onClick={() => removeAllContainers(filteredContainers)}
+							onClick={() => removeContainers(filteredContainers)}
 							disabled={disabled}
 						>
 							{children}
@@ -143,7 +143,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 						<Button
 							variant="outlined"
 							color="primary"
-							onClick={() => includeAllContainers(filteredContainers)}
+							onClick={() => includeContainers(filteredContainers)}
 							disabled={disabled}
 						>
 							{children}
