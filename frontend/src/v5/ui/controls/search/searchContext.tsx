@@ -18,14 +18,14 @@
 import { isString } from 'lodash';
 import { createContext, useEffect, useState } from 'react';
 
-export interface SearchContextType {
-	items: any[];
-	filteredItems: any[];
+export interface SearchContextType<T> {
+	items: T[];
+	filteredItems: T[];
 	query: string;
 	setQuery: (query: string) => void
 }
 
-const defaultValue: SearchContextType = { items: [], filteredItems: [], query: '', setQuery: () => {} };
+const defaultValue: SearchContextType<any> = { items: [], filteredItems: [], query: '', setQuery: () => {} };
 export const SearchContext = createContext(defaultValue);
 SearchContext.displayName = 'SearchContext';
 

@@ -40,7 +40,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { SearchContext } from '@controls/search/searchContext';
+import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -55,8 +55,6 @@ interface IContainersList {
 	onClickUpload: () => void;
 }
 
-type SearchContainersContextType = {items: IContainer[], filteredItems: IContainer[], query: string};
-
 export const ContainersList = ({
 	emptyMessage,
 	title,
@@ -68,7 +66,7 @@ export const ContainersList = ({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	// eslint-disable-next-line max-len
-	const { items: containers, filteredItems: filteredContainers, query: filterQuery }: SearchContainersContextType = useContext(SearchContext);
+	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
 
 	const { sortedList, setSortConfig } = useOrderedList(filteredContainers, DEFAULT_SORT_CONFIG);
@@ -149,8 +147,8 @@ export const ContainersList = ({
 						))
 					) : (
 						<DashboardListEmptyContainer>
-							{filterQuery && hasContainers ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							{hasContainers ? (
+								<DashboardListEmptySearchResults />
 							) : emptyMessage}
 						</DashboardListEmptyContainer>
 					)}

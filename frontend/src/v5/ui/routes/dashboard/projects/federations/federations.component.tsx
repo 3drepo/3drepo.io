@@ -27,39 +27,36 @@ import {
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
-import { filterFederations } from '@/v5/store/federations/federations.helpers';
+import { SearchContextComponent } from '@controls/search/searchContext';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 import { CreateFederationForm } from './createFederationForm';
 import { useFederationsData } from './federations.hooks';
 import { DashboardParams } from '../../../routes.constants';
 
+const SEARCH_FIELDS = ['code', 'name', 'desc', 'category'];
+
 export const Federations = (): JSX.Element => {
 	const {
 		federations,
 		favouriteFederations,
-		hasFederations,
 		isListPending,
 	} = useFederationsData();
 
 	const { teamspace, project } = useParams<DashboardParams>();
-	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
-	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 	const [createFedOpen, setCreateFedOpen] = useState(false);
 
 	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
 
+	if (isListPending) {
+		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
+	}
+
 	return (
 		<>
-			{isListPending ? (
-				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
-			) : (
-				<>
+			<>
+				<SearchContextComponent items={favouriteFederations} fieldsToFilter={SEARCH_FIELDS}>
 					<FederationsList
-						hasFederations={hasFederations.favourites}
-						filterQuery={favouritesFilterQuery}
-						onFilterQueryChange={setFavouritesFilterQuery}
-						federations={filterFederations(favouriteFederations, favouritesFilterQuery)}
 						onClickCreate={() => setCreateFedOpen(true)}
 						title={(
 							<FormattedMessage
@@ -80,12 +77,10 @@ export const Federations = (): JSX.Element => {
 							</DashboardListEmptyText>
 						)}
 					/>
-					<Divider />
+				</SearchContextComponent>
+				<Divider />
+				<SearchContextComponent items={federations} fieldsToFilter={SEARCH_FIELDS}>
 					<FederationsList
-						hasFederations={hasFederations.all}
-						filterQuery={allFilterQuery}
-						onFilterQueryChange={setAllFilterQuery}
-						federations={filterFederations(federations, allFilterQuery)}
 						onClickCreate={() => setCreateFedOpen(true)}
 						title={(
 							<FormattedMessage
@@ -114,8 +109,8 @@ export const Federations = (): JSX.Element => {
 							</>
 						)}
 					/>
-				</>
-			)}
+				</SearchContextComponent>
+			</>
 			<CreateFederationForm
 				open={createFedOpen}
 				onClickClose={() => setCreateFedOpen(false)}
