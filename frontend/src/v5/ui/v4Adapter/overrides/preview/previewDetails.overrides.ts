@@ -100,7 +100,7 @@ export default css`
 
 				span {
 					color: ${({ theme }) => theme.palette.base.lighter};
-					border: ${({ theme }) => theme.palette.base.lighter};
+					border: solid 1px ${({ theme }) => theme.palette.base.lighter};
 					margin: 0;
 					box-sizing: border-box;
 					height: 100%;
