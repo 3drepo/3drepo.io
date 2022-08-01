@@ -31,7 +31,7 @@ export const ProjectsList = () => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
 	return (
-		<SearchContextComponent items={projects}>
+		<SearchContextComponent items={projects} fieldsToFilter={['name']}>
 			<Container>
 				<Header>
 					<Title>
