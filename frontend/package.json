@@ -25,7 +25,7 @@
 		"docs": "typedoc --out ./docs ./src/globals --options ./internals/typedoc.js --logger none",
 		"extract": "node ./internals/intl/extract.js",
 		"compile": "node ./internals/intl/compile.js",
-		"storybook": "start-storybook -p 6006 -s ../public",
+		"storybook": "start-storybook -p 6006",
 		"build-storybook": "build-storybook -o ../public/storybook"
 	},
 	"keywords": [
