@@ -22,6 +22,8 @@ const { types } = require('../../../../../utils/helper/yup');
 const { getUserByQuery } = require('../../../../../models/users');
 const { respond } = require('../../../../../utils/responder');
 const Yup = require('yup');
+const { addPkceProtection } = require('..');
+const { validateMany } = require('../../../../common');
 
 const Aad = {};
 
@@ -49,7 +51,9 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 	await next();
 };
 
-Aad.authenticate = (redirectUri) => async (req, res) => {
+Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
+
+const authenticate = (redirectUri) => async (req, res) => {
 	try {
 		const querySchema = Yup.object().shape({ redirectUri: types.strings.title.required() }).strict(true);
 		await querySchema.validate(req.query);
