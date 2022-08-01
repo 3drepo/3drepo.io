@@ -22,9 +22,6 @@ const { generateRandomString } = require('../../helper/services');
 
 const WebRequests = require(`${src}/utils/webRequests`);
 
-// const getResponse = generateRandomString();
-// axios.default.get = jest.fn(() => getResponse);
-
 const testGetRequest = () => {
 	describe('Get request', () => {
 		test('Should make a get request', async () => {

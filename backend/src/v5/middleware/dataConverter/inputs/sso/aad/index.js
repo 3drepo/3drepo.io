@@ -18,8 +18,10 @@ const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../s
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
 const { aad } = require('../../../../../services/sso/sso.constants');
+const { types } = require('../../../../../utils/helper/yup');
 const { getUserByQuery } = require('../../../../../models/users');
 const { respond } = require('../../../../../utils/responder');
+const Yup = require('yup');
 
 const Aad = {};
 
@@ -47,44 +49,26 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 	await next();
 };
 
-Aad.setAuthenticateAuthParams = async (req, res, next) => {
-	const params = {
-		redirectUri: authenticateRedirectUri,
-		state: JSON.stringify({ redirectUri: req.query.signupUri }),
-		codeChallenge: req.session.pkceCodes.challenge,
-		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
-	};
+Aad.authenticate = (redirectUri) => async (req, res) => {
+	try {
+		const querySchema = Yup.object().shape({ redirectUri: types.strings.title.required() }).strict(true);
+		await querySchema.validate(req.query);
+	} catch (err) {
+		return respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
 
-	req.authParams = params;
-
-	await next();
-};
-
-Aad.setSignupAuthParams = async (req, res, next) => {
-	const { body } = req;
-
-	const params = {
-		redirectUri: signupRedirectUri,
+	req.authParams = {
+		redirectUri,
 		state: JSON.stringify({
-			username: body.username,
-			countryCode: body.countryCode,
-			company: body.company,
-			mailListAgreed: body.mailListAgreed,
+			redirectUri: req.query.redirectUri,
+			...(req.body || {})
 		}),
 		codeChallenge: req.session.pkceCodes.challenge,
 		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 	};
 
-	req.authParams = params;
-
-	await next();
-};
-
-Aad.setAuthenticationCodeUrl = async (req, res, next) => {
 	const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
-	req.authenticationCodeUrl = authenticationCodeUrl;
-
-	await next();
+	res.redirect(authenticationCodeUrl);
 };
 
 module.exports = Aad;

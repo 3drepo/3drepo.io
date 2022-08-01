@@ -16,7 +16,7 @@
  */
 
 const RoutesManager = {};
-const AadRoutes = require('./sso/aad/aad');
+const AadRoutes = require('./sso/aad');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
