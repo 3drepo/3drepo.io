@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { InputAdornment } from '@mui/material';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -47,20 +47,20 @@ type IShareTextField = {
 const IS_COPYING_DURATION_MS = 3000;
 
 export const ShareTextField = ({ label, value, className, hideValue, disabled = false }: IShareTextField) => {
-	let isCopiedTimer;
+	const timeoutRef = useRef(null);
 	const [isCopying, setIsCopying] = useState(true);
 
 	const handleCopyToClipboard = () => {
-		if (!isCopying || disabled) {
-			return;
-		}
+		if (!isCopying || disabled) return;
+
 		setIsCopying(false);
-		clearTimeout(isCopiedTimer);
-		isCopiedTimer = setTimeout(() => {
+		clearTimeout(timeoutRef.current);
+		timeoutRef.current = setTimeout(() => {
 			setIsCopying(true);
 		}, IS_COPYING_DURATION_MS);
 	};
-	useEffect(() => () => clearTimeout(isCopiedTimer), []);
+
+	useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
 	return (
 		<>
