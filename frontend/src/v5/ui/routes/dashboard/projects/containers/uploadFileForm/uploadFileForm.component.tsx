@@ -32,7 +32,6 @@ import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
-import { isEmpty } from 'lodash';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
@@ -53,13 +52,11 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 	});
 	const { control,
 		handleSubmit,
-		formState: { errors, isValid },
+		formState: { isValid },
 		trigger,
 		getValues,
 		setValue,
 		watch,
-		setError,
-		clearErrors,
 	} = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -73,12 +70,9 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 		setIsUploading(false);
 	}, [open]);
 
+	const [fileError, setFileError] = useState(false);
 	useEffect(() => {
-		if (fields.some(({ file }) => filesizeTooLarge(file))) {
-			setError('uploads', { type: 'custom', message: '' }); // Otherwise submit button not disabled
-		} else {
-			clearErrors('uploads');
-		}
+		setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
 	}, [fields.length]);
 
 	const DEFAULT_SORT_CONFIG = {
@@ -178,7 +172,7 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
-				isValid={(isValid && isEmpty(errors) && !isUploading) || (isUploading && allUploadsComplete)}
+				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
 			>
 				<UploadsContainer>
 					<UploadsListScroll>
