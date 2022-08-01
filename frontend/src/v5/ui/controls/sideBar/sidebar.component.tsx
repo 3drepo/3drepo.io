@@ -20,7 +20,6 @@ import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles
 
 interface ISidebar {
 	open: boolean;
-	noButton?: boolean;
 	onClick: () => void;
 	className?: string;
 	children: JSX.Element;
@@ -31,16 +30,13 @@ export const Sidebar = ({
 	className,
 	open,
 	onClick,
-	noButton = false,
 	hidden = false,
 	children,
 }: ISidebar): JSX.Element => (
 	<SidebarContainer className={className} open={open} hidden={hidden}>
-		{!noButton && (
-			<ExpandButton onClick={onClick} variant="main">
-				<ExpandIcon />
-			</ExpandButton>
-		)}
+		<ExpandButton onClick={onClick} variant="main">
+			<ExpandIcon />
+		</ExpandButton>
 		<SidebarContent>
 			{children}
 		</SidebarContent>

@@ -229,7 +229,6 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 					<Sidebar
 						open={sidebarOpen}
 						onClick={() => setSelectedIndex(null)}
-						noButton={!sidebarOpen}
 					>
 						{
 							sidebarOpen
