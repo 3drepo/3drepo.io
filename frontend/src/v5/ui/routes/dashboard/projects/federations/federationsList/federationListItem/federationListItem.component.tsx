@@ -26,7 +26,6 @@ import {
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemFederationTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { Highlight } from '@controls/highlight';
 import { Tooltip } from '@mui/material';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
@@ -52,14 +51,12 @@ const MODALS = {
 interface IFederationListItem {
 	index: number;
 	federation: IFederation;
-	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
 }
 
 export const FederationListItem = ({
 	index,
 	federation,
-	filterQuery,
 	onFavouriteChange,
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -98,7 +95,6 @@ export const FederationListItem = ({
 					<DashboardListItemFederationTitle
 						minWidth={90}
 						federation={federation}
-						filterQuery={filterQuery}
 					/>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
@@ -151,9 +147,7 @@ export const FederationListItem = ({
 						/>
 					</DashboardListItemButton>
 					<DashboardListItemText width={188}>
-						<Highlight search={filterQuery}>
-							{federation.code}
-						</Highlight>
+						{federation.code}
 					</DashboardListItemText>
 					<DashboardListItemText width={97} minWidth={73}>
 						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
