@@ -33,7 +33,6 @@ import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styl
 import { Container as PreviewDetailsContainer,
 	CollapsableContent,
 	NotCollapsableContent,
-	ToggleButtonContainer,
 	MainInfoContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
