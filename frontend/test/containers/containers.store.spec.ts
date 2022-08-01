@@ -195,7 +195,6 @@ describe('Containers: store', () => {
 			);
 			const containers = selectContainers.resultFunc(resultState, projectId);
 			const containerIsIncluded = selectContainerById.resultFunc(containers, newContainer._id);
-			console.log(containerIsIncluded)
 			expect(containerIsIncluded).toBeFalsy();
 		});
 	});
