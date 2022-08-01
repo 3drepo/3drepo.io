@@ -28,10 +28,9 @@ export const DashboardListEmptySearchResults = (): JSX.Element => {
 		<DashboardListEmptyText>
 			<FormattedMessage
 				id="dashboardList.noSearchResults"
-				defaultMessage="We couldn't find a match for <SearchPhrase>“{searchPhrase}”</SearchPhrase>. Please try another search."
+				defaultMessage="We couldn't find a match for {searchPhrase}. Please try another search."
 				values={{
-					SearchPhrase: (val: string) => <SearchPhrase>{val}</SearchPhrase>,
-					searchPhrase,
+					searchPhrase: <SearchPhrase>&quot;{searchPhrase}&quot;</SearchPhrase>,
 				}}
 			/>
 		</DashboardListEmptyText>
