@@ -17,6 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
+import { DEFAULT_TEAMSPACE_IMG_SRC } from '@/v5/store/teamspaces/teamspaces.helpers';
 
 export default {
 	title: 'Dashboard/CoverImage',
@@ -33,7 +34,6 @@ export default {
 
 const Template: ComponentStory<typeof CoverImage> = (args) => <CoverImage {...args} />;
 
-const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
 const INVALID_TEAMSPACE_IMG_SRC = new Error();
 
 export const CoverImageWithoutError = Template.bind({});

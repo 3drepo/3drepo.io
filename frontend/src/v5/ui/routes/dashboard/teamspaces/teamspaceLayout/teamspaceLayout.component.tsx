@@ -23,8 +23,7 @@ import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/pro
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
-import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { clientConfigService } from '@/v4/services/clientConfig';
+import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceImage } from './teamspaceLayout.styles';
 
 interface ITeamspaceLayout {
@@ -34,8 +33,6 @@ interface ITeamspaceLayout {
 
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
-	const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
-	const teamspaceImgSrc = generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API);
 
 	useEffect(() => {
 		if (teamspace) {
@@ -48,7 +45,7 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 		<Container className={className}>
 			<AppBar />
 			<TopBar>
-				<TeamspaceImage imgSrc={teamspaceImgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
+				<TeamspaceImage imgSrc={getTeamspaceImgSrc(teamspace)} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
 				<TeamspaceInfo>
 					<TeamspaceName>
 						<FormattedMessage
