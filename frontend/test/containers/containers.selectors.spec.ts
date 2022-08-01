@@ -20,8 +20,7 @@ import { containerMockFactory } from './containers.fixtures';
 import {
 	selectFavouriteContainers,
 	selectContainers,
-	selectAreStatsPending,
-	selectHasContainers
+	selectAreStatsPending
 } from '@/v5/store/containers/containers.selectors';
 
 const searchPhrase = 'test phrase';
