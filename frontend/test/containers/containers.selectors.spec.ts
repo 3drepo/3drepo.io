@@ -54,27 +54,6 @@ describe('Containers: selectors', () => {
 		})
 	})
 
-	describe('selectHasContainers', () => {
-		it('should return correct values when favourite item is in federations', () => {
-			const containers = defaultState.containersByProject[projectId];
-			const favourites = selectFavouriteContainers.resultFunc(containers);
-			const selected = selectHasContainers.resultFunc(containers, favourites);
-			expect(selected).toEqual({ favourites: true, all: true })
-		})
-
-		it('should return correct values when no favourite item is in containers', () => {
-			const containers = [containerMockFactory({ isFavourite: false })];
-			const favourites = selectFavouriteContainers.resultFunc(containers);
-			const selected = selectHasContainers.resultFunc(containers, favourites);
-			expect(selected).toEqual({ favourites: false, all: true })
-		})
-
-		it('should return correct values for empty containers', () => {
-			const selected = selectHasContainers.resultFunc([], []);
-			expect(selected).toEqual({ favourites: false, all: false })
-		})
-	})
-
 	describe('selectAreStatsPending', () => {
 		it('should return true if at least one item has pending stats', () => {
 			const selected = selectAreStatsPending.resultFunc(defaultState.containersByProject[projectId]);
