@@ -18,5 +18,3 @@
 import api from './default';
 
 export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
-
-export const fetchTeamspaceAvatar = (teamspace: string) => api.get(`teamspaces/${teamspace}/avatar`);
