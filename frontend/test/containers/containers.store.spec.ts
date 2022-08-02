@@ -16,7 +16,7 @@
  */
 
 import { INITIAL_STATE, containersReducer, ContainersActions, IContainersState } from '@/v5/store/containers/containers.redux';
-import { selectContainerById, selectContainers, selectFavouriteContainers, selectHasContainers } from '@/v5/store/containers/containers.selectors';
+import { selectContainerById, selectContainers, selectFavouriteContainers } from '@/v5/store/containers/containers.selectors';
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
 import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.types';
@@ -43,50 +43,29 @@ describe('Containers: store', () => {
 
 	describe('Updating container attributes:', () => {
 		it('should add container to favourites', () => {
-			let containers = selectContainers.resultFunc(initialState, projectId);
-			let favouriteContainers = selectFavouriteContainers.resultFunc(containers);
-			expect(selectHasContainers.resultFunc(containers, favouriteContainers)).toEqual({
-				favourites: false,
-				all: false,
-			});
-
 			const newContainer = containerMockFactory({ isFavourite: false });
 			const resultState: IContainersState = containersReducer(
 				getNonEmptyInitialState(newContainer),
 				ContainersActions.setFavouriteSuccess(projectId, newContainer._id, true),
 			);
-			containers = selectContainers.resultFunc(resultState, projectId);
-			favouriteContainers = selectFavouriteContainers.resultFunc(containers);
-			const containerIsIncluded = favouriteContainers.find(({ _id }) => _id === newContainer._id);
-			expect(selectHasContainers.resultFunc(containers, favouriteContainers)).toEqual({
-				favourites: true,
-				all: true,
-			});
+			const containers = selectContainers.resultFunc(resultState, projectId);
+			const favouriteContainers = selectFavouriteContainers.resultFunc(containers);
+			const containerIsIncluded = selectContainerById.resultFunc(favouriteContainers, newContainer._id);
 
 			expect(containerIsIncluded).toBeTruthy();
 		});
 
 		it('should remove container from favourites', () => {
-			let containers = selectContainers.resultFunc(initialState, projectId);
-			let favouriteContainers = selectFavouriteContainers.resultFunc(containers);
-			expect(selectHasContainers.resultFunc(containers, favouriteContainers)).toEqual({
-				favourites: false,
-				all: false,
-			});
 			const newContainer = containerMockFactory({ isFavourite: true });
 			const resultState: IContainersState = containersReducer(
 				getNonEmptyInitialState(newContainer),
 				ContainersActions.setFavouriteSuccess(projectId, newContainer._id, false),
 			);
-			containers = selectContainers.resultFunc(resultState, projectId);
-			favouriteContainers = selectFavouriteContainers.resultFunc(containers);
-			const containerIsIncluded = favouriteContainers.find(({ _id }) => _id === newContainer._id);
-	
+			const containers = selectContainers.resultFunc(resultState, projectId);
+			const favouriteContainers = selectFavouriteContainers.resultFunc(containers);
+			const containerIsIncluded = selectContainerById.resultFunc(favouriteContainers, newContainer._id);
+
 			expect(containerIsIncluded).not.toBeTruthy();
-			expect(selectHasContainers.resultFunc(containers, favouriteContainers)).toEqual({
-				favourites: false,
-				all: true,
-			});
 		});
 
 		it('should update container stats', () => {
