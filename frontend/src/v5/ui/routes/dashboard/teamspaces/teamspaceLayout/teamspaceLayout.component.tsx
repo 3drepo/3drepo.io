@@ -24,8 +24,8 @@ import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspace
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceImage } from './teamspaceLayout.styles';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceImage } from './teamspaceLayout.styles';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
