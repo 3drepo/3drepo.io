@@ -18,6 +18,7 @@
 const {
 	defaultProperties,
 	fieldTypes,
+	fieldTypesToValidator,
 	getApplicableDefaultProperties,
 	presetEnumValues,
 	presetModules,
@@ -26,16 +27,6 @@ const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
 const { isString } = require('../../utils/helper/typeCheck');
-
-const typeNameToType = {
-	[fieldTypes.TEXT]: types.strings.title,
-	[fieldTypes.LONG_TEXT]: types.strings.longDescription,
-	[fieldTypes.BOOLEAN]: Yup.boolean(),
-	[fieldTypes.DATE]: types.date,
-	[fieldTypes.NUMBER]: Yup.number(),
-	[fieldTypes.ONE_OF]: types.strings.title,
-	[fieldTypes.MANY_OF]: Yup.array().of(types.strings.title),
-};
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 
@@ -52,7 +43,7 @@ const fieldSchema = Yup.object().shape({
 				if (isString(value)) {
 					typeToCheck = Yup.string().oneOf(Object.values(presetEnumValues)).required();
 				} else {
-					typeToCheck = Yup.array().of(typeNameToType[fieldTypes.ONE_OF]).min(1).required()
+					typeToCheck = Yup.array().of(fieldTypesToValidator[fieldTypes.ONE_OF]).min(1).required()
 						.strict(true);
 				}
 
@@ -68,7 +59,7 @@ const fieldSchema = Yup.object().shape({
 	}),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
-		const res = typeNameToType[type];
+		const res = fieldTypesToValidator[type];
 		if (type === fieldTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
 				if (defaultValues?.length) {
@@ -122,6 +113,7 @@ const moduleSchema = Yup.object().shape({
 const configSchema = Yup.object().shape({
 	comments: defaultFalse,
 	issueProperties: defaultFalse,
+	attachments: defaultFalse,
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: defaultFalse,

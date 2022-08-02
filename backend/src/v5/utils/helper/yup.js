@@ -98,4 +98,6 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
+YupHelper.types.embeddedImage = Yup.string();
+
 module.exports = YupHelper;

@@ -32,7 +32,6 @@ TemplateConstants.fieldTypes = {};
 	'image',
 	'view',
 	'measurements',
-	'attachments',
 	'safetibase',
 	'coords',
 ].forEach((type) => {
