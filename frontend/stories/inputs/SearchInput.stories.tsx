@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { SearchInput } from '@controls/searchInput';
+import { SearchInput } from '@controls/search/searchInput';
 import { useState } from 'react';
 
 export default {

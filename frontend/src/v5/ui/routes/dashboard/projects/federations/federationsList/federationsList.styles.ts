@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+import * as SearchInputStyles from '@controls/search/searchInput/searchInput.styles';
 import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
