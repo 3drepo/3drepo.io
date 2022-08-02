@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
@@ -25,6 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { Container, Content, TopBar, TeamspaceInfo, TeamspaceName, TeamspaceImage } from './teamspaceLayout.styles';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
@@ -33,19 +34,26 @@ interface ITeamspaceLayout {
 
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
+	const currentUserIsUpating = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
+	const [imgSrc, setImgSrc] = useState(null);
+
+	const updateImg = () => setImgSrc(getTeamspaceImgSrc(teamspace));
 
 	useEffect(() => {
 		if (teamspace) {
 			ProjectsActionsDispatchers.fetch(teamspace);
 			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+			updateImg();
 		}
 	}, [teamspace]);
+
+	useEffect(() => { if (!currentUserIsUpating) updateImg(); }, [currentUserIsUpating]);
 
 	return (
 		<Container className={className}>
 			<AppBar />
 			<TopBar>
-				<TeamspaceImage imgSrc={getTeamspaceImgSrc(teamspace)} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
+				<TeamspaceImage imgSrc={imgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
 				<TeamspaceInfo>
 					<TeamspaceName>
 						<FormattedMessage
