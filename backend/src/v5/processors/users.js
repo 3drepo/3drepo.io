@@ -30,11 +30,11 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
 
-Users.signUp = async (newUserData, generatePassword) => {
+Users.signUp = async (newUserData) => {
 	const token = generateHashString();
 
 	const formattedNewUserData = { ...newUserData, token };
-	if (generatePassword) {
+	if (newUserData.sso) {
 		formattedNewUserData.password = generateHashString();
 	}
 

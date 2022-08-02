@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
+const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail, getUserByEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
@@ -193,7 +193,7 @@ const generateSignUpSchema = (isSSO) => {
 			async (value) => {
 				if (!isSSO && value) {
 					try {
-						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
+						await getUserByEmail(value, { _id: 1 });
 						return false;
 					} catch {
 						// do nothing
@@ -219,6 +219,8 @@ const generateSignUpSchema = (isSSO) => {
 			});
 
 			const result = await checkCaptcha;
+			delete body.captcha;
+
 			return result.success;
 		})
 		: schema;

@@ -19,7 +19,7 @@ const { createResponseCode, templates } = require('../../../../../utils/response
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
 const { providers } = require('../../../../../services/sso/sso.constants');
 const { types } = require('../../../../../utils/helper/yup');
-const { getUserByQuery } = require('../../../../../models/users');
+const {  getUserByEmail } = require('../../../../../models/users');
 const { respond } = require('../../../../../utils/responder');
 const Yup = require('yup');
 const { addPkceProtection } = require('..');
@@ -27,26 +27,31 @@ const { validateMany } = require('../../../../common');
 
 const Aad = {};
 
-Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
+Aad.validateUserDetails = async (req, res, next) => {
 	const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 		signupRedirectUri, req.session.pkceCodes?.verifier);
 
 	try {
-		const user = await getUserByQuery({ 'customData.email': mail }, { 'customData.sso': 1 });
+		const user = await getUserByEmail(mail, { 'customData.sso': 1 });
 		const message = user.customData.sso ? 'Email already exists from SSO user' : 'Email already exists';
-		respond(req, res, createResponseCode(templates.invalidArguments, message));
-		return;
+		return respond(req, res, createResponseCode(templates.invalidArguments, message));
 	} catch {
 		// do nothing
 	}
 
-	req.body = {
-		...JSON.parse(req.query.state),
-		email: mail,
-		firstName: givenName,
-		lastName: surname,
-		sso: { type: providers.AAD, id },
-	};
+	try {		
+		req.body = {
+			...JSON.parse(req.query.state),
+			email: mail,
+			firstName: givenName,
+			lastName: surname,
+			sso: { type: providers.AAD, id },
+		};
+	
+		delete req.body.redirectUri;	
+	} catch (err) {
+		return respond(req, res, createResponseCode(templates.invalidArguments, err));
+	}
 
 	await next();
 };

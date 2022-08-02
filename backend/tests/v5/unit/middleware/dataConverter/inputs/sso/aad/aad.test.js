@@ -44,7 +44,7 @@ const aadUserDetails = {
 	},
 };
 
-const testGetUserDetailsAndCheckEmailAvailability = () => {
+const testValidateUserDetails = () => {
 	describe('Get user details and check email availability', () => {
 		const req = {
 			query: {
@@ -58,7 +58,7 @@ const testGetUserDetailsAndCheckEmailAvailability = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: {} });
 			const mockCB = jest.fn();
-			await Aad.getUserDetailsAndCheckEmailAvailability(req, {}, mockCB);
+			await Aad.validateUserDetails(req, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
@@ -69,7 +69,7 @@ const testGetUserDetailsAndCheckEmailAvailability = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
 			const mockCB = jest.fn();
-			await Aad.getUserDetailsAndCheckEmailAvailability(req, {}, mockCB);
+			await Aad.validateUserDetails(req, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
@@ -80,7 +80,7 @@ const testGetUserDetailsAndCheckEmailAvailability = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByQuery.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
-			await Aad.getUserDetailsAndCheckEmailAvailability(req, {}, mockCB);
+			await Aad.validateUserDetails(req, {}, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledTimes(0);
 			expect(req.body).toEqual(
@@ -164,7 +164,7 @@ const testSetAuthenticationCodeUrl = () => {
 };
 
 describe('middleware/dataConverter/inputs/teamspaces', () => {
-	testGetUserDetailsAndCheckEmailAvailability();
+	testValidateUserDetails();
 	testSetAuthenticateAuthParams();
 	testSetSignupAuthParams();
 	testSetAuthenticationCodeUrl();

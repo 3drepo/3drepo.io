@@ -28,15 +28,15 @@ const Aad = {};
 let clientApplication;
 
 const checkAadConfig = () => {
-	if (!config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret) {
+	if (!config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret || !config.sso?.aad?.authority) {
 		throw templates.ssoNotAvailable;
 	}
 };
 
 const getClientApplication = () => {
-	checkAadConfig();
-
 	if (!clientApplication) {
+		checkAadConfig();
+
 		const loggerOptions = {
 			loggerCallback: (loglevel, message) => {
 				logger.logInfo(message);

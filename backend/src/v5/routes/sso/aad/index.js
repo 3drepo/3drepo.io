@@ -16,7 +16,7 @@
  */
 
 const { authenticateRedirectEndpoint, signupRedirectEndpoint, authenticateRedirectUri, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
-const { getUserDetailsAndCheckEmailAvailability, authenticate } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { validateUserDetails, authenticate } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { respond } = require('../../../utils/responder');
@@ -34,7 +34,7 @@ const authenticatePost = (req, res) => {
 
 const signupPost = async (req, res) => {
 	try {
-		await Users.signUp(req.body, true);
+		await Users.signUp(req.body);
 		res.redirect(JSON.parse(req.query.state).redirectUri);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -105,7 +105,7 @@ const establishRoutes = () => {
 	 */
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(`${signupRedirectEndpoint}`, getUserDetailsAndCheckEmailAvailability, signupPost);
+	router.get(`${signupRedirectEndpoint}`, validateUserDetails, signupPost);
 
 	return router;
 };
