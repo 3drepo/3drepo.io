@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image } from './coverImage.styles';
 
 type CoverImageProps = {
@@ -26,6 +26,8 @@ type CoverImageProps = {
 export const CoverImage = ({ className, defaultImgSrc, imgSrc }: CoverImageProps) => {
 	const [src, setSrc] = useState(imgSrc);
 	const onError = () => { setSrc(defaultImgSrc); };
+
+	useEffect(() => { setSrc(imgSrc); }, [imgSrc]);
 
 	return (<Image onError={onError} className={className} src={src} />);
 };
