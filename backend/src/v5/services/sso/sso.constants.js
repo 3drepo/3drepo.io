@@ -17,6 +17,8 @@
 
 const SsoConstants = {};
 
-SsoConstants.aad = 'aad';
+SsoConstants.providers = {
+    AAD: "aad"
+};
 
 module.exports = SsoConstants;

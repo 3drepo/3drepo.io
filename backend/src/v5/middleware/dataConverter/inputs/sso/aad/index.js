@@ -17,7 +17,7 @@
 const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
-const { aad } = require('../../../../../services/sso/sso.constants');
+const { providers } = require('../../../../../services/sso/sso.constants');
 const { types } = require('../../../../../utils/helper/yup');
 const { getUserByQuery } = require('../../../../../models/users');
 const { respond } = require('../../../../../utils/responder');
@@ -45,7 +45,7 @@ Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
 		email: mail,
 		firstName: givenName,
 		lastName: surname,
-		sso: { type: aad, id },
+		sso: { type: providers.AAD, id },
 	};
 
 	await next();

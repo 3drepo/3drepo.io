@@ -46,11 +46,11 @@ const setupData = async () => {
 };
 
 const testAuthenticate = () => {
-	describe('Sign Up Authenticate', () => {
+	describe('Authenticate', () => {
 		test('should redirect the user to Microsoft authentication page', async () => {
 			const signupUri = generateRandomString();
 			const res = await agent.get(`/v5/sso/aad/authenticate?signupUri=${signupUri}`)
-				.expect(templates.found.status);
+				.expect(302);
 
 			const redirectUri = res.headers.location;
 			expect(redirectUri).toEqual(
@@ -71,7 +71,7 @@ const testAuthenticatePost = () => {
 		test('should redirect the user to ', async () => {
 			const state = { redirectUri: generateRandomString() };
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
-				.expect(templates.found.status);
+				.expect(302);
 			expect(res.headers.location).toEqual(expect.stringMatching(state.redirectUri));
 		});
 	});
@@ -100,7 +100,7 @@ const signup = () => {
 
 		test('should validate signup data and redirect the user to Microsoft authentication page', async () => {
 			const res = await agent.post('/v5/sso/aad/signup').send(newUserData)
-				.expect(templates.found.status);
+				.expect(302);
 
 			const redirectUri = res.headers.location;
 			expect(redirectUri).toEqual(

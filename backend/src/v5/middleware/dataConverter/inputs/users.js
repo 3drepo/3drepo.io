@@ -174,7 +174,7 @@ Users.validateResetPasswordData = async (req, res, next) => {
 	}
 };
 
-const generateBaseSignUpSchema = () => {
+const generateSignUpSchema = (isSSO) => {
 	const captchaEnabled = config.auth.captcha;
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
@@ -184,16 +184,32 @@ const generateBaseSignUpSchema = () => {
 						await getUserByUsername(value, { _id: 1 });
 						return false;
 					} catch {
-						// do nothing
+					// do nothing
 					}
 				}
 				return true;
 			}).required(),
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (!isSSO && value) {
+					try {
+						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).test('checkEmailExists', 'email is a required field', (value) => isSSO || value ),
+		password: types.strings.password.test('checkPasswordExists', 'password is a required field', (value) => isSSO || value ),
+		firstName: types.strings.name.test('checkFirstnameExists', 'firstName is a required field', (value) => isSSO || value ),
+		lastName: types.strings.name.test('checkLastnameExists', 'lastName is a required field', (value) => isSSO || value ),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
-	}).noUnknown().required();
+	})
+		.noUnknown().required();
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
@@ -208,46 +224,18 @@ const generateBaseSignUpSchema = () => {
 		: schema;
 };
 
-const generateSignUpSchema = () => {
-	const schema = generateBaseSignUpSchema();
-	return schema.shape({
-		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
-			async (value) => {
-				if (value) {
-					try {
-						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
-						return false;
-					} catch {
-						// do nothing
-					}
-				}
-				return true;
-			}).required(),
-		password: types.strings.password.required(),
-		firstName: types.strings.name.required().transform(formatPronouns),
-		lastName: types.strings.name.required().transform(formatPronouns),
-	}).noUnknown().required();
-};
-
-Users.validateSignUpData = async (req, res, next) => {
+const validateSignUpData = async (req, res, next, isSSO) => {
 	try {
-		const schema = generateSignUpSchema();
+		const schema = generateSignUpSchema(isSSO); 
 		req.body = await schema.validate(req.body);
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
-};
+}
 
-Users.validateSsoSignUpData = async (req, res, next) => {
-	try {
-		const schema = generateBaseSignUpSchema();
-		req.body = await schema.validate(req.body);
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
+Users.validateSignUpData = (req, res, next) => validateSignUpData(req, res, next, false);
+Users.validateSsoSignUpData = (req, res, next) => validateSignUpData(req, res, next, true);
 
 Users.validateVerifyData = async (req, res, next) => {
 	const schema = Yup.object().shape({
