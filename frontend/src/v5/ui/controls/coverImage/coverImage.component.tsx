@@ -14,33 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useState } from 'react';
+import { Image } from './coverImage.styles';
 
-import styled, { css } from 'styled-components';
+type CoverImageProps = {
+	className?: string;
+	defaultImgSrc: string;
+	imgSrc?: string;
+};
 
-const PlaceholderStyle = css`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	opacity: 0.1;
-	border-radius: 3px;
-`;
+export const CoverImage = ({ className, defaultImgSrc, imgSrc }: CoverImageProps) => {
+	const [src, setSrc] = useState(imgSrc);
+	const onError = () => { setSrc(defaultImgSrc); };
 
-export const ListItem = styled.li`
-	list-style-type: none;
-	float: left;
-	margin: 10px;
-`;
+	useEffect(() => { setSrc(imgSrc); }, [imgSrc]);
 
-export const ImagePlaceholder = styled.img`
-	${PlaceholderStyle}
-	position: relative;
-	height: 175px;
-	width: 222px;
-	object-fit: cover;
-	margin-bottom: -5px;
-`;
-
-export const TextPlaceholder = styled.div<{ width?: string;}>`
-	${PlaceholderStyle}
-	height: 10px;
-	width: ${({ width }) => width || '100%'};
-	margin-top: 13px;
-`;
+	return (<Image onError={onError} className={className} src={src} />);
+};
