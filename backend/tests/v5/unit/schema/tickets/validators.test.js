@@ -22,18 +22,17 @@ const FS = require('fs');
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const TicketSchema = require(`${src}/schemas/tickets`);
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
-const testPropertiesValidators = (testData, moduleProperty) => {
+const testPropertyTypes = (testData, moduleProperty) => {
 	describe.each(
 		testData,
-	)(`${moduleProperty ? '[Modules]' : ''}Should create a validator that correctly validates different types of properties`,
+	)(`${moduleProperty ? '[Modules] ' : ''}Should create a validator that correctly validates different types of properties`,
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const fieldName = generateRandomString();
-				const modName = generateRandomString();
 				const propArr = [
 					{
 						name: fieldName,
@@ -44,7 +43,7 @@ const testPropertiesValidators = (testData, moduleProperty) => {
 					properties: moduleProperty ? [] : propArr,
 					modules: moduleProperty ? [
 						{
-							name: modName,
+							type: presetModules.SEQUENCING,
 							properties: propArr,
 						},
 					] : [],
@@ -59,7 +58,7 @@ const testPropertiesValidators = (testData, moduleProperty) => {
 					const fullData = ({
 						properties: moduleProperty ? {} : propObj,
 						modules: moduleProperty ? {
-							[modName]: {
+							[presetModules.SEQUENCING]: {
 								properties: propObj,
 							},
 						} : {},
@@ -76,6 +75,64 @@ const testPropertiesValidators = (testData, moduleProperty) => {
 				await expect(runTest(badTest)).rejects.toBeUndefined();
 			});
 		});
+};
+
+const testPropertyConditions = (testData, moduleProperty) => {
+	describe.each(
+		testData,
+	)(`${moduleProperty ? '[Modules] ' : ''}Property Conditions`, (desc, schema, succeed, input, output) => {
+		test(desc, async () => {
+			const fieldName = generateRandomString();
+			const modName = generateRandomString();
+			const propArr = [
+				{
+					name: fieldName,
+					...schema,
+				},
+			];
+			const template = {
+				properties: moduleProperty ? [] : propArr,
+				modules: moduleProperty ? [
+					{
+						name: modName,
+						properties: propArr,
+					},
+				] : [],
+			};
+
+			const validator = await TicketSchema.generateTicketValidator(template);
+
+			const propObjIn = input === undefined ? {} : {
+				[fieldName]: input,
+			};
+			const fullData = ({
+				properties: moduleProperty ? {} : propObjIn,
+				modules: moduleProperty ? {
+					[modName]: {
+						properties: propObjIn,
+					},
+				} : {},
+			});
+
+			if (succeed) {
+				const propObjOut = output === undefined ? {} : {
+					[fieldName]: output,
+				};
+				const outData = ({
+					properties: moduleProperty ? {} : propObjOut,
+					modules: moduleProperty ? {
+						[modName]: {
+							properties: propObjOut,
+						},
+					} : {},
+				});
+
+				await expect(validator.validate(fullData, { stripUnknown: true })).resolves.toEqual(outData);
+			} else {
+				await expect(validator.validate(fullData).catch(() => Promise.reject())).rejects.toBeUndefined();
+			}
+		});
+	});
 };
 
 const testGenerateTicketValidator = () => {
@@ -100,7 +157,39 @@ const testGenerateTicketValidator = () => {
 			], [{}]],
 		];
 
-		testPropertiesValidators(propertyTypeTestData);
+		testPropertyTypes(propertyTypeTestData);
+		testPropertyTypes(propertyTypeTestData, true);
+
+		const propertyConditionTests = [
+			['Should fill in default value if not present', { type: fieldTypes.TEXT, default: 'hi' }, true, undefined, 'hi'],
+			['Should pass if optional field is not present', { type: fieldTypes.TEXT }, true],
+			['Should fail if required field is not present', { type: fieldTypes.TEXT, required: true }, false],
+			['Should ignore deprecated fields', { type: fieldTypes.TEXT, deprecated: true }, true, generateRandomString()],
+			['Should ignore read only fields', { type: fieldTypes.TEXT, readOnly: true }, true, generateRandomString()],
+			['Should ignore unrecognised types', { type: generateRandomString(), required: true }, true, generateRandomString()],
+		];
+
+		testPropertyConditions(propertyConditionTests);
+		testPropertyConditions(propertyConditionTests, true);
+
+		test('Should ignore deprecated modules', async () => {
+			const template = {
+				properties: [],
+				modules: [{
+					name: generateRandomString(),
+					properties: [{
+						name: generateRandomString(),
+						required: true,
+						type: fieldTypes.TEXT,
+					}],
+					deprecated: true,
+				}],
+			};
+
+			const input = { properties: {}, modules: {} };
+			const validator = await TicketSchema.generateTicketValidator(template);
+			await expect(validator.validate(input, { stripUnknown: true })).resolves.toEqual(input);
+		});
 	});
 };
 
