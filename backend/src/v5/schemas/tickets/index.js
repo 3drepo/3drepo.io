@@ -70,12 +70,17 @@ const generateModulesValidator = (modules) => {
 	return Yup.object(moduleToSchema).required();
 };
 
-Tickets.generateTicketValidator = (template) => {
+const generateTicketValidator = (template) => {
 	const fullTem = generateFullSchema(template);
 	const validator = Yup.object().shape({
 		properties: generatePropertiesValidator(fullTem.properties),
 		modules: generateModulesValidator(template.modules),
 	});
 	return Promise.resolve(validator); // FIXME
+};
+
+Tickets.validateTicket = async (template, data) => {
+	const validator = await generateTicketValidator(template);
+	return validator.validate(data, { stripUnknown: true });
 };
 module.exports = Tickets;

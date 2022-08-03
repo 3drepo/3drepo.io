@@ -29,7 +29,7 @@ TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 const testPropertyTypes = (testData, moduleProperty) => {
 	describe.each(
 		testData,
-	)(`${moduleProperty ? '[Modules] ' : ''}Should create a validator that correctly validates different types of properties`,
+	)(`${moduleProperty ? '[Modules] ' : ''}Property types`,
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const fieldName = generateRandomString();
@@ -49,8 +49,6 @@ const testPropertyTypes = (testData, moduleProperty) => {
 					] : [],
 				};
 
-				const validator = await TicketSchema.generateTicketValidator(template);
-
 				const runTest = async (data) => {
 					const propObj = {
 						[fieldName]: data,
@@ -65,7 +63,7 @@ const testPropertyTypes = (testData, moduleProperty) => {
 					});
 
 					try {
-						await validator.validate(fullData);
+						await TicketSchema.validateTicket(template, fullData);
 					} catch (err) {
 						throw undefined;
 					}
@@ -100,8 +98,6 @@ const testPropertyConditions = (testData, moduleProperty) => {
 				] : [],
 			};
 
-			const validator = await TicketSchema.generateTicketValidator(template);
-
 			const propObjIn = input === undefined ? {} : {
 				[fieldName]: input,
 			};
@@ -127,16 +123,17 @@ const testPropertyConditions = (testData, moduleProperty) => {
 					} : {},
 				});
 
-				await expect(validator.validate(fullData, { stripUnknown: true })).resolves.toEqual(outData);
+				await expect(TicketSchema.validateTicket(template, fullData)).resolves.toEqual(outData);
 			} else {
-				await expect(validator.validate(fullData).catch(() => Promise.reject())).rejects.toBeUndefined();
+				await expect(TicketSchema.validateTicket(template, fullData)
+					.catch(() => Promise.reject())).rejects.toBeUndefined();
 			}
 		});
 	});
 };
 
-const testGenerateTicketValidator = () => {
-	describe('Generate ticket validator', () => {
+const testValidateTicket = () => {
+	describe('Validate ticket', () => {
 		const propertyTypeTestData = [
 			['Text', { type: fieldTypes.TEXT }, generateRandomString(), generateRandomString(121)],
 			['Long text', { type: fieldTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
@@ -187,12 +184,11 @@ const testGenerateTicketValidator = () => {
 			};
 
 			const input = { properties: {}, modules: {} };
-			const validator = await TicketSchema.generateTicketValidator(template);
-			await expect(validator.validate(input, { stripUnknown: true })).resolves.toEqual(input);
+			await expect(TicketSchema.validateTicket(template, input)).resolves.toEqual(input);
 		});
 	});
 };
 
 describe('schema/tickets/validators', () => {
-	testGenerateTicketValidator();
+	testValidateTicket();
 });
