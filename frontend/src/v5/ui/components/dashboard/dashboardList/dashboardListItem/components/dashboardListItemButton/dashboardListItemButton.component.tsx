@@ -36,15 +36,17 @@ export const DashboardListItemButton = ({
 }: IDashboardListItemButton): JSX.Element => (
 	<FixedOrGrowContainer {...containerProps}>
 		<Tooltip title={tooltipTitle}>
-			<Button
-				disabled={disabled}
-				onClick={(event) => {
-					event.stopPropagation();
-					onClick(event);
-				}}
-			>
-				{children}
-			</Button>
+			<span>
+				<Button
+					disabled={disabled}
+					onClick={(event) => {
+						event.stopPropagation();
+						onClick(event);
+					}}
+				>
+					{children}
+				</Button>
+			</span>
 		</Tooltip>
 	</FixedOrGrowContainer>
 );

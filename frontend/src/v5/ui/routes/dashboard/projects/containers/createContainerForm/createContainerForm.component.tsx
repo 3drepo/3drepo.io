@@ -46,6 +46,13 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
+		defaultValues: {
+			name: '',
+			unit: 'mm',
+			type: 'Uncategorised',
+			desc: '',
+			code: '',
+		},
 	});
 	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
@@ -80,7 +87,6 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					control={control}
 					name="unit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
-					defaultValue="mm"
 				>
 					{
 						CONTAINER_UNITS.map((unit) => (
@@ -94,7 +100,6 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					required
 					control={control}
 					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
-					defaultValue="Uncategorised"
 					name="type"
 				>
 					{

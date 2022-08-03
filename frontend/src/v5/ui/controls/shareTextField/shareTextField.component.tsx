@@ -47,20 +47,19 @@ type IShareTextField = {
 const IS_COPYING_DURATION_MS = 3000;
 
 export const ShareTextField = ({ label, value, className, hideValue, disabled = false }: IShareTextField) => {
-	let isCopiedTimer;
+	const [timeoutId, setTimeoutId] = useState(0);
 	const [isCopying, setIsCopying] = useState(true);
 
 	const handleCopyToClipboard = () => {
-		if (!isCopying || disabled) {
-			return;
-		}
+		if (!isCopying || disabled) return;
+
 		setIsCopying(false);
-		clearTimeout(isCopiedTimer);
-		isCopiedTimer = setTimeout(() => {
+		setTimeoutId(window.setTimeout(() => {
 			setIsCopying(true);
-		}, IS_COPYING_DURATION_MS);
+		}, IS_COPYING_DURATION_MS));
 	};
-	useEffect(() => () => clearTimeout(isCopiedTimer), []);
+
+	useEffect(() => () => clearTimeout(timeoutId), [timeoutId]);
 
 	return (
 		<>
