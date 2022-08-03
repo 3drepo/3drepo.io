@@ -21,6 +21,8 @@ import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/con
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Highlight } from '@controls/highlight';
+import { SearchContext } from '@controls/search/searchContext';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -36,10 +38,11 @@ interface IContainerTitle extends IFixedOrGrowContainer {
 export const DashboardListItemContainerTitle = ({
 	container,
 	isSelected = false,
-	filterQuery = '',
 	openInNewTab = false,
 }: IContainerTitle): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const { query: filterQuery } = useContext(SearchContext);
+
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
 		to: hasRevisions ? viewerRoute(teamspace, project, container) : '#',
@@ -51,7 +54,11 @@ export const DashboardListItemContainerTitle = ({
 		<DashboardListItemTitle
 			subtitle={(
 				<LatestRevision
-					name={container.latestRevision}
+					name={(
+						<Highlight search={filterQuery}>
+							{container.latestRevision}
+						</Highlight>
+					)}
 					status={container.status}
 					error={container.errorResponse}
 					hasRevisions={hasRevisions}

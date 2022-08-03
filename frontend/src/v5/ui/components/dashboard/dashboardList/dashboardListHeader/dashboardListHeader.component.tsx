@@ -24,7 +24,7 @@ type IDashboardListHeader = {
 	className?: string;
 	onSortingChange: Dispatch<ISortConfig>;
 	children: JSX.Element[];
-	defaultSortConfig: ISortConfig;
+	defaultSortConfig?: ISortConfig;
 };
 
 export const DashboardListHeader = ({
@@ -52,7 +52,7 @@ export const DashboardListHeader = ({
 			onSortingChange({ column: colName, direction: directionState });
 		};
 
-		const sortingDirection = (colName === sort.column ? sort.direction : undefined);
+		const sortingDirection = (colName === sort?.column ? sort.direction : undefined);
 
 		return { sortingDirection, onClick, sort: true };
 	};

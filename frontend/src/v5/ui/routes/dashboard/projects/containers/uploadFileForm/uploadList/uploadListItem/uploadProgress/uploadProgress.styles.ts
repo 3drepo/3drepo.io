@@ -28,7 +28,7 @@ export const Container = styled.div`
 `;
 
 export const StatusText = styled(Typography).attrs({
-	variant: 'h5',
+	variant: 'body1',
 })<{ uploadstatus: string; }>`
 	width: 112px;
 	font-weight: bold;

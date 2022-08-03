@@ -33,7 +33,7 @@ export default css`
 		color: ${({ theme }) => theme.palette.secondary.main};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		${({ theme }) => theme.typography.h3};
-		border-bottom: 1px solid #E0E5F0; // TODO - fix after new palette is released
+		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 		height: 48px;
 		font-size: 17px;
 
@@ -119,7 +119,7 @@ export default css`
 		${({ theme }) => theme.typography.caption};
 		color: ${({ theme }) => theme.palette.base.light} !important;
 		box-sizing: border-box;
-		border-color: #E0E5F0; // TODO - fix after new palette is released
+		border-color: ${({ theme }) => theme.palette.base.lightest};
 
 		${StyledIconButton} {
 			height: 26px;

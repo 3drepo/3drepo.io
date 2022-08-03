@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
-import { Avatar } from '@controls/avatar';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { CoverImage } from '@controls/coverImage/coverImage.component';
 
 export const Container = styled.div`
 	height: 100%;
@@ -30,7 +30,6 @@ export const Content = styled.section`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
 	flex-grow: 1;
-	box-shadow: inset 0 6px 16px -16px;
 `;
 
 export const TopBar = styled.div`
@@ -56,14 +55,8 @@ export const TeamspaceName = styled(Typography).attrs({
 	variant: 'h1',
 })``;
 
-export const TeamspaceAvatar = styled(Avatar)`
-	.MuiAvatar-root {
-		border-radius: 10px;
-		height: 142px;
-		width: 142px;
-		margin: 0;
-		font-size: 40px;
-		color: ${({ theme }) => theme.palette.tertiary.dark};
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
+export const TeamspaceImage = styled(CoverImage)`
+	border-radius: 10px;
+	height: 142px;
+	width: 142px;
 `;
