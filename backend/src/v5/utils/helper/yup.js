@@ -17,6 +17,8 @@
 
 const { UUIDToString } = require('./uuids');
 const Yup = require('yup');
+const { fileExtensionFromBuffer } = require('./typeCheck');
+const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
 
@@ -98,6 +100,12 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-YupHelper.types.embeddedImage = Yup.string();
+YupHelper.types.embeddedImage = Yup.mixed().transform((n, orgVal) => Buffer.from(orgVal, 'base64'))
+	.test('Image', `must be smaller than ${fileUploads.resourceSizeLimit}Bytes`, (buffer) => !buffer || buffer.length <= fileUploads.resourceSizeLimit)
+	.test('Image', `must be of type ${fileUploads.imageExtensions.join(',')}`, async (buffer) => {
+		if (!buffer) return true;
+		const ext = await fileExtensionFromBuffer(buffer);
+		return ext && fileUploads.imageExtensions.includes(ext.toLowerCase());
+	});
 
 module.exports = YupHelper;

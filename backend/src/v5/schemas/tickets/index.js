@@ -15,55 +15,67 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Tickets = {};
-const { fieldTypes } = require('./templates.constants');
-const { generateFullSchema } = require('./templates');
-const { types } = require('../../utils/helper/yup');
 const Yup = require('yup');
+const { fieldTypes } = require('./templates.constants');
+const { fieldTypesToValidator } = require('./validators');
+const { generateFullSchema } = require('./templates');
+const { logger } = require('../../utils/logger');
+const { types } = require('../../utils/helper/yup');
+
+const Tickets = {};
 
 const generatePropertiesValidator = (properties) => {
 	const obj = {};
 
 	properties.forEach((prop) => {
-		if (prop.deprecated) return;
-		let fieldValidator;
-		switch (prop.type) {
-			case fieldTypes.TEXT:
-				fieldValidator = types.strings.title;
-				break;
-			case fieldTypes.LONG_TEXT:
-				fieldValidator = types.strings.longDescription;
-			break;
-			case fieldTypes.
-			break;
-		case fieldTypes.DATE:
-			break;
-		case fieldTypes.NUMBER:
-			break;
-		case fieldTypes.ONE_OF:
-			break;
-		case fieldTypes.IMAGE:
-			break;
-		case fieldTypes.VIEW:
-			break;
-		case fieldTypes.MEASUREMENTS:
-			break;
-		case fieldTypes.ATTACHMENTS:
-			break;
-		case fieldTypes.SAFETIBASE:
-			break;
-		case fieldTypes.COORDS:
-			break;
+		if (prop.deprecated || prop.readOnly) return;
+		let validator = fieldTypesToValidator[prop.type];
+		if (validator) {
+			// FIXME: Deal with predefined list
+			if (prop.type === fieldTypes.ONE_OF) {
+				validator = validator.oneOf(prop.values);
+			} else if (prop.type === fieldTypes.MANY_OF) {
+				validator = Yup.array().of(types.strings.title.oneOf(prop.values));
+			}
+
+			if (prop.required) {
+				validator = validator.required();
+			}
+
+			if (prop.default) {
+				validator = validator.default(prop.default);
+			}
+
+			obj[prop.name] = validator;
+		} else {
+			logger.logError(`Unrecognised custom ticket property type: ${prop.type}`);
 		}
 	});
 
-	return Yup.object(obj);
+	return Yup.object(obj).required();
+};
+
+const generateModulesValidator = (modules) => {
+	const moduleToSchema = {};
+
+	modules.forEach((module) => {
+		if (!module.deprecated) {
+			const id = module.name || module.type;
+			moduleToSchema[id] = Yup.object({
+				properties: generatePropertiesValidator(module.properties),
+			}).required();
+		}
+	});
+
+	return Yup.object(moduleToSchema).required();
 };
 
 Tickets.generateTicketValidator = (template) => {
 	const fullTem = generateFullSchema(template);
 	const validator = Yup.object().shape({
-		properties: propertiesValidator(template.properties),
+		properties: generatePropertiesValidator(fullTem.properties),
+		modules: generateModulesValidator(template.modules),
 	});
+	return Promise.resolve(validator); // FIXME
 };
 module.exports = Tickets;

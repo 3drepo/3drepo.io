@@ -38,23 +38,23 @@ Validators.fieldTypesToValidator = {
 	[fieldTypes.IMAGE]: types.embeddedImage,
 	[fieldTypes.VIEW]: Yup.object().shape({
 		screenshot: types.embeddedImage,
-		state: {
+		state: Yup.object({
 			showHiddenObjects: Yup.boolean().default(false),
 			highlightedGroups: Yup.array().of(groupIdOrData),
 			colorOverrideGroups: Yup.array().of(groupIdOrData),
 			hiddenGroups: Yup.array().of(groupIdOrData),
 			shownGroups: Yup.array().of(groupIdOrData),
 			transformGroups: Yup.array().of(groupIdOrData),
-		},
-		camera: {
+		}),
+		camera: Yup.object({
 			type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
-				.default(CameraType.ORTHOGRAPHIC),
+				.default(CameraType.PERSPECTIVE),
 			position: types.position.required(),
 			forward: types.position.required(),
 			up: types.position.required(),
 			orthographicSize: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 
-		},
+		}),
 	}),
 	[fieldTypes.MEASUREMENTS]: Yup.array().of(
 		Yup.object().shape({
