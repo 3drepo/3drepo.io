@@ -15,32 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
 
-const PlaceholderStyle = css`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	opacity: 0.1;
-	border-radius: 3px;
-`;
+export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
 
-export const ListItem = styled.li`
-	list-style-type: none;
-	float: left;
-	margin: 10px;
-`;
-
-export const ImagePlaceholder = styled.img`
-	${PlaceholderStyle}
-	position: relative;
-	height: 175px;
-	width: 222px;
-	object-fit: cover;
-	margin-bottom: -5px;
-`;
-
-export const TextPlaceholder = styled.div<{ width?: string;}>`
-	${PlaceholderStyle}
-	height: 10px;
-	width: ${({ width }) => width || '100%'};
-	margin-top: 13px;
-`;
+export const getTeamspaceImgSrc = (teamspace: string) => (
+	generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API)
+);
