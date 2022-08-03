@@ -41,10 +41,10 @@ export const FadeMessageTrigger = styled.div`
 
 export const WelcomeMessage = styled(Typography).attrs({
 	variant: 'h1',
-})<{ visible: boolean; }>`
+})<{ $visible: boolean; }>`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	text-align: center;
 	transition: opacity 0.5s ease-out;
-	opacity: ${({ visible }) => (visible ? 1 : 0)};
+	opacity: ${({ $visible }) => ($visible ? 1 : 0)};
 	transform: translateY(75px);
 `;

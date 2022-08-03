@@ -55,12 +55,6 @@ const mainFabStyles = css<{ disabled?: boolean }>`
 				background-color: transparent;
 			}
 		}
-
-		&:active {
-			&& {
-				background-color: ${({ theme }) => theme.palette.base.lightest};
-			}
-		}
 	}
 `;
 
@@ -90,17 +84,6 @@ const contrastFabStyles = css<{ disabled?: boolean }>`
 			border: 1px solid ${({ theme }) => theme.palette.primary.main};
 			path {
 				fill: ${({ theme }) => theme.palette.primary.main};
-			}
-		}
-	}
-
-	&:active {
-		&& {
-			background-color: ${({ theme }) => theme.palette.secondary.light};
-			border-color: ${({ theme }) => theme.palette.secondary.light};
-
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
 			}
 		}
 	}

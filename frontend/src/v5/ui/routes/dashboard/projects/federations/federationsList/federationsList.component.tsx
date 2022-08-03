@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -29,7 +29,7 @@ import {
 	DashboardListHeaderLabel,
 } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { SearchInput } from '@controls/searchInput';
+import { SearchInput } from '@controls/search/searchInput';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
@@ -40,37 +40,34 @@ import { DashboardListButton } from '@components/dashboard/dashboardList/dashboa
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { SearchContextType, SearchContext } from '@controls/search/searchContext';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
 	emptyMessage: ReactNode;
-	federations: IFederation[];
 	title: ReactNode;
 	titleTooltips: {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	hasFederations: boolean;
 	showBottomButton?: boolean;
 	onClickCreate: () => void;
-	onFilterQueryChange? : (query: string) => void;
-	filterQuery?: string;
 };
 
 export const FederationsList = ({
 	emptyMessage,
-	federations,
 	title,
 	titleTooltips,
-	filterQuery,
-	onFilterQueryChange,
 	onClickCreate,
 	showBottomButton = false,
-	hasFederations,
 }: IFederationsList): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
-	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
+	// eslint-disable-next-line max-len
+	const { items: federations, filteredItems: filteredFederations } = useContext<SearchContextType<IFederation>>(SearchContext);
+	const hasFederations = federations.length > 0;
+
+	const { sortedList, setSortConfig } = useOrderedList(filteredFederations, DEFAULT_SORT_CONFIG);
 
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
@@ -92,9 +89,6 @@ export const FederationsList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => onFilterQueryChange('')}
-							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
-							value={filterQuery}
 							placeholder={formatMessage({ id: 'federations.search.placeholder',
 								defaultMessage: 'Search...' })}
 							disabled={isListPending}
@@ -137,14 +131,13 @@ export const FederationsList = ({
 								index={index}
 								key={federation._id}
 								federation={federation}
-								filterQuery={filterQuery}
 								onFavouriteChange={setFavourite}
 							/>
 						))
 					) : (
 						<DashboardListEmptyContainer>
-							{filterQuery && hasFederations ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							{ hasFederations ? (
+								<DashboardListEmptySearchResults />
 							) : emptyMessage}
 						</DashboardListEmptyContainer>
 					)}

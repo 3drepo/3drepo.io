@@ -26,11 +26,7 @@ import {
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
-export const filterFederations = (federations: IFederation[], filterQuery: string) => (
-	federations.filter((
-		{ name, code, category },
-	) => [name, code, category].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
-);
+export const FEDERATION_SEARCH_FIELDS = ['code', 'name', 'desc', 'category'];
 
 export const prepareNewFederation = (
 	newFederation: NewFederation,
