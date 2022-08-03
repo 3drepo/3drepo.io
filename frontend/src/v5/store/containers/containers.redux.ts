@@ -159,6 +159,7 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 			...state.containersByProject[projectId],
 			{
 				...container,
+				isFavourite: false,
 				revisionsCount: 0,
 				status: UploadStatuses.OK,
 			},

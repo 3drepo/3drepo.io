@@ -88,9 +88,8 @@ const WrapAuthenticationRedirect = ({ children }) => {
 
 	const location = useLocation();
 
-	AuthActionsDispatchers.setReturnUrl(location);
-
 	useEffect(() => {
+		AuthActionsDispatchers.setReturnUrl(location);
 		if (!isAuthenticated && authenticationFetched) {
 			history.replace(LOGIN_PATH);
 		}
