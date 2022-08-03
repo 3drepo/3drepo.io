@@ -14,31 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
-import { Avatar } from '@controls/avatar';
 
-export const MyTeamspaceImage = styled(Avatar)`
+export const Image = styled.img`
 	width: 100%;
-	margin: 0;
-	
-	.MuiAvatar-root {
-		cursor: pointer;
-		border-radius: 0;
-		width: 100%;
-		height: 175px;
-		margin: 0;
-		font-size: 40px;
-		color: ${({ theme }) => theme.palette.tertiary.dark};
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
-
-export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
-	position: relative;
 	height: 175px;
-	width: 222px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	margin: 0;
 	object-fit: cover;
-	margin-bottom: -5px;
 `;
