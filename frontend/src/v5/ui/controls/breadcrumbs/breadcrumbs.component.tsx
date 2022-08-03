@@ -81,7 +81,7 @@ export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 				const { to = '#' } = item as BreadcrumbItem;
 
 				return (
-					<Breadcrumb key={title || to} color="inherit" to={to}>
+					<Breadcrumb key={to} color="inherit" to={to}>
 						{title}
 					</Breadcrumb>
 				);
