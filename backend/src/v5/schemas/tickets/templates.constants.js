@@ -17,10 +17,7 @@
 
 const { toConstantCase } = require('../../utils/helper/strings');
 
-const TemplateConstants = {};
-
-TemplateConstants.fieldTypes = {};
-
+const fieldTypes = {};
 [
 	'text',
 	'longText',
@@ -35,10 +32,10 @@ TemplateConstants.fieldTypes = {};
 	'safetibase',
 	'coords',
 ].forEach((type) => {
-	TemplateConstants.fieldTypes[toConstantCase(type)] = type;
+	fieldTypes[toConstantCase(type)] = type;
 });
 
-TemplateConstants.presetModules = {};
+const presetModules = {};
 
 [
 	'sequencing',
@@ -46,46 +43,69 @@ TemplateConstants.presetModules = {};
 	'attachments',
 	'safetibase',
 ].forEach((mod) => {
-	TemplateConstants.presetModules[toConstantCase(mod)] = mod;
+	presetModules[toConstantCase(mod)] = mod;
 });
 
-TemplateConstants.presetEnumValues = {};
+const presetEnumValues = {};
 
 [
 	'jobsAndUsers',
+	'riskCategories',
 ].forEach((val) => {
-	TemplateConstants.presetEnumValues[toConstantCase(val)] = val;
+	presetEnumValues[toConstantCase(val)] = val;
 });
 
+const TemplateConstants = { fieldTypes, presetEnumValues, presetModules };
+
+const riskLevels = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
+
 TemplateConstants.presetModulesProperties = {
-	[TemplateConstants.presetModules.SEQUENCING]: [
-		{ name: 'Start Time', type: TemplateConstants.fieldTypes.DATE },
-		{ name: 'End Time', type: TemplateConstants.fieldTypes.DATE },
+	[presetModules.SEQUENCING]: [
+		{ name: 'Start Time', type: fieldTypes.DATE },
+		{ name: 'End Time', type: fieldTypes.DATE },
 	],
-	[TemplateConstants.presetModules.SHAPES]: [
-		{ name: 'Shapes', type: TemplateConstants.fieldTypes.MEASUREMENTS },
+	[presetModules.SHAPES]: [
+		{ name: 'Shapes', type: fieldTypes.MEASUREMENTS },
 	],
-	[TemplateConstants.presetModules.ATTACHMENTS]: [
-		{ name: 'Resources', type: TemplateConstants.fieldTypes.ATTACHMENTS },
+	[presetModules.ATTACHMENTS]: [
+		{ name: 'Resources', type: fieldTypes.ATTACHMENTS },
 	],
-	[TemplateConstants.presetModules.SAFETIBASE]: [
-		{ name: 'Safetibase', type: TemplateConstants.fieldTypes.SAFETIBASE },
+	[presetModules.SAFETIBASE]: [
+		{ name: 'Risk Likelyhood', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
+		{ name: 'Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
+		{ name: 'Level of Risk', type: TemplateConstants.TEXT, readOnly: true },
+		{ name: 'Risk owner', type: fieldTypes.ONE_OF, values: presetEnumValues.JOBS_AND_USERS }, // TODO check if still needed
+		{ name: 'Category', type: fieldTypes.ONE_OF, values: presetEnumValues.RISK_CATEGORIES },
+		{ name: 'Associated Activity', type: TemplateConstants.TEXT },
+		{ name: 'Element Type', type: TemplateConstants.TEXT },
+		{ name: 'Risk Factor', type: TemplateConstants.TEXT },
+		{ name: 'Construction Scope', type: TemplateConstants.TEXT },
+		{ name: 'Location', type: TemplateConstants.TEXT },
+		{ name: 'Treatment', type: TemplateConstants.TEXT },
+		{ name: 'Treatment Details', type: TemplateConstants.LONG_TEXT },
+		{ name: 'Stage', type: TemplateConstants.TEXT },
+		{ name: 'Type', type: TemplateConstants.TEXT },
+		{ name: 'Treatment Status', type: fieldTypes.ONE_OF, values: ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], default: 'Unmitigated' },
+		{ name: 'Treated Risk Likelyhood', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
+		{ name: 'Treated Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
+		{ name: 'Residual Risk', type: TemplateConstants.TEXT },
+
 	],
 
 };
 
 TemplateConstants.defaultProperties = [
-	{ name: 'Description', type: TemplateConstants.fieldTypes.LONG_TEXT },
-	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, readOnly: true },
-	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
-	{ name: 'Updated at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
-	{ name: 'Default Image', type: TemplateConstants.fieldTypes.IMAGE, availableIf: ({ defaultImage }) => defaultImage },
-	{ name: 'Default View', type: TemplateConstants.fieldTypes.VIEW, availableIf: ({ defaultView }) => defaultView },
-	{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None', availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open', availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS, availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Pin', type: TemplateConstants.fieldTypes.COORDS, availableIf: ({ pin }) => pin },
+	{ name: 'Description', type: fieldTypes.LONG_TEXT },
+	{ name: 'Owner', type: fieldTypes.TEXT, readOnly: true },
+	{ name: 'Created at', type: fieldTypes.DATE, readOnly: true },
+	{ name: 'Updated at', type: fieldTypes.DATE, readOnly: true },
+	{ name: 'Default Image', type: fieldTypes.IMAGE, availableIf: ({ defaultImage }) => defaultImage },
+	{ name: 'Default View', type: fieldTypes.VIEW, availableIf: ({ defaultView }) => defaultView },
+	{ name: 'Priority', type: fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None', availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Status', type: fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open', availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Assignees', type: fieldTypes.MANY_OF, values: presetEnumValues.JOBS_AND_USERS, availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Due Date', type: fieldTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Pin', type: fieldTypes.COORDS, availableIf: ({ pin }) => pin },
 ];
 
 TemplateConstants.getApplicableDefaultProperties = (config) => TemplateConstants.defaultProperties.flatMap(

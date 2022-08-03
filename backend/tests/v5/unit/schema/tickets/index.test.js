@@ -145,6 +145,7 @@ const testValidateTicket = () => {
 			['Many Of', { type: fieldTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
 			['Image', { type: fieldTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
 			['View', { type: fieldTypes.VIEW }, { camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, {}],
+			['View (orthographic)', { type: fieldTypes.VIEW }, { camera: { type: 'orthographic', size: 5, position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, {}],
 			['Measurements', { type: fieldTypes.MEASUREMENTS }, [
 				{ positions: [[0, 0, 0], [1, 1, 1]],
 					value: generateRandomNumber(),

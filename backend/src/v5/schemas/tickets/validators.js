@@ -52,7 +52,7 @@ Validators.fieldTypesToValidator = {
 			position: types.position.required(),
 			forward: types.position.required(),
 			up: types.position.required(),
-			orthographicSize: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
+			size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 
 		}),
 	}),
@@ -65,7 +65,6 @@ Validators.fieldTypesToValidator = {
 			name: types.strings.title.required(),
 		}),
 	),
-	[fieldTypes.SAFETIBASE]: Yup.array().of(types.strings.title), // FIXME
 	[fieldTypes.COORDS]: types.position,
 };
 

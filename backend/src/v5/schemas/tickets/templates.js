@@ -18,7 +18,6 @@
 const {
 	defaultProperties,
 	fieldTypes,
-	fieldTypesToValidator,
 	getApplicableDefaultProperties,
 	presetEnumValues,
 	presetModules,
@@ -26,6 +25,7 @@ const {
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
+const { fieldTypesToValidator } = require('./validators');
 const { isString } = require('../../utils/helper/typeCheck');
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
