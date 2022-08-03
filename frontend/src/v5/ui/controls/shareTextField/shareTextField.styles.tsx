@@ -71,9 +71,7 @@ export const CopyToClipboardTooltip = styled(
 			{props.children}
 		</Tooltip>
 	),
-)`
-	margin-top: -${SVG_PADDING_IN_PX}px;
-`;
+)``;
 
 export const CopiedToClipboardTooltip = styled(CopyToClipboardTooltip)`
 	& .MuiTooltip-tooltip {

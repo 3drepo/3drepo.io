@@ -41,7 +41,9 @@ const GroupTreeItem = ({ item, collapse, disabled }) => {
 
 export const GroupTree = ({ tree, collapse, disabled }) => (
 	<GroupsTreeList>
-		{tree.map((item) => (<GroupTreeItem item={item} collapse={collapse} disabled={disabled} />))}
+		{tree.map((item) => (
+			<GroupTreeItem item={item} collapse={collapse} disabled={disabled} key={item._id || item.name} />
+		))}
 	</GroupsTreeList>
 );
 

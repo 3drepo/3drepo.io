@@ -59,11 +59,12 @@ export const FederationListItem = ({
 	federation,
 	onFavouriteChange,
 }: IFederationListItem): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
+
+	const { teamspace, project } = useParams<DashboardParams>();
+
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
 
