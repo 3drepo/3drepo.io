@@ -50,7 +50,7 @@ Aad.validateUserDetails = async (req, res, next) => {
 	
 		delete req.body.redirectUri;	
 	} catch (err) {
-		return respond(req, res, createResponseCode(templates.invalidArguments, err));
+		return respond(req, res, createResponseCode(templates.invalidArguments));
 	}
 
 	await next();

@@ -27,6 +27,7 @@ jest.mock('../../../../../../src/v5/services/sso/aad', () => ({
 }));
 const Aad = require('../../../../../../src/v5/services/sso/aad');
 const { aad } = require('../../../../../../src/v5/services/sso/sso.constants');
+const { getUserByUsername } = require('../../../../../../src/v5/models/users');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -165,7 +166,6 @@ const signupPost = () => {
 		});
 
 		test('should fail if state is not provided', async () => {
-			const state = { ...newUserData };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmail } });
 			const res = await agent.get(`/v5/sso/aad/signup-post`)
 				.expect(templates.invalidArguments.status);
@@ -177,6 +177,9 @@ const signupPost = () => {
 			Aad.getUserDetails.mockResolvedValueOnce({ data: newUserDataFromAad });
 			await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
+
+			//ensure user is created
+			await getUserByUsername(newUserData.username, { _id: 1 });			
 		});
 	});
 };

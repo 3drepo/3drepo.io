@@ -202,8 +202,10 @@ const generateSignUpSchema = (isSSO) => {
 				return true;
 			}).test('checkEmailExists', 'email is a required field', (value) => isSSO || value ),
 		password: types.strings.password.test('checkPasswordExists', 'password is a required field', (value) => isSSO || value ),
-		firstName: types.strings.name.test('checkFirstnameExists', 'firstName is a required field', (value) => isSSO || value ),
-		lastName: types.strings.name.test('checkLastnameExists', 'lastName is a required field', (value) => isSSO || value ),
+		firstName: types.strings.name.test('checkFirstnameExists', 'firstName is a required field', (value) => isSSO || value )
+			.transform(formatPronouns),
+		lastName: types.strings.name.test('checkLastnameExists', 'lastName is a required field', (value) => isSSO || value )
+			.transform(formatPronouns),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
@@ -219,7 +221,6 @@ const generateSignUpSchema = (isSSO) => {
 			});
 
 			const result = await checkCaptcha;
-			delete body.captcha;
 
 			return result.success;
 		})
@@ -230,6 +231,7 @@ const validateSignUpData = async (req, res, next, isSSO) => {
 	try {
 		const schema = generateSignUpSchema(isSSO); 
 		req.body = await schema.validate(req.body);
+		delete req.body.captcha;
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

@@ -59,32 +59,45 @@ const testGetAuthenticationCodeUrl = () => {
 
 		test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.clientId is not set`, () => {
 			const initialConfig = config.sso;
-			config.sso = { clientSecret: generateRandomString() };
+			config.sso = {
+				aad: {
+					authority: generateRandomString(),
+					clientSecret: generateRandomString(),
+				},
+			};
 			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
 			config.sso = initialConfig;
 		});
 
 		test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.clientSecret is not set`, () => {
 			const initialConfig = config.sso;
-			config.sso = { clientId: generateRandomString() };
+			config.sso = {
+				aad: {
+					authority: generateRandomString(),
+					clientId: generateRandomString(),
+				},
+			};
 			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
 			config.sso = initialConfig;
 		});
 
-		test('should return authentication code url if all config values are set', async () => {
+		test(`should fail with ${templates.ssoNotAvailable.code} if sso.aad.authority is not set`, () => {
 			const initialConfig = config.sso;
 			config.sso = {
 				aad: {
-					clientId: generateRandomString(),
 					clientSecret: generateRandomString(),
+					clientId: generateRandomString(),
 				},
 			};
+			expect(Aad.getAuthenticationCodeUrl).toThrow(templates.ssoNotAvailable);
+			config.sso = initialConfig;
+		});
 
+		test('should return authentication code url if all config values are set', async () => {			
 			const params = { redirectUri: generateRandomString() };
 			const res = await Aad.getAuthenticationCodeUrl(params);
 
 			expect(res).toEqual(authCodeUrl);
-			config.sso = initialConfig;
 		});
 	});
 };

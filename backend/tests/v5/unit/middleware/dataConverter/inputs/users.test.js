@@ -77,6 +77,12 @@ UsersModel.getUserByUsername.mockImplementation((username) => {
 	throw templates.userNotFound;
 });
 
+UsersModel.getUserByEmail.mockImplementation((email) => {
+	if (email === availableEmail) {
+		throw templates.userNotFound;
+	}
+});
+
 UsersModel.authenticate.mockImplementation((username, password) => {
 	// eslint-disable-next-line security/detect-possible-timing-attacks
 	if (password !== validPassword) {
