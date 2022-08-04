@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/search/searchInput/searchInput.styles';
-import { Display } from '@/v5/ui/themes/media';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
 
-export const Container = styled.div`
-	margin: 16px 0;
-	min-width: 380px;
-`;
+export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
 
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-	
-	> :last-child {
-		margin-right: 0;
-	}
-	
-	${SearchInputStyles.TextField} {
-		width: 405px;
-
-		@media (max-width: ${Display.Tablet}px) {
-			width: 367px;
-			padding-left: 25px;
-			box-sizing: border-box;
-		}
-	}
-`;
+export const getTeamspaceImgSrc = (teamspace: string) => (
+	generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API)
+);

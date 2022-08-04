@@ -19,7 +19,7 @@ import { times } from 'lodash';
 import {
 	selectFederations,
 	selectFavouriteFederations,
-	selectAreStatsPending, selectHasFederations
+	selectAreStatsPending
 } from '@/v5/store/federations/federations.selectors';
 import { federationMockFactory } from './federations.fixtures';
 
@@ -50,27 +50,6 @@ describe('Federations: selectors', () => {
 		it('should return all federations', () => {
 			const selected = selectFederations.resultFunc(defaultState, projectId);
 			expect(selected).toHaveLength(11);
-		})
-	})
-
-	describe('selectHasFederations', () => {
-		it('should return correct values when favourite item is in federations', () => {
-			const federations = defaultState.federationsByProject[projectId];
-			const favourites = selectFavouriteFederations.resultFunc(federations);
-			const selected = selectHasFederations.resultFunc(federations, favourites);
-			expect(selected).toEqual({ favourites: true, all: true })
-		})
-
-		it('should return correct values when no favourite item is in federations', () => {
-			const federations = [federationMockFactory({ isFavourite: false })];
-			const favourites = selectFavouriteFederations.resultFunc(federations);
-			const selected = selectHasFederations.resultFunc(federations, favourites);
-			expect(selected).toEqual({ favourites: false, all: true })
-		})
-
-		it('should return correct values for empty federations', () => {
-			const selected = selectHasFederations.resultFunc([],[]);
-			expect(selected).toEqual({ favourites: false, all: false })
 		})
 	})
 

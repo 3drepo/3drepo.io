@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,31 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useState } from 'react';
+import { Image } from './coverImage.styles';
 
-import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/search/searchInput/searchInput.styles';
-import { Display } from '@/v5/ui/themes/media';
+type CoverImageProps = {
+	className?: string;
+	defaultImgSrc: string;
+	imgSrc?: string;
+};
 
-export const Container = styled.div`
-	margin: 16px 0;
-	min-width: 380px;
-`;
+export const CoverImage = ({ className, defaultImgSrc, imgSrc }: CoverImageProps) => {
+	const [src, setSrc] = useState(imgSrc);
+	const onError = () => { setSrc(defaultImgSrc); };
 
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-	
-	> :last-child {
-		margin-right: 0;
-	}
-	
-	${SearchInputStyles.TextField} {
-		width: 405px;
+	useEffect(() => { setSrc(imgSrc); }, [imgSrc]);
 
-		@media (max-width: ${Display.Tablet}px) {
-			width: 367px;
-			padding-left: 25px;
-			box-sizing: border-box;
-		}
-	}
-`;
+	return (<Image onError={onError} className={className} src={src} />);
+};

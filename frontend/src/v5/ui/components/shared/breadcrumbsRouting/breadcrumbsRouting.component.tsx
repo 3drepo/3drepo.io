@@ -19,7 +19,7 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE, VIEWER_ROUTE, TEAMSPACE_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE, VIEWER_ROUTE, TEAMSPACE_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
@@ -81,7 +81,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [
 			{
 				title: teamspace,
-				to: DASHBOARD_ROUTE,
+				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
 			},
 			{
 				title: project?.name,

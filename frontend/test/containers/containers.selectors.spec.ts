@@ -20,8 +20,7 @@ import { containerMockFactory } from './containers.fixtures';
 import {
 	selectFavouriteContainers,
 	selectContainers,
-	selectAreStatsPending,
-	selectHasContainers
+	selectAreStatsPending
 } from '@/v5/store/containers/containers.selectors';
 
 const searchPhrase = 'test phrase';
@@ -51,27 +50,6 @@ describe('Containers: selectors', () => {
 		it('should return all containers', () => {
 			const selected = selectContainers.resultFunc(defaultState, projectId);
 			expect(selected).toHaveLength(11);
-		})
-	})
-
-	describe('selectHasContainers', () => {
-		it('should return correct values when favourite item is in federations', () => {
-			const containers = defaultState.containersByProject[projectId];
-			const favourites = selectFavouriteContainers.resultFunc(containers);
-			const selected = selectHasContainers.resultFunc(containers, favourites);
-			expect(selected).toEqual({ favourites: true, all: true })
-		})
-
-		it('should return correct values when no favourite item is in containers', () => {
-			const containers = [containerMockFactory({ isFavourite: false })];
-			const favourites = selectFavouriteContainers.resultFunc(containers);
-			const selected = selectHasContainers.resultFunc(containers, favourites);
-			expect(selected).toEqual({ favourites: false, all: true })
-		})
-
-		it('should return correct values for empty containers', () => {
-			const selected = selectHasContainers.resultFunc([], []);
-			expect(selected).toEqual({ favourites: false, all: false })
 		})
 	})
 
