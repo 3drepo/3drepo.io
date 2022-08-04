@@ -58,7 +58,7 @@ const testAuthenticate = () => {
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.hostname).toEqual('login.microsoftonline.com');
-			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');			
+			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
 			expect(resUri.searchParams.get('redirect_uri')).toEqual(authenticateRedirectUri);
 			expect(resUri.searchParams.has('client_id')).toEqual(true);
 			expect(resUri.searchParams.has('code_challenge')).toEqual(true);
@@ -119,13 +119,13 @@ const signup = () => {
 
 			const resUri = new URL(res.headers.location);
 			expect(resUri.hostname).toEqual('login.microsoftonline.com');
-			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');			
+			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
 			expect(resUri.searchParams.get('redirect_uri')).toEqual(signupRedirectUri);
 			expect(resUri.searchParams.has('client_id')).toEqual(true);
 			expect(resUri.searchParams.has('code_challenge')).toEqual(true);
 			expect(resUri.searchParams.get('code_challenge_method')).toEqual('S256');
 			const state = JSON.parse(resUri.searchParams.get('state'));
-			expect(state).toEqual({ redirectUri, ...newUserData	});
+			expect(state).toEqual({ redirectUri, ...newUserData });
 		});
 	});
 };
@@ -167,7 +167,7 @@ const signupPost = () => {
 
 		test('should fail if state is not provided', async () => {
 			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmail } });
-			const res = await agent.get(`/v5/sso/aad/signup-post`)
+			const res = await agent.get('/v5/sso/aad/signup-post')
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -178,8 +178,8 @@ const signupPost = () => {
 			await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 
-			//ensure user is created
-			await getUserByUsername(newUserData.username, { _id: 1 });			
+			// ensure user is created
+			await getUserByUsername(newUserData.username, { _id: 1 });
 		});
 	});
 };

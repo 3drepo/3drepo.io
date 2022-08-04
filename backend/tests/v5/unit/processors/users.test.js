@@ -240,20 +240,20 @@ const testSignUp = () => {
 
 		test('should generate a password and sign a user up', async () => {
 			const sso = { id: generateRandomString() };
-			await Users.signUp({ ...newUserData, sso});
+			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
-			expect(UsersModel.addUser).toHaveBeenCalledWith({ 
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
 				...newUserData,
 				password: exampleHashString,
 				token: exampleHashString,
-				sso
+				sso,
 			});
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
 				token: exampleHashString,
 				email: newUserData.email,
 				firstName: newUserData.firstName,
-				username: newUserData.username
+				username: newUserData.username,
 			});
 		});
 	});

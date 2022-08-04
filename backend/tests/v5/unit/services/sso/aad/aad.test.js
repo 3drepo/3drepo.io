@@ -93,7 +93,7 @@ const testGetAuthenticationCodeUrl = () => {
 			config.sso = initialConfig;
 		});
 
-		test('should return authentication code url if all config values are set', async () => {			
+		test('should return authentication code url if all config values are set', async () => {
 			const params = { redirectUri: generateRandomString() };
 			const res = await Aad.getAuthenticationCodeUrl(params);
 

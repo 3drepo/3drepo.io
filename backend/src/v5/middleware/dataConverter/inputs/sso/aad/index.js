@@ -14,15 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
-const { providers } = require('../../../../../services/sso/sso.constants');
-const { types } = require('../../../../../utils/helper/yup');
-const {  getUserByEmail } = require('../../../../../models/users');
-const { respond } = require('../../../../../utils/responder');
 const Yup = require('yup');
 const { addPkceProtection } = require('..');
+const { getUserByEmail } = require('../../../../../models/users');
+const { logger } = require('../../../../../utils/logger');
+const { providers } = require('../../../../../services/sso/sso.constants');
+const { respond } = require('../../../../../utils/responder');
+const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
+const { types } = require('../../../../../utils/helper/yup');
 const { validateMany } = require('../../../../common');
 
 const Aad = {};
@@ -33,13 +34,14 @@ Aad.validateUserDetails = async (req, res, next) => {
 
 	try {
 		const user = await getUserByEmail(mail, { 'customData.sso': 1 });
-		const message = user.customData.sso ? 'Email already exists from SSO user' : 'Email already exists';
-		return respond(req, res, createResponseCode(templates.invalidArguments, message));
+		const error = user.customData.sso ? templates.emailAlreadyExistsSso : templates.emailAlreadyExists;
+		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${error.code}`);
+		return;
 	} catch {
 		// do nothing
 	}
 
-	try {		
+	try {
 		req.body = {
 			...JSON.parse(req.query.state),
 			email: mail,
@@ -47,16 +49,16 @@ Aad.validateUserDetails = async (req, res, next) => {
 			lastName: surname,
 			sso: { type: providers.AAD, id },
 		};
-	
-		delete req.body.redirectUri;	
+
+		delete req.body.redirectUri;
 	} catch (err) {
-		return respond(req, res, createResponseCode(templates.invalidArguments));
+		logger.logError(`Failed to parse req.query.state as JSON: ${err.message}`);
+		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${templates.unknown.code}`);
+		return;
 	}
 
 	await next();
 };
-
-Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
 const authenticate = (redirectUri) => async (req, res) => {
 	try {
@@ -70,14 +72,16 @@ const authenticate = (redirectUri) => async (req, res) => {
 		redirectUri,
 		state: JSON.stringify({
 			redirectUri: req.query.redirectUri,
-			...(req.body || {})
+			...(req.body || {}),
 		}),
 		codeChallenge: req.session.pkceCodes.challenge,
 		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 	};
 
 	const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
-	res.redirect(authenticationCodeUrl);
+	return res.redirect(authenticationCodeUrl);
 };
+
+Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
 module.exports = Aad;

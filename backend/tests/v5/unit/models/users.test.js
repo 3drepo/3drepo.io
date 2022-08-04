@@ -484,7 +484,7 @@ const testGetUserByEmail = () => {
 			const res = await User.getUserByEmail(email);
 			expect(res).toEqual({ user: 'user' });
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', {'customData.email': 'example@email.com'}, undefined, undefined);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'customData.email': 'example@email.com' }, undefined, undefined);
 		});
 
 		test('should throw error if user does not exist', async () => {

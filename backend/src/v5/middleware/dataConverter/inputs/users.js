@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail, getUserByEmail } = require('../../../models/users');
+const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
@@ -200,11 +200,11 @@ const generateSignUpSchema = (isSSO) => {
 					}
 				}
 				return true;
-			}).test('checkEmailExists', 'email is a required field', (value) => isSSO || value ),
-		password: types.strings.password.test('checkPasswordExists', 'password is a required field', (value) => isSSO || value ),
-		firstName: types.strings.name.test('checkFirstnameExists', 'firstName is a required field', (value) => isSSO || value )
+			}).test('checkEmailExists', 'email is a required field', (value) => isSSO || value),
+		password: types.strings.password.test('checkPasswordExists', 'password is a required field', (value) => isSSO || value),
+		firstName: types.strings.name.test('checkFirstnameExists', 'firstName is a required field', (value) => isSSO || value)
 			.transform(formatPronouns),
-		lastName: types.strings.name.test('checkLastnameExists', 'lastName is a required field', (value) => isSSO || value )
+		lastName: types.strings.name.test('checkLastnameExists', 'lastName is a required field', (value) => isSSO || value)
 			.transform(formatPronouns),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
@@ -229,14 +229,14 @@ const generateSignUpSchema = (isSSO) => {
 
 const validateSignUpData = async (req, res, next, isSSO) => {
 	try {
-		const schema = generateSignUpSchema(isSSO); 
+		const schema = generateSignUpSchema(isSSO);
 		req.body = await schema.validate(req.body);
 		delete req.body.captcha;
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
-}
+};
 
 Users.validateSignUpData = (req, res, next) => validateSignUpData(req, res, next, false);
 Users.validateSsoSignUpData = (req, res, next) => validateSignUpData(req, res, next, true);
