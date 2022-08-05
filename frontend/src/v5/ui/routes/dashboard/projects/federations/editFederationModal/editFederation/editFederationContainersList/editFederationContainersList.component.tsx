@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, ComponentType, useState } from 'react';
+import { ReactNode, ComponentType, useState, useContext } from 'react';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -25,22 +25,22 @@ import {
 	DashboardListHeader } from '@components/dashboard/dashboardList';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { SearchInput } from '@controls/searchInput';
+import { SearchInput } from '@controls/search/searchInput';
 import { Display } from '@/v5/ui/themes/media';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ButtonProps } from '@mui/material/Button';
 import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
+import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { EditFederationContainersListItem } from './editFederationContainersListItem/editFederationContainersListItem.component';
 import { Container } from './editFederationContainersList.styles';
 
 export type ActionButtonProps = {
 	children: ReactNode;
 	disabled?: boolean;
-	filterQuery?: string;
+	filteredContainers?: IContainer[];
 };
 
 export type IconButtonProps = {
@@ -49,8 +49,6 @@ export type IconButtonProps = {
 };
 
 type EditFederationContainersProps = {
-	containers: IContainer[];
-	hasContainers: boolean;
 	title: string;
 	collapsableTooltips?: {
 		visible: ReactNode;
@@ -66,19 +64,19 @@ type EditFederationContainersProps = {
 };
 
 export const EditFederationContainers = ({
-	containers,
 	title,
 	collapsableTooltips,
 	emptyListMessage,
 	actionButton: ActionButton,
 	actionButtonTexts,
 	iconButton: IconButton,
-	hasContainers,
 }: EditFederationContainersProps) => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-	const [filterQuery, setFilterQuery] = useState<string>('');
+	const { items: containers, filteredItems, query } = useContext<SearchContextType<IContainer>>(SearchContext);
+	const hasContainers = containers.length > 0;
+
 	const { sortedList, setSortConfig } = useOrderedList(
-		filterContainers(containers, filterQuery),
+		filteredItems,
 		DEFAULT_SORT_CONFIG,
 	);
 
@@ -97,15 +95,12 @@ export const EditFederationContainers = ({
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
 					<CollapseSideElementGroup>
-						<ActionButton disabled={isEmpty(containers)} filterQuery={filterQuery}>
-							{isEmpty(filterQuery)
+						<ActionButton disabled={isEmpty(containers)} filteredContainers={sortedList}>
+							{isEmpty(query)
 								? actionButtonTexts.allResults
 								: actionButtonTexts.filteredResults}
 						</ActionButton>
 						<SearchInput
-							onClear={() => setFilterQuery('')}
-							onChange={(event) => setFilterQuery(event.currentTarget.value)}
-							value={filterQuery}
 							placeholder={formatMessage({ id: 'modal.editFederation.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
 					</CollapseSideElementGroup>
@@ -139,14 +134,14 @@ export const EditFederationContainers = ({
 								key={container._id}
 								isSelected={container._id === selectedItemId}
 								container={container}
-								filterQuery={filterQuery}
+								filterQuery={query}
 								onSelectOrToggleItem={selectOrToggleItem}
 							/>
 						))
 					) : (
 						<DashboardListEmptyContainer>
-							{filterQuery && hasContainers ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							{ hasContainers ? (
+								<DashboardListEmptySearchResults />
 							) : emptyListMessage}
 						</DashboardListEmptyContainer>
 					)}

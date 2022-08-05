@@ -249,20 +249,19 @@ export class Tree extends PureComponent<IProps, IState> {
 		const { expandedNodesMap, activeNode } = this.props;
 		const treeNode = data[index];
 
-		return (
-			<TreeNode
-				index={index}
-				style={style}
-				key={treeNode._id}
-				data={treeNode}
-				hasFederationRoot={this.isFederation}
-				isSearchResult={treeNode.isSearchResult}
-				active={activeNode === treeNode._id}
-				expanded={expandedNodesMap[treeNode._id]}
-				onScrollToTop={this.handleScrollToTop}
-				onClick={this.handleNodesClick}
-			/>
-		);
+		const treeNodeProps = {
+			index,
+			style,
+			key: treeNode._id,
+			data: treeNode,
+			hasFederationRoot: this.isFederation,
+			isSearchResult: treeNode.isSearchResult,
+			active: activeNode === treeNode._id,
+			expanded: expandedNodesMap[treeNode._id],
+			onScrollToTop: this.handleScrollToTop,
+			onClick: this.handleNodesClick,
+		}
+		return (<TreeNode {...treeNodeProps} />);
 	}
 
 	private renderCheckIcon = renderWhenTrue(() => <Check fontSize="small" />);
