@@ -39,7 +39,7 @@ const parseStateAsJson = (req, res, state) => {
 }
 
 Aad.validateUserDetails = async (req, res, next) => {
-	const state = parseStateAsJson(req, res, req.query.state2);	
+	const state = parseStateAsJson(req, res, req.query.state);	
 	if(!state){
 		return;
 	}
