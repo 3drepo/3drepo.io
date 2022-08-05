@@ -430,6 +430,12 @@ export const theme = createTheme({
 						boxSizing: 'border-box',
 					},
 				},
+				option: {
+					width: '100%',
+					'&:hover, &:focus': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					},
+				},
 			},
 		},
 		MuiLinearProgress: {
