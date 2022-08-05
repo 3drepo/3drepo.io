@@ -34,6 +34,10 @@ describe('Containers: store', () => {
 	const projectId = 'projectId';
 	dispatch(ProjectsActions.setCurrentProject(projectId));
 
+	beforeEach(() => {
+		dispatch(ContainersActions.fetchContainersSuccess(projectId, []));
+	})
+
 	const createAndAddContainerToStore = (containerOverrides = {}) => {
 		const newContainer = containerMockFactory(containerOverrides);
 		dispatch(ContainersActions.fetchContainersSuccess(projectId, [newContainer]));
