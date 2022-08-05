@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, validateUserDetails } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { authenticate, validateUserDetails, checkIfMsAccountIsLinkedTo3DRepo } = require('../../../middleware/dataConverter/inputs/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 const { createSessionSso } = require('../../../middleware/sessions');
+const { notLoggedIn } = require('../../../middleware/auth');
 
 const authenticatePost = (req, res) => {
 	try {

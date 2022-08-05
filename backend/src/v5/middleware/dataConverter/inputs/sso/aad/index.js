@@ -22,7 +22,7 @@ const { getUserByEmail, recordSuccessfulAuthAttempt } = require('../../../../../
 const { logger } = require('../../../../../utils/logger');
 const { providers } = require('../../../../../services/sso/sso.constants');
 const { respond } = require('../../../../../utils/responder');
-const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
+const { signupRedirectUri, authenticateRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { types } = require('../../../../../utils/helper/yup');
 const { validateMany } = require('../../../../common');
 
@@ -89,24 +89,22 @@ const authenticate = (redirectUri) => async (req, res) => {
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
 Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
-	const { data: { id, mail } } = await getUserDetails(req.query.code,
-		authenticateRedirectUri);
+	const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
+		req.session.pkceCodes?.verifier);
 
 	try {
-		const user = await getUserByQuery({ 'customData.email': mail },
-			{ _id: 0, user: 1, 'customData.sso.id': 1 });
+		const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
 
 		if (user.customData.sso?.id != id) {
-			throw templates.containerIsSubModel;
+			throw templates.nonSsoUser;
 		}
 
 		const loginData = await recordSuccessfulAuthAttempt(user.user);
 		req.loginData = loginData;
+		await next();
 	} catch {
-
-	}
-
-	await next();
+		respond(req, res, templates.incorrectUsernameOrPassword);
+	}	
 };
 
 module.exports = Aad;
