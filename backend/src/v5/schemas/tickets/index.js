@@ -15,27 +15,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { fieldTypes, presetEnumValues } = require('./templates.constants');
 const Yup = require('yup');
-const { fieldTypes } = require('./templates.constants');
 const { fieldTypesToValidator } = require('./validators');
 const { generateFullSchema } = require('./templates');
+const { getAllUsersInTeamspace } = require('../../models/teamspaces');
+const { getJobs } = require('../../models/jobs');
 const { logger } = require('../../utils/logger');
 const { types } = require('../../utils/helper/yup');
 
 const Tickets = {};
 
-const generatePropertiesValidator = (properties) => {
+const generatePropertiesValidator = async (teamspace, properties) => {
 	const obj = {};
 
-	properties.forEach((prop) => {
+	const proms = properties.map(async (prop) => {
 		if (prop.deprecated || prop.readOnly) return;
 		let validator = fieldTypesToValidator[prop.type];
 		if (validator) {
-			// FIXME: Deal with predefined list
-			if (prop.type === fieldTypes.ONE_OF) {
-				validator = validator.oneOf(prop.values);
-			} else if (prop.type === fieldTypes.MANY_OF) {
-				validator = Yup.array().of(types.strings.title.oneOf(prop.values));
+			if (prop.value && presetEnumValues.includes(prop.value)) {
+				let values;
+				switch (prop.value) {
+				case presetEnumValues.JOBS_AND_USERS:
+					{
+						const [jobs, users] = await Promise.all([
+							getJobs(teamspace),
+							getAllUsersInTeamspace(teamspace),
+						]);
+
+						values = [...jobs, ...users];
+					}
+					break;
+				default:
+					values = prop.value;
+				}
+				if (prop.type === fieldTypes.ONE_OF) {
+					validator = validator.oneOf(values);
+				} else if (prop.type === fieldTypes.MANY_OF) {
+					validator = Yup.array().of(types.strings.title.oneOf(values));
+				}
 			}
 
 			if (prop.required) {
@@ -52,35 +70,37 @@ const generatePropertiesValidator = (properties) => {
 		}
 	});
 
+	await proms;
+
 	return Yup.object(obj).required();
 };
 
-const generateModulesValidator = (modules) => {
+const generateModulesValidator = async (teamspace, modules) => {
 	const moduleToSchema = {};
 
-	modules.forEach((module) => {
+	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
 			moduleToSchema[id] = Yup.object({
-				properties: generatePropertiesValidator(module.properties),
+				properties: await generatePropertiesValidator(teamspace, module.properties),
 			}).required();
 		}
 	});
 
+	await proms;
 	return Yup.object(moduleToSchema).required();
 };
 
-const generateTicketValidator = (template) => {
+const generateTicketValidator = async (teamspace, template) => {
 	const fullTem = generateFullSchema(template);
-	const validator = Yup.object().shape({
-		properties: generatePropertiesValidator(fullTem.properties),
-		modules: generateModulesValidator(template.modules),
+	return Yup.object().shape({
+		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
+		modules: await generateModulesValidator(teamspace, template.modules),
 	});
-	return Promise.resolve(validator); // FIXME
 };
 
-Tickets.validateTicket = async (template, data) => {
-	const validator = await generateTicketValidator(template);
+Tickets.validateTicket = async (teamspace, template, data) => {
+	const validator = await generateTicketValidator(teamspace, template);
 	return validator.validate(data, { stripUnknown: true });
 };
 module.exports = Tickets;
