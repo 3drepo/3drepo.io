@@ -53,7 +53,7 @@ Aad.validateUserDetails = async (req, res, next) => {
 		delete req.body.redirectUri;
 	} catch (err) {
 		logger.logError(`SSO Signup - Failed to parse req.query.state as JSON: ${err.message}`);
-		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${templates.unknown.code}`);
+		respond(req, res, templates.unknown);
 		return;
 	}
 
@@ -78,10 +78,10 @@ const authenticate = (redirectUri) => async (req, res) => {
 		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 	};
 
-	try{
+	try {
 		const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
 		return res.redirect(authenticationCodeUrl);
-	} catch (err){
+	} catch (err) {
 		return respond(req, res, err);
 	}
 };
