@@ -15,68 +15,62 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, containersReducer, ContainersActions, IContainersState } from '@/v5/store/containers/containers.redux';
+import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { selectContainerById, selectContainers, selectFavouriteContainers } from '@/v5/store/containers/containers.selectors';
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
 import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.types';
 import { revisionsMockFactory } from '../revisions/revisions.fixtures';
+import { combineReducers, createStore } from 'redux';
+import reducers from '@/v5/store/reducers';
+import { ProjectsActions } from '@/v5/store/projects/projects.redux';
+
+const containerListIncludesContainer = (containerList, container) => (
+	containerList.map(({ _id }) => _id).includes(container._id)
+);
 
 describe('Containers: store', () => {
+	const { dispatch, getState } = createStore(combineReducers(reducers));
 	const projectId = 'projectId';
-	const initialState: IContainersState = INITIAL_STATE;
+	dispatch(ProjectsActions.setCurrentProject(projectId));
 
-	const getNonEmptyInitialState = (containerOverrides = {}) => containersReducer(
-		initialState,
-		ContainersActions.fetchContainersSuccess(projectId, [containerMockFactory(containerOverrides)]),
-	);
+	const createAndAddContainerToStore = (containerOverrides = {}) => {
+		const newContainer = containerMockFactory(containerOverrides);
+		dispatch(ContainersActions.fetchContainersSuccess(projectId, [newContainer]));
+		return newContainer;
+	};
 
 	it('should set containers', () => {
 		const mockContainers = times(5, () => containerMockFactory());
-		const resultState: IContainersState = containersReducer(
-			initialState,
-			ContainersActions.fetchContainersSuccess(projectId, mockContainers),
-		);
-		const containers = selectContainers.resultFunc(resultState, projectId);
+		dispatch(ContainersActions.fetchContainersSuccess(projectId, mockContainers));
+		const containers = selectContainers(getState());
 		expect(containers).toEqual(mockContainers);
 	});
 
 	describe('Updating container attributes:', () => {
 		it('should add container to favourites', () => {
-			const newContainer = containerMockFactory({ isFavourite: false });
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.setFavouriteSuccess(projectId, newContainer._id, true),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const favouriteContainers = selectFavouriteContainers.resultFunc(containers);
-			const containerIsIncluded = selectContainerById.resultFunc(favouriteContainers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ isFavourite: false });
+			dispatch(ContainersActions.setFavouriteSuccess(projectId, newContainer._id, true));
+			const favouriteContainers = selectFavouriteContainers(getState());
+			const containerIsIncluded = containerListIncludesContainer(favouriteContainers, newContainer);
 
 			expect(containerIsIncluded).toBeTruthy();
 		});
 
 		it('should remove container from favourites', () => {
-			const newContainer = containerMockFactory({ isFavourite: true });
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.setFavouriteSuccess(projectId, newContainer._id, false),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const favouriteContainers = selectFavouriteContainers.resultFunc(containers);
-			const containerIsIncluded = selectContainerById.resultFunc(favouriteContainers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ isFavourite: true });
+			dispatch(ContainersActions.setFavouriteSuccess(projectId, newContainer._id, false));
+			const favouriteContainers = selectFavouriteContainers(getState());
+			const containerIsIncluded = containerListIncludesContainer(favouriteContainers, newContainer);
 
 			expect(containerIsIncluded).not.toBeTruthy();
 		});
 
 		it('should update container stats', () => {
 			const stats = prepareMockStats();
-			const newContainer = containerMockFactory({ status: null });
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.fetchContainerStatsSuccess(projectId, newContainer._id, stats),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerFromState = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ status: null });
+			dispatch(ContainersActions.fetchContainerStatsSuccess(projectId, newContainer._id, stats));
+			const containerFromState = selectContainerById(getState(), newContainer._id);
 
 			expect(containerFromState.code).toEqual(stats.code);
 			expect(containerFromState.unit).toEqual(stats.unit);
@@ -85,40 +79,28 @@ describe('Containers: store', () => {
 		});
 
 		it('should update container status', () => {
-			const newContainer = containerMockFactory({ status: UploadStatuses.GENERATING_BUNDLES });
 			const newStatus = UploadStatuses.OK;
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.setContainerStatus(projectId, newContainer._id, newStatus),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerFromState = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ status: UploadStatuses.GENERATING_BUNDLES });
+			dispatch(ContainersActions.setContainerStatus(projectId, newContainer._id, newStatus));
+			const containerFromState = selectContainerById(getState(), newContainer._id);
 
 			expect(containerFromState.status).toEqual(newStatus);
 		});
 
 		it('should update container views', () => {
 			const views = prepareMockViews();
-			const newContainer = containerMockFactory({ status: null });
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.fetchContainerViewsSuccess(projectId, newContainer._id, views),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerFromState = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ status: null });
+			dispatch(ContainersActions.fetchContainerViewsSuccess(projectId, newContainer._id, views));
+			const containerFromState = selectContainerById(getState(), newContainer._id);
 
 			expect(containerFromState.views.length).toEqual(views.length);
 		});
 
 		it('should update container settings (fetch)', () => {
 			const settings = prepareMockSettingsReply(containerMockFactory());
-			const newContainer = containerMockFactory({ surveyPoint: null });
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.fetchContainerSettingsSuccess(projectId, newContainer._id, settings),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerFromState = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ surveyPoint: null });
+			dispatch(ContainersActions.fetchContainerSettingsSuccess(projectId, newContainer._id, settings));
+			const containerFromState = selectContainerById(getState(), newContainer._id);
 
 			expect(containerFromState.surveyPoint.latLong).toEqual(settings.surveyPoint.latLong);
 			expect(containerFromState.surveyPoint.position).toEqual(settings.surveyPoint.position);
@@ -126,13 +108,9 @@ describe('Containers: store', () => {
 
 		it('should update container settings (update)', () => {
 			const settings = prepareMockSettingsReply(containerMockFactory());
-			const newContainer = containerMockFactory({ surveyPoint: null });
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.updateContainerSettingsSuccess(projectId, newContainer._id, settings),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerFromState = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore({ surveyPoint: null });
+			dispatch(ContainersActions.updateContainerSettingsSuccess(projectId, newContainer._id, settings));
+			const containerFromState = selectContainerById(getState(), newContainer._id);
 
 			expect(containerFromState.surveyPoint.latLong).toEqual(settings.surveyPoint.latLong);
 			expect(containerFromState.surveyPoint.position).toEqual(settings.surveyPoint.position);
@@ -140,13 +118,9 @@ describe('Containers: store', () => {
 
 		it('should update revision processing status', () => {
 			const newRevision = revisionsMockFactory();
-			const newContainer = containerMockFactory();
-			const resultState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.containerProcessingSuccess(projectId, newContainer._id, newRevision)
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerFromState = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore();
+			dispatch(ContainersActions.containerProcessingSuccess(projectId, newContainer._id, newRevision));
+			const containerFromState = selectContainerById(getState(), newContainer._id);
 
 			expect(containerFromState.revisionsCount).toEqual(newContainer.revisionsCount + 1);
 			expect(containerFromState.latestRevision).toEqual(newRevision.tag);
@@ -156,24 +130,16 @@ describe('Containers: store', () => {
 
 	describe('Updating container list:', () => {
 		it('should create new container', () => {
-			const newContainer = containerMockFactory() as NewContainer;
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(),
-				ContainersActions.createContainerSuccess(projectId, newContainer),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerIsIncluded = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore() as NewContainer;
+			dispatch(ContainersActions.createContainerSuccess(projectId, newContainer));
+			const containerIsIncluded = selectContainerById(getState(), newContainer._id);
 			expect(containerIsIncluded).toBeTruthy();
 		});
 
 		it('should delete container', () => {
-			const newContainer = containerMockFactory() as NewContainer;
-			const resultState: IContainersState = containersReducer(
-				getNonEmptyInitialState(newContainer),
-				ContainersActions.deleteContainerSuccess(projectId, newContainer._id),
-			);
-			const containers = selectContainers.resultFunc(resultState, projectId);
-			const containerIsIncluded = selectContainerById.resultFunc(containers, newContainer._id);
+			const newContainer = createAndAddContainerToStore() as NewContainer;
+			dispatch(ContainersActions.deleteContainerSuccess(projectId, newContainer._id));
+			const containerIsIncluded = selectContainerById(getState(), newContainer._id);
 			expect(containerIsIncluded).toBeFalsy();
 		});
 	});
