@@ -57,7 +57,7 @@ Aad.validateUserDetails = async (req, res, next) => {
 	}
 
 	req.body = {
-		state,
+		...state,
 		email: mail,
 		firstName: givenName,
 		lastName: surname,
