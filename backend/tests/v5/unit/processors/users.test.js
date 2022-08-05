@@ -24,16 +24,28 @@ const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
+
 jest.mock('../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+
+jest.mock('../../../../src/v5/models/loginRecords');
+const LoginRecords = require(`${src}/models/loginRecords`);
+
+jest.mock('../../../../src/v5/models/notifications');
+const Notifications = require(`${src}/models/notifications`);
+
 jest.mock('../../../../src/v5/services/intercom');
 const Intercom = require(`${src}/services/intercom`);
+
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
+
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { generateRandomString } = require('../../helper/services');
 
@@ -285,6 +297,27 @@ const testUploadAvatar = () => {
 	});
 };
 
+const testRemoveUser = () => {
+	describe('Removing a user', () => {
+		test('Should call all relevant functions to clean up user data', async () => {
+			const username = generateRandomString();
+			await Users.remove(username);
+
+			expect(UsersModel.removeUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.removeUser).toHaveBeenCalledWith(username);
+
+			expect(FilesManager.removeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
+
+			expect(LoginRecords.removeAllUserRecords).toHaveBeenCalledTimes(1);
+			expect(LoginRecords.removeAllUserRecords).toHaveBeenCalledWith(username);
+
+			expect(Notifications.removeAllUserNotifications).toHaveBeenCalledTimes(1);
+			expect(Notifications.removeAllUserNotifications).toHaveBeenCalledWith(username);
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
@@ -294,4 +327,5 @@ describe('processors/users', () => {
 	testVerify();
 	testGetAvatarStream();
 	testUploadAvatar();
+	testRemoveUser();
 });

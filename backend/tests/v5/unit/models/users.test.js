@@ -566,6 +566,20 @@ const testGrantTeamspacePermissionToUser = () => {
 	});
 };
 
+const testRemoveUser = () => {
+	describe('Drop user', () => {
+		test('Should call dropUser to remove the user from the database', async () => {
+			const fn = jest.spyOn(db, 'dropUser').mockResolvedValueOnce(undefined);
+
+			const username = generateRandomString();
+			await expect(User.removeUser(username)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(username);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -580,6 +594,7 @@ describe('models/users', () => {
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
 	testAddUser();
+	testRemoveUser();
 	testVerify();
 	testGrantTeamspacePermissionToUser();
 });

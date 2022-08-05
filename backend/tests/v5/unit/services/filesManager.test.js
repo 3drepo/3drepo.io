@@ -18,7 +18,6 @@
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
 const { generateRandomString } = require('../../helper/services');
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../../../../src/v5/models/users.constants');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
@@ -117,6 +116,95 @@ const testRemoveAllFilesFromModel = () => {
 			const teamspace = generateRandomString();
 
 			await expect(FilesManager.removeAllFilesFromModel(teamspace, model))
+				.rejects.toEqual(templates.fileNotFound);
+
+			expect(db.listCollections).toHaveBeenCalledTimes(1);
+			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
+
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
+		});
+	});
+};
+
+const testRemoveAllFilesFromTeamspace = () => {
+	describe('Remove all files from teamspace', () => {
+		test('Should not do any calls if no ref collections are found', async () => {
+			db.listCollections.mockResolvedValueOnce([
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+				`${generateRandomString()}ref`,
+			].map((name) => ({ name })));
+			const teamspace = generateRandomString();
+
+			await FilesManager.removeAllFilesFromTeamspace(teamspace);
+
+			expect(db.listCollections).toHaveBeenCalledTimes(1);
+			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
+
+			expect(FileRefs.getAllRemovableEntriesByType).not.toHaveBeenCalled();
+		});
+
+		test('Should do the relevant calls to remove files', async () => {
+			const refCol1 = `${generateRandomString()}.ref`;
+			const refCol2 = `${generateRandomString()}.ref`;
+
+			db.listCollections.mockResolvedValueOnce([
+				generateRandomString(),
+				generateRandomString(),
+				refCol1,
+				`${generateRandomString()}.refasdf`,
+				`${generateRandomString()}.aaref`,
+				generateRandomString(),
+				refCol2,
+			].map((name) => ({ name })));
+
+			const refCol1Data = [
+				{
+					_id: 'fs',
+					links: [generateRandomString(), generateRandomString(), generateRandomString()],
+				},
+				{
+					_id: 'gridfs',
+					links: [generateRandomString(), generateRandomString(), generateRandomString()],
+				},
+			];
+
+			FileRefs.getAllRemovableEntriesByType
+				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data : [{ _id: 'fs', links: [] }]));
+
+			const teamspace = generateRandomString();
+
+			await FilesManager.removeAllFilesFromTeamspace(teamspace);
+
+			expect(db.listCollections).toHaveBeenCalledTimes(1);
+			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
+
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenCalledTimes(2);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
+			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(2, teamspace, refCol2);
+
+			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FSHandler.removeFiles).toHaveBeenCalledWith(refCol1Data[0].links);
+
+			expect(GridFSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, refCol1, refCol1Data[1].links);
+		});
+
+		test('Should throw error if the type of storage is unknown', async () => {
+			const refCol1 = `${generateRandomString()}.ref`;
+
+			db.listCollections.mockResolvedValueOnce([
+				refCol1,
+			].map((name) => ({ name })));
+
+			FileRefs.getAllRemovableEntriesByType
+				.mockResolvedValueOnce([{ _id: 'aaafs', links: [generateRandomString()] }]);
+
+			const teamspace = generateRandomString();
+
+			await expect(FilesManager.removeAllFilesFromTeamspace(teamspace))
 				.rejects.toEqual(templates.fileNotFound);
 
 			expect(db.listCollections).toHaveBeenCalledTimes(1);
@@ -321,26 +409,32 @@ const testFileExists = () => {
 			config.defaultStorage = 'fs';
 
 			FileRefs.getRefEntry.mockResolvedValueOnce({ _id: generateRandomString() });
+			const ts = generateRandomString();
+			const collection = generateRandomString();
+
 			const filename = generateRandomString();
-			await expect(FilesManager.fileExists(filename)).resolves.toEqual(true);
+			await expect(FilesManager.fileExists(ts, collection, filename)).resolves.toEqual(true);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
-			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, filename);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(ts, collection, filename);
 
 			config.defaultStorage = defaultStorage;
 		});
 
 		test('should return false if file does not exist', async () => {
 			FileRefs.getRefEntry.mockRejectedValueOnce(templates.fileNotFound);
+			const ts = generateRandomString();
+			const collection = generateRandomString();
 			const filename = generateRandomString();
-			await expect(FilesManager.fileExists(filename)).resolves.toEqual(false);
+			await expect(FilesManager.fileExists(ts, collection, filename)).resolves.toEqual(false);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
-			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, filename);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(ts, collection, filename);
 		});
 	});
 };
 
 describe('services/filesManager', () => {
 	testRemoveAllFilesFromModel();
+	testRemoveAllFilesFromTeamspace();
 	testGetFile();
 	testGetFileAsStream();
 	testStoreFile();
