@@ -24,7 +24,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Sidebar } from '@controls/sideBar';
-import { ScrollArea } from '@controls/scrollArea';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
@@ -32,19 +31,17 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { Display } from '@/v5/ui/themes/media';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
-import { isEmpty } from 'lodash';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
+import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
-	openState: boolean;
+	open: boolean;
 	onClickClose: () => void;
 };
 
-export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
+export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
@@ -55,14 +52,11 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	});
 	const { control,
 		handleSubmit,
-		formState: { errors, isValid },
+		formState: { isValid },
 		trigger,
 		getValues,
 		setValue,
 		watch,
-		reset,
-		setError,
-		clearErrors,
 	} = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -71,15 +65,14 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	});
 
 	useEffect(() => {
-		if (!isUploading) reset();
-	}, [isUploading]);
+		remove();
+		setSelectedIndex(null);
+		setIsUploading(false);
+	}, [open]);
 
+	const [fileError, setFileError] = useState(false);
 	useEffect(() => {
-		if (fields.some((field) => filesizeTooLarge(field.file))) {
-			setError('uploads', { type: 'custom', message: '' });
-		} else {
-			clearErrors('uploads');
-		}
+		setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
 	}, [fields.length]);
 
 	const DEFAULT_SORT_CONFIG = {
@@ -124,9 +117,11 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		append(filesToAppend);
 	};
 
+	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
+
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = Number.isInteger(selectedIndex) && getOriginalIndex(selectedIndex);
+	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
 
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
@@ -157,7 +152,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	return (
 		<FormProvider {...methods}>
 			<Modal
-				open={openState}
+				open={open}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
 				confirmLabel={
@@ -177,63 +172,64 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
-				isValid={(isValid && isEmpty(errors) && !isUploading) || (isUploading && allUploadsComplete)}
+				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
 			>
-				<Container>
-					<ScrollArea>
+				<UploadsContainer>
+					<UploadsListScroll>
 						<Padding>
-							<div hidden={!fields.length}>
-								<UploadsListHeader
-									onSortingChange={setSortConfig}
-									defaultSortConfig={DEFAULT_SORT_CONFIG}
-								>
-									<DashboardListHeaderLabel key="file" name="file.name" hideWhenSmallerThan={Display.Desktop}>
-										<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="destination" width={352}>
-										<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
-										<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
-										<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-									</DashboardListHeaderLabel>
-								</UploadsListHeader>
-							</div>
 							{!!fields.length && (
-								<UploadList
-									values={sortedList}
-									selectedIndex={selectedIndex}
-									isUploading={isUploading}
-									onClickEdit={(id) => onClickEdit(id)}
-									onClickDelete={(id) => onClickDelete(id)}
-									getOriginalIndex={getOriginalIndex}
-								/>
+								<>
+									<UploadsListHeader
+										onSortingChange={setSortConfig}
+										defaultSortConfig={DEFAULT_SORT_CONFIG}
+									>
+										<DashboardListHeaderLabel key="file" name="file.name" minWidth={122}>
+											<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="destination" width={352}>
+											<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
+											<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
+											<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+										</DashboardListHeaderLabel>
+									</UploadsListHeader>
+									<UploadList
+										values={sortedList}
+										selectedIndex={selectedIndex}
+										isUploading={isUploading}
+										onClickEdit={(id) => onClickEdit(id)}
+										onClickDelete={(id) => onClickDelete(id)}
+										getOriginalIndex={getOriginalIndex}
+									/>
+								</>
 							)}
 							<DropZone
 								message={formatMessage(
 									{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-									{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+									{ MoreLink:
+										(child: string) => (
+											<a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a>
+										),
+									},
 								)}
 								processFiles={(files) => { processFiles(files); }}
 								hidden={isUploading}
 							/>
 						</Padding>
-					</ScrollArea>
+					</UploadsListScroll>
 					<Sidebar
-						open={Number.isInteger(selectedIndex) && !isUploading}
+						open={sidebarOpen}
 						onClick={() => setSelectedIndex(null)}
-						noButton={!(Number.isInteger(selectedIndex))}
 					>
 						{
-							Number.isInteger(selectedIndex)
+							sidebarOpen
 								? (
 									<span key={watch(`uploads.${origIndex}.containerName`)}>
 										<SidebarForm
-											value={
-												getValues(`uploads.${origIndex}`)
-											}
+											value={getValues(`uploads.${origIndex}`)}
 											key={sortedList[selectedIndex].uploadId}
 											isNewContainer={
 												!getValues(`uploads.${origIndex}.containerId`)
@@ -252,7 +248,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								: <></>
 						}
 					</Sidebar>
-				</Container>
+				</UploadsContainer>
 			</Modal>
 		</FormProvider>
 	);

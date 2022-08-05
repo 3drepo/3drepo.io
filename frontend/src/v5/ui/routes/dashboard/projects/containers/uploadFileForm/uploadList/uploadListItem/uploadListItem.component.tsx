@@ -67,15 +67,13 @@ export const UploadListItem = ({
 			containerId: value._id,
 			containerName: value.name,
 			containerCode: value.code,
-			containerType: value.type,
-			containerUnit: value.unit,
+			containerType: value.type || 'Uncategorised',
+			containerUnit: value.unit || 'mm',
 			containerDesc: value.desc,
 		};
 		Object.keys(conversion).forEach((key: any) => {
-			if (conversion[key] || key === 'containerName') {
-				setValue(key, conversion[key]);
-				updateValue(key);
-			}
+			setValue(key, conversion[key]);
+			updateValue(key);
 		});
 		trigger('containerName');
 	};

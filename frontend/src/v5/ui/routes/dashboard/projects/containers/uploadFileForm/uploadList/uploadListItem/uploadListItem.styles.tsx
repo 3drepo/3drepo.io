@@ -37,6 +37,7 @@ export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () 
 const DestinationAndTagDimensions = css`
 	width: 340px;
 	height: 35px;
+	min-width: 80px;
 `;
 
 export const Destination = styled(UploadListItemDestination)`
