@@ -52,7 +52,7 @@ Aad.validateUserDetails = async (req, res, next) => {
 
 		delete req.body.redirectUri;
 	} catch (err) {
-		logger.logError(`Failed to parse req.query.state as JSON: ${err.message}`);
+		logger.logError(`SSO Signup - Failed to parse req.query.state as JSON: ${err.message}`);
 		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${templates.unknown.code}`);
 		return;
 	}
@@ -78,8 +78,12 @@ const authenticate = (redirectUri) => async (req, res) => {
 		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 	};
 
-	const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
-	return res.redirect(authenticationCodeUrl);
+	try{
+		const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
+		return res.redirect(authenticationCodeUrl);
+	} catch (err){
+		return respond(req, res, err);
+	}
 };
 
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);

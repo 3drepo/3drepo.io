@@ -19,7 +19,7 @@ const config = require('../../../utils/config');
 
 const AadConstants = {};
 
-const createRedirectUri = (redirectEndpoint) => `${config.sso.aad.redirectDomain || config.api_server.url}/v5/sso/aad${redirectEndpoint}`;
+const createRedirectUri = (redirectEndpoint) => `${config.sso?.aad?.redirectDomain || config.api_server.url}/v5/sso/aad${redirectEndpoint}`;
 
 AadConstants.authenticateRedirectEndpoint = '/authenticate-post';
 AadConstants.authenticateRedirectUri = createRedirectUri(AadConstants.authenticateRedirectEndpoint);
