@@ -28,7 +28,22 @@ const { validateMany } = require('../../../../common');
 
 const Aad = {};
 
+const parseStateAsJson = (req, res, state) => {
+	try {
+		return JSON.parse(state);
+	} catch (err) {
+		logger.logError(`SSO Signup - Failed to parse req.query.state as JSON: ${err.message}`);
+		respond(req, res, templates.unknown);
+		return;
+	}
+}
+
 Aad.validateUserDetails = async (req, res, next) => {
+	const state = parseStateAsJson(req, res, req.query.state2);	
+	if(!state){
+		return;
+	}
+	
 	const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 		signupRedirectUri, req.session.pkceCodes?.verifier);
 
@@ -41,21 +56,15 @@ Aad.validateUserDetails = async (req, res, next) => {
 		// do nothing
 	}
 
-	try {
-		req.body = {
-			...JSON.parse(req.query.state),
-			email: mail,
-			firstName: givenName,
-			lastName: surname,
-			sso: { type: providers.AAD, id },
-		};
+	req.body = {
+		state,
+		email: mail,
+		firstName: givenName,
+		lastName: surname,
+		sso: { type: providers.AAD, id },
+	};
 
-		delete req.body.redirectUri;
-	} catch (err) {
-		logger.logError(`SSO Signup - Failed to parse req.query.state as JSON: ${err.message}`);
-		respond(req, res, templates.unknown);
-		return;
-	}
+	delete req.body.redirectUri;
 
 	await next();
 };
