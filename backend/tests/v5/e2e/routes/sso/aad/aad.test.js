@@ -26,7 +26,7 @@ jest.mock('../../../../../../src/v5/services/sso/aad', () => ({
 	getUserDetails: jest.fn(),
 }));
 const Aad = require('../../../../../../src/v5/services/sso/aad');
-const { aad } = require('../../../../../../src/v5/services/sso/sso.constants');
+const { providers } = require('../../../../../../src/v5/services/sso/sso.constants');
 const { getUserByUsername } = require('../../../../../../src/v5/models/users');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -34,16 +34,16 @@ const { templates } = require(`${src}/utils/responseCodes`);
 let server;
 let agent;
 
-const userEmail = 'example@email.com';
+const userEmail = `${generateRandomString()}@email.com`;
 const testUser = ServiceHelper.generateUserCredentials();
-const userEmailSso = 'example2@email.com';
+const userEmailSso = `${generateRandomString()}@email.com`;
 const testUserSso = ServiceHelper.generateUserCredentials();
-const newUserEmail = 'newUserEmail@email.com';
+const newUserEmail = `${generateRandomString()}@email.com`;
 
 const setupData = async () => {
 	await ServiceHelper.db.createUser(testUser, [], { email: userEmail });
 	await ServiceHelper.db.createUser(testUserSso, [], { email: userEmailSso,
-		sso: { type: aad, id: generateRandomString() } });
+		sso: { type: providers.AAD, id: generateRandomString() } });
 };
 
 const testAuthenticate = () => {
@@ -132,7 +132,7 @@ const signup = () => {
 
 const signupPost = () => {
 	describe('Sign Up Post', () => {
-		const redirectUri = generateRandomString();
+		const redirectUri = 'http://www.example.com';
 
 		const newUserData = {
 			redirectUri,
@@ -149,27 +149,31 @@ const signupPost = () => {
 			id: generateRandomString(),
 		};
 
-		test('should fail if the email already exists', async () => {
+		test('should redirect and add error to the query email already exists', async () => {
 			const state = { ...newUserData };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmail } });
 			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
+				.expect(302);
+			const resUri = new URL(res.headers.location);
+			expect(resUri.origin).toEqual(redirectUri);
+			expect(resUri.searchParams.get('error')).toEqual(templates.emailAlreadyExists.code);
 		});
 
-		test('should fail if the email already exists (SSO user)', async () => {
+		test('should redirect and add error to the query email already exists (SSO user)', async () => {
 			const state = { ...newUserData };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmailSso } });
 			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
+				.expect(302);
+			const resUri = new URL(res.headers.location);
+			expect(resUri.origin).toEqual(redirectUri);
+			expect(resUri.searchParams.get('error')).toEqual(templates.emailAlreadyExistsSso.code);
 		});
 
 		test('should fail if state is not provided', async () => {
-			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmail } });
+			Aad.getUserDetails.mockResolvedValueOnce({ data: newUserDataFromAad });
 			const res = await agent.get('/v5/sso/aad/signup-post')
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
+				.expect(templates.unknown.status);
+			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 
 		test('should sign a new user up', async () => {

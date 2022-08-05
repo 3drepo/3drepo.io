@@ -85,16 +85,16 @@ const testValidateUserDetails = () => {
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${templates.emailAlreadyExistsSso.code}`);
 		});
 
-		// test(`should respond with ${templates.invalidArguments.code} if state is empty`, async () => {
-		// 	AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-		// 	UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
-		// 	const mockCB = jest.fn();
-		// 	const reqWithNoState = {...req, query: { code: generateRandomString() }};
-		// 	await Aad.validateUserDetails(reqWithNoState, {}, mockCB);
-		// 	expect(mockCB).not.toHaveBeenCalled();
-		// 	expect(Responder.respond).toHaveBeenCalledTimes(1);
-		// 	expect(Responder.respond).toHaveBeenCalledWith(reqWithNoState, {}, createResponseCode(templates.invalidArguments));
-		// });
+		test(`should respond with ${templates.invalidArguments.code} if state is empty`, async () => {
+			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
+			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
+			const mockCB = jest.fn();
+			const reqWithNoState = { ...req, query: { code: generateRandomString() } };
+			await Aad.validateUserDetails(reqWithNoState, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(reqWithNoState, res, createResponseCode(templates.unkown));
+		});
 
 		test('should call next if email is available', async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
@@ -131,6 +131,18 @@ const testAuthenticate = () => {
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
 				createResponseCode(templates.invalidArguments, 'redirectUri is a required field'));
+		});
+
+		test(`should respond with ${templates.ssoNotAvailable.code} if getAuthenticationCodeUrl throws ${templates.ssoNotAvailable.code}`, async () => {
+			const req = { query: { redirectUri: generateRandomString() } };
+			addPkceCodes(req);
+			AadServices.getAuthenticationCodeUrl.mockRejectedValueOnce(templates.ssoNotAvailable);
+
+			await Aad.authenticate(redirectUri)(req, res);
+			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.ssoNotAvailable));
 		});
 
 		test('should set authParams and reqirect to ms authentication page if req has no body', async () => {
