@@ -19,6 +19,7 @@ import { css } from 'styled-components';
 
 import { Container, Submenu } from '@/v4/routes/viewerGui/components/toolbar/toolbar.styles';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
+import { Container as CloseFocusModeButton } from '@/v4/routes/viewerGui/components/closeFocusModeButton/closeFocusModeButton.styles';
 import { hexToOpacity } from '../../themes/theme';
 
 export default css`
@@ -51,4 +52,7 @@ export default css`
 		}
 	}
 
+	${CloseFocusModeButton} {
+		top: 80px;
+	}
 `;

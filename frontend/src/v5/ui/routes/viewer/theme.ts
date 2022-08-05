@@ -176,6 +176,11 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiTooltip: {
+					defaultProps: {
+						disableInteractive: true,
+					},
+				},
 				MuiTabs: {
 					styleOverrides: {
 						root: {
