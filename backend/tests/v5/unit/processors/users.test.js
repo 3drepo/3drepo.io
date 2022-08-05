@@ -239,11 +239,15 @@ const testSignUp = () => {
 		});
 
 		test('should generate a password and sign a user up', async () => {
-			await Users.signUp(newUserData, true);
+			const sso = { id: generateRandomString() };
+			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
-			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData,
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				...newUserData,
 				password: exampleHashString,
-				token: exampleHashString });
+				token: exampleHashString,
+				sso,
+			});
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
 				token: exampleHashString,

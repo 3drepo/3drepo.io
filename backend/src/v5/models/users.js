@@ -116,6 +116,8 @@ User.getUserByQuery = async (query, projection) => {
 
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
 
+User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.email': email }, projection);
+
 User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
 	$or: [{ user: usernameOrEmail },
 		// eslint-disable-next-line security/detect-non-literal-regexp

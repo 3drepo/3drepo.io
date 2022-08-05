@@ -742,8 +742,6 @@ async function _createAccounts(roles, userName) {
 	roles.forEach(async role => {
 		promises.push(User.findByUserName(role.db).then(async user => {
 			if (!user) {
-				// skip missing user account
-				systemLogger.logError("User account (" + role.db + ") not found; skipping...");
 				return;
 			}
 

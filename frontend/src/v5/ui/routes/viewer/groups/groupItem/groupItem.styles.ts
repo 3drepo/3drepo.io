@@ -109,11 +109,13 @@ const GroupItemNameV4 = css`
 	font-weight: 500;
 	font-size: 12px;
 	line-height: 16px;
+	max-width: 233px;
 `;
 
 const GroupItemNameV5 = css`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
+	max-width: 261px;
 `;
 
 const GroupItemObjectsV4 = css`
@@ -131,6 +133,9 @@ const GroupItemObjectsV5 = css`
 
 export const GroupItemName = styled.div`
 	${isV5() ? GroupItemNameV5 : GroupItemNameV4}
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 `;
 
 export const GroupItemObjects = styled.div`

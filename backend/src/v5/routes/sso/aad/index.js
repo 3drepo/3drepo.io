@@ -15,24 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticateRedirectEndpoint, signupRedirectEndpoint } = require('../../../services/sso/aad/aad.constants');
-const { getUserDetailsAndCheckEmailAvailability, setAuthenticateAuthParams, setAuthenticationCodeUrl, setSignupAuthParams, checkIfMsAccountIsLinkedTo3DRepo } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { authenticate, validateUserDetails } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { addPkceProtection } = require('../../../middleware/dataConverter/inputs/sso');
 const { respond } = require('../../../utils/responder');
-const { templates } = require('../../../utils/responseCodes');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 const { createSessionSso } = require('../../../middleware/sessions');
-
-const authenticate = (req, res) => {
-	try {
-		res.redirect(req.authenticationCodeUrl);
-	} catch (err) {
-		/* istanbul ignore next */
-		respond(req, res, err);
-	}
-};
 
 const authenticatePost = (req, res) => {
 	try {
@@ -43,19 +32,10 @@ const authenticatePost = (req, res) => {
 	}
 };
 
-const signup = (req, res) => {
-	try {
-		res.redirect(req.authenticationCodeUrl);
-	} catch (err) {
-		/* istanbul ignore next */
-		respond(req, res, err);
-	}
-};
-
 const signupPost = async (req, res) => {
 	try {
-		await Users.signUp(req.body, true);
-		respond(req, res, templates.ok);
+		await Users.signUp(req.body);
+		res.redirect(JSON.parse(req.query.state).redirectUri);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -69,16 +49,16 @@ const establishRoutes = () => {
 	* @openapi
 	* /sso/aad/authenticate:
 	*   get:
-	*     description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
+	*     description: Redirects the user to Microsoft's authentication page and then to a URI provided via query upon success
 	*     tags: [Aad]
 	*     operationId: authenticate
 	*     responses:
 	*       302:
 	*         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	*/
-	router.get('/authenticate', addPkceProtection, setAuthenticateAuthParams, setAuthenticationCodeUrl, authenticate);
+	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(`/${authenticateRedirectEndpoint}`, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, authenticatePost);
+	router.get(`${authenticateRedirectEndpoint}`, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, authenticatePost);
 
 	/**
 	 * @openapi
@@ -123,9 +103,9 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
 	 */
-	router.post('/signup', validateSsoSignUpData, addPkceProtection, setSignupAuthParams, setAuthenticationCodeUrl, signup);
+	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(`/${signupRedirectEndpoint}`, getUserDetailsAndCheckEmailAvailability, signupPost);
+	router.get(`${signupRedirectEndpoint}`, validateUserDetails, signupPost);
 
 	return router;
 };

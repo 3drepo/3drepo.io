@@ -27,7 +27,8 @@ import {
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
-import { filterFederations } from '@/v5/store/federations/federations.helpers';
+import { SearchContextComponent } from '@controls/search/searchContext';
+import { FEDERATION_SEARCH_FIELDS } from '@/v5/store/federations/federations.helpers';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 import { CreateFederationForm } from './createFederationForm';
@@ -38,84 +39,75 @@ export const Federations = (): JSX.Element => {
 	const {
 		federations,
 		favouriteFederations,
-		hasFederations,
 		isListPending,
 	} = useFederationsData();
 
 	const { teamspace, project } = useParams<DashboardParams>();
-	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
-	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 	const [createFedOpen, setCreateFedOpen] = useState(false);
 
-	useEffect(() => enableRealtimeNewFederation(teamspace, project), []);
+	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
+
+	if (isListPending) {
+		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
+	}
 
 	return (
 		<>
-			{isListPending ? (
-				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
-			) : (
-				<>
-					<FederationsList
-						hasFederations={hasFederations.favourites}
-						filterQuery={favouritesFilterQuery}
-						onFilterQueryChange={setFavouritesFilterQuery}
-						federations={filterFederations(favouriteFederations, favouritesFilterQuery)}
-						onClickCreate={() => setCreateFedOpen(true)}
-						title={(
+			<SearchContextComponent items={favouriteFederations} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
+				<FederationsList
+					onClickCreate={() => setCreateFedOpen(true)}
+					title={(
+						<FormattedMessage
+							id="federations.favourites.collapseTitle"
+							defaultMessage="Favourites"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="federations.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+						visible: <FormattedMessage id="federations.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+					}}
+					emptyMessage={(
+						<DashboardListEmptyText>
 							<FormattedMessage
-								id="federations.favourites.collapseTitle"
-								defaultMessage="Favourites"
+								id="federations.favourites.emptyMessage"
+								defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
 							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="federations.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
-							visible: <FormattedMessage id="federations.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
-						}}
-						emptyMessage={(
+						</DashboardListEmptyText>
+					)}
+				/>
+			</SearchContextComponent>
+			<Divider />
+			<SearchContextComponent items={federations} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
+				<FederationsList
+					onClickCreate={() => setCreateFedOpen(true)}
+					title={(
+						<FormattedMessage
+							id="federations.all.collapseTitle"
+							defaultMessage="All Federations"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
+						visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
+					}}
+					showBottomButton
+					emptyMessage={(
+						<>
 							<DashboardListEmptyText>
-								<FormattedMessage
-									id="federations.favourites.emptyMessage"
-									defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
-								/>
+								<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
 							</DashboardListEmptyText>
-						)}
-					/>
-					<Divider />
-					<FederationsList
-						hasFederations={hasFederations.all}
-						filterQuery={allFilterQuery}
-						onFilterQueryChange={setAllFilterQuery}
-						federations={filterFederations(federations, allFilterQuery)}
-						onClickCreate={() => setCreateFedOpen(true)}
-						title={(
-							<FormattedMessage
-								id="federations.all.collapseTitle"
-								defaultMessage="All Federations"
-							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
-							visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
-						}}
-						showBottomButton
-						emptyMessage={(
-							<>
-								<DashboardListEmptyText>
-									<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
-								</DashboardListEmptyText>
-								<Button
-									startIcon={<AddCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => setCreateFedOpen(true)}
-								>
-									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
-								</Button>
-							</>
-						)}
-					/>
-				</>
-			)}
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={() => setCreateFedOpen(true)}
+							>
+								<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
+							</Button>
+						</>
+					)}
+				/>
+			</SearchContextComponent>
 			<CreateFederationForm
 				open={createFedOpen}
 				onClickClose={() => setCreateFedOpen(false)}

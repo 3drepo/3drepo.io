@@ -476,6 +476,24 @@ const testGetUserByUsernameOrEmail = () => {
 	});
 };
 
+const testGetUserByEmail = () => {
+	describe('Get user by email', () => {
+		test('should return user by email if user exists', async () => {
+			const email = 'example@email.com';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
+			const res = await User.getUserByEmail(email);
+			expect(res).toEqual({ user: 'user' });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'customData.email': 'example@email.com' }, undefined, undefined);
+		});
+
+		test('should throw error if user does not exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getUserByEmail('user')).rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
 const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
 		createdAt,
@@ -611,6 +629,7 @@ describe('models/users', () => {
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
+	testGetUserByEmail();
 	testAddUser();
 	testVerify();
 	testGrantTeamspacePermissionToUser();

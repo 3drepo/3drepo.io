@@ -14,88 +14,89 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
-const { aad } = require('../../../../../services/sso/sso.constants');
-const { getUserByQuery, recordSuccessfulAuthAttempt } = require('../../../../../models/users');
+const Yup = require('yup');
+const { addPkceProtection } = require('..');
+const { getUserByEmail, recordSuccessfulAuthAttempt } = require('../../../../../models/users');
+const { logger } = require('../../../../../utils/logger');
+const { providers } = require('../../../../../services/sso/sso.constants');
 const { respond } = require('../../../../../utils/responder');
+const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
+const { types } = require('../../../../../utils/helper/yup');
+const { validateMany } = require('../../../../common');
 
 const Aad = {};
 
-Aad.getUserDetailsAndCheckEmailAvailability = async (req, res, next) => {
+Aad.validateUserDetails = async (req, res, next) => {
 	const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 		signupRedirectUri, req.session.pkceCodes?.verifier);
 
 	try {
-		const user = await getUserByQuery({ 'customData.email': mail }, { 'customData.sso': 1 });
-		const message = user.customData.sso ? 'Email already exists from SSO user' : 'Email already exists';
-		respond(req, res, createResponseCode(templates.invalidArguments, message));
+		const user = await getUserByEmail(mail, { 'customData.sso': 1 });
+		const error = user.customData.sso ? templates.emailAlreadyExistsSso : templates.emailAlreadyExists;
+		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${error.code}`);
 		return;
 	} catch {
 		// do nothing
 	}
 
-	req.body = {
-		...JSON.parse(req.query.state),
-		email: mail,
-		firstName: givenName,
-		lastName: surname,
-		sso: { type: aad, id },
-	};
+	try {
+		req.body = {
+			...JSON.parse(req.query.state),
+			email: mail,
+			firstName: givenName,
+			lastName: surname,
+			sso: { type: providers.AAD, id },
+		};
+
+		delete req.body.redirectUri;
+	} catch (err) {
+		logger.logError(`SSO Signup - Failed to parse req.query.state as JSON: ${err.message}`);
+		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${templates.unknown.code}`);
+		return;
+	}
 
 	await next();
 };
 
-Aad.setAuthenticateAuthParams = async (req, res, next) => {
-	const params = {
-		redirectUri: authenticateRedirectUri,
-		state: JSON.stringify({ redirectUri: req.query.signupUri }),
-		codeChallenge: req.session.pkceCodes.challenge,
-		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
-	};
+const authenticate = (redirectUri) => async (req, res) => {
+	try {
+		const querySchema = Yup.object().shape({ redirectUri: types.strings.title.required() }).strict(true);
+		await querySchema.validate(req.query);
+	} catch (err) {
+		return respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
 
-	req.authParams = params;
-
-	await next();
-};
-
-Aad.setSignupAuthParams = async (req, res, next) => {
-	const { body } = req;
-
-	const params = {
-		redirectUri: signupRedirectUri,
+	req.authParams = {
+		redirectUri,
 		state: JSON.stringify({
-			username: body.username,
-			countryCode: body.countryCode,
-			company: body.company,
-			mailListAgreed: body.mailListAgreed,
+			redirectUri: req.query.redirectUri,
+			...(req.body || {}),
 		}),
 		codeChallenge: req.session.pkceCodes.challenge,
 		codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 	};
 
-	req.authParams = params;
-
-	await next();
+	try{
+		const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
+		return res.redirect(authenticationCodeUrl);
+	} catch (err){
+		return respond(req, res, err);
+	}
 };
 
-Aad.setAuthenticationCodeUrl = async (req, res, next) => {
-	const authenticationCodeUrl = await getAuthenticationCodeUrl(req.authParams);
-	req.authenticationCodeUrl = authenticationCodeUrl;
-
-	await next();
-};
+Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
 Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 	const { data: { id, mail } } = await getUserDetails(req.query.code,
 		authenticateRedirectUri);
 
 	try {
-		const user = await getUserByQuery({ 'customData.email': mail }, 
-			{ _id : 0, user: 1, 'customData.sso.id': 1 });
+		const user = await getUserByQuery({ 'customData.email': mail },
+			{ _id: 0, user: 1, 'customData.sso.id': 1 });
 
-		if (user.customData.sso?.id != id){
+		if (user.customData.sso?.id != id) {
 			throw templates.containerIsSubModel;
 		}
 
@@ -107,6 +108,5 @@ Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 
 	await next();
 };
-
 
 module.exports = Aad;

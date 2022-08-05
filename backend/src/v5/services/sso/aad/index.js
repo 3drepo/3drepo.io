@@ -17,8 +17,8 @@
 
 const config = require('../../../utils/config');
 const { get } = require('../../../utils/webRequests');
-const ssoLabel = require('../../../utils/logger').labels.sso;
-const logger = require('../../../utils/logger').logWithLabel(ssoLabel);
+const aadLabel = require('../../../utils/logger').labels.aad;
+const logger = require('../../../utils/logger').logWithLabel(aadLabel);
 const { msGraphUserDetailsUri } = require('./aad.constants');
 const msal = require('@azure/msal-node');
 const { templates } = require('../../../utils/responseCodes');
@@ -28,15 +28,15 @@ const Aad = {};
 let clientApplication;
 
 const checkAadConfig = () => {
-	if (!config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret) {
+	if (!config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret || !config.sso?.aad?.authority) {
 		throw templates.ssoNotAvailable;
 	}
 };
 
 const getClientApplication = () => {
-	checkAadConfig();
-
 	if (!clientApplication) {
+		checkAadConfig();
+
 		const loggerOptions = {
 			loggerCallback: (loglevel, message) => {
 				logger.logInfo(message);
@@ -51,24 +51,18 @@ const getClientApplication = () => {
 };
 
 Aad.getAuthenticationCodeUrl = (params) => {
-	checkAadConfig();
-
 	const clientApp = getClientApplication();
 	return clientApp.getAuthCodeUrl(params);
 };
 
-Aad.getUserDetails = async (authCode, redirectUri, codeVerifier) => {
-	checkAadConfig();
-
-	const tokenRequest = { code: authCode, redirectUri, codeVerifier };
+Aad.getUserDetails = async (code, redirectUri, codeVerifier) => {
+	const tokenRequest = { code, redirectUri, codeVerifier };
 	const clientApp = getClientApplication();
 	const response = await clientApp.acquireTokenByCode(tokenRequest);
 
-	const user = await get(msGraphUserDetailsUri, {
+	return get(msGraphUserDetailsUri, {
 		Authorization: `Bearer ${response.accessToken}`,
 	});
-
-	return user;
 };
 
 module.exports = Aad;

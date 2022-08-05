@@ -22,7 +22,6 @@ const ResponseCodes = {};
 
 ResponseCodes.templates = {
 	ok: { message: 'OK', status: 200 },
-	found: { message: 'Found', status: 302 },
 
 	// Auth
 	notLoggedIn: { message: 'You are not logged in', status: 401 },
@@ -33,7 +32,9 @@ ResponseCodes.templates = {
 	userNotVerified: { message: 'Account not yet verified. Please check your email', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
-	ssoNotAvailable: { message: 'SSO provider not available', status: 400 },
+	ssoNotAvailable: { message: 'SSO provider not available', status: 500 },
+	emailAlreadyExists: { message: 'Email already exists.', status: 400 },
+	emailAlreadyExistsSso: { message: 'Email already exists from SSO user.', status: 400 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },

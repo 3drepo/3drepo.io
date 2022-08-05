@@ -29,25 +29,7 @@ export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabl
 	padding: 0;
 	margin: 8px 7px;
 
-	${({ $isButton, theme }) => ($isButton ? `
-		cursor: pointer;
-		
-		&:hover {
-			.MuiAvatar-root {
-				background-color: ${theme.palette.tertiary.mid};
-			}
-		}
-
-		&:active {
-			.MuiAvatar-root {
-				background-color: ${theme.palette.tertiary.main};
-			}
-		}
-	` : 'cursor: default;')}
-
-	&:hover {
-		background-color: transparent;
-	}
+	cursor: ${({ $isButton }) => ($isButton ? 'pointer' : 'default')};
 
 	.MuiAvatar-circular {
 		margin: 0;

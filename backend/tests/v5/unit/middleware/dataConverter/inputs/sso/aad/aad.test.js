@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');
 const { generateRandomString } = require('../../../../../../helper/services');
+const { providers } = require('../../../../../../../../src/v5/services/sso/sso.constants');
 const { src } = require('../../../../../../helper/path');
-const { aad } = require('../../../../../../../../src/v5/services/sso/sso.constants');
-const { authenticateRedirectUri, signupRedirectUri } = require('../../../../../../../../src/v5/services/sso/aad/aad.constants');
 
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -32,84 +32,135 @@ const UsersModel = require(`${src}/models/users`);
 const Aad = require(`${src}/middleware/dataConverter/inputs/sso/aad`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+jest.mock('../../../../../../../../src/v5/middleware/dataConverter/inputs/sso');
+const Sso = require(`${src}/middleware/dataConverter/inputs/sso`);
+
+Sso.addPkceProtection.mockImplementation((req, res, next) => next());
+
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const aadUserDetails = {
-	data: {
-		mail: 'example@email.com',
-		givenName: generateRandomString(),
-		surname: generateRandomString(),
-		id: generateRandomString(),
-	},
+const addPkceCodes = (req) => {
+	req.session = { pkceCodes: { challenge: generateRandomString(), challengeMethod: generateRandomString() } };
 };
 
-const testGetUserDetailsAndCheckEmailAvailability = () => {
+const testValidateUserDetails = () => {
 	describe('Get user details and check email availability', () => {
+		const aadUserDetails = {
+			data: {
+				mail: 'example@email.com',
+				givenName: generateRandomString(),
+				surname: generateRandomString(),
+				id: generateRandomString(),
+			},
+		};
+
+		const redirectUri = generateRandomString();
+		const res = { redirect: jest.fn() };
 		const req = {
 			query: {
 				code: generateRandomString(),
-				state: JSON.stringify({ username: generateRandomString() }),
+				state: JSON.stringify({ username: generateRandomString(), redirectUri }),
 			},
 			session: { pkceCodes: { verifier: generateRandomString() } },
 		};
 
 		test(`should respond with ${templates.invalidArguments.code} if the email already exists`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: {} });
+			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: {} });
 			const mockCB = jest.fn();
-			await Aad.getUserDetailsAndCheckEmailAvailability(req, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			expect(Responder.respond.mock.results[0].value.message).toEqual('Email already exists');
+			await Aad.validateUserDetails(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${templates.emailAlreadyExists.code}`);
 		});
 
-		test(`should respond with ${templates.invalidArguments.code} if the email already exists`, async () => {
+		test(`should respond with ${templates.invalidArguments.code} if the email already exists (SSO user)`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
+			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
 			const mockCB = jest.fn();
-			await Aad.getUserDetailsAndCheckEmailAvailability(req, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			expect(Responder.respond.mock.results[0].value.message).toEqual('Email already exists from SSO user');
+			await Aad.validateUserDetails(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${templates.emailAlreadyExistsSso.code}`);
 		});
+
+		// test(`should respond with ${templates.invalidArguments.code} if state is empty`, async () => {
+		// 	AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
+		// 	UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
+		// 	const mockCB = jest.fn();
+		// 	const reqWithNoState = {...req, query: { code: generateRandomString() }};
+		// 	await Aad.validateUserDetails(reqWithNoState, {}, mockCB);
+		// 	expect(mockCB).not.toHaveBeenCalled();
+		// 	expect(Responder.respond).toHaveBeenCalledTimes(1);
+		// 	expect(Responder.respond).toHaveBeenCalledWith(reqWithNoState, {}, createResponseCode(templates.invalidArguments));
+		// });
 
 		test('should call next if email is available', async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByQuery.mockRejectedValueOnce(templates.userNotFound);
+			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
-			await Aad.getUserDetailsAndCheckEmailAvailability(req, {}, mockCB);
+			await Aad.validateUserDetails(req, res, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledTimes(0);
+			expect(res.redirect).not.toHaveBeenCalled();
 			expect(req.body).toEqual(
 				{
 					...JSON.parse(req.query.state),
+					redirectUri: undefined,
 					email: aadUserDetails.data.mail,
 					firstName: aadUserDetails.data.givenName,
 					lastName: aadUserDetails.data.surname,
-					sso: { type: aad, id: aadUserDetails.data.id },
+					sso: { type: providers.AAD, id: aadUserDetails.data.id },
 				},
 			);
 		});
 	});
 };
 
-const testSetAuthenticateAuthParams = () => {
-	describe('Set auth params for authenticate endpoint', () => {
-		const req = {
-			query: { signupUri: generateRandomString() },
-			session: { pkceCodes: { challenge: generateRandomString(), challengeMethod: generateRandomString() } },
-		};
+const testAuthenticate = () => {
+	describe('Add PKCE codes and redirect to MS authentication page', () => {
+		const redirectUri = generateRandomString();
+		const res = { redirect: () => {} };
 
-		test('should set authParams and call next', async () => {
-			const mockCB = jest.fn();
-			await Aad.setAuthenticateAuthParams(req, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
+		test(`should respond with ${templates.invalidArguments.code} if req.query has no redirectUri`, async () => {
+			const req = { query: {} };
+			addPkceCodes(req);
+
+			await Aad.authenticate(redirectUri)(req, res);
+			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, 'redirectUri is a required field'));
+		});
+
+		test('should set authParams and reqirect to ms authentication page if req has no body', async () => {
+			const req = { query: { redirectUri: generateRandomString() } };
+			addPkceCodes(req);
+
+			await Aad.authenticate(redirectUri)(req, res);
+			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(req.authParams).toEqual({
-				redirectUri: authenticateRedirectUri,
-				state: JSON.stringify({ redirectUri: req.query.signupUri }),
+				redirectUri,
+				state: JSON.stringify({ redirectUri: req.query.redirectUri }),
+				codeChallenge: req.session.pkceCodes.challenge,
+				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+			});
+		});
+
+		test('should set authParams and reqirect to ms authentication page if req has body', async () => {
+			const req = {
+				query: { redirectUri: generateRandomString() },
+				body: { username: generateRandomString() },
+			};
+			addPkceCodes(req);
+
+			await Aad.authenticate(redirectUri)(req, res);
+			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(req.authParams).toEqual({
+				redirectUri,
+				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 			});
@@ -117,55 +168,7 @@ const testSetAuthenticateAuthParams = () => {
 	});
 };
 
-const testSetSignupAuthParams = () => {
-	describe('Set auth params for signup endpoint', () => {
-		const req = {
-			body: {
-				username: generateRandomString(),
-				countryCode: generateRandomString(),
-				company: generateRandomString(),
-				mailListAgreed: true,
-			},
-			session: { pkceCodes: { challenge: generateRandomString(), challengeMethod: generateRandomString() } },
-		};
-
-		test('should set authParams and call next', async () => {
-			const mockCB = jest.fn();
-			await Aad.setSignupAuthParams(req, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(req.authParams).toEqual({
-				redirectUri: signupRedirectUri,
-				state: JSON.stringify({
-					username: req.body.username,
-					countryCode: req.body.countryCode,
-					company: req.body.company,
-					mailListAgreed: req.body.mailListAgreed,
-				}),
-				codeChallenge: req.session.pkceCodes.challenge,
-				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
-			});
-		});
-	});
-};
-
-const testSetAuthenticationCodeUrl = () => {
-	describe('Get authentication code url', () => {
-		const req = { };
-
-		test('should call set authParams and call next', async () => {
-			const mockCB = jest.fn();
-			const authenticationCodeUrl = generateRandomString();
-			AadServices.getAuthenticationCodeUrl.mockResolvedValueOnce(authenticationCodeUrl);
-			await Aad.setAuthenticationCodeUrl(req, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(req.authenticationCodeUrl).toEqual(authenticationCodeUrl);
-		});
-	});
-};
-
-describe('middleware/dataConverter/inputs/teamspaces', () => {
-	testGetUserDetailsAndCheckEmailAvailability();
-	testSetAuthenticateAuthParams();
-	testSetSignupAuthParams();
-	testSetAuthenticationCodeUrl();
+describe('middleware/dataConverter/inputs/sso/aad', () => {
+	testValidateUserDetails();
+	testAuthenticate();
 });
