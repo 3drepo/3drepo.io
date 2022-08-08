@@ -15,25 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');
-const { generateRandomString } = require('../../../../../../helper/services');
-const { providers, errorCodes } = require('../../../../../../../../src/v5/services/sso/sso.constants');
-const { src } = require('../../../../../../helper/path');
+const { createResponseCode } = require('../../../../../src/v5/utils/responseCodes');
+const { generateRandomString } = require('../../../helper/services');
+const { providers, errorCodes } = require('../../../../../src/v5/services/sso/sso.constants');
+const { src } = require('../../../helper/path');
 
-jest.mock('../../../../../../../../src/v5/utils/responder');
+jest.mock('../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../../src/v5/services/sso/aad');
+jest.mock('../../../../../src/v5/services/sso/aad');
 const AadServices = require(`${src}/services/sso/aad`);
 
-jest.mock('../../../../../../../../src/v5/models/users');
+jest.mock('../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
 
-const Aad = require(`${src}/middleware/dataConverter/inputs/sso/aad`);
+const Aad = require(`${src}/middleware/sso/aad`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-jest.mock('../../../../../../../../src/v5/middleware/dataConverter/inputs/sso');
-const Sso = require(`${src}/middleware/dataConverter/inputs/sso`);
+jest.mock('../../../../../src/v5/middleware/sso/pkce');
+const Sso = require(`${src}/middleware/sso/pkce`);
 
 Sso.addPkceProtection.mockImplementation((req, res, next) => next());
 
@@ -44,7 +44,7 @@ const addPkceCodes = (req) => {
 	req.session = { pkceCodes: { challenge: generateRandomString(), challengeMethod: generateRandomString() } };
 };
 
-const testValidateUserDetails = () => {
+const testVerifyNewUserDetails = () => {
 	describe('Get user details and check email availability', () => {
 		const aadUserDetails = {
 			data: {
@@ -69,7 +69,7 @@ const testValidateUserDetails = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: {} });
 			const mockCB = jest.fn();
-			await Aad.validateUserDetails(req, res, mockCB);
+			await Aad.verifyNewUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExists}`);
@@ -79,10 +79,10 @@ const testValidateUserDetails = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
 			const mockCB = jest.fn();
-			await Aad.validateUserDetails(req, res, mockCB);
+			await Aad.verifyNewUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExistsBySsoUser}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExistsWithSSO}`);
 		});
 
 		test(`should respond with ${templates.invalidArguments.code} if state is empty`, async () => {
@@ -90,7 +90,7 @@ const testValidateUserDetails = () => {
 			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
 			const reqWithNoState = { ...req, query: { code: generateRandomString() } };
-			await Aad.validateUserDetails(reqWithNoState, res, mockCB);
+			await Aad.verifyNewUserDetails(reqWithNoState, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(reqWithNoState, res, createResponseCode(templates.unkown));
@@ -100,7 +100,7 @@ const testValidateUserDetails = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
-			await Aad.validateUserDetails(req, res, mockCB);
+			await Aad.verifyNewUserDetails(req, res, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(req.body).toEqual(
@@ -130,7 +130,7 @@ const testAuthenticate = () => {
 			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'redirectUri is a required field'));
+				createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
 		});
 
 		test(`should respond with ${templates.ssoNotAvailable.code} if getAuthenticationCodeUrl throws ${templates.ssoNotAvailable.code}`, async () => {
@@ -180,7 +180,42 @@ const testAuthenticate = () => {
 	});
 };
 
+const testRedirectToStateURL = () => {
+	describe('Redirect to state url', () => {
+		test('Res.redirect to have been called with the redirect url', () => {
+			const redirectUri = generateRandomString();
+			const req = {
+				query: { state: JSON.stringify({ redirectUri }) },
+			};
+			const res = {
+				redirect: jest.fn(),
+			};
+
+			Aad.redirectToStateURL(req, res);
+
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(redirectUri);
+
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('Responder should be called if something went wrong', () => {
+			const res = {
+				redirect: jest.fn(),
+			};
+
+			Aad.redirectToStateURL({}, res);
+
+			expect(res.redirect).not.toHaveBeenCalled();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith({}, res, templates.unknown);
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/sso/aad', () => {
-	testValidateUserDetails();
+	testVerifyNewUserDetails();
 	testAuthenticate();
+	testRedirectToStateURL();
 });

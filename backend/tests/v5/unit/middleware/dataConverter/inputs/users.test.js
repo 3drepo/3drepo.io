@@ -285,7 +285,7 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
-	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
+	])('Validate user sign up data', (req, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const bodyBefore = { ...req.body };

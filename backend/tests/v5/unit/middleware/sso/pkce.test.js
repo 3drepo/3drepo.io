@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../helper/path');
+const { src } = require('../../../helper/path');
 
-const Sso = require(`${src}/middleware/dataConverter/inputs/sso`);
+const Sso = require(`${src}/middleware/sso/pkce`);
 
 const testAddPkceProtection = () => {
 	describe('Add pkce protection', () => {
@@ -33,6 +33,6 @@ const testAddPkceProtection = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/sso', () => {
+describe('middleware/dataConverter/inputs/sso/pkce', () => {
 	testAddPkceProtection();
 });
