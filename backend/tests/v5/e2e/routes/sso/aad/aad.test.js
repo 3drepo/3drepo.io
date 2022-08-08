@@ -166,7 +166,7 @@ const signupPost = () => {
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
-			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExistsBySsoUser.toString());
+			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExistsWithSSO.toString());
 		});
 
 		test('should fail if state is not provided', async () => {

@@ -22,7 +22,7 @@ const Users = require('../../../processors/users');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 
-const signupPost = async (req, res, next) => {
+const signUpPost = async (req, res, next) => {
 	try {
 		await Users.signUp(req.body);
 		await next();
@@ -105,9 +105,9 @@ const establishRoutes = () => {
 	 *       302:
 	 *         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	 */
-	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri), redirectToStateURL);
+	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(signupRedirectEndpoint, verifyNewUserDetails, signupPost);
+	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
 	return router;
 };
