@@ -21,6 +21,7 @@ import { EMPTY_VIEW } from './../../src/v5/store/store.helpers';
 import { FetchContainerViewsResponse } from '@/v5/services/api/containers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
 import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
+import { View } from '@/v5/store/store.types';
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -53,6 +54,31 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	
 	...overrides,
 });
+
+export const prepareMockStats = (overrides?: Partial<ContainerStats>): ContainerStats => ({
+	revisions: {
+		total: faker.datatype.number(),
+		lastUpdated: faker.datatype.number(),
+		latestRevision: faker.random.word(),
+	},
+	type: faker.random.word(),
+	status: UploadStatuses.OK,
+	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	code: faker.datatype.uuid(),
+	...overrides,
+});
+
+export const prepareMockViews = (): View[] => {
+	const views = [];
+	for(let i = 0; i < 3; i++) {
+		views.push({
+			_id: faker.datatype.uuid(),
+			hasThumbnail: faker.datatype.boolean(),
+			name: faker.random.word(),
+		});
+	}
+	return views;
+};
 
 export const prepareMockStatsReply = (container: IContainer): ContainerStats => ({
 	revisions: {

@@ -19,6 +19,9 @@ import { DashboardListItemTitle as ListItemTitle } from '@components/dashboard/d
 import styled from 'styled-components';
 
 export const DashboardListItemTitle = styled(ListItemTitle)`
+	min-width: 90px;
+	padding-right: 5px;
+	box-sizing: border-box;
 	.MuiButton-root {
 		cursor: default;
 		text-decoration-line: none;

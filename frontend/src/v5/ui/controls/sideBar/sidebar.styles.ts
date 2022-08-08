@@ -18,19 +18,22 @@
 import styled from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
 
-export const Container = styled.span`
+export const SidebarContainer = styled.span<{ open: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	position: relative;
-	${({ open }: {open: boolean}) => (open ? 'width: 400px; transition: width 0.1s;' : 'width: 0; transition: width 0.1s;')}
-`;
-
-export const Content = styled.div`
+	width: ${({ open }) => (open ? '400px' : '0')};
+	transition: width 0.1s;
 	overflow: hidden;
-	margin: 30px;
-	width: 340px;
+	flex-shrink: 0;
 `;
 
-export const Button = styled(CircleButton)`
+export const SidebarContent = styled.div`
+	padding: 30px;
+	width: 100%;
+	box-sizing: border-box;
+`;
+
+export const ExpandButton = styled(CircleButton)`
 	position: absolute;
 	right: 11px;
 	top: 14px;
