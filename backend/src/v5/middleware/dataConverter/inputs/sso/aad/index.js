@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { errorCodes, providers } = require('../../../../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../../../../services/sso/aad');
 const Yup = require('yup');
 const { addPkceProtection } = require('..');
 const { getUserByEmail } = require('../../../../../models/users');
 const { logger } = require('../../../../../utils/logger');
-const { providers } = require('../../../../../services/sso/sso.constants');
 const { respond } = require('../../../../../utils/responder');
 const { signupRedirectUri } = require('../../../../../services/sso/aad/aad.constants');
 const { types } = require('../../../../../utils/helper/yup');
@@ -34,23 +34,23 @@ const parseStateAsJson = (req, res, state) => {
 	} catch (err) {
 		logger.logError(`SSO Signup - Failed to parse req.query.state as JSON: ${err.message}`);
 		respond(req, res, templates.unknown);
-		return;
+		return null;
 	}
-}
+};
 
 Aad.validateUserDetails = async (req, res, next) => {
-	const state = parseStateAsJson(req, res, req.query.state);	
-	if(!state){
+	const state = parseStateAsJson(req, res, req.query.state);
+	if (!state) {
 		return;
 	}
-	
+
 	const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 		signupRedirectUri, req.session.pkceCodes?.verifier);
 
 	try {
 		const user = await getUserByEmail(mail, { 'customData.sso': 1 });
-		const error = user.customData.sso ? templates.emailAlreadyExistsSso : templates.emailAlreadyExists;
-		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${error.code}`);
+		const errorCode = user.customData.sso ? errorCodes.emailExistsBySsoUser : errorCodes.emailExists;
+		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${errorCode}`);
 		return;
 	} catch {
 		// do nothing

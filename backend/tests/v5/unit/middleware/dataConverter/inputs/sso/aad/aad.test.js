@@ -17,7 +17,7 @@
 
 const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');
 const { generateRandomString } = require('../../../../../../helper/services');
-const { providers } = require('../../../../../../../../src/v5/services/sso/sso.constants');
+const { providers, errorCodes } = require('../../../../../../../../src/v5/services/sso/sso.constants');
 const { src } = require('../../../../../../helper/path');
 
 jest.mock('../../../../../../../../src/v5/utils/responder');
@@ -72,7 +72,7 @@ const testValidateUserDetails = () => {
 			await Aad.validateUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${templates.emailAlreadyExists.code}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExists}`);
 		});
 
 		test(`should respond with ${templates.invalidArguments.code} if the email already exists (SSO user)`, async () => {
@@ -82,7 +82,7 @@ const testValidateUserDetails = () => {
 			await Aad.validateUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${templates.emailAlreadyExistsSso.code}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExistsBySsoUser}`);
 		});
 
 		test(`should respond with ${templates.invalidArguments.code} if state is empty`, async () => {

@@ -33,8 +33,6 @@ ResponseCodes.templates = {
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
 	ssoNotAvailable: { message: 'SSO provider not available', status: 500 },
-	emailAlreadyExists: { message: 'Email already exists.', status: 400 },
-	emailAlreadyExistsSso: { message: 'Email already exists from SSO user.', status: 400 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
