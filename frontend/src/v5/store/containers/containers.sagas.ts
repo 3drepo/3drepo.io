@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	AddFavouriteAction,
@@ -33,8 +33,11 @@ import {
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
+import { isEqualWith } from 'lodash';
 import { FetchContainerViewsResponseView } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
+import { selectContainerById, selectContainers } from './containers.selectors';
+import { compByColum } from '../store.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -66,8 +69,12 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 	try {
 		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
+		const storedContainers = yield select(selectContainers);
 
-		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		// Only update if theres is new data
+		if (!isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		}
 
 		yield all(
 			containers.map(
@@ -88,7 +95,17 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 			teamspace, projectId, containerId,
 		});
 
-		yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
+		const container = yield select(selectContainerById, containerId);
+
+		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
+		// eslint-disable-next-line max-len
+		const revisionsEqual = (container?.latestRevision === stats?.revisions?.latestRevision && container?.status === stats?.status) // if it has revisions
+							|| (container?.latestRevision === '' && stats?.revisions?.total === 0); // if it doesnt
+
+		// Only update if theres is new data
+		if (!basicDataEqual || !revisionsEqual) {
+			yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
+		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchStats.error', defaultMessage: 'trying to fetch containers details' }),
