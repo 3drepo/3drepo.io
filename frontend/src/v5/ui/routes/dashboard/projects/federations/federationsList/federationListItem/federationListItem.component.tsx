@@ -156,7 +156,9 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<Tooltip
 							title={
-								<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+								federation.isFavourite
+									? <FormattedMessage id="federations.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
+									: <FormattedMessage id="federations.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
 							}
 						>
 							<FavouriteCheckbox
