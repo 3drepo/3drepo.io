@@ -16,13 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { AppBar } from '@mui/material';
-
-export const AppBarContainer = styled(AppBar)`
-	@media print {
-		display: none;
-	}
-`;
 
 export const Items = styled.div`
 	display: flex;
