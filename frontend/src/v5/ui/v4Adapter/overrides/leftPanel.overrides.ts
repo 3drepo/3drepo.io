@@ -80,12 +80,16 @@ export default css`
 	}
 
 	${FilterPanelContainer} {
-		.MuiOutlinedInput-notchedOutline {
+		.Mui-focused .MuiOutlinedInput-notchedOutline, .MuiOutlinedInput-notchedOutline {
+			box-sizing: border-box;
+			box-shadow: none;
+			border: 0;
+			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 			border-radius: 0;
-			border-right: 0;
-			border-left: 0;
-			border-top: 0;
 		}
+		/* .MuiOutlinedInput-notchedOutline {
+			border: 0;
+		} */
 
 		${Placeholder} {
 			.MuiSvgIcon-root {
@@ -123,6 +127,11 @@ export default css`
 
 		${StyledIconButton} {
 			height: 26px;
+		}
+
+		.Mui-focused .MuiInputBase-input {
+			border: 0;
+			box-shadow: none;
 		}
 
 		button {
