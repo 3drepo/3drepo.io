@@ -63,7 +63,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided via query. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 Email already exists, 2 Email already exists by an SSO user
 	 *     tags: [Aad]
 	 *     operationId: signup
 	 *     requestBody:
