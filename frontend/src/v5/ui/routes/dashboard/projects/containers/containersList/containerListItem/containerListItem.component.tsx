@@ -18,7 +18,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import { Tooltip } from '@mui/material';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,
@@ -144,27 +143,19 @@ export const ContainerListItem = ({
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
-					<Tooltip
-						title={
-							container.isFavourite
-								? <FormattedMessage id="containers.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
-								: <FormattedMessage id="containers.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
-						}
-					>
-						<FavouriteCheckbox
-							checked={container.isFavourite}
-							selected={isSelected}
-							onClick={(event) => {
-								event.stopPropagation();
-							}}
-							onChange={(event) => {
-								onFavouriteChange(
-									container._id,
-									!!event.currentTarget.checked,
-								);
-							}}
-						/>
-					</Tooltip>
+					<FavouriteCheckbox
+						checked={container.isFavourite}
+						selected={isSelected}
+						onClick={(event) => {
+							event.stopPropagation();
+						}}
+						onChange={(event) => {
+							onFavouriteChange(
+								container._id,
+								!!event.currentTarget.checked,
+							);
+						}}
+					/>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
 					<ContainerEllipsisMenu

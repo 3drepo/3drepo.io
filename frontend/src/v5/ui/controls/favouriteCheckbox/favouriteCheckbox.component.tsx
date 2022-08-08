@@ -14,9 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { forwardRef, Ref } from 'react';
 import StarIcon from '@assets/icons/star.svg';
-import { CheckboxProps } from '@mui/material';
+import { CheckboxProps, Tooltip } from '@mui/material';
+import { FormattedMessage } from 'react-intl';
 import { Checkbox } from './favouriteCheckbox.styles';
 
 interface IFavouriteCheckbox extends Omit<CheckboxProps, 'icon'|'checkedIcon'> {
@@ -25,12 +27,20 @@ interface IFavouriteCheckbox extends Omit<CheckboxProps, 'icon'|'checkedIcon'> {
 
 export const FavouriteCheckbox = forwardRef(
 	({ selected = false, ...props }: IFavouriteCheckbox, ref: Ref<HTMLButtonElement>): JSX.Element => (
-		<Checkbox
-			icon={<StarIcon />}
-			checkedIcon={<StarIcon />}
-			ref={ref}
-			selected={selected}
-			{...props}
-		/>
+		<Tooltip
+			title={
+				props.checked
+					? <FormattedMessage id="favouriteCheckbox.removeTooltip" defaultMessage="Remove from favourites" />
+					: <FormattedMessage id="favouriteCheckbox.addTooltip" defaultMessage="Add to favourites" />
+			}
+		>
+			<Checkbox
+				icon={<StarIcon />}
+				checkedIcon={<StarIcon />}
+				ref={ref}
+				selected={selected}
+				{...props}
+			/>
+		</Tooltip>
 	),
 );
