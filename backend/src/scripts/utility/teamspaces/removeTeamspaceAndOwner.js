@@ -19,9 +19,11 @@ const Path = require('path');
 
 const { v5Path } = require('../../../interop');
 
+const { getTeamspaceList } = require('../../common/utils');
+
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceListByUser, removeTeamspaceMember, removeTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
-const { remove: deleteUser } = require(`${v5Path}/processors/users`);
+const { remove: deleteUser, getUserByUsername } = require(`${v5Path}/processors/users`);
 
 const removeUserFromAllTeamspaces = async (user) => {
 	const teamspaces = await getTeamspaceListByUser(user);
@@ -31,16 +33,23 @@ const removeUserFromAllTeamspaces = async (user) => {
 };
 
 const removeUser = async (user) => {
-	await removeUserFromAllTeamspaces(user);
-	await deleteUser(user);
+	const userExists = await getUserByUsername(user).catch(() => false);
+
+	if (userExists) {
+		await removeUserFromAllTeamspaces(user);
+		await deleteUser(user);
+	}
 };
 
 const run = async (teamspaces, removeOwners) => {
 	const teamspaceArr = teamspaces.split(',');
+	const tsList = await getTeamspaceList();
 	for (const teamspace of teamspaceArr) {
 		logger.logInfo(`-${teamspace}`);
-		// eslint-disable-next-line no-await-in-loop
-		await removeTeamspace(teamspace);
+		if (tsList.includes(teamspace)) {
+			// eslint-disable-next-line no-await-in-loop
+			await removeTeamspace(teamspace);
+		}
 		if (removeOwners) {
 			// eslint-disable-next-line no-await-in-loop
 			await removeUser(teamspace);

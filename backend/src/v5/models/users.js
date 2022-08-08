@@ -168,7 +168,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 			await updateUser(username, action);
 		}
-	} else {
+	} else if (favouritesToRemove?.length) {
 		throw createResponseCode(templates.invalidArguments, "The IDs provided are not in the user's favourites list");
 	}
 };
