@@ -98,6 +98,11 @@ const authenticate = (redirectUri) => async (req, res) => {
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
 Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
+	const state = parseStateAsJson(req, res, req.query.state);	
+	if(!state){
+		return;
+	}
+	
 	const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
 		req.session.pkceCodes?.verifier);
 
@@ -105,15 +110,17 @@ Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 		const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
 
 		if (user.customData.sso?.id != id) {
-			throw templates.nonSsoUser;
+			res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${nonSsoUser.code}`);
+			//redirect with specific error code
+			return;
 		}
 
-		const loginData = await recordSuccessfulAuthAttempt(user.user);
-		req.loginData = loginData;
+		req.loginData = await recordSuccessfulAuthAttempt(user.user);
 		await next();
 	} catch {
-		respond(req, res, templates.incorrectUsernameOrPassword);
+		//redirect with specific error code
 	}	
+
 };
 
 module.exports = Aad;
