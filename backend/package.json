@@ -23,6 +23,7 @@
     "run-script": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/index"
   },
   "dependencies": {
+    "@azure/msal-node": "1.11.0",
     "@elastic/elasticsearch": "7.17.0",
     "amqplib": "0.8.0",
     "apidoc": "0.17.7",
