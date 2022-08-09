@@ -170,9 +170,9 @@ module.exports = {
 
 	sso: {
 		aad: {
-			clientId: "e23070b8-b152-4e3c-8e9d-288470923063",
+			clientId: "abc",
 			authority: "https://login.microsoftonline.com/common",
-			clientSecret: "80a84226-aaf1-4b2b-a774-d44fde99588e"
+			clientSecret: "xyz"
 		}
 	}
 }
