@@ -146,9 +146,6 @@ export const ContainerListItem = ({
 					<FavouriteCheckbox
 						checked={container.isFavourite}
 						selected={isSelected}
-						onClick={(event) => {
-							event.stopPropagation();
-						}}
 						onChange={(event) => {
 							onFavouriteChange(
 								container._id,

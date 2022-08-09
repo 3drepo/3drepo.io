@@ -39,6 +39,9 @@ export const FavouriteCheckbox = forwardRef(
 				checkedIcon={<StarIcon />}
 				ref={ref}
 				selected={selected}
+				onClick={(event) => {
+					event.stopPropagation();
+				}}
 				{...props}
 			/>
 		</Tooltip>

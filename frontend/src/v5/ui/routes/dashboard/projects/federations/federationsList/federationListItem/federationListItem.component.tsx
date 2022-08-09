@@ -155,9 +155,6 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<FavouriteCheckbox
 							checked={federation.isFavourite}
-							onClick={(event) => {
-								event.stopPropagation();
-							}}
 							onChange={(event) => {
 								onFavouriteChange(
 									federation._id,
