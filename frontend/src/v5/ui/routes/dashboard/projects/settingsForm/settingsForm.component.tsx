@@ -27,10 +27,11 @@ import { IFederation, FederationSettings } from '@/v5/store/federations/federati
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
+import { ShareTextField } from '@controls/shareTextField';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { FlexContainer, SectionTitle, ShareTextField, Placeholder, HiddenMenuItem } from './settingsForm.styles';
+import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
 	{

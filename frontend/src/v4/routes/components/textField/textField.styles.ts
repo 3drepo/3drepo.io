@@ -71,9 +71,7 @@ export const StyledMarkdownField = styled(MarkdownField)<{ $isPlaceholder?: bool
 		font-size: 14px;
 		overflow: hidden;
 
-		/* TODO: fix after new palette is released */
-		${({ $isPlaceholder }) => $isPlaceholder && css`color: #C1C8D5;`}
-
+		${({ $isPlaceholder }) => $isPlaceholder && css`color: ${({ theme }) => theme.palette.base.lighter};`}
 	}
 `;
 
