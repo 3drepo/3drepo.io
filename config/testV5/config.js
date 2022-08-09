@@ -167,4 +167,12 @@ module.exports = {
 		},
 		sender: '"3D Repo" <dummyEmail@3drepo.org>'
 	},
+
+	sso: {
+		aad: {
+			clientId: "abc",
+			authority: "https://login.microsoftonline.com/common",
+			clientSecret: "xyz"
+		}
+	}
 }

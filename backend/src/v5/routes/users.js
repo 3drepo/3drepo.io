@@ -520,7 +520,7 @@ const establishRoutes = () => {
 	*                 example: 3D Repo
 	*               mailListAgreed:
 	*                 type: boolean
-	*                 description: Whether the user has signed yp for the latest news and tutorials
+	*                 description: Whether the user has signed up for the latest news and tutorials
 	*                 example: true
 	*               captcha:
 	*                 type: string

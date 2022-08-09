@@ -15,8 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const HttpsReq = require(`${v4Path}/libs/httpsReq`);
+const { CryptoProvider } = require('@azure/msal-node');
 
-module.exports = HttpsReq;
+const Sso = {};
+
+Sso.addPkceProtection = async (req, res, next) => {
+	const cryptoProvider = new CryptoProvider();
+	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
+
+	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
+
+	await next();
+};
+
+module.exports = Sso;

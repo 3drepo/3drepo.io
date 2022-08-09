@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const config = require('../../../utils/config');
 
-const Objects = {};
+const AadConstants = {};
 
-Objects.cloneDeep = _.cloneDeep;
+const createUri = (redirectEndpoint) => `${config.sso?.aad?.redirectDomain || config.apiUrls.all[0]}/v5/sso/aad${redirectEndpoint}`;
 
-Objects.removeFields = _.omit;
+AadConstants.authenticateRedirectEndpoint = '/authenticate-post';
+AadConstants.authenticateRedirectUri = createUri(AadConstants.authenticateRedirectEndpoint);
+AadConstants.signupRedirectEndpoint = '/signup-post';
+AadConstants.signupRedirectUri = createUri(AadConstants.signupRedirectEndpoint);
+AadConstants.msGraphUserDetailsUri = 'https://graph.microsoft.com/v1.0/me';
 
-Objects.isEmpty = _.isEmpty;
-
-Objects.deleteIfUndefined = (obj) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		if (obj[key] === undefined) delete res[key];
-	});
-
-	return res;
-};
-
-module.exports = Objects;
+module.exports = AadConstants;

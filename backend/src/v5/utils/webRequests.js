@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const axios = require('axios');
 
-const Objects = {};
+const WebRequests = {};
 
-Objects.cloneDeep = _.cloneDeep;
+WebRequests.get = (uri, headers) => {
+	const options = {};
 
-Objects.removeFields = _.omit;
+	if (headers) {
+		options.headers = headers;
+	}
 
-Objects.isEmpty = _.isEmpty;
-
-Objects.deleteIfUndefined = (obj) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		if (obj[key] === undefined) delete res[key];
-	});
-
-	return res;
+	return axios.default.get(uri, options);
 };
 
-module.exports = Objects;
+WebRequests.post = (uri, data) => axios.default.post(uri, data);
+
+module.exports = WebRequests;
