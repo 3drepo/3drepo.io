@@ -17,6 +17,7 @@
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
+const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
 const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
@@ -59,7 +60,9 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 		const user = await getUserByEmail(mail, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
 			const errorCode = user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
-			res.redirect(`${state.redirectUri}?error=${errorCode}`);
+			const urlRedirect = new URL(state.redirectUri);
+			urlRedirect.searchParams.set('error', errorCode);
+			res.redirect(urlRedirect.href);
 		} else {
 			req.body = {
 				...state,
