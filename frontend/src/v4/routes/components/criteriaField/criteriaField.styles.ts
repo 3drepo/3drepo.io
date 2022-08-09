@@ -159,8 +159,7 @@ const emptySelectFieldValueStyleV4 = css`
 	opacity: 0.42;
 `;
 const emptySelectFieldValueStyleV5 = css`
-	/* TODO - fix after new palette is released */
-	color: #C1C8D5;
+	color: ${({ theme }) => theme.palette.base.lighter};
 `;
 
 export const SelectFieldValue = styled.div`

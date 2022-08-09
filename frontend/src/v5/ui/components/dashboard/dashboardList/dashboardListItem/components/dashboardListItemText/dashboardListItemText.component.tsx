@@ -16,22 +16,38 @@
  */
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
+import { Highlight } from '@controls/highlight';
+import { SearchContext } from '@controls/search/searchContext';
+import { isString } from 'lodash';
+import { useContext } from 'react';
 import { Text } from './dashboardListItemText.styles';
 
 interface IDashboardListItemText extends IFixedOrGrowContainer {
 	selected?: boolean;
+	dontHighlight?: boolean
 }
 
 export const DashboardListItemText = ({
 	selected = false,
 	children,
+	dontHighlight,
 	...containerProps
-}: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer
-		{...containerProps}
-	>
-		<Text selected={selected}>
-			{children}
-		</Text>
-	</FixedOrGrowContainer>
-);
+}: IDashboardListItemText): JSX.Element => {
+	const { query } = useContext(SearchContext);
+	const shouldHighlight = isString(children) && !dontHighlight;
+
+	return (
+		<FixedOrGrowContainer
+			{...containerProps}
+		>
+			<Text selected={selected}>
+				{shouldHighlight && (
+					<Highlight search={query}>
+						{children as string}
+					</Highlight>
+				)}
+				{!shouldHighlight && children}
+			</Text>
+		</FixedOrGrowContainer>
+	);
+};

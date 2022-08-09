@@ -16,14 +16,14 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { AddCircleIcon, Container, Message } from './newContainer.styles';
+import { AddCircleIcon, NewContainerOption, Message } from './newContainer.styles';
 
 interface INewContainer {
 	containerName: string;
 }
 
 export const NewContainer = ({ containerName, ...props }: INewContainer) => (
-	<Container {...props}>
+	<NewContainerOption {...props}>
 		<AddCircleIcon />
 		<Message>
 			<FormattedMessage
@@ -35,5 +35,5 @@ export const NewContainer = ({ containerName, ...props }: INewContainer) => (
 				}}
 			/>
 		</Message>
-	</Container>
+	</NewContainerOption>
 );

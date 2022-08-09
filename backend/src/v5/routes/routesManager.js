@@ -16,6 +16,7 @@
  */
 
 const RoutesManager = {};
+const AadRoutes = require('./sso/aad');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
@@ -35,6 +36,9 @@ const UserRoutes = require('./users');
 RoutesManager.init = (app) => {
 	// Auth
 	app.use('/v5/', UserRoutes);
+
+	// Single Sign On
+	app.use('/v5/sso/aad', AadRoutes);
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);

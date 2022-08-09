@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { Typography } from '@mui/material';
 import { CardListItem } from '@components/shared/linkCard/linkCard.styles';
 import { Button } from '@controls/button';
-import { SearchInput as SearchInputBase } from '@controls/searchInput';
+import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};

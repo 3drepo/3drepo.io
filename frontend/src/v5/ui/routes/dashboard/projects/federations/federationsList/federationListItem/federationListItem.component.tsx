@@ -26,8 +26,6 @@ import {
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemFederationTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { Highlight } from '@controls/highlight';
-import { Tooltip } from '@mui/material';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
@@ -52,21 +50,20 @@ const MODALS = {
 interface IFederationListItem {
 	index: number;
 	federation: IFederation;
-	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
 }
 
 export const FederationListItem = ({
 	index,
 	federation,
-	filterQuery,
 	onFavouriteChange,
 }: IFederationListItem): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
+
+	const { teamspace, project } = useParams<DashboardParams>();
+
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
 
@@ -98,7 +95,6 @@ export const FederationListItem = ({
 					<DashboardListItemFederationTitle
 						minWidth={90}
 						federation={federation}
-						filterQuery={filterQuery}
 					/>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
@@ -151,32 +147,21 @@ export const FederationListItem = ({
 						/>
 					</DashboardListItemButton>
 					<DashboardListItemText width={188}>
-						<Highlight search={filterQuery}>
-							{federation.code}
-						</Highlight>
+						{federation.code}
 					</DashboardListItemText>
 					<DashboardListItemText width={97} minWidth={73}>
 						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 					</DashboardListItemText>
 					<DashboardListItemIcon>
-						<Tooltip
-							title={
-								<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
-							}
-						>
-							<FavouriteCheckbox
-								checked={federation.isFavourite}
-								onClick={(event) => {
-									event.stopPropagation();
-								}}
-								onChange={(event) => {
-									onFavouriteChange(
-										federation._id,
-										!!event.currentTarget.checked,
-									);
-								}}
-							/>
-						</Tooltip>
+						<FavouriteCheckbox
+							checked={federation.isFavourite}
+							onChange={(event) => {
+								onFavouriteChange(
+									federation._id,
+									!!event.currentTarget.checked,
+								);
+							}}
+						/>
 					</DashboardListItemIcon>
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
