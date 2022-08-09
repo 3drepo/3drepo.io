@@ -21,7 +21,7 @@ import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 
-const selectFederationsDomain = (state): IFederationsState => state?.federations;
+const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
 export const selectFederations = createSelector(
 	selectFederationsDomain, selectCurrentProject,
