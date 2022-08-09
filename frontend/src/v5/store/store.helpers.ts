@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { uniqWith } from 'lodash';
+import { uniqWith, isArray, isEqual } from 'lodash';
 import { IContainer } from './containers/containers.types';
 import { IFederation } from './federations/federations.types';
 import { View } from './store.types';
@@ -33,3 +33,9 @@ export const isFederation = (containerOrFederation: CF) => (
 export const uniqueIds = <T>(listItems: T[]) =>
 	// eslint-disable-next-line implicit-arrow-linebreak
 	uniqWith(listItems, (a, b) => (a as unknown as CF)._id === (b as unknown as CF)._id);
+
+export const compByColum = (columns: string[]) => (a, b) => {
+	if (isArray(a) || isArray(b)) return undefined;
+	if (a === undefined || b === undefined) return undefined;
+	return columns.every((col) => isEqual(a[col], b[col]));
+};
