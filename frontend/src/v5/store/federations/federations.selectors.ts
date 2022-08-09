@@ -21,11 +21,11 @@ import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 
-const selectFederationsDomain = (state): IFederationsState => state.federations;
+const selectFederationsDomain = (state): IFederationsState => state?.federations;
 
 export const selectFederations = createSelector(
 	selectFederationsDomain, selectCurrentProject,
-	(state, currentProject) => state.federationsByProject[currentProject] ?? [],
+	(state, currentProject) => state?.federationsByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteFederations = createSelector(
