@@ -33,7 +33,6 @@ import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styl
 import { Container as PreviewDetailsContainer,
 	CollapsableContent,
 	NotCollapsableContent,
-	ToggleButtonContainer,
 	MainInfoContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
@@ -123,16 +122,16 @@ const expandedGroupItem = css`
 			background-color: #F7F8FA;
 		}
 		.MuiAccordionDetails-root {
-			background-color: ${({ theme }) => theme.palette.primary.constrast};
 			${CollapsableContent} {
 				padding: 10px;
 				label {
 					font-size: 10px;
 				}
 				${TextFieldContainer} {
-					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+					border: 1px solid ${({ theme }) => theme.palette.base.lighter};
 					border-radius: 5px;
-					background-color: ${({ theme }) => theme.palette.primary.constrast};
+					background-color: ${({ theme }) => theme.palette.primary.contrast};
+
 					label {
 						transform: scale(1);
 						left: 1px;
@@ -147,12 +146,16 @@ const expandedGroupItem = css`
 						padding: 0;
 						& > textarea {
 							min-height: 2rem;
-							padding: 5px 10px 0;
+							padding: 5px 10px;
+						}
+						&.Mui-focused fieldset {
+							border: 1px solid ${({ theme }) => theme.palette.primary.main};
+							box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
 						}
 						fieldset {
 							border: none;
+							box-shadow: none;
 						}
-
 					}
 
 					${FieldWrapper} {
@@ -185,7 +188,6 @@ const expandedGroupItem = css`
 				}
 				${DetailsDescription} {
 					margin-top: 30px;
-					background-color: ${({ theme }) => theme.palette.primary.contrast};
 					
 					> div {
 						min-height: 42px !important;
@@ -221,9 +223,6 @@ const expandedGroupItem = css`
 				}
 			}
 		}
-		${ToggleButtonContainer} {
-			background-color: ${({ theme }) => theme.palette.primary.constrast};
-		}
 		${NotCollapsableContent} {
 			padding: 15px 0 0;
 			${FiltersContainer} {
@@ -247,7 +246,7 @@ const expandedGroupItem = css`
 					border: none;
 					/* TODO - fix after new palette is released */
 					background-color: #F7F8FA;
-					color: #C1C8D5;
+					color: ${({ theme }) => theme.palette.base.lighter};
 					border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					padding: 12px 15px;
 
@@ -267,7 +266,7 @@ const expandedGroupItem = css`
 
 						& ::placeholder {
 							// TODO - fix after new palette is released
-							-webkit-text-fill-color: #C1C8D5;
+							-webkit-text-fill-color: ${({ theme }) => theme.palette.base.lighter};
 							font-weight: 400;
 						}
 
@@ -293,6 +292,7 @@ const expandedGroupItem = css`
 									padding-left: 12px;
 									~ svg {
 										margin-top: 0;
+										color: ${({ theme }) => theme.palette.base.lighter};
 									}
 								}
 							}
