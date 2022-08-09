@@ -31,6 +31,7 @@ const getButtonSize = (size) => {
 		return css`
 			height: ${SIZE_MAP[size]}px;
 			width: ${SIZE_MAP[size]}px;
+			flex-shrink: 0;
 		`;
 	}
 
