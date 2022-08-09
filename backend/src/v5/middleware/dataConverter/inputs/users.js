@@ -19,8 +19,8 @@ const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUser
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const httpsPost = require('../../../utils/webRequests').post;
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -216,7 +216,7 @@ const generateSignUpSchema = (isSSO) => {
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
-			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
+			const checkCaptcha = post(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
 				response: body.captcha,
 			});
