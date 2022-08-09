@@ -20,11 +20,11 @@ import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
 
-const selectContainersDomain = (state): IContainersState => state.containers;
+const selectContainersDomain = (state): IContainersState => state?.containers;
 
 export const selectContainers = createSelector(
 	selectContainersDomain, selectCurrentProject,
-	(state, currentProject) => state.containersByProject[currentProject] ?? [],
+	(state, currentProject) => state?.containersByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteContainers = createSelector(
