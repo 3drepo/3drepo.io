@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode } = require('../../../../../src/v5/utils/responseCodes');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, generateRandomURL } = require('../../../helper/services');
 const { providers, errorCodes } = require('../../../../../src/v5/services/sso/sso.constants');
 const { src } = require('../../../helper/path');
 
@@ -55,7 +55,7 @@ const testVerifyNewUserDetails = () => {
 			},
 		};
 
-		const redirectUri = generateRandomString();
+		const redirectUri = generateRandomURL();
 		const res = { redirect: jest.fn() };
 		const req = {
 			query: {
@@ -65,7 +65,7 @@ const testVerifyNewUserDetails = () => {
 			session: { pkceCodes: { verifier: generateRandomString() } },
 		};
 
-		test(`should respond with ${templates.invalidArguments.code} if the email already exists`, async () => {
+		test(`should respond with error code ${errorCodes.emailExists} if the email already exists`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: {} });
 			const mockCB = jest.fn();
@@ -75,7 +75,7 @@ const testVerifyNewUserDetails = () => {
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExists}`);
 		});
 
-		test(`should respond with ${templates.invalidArguments.code} if the email already exists (SSO user)`, async () => {
+		test(`should respond with error code ${errorCodes.emailExistsWithSSO} if the email already exists (SSO user)`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
 			const mockCB = jest.fn();
@@ -183,7 +183,7 @@ const testAuthenticate = () => {
 const testRedirectToStateURL = () => {
 	describe('Redirect to state url', () => {
 		test('Res.redirect to have been called with the redirect url', () => {
-			const redirectUri = generateRandomString();
+			const redirectUri = generateRandomURL();
 			const req = {
 				query: { state: JSON.stringify({ redirectUri }) },
 			};
@@ -214,7 +214,7 @@ const testRedirectToStateURL = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/sso/aad', () => {
+describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
 	testAuthenticate();
 	testRedirectToStateURL();
