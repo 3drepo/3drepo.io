@@ -18,6 +18,8 @@
 import { StyledTab, StyledTabs, TabContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
 import safetiBaseRisk from './risk.overrides';
+import safetiBaseTreatments from './treatments.overrides';
+import safetiBaseSequences from './sequences.overrides';
 
 export default css`
 	${StyledTabs} {
@@ -37,5 +39,7 @@ export default css`
 		background-color: #F7F8FA;
 		
 		${safetiBaseRisk}
+		${safetiBaseTreatments}
+		${safetiBaseSequences}
 	}
 `;

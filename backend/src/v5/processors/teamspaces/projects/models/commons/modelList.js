@@ -17,6 +17,7 @@
 
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
 const { removeModelData } = require('../../../../../utils/helper/models');
@@ -24,7 +25,7 @@ const { removeModelData } = require('../../../../../utils/helper/models');
 const ModelList = {};
 
 ModelList.addModel = async (teamspace, project, data) => {
-	const insertedId = await addModel(teamspace, data);
+	const insertedId = await addModel(teamspace, project, data);
 
 	await addModelToProject(teamspace, project, insertedId);
 
@@ -32,7 +33,7 @@ ModelList.addModel = async (teamspace, project, data) => {
 };
 
 ModelList.deleteModel = async (teamspace, project, model) => {
-	await removeModelData(teamspace, model);
+	await removeModelData(teamspace, project, model);
 	await removeModelFromProject(teamspace, project, model);
 };
 
@@ -49,7 +50,10 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
 		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
 		return (!isAdmin && !perm)
-			? [] : { _id, name, role: isAdmin ? 'admin' : perm.permission, isFavourite: favourites.includes(_id) };
+			? [] : { _id,
+				name,
+				role: isAdmin ? USERS_DB_NAME : perm.permission,
+				isFavourite: favourites.includes(_id) };
 	});
 };
 

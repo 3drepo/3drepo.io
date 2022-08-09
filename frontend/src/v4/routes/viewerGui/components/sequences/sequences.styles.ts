@@ -65,15 +65,11 @@ export const SequenceTasksListContainer = styled(ViewerPanelContent)`
 	background-color: ${COLOR.BLACK_6};
 	font-size: 13px;
 	color: ${COLOR.BLACK_60};
-	padding: 15px;
-
-	& > * {
-		margin-bottom: 15px;
-	}
 `;
 
 export const TaskListLabel = styled.div`
 	font-weight: 500;
+	padding: 15px;
 `;
 
 export const SequenceTasksListItem = styled.div`

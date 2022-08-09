@@ -30,9 +30,5 @@ export const Select = styled(SelectBase)`
 		width: 100%;
 		cursor: initial;
 		pointer-events: none;
-		
-		fieldset {
-			border: 0;
-		}
 	}
 `;

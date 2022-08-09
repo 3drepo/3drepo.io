@@ -106,11 +106,13 @@
 	};
 
 	Handler.dropCollection = function (database, collection) {
-		Handler.getDB(database).then(dbConn => {
-			dbConn.dropCollection(collection.name);
+		return Handler.getDB(database).then(dbConn => {
+			return dbConn.dropCollection(collection.name || collection);
 		}).catch(err => {
-			Handler.disconnect();
-			return Promise.reject(err);
+			if(err.message !== "ns not found") {
+				Handler.disconnect();
+				return Promise.reject(err);
+			}
 		});
 	};
 
@@ -194,6 +196,11 @@
 		});
 	};
 
+	Handler.getDatabaseStats = async (database) => {
+		const dbConn = await Handler.getDB(database);
+		return dbConn.stats();
+	};
+
 	Handler.getCollectionStats = function (database, colName) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
@@ -271,6 +278,11 @@
 	Handler.createIndex = async (database, colName, indexDef) => {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.createIndex(indexDef);
+	};
+
+	Handler.createIndices = async (database, colName, indicesDef) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.createIndexes(indicesDef);
 	};
 
 	Handler.dropIndex = async (database, colName, indexName) => {
@@ -363,6 +375,20 @@
 		return defaultRoleProm;
 	};
 
+	Handler.dropDatabase = async (database) => {
+		if(!["config", "admin"].includes(database)) {
+			try {
+				const dbConn = await Handler.getDB(database);
+				await dbConn.dropDatabase();
+			} catch (err) {
+				if(err.message !== "ns not found") {
+					Handler.disconnect();
+					throw err;
+				}
+			}
+		}
+	};
+
 	Handler.createUser = async function (username, password, customData, roles = []) {
 		const [adminDB] = await Promise.all([
 			Handler.getAuthDB(),
@@ -371,6 +397,10 @@
 
 		roles.push(C.DEFAULT_ROLE_OBJ);
 		await adminDB.addUser(username, password, { customData, roles});
+	};
+
+	Handler.dropUser = async (user) => {
+		await Handler.deleteOne("admin", "system.users", { user });
 	};
 
 	module.exports = Handler;

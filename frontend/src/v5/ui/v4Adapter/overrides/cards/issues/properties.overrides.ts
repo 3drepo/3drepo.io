@@ -41,13 +41,16 @@ export const DescriptionStyles = css`
 
 		.MuiFormControl-root {
 			margin-top: 0;
-		}
-		
-		.MuiInputBase-root {
-			padding: 0;
-			& > textarea {
-				min-height: 2rem;
-				padding: 5px 10px;
+			.MuiInputBase-root {
+				padding: 0;
+				& > textarea {
+					min-height: 2rem;
+					padding: 5px 10px;
+				}
+				.MuiOutlinedInput-notchedOutline {
+					height: calc(100%);
+					min-height: 42px;
+				}
 			}
 		}
 
@@ -71,7 +74,7 @@ export const DescriptionStyles = css`
 			right: 0;
 		}
 		${StyledMarkdownField} {
-			border: 1px solid #C1C8D5; // TODO: fix after new palette is released
+			border: 1px solid ${({ theme }) => theme.palette.base.lighter};
 			border-radius: 5px;
 			min-height: 32px;
 			padding: 4px 10px;
@@ -122,24 +125,19 @@ export default css`
 
 		${DateFieldContainer} {
 			margin-top: 17px;
-			input {
-				cursor: pointer;
-				height: 24px;
+			.MuiInputBase-root {
+				padding: 0;
+				input {
+					cursor: pointer;
+					height: 24px;
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 	}
 
 	${DescriptionImage} img {
 		border-radius: 5px;
-	}
-
-	${DateFieldContainer} {
-		margin-top: 18px;
-		input {
-			cursor: pointer;
-			height: 24px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-		}
 	}
 
 	${UpdateButtonsContainer} {

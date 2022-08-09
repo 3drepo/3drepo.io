@@ -21,24 +21,70 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { CurrentUserActions, CurrentUserTypes } from './currentUser.redux';
+import {
+	CurrentUserActions,
+	CurrentUserTypes,
+	UpdatePersonalDataAction,
+} from './currentUser.redux';
 
-export function* getProfile() {
+export function* fetchUser() {
 	try {
-		const userData = yield API.CurrentUser.getProfile();
+		const userData = yield API.CurrentUser.fetchUser();
 		const avatarUrl = generateV5ApiUrl(`user/avatar?${Date.now()}`, clientConfigService.GET_API);
-		yield put(CurrentUserActions.getProfileSuccess({
+		yield put(CurrentUserActions.fetchUserSuccess({
 			...userData,
 			avatarUrl,
 		}));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'currentUser.getProfile.error', defaultMessage: 'trying to fetch current user details' }),
+			currentActions: formatMessage({ id: 'currentUser.fetchUser.error', defaultMessage: 'trying to fetch current user details' }),
 			error,
 		}));
 	}
 }
 
+export function* updatePersonalData({
+	personalData: { avatarFile, ...restOfPersonalData },
+	onError,
+}: UpdatePersonalDataAction) {
+	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
+	try {
+		yield API.CurrentUser.updateUser(restOfPersonalData);
+		if (avatarFile) {
+			const formData = new FormData();
+			formData.append('file', avatarFile);
+			yield API.CurrentUser.updateAvatar(formData);
+			const avatarUrl = URL.createObjectURL(avatarFile);
+			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }));
+		}
+		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
+	} catch (error) {
+		onError(error);
+	}
+	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
+}
+
+export function* generateApiKey() {
+	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
+	try {
+		const apiKey = yield API.CurrentUser.generateApiKey();
+		yield put(CurrentUserActions.updateUserSuccess(apiKey));
+	} catch(error) { } // eslint-disable-line
+	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
+}
+
+export function* deleteApiKey() {
+	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
+	try {
+		yield API.CurrentUser.deleteApiKey();
+		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
+	} catch(error) { } // eslint-disable-line
+	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
+}
+
 export default function* AuthSaga() {
-	yield takeLatest(CurrentUserTypes.GET_PROFILE, getProfile);
+	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
+	yield takeLatest(CurrentUserTypes.UPDATE_PERSONAL_DATA, updatePersonalData);
+	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
+	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
+import { UnhandledError as UnhandledErrorBase } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
 export const OtherOptions = styled.div`
 	display: flex;
@@ -38,4 +39,8 @@ export const SignUpPrompt = styled(StyledTypography)`
 
 export const ForgotPasswordPrompt = styled(StyledTypography)`
 	margin-left: auto;
+`;
+
+export const UnhandledError = styled(UnhandledErrorBase)`
+	margin-top: 5px;
 `;

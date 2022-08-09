@@ -132,6 +132,9 @@ export const measurementsStying = css`
 
 		${StyledTextField} {
 			overflow: visible;
+			input {
+				margin: 0;
+			}
 
 			${StyledMarkdownField},
 			${StyledLinkableField} {
@@ -140,7 +143,7 @@ export const measurementsStying = css`
 			}
 
 			${ActionsLine} {
-				bottom: 4px;
+				bottom: 0px;
 
 				button { 
 					margin: 0;

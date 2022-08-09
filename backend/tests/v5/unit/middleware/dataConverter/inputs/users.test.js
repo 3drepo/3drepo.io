@@ -19,14 +19,15 @@ const { src, modelFolder, imagesFolder } = require('../../../../helper/path');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../../src/v5/utils/httpsReq');
-const HttpsReq = require(`${src}/utils/httpsReq`);
+jest.mock('../../../../../../src/v5/utils/webRequests');
+const WebRequests = require(`${src}/utils/webRequests`);
 jest.mock('../../../../../../src/v5/utils/permissions/permissions');
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
 const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 const MockExpressRequest = require('mock-express-request');
@@ -39,7 +40,7 @@ const config = require(`${src}/utils/config`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
-HttpsReq.post.mockImplementation(() => Promise.resolve({
+WebRequests.post.mockImplementation(() => Promise.resolve({
 	success: true,
 }));
 
@@ -74,6 +75,12 @@ UsersModel.getUserByUsername.mockImplementation((username) => {
 		return { user: existingUsername };
 	}
 	throw templates.userNotFound;
+});
+
+UsersModel.getUserByEmail.mockImplementation((email) => {
+	if (email === availableEmail) {
+		throw templates.userNotFound;
+	}
 });
 
 UsersModel.authenticate.mockImplementation((username, password) => {
@@ -270,6 +277,7 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
 		[{ body: { ...newUserData, email: generateRandomString() } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { ...newUserData, username: generateRandomString(64) } }, false, 'with too large username', templates.invalidArguments],
 		[{ body: { ...newUserData, firstName: generateRandomString(50) } }, false, 'with too large firstName', templates.invalidArguments],
 		[{ body: { ...newUserData, lastName: generateRandomString(50) } }, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],
@@ -277,7 +285,7 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
-	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
+	])('Validate user sign up data', (req, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const bodyBefore = { ...req.body };
@@ -321,6 +329,64 @@ const testValidateSignUpData = () => {
 	});
 };
 
+const testValidateSsoSignUpData = () => {
+	const newUserData = {
+		username: availableUsername,
+		countryCode: 'GB',
+		company: generateRandomString(),
+		mailListAgreed: true,
+	};
+
+	describe.each([
+		[{ body: { ...newUserData } }, true, 'with valid data'],
+		[{ body: { ...newUserData, company: undefined } }, true, 'with empty company'],
+		[{ body: { ...newUserData, username: existingUsername } }, false, 'with username that already exists', templates.invalidArguments],
+		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
+		[{ body: { ...newUserData, username: generateRandomString(64) } }, false, 'with too large username', templates.invalidArguments],
+		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			await Users.validateSsoSignUpData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+			} else {
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+
+	test('with captcha enabled it should call next', async () => {
+		config.auth.captcha = true;
+		config.captcha = {};
+
+		const mockCB = jest.fn();
+		await Users.validateSsoSignUpData({ body: { ...newUserData, captcha: generateRandomString() } }, {}, mockCB);
+		expect(mockCB).toHaveBeenCalledTimes(1);
+
+		config.auth.captcha = false;
+		config.captcha = null;
+	});
+
+	test('with captcha enabled but not provided it should respond with invalidArguments', async () => {
+		config.auth.captcha = true;
+		config.captcha = {};
+
+		const mockCB = jest.fn();
+		await Users.validateSsoSignUpData({ body: newUserData }, {}, mockCB);
+		expect(mockCB).toHaveBeenCalledTimes(0);
+		expect(Responder.respond).toHaveBeenCalledTimes(1);
+		expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+
+		config.auth.captcha = false;
+		config.captcha = null;
+	});
+};
+
 const testVerifyData = () => {
 	describe.each([
 		[{ body: { username: existingUsername, token: generateRandomString() } }, true, 'with valid data'],
@@ -350,5 +416,6 @@ describe('middleware/dataConverter/inputs/users', () => {
 	testForgotPasswordData();
 	testResetingPasswordData();
 	testValidateSignUpData();
+	testValidateSsoSignUpData();
 	testVerifyData();
 });

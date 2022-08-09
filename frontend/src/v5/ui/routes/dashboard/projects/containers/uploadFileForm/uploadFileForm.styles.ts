@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 const MODAL_PADDING = 35;
 
@@ -31,14 +32,19 @@ export const Modal = styled(FormModal)`
 	margin: 0;
 `;
 
-export const Container = styled.div`
+export const UploadsContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	height: 550px;
+	height: 100%;
 	width: 100%;
 	box-sizing: border-box;
 	overflow-x: hidden;
 `;
+
+export const UploadsListScroll = styled(ScrollArea).attrs({
+	autoHeight: true,
+	autoHeightMin: '65vh',
+})``;
 
 export const Padding = styled.div`
 	margin: ${MODAL_PADDING}px;

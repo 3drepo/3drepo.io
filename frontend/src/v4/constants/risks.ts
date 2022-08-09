@@ -24,6 +24,7 @@ import NewReleases from '@mui/icons-material/NewReleases';
 import Pins from '@mui/icons-material/PinDrop';
 import Print from '@mui/icons-material/Print';
 import SyncProblem from '@mui/icons-material/SyncProblem';
+import { isV5 } from '../helpers/isV5';
 
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
@@ -41,7 +42,7 @@ export const LEVELS = {
 };
 
 export const LEVELS_LIST = [
-	{ value: LEVELS.UNSET, name: 'UNSET' },
+	{ value: LEVELS.UNSET, name: isV5() ? 'Unset' : 'UNSET' },
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
 	{ value: LEVELS.LOW, name: 'Low' },
 	{ value: LEVELS.MODERATE, name: 'Moderate' },
@@ -67,6 +68,11 @@ export const RISK_TABS = {
 	SEQUENCING: 'Sequencing',
 	SHAPES: 'Shapes',
 	ATTACHMENTS: 'Attachments',
+};
+
+export const V5_RISK_TABS = {
+	...RISK_TABS,
+	SEQUENCING: '4D',
 };
 
 export const RISK_LEVELS = {

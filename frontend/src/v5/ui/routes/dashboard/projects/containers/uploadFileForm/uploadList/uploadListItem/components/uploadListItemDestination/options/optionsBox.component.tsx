@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container } from './optionsBox.styles';
+import { forwardRef } from 'react';
+import { ScrollArea } from './optionsBox.styles';
 
-export const OptionsBox = (props): JSX.Element => (
-	<Container autoHeightMax="350px" autoHeight {...props} />
-);
+export const OptionsBox = forwardRef<HTMLDivElement, any>((
+	props,
+	ref,
+): JSX.Element => (
+	<div ref={ref}>
+		<ScrollArea autoHeightMax="350px" autoHeight {...props} />
+	</div>
+));

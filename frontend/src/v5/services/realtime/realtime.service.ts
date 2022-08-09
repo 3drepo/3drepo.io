@@ -50,7 +50,8 @@ interface IChatConfig {
 export const joinRoom = (roomType : IRoomType) => {
 	const joinedCount = (roomsJoined[roomTypeToId(roomType)] || 0);
 	roomsJoined[roomTypeToId(roomType)] = joinedCount + 1;
-	if (joinedCount > 0) return;
+
+	if (joinedCount > 0 || !socket.connected) return;
 
 	socket.emit('join', roomType);
 };
@@ -66,7 +67,7 @@ export const leaveRoom = (roomType : IRoomType) => {
 	roomsJoined[roomTypeToId(roomType)]--;
 	const joinedCount = roomsJoined[roomTypeToId(roomType)];
 
-	if (joinedCount !== 0) return;
+	if (joinedCount > 0) return;
 	delete roomsJoined[roomTypeToId(roomType)];
 
 	socket.emit('leave', roomType);
@@ -92,21 +93,51 @@ const unsubscribeToEvent = (event, callback) => {
 	socket.off(event, callback);
 };
 
+/**
+ * Subscribes to a room event and returns a function to unsubscribe
+ * @param roomType
+ * @param event
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callback) => {
 	joinRoom(roomType);
-	subscribeToEvent(event, callback);
+	const roomCallback = (roomEvent) => {
+		const { data, ...room } = roomEvent;
+
+		if (roomTypeToId(roomType) !== roomTypeToId(room)) return;
+
+		callback(data);
+	};
+
+	subscribeToEvent(event, roomCallback);
 
 	return () => {
-		unsubscribeToEvent(event, callback);
+		unsubscribeToEvent(event, roomCallback);
 		leaveRoom(roomType);
 	};
 };
+
+/**
+ * This function combines all functions passed as parameter and return a function that when called will
+ * execute all functions.
+ * @param unsubscribeFunctions The functions used for unsubscribe to an event
+ * @returns A function that when executed will call of the functions to unsubscribe
+ */
+// eslint-disable-next-line max-len
+export const combineSubscriptions = (...unsubscribeFunctions: (() => void)[]) => () => unsubscribeFunctions.forEach((f) => f());
 
 interface IDirectMessage {
 	event: string;
 	data: any;
 }
 
+/**
+ * Subscribes to a direct message event and returns a function to unsubscribe
+ * @param event
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToDM = (event: string, callback) => {
 	const dmCallback = (message: IDirectMessage) => {
 		if (message.event !== event) return;
@@ -120,6 +151,12 @@ export const subscribeToDM = (event: string, callback) => {
 	};
 };
 
+/**
+ * Subscribes to a socket event and returns a function to unsubscribe
+ * @param socketEvent
+ * @param callback
+ * @returns unsubscribeFunction() => void;
+ */
 export const subscribeToSocketEvent = (socketEvent:SocketEvents, callback) => {
 	subscribeToEvent(socketEvent.toString(), callback);
 

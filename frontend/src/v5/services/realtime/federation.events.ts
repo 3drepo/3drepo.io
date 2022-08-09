@@ -16,13 +16,26 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { IFederation } from '@/v5/store/federations/federations.types';
+import { FederationRevision, FederationSettings, NewFederationRealtime } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '../actionsDispatchers/federationsActions.dispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
-type FederationUpdatedPayload = Partial<IFederation>;
+export const enableRealtimeFederationUpdateSettings = (teamspace:string, project:string, federationId:string) =>
+	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationSettingsUpdate',
+		(settings: FederationSettings) =>
+			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, settings));
 
-export const enableRealtimeFederationUpdates = (teamspace, project) =>
-	subscribeToRoomEvent({ teamspace, project }, 'federationUpdate',
-		(federation: FederationUpdatedPayload) =>
-			FederationsActionsDispatchers.updateFederationSuccess(project, federation._id, federation));
+export const enableRealtimeNewFederation = (teamspace:string, project:string) =>
+	subscribeToRoomEvent({ teamspace, project }, 'newFederation',
+		({ _id: federationId, ...newFederation }: NewFederationRealtime) =>
+			FederationsActionsDispatchers.createFederationSuccess(project, newFederation, federationId));
+
+export const enableRealtimeFederationRemoved = (teamspace:string, project:string, federationId:string) =>
+	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationRemoved',
+		() =>
+			FederationsActionsDispatchers.deleteFederationSuccess(project, federationId));
+
+export const enableRealtimeFederationNewRevision = (teamspace:string, project:string, federationId:string) =>
+	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationNewRevision',
+		(revision: FederationRevision) =>
+			FederationsActionsDispatchers.updateFederationSuccess(project, federationId, revision));

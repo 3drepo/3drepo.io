@@ -22,7 +22,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
-import { filesizeTooLarge, ListItemSchema } from '@/v5/validation/containers';
+import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
+import { ListItemSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
@@ -66,15 +67,13 @@ export const UploadListItem = ({
 			containerId: value._id,
 			containerName: value.name,
 			containerCode: value.code,
-			containerType: value.type,
-			containerUnit: value.unit,
+			containerType: value.type || 'Uncategorised',
+			containerUnit: value.unit || 'mm',
 			containerDesc: value.desc,
 		};
 		Object.keys(conversion).forEach((key: any) => {
-			if (conversion[key] || key === 'containerName') {
-				setValue(key, conversion[key]);
-				updateValue(key);
-			}
+			setValue(key, conversion[key]);
+			updateValue(key);
 		});
 		trigger('containerName');
 	};
@@ -97,7 +96,7 @@ export const UploadListItem = ({
 			<UploadListItemTitle
 				name={item.file.name}
 				filesize={filesize(item.file.size)}
-				selectedrow={isSelected}
+				isSelected={isSelected}
 				errorMessage={errors.file?.message}
 			/>
 			<Destination

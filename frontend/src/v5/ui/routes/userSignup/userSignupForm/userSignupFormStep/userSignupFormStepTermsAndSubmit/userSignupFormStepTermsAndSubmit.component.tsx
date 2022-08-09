@@ -19,22 +19,20 @@ import { FormattedMessage } from 'react-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
+import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
 	CheckboxMessage,
 	TermsContainer,
-	ErrorContainer,
-	ErrorMessage,
 	FormCheckbox,
-	ErrorIcon,
 	Link,
-	Gap,
 } from './userSignupFormStepTermsAndSubmit.styles';
 
 export interface ITermsAndSubmitFormInput {
@@ -51,9 +49,9 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	hasUnexpectedError: boolean;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
+	formIsSubmitting: boolean;
 };
 
 export const UserSignupFormStepTermsAndSubmit = ({
@@ -61,9 +59,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	hasUnexpectedError,
 	fields,
 	isActiveStep,
+	formIsSubmitting,
 }: UserSignupFormStepTermsAndSubmitProps) => {
 	const DEFAULT_FIELDS: MinimalTermsAndSubmitFormInput = {
 		termsAgreed: false,
@@ -88,18 +86,17 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	});
 
 	const captchaRef = useRef<ReCAPTCHA>();
-	const [submitButtonIsPending, setSubmitButtonIsPending] = useState(false);
+	const [captchaIsPending, setCaptchaIsPending] = useState(false);
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		setSubmitButtonIsPending(true);
 		onSubmitStep();
 	};
 
 	const handleCaptchaChange = async (captcha) => {
 		if (!fields.captcha && captcha) {
-			setSubmitButtonIsPending(true);
+			setCaptchaIsPending(true);
 			updateFields({ captcha });
-			setSubmitButtonIsPending(false);
+			setCaptchaIsPending(false);
 		}
 	};
 
@@ -128,8 +125,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			updateFields(formValues);
 		}
 	}, [formState]);
-
-	useEffect(() => setSubmitButtonIsPending(false), [hasUnexpectedError]);
 
 	return (
 		<>
@@ -180,36 +175,11 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			{ hasUnexpectedError && (
-				<ErrorContainer>
-					<ErrorIcon />
-					<ErrorMessage>
-						<FormattedMessage
-							id="userSignup.form.error.unexpected"
-							defaultMessage="An unexpected error has occurred. Please try again later."
-						/>
-						<Gap />
-						<FormattedMessage
-							id="userSignup.form.error.unexpected.contactSupport"
-							defaultMessage="If the error persists, please {contactSupport}."
-							values={{
-								contactSupport: (
-									<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-										<FormattedMessage
-											id="userSignup.form.error.contactSupport"
-											defaultMessage="contact the support"
-										/>
-									</Link>
-								),
-							}}
-						/>
-					</ErrorMessage>
-				</ErrorContainer>
-			)}
+			<UnhandledError expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
 			<CreateAccountButton
-				isPending={submitButtonIsPending}
+				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
-				disabled={!formIsValid || !fields.captcha || hasUnexpectedError}
+				disabled={!formIsValid || !fields.captcha}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage

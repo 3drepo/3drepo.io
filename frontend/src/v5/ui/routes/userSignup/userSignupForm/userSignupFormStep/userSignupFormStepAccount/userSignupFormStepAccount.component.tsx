@@ -23,7 +23,7 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { UserSignupSchemaAccount } from '@/v5/validation/schemes';
+import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { isEqual, pick, defaults } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
 import { IconContainer } from './userSignupFormStepAccount.styles';

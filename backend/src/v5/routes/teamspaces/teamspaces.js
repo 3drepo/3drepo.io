@@ -17,8 +17,10 @@
 
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
+const { canRemoveTeamspaceMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
+const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
@@ -49,6 +51,30 @@ const getAvatar = async (req, res) => {
 		respond(req, res, templates.ok, buffer);
 	} catch (err) {
 		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const getQuotaInfo = async (req, res) => {
+	const { teamspace } = req.params;
+
+	try {
+		const quotaInfo = await Teamspaces.getQuotaInfo(teamspace);
+		respond(req, res, templates.ok, quotaInfo);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const removeTeamspaceMember = async (req, res) => {
+	const { teamspace, username } = req.params;
+
+	try {
+		await Teamspaces.removeTeamspaceMember(teamspace, username);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
@@ -98,8 +124,7 @@ const establishRoutes = () => {
 	 *     tags: [Teamspaces]
 	 *     operationId: getTeamspaceMembers
 	 *     parameters:
-   	 *       - teamspace:
-	 *         name: teamspace
+   	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
@@ -151,8 +176,7 @@ const establishRoutes = () => {
 	*     description: Gets the avatar of the teamspace
 	*     tags: [Teamspaces]
 	*     parameters:
-   	*       - teamspace:
-	*         name: teamspace
+   	*       - name: teamspace
 	*         description: name of teamspace
 	*         in: path
 	*         required: true
@@ -164,8 +188,6 @@ const establishRoutes = () => {
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
 	*         description: Gets the avatar of the Teamspace
-	*         produces:
-	*           image/png:
 	*         content:
 	*           image/png:
 	*             schema:
@@ -173,6 +195,93 @@ const establishRoutes = () => {
 	*               format: binary
 	*/
 	router.get('/:teamspace/avatar', hasAccessToTeamspace, getAvatar);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/quota:
+	*   get:
+	*     description: Gets quota information about a user
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getQuotaInfo
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Gets the quota information of the user
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 freeTier:
+	*                   type: boolean
+	*                   description: Whether or not the user has a paid subscription
+	*                   example: true
+	*                 expiryDate:
+	*                   type: number
+	*                   description: The closest expiry date of a users active plan (in epoch)
+	*                   example: 1233445
+	*                 data:
+	*                   type: object
+	*                   properties:
+	*                     used:
+	*                       type: number
+	*                       description: The number of bytes the user is currently using
+	*                       example: 1000000
+	*                     available:
+	*                       type: number
+	*                       description: The number of bytes the user can use
+	*                       example: 1000000
+	*                 seats:
+	*                   type: object
+	*                   properties:
+	*                     used:
+	*                       type: number
+	*                       description: The number of collaborators the user is currently using
+	*                       example: 1000000
+	*                     available:
+	*                       type: number
+	*                       description: The number of collaborators the user can use
+	*                       example: 1000000
+	*
+	*/
+	router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/members/{username}:
+	*   delete:
+	*     description: Removes the user from the teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - name: username
+	*         description: the username of the user to be removed
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: removeTeamspaceMember
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Removes the user from the teamspace
+	*
+	*/
+	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, removeTeamspaceMember);
 
 	return router;
 };

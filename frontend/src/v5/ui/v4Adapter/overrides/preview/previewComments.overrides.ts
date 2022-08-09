@@ -22,8 +22,8 @@ import { Container as CommentPadding } from '@/v4/routes/components/messagesList
 import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollapsableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
-import { Container as TabContainer } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { TabContent, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { Container as TabContainer, TabContent as TabContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { TabContent as TabContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export default css`
@@ -40,7 +40,7 @@ export default css`
 			padding-top: 15px;
 		}
 
-		${TabContent} {
+		${TabContentIssues}, ${TabContentRisks} {
 			background-color: inherit;
 			padding: 0 16px;
 
@@ -89,6 +89,10 @@ export default css`
 					font-size: 10px;
 					font-weight: 500;
 				}
+				.MuiSelect-select {
+					border: 0;
+					box-shadow: none;
+				}
 
 				svg {
 					right: 8px;
@@ -130,12 +134,12 @@ export default css`
 
 				${CommentFooter} {
 					${Username} {
-						color: #6b778c; // TODO - fix after new palette is released
+						color: ${({ theme }) => theme.palette.base.main};
 						font-style: unset;
 					}
 	
 					${Date} {
-						color: #6b778c; // TODO - fix after new palette is released
+						color: ${({ theme }) => theme.palette.base.main};
 						font-style: unset;
 						&::before {
 							content: '';
@@ -179,7 +183,7 @@ export default css`
 		}
 
 		${Counter} {
-			color: #c1c8d5; // TODO - fix after new palette is released
+			color: ${({ theme }) => theme.palette.base.lighter};
 			position: absolute;
 			left: 94px;
 			bottom: -33px;

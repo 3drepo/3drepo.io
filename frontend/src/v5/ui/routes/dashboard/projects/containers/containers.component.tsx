@@ -15,79 +15,75 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
-import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { FormattedMessage } from 'react-intl';
-import { filterContainers } from '@/v5/store/containers/containers.helpers';
+import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
+import { SearchContextComponent } from '@controls/search/searchContext';
+import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
+import { DashboardParams } from '../../../routes.constants';
+
+export const IsMainList = createContext(false);
 
 export const Containers = (): JSX.Element => {
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
 		containers,
 		favouriteContainers,
-		hasContainers,
 		isListPending,
 	} = useContainersData();
-
-	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
-	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
 	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	const onClickClose = () => setUploadModalOpen(false);
 
+	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
+
+	if (isListPending) {
+		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
+	}
+
 	return (
 		<>
-			{isListPending ? (
-				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
-			) : (
-				<>
-					<ContainersList
-						hasContainers={hasContainers.favourites}
-						filterQuery={favouritesFilterQuery}
-						onFilterQueryChange={setFavouritesFilterQuery}
-						containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
-						title={(
+			<SearchContextComponent items={favouriteContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
+				<ContainersList
+					title={(
+						<FormattedMessage
+							id="containers.favourites.collapseTitle"
+							defaultMessage="Favourites"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+						visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+					}}
+					onClickCreate={() => setCreateContainerOpen(true)}
+					onClickUpload={() => setUploadModalOpen(true)}
+					emptyMessage={(
+						<DashboardListEmptyText>
 							<FormattedMessage
-								id="containers.favourites.collapseTitle"
-								defaultMessage="Favourites"
+								id="containers.favourites.emptyMessage"
+								defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
 							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
-							visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
-						}}
-						onClickCreate={() => setCreateContainerOpen(true)}
-						onClickUpload={() => setUploadModalOpen(true)}
-						emptyMessage={
-							favouritesFilterQuery && hasContainers.favourites ? (
-								<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
-							) : (
-								<DashboardListEmptyText>
-									<FormattedMessage
-										id="containers.favourites.emptyMessage"
-										defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
-									/>
-								</DashboardListEmptyText>
-							)
-						}
-					/>
-					<Divider />
+						</DashboardListEmptyText>
+					)}
+				/>
+			</SearchContextComponent>
+			<Divider />
+			<IsMainList.Provider value>
+				<SearchContextComponent items={containers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 					<ContainersList
-						filterQuery={allFilterQuery}
-						onFilterQueryChange={setAllFilterQuery}
-						hasContainers={hasContainers.all}
-						containers={filterContainers(containers, allFilterQuery)}
 						title={(
 							<FormattedMessage
 								id="containers.all.collapseTitle"
@@ -101,33 +97,29 @@ export const Containers = (): JSX.Element => {
 						showBottomButton
 						onClickCreate={() => setCreateContainerOpen(true)}
 						onClickUpload={() => setUploadModalOpen(true)}
-						emptyMessage={
-							allFilterQuery && hasContainers.all ? (
-								<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
-							) : (
-								<>
-									<DashboardListEmptyText>
-										<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
-									</DashboardListEmptyText>
-									<Button
-										startIcon={<AddCircleIcon />}
-										variant="contained"
-										color="primary"
-										onClick={() => setCreateContainerOpen(true)}
-									>
-										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-									</Button>
-								</>
-							)
-						}
+						emptyMessage={(
+							<>
+								<DashboardListEmptyText>
+									<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
+								</DashboardListEmptyText>
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+									onClick={() => setCreateContainerOpen(true)}
+								>
+									<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+								</Button>
+							</>
+						)}
 					/>
-				</>
-			)}
+				</SearchContextComponent>
+			</IsMainList.Provider>
 			<CreateContainerForm
 				open={createContainerOpen}
 				onClickClose={() => setCreateContainerOpen(false)}
 			/>
-			<UploadFileForm openState={uploadModalOpen} onClickClose={onClickClose} />
+			<UploadFileForm open={uploadModalOpen} onClickClose={onClickClose} />
 		</>
 	);
 };

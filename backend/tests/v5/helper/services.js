@@ -21,17 +21,21 @@ const http = require('http');
 
 const { src, srcV4 } = require('./path');
 
-const { createApp } = require(`${srcV4}/services/api`);
+const { createApp: createServer } = require(`${srcV4}/services/api`);
+const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const ExternalServices = require('../../../src/v5/handler/externalServices');
+const FilesManager = require('../../../src/v5/services/filesManager');
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../../../src/v5/models/users.constants');
 
 const db = {};
 const queue = {};
@@ -98,8 +102,7 @@ db.createModel = (teamspace, _id, name, props) => {
 db.createRevision = async (teamspace, modelId, revision) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		const refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, revision.refData);
-		DbHandler.insertOne(teamspace, `${modelId}.history.ref`, { ...refInfo, _id: refId });
+		await FilesManager.storeFile(teamspace, `${modelId}.history.ref`, refId, revision.refData);
 	}
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	delete formattedRevision.refData;
@@ -154,6 +157,13 @@ db.createLegends = (teamspace, modelId, legends) => {
 db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
 	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
 
+db.createAvatar = async (username, type, avatarData) => {
+	const { defaultStorage } = config;
+	config.defaultStorage = type;
+	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);
+	config.defaultStorage = defaultStorage;
+};
+
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
@@ -162,6 +172,8 @@ ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+
+ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -302,7 +314,9 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = () => createApp().listen(8080);
+ServiceHelper.app = () => createServer().listen(8080);
+
+ServiceHelper.frontend = () => createFrontend().listen(8080);
 
 ServiceHelper.chatApp = () => {
 	const server = http.createServer();
@@ -364,6 +378,8 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();
 	if (server) await server.close();
+	EventsManager.reset();
+	QueueHandler.close();
 };
 
 module.exports = ServiceHelper;

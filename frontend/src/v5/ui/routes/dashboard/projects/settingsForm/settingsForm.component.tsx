@@ -27,10 +27,11 @@ import { IFederation, FederationSettings } from '@/v5/store/federations/federati
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
+import { ShareTextField } from '@controls/shareTextField';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { FlexContainer, SectionTitle, ShareTextField, Placeholder, HiddenMenuItem } from './settingsForm.styles';
+import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
 	{
@@ -148,7 +149,7 @@ export const SettingsForm = ({
 		watch,
 		control,
 		formState,
-		formState: { errors },
+		formState: { errors, dirtyFields },
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(settingsSchema),
@@ -167,8 +168,10 @@ export const SettingsForm = ({
 	}, [open]);
 
 	useEffect(() => {
-		reset(getDefaultValues(containerOrFederation, isContainer));
-	}, [containerOrFederation]);
+		if (open) {
+			reset(getDefaultValues(containerOrFederation, isContainer));
+		}
+	}, [open]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
@@ -191,6 +194,8 @@ export const SettingsForm = ({
 		onClose();
 	};
 
+	const fieldsHaveChanged = Object.keys(dirtyFields).length > 0;
+
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 
 	return (
@@ -200,7 +205,7 @@ export const SettingsForm = ({
 			onClickClose={onClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'settings.ok', defaultMessage: 'Save Changes' })}
-			isValid={formState.isValid}
+			isValid={formState.isValid && fieldsHaveChanged}
 		>
 			<SectionTitle>
 				<FormattedMessage

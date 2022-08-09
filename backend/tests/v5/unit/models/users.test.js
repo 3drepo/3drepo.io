@@ -25,6 +25,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
 const { generateRandomString } = require('../../helper/services');
 const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
+const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
@@ -179,10 +180,13 @@ const testDeleteFromFavourites = () => {
 	const determineAction = (teamspace, favToRm) => {
 		const results = _.cloneDeep(favouritesData.starredModels);
 		if (results[teamspace]) {
-			const newArr = results[teamspace].filter((id) => !favToRm.includes(id));
+			if (favToRm?.length) {
+				const newArr = results[teamspace].filter((id) => !favToRm.includes(id));
 
-			return newArr.length ? { $set: { 'customData.starredModels': results } }
-				: { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+				return newArr.length ? { $set: { 'customData.starredModels': results } }
+					: { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+			}
+			return { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 		}
 
 		return undefined;
@@ -202,6 +206,14 @@ const testDeleteFromFavourites = () => {
 			const arr = ['d'];
 			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBe(undefined);
 			checkResults(fn, teamspace, arr);
+		});
+
+		test('Should remove all favourite containers from a teamspace if an array is not provided', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: favouritesData });
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			const teamspace = 'teamspace2';
+			await expect(User.deleteFavourites('xxx', teamspace)).resolves.toBe(undefined);
+			checkResults(fn, teamspace);
 		});
 
 		test('Should remove some favourite containers from teamspace', async () => {
@@ -422,45 +434,6 @@ const testDeleteApiKey = () => {
 	});
 };
 
-const testGetAvatar = () => {
-	describe('Get users avatar', () => {
-		test('should get users avatar if user has a valid avatar', async () => {
-			const user = { customData: { avatar: { data: { buffer: 'validAvatar' } } } };
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
-			const res = await User.getAvatar('user1');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
-			expect(res).toEqual('validAvatar');
-		});
-
-		test('should return error if user does not exist', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => undefined);
-			await expect(User.getAvatar('user1')).rejects.toEqual(templates.userNotFound);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
-		});
-
-		test('should return error if user does not have a valid avatar', async () => {
-			const user = { customData: { firstname: 'Nick' } };
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
-			await expect(User.getAvatar('user1')).rejects.toEqual(templates.avatarNotFound);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
-		});
-	});
-};
-
-const testUploadAvatar = () => {
-	describe('Upload user avatar', () => {
-		test('should upload users avatar', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await User.uploadAvatar('user1', 'validAvatar');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][3]).toEqual({ $set: { 'customData.avatar': { data: 'validAvatar' } } });
-		});
-	});
-};
-
 const testUpdateResetPasswordToken = () => {
 	describe('Reset password token', () => {
 		test('should update user password', async () => {
@@ -503,6 +476,24 @@ const testGetUserByUsernameOrEmail = () => {
 	});
 };
 
+const testGetUserByEmail = () => {
+	describe('Get user by email', () => {
+		test('should return user by email if user exists', async () => {
+			const email = 'example@email.com';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
+			const res = await User.getUserByEmail(email);
+			expect(res).toEqual({ user: 'user' });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'customData.email': 'example@email.com' }, undefined, undefined);
+		});
+
+		test('should throw error if user does not exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getUserByEmail('user')).rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
 const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
 		createdAt,
@@ -525,6 +516,10 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 		},
 		permissions: newUserData.permissions,
 	};
+
+	if (newUserData.sso) {
+		formattedData.sso = newUserData.sso;
+	}
 
 	return formattedData;
 };
@@ -554,6 +549,34 @@ const testAddUser = () => {
 				userCustomData.emailVerifyToken.expiredAt);
 			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
+
+		test('should add a new user created with SSO', async () => {
+			const newUserData = {
+				username: generateRandomString(),
+				email: 'example@email.com',
+				password: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+				mailListAgreed: true,
+				countryCode: 'GB',
+				company: generateRandomString(),
+				permissions: [],
+				sso: {
+					type: generateRandomString(),
+					id: generateRandomString(),
+				},
+			};
+
+			const fn = jest.spyOn(db, 'createUser');
+			await User.addUser(newUserData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			const userCustomData = fn.mock.calls[0][2];
+			expect(userCustomData).toHaveProperty('createdAt');
+			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
+				userCustomData.emailVerifyToken.expiredAt);
+			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
+		});
 	});
 };
 
@@ -566,7 +589,7 @@ const testVerify = () => {
 			const res = await User.verify(username);
 			expect(res).toEqual(customData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: username },
 				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
 				{
 					'customData.firstName': 1,
@@ -587,7 +610,7 @@ const testGrantTeamspacePermissionToUser = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			await User.grantAdminToUser(username, teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, 'system.users', { user: username },
 				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
@@ -603,11 +626,10 @@ describe('models/users', () => {
 	testUpdateProfile();
 	testGenerateApiKey();
 	testDeleteApiKey();
-	testGetAvatar();
-	testUploadAvatar();
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
+	testGetUserByEmail();
 	testAddUser();
 	testVerify();
 	testGrantTeamspacePermissionToUser();
