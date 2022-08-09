@@ -36,7 +36,7 @@ import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { isEqualWith } from 'lodash';
 import { FetchContainerViewsResponseView } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
-import { selectContainerById, selectContainers } from './containers.selectors';
+import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum } from '../store.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
@@ -70,9 +70,10 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
 		const storedContainers = yield select(selectContainers);
+		const isPending = yield select(selectIsListPending);
 
 		// Only update if theres is new data
-		if (!isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+		if (isPending || !isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
 			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		}
 

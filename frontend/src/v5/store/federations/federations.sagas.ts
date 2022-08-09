@@ -38,7 +38,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { isEqualWith } from 'lodash';
 import { compByColum } from '../store.helpers';
-import { selectFederationById, selectFederations } from './federations.selectors';
+import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
 
 export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
 	try {
@@ -93,8 +93,9 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 		});
 		const federationsWithoutStats = prepareFederationsData(federations);
 		const storedFederations = yield select(selectFederations);
+		const isPending = yield select(selectIsListPending);
 
-		if (!isEqualWith(storedFederations, federationsWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+		if (isPending || !isEqualWith(storedFederations, federationsWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
 			yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));
 		}
 
