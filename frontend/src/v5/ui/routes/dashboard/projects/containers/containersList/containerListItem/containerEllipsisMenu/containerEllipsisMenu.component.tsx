@@ -24,6 +24,7 @@ import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { UploadFileForm } from '../../../uploadFileForm';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -56,6 +57,11 @@ export const ContainerEllipsisMenu = ({
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
+				})}
+				onClick={() => DialogsActionsDispatchers.open(UploadFileForm, {
+					presetContainerId: container._id,
+					teamspace,
+					project,
 				})}
 				disabled={!canUploadToBackend(container.status)}
 			/>

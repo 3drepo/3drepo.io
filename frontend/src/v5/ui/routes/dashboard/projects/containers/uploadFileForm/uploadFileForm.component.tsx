@@ -37,13 +37,20 @@ import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
+	presetContainerId?: string;
+	teamspace: string;
+	project: string;
 	open: boolean;
 	onClickClose: () => void;
 };
 
-export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-
+export const UploadFileForm = ({
+	presetContainerId,
+	teamspace,
+	project,
+	open,
+	onClickClose,
+}: IUploadFileForm): JSX.Element => {
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
@@ -63,12 +70,6 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 		name: 'uploads',
 		keyName: 'uploadId',
 	});
-
-	useEffect(() => {
-		remove();
-		setSelectedIndex(null);
-		setIsUploading(false);
-	}, [open]);
 
 	const [fileError, setFileError] = useState(false);
 	useEffect(() => {

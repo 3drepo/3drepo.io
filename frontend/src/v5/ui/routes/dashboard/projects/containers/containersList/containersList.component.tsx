@@ -34,6 +34,7 @@ import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
@@ -42,6 +43,7 @@ import { DashboardListButton } from '@components/dashboard/dashboardList/dashboa
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
+import { UploadFileForm } from '../uploadFileForm';
 
 interface IContainersList {
 	emptyMessage: ReactNode;
@@ -52,7 +54,6 @@ interface IContainersList {
 	},
 	showBottomButton?: boolean;
 	onClickCreate: () => void;
-	onClickUpload: () => void;
 }
 
 export const ContainersList = ({
@@ -60,7 +61,6 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 	onClickCreate,
-	onClickUpload,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -109,7 +109,10 @@ export const ContainersList = ({
 							startIcon={<ArrowUpCircleIcon />}
 							variant="contained"
 							color="primary"
-							onClick={onClickUpload}
+							onClick={() => DialogsActionsDispatchers.open(UploadFileForm, {
+								teamspace,
+								project,
+							})}
 						>
 							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 						</Button>

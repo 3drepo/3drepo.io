@@ -30,14 +30,12 @@ import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpe
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
-import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
 import { DashboardParams } from '../../../routes.constants';
 
 export const IsMainList = createContext(false);
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
 		containers,
 		favouriteContainers,
@@ -45,8 +43,6 @@ export const Containers = (): JSX.Element => {
 	} = useContainersData();
 
 	const [createContainerOpen, setCreateContainerOpen] = useState(false);
-
-	const onClickClose = () => setUploadModalOpen(false);
 
 	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
 
@@ -69,7 +65,6 @@ export const Containers = (): JSX.Element => {
 						visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 					}}
 					onClickCreate={() => setCreateContainerOpen(true)}
-					onClickUpload={() => setUploadModalOpen(true)}
 					emptyMessage={(
 						<DashboardListEmptyText>
 							<FormattedMessage
@@ -96,7 +91,6 @@ export const Containers = (): JSX.Element => {
 						}}
 						showBottomButton
 						onClickCreate={() => setCreateContainerOpen(true)}
-						onClickUpload={() => setUploadModalOpen(true)}
 						emptyMessage={(
 							<>
 								<DashboardListEmptyText>
@@ -119,7 +113,6 @@ export const Containers = (): JSX.Element => {
 				open={createContainerOpen}
 				onClickClose={() => setCreateContainerOpen(false)}
 			/>
-			<UploadFileForm open={uploadModalOpen} onClickClose={onClickClose} />
 		</>
 	);
 };
