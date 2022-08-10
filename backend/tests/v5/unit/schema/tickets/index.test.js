@@ -232,12 +232,14 @@ const testValidateTicket = () => {
 
 		testPropertyTypes(propertyTypeTestData);
 		testPropertyTypes(propertyTypeTestData, true);
+		const randomData = generateRandomString();
 
 		const propertyConditionTests = [
-			['Should fill in default value if not present', { type: fieldTypes.TEXT, default: 'hi' }, true, undefined, 'hi'],
+			['Should fill in default value if not present', { type: fieldTypes.TEXT, default: randomData }, true, undefined, randomData],
 			['Should pass if optional field is not present', { type: fieldTypes.TEXT }, true],
 			['Should fail if required field is not present', { type: fieldTypes.TEXT, required: true }, false],
 			['Should ignore deprecated fields', { type: fieldTypes.TEXT, deprecated: true }, true, generateRandomString()],
+			['Ignore values on N/A types', { type: fieldTypes.TEXT, values: [generateRandomString()] }, true, randomData, randomData],
 			['Should ignore read only fields', { type: fieldTypes.TEXT, readOnly: true }, true, generateRandomString()],
 			['Should ignore unrecognised types', { type: generateRandomString(), required: true }, true, generateRandomString()],
 		];

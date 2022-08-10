@@ -78,9 +78,27 @@ const testRemoveUserFromJobs = () => {
 	});
 };
 
+const testGetJobs = () => {
+	describe('Get jobs', () => {
+		test('return names of all available jobs', async () => {
+			const teamspace = generateRandomString();
+			const jobs = [generateRandomString(), generateRandomString(), generateRandomString()];
+			jest.spyOn(db, 'find').mockResolvedValueOnce(jobs.map((_id) => ({ _id })));
+			await expect(Jobs.getJobs(teamspace)).resolves.toEqual(jobs);
+		});
+
+		test('return an empty array if there are no jobs', async () => {
+			const teamspace = generateRandomString();
+			jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(Jobs.getJobs(teamspace)).resolves.toEqual([]);
+		});
+	});
+};
+
 describe('models/jobs', () => {
 	testGetJobsToUsers();
 	testAddDefaultJobs();
 	testAssignUserToJob();
 	testRemoveUserFromJobs();
+	testGetJobs();
 });
