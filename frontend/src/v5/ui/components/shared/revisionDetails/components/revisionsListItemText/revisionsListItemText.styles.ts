@@ -20,5 +20,5 @@ import { TextOverflow } from '@controls/textOverflow';
 
 export const Text = styled(TextOverflow)<{ $active: boolean }>`
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
-	margin-right: 105px;
+	margin-right: 140px;
 `;

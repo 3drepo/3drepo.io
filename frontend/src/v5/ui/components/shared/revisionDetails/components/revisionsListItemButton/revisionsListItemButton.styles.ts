@@ -20,7 +20,7 @@ import { Button as ButtonComponent } from '@controls/button';
 export const Container = styled.div`
 	min-width: 80px;
 	position: absolute;
-    right: 36px;
+    right: 60px;
 `;
 
 export const Button = styled(ButtonComponent).attrs({
