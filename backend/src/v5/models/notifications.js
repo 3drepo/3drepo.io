@@ -15,23 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const db = require('../handler/db');
 
-const Objects = {};
+const Notifications = {};
+const NOTIFICATIONS_DB = 'notifications';
 
-Objects.cloneDeep = _.cloneDeep;
+Notifications.removeAllUserNotifications = (user) => db.dropCollection(NOTIFICATIONS_DB, user);
 
-Objects.removeFields = _.omit;
-
-Objects.isEmpty = _.isEmpty;
-
-Objects.deleteIfUndefined = (obj) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		if (obj[key] === undefined) delete res[key];
-	});
-
-	return res;
-};
-
-module.exports = Objects;
+module.exports = Notifications;
