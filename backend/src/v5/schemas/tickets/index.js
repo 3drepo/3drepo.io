@@ -49,10 +49,13 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 				default:
 					values = prop.values;
 				}
+
 				if (prop.type === fieldTypes.ONE_OF) {
 					validator = validator.oneOf(values);
 				} else if (prop.type === fieldTypes.MANY_OF) {
 					validator = Yup.array().of(types.strings.title.oneOf(values));
+				} else {
+					logger.logError(`Property values found for a non selection type (${prop.type})`);
 				}
 			}
 
@@ -70,7 +73,7 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 		}
 	});
 
-	await proms;
+	await Promise.all(proms);
 
 	return Yup.object(obj).required();
 };

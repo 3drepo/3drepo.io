@@ -21,6 +21,13 @@ const FS = require('fs');
 
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
+
+jest.mock('../../../../../src/v5/models/jobs');
+const JobsModel = require(`${src}/models/jobs`);
+
+jest.mock('../../../../../src/v5/models/teamspaces');
+const TeamspaceModel = require(`${src}/models/teamspaces`);
+
 const TicketSchema = require(`${src}/schemas/tickets`);
 const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -134,6 +141,72 @@ const testPropertyConditions = (testData, moduleProperty) => {
 	});
 };
 
+const testPresetValues = () => {
+	describe('Preset values', () => {
+		const teamspace = generateRandomString();
+		const module = generateRandomString();
+		const prop = generateRandomString();
+		const prop2 = generateRandomString();
+		const template = {
+			properties: [{
+				name: prop,
+				type: fieldTypes.ONE_OF,
+				values: 'jobsAndUsers',
+				required: true,
+			}],
+			modules: [{
+				name: module,
+				properties: [{
+					name: prop2,
+					type: fieldTypes.ONE_OF,
+					values: 'jobsAndUsers',
+					required: true,
+				}],
+			}],
+		};
+
+		JobsModel.getJobs.mockResolvedValue(['JobA', 'JobB']);
+		TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(['UserA', 'UserB']);
+
+		const createData = (a, b) => ({
+			properties: {
+				[prop]: a,
+			},
+			modules: {
+				[module]: {
+					properties: {
+						[prop2]: b,
+					},
+				},
+			},
+		});
+
+		const testCases = [
+			['With existing jobs', createData('JobA', 'JobB'), true],
+			['With existing users', createData('UserA', 'UserB'), true],
+			['With non existing values', createData(generateRandomString(), generateRandomString()), false],
+		];
+
+		const runTest = async (data) => {
+			try {
+				await TicketSchema.validateTicket(teamspace, template, data);
+			} catch (err) {
+				throw undefined;
+			}
+		};
+
+		for (const [desc, input, success] of testCases) {
+			test(`${desc} should ${success ? 'pass' : 'fail'}`, async () => {
+				if (success) {
+					await expect(runTest(input)).resolves.toBeUndefined();
+				} else {
+					await expect(runTest(input)).rejects.toBeUndefined();
+				}
+			});
+		}
+	});
+};
+
 const testValidateTicket = () => {
 	describe('Validate ticket', () => {
 		const propertyTypeTestData = [
@@ -190,6 +263,8 @@ const testValidateTicket = () => {
 			const input = { properties: {}, modules: {} };
 			await expect(TicketSchema.validateTicket(teamspace, template, input)).resolves.toEqual(input);
 		});
+
+		testPresetValues();
 	});
 };
 
