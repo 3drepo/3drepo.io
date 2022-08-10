@@ -171,7 +171,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 			await updateUser(username, action);
 		}
-	} else {
+	} else if (favouritesToRemove?.length) {
 		throw createResponseCode(templates.invalidArguments, "The IDs provided are not in the user's favourites list");
 	}
 };
@@ -238,6 +238,8 @@ User.addUser = async (newUserData) => {
 
 	await db.createUser(newUserData.username, newUserData.password, customData);
 };
+
+User.removeUser = (user) => db.dropUser(user);
 
 User.verify = async (username) => {
 	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, COLL_NAME, { user: username },

@@ -19,34 +19,11 @@ const Path = require('path');
 
 const { v5Path } = require('../../../interop');
 
+const { getTeamspaceList } = require('../../common/utils');
+
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getMembersInfo } = require(`${v5Path}/models/teamspaces`);
-const { deleteFavourites } = require(`${v5Path}/models/users`);
-const { removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
-const { getTeamspaceListByUser, removeTeamspaceMember } = require(`${v5Path}/processors/teamspaces/teamspaces`);
-const { dropDatabase, dropCollection, dropUser } = require(`${v5Path}/handler/db`);
-
-const removeAllUsersFromTS = async (teamspace) => {
-	const members = await getMembersInfo(teamspace);
-	await Promise.all(
-		members.map(async ({ user }) => {
-			if (user !== teamspace) {
-				await Promise.all([
-					revokeTeamspaceRoleFromUser(teamspace, user),
-					deleteFavourites(user, teamspace),
-				]);
-			}
-		}),
-	);
-};
-
-const removeTeamspace = async (teamspace) => {
-	await removeAllUsersFromTS(teamspace);
-	await Promise.all([
-		dropDatabase(teamspace),
-		removeTeamspaceRole(teamspace),
-	]);
-};
+const { getTeamspaceListByUser, removeTeamspaceMember, removeTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
+const { remove: deleteUser, getUserByUsername } = require(`${v5Path}/processors/users`);
 
 const removeUserFromAllTeamspaces = async (user) => {
 	const teamspaces = await getTeamspaceListByUser(user);
@@ -56,22 +33,27 @@ const removeUserFromAllTeamspaces = async (user) => {
 };
 
 const removeUser = async (user) => {
-	await removeUserFromAllTeamspaces(user);
-	await Promise.all([
-		dropCollection('loginRecords', user),
-		dropCollection('notifications', user),
-		dropUser(user),
-	]);
+	const userExists = await getUserByUsername(user, { _id: 1 }).catch(() => false);
+
+	if (userExists) {
+		await removeUserFromAllTeamspaces(user);
+		await deleteUser(user);
+	}
 };
 
-const run = async (users) => {
-	const userArr = users.split(',');
-	for (const user of userArr) {
-		logger.logInfo(`-${user}`);
-		// eslint-disable-next-line no-await-in-loop
-		await removeTeamspace(user);
-		// eslint-disable-next-line no-await-in-loop
-		await removeUser(user);
+const run = async (teamspaces, removeOwners) => {
+	const teamspaceArr = teamspaces.split(',');
+	const tsList = await getTeamspaceList();
+	for (const teamspace of teamspaceArr) {
+		logger.logInfo(`-${teamspace}`);
+		if (tsList.includes(teamspace)) {
+			// eslint-disable-next-line no-await-in-loop
+			await removeTeamspace(teamspace);
+		}
+		if (removeOwners) {
+			// eslint-disable-next-line no-await-in-loop
+			await removeUser(teamspace);
+		}
 	}
 };
 
@@ -79,14 +61,19 @@ const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('accounts',
 		{
-			describe: 'accounts to remove (comma separated)',
+			describe: 'teamspaces to remove (comma separated)',
 			type: 'string',
 			demandOption: true,
+		}).option('removeOwners',
+		{
+			describe: 'also remove user account',
+			type: 'boolean',
+			default: false,
 		});
 	return yargs.command(commandName,
-		'Remove a user account and its teamspace from the database',
+		'Remove a teamspace and the owner\'s account',
 		argsSpec,
-		(argv) => run(argv.accounts));
+		(argv) => run(argv.accounts, argv.removeOwners));
 };
 
 module.exports = {
