@@ -47,10 +47,8 @@ export const RevisionsListItemText = ({
 		hideWhenSmallerThan={hideWhenSmallerThan}
 		className={className}
 	>
-		<TextOverflow>
-			<Text $active={active}>
-				{children}
-			</Text>
-		</TextOverflow>
+		<Text $active={active}>
+			{children}
+		</Text>
 	</FixedOrGrowContainer>
 );

@@ -22,4 +22,9 @@ export const Text = styled(Typography).attrs({
 	variant: 'body1',
 })<{ $active: boolean }>`
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+	text-overflow: ellipsis;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+	margin-right: 4px;
 `;
