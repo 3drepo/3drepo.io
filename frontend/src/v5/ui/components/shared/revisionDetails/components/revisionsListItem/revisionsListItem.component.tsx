@@ -59,19 +59,17 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
 				{formatDate(timestamp)}
 			</RevisionsListItemDate>
-			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
-			<RevisionsListItemCode
-				tabletWidth={150}
-				onClick={() => {}}
-			>
+			<RevisionsListItemAuthor authorName={author} active={active} width="16%" tabletWidth={155} />
+			<RevisionsListItemCode width="21%" tabletWidth={150}>
 				{tag}
 			</RevisionsListItemCode>
 			<RevisionsListItemText
-				hideWhenSmallerThan={Display.Tablet}
+				hideWhenSmallerThan={887}
 				active={active}
 			>
-				{desc}
-			</RevisionsListItemText>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec nunc in tortor mattis aliquet. Aenean quis finibus mauris, et gravida metus. Etiam hendrerit consectetur sem quis porta. Integer pulvinar odio dui, posuere blandit nunc lobortis vitae. Curabitur nec sem metus. Proin vitae ultrices diam, sit amet tincidunt velit. Donec non ex pulvinar, pellentesque ligula id, vehicula tortor. Aenean non fringilla erat. Nunc sed velit ligula. Mauris condimentum ornare pulvinar. Etiam consequat accumsan finibus.
+
+Aliquam erat volutpat. Etiam justo urna, porttitor ut pellentesque a, bibendum vitae leo. Aliquam erat volutpat. Suspendisse ullamcorper metus nisl, in ultrices erat pulvinar sed. Sed posuere quam ligula, et commodo sem interdum vitae. Cras mi nisl, cursus efficitur pharetra ac, aliquet placerat dolor. Aliquam eget lectus imperdiet, tincidunt sem at, posuere neque. Aliquam pulvinar risus fringilla lacinia porta. Praesent ut gravida neque, mattis scelerisque dolor. Aliquam erat volutpat. Aenean at velit lacus. Vivamus 			</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 			<Tooltip
 				title={(

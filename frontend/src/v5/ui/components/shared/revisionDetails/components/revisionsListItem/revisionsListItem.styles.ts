@@ -46,4 +46,7 @@ export const DownloadButton = styled(IconButton)`
 			color: ${({ theme }) => theme.palette.primary.main};
 		}
 	}
+
+	position: absolute;
+	right: 0;
 `;

@@ -16,15 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@mui/material';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const Text = styled(Typography).attrs({
-	variant: 'body1',
-})<{ $active: boolean }>`
+export const Text = styled(TextOverflow)<{ $active: boolean }>`
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
-	text-overflow: ellipsis;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-	margin-right: 4px;
+	margin-right: 105px;
 `;
