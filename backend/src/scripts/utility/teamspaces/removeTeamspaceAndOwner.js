@@ -33,7 +33,7 @@ const removeUserFromAllTeamspaces = async (user) => {
 };
 
 const removeUser = async (user) => {
-	const userExists = await getUserByUsername(user).catch(() => false);
+	const userExists = await getUserByUsername(user, { _id: 1 }).catch(() => false);
 
 	if (userExists) {
 		await removeUserFromAllTeamspaces(user);

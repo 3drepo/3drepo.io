@@ -27,7 +27,6 @@ const { getAllTeamspacesWithActiveLicenses } = require(`${v5Path}/models/teamspa
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
-	const currDate = new Date();
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('Teamspace,Type, Data(MB),Seats,ExpiryDate\n');
@@ -35,9 +34,7 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 		const subs = customData.billing.subscriptions;
 		Object.keys(subs).forEach((subType) => {
 			const { collaborators, expiryDate, data } = subs[subType];
-			if (!expiryDate || expiryDate > currDate) {
-				writeStream.write(`${user},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
-			}
+			writeStream.write(`${user},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
 		});
 	});
 

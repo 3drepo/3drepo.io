@@ -36,6 +36,6 @@ const testRemoveAllUserNotifications = () => {
 	});
 };
 
-describe('models/loginRecords', () => {
+describe('models/notifications', () => {
 	testRemoveAllUserNotifications();
 });

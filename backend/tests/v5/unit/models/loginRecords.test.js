@@ -27,12 +27,12 @@ UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua da
 const LoginRecord = require(`${src}/models/loginRecords`);
 
 const testSaveLoginRecord = () => {
-	const sessionId = '123456';
-	const username = 'someUsername';
-	const ipAddress = '290.241.146.180';
-	const browserUserAgent = 'browser user agent';
-	const pluginUserAgent = 'PLUGIN: plugin user agent';
-	const referrer = 'www.google.com';
+	const sessionId = generateRandomString();
+	const username = generateRandomString();
+	const ipAddress = generateRandomString();
+	const browserUserAgent = generateRandomString();
+	const pluginUserAgent = `PLUGIN: ${generateRandomString()}`;
+	const referrer = generateRandomString();
 	const formatLoginRecord = (userAgentInfo, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
 			_id: sessionId,
