@@ -126,7 +126,7 @@ const testAppendFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace3';
 			const arr = ['e', 'f'];
-			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBeUndefined();
 			checkResults(fn, teamspace, arr, {});
 		});
 
@@ -135,7 +135,7 @@ const testAppendFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace3';
 			const arr = ['e', 'f'];
-			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBeUndefined();
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -144,7 +144,7 @@ const testAppendFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace1';
 			const arr = ['d', 'e'];
-			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBeUndefined();
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -153,7 +153,7 @@ const testAppendFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace1';
 			const arr = ['a', 'b', 'c', ' d', 'e'];
-			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBeUndefined();
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -204,7 +204,7 @@ const testDeleteFromFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace2';
 			const arr = ['d'];
-			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBe(undefined);
+			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBeUndefined();
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -212,7 +212,7 @@ const testDeleteFromFavourites = () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: favouritesData });
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace2';
-			await expect(User.deleteFavourites('xxx', teamspace)).resolves.toBe(undefined);
+			await expect(User.deleteFavourites('xxx', teamspace)).resolves.toBeUndefined();
 			checkResults(fn, teamspace);
 		});
 
@@ -221,7 +221,7 @@ const testDeleteFromFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const teamspace = 'teamspace1';
 			const arr = ['c'];
-			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBe(undefined);
+			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBeUndefined();
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -239,6 +239,13 @@ const testDeleteFromFavourites = () => {
 			await expect(User.deleteFavourites('xxx', 'teamspace3', ['e', 'f']))
 				.rejects.toEqual({ ...templates.invalidArguments, message: "The IDs provided are not in the user's favourites list" });
 			expect(fn.mock.calls.length).toBe(0);
+		});
+
+		test('Should not return error when trying to remove all favourites from a specific teamspace but the user doesn\'t have any', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: {} });
+			const fn = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
+			await expect(User.deleteFavourites('xxx', 'teamspace3')).resolves.toBeUndefined();
+			expect(fn).not.toHaveBeenCalled();
 		});
 
 		test('Should return error when trying to remove favourites from a user that has no favourites', async () => {
@@ -281,7 +288,7 @@ const testCanLogIn = () => {
 			if (expectedError) {
 				await expect(User.canLogIn(username)).rejects.toEqual(expectedError);
 			} else {
-				await expect(User.canLogIn(username)).resolves.toBe(undefined);
+				await expect(User.canLogIn(username)).resolves.toBeUndefined();
 			}
 
 			expect(fn.mock.calls.length).toBe(1);
@@ -376,7 +383,7 @@ const testUpdatePassword = () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const fn2 = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
 			const newPassword = 1234;
-			await expect(User.updatePassword('user 1', newPassword)).resolves.toBe(undefined);
+			await expect(User.updatePassword('user 1', newPassword)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({ $unset: { 'customData.resetPasswordToken': 1 } });
 			expect(fn2.mock.calls.length).toBe(1);
@@ -390,7 +397,7 @@ const testUpdateProfile = () => {
 		test('should update a user profile', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const updatedProfile = { firstName: 'John' };
-			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBe(undefined);
+			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({ $set: { 'customData.firstName': 'John' } });
 		});
@@ -398,7 +405,7 @@ const testUpdateProfile = () => {
 		test('should update a user profile with billing data', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const updatedProfile = { firstName: 'John', company: '3D Repo', countryCode: 'GB' };
-			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBe(undefined);
+			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({
 				$set: {
@@ -616,6 +623,20 @@ const testGrantTeamspacePermissionToUser = () => {
 	});
 };
 
+const testRemoveUser = () => {
+	describe('Drop user', () => {
+		test('Should call dropUser to remove the user from the database', async () => {
+			const fn = jest.spyOn(db, 'dropUser').mockResolvedValueOnce(undefined);
+
+			const username = generateRandomString();
+			await expect(User.removeUser(username)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(username);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -631,6 +652,7 @@ describe('models/users', () => {
 	testGetUserByUsernameOrEmail();
 	testGetUserByEmail();
 	testAddUser();
+	testRemoveUser();
 	testVerify();
 	testGrantTeamspacePermissionToUser();
 });
