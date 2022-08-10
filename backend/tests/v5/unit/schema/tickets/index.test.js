@@ -32,6 +32,7 @@ const testPropertyTypes = (testData, moduleProperty) => {
 	)(`${moduleProperty ? '[Modules] ' : ''}Property types`,
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
+				const teamspace = generateRandomString();
 				const fieldName = generateRandomString();
 				const propArr = [
 					{
@@ -63,7 +64,7 @@ const testPropertyTypes = (testData, moduleProperty) => {
 					});
 
 					try {
-						await TicketSchema.validateTicket(template, fullData);
+						await TicketSchema.validateTicket(teamspace, template, fullData);
 					} catch (err) {
 						throw undefined;
 					}
@@ -80,6 +81,7 @@ const testPropertyConditions = (testData, moduleProperty) => {
 		testData,
 	)(`${moduleProperty ? '[Modules] ' : ''}Property Conditions`, (desc, schema, succeed, input, output) => {
 		test(desc, async () => {
+			const teamspace = generateRandomString();
 			const fieldName = generateRandomString();
 			const modName = generateRandomString();
 			const propArr = [
@@ -123,9 +125,9 @@ const testPropertyConditions = (testData, moduleProperty) => {
 					} : {},
 				});
 
-				await expect(TicketSchema.validateTicket(template, fullData)).resolves.toEqual(outData);
+				await expect(TicketSchema.validateTicket(teamspace, template, fullData)).resolves.toEqual(outData);
 			} else {
-				await expect(TicketSchema.validateTicket(template, fullData)
+				await expect(TicketSchema.validateTicket(teamspace, template, fullData)
 					.catch(() => Promise.reject())).rejects.toBeUndefined();
 			}
 		});
@@ -171,6 +173,7 @@ const testValidateTicket = () => {
 		testPropertyConditions(propertyConditionTests, true);
 
 		test('Should ignore deprecated modules', async () => {
+			const teamspace = generateRandomString();
 			const template = {
 				properties: [],
 				modules: [{
@@ -185,7 +188,7 @@ const testValidateTicket = () => {
 			};
 
 			const input = { properties: {}, modules: {} };
-			await expect(TicketSchema.validateTicket(template, input)).resolves.toEqual(input);
+			await expect(TicketSchema.validateTicket(teamspace, template, input)).resolves.toEqual(input);
 		});
 	});
 };

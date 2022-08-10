@@ -33,9 +33,9 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 		if (prop.deprecated || prop.readOnly) return;
 		let validator = fieldTypesToValidator[prop.type];
 		if (validator) {
-			if (prop.value && presetEnumValues.includes(prop.value)) {
+			if (prop.values) {
 				let values;
-				switch (prop.value) {
+				switch (prop.values) {
 				case presetEnumValues.JOBS_AND_USERS:
 					{
 						const [jobs, users] = await Promise.all([
@@ -47,7 +47,7 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 					}
 					break;
 				default:
-					values = prop.value;
+					values = prop.values;
 				}
 				if (prop.type === fieldTypes.ONE_OF) {
 					validator = validator.oneOf(values);
@@ -75,9 +75,8 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 	return Yup.object(obj).required();
 };
 
-const generateModulesValidator = async (teamspace, modules) => {
+const generateModuleValidator = async (teamspace, modules) => {
 	const moduleToSchema = {};
-
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
@@ -87,20 +86,20 @@ const generateModulesValidator = async (teamspace, modules) => {
 		}
 	});
 
-	await proms;
-	return Yup.object(moduleToSchema).required();
-};
+	await Promise.all(proms);
 
-const generateTicketValidator = async (teamspace, template) => {
-	const fullTem = generateFullSchema(template);
-	return Yup.object().shape({
-		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
-		modules: await generateModulesValidator(teamspace, template.modules),
-	});
+	return moduleToSchema;
 };
 
 Tickets.validateTicket = async (teamspace, template, data) => {
-	const validator = await generateTicketValidator(teamspace, template);
+	const fullTem = generateFullSchema(template);
+
+	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules);
+
+	const validator = Yup.object().shape({
+		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
+		modules: Yup.object(moduleSchema),
+	});
 	return validator.validate(data, { stripUnknown: true });
 };
 module.exports = Tickets;
