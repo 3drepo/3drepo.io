@@ -242,7 +242,7 @@ const testDeleteFromFavourites = () => {
 		});
 
 		test('Should not return error when trying to remove all favourites from a specific teamspace but the user doesn\'t have any', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: favouritesData });
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: {} });
 			const fn = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
 			await expect(User.deleteFavourites('xxx', 'teamspace3')).resolves.toBeUndefined();
 			expect(fn).not.toHaveBeenCalled();
