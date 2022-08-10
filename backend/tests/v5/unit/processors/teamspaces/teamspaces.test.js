@@ -47,8 +47,12 @@ const Permissions = require(`${src}/utils/permissions/permissions`);
 
 jest.mock('../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+
 jest.mock('../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);
+
+jest.mock('../../../../../src/v5/handler/db');
+const DB = require(`${src}/handler/db`);
 
 const invalidUsername = 'invalid';
 const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation((username) => {
@@ -227,6 +231,42 @@ const testGetAvatarStream = () => {
 	});
 };
 
+const testRemoveTeamspace = () => {
+	describe('Remove teamspace', () => {
+		test('Should remove the teamspace and all the relevant data', async () => {
+			const users = [
+				{ user: generateRandomString() },
+				{ user: generateRandomString() },
+			];
+			TeamspacesModel.getMembersInfo.mockResolvedValueOnce(users);
+
+			const teamspace = generateRandomString();
+
+			await Teamspaces.removeTeamspace(teamspace);
+
+			expect(TeamspacesModel.getMembersInfo).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.getMembersInfo).toHaveBeenCalledWith(teamspace);
+
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(users.length);
+			expect(UsersModel.deleteFavourites).toHaveBeenCalledTimes(users.length);
+
+			users.forEach(({ user }) => {
+				expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user);
+				expect(UsersModel.deleteFavourites).toHaveBeenCalledWith(user, teamspace);
+			});
+
+			expect(FilesManager.removeAllFilesFromTeamspace).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeAllFilesFromTeamspace).toHaveBeenCalledWith(teamspace);
+
+			expect(RolesModel.removeTeamspaceRole).toHaveBeenCalledTimes(1);
+			expect(RolesModel.removeTeamspaceRole).toHaveBeenCalledWith(teamspace);
+
+			expect(DB.dropDatabase).toHaveBeenCalledTimes(1);
+			expect(DB.dropDatabase).toHaveBeenCalledWith(teamspace);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
@@ -234,4 +274,5 @@ describe('processors/teamspaces', () => {
 	testRemoveTeamspaceMember();
 	testGetAvatarStream();
 	testGetQuotaInfo();
+	testRemoveTeamspace();
 });
