@@ -43,8 +43,7 @@ export default css`
 			color: ${({ theme }) => theme.palette.secondary.main};
 			~ svg {
 				margin-top: -4px;
-				/* TODO: fix after new palette is released */
-				color: #C1C8D5;
+				color: ${({ theme }) => theme.palette.base.lighter};
 			}
 		}
 		input, fieldset {

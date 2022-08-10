@@ -18,7 +18,7 @@
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { FormattedMessage } from 'react-intl';
-import { Container, ErrorText } from './existingContainer.styles';
+import { ExistingContainerOption, InUseText, Name } from './existingContainer.styles';
 
 interface IExistingContainer {
 	container: IContainer;
@@ -27,15 +27,15 @@ interface IExistingContainer {
 }
 
 export const ExistingContainer = ({ container, latestRevision, inUse, ...props }: IExistingContainer) => (
-	<Container {...props}>
-		{container.name}
+	<ExistingContainerOption {...props}>
+		<Name>{container.name}</Name>
 		<LatestRevision
 			hasRevisions={!!container.revisionsCount}
-			name={container.name}
+			name={container.latestRevision}
 			status={container.status}
 		/>
-		<ErrorText hidden={!inUse}>
+		<InUseText hidden={!inUse}>
 			<FormattedMessage id="uploads.destination.containerInUse" defaultMessage="Already in use in another file upload" />
-		</ErrorText>
-	</Container>
+		</InUseText>
+	</ExistingContainerOption>
 );

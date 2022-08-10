@@ -20,6 +20,7 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -225,6 +226,7 @@ User.addUser = async (newUserData) => {
 			},
 		},
 		permissions: [],
+		...deleteIfUndefined({ sso: newUserData.sso }),
 	};
 
 	if (newUserData.sso) {

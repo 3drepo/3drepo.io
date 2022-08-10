@@ -39,7 +39,7 @@ const getClientApplication = () => {
 
 		const loggerOptions = {
 			loggerCallback: (loglevel, message) => {
-				logger.logInfo(message);
+				logger.logDebug(message);
 			},
 			logLevel: msal.LogLevel.Verbose,
 		};

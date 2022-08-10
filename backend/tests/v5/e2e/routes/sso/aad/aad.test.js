@@ -26,7 +26,7 @@ jest.mock('../../../../../../src/v5/services/sso/aad', () => ({
 	getUserDetails: jest.fn(),
 }));
 const Aad = require('../../../../../../src/v5/services/sso/aad');
-const { providers } = require('../../../../../../src/v5/services/sso/sso.constants');
+const { providers, errorCodes } = require('../../../../../../src/v5/services/sso/sso.constants');
 const { getUserByUsername } = require('../../../../../../src/v5/models/users');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -156,7 +156,7 @@ const signupPost = () => {
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
-			expect(resUri.searchParams.get('error')).toEqual(templates.emailAlreadyExists.code);
+			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExists.toString());
 		});
 
 		test('should redirect and add error to the query email already exists (SSO user)', async () => {
@@ -166,7 +166,7 @@ const signupPost = () => {
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
-			expect(resUri.searchParams.get('error')).toEqual(templates.emailAlreadyExistsSso.code);
+			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExistsWithSSO.toString());
 		});
 
 		test('should fail if state is not provided', async () => {

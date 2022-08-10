@@ -47,7 +47,7 @@ export default css`
 					margin-top: 0;
 					padding-top: 2px;
 					min-height: 24px;
-					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+					border: 1px solid ${({ theme }) => theme.palette.base.lighter};
 					word-break: break-word;
 				}
 				

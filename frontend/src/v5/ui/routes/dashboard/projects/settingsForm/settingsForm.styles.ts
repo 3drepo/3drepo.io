@@ -17,7 +17,6 @@
 
 import styled, { css } from 'styled-components';
 import { MenuItem, Typography } from '@mui/material';
-import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
 
 export const SectionTitle = styled(Typography).attrs({
 	variant: 'h5',
@@ -42,15 +41,6 @@ export const FlexContainer = styled.div`
 
 		&:not(:last-child) {
 			margin-right: 9px;
-		}
-	}
-`;
-
-export const ShareTextField = styled(ShareTextFieldBase)`
-	& > label:not(.Mui-error) {
-		&,
-		&.Mui-focused {
-			color: ${({ theme }) => theme.palette.base.light};
 		}
 	}
 `;

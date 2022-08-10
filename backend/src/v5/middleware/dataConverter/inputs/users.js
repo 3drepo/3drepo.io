@@ -19,8 +19,8 @@ const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUser
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const httpsPost = require('../../../utils/webRequests').post;
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -176,10 +176,28 @@ Users.validateResetPasswordData = async (req, res, next) => {
 
 const generateSignUpSchema = (isSSO) => {
 	const captchaEnabled = config.auth.captcha;
+
+	const nonSSOFields = {
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByEmail(value, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		password: types.strings.password.required(),
+		firstName: types.strings.name.transform(formatPronouns).required(),
+		lastName: types.strings.name.transform(formatPronouns).required(),
+	};
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
 			async (value) => {
-				if (value) {
+				if (!isSSO && value) {
 					try {
 						await getUserByUsername(value, { _id: 1 });
 						return false;
@@ -189,33 +207,16 @@ const generateSignUpSchema = (isSSO) => {
 				}
 				return true;
 			}).required(),
-		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
-			async (value) => {
-				if (!isSSO && value) {
-					try {
-						await getUserByEmail(value, { _id: 1 });
-						return false;
-					} catch {
-						// do nothing
-					}
-				}
-				return true;
-			}).test('checkEmailExists', 'email is a required field', (value) => isSSO || value),
-		password: types.strings.password.test('checkPasswordExists', 'password is a required field', (value) => isSSO || value),
-		firstName: types.strings.name.test('checkFirstnameExists', 'firstName is a required field', (value) => isSSO || value)
-			.transform(formatPronouns),
-		lastName: types.strings.name.test('checkLastnameExists', 'lastName is a required field', (value) => isSSO || value)
-			.transform(formatPronouns),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
-	})
-		.noUnknown().required();
+		...(isSSO ? {} : nonSSOFields),
+	}).noUnknown().required();
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
-			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
+			const checkCaptcha = post(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
 				response: body.captcha,
 			});
@@ -227,7 +228,7 @@ const generateSignUpSchema = (isSSO) => {
 		: schema;
 };
 
-const validateSignUpData = async (req, res, next, isSSO) => {
+const validateSignUpData = (isSSO) => async (req, res, next) => {
 	try {
 		const schema = generateSignUpSchema(isSSO);
 		req.body = await schema.validate(req.body);
@@ -238,8 +239,8 @@ const validateSignUpData = async (req, res, next, isSSO) => {
 	}
 };
 
-Users.validateSignUpData = (req, res, next) => validateSignUpData(req, res, next, false);
-Users.validateSsoSignUpData = (req, res, next) => validateSignUpData(req, res, next, true);
+Users.validateSignUpData = validateSignUpData(false);
+Users.validateSsoSignUpData = validateSignUpData(true);
 
 Users.validateVerifyData = async (req, res, next) => {
 	const schema = Yup.object().shape({

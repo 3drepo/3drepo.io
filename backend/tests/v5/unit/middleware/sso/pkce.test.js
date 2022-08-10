@@ -15,25 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { AddCircleIcon, NewContainerOption, Message } from './newContainer.styles';
+const { src } = require('../../../helper/path');
 
-interface INewContainer {
-	containerName: string;
-}
+const Sso = require(`${src}/middleware/sso/pkce`);
 
-export const NewContainer = ({ containerName, ...props }: INewContainer) => (
-	<NewContainerOption {...props}>
-		<AddCircleIcon />
-		<Message>
-			<FormattedMessage
-				id="uploads.destination.addNewContainer"
-				defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
-				values={{
-					Bold: (val: string) => <b>{val}</b>,
-					containerName,
-				}}
-			/>
-		</Message>
-	</NewContainerOption>
-);
+const testAddPkceProtection = () => {
+	describe('Add pkce protection', () => {
+		test('should generate pkce codes and assign them to req', async () => {
+			const mockCB = jest.fn();
+			const req = { session: {} };
+			await Sso.addPkceProtection(req, {}, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.session.pkceCodes.challengeMethod).toEqual('S256');
+			expect(req.session.pkceCodes).toHaveProperty('verifier');
+			expect(req.session.pkceCodes).toHaveProperty('challenge');
+		});
+	});
+};
+
+describe('middleware/dataConverter/inputs/sso/pkce', () => {
+	testAddPkceProtection();
+});

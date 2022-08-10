@@ -49,7 +49,6 @@ export default css`
 				}
 
 				&:not(:first-of-type) {
-					// TODO - fix after new palette is released
 					border-top: solid 1px ${({ theme }) => theme.palette.base.lightest};
 				}
 			}

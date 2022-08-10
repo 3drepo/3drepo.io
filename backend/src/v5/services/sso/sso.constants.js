@@ -21,4 +21,9 @@ SsoConstants.providers = {
 	AAD: 'aad',
 };
 
+SsoConstants.errorCodes = {
+	emailExists: 1,
+	emailExistsWithSSO: 2,
+};
+
 module.exports = SsoConstants;

@@ -19,12 +19,12 @@ const config = require('../../../utils/config');
 
 const AadConstants = {};
 
-const createRedirectUri = (redirectEndpoint) => `${config.sso?.aad?.redirectDomain || config.api_server.url}/v5/sso/aad${redirectEndpoint}`;
+const createUri = (redirectEndpoint) => `${config.sso?.aad?.redirectDomain || config.apiUrls.all[0]}/v5/sso/aad${redirectEndpoint}`;
 
 AadConstants.authenticateRedirectEndpoint = '/authenticate-post';
-AadConstants.authenticateRedirectUri = createRedirectUri(AadConstants.authenticateRedirectEndpoint);
+AadConstants.authenticateRedirectUri = createUri(AadConstants.authenticateRedirectEndpoint);
 AadConstants.signupRedirectEndpoint = '/signup-post';
-AadConstants.signupRedirectUri = createRedirectUri(AadConstants.signupRedirectEndpoint);
+AadConstants.signupRedirectUri = createUri(AadConstants.signupRedirectEndpoint);
 AadConstants.msGraphUserDetailsUri = 'https://graph.microsoft.com/v1.0/me';
 
 module.exports = AadConstants;

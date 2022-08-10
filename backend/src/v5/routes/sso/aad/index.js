@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, validateUserDetails, checkIfMsAccountIsLinkedTo3DRepo } = require('../../../middleware/dataConverter/inputs/sso/aad');
+const { authenticate, redirectToStateURL, verifyNewUserDetails, checkIfMsAccountIsLinkedTo3DRepo } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
@@ -24,19 +24,10 @@ const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inp
 const { createSessionSso } = require('../../../middleware/sessions');
 const { notLoggedIn } = require('../../../middleware/auth');
 
-const authenticatePost = (req, res) => {
-	try {
-		res.redirect(JSON.parse(req.query.state).redirectUri);
-	} catch (err) {
-		/* istanbul ignore next */
-		respond(req, res, err);
-	}
-};
-
-const signupPost = async (req, res) => {
+const signUpPost = async (req, res, next) => {
 	try {
 		await Users.signUp(req.body);
-		res.redirect(JSON.parse(req.query.state).redirectUri);
+		await next();
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -50,24 +41,36 @@ const establishRoutes = () => {
 	* @openapi
 	* /sso/aad/authenticate:
 	*   get:
-	*     description: Redirects the user to Microsoft's authentication page and then to a URI provided via query upon success
+	*     description: Redirects the user to Microsoft's authentication page and then to a URI provided upon success
 	*     tags: [Aad]
-	*     operationId: authenticate
+	*     operationId: aadAuthenticate
+	*     parameters:
+	*       - in: query
+	*         name: redirectUri
+	*         schema:
+	*           type: string
+	*         description: a URI to redirect to when authentication finished
 	*     responses:
 	*       302:
 	*         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(`${authenticateRedirectEndpoint}`, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, authenticatePost);
+	router.get(authenticateRedirectEndpoint, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, redirectToStateURL);
 
 	/**
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email 2 there is a SSO account witht he same email
 	 *     tags: [Aad]
-	 *     operationId: signup
+	 *     operationId: aadSignup
+	 *     parameters:
+	 *       - in: query
+	 *         name: redirectUri
+	 *         schema:
+	 *           type: string
+	 *         description: a URI to redirect to when authentication finished
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
@@ -101,12 +104,12 @@ const establishRoutes = () => {
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/invalidArguments"
-	 *       200:
-	 *         description: Redirects the user to Microsoft's authentication page and signs the user up upon successful authentication
+	 *       302:
+	 *         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	 */
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(`${signupRedirectEndpoint}`, validateUserDetails, signupPost);
+	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
 	return router;
 };

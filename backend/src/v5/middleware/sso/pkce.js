@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const { CryptoProvider } = require('@azure/msal-node');
 
-const Objects = {};
+const Sso = {};
 
-Objects.cloneDeep = _.cloneDeep;
+Sso.addPkceProtection = async (req, res, next) => {
+	const cryptoProvider = new CryptoProvider();
+	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
 
-Objects.removeFields = _.omit;
+	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
 
-Objects.isEmpty = _.isEmpty;
-
-Objects.deleteIfUndefined = (obj) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		if (obj[key] === undefined) delete res[key];
-	});
-
-	return res;
+	await next();
 };
 
-module.exports = Objects;
+module.exports = Sso;
