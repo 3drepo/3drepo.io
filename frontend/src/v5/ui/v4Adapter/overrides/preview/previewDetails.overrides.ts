@@ -99,8 +99,8 @@ export default css`
 				}
 
 				span {
-					color: #c1c8d5; // TODO - fix after new palette is released
-					border: solid 1px #c1c8d5; // TODO - fix after new palette is released
+					color: ${({ theme }) => theme.palette.base.lighter};
+					border: solid 1px ${({ theme }) => theme.palette.base.lighter};
 					margin: 0;
 					box-sizing: border-box;
 					height: 100%;

@@ -89,6 +89,10 @@ export default css`
 					font-size: 10px;
 					font-weight: 500;
 				}
+				.MuiSelect-select {
+					border: 0;
+					box-shadow: none;
+				}
 
 				svg {
 					right: 8px;
@@ -179,7 +183,7 @@ export default css`
 		}
 
 		${Counter} {
-			color: #c1c8d5; // TODO - fix after new palette is released
+			color: ${({ theme }) => theme.palette.base.lighter};
 			position: absolute;
 			left: 94px;
 			bottom: -33px;

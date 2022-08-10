@@ -20,6 +20,7 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -115,6 +116,8 @@ User.getUserByQuery = async (query, projection) => {
 };
 
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
+
+User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.email': email }, projection);
 
 User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
 	$or: [{ user: usernameOrEmail },
@@ -223,6 +226,7 @@ User.addUser = async (newUserData) => {
 			},
 		},
 		permissions: [],
+		...deleteIfUndefined({ sso: newUserData.sso }),
 	};
 
 	const expiryAt = new Date();

@@ -483,6 +483,24 @@ const testGetUserByUsernameOrEmail = () => {
 	});
 };
 
+const testGetUserByEmail = () => {
+	describe('Get user by email', () => {
+		test('should return user by email if user exists', async () => {
+			const email = 'example@email.com';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
+			const res = await User.getUserByEmail(email);
+			expect(res).toEqual({ user: 'user' });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { 'customData.email': 'example@email.com' }, undefined, undefined);
+		});
+
+		test('should throw error if user does not exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getUserByEmail('user')).rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
 const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
 		createdAt,
@@ -506,6 +524,10 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 		permissions: newUserData.permissions,
 	};
 
+	if (newUserData.sso) {
+		formattedData.sso = newUserData.sso;
+	}
+
 	return formattedData;
 };
 
@@ -522,6 +544,34 @@ const testAddUser = () => {
 				countryCode: 'GB',
 				company: generateRandomString(),
 				permissions: [],
+			};
+
+			const fn = jest.spyOn(db, 'createUser');
+			await User.addUser(newUserData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			const userCustomData = fn.mock.calls[0][2];
+			expect(userCustomData).toHaveProperty('createdAt');
+			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
+				userCustomData.emailVerifyToken.expiredAt);
+			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
+		});
+
+		test('should add a new user created with SSO', async () => {
+			const newUserData = {
+				username: generateRandomString(),
+				email: 'example@email.com',
+				password: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+				mailListAgreed: true,
+				countryCode: 'GB',
+				company: generateRandomString(),
+				permissions: [],
+				sso: {
+					type: generateRandomString(),
+					id: generateRandomString(),
+				},
 			};
 
 			const fn = jest.spyOn(db, 'createUser');
@@ -600,6 +650,7 @@ describe('models/users', () => {
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
+	testGetUserByEmail();
 	testAddUser();
 	testRemoveUser();
 	testVerify();

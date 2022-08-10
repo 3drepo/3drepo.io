@@ -173,6 +173,8 @@ ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
+ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
+
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
 	password: ServiceHelper.generateRandomString(),

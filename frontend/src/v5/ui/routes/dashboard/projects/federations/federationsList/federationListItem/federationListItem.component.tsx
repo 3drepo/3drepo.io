@@ -26,7 +26,6 @@ import {
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemFederationTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { Tooltip } from '@mui/material';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
@@ -154,24 +153,15 @@ export const FederationListItem = ({
 						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 					</DashboardListItemText>
 					<DashboardListItemIcon>
-						<Tooltip
-							title={
-								<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
-							}
-						>
-							<FavouriteCheckbox
-								checked={federation.isFavourite}
-								onClick={(event) => {
-									event.stopPropagation();
-								}}
-								onChange={(event) => {
-									onFavouriteChange(
-										federation._id,
-										!!event.currentTarget.checked,
-									);
-								}}
-							/>
-						</Tooltip>
+						<FavouriteCheckbox
+							checked={federation.isFavourite}
+							onChange={(event) => {
+								onFavouriteChange(
+									federation._id,
+									!!event.currentTarget.checked,
+								);
+							}}
+						/>
 					</DashboardListItemIcon>
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
