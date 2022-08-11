@@ -124,7 +124,7 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 							&& stats?.tickets?.risks === federation?.risks;
 		const defaultStat = { desc: '', code: '', containers: [], status: 'ok' };
 
-		if (!isEqualWith(federation, { ...defaultStat, ...stats }, compByColum(['code', 'desc', 'containers', 'status'])) || !sameTickets) {
+		if (!isEqualWith(federation, { ...defaultStat, ...stats }, compByColum(['name', 'code', 'desc', 'containers', 'status'])) || !sameTickets) {
 			yield put(FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats));
 		}
 	} catch (error) {
