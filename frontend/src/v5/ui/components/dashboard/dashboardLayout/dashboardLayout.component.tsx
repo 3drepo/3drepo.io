@@ -23,14 +23,13 @@ import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Container, Content } from './dashboardLayout.styles';
+import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
 	children: ReactNode;
-	className?: string;
 }
 
-export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.Element => {
+export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
 	const { teamspace, project, containerOrFederation } = useParams<DashboardParams>();
 
 	useEffect(() => {
@@ -47,12 +46,12 @@ export const DashboardLayout = ({ children, className }: IDashboardLayout): JSX.
 	}, [project]);
 
 	return (
-		<Container className={className}>
+		<>
 			<AppBar />
 			{project && !containerOrFederation && <ProjectNavigation />}
 			<Content>
 				{children}
 			</Content>
-		</Container>
+		</>
 	);
 };

@@ -21,14 +21,14 @@ import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UserMenu } from '../userMenu';
-import { Items, AppBarContainer } from './appBar.styles';
+import { AppBarContainer, Items } from './appBar.styles';
 import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	return (
-		<AppBarContainer position="static">
+		<AppBarContainer>
 			<Items>
 				<Link to={DASHBOARD_ROUTE}>
 					<LogoIcon />

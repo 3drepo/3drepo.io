@@ -17,11 +17,10 @@
 
 import { ReactNode } from 'react';
 import { Typography } from '@controls/typography';
-import { IFixedOrGrowContainer as IFixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
+import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Container } from './revisionsListHeaderLabel.styles';
 
-type IDashboardListHeaderLabel = IFixedOrGrowContainerProps & {
-	className?: string;
+type IDashboardListHeaderLabel = FixedOrGrowContainerProps & {
 	children?: ReactNode;
 };
 

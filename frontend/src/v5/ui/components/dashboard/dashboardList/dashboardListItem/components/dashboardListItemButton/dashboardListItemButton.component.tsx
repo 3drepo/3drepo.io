@@ -16,12 +16,11 @@
  */
 
 import { Dispatch, ReactNode, SyntheticEvent } from 'react';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@mui/material';
-import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Button } from './dashboardListItemButton.styles';
 
-interface IDashboardListItemButton extends IFixedOrGrowContainer {
+interface IDashboardListItemButton extends FixedOrGrowContainerProps {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
 	disabled?: boolean
