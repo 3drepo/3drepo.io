@@ -18,10 +18,9 @@
 import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
 import PrintIcon from '@assets/icons/print.svg';
-import { AppBar as MuiAppBar } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
-import { Items } from '@components/shared/appBar/appBar.styles';
+import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavLink, NavLinks } from './legalAppBar.styles';
 
@@ -30,7 +29,7 @@ type ILegalAppBar = {
 };
 
 export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
-	<MuiAppBar position="static">
+	<AppBarContainer>
 		<Items>
 			<Link to={DASHBOARD_ROUTE}>
 				<LogoIcon />
@@ -52,5 +51,5 @@ export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
 				<PrintIcon />
 			</CircleButton>
 		</Items>
-	</MuiAppBar>
+	</AppBarContainer>
 );

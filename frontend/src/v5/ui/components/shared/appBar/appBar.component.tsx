@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AppBar as MuiAppBar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
@@ -22,14 +21,14 @@ import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UserMenu } from '../userMenu';
-import { Items } from './appBar.styles';
+import { AppBarContainer, Items } from './appBar.styles';
 import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	return (
-		<MuiAppBar position="static">
+		<AppBarContainer>
 			<Items>
 				<Link to={DASHBOARD_ROUTE}>
 					<LogoIcon />
@@ -42,6 +41,6 @@ export const AppBar = (): JSX.Element => {
 				</CircleButton>
 				<UserMenu user={user} />
 			</Items>
-		</MuiAppBar>
+		</AppBarContainer>
 	);
 };
