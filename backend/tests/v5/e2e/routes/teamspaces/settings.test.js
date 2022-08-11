@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
@@ -93,15 +94,15 @@ const testAddTemplate = () => {
 
 const testUpdateTemplate = () => {
 	const templateToUse = generateTemplate();
+	const templateThatClashes = generateTemplate();
 	let _id;
-	const nameClash = generateRandomString();
 	const updateTemplateRoute = (key, ts = teamspace.name, id = _id) => `/v5/teamspaces/${ts}/settings/tickets/templates/${id}${key ? `?key=${key}` : ''}`;
 	describe('Update template', () => {
 		beforeAll(async () => {
 			const res = await agent.post(addTemplateRoute(tsAdmin.apiKey)).send(templateToUse);
 			_id = res.body._id;
 
-			await agent.post(addTemplateRoute(tsAdmin.apiKey)).send({ ...templateToUse, name: nameClash });
+			await agent.post(addTemplateRoute(tsAdmin.apiKey)).send(templateThatClashes);
 		});
 		describe.each([
 			['user does not have a valid session', undefined, undefined, undefined, templateToUse, false, templates.notLoggedIn],
@@ -112,7 +113,8 @@ const testUpdateTemplate = () => {
 			['updated template should retain old properties as deprecated', tsAdmin.apiKey, undefined, undefined,
 				{ ...templateToUse, properties: [{ name: 'newProp', type: fieldTypes.NUMBER }] }, true, { ...templateToUse, properties: [{ name: 'newProp', type: fieldTypes.NUMBER }, { ...templateToUse.properties[0], deprecated: true }] }],
 			['template is invalid', tsAdmin.apiKey, undefined, undefined, {}, false, templates.invalidArguments],
-			['template name is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: nameClash }, false, templates.invalidArguments],
+			['template name is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: templateThatClashes.name }, false, templates.invalidArguments],
+			['template code is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, code: templateThatClashes.code }, false, templates.invalidArguments],
 			['template id is invalid', tsAdmin.apiKey, undefined, generateRandomString(), templateToUse, false, templates.templateNotFound],
 		])('', (desc, key, ts, id, data, success, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
@@ -158,6 +160,39 @@ const testGetTemplate = () => {
 	});
 };
 
+const testGetTemplateList = () => {
+	const templateList = times(5, generateTemplate);
+	const route = (key, ts = teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/templates${key ? `?key=${key}` : ''}`;
+	describe('Get template List', () => {
+		beforeAll(async () => {
+			await Promise.all(templateList.map(async (template) => {
+				const res = await agent.post(addTemplateRoute(tsAdmin.apiKey)).send(template);
+				// eslint-disable-next-line no-param-reassign
+				template._id = res.body._id;
+			}));
+		});
+		describe.each([
+			['user does not have a valid session', undefined, undefined, false, templates.notLoggedIn],
+			['user is not a teamspace admin', normalUser.apiKey, undefined, false, templates.notAuthorized],
+			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, false, templates.teamspaceNotFound],
+			['user is a ts admin', tsAdmin.apiKey, undefined, true],
+		])('', (desc, key, ts, success, expectedRes) => {
+			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedRes.status;
+				const res = await agent.get(route(key, ts)).expect(expectedStatus);
+				if (success) {
+					expect(res.body.templates).toEqual(expect.arrayContaining(templateList.map(
+						({ _id, name, code }) => ({ _id, name, code }),
+					)));
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/settings', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -168,4 +203,5 @@ describe('E2E routes/teamspaces/settings', () => {
 	testAddTemplate();
 	testUpdateTemplate();
 	testGetTemplate();
+	testGetTemplateList();
 });

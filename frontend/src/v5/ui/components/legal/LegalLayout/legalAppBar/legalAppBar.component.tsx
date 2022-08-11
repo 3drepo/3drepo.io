@@ -29,7 +29,7 @@ type ILegalAppBar = {
 };
 
 export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
-	<AppBarContainer position="static">
+	<AppBarContainer>
 		<Items>
 			<Link to={DASHBOARD_ROUTE}>
 				<LogoIcon />

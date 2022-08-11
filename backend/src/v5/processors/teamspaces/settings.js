@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTemplate, updateTemplate } = require('../../models/tickets.templates');
+const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
 
 const Settings = {};
 
 Settings.addTicketTemplate = addTemplate;
 Settings.updateTicketTemplate = updateTemplate;
+Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1 });
 
 module.exports = Settings;

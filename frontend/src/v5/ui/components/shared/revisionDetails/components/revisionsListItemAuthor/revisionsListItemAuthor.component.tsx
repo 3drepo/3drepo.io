@@ -17,7 +17,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
@@ -25,22 +25,15 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Text } from './revisionsListItemAuthor.styles';
 
-type IRevisionsListItemAuthor = {
-	width?: number;
-	tabletWidth?: number;
-	mobileWidth?: number;
-	className?: string;
+interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
 	active?: boolean;
-};
+}
 
 export const RevisionsListItemAuthor = ({
-	width,
-	tabletWidth,
-	mobileWidth,
-	className,
 	authorName,
 	active = false,
+	...rest
 }: IRevisionsListItemAuthor): JSX.Element => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const { teamspace } = useParams<DashboardParams>();
@@ -57,7 +50,7 @@ export const RevisionsListItemAuthor = ({
 	const open = Boolean(anchorEl);
 
 	return (
-		<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
+		<FixedOrGrowContainer {...rest}>
 			<Text
 				aria-owns={open ? 'mouse-over-popover' : undefined}
 				aria-haspopup="true"

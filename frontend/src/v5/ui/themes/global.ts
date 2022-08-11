@@ -61,6 +61,7 @@ export const GlobalStyle = createGlobalStyle`
 		height: 100% !important;
 		width: 100% !important;
 		overflow: hidden;
+		margin-top: 62px;
 		background: ${COLOR.TRANSPARENT} !important;
 	}
 

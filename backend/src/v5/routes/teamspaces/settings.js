@@ -58,6 +58,20 @@ const updateTicketTemplate = async (req, res) => {
 	}
 };
 
+const getTemplateList = async (req, res) => {
+	const { teamspace } = req.params;
+
+	try {
+		const data = await TeamspaceSettings.getTemplateList(teamspace);
+
+		respond(req, res, templates.ok,
+			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 	/**
@@ -94,6 +108,51 @@ const establishRoutes = () => {
 	*                   format: uuid
 	*/
 	router.post('/tickets/templates', isTeamspaceAdmin, validateNewTicketSchema, addTicketTemplate);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/settings/tickets/templates:
+	*   get:
+	*     description: Get the list of templates within this teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: ticketTemplateList
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Return the list of templates within the teamspace
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 templates:
+	*                   type: array
+	*                   items:
+	*                     type: object
+	*                     properties:
+	*                       _id:
+	*                         type: string
+	*                         format: uuid
+	*                       name:
+	*                         type: string
+	*                         description: name of the template
+	*                       code:
+	*                         type: string
+	*                         description: a 3 letter code representing the template
+	*                       deprecated:
+	*                         description: indicates the template is deprecated and no longer in use
+	*                         type: boolean
+	*
+	*/
+	router.get('/tickets/templates', isTeamspaceAdmin, getTemplateList);
 
 	/**
 	* @openapi

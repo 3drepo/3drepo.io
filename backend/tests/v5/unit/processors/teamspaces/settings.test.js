@@ -56,7 +56,22 @@ const testUpdateTemplate = () => {
 	});
 };
 
+const testGetTemplateList = () => {
+	describe('Get template list', () => {
+		test('should call getAllTemplates with projection', async () => {
+			const teamspace = generateRandomString();
+			const data = generateRandomString();
+			TemplateModel.getAllTemplates.mockResolvedValueOnce(data);
+			await expect(Settings.getTemplateList(teamspace)).resolves.toEqual(data);
+
+			expect(TemplateModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, name: 1, code: 1 });
+		});
+	});
+};
+
 describe('processors/teamspaces/settings', () => {
 	testAddTemplate();
 	testUpdateTemplate();
+	testGetTemplateList();
 });

@@ -42,6 +42,7 @@ Templates.addTemplate = async (teamspace, template) => {
 Templates.getTemplateById = (teamspace, _id, projection) => findOne(teamspace, { _id }, projection);
 
 Templates.getTemplateByName = (teamspace, name, projection) => findOne(teamspace, { name }, projection);
+Templates.getTemplateByCode = (teamspace, code, projection) => findOne(teamspace, { code }, projection);
 
 Templates.updateTemplate = async (teamspace, _id, data) => {
 	await db.replaceOne(teamspace, TEMPLATES_COL, { _id }, { ...data, _id });
