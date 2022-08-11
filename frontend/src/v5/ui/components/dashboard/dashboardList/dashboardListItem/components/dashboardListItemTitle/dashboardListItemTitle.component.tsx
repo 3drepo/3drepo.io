@@ -16,12 +16,11 @@
  */
 
 import { ReactNode } from 'react';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@mui/material';
-import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Title, Subtitle, Container } from './dashboardListItemTitle.styles';
 
-interface IDashboardListItemTitle extends IFixedOrGrowContainer {
+interface IDashboardListItemTitle extends FixedOrGrowContainerProps {
 	subtitle: ReactNode;
 	tooltipTitle?: ReactNode;
 	selected?: boolean;

@@ -19,11 +19,11 @@ import { ReactNode, CSSProperties } from 'react';
 
 import { Container, ContainerProps } from './fixedOrGrowContainer.styles';
 
-export interface FixedOrGrowContainerProps extends ContainerProps {
+export type FixedOrGrowContainerProps = ContainerProps & {
 	children?: JSX.Element | ReactNode | ReactNode[] ;
 	className?: string;
 	style?: CSSProperties;
-}
+};
 
 export const FixedOrGrowContainer = ({
 	width,
