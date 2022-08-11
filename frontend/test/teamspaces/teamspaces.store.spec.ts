@@ -24,19 +24,27 @@ import { teamspaceMockFactory } from './teamspaces.fixtures';
 
 
 describe('Teamspaces: store', () => {
-	let { dispatch, getState } = createStore(combineReducers(reducers));
+	let dispatch, getState = null;
+
+	beforeEach(() => {
+		// resetting the store //
+		const store = createStore(combineReducers(reducers));
+		dispatch = store.dispatch;
+		getState = store.getState;
+	})
+
 
 	it('should fetch teamspaces succesfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.fetchSuccess(mockTeamspaces));
-		const teamspaces =  selectTeamspaces(getState());
+		const teamspaces = selectTeamspaces(getState());
 		expect(teamspaces).toEqual(mockTeamspaces);
 	});
 
 	it('should set the current teamspace succesfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.setCurrentTeamspace(mockTeamspaces[3].name));
-		const currentTeamspace =  selectCurrentTeamspace(getState());
+		const currentTeamspace = selectCurrentTeamspace(getState());
 		expect(currentTeamspace).toEqual(mockTeamspaces[3].name);
 	});
 });
