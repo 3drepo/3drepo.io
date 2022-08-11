@@ -15,30 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Avatar } from '@controls/avatar';
+const { CryptoProvider } = require('@azure/msal-node');
 
-export const MyTeamspaceImage = styled(Avatar)`
-	width: 100%;
-	margin: 0;
-	
-	.MuiAvatar-root {
-		cursor: pointer;
-		border-radius: 0;
-		width: 100%;
-		height: 175px;
-		margin: 0;
-		font-size: 40px;
-		color: ${({ theme }) => theme.palette.tertiary.dark};
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
+const Sso = {};
 
-export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
-	position: relative;
-	height: 175px;
-	width: 222px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	object-fit: cover;
-	margin-bottom: -5px;
-`;
+Sso.addPkceProtection = async (req, res, next) => {
+	const cryptoProvider = new CryptoProvider();
+	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
+
+	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
+
+	await next();
+};
+
+module.exports = Sso;

@@ -16,29 +16,21 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 
-const selectFederationsDomain = (state): IFederationsState => state.federations;
+const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
 export const selectFederations = createSelector(
 	selectFederationsDomain, selectCurrentProject,
-	(state, currentProject) => state.federationsByProject[currentProject] ?? [],
+	(state, currentProject) => state?.federationsByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteFederations = createSelector(
 	selectFederations,
 	(federations) => federations.filter(({ isFavourite }) => isFavourite),
-);
-
-export const selectHasFederations = createSelector(
-	selectFederations, selectFavouriteFederations, (federations, favouriteFederations) => ({
-		favourites: !isEmpty(favouriteFederations),
-		all: !isEmpty(federations),
-	}),
 );
 
 export const selectIsListPending = createSelector(

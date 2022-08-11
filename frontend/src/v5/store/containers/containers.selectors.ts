@@ -16,29 +16,20 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
 
-const selectContainersDomain = (state): IContainersState => state.containers;
+const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
 export const selectContainers = createSelector(
 	selectContainersDomain, selectCurrentProject,
-	(state, currentProject) => state.containersByProject[currentProject] ?? [],
+	(state, currentProject) => state?.containersByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteContainers = createSelector(
 	selectContainers,
 	(containers) => containers.filter(({ isFavourite }) => isFavourite),
-);
-
-export const selectHasContainers = createSelector(
-	selectContainers, selectFavouriteContainers,
-	(containers, favouriteContainers) => ({
-		favourites: !isEmpty(favouriteContainers),
-		all: !isEmpty(containers),
-	}),
 );
 
 export const selectIsListPending = createSelector(

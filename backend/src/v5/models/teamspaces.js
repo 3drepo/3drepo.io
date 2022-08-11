@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { ADD_ONS } = require('./teamspaces.constants');
+const { ADD_ONS, SUBSCRIPTION_TYPES } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
@@ -139,6 +139,14 @@ Teamspace.getMembersInfo = async (teamspace) => {
 		}
 		return res;
 	});
+};
+
+Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
+	const currentDate = new Date();
+	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`${SUBSCRIPTION_PATH}.${type}`]: { $exists: true }, [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: null },
+		{ [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: { $gt: currentDate } },
+	]) };
+	return findMany(query, projection);
 };
 
 Teamspace.createTeamspaceSettings = async (teamspace) => {

@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
+const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const httpsPost = require('../../../utils/httpsReq').post;
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -174,8 +174,26 @@ Users.validateResetPasswordData = async (req, res, next) => {
 	}
 };
 
-const generateSignUpSchema = () => {
+const generateSignUpSchema = (isSSO) => {
 	const captchaEnabled = config.auth.captcha;
+
+	const nonSSOFields = {
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByEmail(value, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		password: types.strings.password.required(),
+		firstName: types.strings.name.transform(formatPronouns).required(),
+		lastName: types.strings.name.transform(formatPronouns).required(),
+	};
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
 			async (value) => {
@@ -189,50 +207,40 @@ const generateSignUpSchema = () => {
 				}
 				return true;
 			}).required(),
-		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
-			async (value) => {
-				if (value) {
-					try {
-						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
-						return false;
-					} catch {
-						// do nothing
-					}
-				}
-				return true;
-			}).required(),
-		password: types.strings.password.required(),
-		firstName: types.strings.name.required().transform(formatPronouns),
-		lastName: types.strings.name.required().transform(formatPronouns),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
-	})
-		.noUnknown().required();
+		...(isSSO ? {} : nonSSOFields),
+	}).noUnknown().required();
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
-			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
+			const checkCaptcha = post(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
 				response: body.captcha,
 			});
 
 			const result = await checkCaptcha;
+
 			return result.success;
 		})
 		: schema;
 };
 
-Users.validateSignUpData = async (req, res, next) => {
+const validateSignUpData = (isSSO) => async (req, res, next) => {
 	try {
-		const schema = generateSignUpSchema();
+		const schema = generateSignUpSchema(isSSO);
 		req.body = await schema.validate(req.body);
+		delete req.body.captcha;
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+Users.validateSignUpData = validateSignUpData(false);
+Users.validateSsoSignUpData = validateSignUpData(true);
 
 Users.validateVerifyData = async (req, res, next) => {
 	const schema = Yup.object().shape({

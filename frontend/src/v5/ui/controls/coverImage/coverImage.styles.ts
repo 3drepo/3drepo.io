@@ -14,9 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const HttpsReq = require(`${v4Path}/libs/httpsReq`);
-
-module.exports = HttpsReq;
+export const Image = styled.img`
+	width: 100%;
+	height: 175px;
+	margin: 0;
+	object-fit: cover;
+`;

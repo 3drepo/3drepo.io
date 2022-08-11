@@ -15,17 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 
 export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 	margin: 0 12px;
 	.MuiOutlinedInput-root {
 		height: 100%;
-		${({ $selectedrow, theme }) => $selectedrow && `
+		border-radius: 6px;
+
+		&.Mui-error {
+			svg {
+				overflow: visible;
+			}
+			.MuiInputBase-input {
+				padding-left: 0;
+			}
+		}
+		&, &.Mui-focused, &.Mui-error, &.Mui-focused.Mui-error {
+			>.MuiInputBase-input {
+				border: 0;
+				box-shadow: none;
+				&.Mui-disabled { -webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main}; }
+			}
+		}
+
+		${({ $selectedrow, theme }) => $selectedrow && css`
+			fieldset, &:hover fieldset {
+				border: 0;
+			}
 			&.MuiOutlinedInput-root:not(.Mui-error) {
 				input { color: ${theme.palette.primary.contrast}; }
-				&.MuiInputBase-formControl fieldset { border-color: transparent; }
 				background-color: ${theme.palette.secondary.light};
 			}
 		`}
@@ -35,7 +55,7 @@ export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 				-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
 			}
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			fieldset { border: none; }
+			border: 0;
 		}
 	}
 `;

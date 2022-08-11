@@ -18,7 +18,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import { Tooltip } from '@mui/material';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,
@@ -26,7 +25,6 @@ import {
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import {
 	enableRealtimeContainerRemoved,
@@ -54,7 +52,6 @@ interface IContainerListItem {
 	index: number;
 	isSelected: boolean;
 	container: IContainer;
-	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
 	onSelectOrToggleItem: (id: string) => void;
 }
@@ -63,7 +60,6 @@ export const ContainerListItem = ({
 	index,
 	isSelected,
 	container,
-	filterQuery,
 	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
@@ -112,7 +108,6 @@ export const ContainerListItem = ({
 				<DashboardListItemContainerTitle
 					container={container}
 					isSelected={isSelected}
-					filterQuery={filterQuery}
 				/>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(container._id)}
@@ -132,18 +127,14 @@ export const ContainerListItem = ({
 					selected={isSelected}
 					width={160}
 				>
-					<Highlight search={filterQuery}>
-						{container.code}
-					</Highlight>
+					{container.code}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={188}
 					hideWhenSmallerThan={Display.Tablet}
 					selected={isSelected}
 				>
-					<Highlight search={filterQuery}>
-						{container.type}
-					</Highlight>
+					{container.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={78}
@@ -152,27 +143,16 @@ export const ContainerListItem = ({
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
-					<Tooltip
-						title={
-							container.isFavourite
-								? <FormattedMessage id="containers.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
-								: <FormattedMessage id="containers.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
-						}
-					>
-						<FavouriteCheckbox
-							checked={container.isFavourite}
-							selected={isSelected}
-							onClick={(event) => {
-								event.stopPropagation();
-							}}
-							onChange={(event) => {
-								onFavouriteChange(
-									container._id,
-									!!event.currentTarget.checked,
-								);
-							}}
-						/>
-					</Tooltip>
+					<FavouriteCheckbox
+						checked={container.isFavourite}
+						selected={isSelected}
+						onChange={(event) => {
+							onFavouriteChange(
+								container._id,
+								!!event.currentTarget.checked,
+							);
+						}}
+					/>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
 					<ContainerEllipsisMenu

@@ -18,22 +18,24 @@
 import { Name as RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.styles';
 import styled from 'styled-components';
 
-export const Container = styled.div`
+export const ExistingContainerOption = styled.div`
 	display: flex;
 	flex-direction: column;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	width: 100%;
+	color: ${({ theme }) => theme.palette.base.main};
 	align-items: baseline;
-	padding: 12px;
-
-	&:hover, &:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
-	&, ${RevisionStatus} {
+	
+	${RevisionStatus} {
 		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
-export const ErrorText = styled.div`
+export const Name = styled.div`
+	width: calc(100% - 10px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const InUseText = styled.div`
 	color: ${({ theme }) => theme.palette.error.main};
 `;
