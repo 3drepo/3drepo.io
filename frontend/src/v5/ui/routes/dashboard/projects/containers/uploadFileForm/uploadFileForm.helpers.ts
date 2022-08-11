@@ -21,6 +21,7 @@ import { UploadFileForm } from './uploadFileForm.component';
 export const uploadToContainer = ({ presetContainerId }) => {
 	const f = document.createElement('input');
 	f.type = 'file';
+	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 	f.onchange = (e: Event) => {
 		const presetFile = (<HTMLInputElement>e.target).files[0];
 		DialogsActionsDispatchers.open(UploadFileForm, {
