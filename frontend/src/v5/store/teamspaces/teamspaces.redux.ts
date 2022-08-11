@@ -31,7 +31,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
 	currentTeamspace: null,
-	quota: new Map(),
+	quota: {},
 };
 
 export const setCurrentTeamspace = (state, { currentTeamspace }: SetCurrentTeamspaceAction) => {
@@ -58,7 +58,7 @@ export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
  */
 export interface ITeamspacesState {
 	teamspaces: ITeamspace[];
-	quota: Map<string, QuotaType>;
+	quota: Record<string, QuotaType>;
 	currentTeamspace: string;
 }
 
