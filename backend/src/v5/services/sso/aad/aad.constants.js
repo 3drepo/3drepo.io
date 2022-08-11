@@ -15,8 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const HttpsReq = require(`${v4Path}/libs/httpsReq`);
+const config = require('../../../utils/config');
 
-module.exports = HttpsReq;
+const AadConstants = {};
+
+const createUri = (redirectEndpoint) => `${config.sso?.aad?.redirectDomain || config.apiUrls.all[0]}/v5/sso/aad${redirectEndpoint}`;
+
+AadConstants.authenticateRedirectEndpoint = '/authenticate-post';
+AadConstants.authenticateRedirectUri = createUri(AadConstants.authenticateRedirectEndpoint);
+AadConstants.signupRedirectEndpoint = '/signup-post';
+AadConstants.signupRedirectUri = createUri(AadConstants.signupRedirectEndpoint);
+AadConstants.msGraphUserDetailsUri = 'https://graph.microsoft.com/v1.0/me';
+
+module.exports = AadConstants;

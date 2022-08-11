@@ -14,13 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
-import { DashboardLayout as DashboardLayoutBase } from '@components/dashboard/dashboardLayout';
 
-export const DashboardLayout = styled(DashboardLayoutBase)`
-	${AppBarContainer} {
-		opacity: .95;
-		position: absolute;
+const axios = require('axios');
+
+const WebRequests = {};
+
+WebRequests.get = (uri, headers) => {
+	const options = {};
+
+	if (headers) {
+		options.headers = headers;
 	}
-`;
+
+	return axios.default.get(uri, options);
+};
+
+WebRequests.post = (uri, data) => axios.default.post(uri, data);
+
+module.exports = WebRequests;

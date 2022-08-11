@@ -60,9 +60,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 		onClickClose();
 	};
 
-	useEffect(() => {
-		if (formState.isSubmitSuccessful) reset();
-	}, [formState, reset]);
+	useEffect(reset, [open]);
 
 	return (
 		<FormModal

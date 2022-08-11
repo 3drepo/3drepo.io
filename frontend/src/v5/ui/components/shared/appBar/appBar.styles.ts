@@ -15,14 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import { AppBar } from '@mui/material';
-
-export const AppBarContainer = styled(AppBar)`
-	@media print {
-		display: none;
-	}
-`;
+import styled from 'styled-components';
 
 export const Items = styled.div`
 	display: flex;
@@ -35,5 +29,13 @@ export const Items = styled.div`
 	&:last-child {
 		justify-content: flex-end;
 		min-width: 152px;
+	}
+`;
+
+export const AppBarContainer = styled(AppBar).attrs({
+	position: 'static',
+})`
+	@media print {
+		display: none;
 	}
 `;

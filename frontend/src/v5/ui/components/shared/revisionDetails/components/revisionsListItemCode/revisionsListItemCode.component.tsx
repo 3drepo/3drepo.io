@@ -15,31 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MouseEventHandler, ReactNode } from 'react';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { ReactNode } from 'react';
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { TextOverflow } from '@controls/textOverflow';
 import { Text } from './revisionsListItemCode.styles';
 
-type IRevisionsListItemCode = {
+interface IRevisionsListItemCode extends FixedOrGrowContainerProps {
 	children: ReactNode;
-	width?: number;
-	tabletWidth?: number;
-	mobileWidth?: number;
-	className?: string;
-	onClick?: MouseEventHandler<HTMLSpanElement>;
-};
+}
 
 export const RevisionsListItemCode = ({
 	children,
-	width,
-	tabletWidth,
-	mobileWidth,
-	className,
-	onClick,
+	...rest
 }: IRevisionsListItemCode): JSX.Element => (
-	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
+	<FixedOrGrowContainer {...rest}>
 		<TextOverflow tooltipText="Launch in Viewer">
-			<Text onClick={onClick}>
+			<Text>
 				{children}
 			</Text>
 		</TextOverflow>

@@ -323,6 +323,11 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiTooltip: {
+					defaultProps: {
+						disableInteractive: true,
+					},
+				},
 				MuiDialog: {
 					defaultProps: {
 						container: () => document.getElementById('v4DialogsOverrides'),
