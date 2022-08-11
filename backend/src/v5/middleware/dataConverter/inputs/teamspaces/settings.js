@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
+const { getTemplateByCode, getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
@@ -25,6 +25,9 @@ const { validateMany } = require('../../../common');
 const Settings = {};
 
 const nameExists = (teamspace, name) => getTemplateByName(teamspace, name, { _id: 1 })
+	.then(() => true).catch(() => false);
+
+const codeExists = (teamspace, code) => getTemplateByCode(teamspace, code, { _id: 1 })
 	.then(() => true).catch(() => false);
 
 const mergeProperties = (newProps, oldProps) => {
@@ -66,8 +69,13 @@ const validateUpdateTemplateSchema = async (req, res, next) => {
 		const oldTemplate = req.templateData;
 
 		if (oldTemplate.name !== data.name) {
-			// if the name is changed, make sure it's not used by some other template
+			// if the name has changed, make sure it's not used by some other template
 			if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
+		}
+
+		if (oldTemplate.code !== data.code) {
+			// if the code has changed, make sure it's not used by some other template
+			if (await codeExists(teamspace, data.code)) throw new Error('Code already in use');
 		}
 
 		processTemplateUpdate(data, oldTemplate);
@@ -88,6 +96,7 @@ Settings.validateNewTicketSchema = async (req, res, next) => {
 		req.body = validate(data);
 
 		if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
+		if (await codeExists(teamspace, data.code)) throw new Error('Code already in use');
 
 		await next();
 	} catch (err) {
