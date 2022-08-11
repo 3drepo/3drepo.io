@@ -15,7 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { fieldTypes, presetEnumValues } = require('./templates.constants');
+const {
+	basePropertyLabels,
+	fieldTypes,
+	modulePropertyLabels,
+	presetEnumValues,
+	presetModules,
+	riskLevels,
+	riskLevelsToNum } = require('./templates.constants');
 const Yup = require('yup');
 const { fieldTypesToValidator } = require('./validators');
 const { generateFullSchema } = require('./templates');
@@ -83,9 +90,7 @@ const generateModuleValidator = async (teamspace, modules) => {
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = Yup.object({
-				properties: await generatePropertiesValidator(teamspace, module.properties),
-			}).required();
+			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties);
 		}
 	});
 
@@ -100,9 +105,64 @@ Tickets.validateTicket = async (teamspace, template, data) => {
 	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules);
 
 	const validator = Yup.object().shape({
+		title: types.strings.title.required(),
+		type: Yup.mixed().required(),
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
 		modules: Yup.object(moduleSchema),
 	});
 	return validator.validate(data, { stripUnknown: true });
+};
+
+const calculateLevelOfRisk = (likelihood, consequence) => {
+	let levelOfRisk;
+
+	const data1 = riskLevelsToNum(likelihood);
+	const data2 = riskLevelsToNum(consequence);
+
+	if (data1 >= 0 && data2 >= 0) {
+		const score = data1 + data2;
+
+		if (score > 6) {
+			levelOfRisk = riskLevels.VERY_HIGH;
+		} else if (score > 5) {
+			levelOfRisk = riskLevels.HIGH;
+		} else if (score > 2) {
+			levelOfRisk = riskLevels.MODERATE;
+		} else if (score > 1) {
+			levelOfRisk = riskLevels.LOW;
+		} else {
+			levelOfRisk = riskLevels.VERY_LOW;
+		}
+	}
+
+	return levelOfRisk;
+};
+
+Tickets.processReadOnlyValues = (ticket, user) => {
+	const { properties, modules } = ticket;
+	const currTime = new Date();
+
+	properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
+	properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
+	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
+
+	if (modules[presetModules.SAFETIBASE]) {
+		const safetiBaseProps = modules[presetModules.SAFETIBASE];
+		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
+
+		safetiBaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
+			safetiBaseProps[modProps.RISK_LIKELIHOOD],
+			safetiBaseProps[modProps.RISK_CONSEQUENCE],
+		);
+
+		const treatedLevel = calculateLevelOfRisk(
+			safetiBaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+			safetiBaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+		);
+
+		if (treatedLevel) {
+			safetiBaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
+		}
+	}
 };
 module.exports = Tickets;

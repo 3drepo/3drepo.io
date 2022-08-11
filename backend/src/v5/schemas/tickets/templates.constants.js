@@ -17,8 +17,16 @@
 
 const { toConstantCase } = require('../../utils/helper/strings');
 
-const fieldTypes = {};
-[
+const createConstantMapping = (values) => {
+	const res = {};
+	values.forEach((value) => {
+		res[toConstantCase(value)] = value;
+	});
+
+	return res;
+};
+
+const fieldTypes = createConstantMapping([
 	'text',
 	'longText',
 	'boolean',
@@ -31,33 +39,26 @@ const fieldTypes = {};
 	'measurements',
 	'safetibase',
 	'coords',
-].forEach((type) => {
-	fieldTypes[toConstantCase(type)] = type;
-});
+]);
 
-const presetModules = {};
-
-[
+const presetModules = createConstantMapping([
 	'sequencing',
 	'shapes',
 	'attachments',
 	'safetibase',
-].forEach((mod) => {
-	presetModules[toConstantCase(mod)] = mod;
-});
+]);
 
-const presetEnumValues = {};
-
-[
+const presetEnumValues = createConstantMapping([
 	'jobsAndUsers',
 	'riskCategories',
-].forEach((val) => {
-	presetEnumValues[toConstantCase(val)] = val;
-});
+]);
 
-const TemplateConstants = { fieldTypes, presetEnumValues, presetModules };
+const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
+const riskLevels = createConstantMapping(riskLevelsArr);
 
-const riskLevels = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
+const TemplateConstants = { fieldTypes, presetEnumValues, presetModules, riskLevels };
+
+TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
@@ -71,10 +72,9 @@ TemplateConstants.presetModulesProperties = {
 		{ name: 'Resources', type: fieldTypes.ATTACHMENTS },
 	],
 	[presetModules.SAFETIBASE]: [
-		{ name: 'Risk Likelyhood', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
-		{ name: 'Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
+		{ name: 'Risk Likelihood', type: fieldTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
+		{ name: 'Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
 		{ name: 'Level of Risk', type: TemplateConstants.TEXT, readOnly: true },
-		{ name: 'Risk owner', type: fieldTypes.ONE_OF, values: presetEnumValues.JOBS_AND_USERS }, // TODO check if still needed
 		{ name: 'Category', type: fieldTypes.ONE_OF, values: presetEnumValues.RISK_CATEGORIES },
 		{ name: 'Associated Activity', type: TemplateConstants.TEXT },
 		{ name: 'Element Type', type: TemplateConstants.TEXT },
@@ -86,8 +86,9 @@ TemplateConstants.presetModulesProperties = {
 		{ name: 'Stage', type: TemplateConstants.TEXT },
 		{ name: 'Type', type: TemplateConstants.TEXT },
 		{ name: 'Treatment Status', type: fieldTypes.ONE_OF, values: ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], default: 'Unmitigated' },
-		{ name: 'Treated Risk Likelyhood', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
-		{ name: 'Treated Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevels, default: 'Very Low' },
+		{ name: 'Treated Risk Likelihood', type: fieldTypes.ONE_OF, values: riskLevels },
+		{ name: 'Treated Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevels },
+		{ name: 'Treated Level of Risk', type: fieldTypes.TEXT, readOnly: true },
 		{ name: 'Residual Risk', type: TemplateConstants.TEXT },
 
 	],
@@ -107,6 +108,19 @@ TemplateConstants.defaultProperties = [
 	{ name: 'Due Date', type: fieldTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
 	{ name: 'Pin', type: fieldTypes.COORDS, availableIf: ({ pin }) => pin },
 ];
+
+TemplateConstants.basePropertyLabels = createConstantMapping(TemplateConstants.defaultProperties.map(
+	({ name }) => name,
+));
+
+TemplateConstants.modulePropertyLabels = {};
+
+Object.keys(TemplateConstants.presetModulesProperties).forEach((module) => {
+	const modProps = TemplateConstants.presetModulesProperties[module];
+	TemplateConstants.modulePropertyLabels[module] = createConstantMapping(
+		modProps.map(({ name }) => name),
+	);
+});
 
 TemplateConstants.getApplicableDefaultProperties = (config) => TemplateConstants.defaultProperties.flatMap(
 	({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),

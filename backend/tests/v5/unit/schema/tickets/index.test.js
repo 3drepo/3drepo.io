@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
-const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateUUID } = require('../../../helper/services');
 const FS = require('fs');
 
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
@@ -29,7 +30,7 @@ jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspaceModel = require(`${src}/models/teamspaces`);
 
 const TicketSchema = require(`${src}/schemas/tickets`);
-const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { basePropertyLabels, modulePropertyLabels, fieldTypes, riskLevels, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
@@ -62,11 +63,11 @@ const testPropertyTypes = (testData, moduleProperty) => {
 						[fieldName]: data,
 					};
 					const fullData = ({
+						title: generateRandomString(),
+						type: generateUUID(),
 						properties: moduleProperty ? {} : propObj,
 						modules: moduleProperty ? {
-							[presetModules.SEQUENCING]: {
-								properties: propObj,
-							},
+							[presetModules.SEQUENCING]: propObj,
 						} : {},
 					});
 
@@ -111,11 +112,11 @@ const testPropertyConditions = (testData, moduleProperty) => {
 				[fieldName]: input,
 			};
 			const fullData = ({
+				title: generateRandomString(),
+				type: generateUUID(),
 				properties: moduleProperty ? {} : propObjIn,
 				modules: moduleProperty ? {
-					[modName]: {
-						properties: propObjIn,
-					},
+					[modName]: propObjIn,
 				} : {},
 			});
 
@@ -124,11 +125,10 @@ const testPropertyConditions = (testData, moduleProperty) => {
 					[fieldName]: output,
 				};
 				const outData = ({
+					...fullData,
 					properties: moduleProperty ? {} : propObjOut,
 					modules: moduleProperty ? {
-						[modName]: {
-							properties: propObjOut,
-						},
+						[modName]: propObjOut,
 					} : {},
 				});
 
@@ -169,14 +169,15 @@ const testPresetValues = () => {
 		TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(['UserA', 'UserB']);
 
 		const createData = (a, b) => ({
+
+			title: generateRandomString(),
+			type: generateUUID(),
 			properties: {
 				[prop]: a,
 			},
 			modules: {
 				[module]: {
-					properties: {
-						[prop2]: b,
-					},
+					[prop2]: b,
 				},
 			},
 		});
@@ -262,7 +263,12 @@ const testValidateTicket = () => {
 				}],
 			};
 
-			const input = { properties: {}, modules: {} };
+			const input = {
+
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {},
+				modules: {} };
 			await expect(TicketSchema.validateTicket(teamspace, template, input)).resolves.toEqual(input);
 		});
 
@@ -270,6 +276,127 @@ const testValidateTicket = () => {
 	});
 };
 
+const testProcessReadOnlyValues = () => {
+	describe('Process read only values', () => {
+		test('Should fill in all the base properties if they are not present', () => {
+			const user = generateRandomString();
+			const ticket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {},
+				modules: {} };
+			TicketSchema.processReadOnlyValues(ticket, user);
+			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
+			expect(ticket.properties[OWNER]).toEqual(user);
+			expect(ticket.properties[CREATED_AT]).toBeInstanceOf(Date);
+			expect(ticket.properties[UPDATED_AT]).toBeInstanceOf(Date);
+		});
+		test('Should leave the properties with existing values if they are available', () => {
+			const user = generateRandomString();
+			const created = new Date(1000000);
+			const updated = new Date(2000000);
+			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
+			const ticket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[OWNER]: user,
+					[CREATED_AT]: created,
+					[UPDATED_AT]: updated,
+				},
+				modules: {} };
+			const expectedOutput = cloneDeep(ticket);
+			TicketSchema.processReadOnlyValues(ticket, generateRandomString());
+			expect(ticket).toEqual(expectedOutput);
+		});
+
+		describe(presetModules.SAFETIBASE, () => {
+			const {
+				RISK_LIKELIHOOD,
+				RISK_CONSEQUENCE,
+				LEVEL_OF_RISK,
+				TREATED_RISK_LIKELIHOOD,
+				TREATED_RISK_CONSEQUENCE,
+				TREATED_LEVEL_OF_RISK,
+			} = modulePropertyLabels[presetModules.SAFETIBASE];
+
+			describe.each([
+				['likelihood is missing', true, false],
+				['consequence is missing', false, true],
+				['both are missing', false, false],
+			])('Should not calculate treated level of risk if ', (desc, likelihood, consequence) => {
+				test(desc, () => {
+					const ticket = { properties: {},
+						title: generateRandomString(),
+						type: generateUUID(),
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								[RISK_LIKELIHOOD]: riskLevels.VERY_HIGH,
+								[RISK_CONSEQUENCE]: riskLevels.VERY_HIGH,
+								[TREATED_RISK_LIKELIHOOD]: likelihood ? riskLevels.VERY_HIGH : undefined,
+								[TREATED_RISK_CONSEQUENCE]: consequence ? riskLevels.VERY_HIGH : undefined,
+							},
+						},
+					};
+
+					TicketSchema.processReadOnlyValues(ticket, generateRandomString());
+					const expectedOutput = { ...ticket,
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								[RISK_LIKELIHOOD]: riskLevels.VERY_HIGH,
+								[RISK_CONSEQUENCE]: riskLevels.VERY_HIGH,
+								[LEVEL_OF_RISK]: riskLevels.VERY_HIGH,
+								[TREATED_RISK_LIKELIHOOD]: likelihood ? riskLevels.VERY_HIGH : undefined,
+								[TREATED_RISK_CONSEQUENCE]: consequence ? riskLevels.VERY_HIGH : undefined,
+							},
+						},
+					};
+					expect(ticket).toEqual(expectedOutput);
+				});
+			});
+
+			describe.each([
+				[riskLevels.VERY_HIGH, riskLevels.VERY_HIGH, riskLevels.VERY_HIGH],
+				[riskLevels.VERY_HIGH, riskLevels.MODERATE, riskLevels.HIGH],
+				[riskLevels.MODERATE, riskLevels.LOW, riskLevels.MODERATE],
+				[riskLevels.LOW, riskLevels.LOW, riskLevels.LOW],
+				[riskLevels.VERY_LOW, riskLevels.VERY_LOW, riskLevels.VERY_LOW],
+			])('Level of risk calculation', (likelihood, consequence, expectedRes) => {
+				test(`Likelihood: ${likelihood}, Consequence: ${consequence} should result in ${expectedRes}`, () => {
+					const ticket = { properties: {},
+						title: generateRandomString(),
+						type: generateUUID(),
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								[RISK_LIKELIHOOD]: likelihood,
+								[RISK_CONSEQUENCE]: consequence,
+								[TREATED_RISK_LIKELIHOOD]: likelihood,
+								[TREATED_RISK_CONSEQUENCE]: consequence,
+							},
+						},
+					};
+					TicketSchema.processReadOnlyValues(ticket, generateRandomString());
+					const expectedOutput = { ...ticket,
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								[RISK_LIKELIHOOD]: likelihood,
+								[RISK_CONSEQUENCE]: consequence,
+								[LEVEL_OF_RISK]: expectedRes,
+								[TREATED_RISK_LIKELIHOOD]: likelihood,
+								[TREATED_RISK_CONSEQUENCE]: consequence,
+								[TREATED_LEVEL_OF_RISK]: expectedRes,
+							},
+						},
+					};
+
+					expect(ticket).toEqual(expectedOutput);
+				});
+			});
+		});
+	});
+};
+
 describe('schema/tickets/validators', () => {
 	testValidateTicket();
+	testProcessReadOnlyValues();
 });

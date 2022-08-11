@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { templateExistsInProject, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { checkTicketTemplateExists } = require('../../../../middleware/dataConverter/inputs/teamspaces/settings');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
-const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
@@ -148,7 +148,9 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/ticketTemplate"
 	 */
-	router.get('/templates/:template', hasReadAccessToContainer, checkTicketTemplateExists, serialiseFullTicketTemplate);
+	router.get('/templates/:template', hasReadAccessToContainer, templateExistsInProject, serialiseFullTicketTemplate);
+
+	router.post('/', hasCommenterAccessToContainer, validateNewTicket);
 
 	return router;
 };

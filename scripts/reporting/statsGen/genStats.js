@@ -41,7 +41,7 @@ async function start() {
 		console.log('Connected successfully!');
 		await Promise.all([
 			UserList.createUsersReport(db, folder),
-			DBStats.createDBReport(db, folder)
+			//			DBStats.createDBReport(db, folder)
 		]);
 		await client.close();
 	} catch (err) {
