@@ -24,6 +24,7 @@ SsoConstants.providers = {
 SsoConstants.errorCodes = {
 	emailExists: 1,
 	emailExistsWithSSO: 2,
+	nonSsoUser: 3,
 };
 
 module.exports = SsoConstants;

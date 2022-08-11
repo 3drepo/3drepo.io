@@ -22,7 +22,7 @@ const { addPkceProtection } = require('./pkce');
 const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
-const { signupRedirectUri } = require('../../services/sso/aad/aad.constants');
+const { signupRedirectUri, authenticateRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { validateMany } = require('../common');
 
 const Aad = {};
@@ -91,5 +91,26 @@ Aad.redirectToStateURL = (req, res) => {
 	}
 };
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
+
+Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
+	const state = JSON.parse(req.query.state);
+	
+	const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
+		req.session.pkceCodes?.verifier);
+
+	try {
+		const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
+
+		if (user.customData.sso?.id != id) {
+			res.redirect(`${state.redirectUri}?error=${errorCodes.nonSsoUser}`);			
+		}
+
+		req.loginData = await recordSuccessfulAuthAttempt(user.user);
+		await next();
+	} catch {
+		//redirect with specific error code
+	}	
+
+};
 
 module.exports = Aad;
