@@ -17,7 +17,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { useParams } from 'react-router';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -31,6 +30,8 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
@@ -38,19 +39,19 @@ import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsL
 
 type IUploadFileForm = {
 	presetContainerId?: string;
-	teamspace: string;
-	project: string;
+	presetFile?: File;
 	open: boolean;
 	onClickClose: () => void;
 };
 
 export const UploadFileForm = ({
 	presetContainerId,
-	teamspace,
-	project,
+	presetFile,
 	open,
 	onClickClose,
 }: IUploadFileForm): JSX.Element => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({

@@ -109,10 +109,7 @@ export const ContainersList = ({
 							startIcon={<ArrowUpCircleIcon />}
 							variant="contained"
 							color="primary"
-							onClick={() => DialogsActionsDispatchers.open(UploadFileForm, {
-								teamspace,
-								project,
-							})}
+							onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
 						>
 							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 						</Button>

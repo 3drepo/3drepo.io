@@ -31,8 +31,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { UploadFileForm } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import {
 	Container,
@@ -78,11 +77,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 									startIcon={<ArrowUpCircleIcon />}
 									variant="contained"
 									color="primary"
-									onClick={() => DialogsActionsDispatchers.open(UploadFileForm, {
-										presetContainerId: containerId,
-										teamspace,
-										project,
-									})}
+									onClick={() => uploadToContainer({ presetContainerId: containerId })}
 								>
 									<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
 								</Button>
