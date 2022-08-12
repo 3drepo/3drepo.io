@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { ITeamspacesState } from './teamspaces.redux';
+import styled from 'styled-components';
 
-const selectTeamspacesDomain = (state): ITeamspacesState => state.teamspaces2;
-
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
-
-export const selectCurrentTeamspace = createSelector(
-	selectTeamspacesDomain, (state) => state.currentTeamspace,
-);
-
-export const selectCurrentQuota = createSelector(
-	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.quota[teamspace],
-);
-
-export const selectCurrentQuotaLoaded = createSelector(
-	selectCurrentQuota, (quota) => !!(quota),
-);
+export const TeamspaceInfoContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    color: ${({ theme }) => theme.palette.primary.contrast};
+    margin-left: 29px;
+`;

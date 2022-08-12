@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@mui/material';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 
@@ -41,19 +40,6 @@ export const TopBar = styled.div`
 	justify-content: flex-start;
 	border-top: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.main, 10)};
 `;
-
-export const TeamspaceInfo = styled.div`
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: center;
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	margin-left: 29px;
-`;
-
-export const TeamspaceName = styled(Typography).attrs({
-	variant: 'h1',
-})``;
 
 export const TeamspaceImage = styled(CoverImage)`
 	border-radius: 10px;
