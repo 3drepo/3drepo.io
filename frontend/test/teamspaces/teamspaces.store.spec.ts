@@ -19,8 +19,8 @@ import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import reducers from '@/v5/store/reducers';
 import { createStore, combineReducers } from 'redux';
 import { times } from 'lodash';
-import { selectCurrentTeamspace, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
-import { teamspaceMockFactory } from './teamspaces.fixtures';
+import { selectCurrentQuota, selectCurrentQuotaLoaded, selectCurrentTeamspace, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { quotaMockFactory, teamspaceMockFactory } from './teamspaces.fixtures';
 
 
 describe('Teamspaces: store', () => {
@@ -32,7 +32,6 @@ describe('Teamspaces: store', () => {
 		dispatch = store.dispatch;
 		getState = store.getState;
 	});
-
 
 	it('should fetch teamspaces successfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
@@ -47,4 +46,32 @@ describe('Teamspaces: store', () => {
 		const currentTeamspace = selectCurrentTeamspace(getState());
 		expect(currentTeamspace).toEqual(mockTeamspaces[3].name);
 	});
+
+	describe('the quota', () => {
+		it('should not be loaded', () => {
+			const teamspace = teamspaceMockFactory();
+			
+			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace.name));
+			let wasQuotaLoaded = selectCurrentQuotaLoaded(getState());
+			expect(wasQuotaLoaded).toEqual(false);
+		})
+
+		it('should be loaded and retrievable', () => {
+			const teamspace = teamspaceMockFactory();
+			const quota = quotaMockFactory();
+			
+			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace.name));
+			dispatch(TeamspacesActions.fetchQuotaSuccess(teamspace.name, quota));
+
+			let wasQuotaLoaded = selectCurrentQuotaLoaded(getState());
+			expect(wasQuotaLoaded).toEqual(true);
+
+			expect(quota).toBe(selectCurrentQuota(getState()));
+
+			dispatch(TeamspacesActions.setCurrentTeamspace('anotherTeamspace'));
+			wasQuotaLoaded = selectCurrentQuotaLoaded(getState());
+			expect(wasQuotaLoaded).toEqual(false);
+		})
+	});
+
 });

@@ -42,9 +42,13 @@ export const fetchSuccess = (state, { teamspaces }: FetchSuccessAction) => {
 	state.teamspaces = teamspaces;
 };
 
-export const fetchQuotaSuccess = (state = INITIAL_STATE, { teamspaces }: FetchSuccessAction): ITeamspacesState => ({
+export const fetchQuotaSuccess = (state = INITIAL_STATE,
+	{ teamspace, quota }: FetchQuotaSuccessAction): ITeamspacesState => ({
 	...state,
-	teamspaces,
+	quota: {
+		...state.quota,
+		[teamspace]: quota,
+	},
 });
 
 export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
