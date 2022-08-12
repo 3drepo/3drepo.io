@@ -16,7 +16,7 @@
  */
 const Yup = require('yup');
 
-const { fieldTypes } = require('./templates.constants');
+const { propTypes } = require('./templates.constants');
 const { types } = require('../../utils/helper/yup');
 
 const Validators = {};
@@ -27,16 +27,16 @@ const CameraType = {
 };
 
 const groupIdOrData = types.id; // FIXME
-Validators.fieldTypesToValidator = {
-	[fieldTypes.TEXT]: types.strings.title,
-	[fieldTypes.LONG_TEXT]: types.strings.longDescription,
-	[fieldTypes.BOOLEAN]: Yup.boolean(),
-	[fieldTypes.DATE]: types.date,
-	[fieldTypes.NUMBER]: Yup.number(),
-	[fieldTypes.ONE_OF]: types.strings.title,
-	[fieldTypes.MANY_OF]: Yup.array().of(types.strings.title),
-	[fieldTypes.IMAGE]: types.embeddedImage,
-	[fieldTypes.VIEW]: Yup.object().shape({
+Validators.propTypesToValidator = {
+	[propTypes.TEXT]: types.strings.title,
+	[propTypes.LONG_TEXT]: types.strings.longDescription,
+	[propTypes.BOOLEAN]: Yup.boolean(),
+	[propTypes.DATE]: types.date,
+	[propTypes.NUMBER]: Yup.number(),
+	[propTypes.ONE_OF]: types.strings.title,
+	[propTypes.MANY_OF]: Yup.array().of(types.strings.title),
+	[propTypes.IMAGE]: types.embeddedImage,
+	[propTypes.VIEW]: Yup.object().shape({
 		screenshot: types.embeddedImage,
 		state: Yup.object({
 			showHiddenObjects: Yup.boolean().default(false),
@@ -56,7 +56,7 @@ Validators.fieldTypesToValidator = {
 
 		}),
 	}),
-	[fieldTypes.MEASUREMENTS]: Yup.array().of(
+	[propTypes.MEASUREMENTS]: Yup.array().of(
 		Yup.object().shape({
 			positions: Yup.array().of(types.position).min(2).required(),
 			value: Yup.number().required(),
@@ -65,7 +65,7 @@ Validators.fieldTypesToValidator = {
 			name: types.strings.title.required(),
 		}),
 	),
-	[fieldTypes.COORDS]: types.position,
+	[propTypes.COORDS]: types.position,
 };
 
 module.exports = Validators;
