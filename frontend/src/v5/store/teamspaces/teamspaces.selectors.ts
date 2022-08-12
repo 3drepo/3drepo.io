@@ -31,7 +31,3 @@ export const selectCurrentTeamspace = createSelector(
 export const selectCurrentQuota = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.quota[teamspace],
 );
-
-export const selectCurrentQuotaLoaded = createSelector(
-	selectCurrentQuota, (quota) => !!(quota),
-);

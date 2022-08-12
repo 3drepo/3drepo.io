@@ -43,8 +43,8 @@ export function* fetch() {
 
 export function* fetchQuota({ teamspace }) {
 	try {
-		const { data: { quota } } = yield API.Teamspaces.fetchTeamspaces();
-		yield put(TeamspacesActions.fetchQuotaSuccess(teamspace, quota));
+		const { data } = yield API.Teamspaces.fetchQuota(teamspace);
+		yield put(TeamspacesActions.fetchQuotaSuccess(teamspace, data));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({

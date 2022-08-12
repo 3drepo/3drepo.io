@@ -16,30 +16,62 @@
  */
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
+import byteSize from 'byte-size';
 import { TeamspaceParams } from '../../../routes.constants';
 import { TeamspaceInfoContainer } from './teamspaceInfo.styles';
 
+type ByteSizeType = {
+	value: number,
+	unit: string
+};
+
 export const TeamspaceInfo = () => {
 	const { teamspace } = useParams<TeamspaceParams>();
-	const isQuotaLoaded = TeamspacesHooksSelectors.selectCurrentQuotaLoaded();
+	const quota = TeamspacesHooksSelectors.selectCurrentQuota();
+	const quotaLoaded = !!quota;
 
 	useEffect(() => {
-		if (isQuotaLoaded || !teamspace) return;
+		if (quotaLoaded || !teamspace) return;
 		TeamspacesActionsDispatchers.fetchQuota(teamspace);
-	}, [isQuotaLoaded, teamspace]);
+	}, [quotaLoaded, teamspace]);
+
+	if (!quotaLoaded) {
+		return <>loading...</>;
+	}
+
+	const availableReadableData = byteSize(quota.data.available) as ByteSizeType;
+	const usedReadableData = byteSize(quota.data.used) as ByteSizeType;
 
 	return (
 		<TeamspaceInfoContainer>
-			<h1>
+			<Typography variant="h1">
 				<FormattedMessage
-					id="teamspace.definition"
+					id="teamspace.info.name"
 					defaultMessage="{teamspace} Teamspace"
 					values={{ teamspace }}
 				/>
-			</h1>
+			</Typography>
+			<FormattedMessage
+				id="teamspace.info.storage"
+				defaultMessage="{used} {usedUnits} of {available} {availableUnits} used"
+				values={
+					{
+						used: usedReadableData.value,
+						usedUnits: usedReadableData.unit,
+						available: availableReadableData.value,
+						availableUnits: availableReadableData.unit,
+					}
+				}
+			/>
+			<FormattedMessage
+				id="teamspace.info.storage"
+				defaultMessage="{used} of {available} seats assigned"
+				values={quota.seats}
+			/>
 		</TeamspaceInfoContainer>
 	);
 };
