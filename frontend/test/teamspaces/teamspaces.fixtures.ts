@@ -14,17 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ThemeProvider } from 'styled-components';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { theme } from '@/v5/ui/routes/viewer/theme';
-import { DashboardLayout } from './dashboardViewerLayout.styles';
 
-export const DashboardViewerLayout = ({ children }) => (
-	<DashboardLayout>
-		<ThemeProvider theme={theme}>
-			<MuiThemeProvider theme={theme}>
-				{children}
-			</MuiThemeProvider>
-		</ThemeProvider>
-	</DashboardLayout>
-);
+import { ITeamspace } from "@/v5/store/teamspaces/teamspaces.redux";
+import faker from "faker";
+
+export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
+    name: faker.random.word(),
+	isAdmin: faker.datatype.boolean(),
+});

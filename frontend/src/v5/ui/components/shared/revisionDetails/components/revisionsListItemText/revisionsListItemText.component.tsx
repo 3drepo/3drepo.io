@@ -17,7 +17,6 @@
 
 import { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { TextOverflow } from '@controls/textOverflow';
 import { Display } from '@/v5/ui/themes/media';
 import { Text } from './revisionsListItemText.styles';
 
@@ -47,10 +46,8 @@ export const RevisionsListItemText = ({
 		hideWhenSmallerThan={hideWhenSmallerThan}
 		className={className}
 	>
-		<TextOverflow>
-			<Text $active={active}>
-				{children}
-			</Text>
-		</TextOverflow>
+		<Text $active={active}>
+			{children}
+		</Text>
 	</FixedOrGrowContainer>
 );

@@ -24,7 +24,6 @@ import { RevisionsListItemCode } from '@components/shared/revisionDetails/compon
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
-import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -60,18 +59,8 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 				{formatDate(timestamp)}
 			</RevisionsListItemDate>
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
-			<RevisionsListItemCode
-				tabletWidth={150}
-				onClick={() => {}}
-			>
-				{tag}
-			</RevisionsListItemCode>
-			<RevisionsListItemText
-				hideWhenSmallerThan={Display.Tablet}
-				active={active}
-			>
-				{desc}
-			</RevisionsListItemText>
+			<RevisionsListItemCode width="20%" tabletWidth={150}> {tag} </RevisionsListItemCode>
+			<RevisionsListItemText hideWhenSmallerThan={887} active={active}> {desc} </RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 			<Tooltip
 				title={(
