@@ -34,7 +34,7 @@ const testAddTicket = () => {
 			const project = generateRandomString();
 			const model = generateRandomString();
 
-			const _id = await Ticket.addTicket(teamspace, project, model);
+			const _id = await Ticket.addTicket(teamspace, project, model, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...data, teamspace, project, model, _id });

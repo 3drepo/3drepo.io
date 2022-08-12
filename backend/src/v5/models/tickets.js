@@ -24,7 +24,7 @@ const { generateUUID } = require('../utils/helper/uuids');
 
 Tickets.addTicket = async (teamspace, project, model, template) => {
 	const _id = generateUUID();
-	await db.insertOne(teamspace, TICKETS_COL, { teamspace, project, model, ...template, _id });
+	await db.insertOne(teamspace, TICKETS_COL, { ...template, teamspace, project, model, _id });
 	return _id;
 };
 
