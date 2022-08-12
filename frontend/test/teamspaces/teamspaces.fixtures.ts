@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspace } from "@/v5/store/teamspaces/teamspaces.redux";
-import faker from "faker";
+import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
+import faker from 'faker';
 
 export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
     name: faker.random.word(),
