@@ -27,7 +27,7 @@ const { generateUUID } = require(`${src}/utils/helper/uuids`);
 
 const testAddTemplate = () => {
 	describe('Add template', () => {
-		test('should call addTicketTemplate in the model object', async () => {
+		test('should call addTemplate in the model object', async () => {
 			const teamspace = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString() };
 			const expectedOutput = generateRandomString();
@@ -42,7 +42,7 @@ const testAddTemplate = () => {
 
 const testUpdateTemplate = () => {
 	describe('update template', () => {
-		test('should call updateTicketTemplate in the model object', async () => {
+		test('should call updateTemplate in the model object', async () => {
 			const teamspace = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString() };
 			const id = generateUUID();
@@ -65,7 +65,8 @@ const testGetTemplateList = () => {
 			await expect(Settings.getTemplateList(teamspace)).resolves.toEqual(data);
 
 			expect(TemplateModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplateModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, name: 1, code: 1 });
+			expect(TemplateModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true,
+				{ _id: 1, name: 1, code: 1, deprecated: 1 });
 		});
 	});
 };

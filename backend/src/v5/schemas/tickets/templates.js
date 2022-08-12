@@ -37,7 +37,7 @@ const fieldSchema = Yup.object().shape({
 	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
-	values: Yup.mixed().when(['type'], (val, schema) => {
+	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === fieldTypes.MANY_OF || val === fieldTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {
 				if (value === undefined) return false;
@@ -103,8 +103,14 @@ const moduleSchema = Yup.object().shape({
 	properties: propertyArray.when('type', (type, schema) => {
 		if (type) {
 			const propertiesToCheck = presetModulesProperties[type];
-			return schema.test('No name clash', 'Properties cannot have the same name as a default property',
-				(val) => val.every(({ name }) => !propertiesToCheck.includes(name)));
+			return schema.test((val, context) => {
+				for (const { name } of val) {
+					if (propertiesToCheck.find(({ name: usedName }) => name === usedName)) {
+						return context.createError({ message: `Property "${name}" has the same name as a default property.` });
+					}
+				}
+				return true;
+			});
 		}
 
 		return schema;
@@ -128,19 +134,17 @@ const schema = Yup.object().shape({
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
 		(val) => val.every(({ name }) => !defaultPropertyNames.includes(name))),
-	modules: Yup.array().default([]).of(moduleSchema).test('Module names', 'Module names must be unique', (arr) => {
+	modules: Yup.array().default([]).of(moduleSchema).test((arr, context) => {
 		const modNames = new Set();
-		let res = true;
-		arr.forEach(({ name, type }) => {
+		for (const { name, type } of arr) {
 			const id = (name || type).toUpperCase();
 			if (modNames.has(id)) {
-				res = false;
-			} else {
-				modNames.add(id);
+				return context.createError({ message: `Module "${id}" has been defined multiple times.` });
 			}
-		});
+			modNames.add(id);
+		}
 
-		return res;
+		return true;
 	}),
 
 }).noUnknown();

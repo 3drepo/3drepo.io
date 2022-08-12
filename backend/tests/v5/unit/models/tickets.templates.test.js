@@ -95,7 +95,7 @@ const testGetTemplateById = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { _id }, projection);
 		});
 
-		test(`should error with ${templates.templateNotFound} if there's no matching name`, async () => {
+		test(`should error with ${templates.templateNotFound} if there's no matching id`, async () => {
 			const teamspace = generateRandomString();
 			const _id = generateUUID();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);

@@ -31,8 +31,8 @@ const testValidate = () => {
 
 	const codeTests = [
 		['code is not defined', { name: generateRandomString() }, false],
-		['code is too long', { name: '', code: generateRandomString(4) }, false],
-		['code is too short', { name: '', code: generateRandomString(2) }, false],
+		['code is too long', { name: generateRandomString(), code: generateRandomString(4) }, false],
+		['code is too short', { name: generateRandomString(), code: generateRandomString(2) }, false],
 	];
 
 	const schemaFieldsTest = [
@@ -203,8 +203,10 @@ const testValidate = () => {
 		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString() }]), false],
 		['module with a name that is the same as a preset module', createSkeleton([{ name: presetModules.SEQUENCING }]), false],
 		['module trying to redefine a predefined property', {
-			...createSkeleton([{ type: presetModules.SEQUENCING }]),
-			properties: presetModulesProperties[presetModules.SEQUENCING][0],
+			...createSkeleton([{ type: presetModules.SEQUENCING,
+
+				properties: [presetModulesProperties[presetModules.SEQUENCING][0]],
+			}]),
 		}, false],
 		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
 		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: fieldTypes.TEXT }] }]), properties: [{ name: 'a', type: fieldTypes.TEXT }] }, true],

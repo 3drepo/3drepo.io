@@ -255,16 +255,22 @@ const testValidateUpdateTicketSchema = () => {
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce({ name: generateRandomString() });
 			TemplateModelSchema.getTemplateByName.mockResolvedValueOnce({ });
 
-			TicketTemplateSchema.validate.mockReturnValueOnce({ name: generateRandomString() });
+			const teamspace = generateRandomString();
+			const name = generateRandomString();
+
+			TicketTemplateSchema.validate.mockReturnValueOnce({ name });
 
 			const req = {
-				body: { name: generateRandomString() },
-				params: { teamspace: generateRandomString(), template: generateRandomString() },
+				body: { name },
+				params: { teamspace, template: generateRandomString() },
 			};
 			const res = {};
 			const next = jest.fn();
 
 			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateByName).toHaveBeenCalledTimes(1);
+			expect(TemplateModelSchema.getTemplateByName).toHaveBeenCalledWith(teamspace, name, { _id: 1 });
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -280,17 +286,22 @@ const testValidateUpdateTicketSchema = () => {
 
 			TemplateModelSchema.getTemplateByName.mockRejectedValueOnce({ });
 			TemplateModelSchema.getTemplateByCode.mockResolvedValueOnce({ });
+			const code = generateRandomString();
+			const teamspace = generateRandomString();
 
-			TicketTemplateSchema.validate.mockReturnValueOnce({ code: generateRandomString() });
+			TicketTemplateSchema.validate.mockReturnValueOnce({ code });
 
 			const req = {
-				body: { code: generateRandomString() },
-				params: { teamspace: generateRandomString(), template: generateRandomString() },
+				body: { code },
+				params: { teamspace, template: generateRandomString() },
 			};
 			const res = {};
 			const next = jest.fn();
 
 			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateByCode).toHaveBeenCalledTimes(1);
+			expect(TemplateModelSchema.getTemplateByCode).toHaveBeenCalledWith(teamspace, code, { _id: 1 });
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
