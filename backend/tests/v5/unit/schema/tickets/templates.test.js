@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { fieldTypes, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -36,7 +36,7 @@ const testValidate = () => {
 	];
 
 	const schemaFieldsTest = [
-		['all optional fields provided', {
+		['all optional properties provided', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
@@ -66,23 +66,23 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: 'abc',
 			}] }, false],
-		['property has all required fields', { name: generateRandomString(),
+		['property has all required properties', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 			}] }, true],
 		['property with enum type without values', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.ONE_OF,
+				type: propTypes.ONE_OF,
 			}] }, false],
 		['property with enum type with values', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.ONE_OF,
+				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString()],
 			}] }, true],
 		['property with enum type with values where default value is not within the values provided', {
@@ -90,7 +90,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.ONE_OF,
+				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString()],
 				default: generateRandomString(),
 			}] }, true],
@@ -99,7 +99,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.MANY_OF,
+				type: propTypes.MANY_OF,
 				values: ['a', 'b'],
 				default: ['a', 'b'],
 			}] }, true],
@@ -108,7 +108,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.MANY_OF,
+				type: propTypes.MANY_OF,
 				values: [123, 12354],
 			}] }, false],
 
@@ -117,7 +117,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.MANY_OF,
+				type: propTypes.MANY_OF,
 				values: presetEnumValues.JOBS_AND_USERS,
 			}] }, true],
 		['property with enum type with values is the wrong type', {
@@ -125,7 +125,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.ONE_OF,
+				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString(), 'a'],
 				default: ['a'],
 			}] }, false],
@@ -134,7 +134,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.MANY_OF,
+				type: propTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString(), 'a'],
 				default: ['a', 'a'],
 			}] }, false],
@@ -143,17 +143,17 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(121),
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 			}] }, false],
-		['all properties has all required fields', {
+		['all properties has all required properties', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 			}, {
 				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
+				type: propTypes.NUMBER,
 				default: 10,
 			}] }, true],
 		['one of the properties doesn\'t match the schema', {
@@ -161,10 +161,10 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 			}, {
 				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
+				type: propTypes.NUMBER,
 				default: generateRandomString(),
 			}] }, false],
 		['more than one property has the same name', {
@@ -172,17 +172,17 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: 'A',
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 			}, {
 				name: 'a',
-				type: fieldTypes.NUMBER,
+				type: propTypes.NUMBER,
 			}] }, false],
 		['property default value type matches', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 				default: generateRandomString(),
 			}] }, true],
 		['property default value type mismatches', {
@@ -190,16 +190,16 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
-				type: fieldTypes.NUMBER,
+				type: propTypes.NUMBER,
 				default: generateRandomString(),
 			}] }, false],
 	];
 
 	const createSkeleton = (modules) => ({ name: generateRandomString(), code: generateRandomString(3), modules });
 	const moduleSchemaTest = [
-		['module with all required fields filled in (custom module)', createSkeleton([{ name: generateRandomString() }]), true],
+		['module with all required properties filled in (custom module)', createSkeleton([{ name: generateRandomString() }]), true],
 		['module with a name that is too long', createSkeleton([{ name: generateRandomString(121) }]), false],
-		['module with all required fields filled in (preset module)', createSkeleton([{ type: presetModules.SEQUENCING }]), true],
+		['module with all required properties filled in (preset module)', createSkeleton([{ type: presetModules.SEQUENCING }]), true],
 		['module with an unrecognised preset module', createSkeleton([{ type: generateRandomString() }]), false],
 		['module with a name that is the same as a preset module', createSkeleton([{ name: presetModules.SEQUENCING }]), false],
 		['module trying to redefine a predefined property', {
@@ -209,12 +209,12 @@ const testValidate = () => {
 			}]),
 		}, false],
 		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
-		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: fieldTypes.TEXT }] }]), properties: [{ name: 'a', type: fieldTypes.TEXT }] }, true],
+		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: propTypes.TEXT }] }]), properties: [{ name: 'a', type: propTypes.TEXT }] }, true],
 		['all modules provided are valid', createSkeleton([
 			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
 		['2 modules with same property name', createSkeleton([
-			{ type: presetModules.SEQUENCING, properties: [{ name: 'a', type: fieldTypes.TEXT }] },
-			{ name: generateRandomString(), properties: [{ name: 'a', type: fieldTypes.TEXT }] }]), true],
+			{ type: presetModules.SEQUENCING, properties: [{ name: 'a', type: propTypes.TEXT }] },
+			{ name: generateRandomString(), properties: [{ name: 'a', type: propTypes.TEXT }] }]), true],
 		['all modules names must be unique', createSkeleton([
 			{ name: 'same' }, { name: 'same' }]), false],
 		['all modules types must be unique', createSkeleton([
@@ -231,7 +231,7 @@ const testValidate = () => {
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
-		['the template has all the required fields', { name: generateRandomString(), code: generateRandomString(3) }, true],
+		['the template has all the required properties', { name: generateRandomString(), code: generateRandomString(3) }, true],
 		...nameTests,
 		...codeTests,
 		...schemaFieldsTest,
@@ -246,7 +246,7 @@ const testValidate = () => {
 		});
 	});
 
-	test('Any unknown fields should be stripped from the schema and necessary fields filled in', () => {
+	test('Any unknown properties should be stripped from the schema and necessary properties filled in', () => {
 		const data = {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -256,16 +256,16 @@ const testValidate = () => {
 			},
 			properties: [{
 				name: 'I am an apple',
-				type: fieldTypes.NUMBER,
+				type: propTypes.NUMBER,
 			},
 			{
 				name: generateRandomString(),
-				type: fieldTypes.TEXT,
+				type: propTypes.TEXT,
 				deprecated: true,
 			},
 			{
 				name: generateRandomString(),
-				type: fieldTypes.DATE,
+				type: propTypes.DATE,
 				default: Date.now(),
 			},
 			],

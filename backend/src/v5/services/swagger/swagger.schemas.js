@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { fieldTypes, presetModules } = require('../../schemas/tickets/templates.constants');
+const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
 
@@ -49,11 +49,11 @@ const ticketTemplatePropSchema = {
 		type: 'object',
 		required: ['name', 'type'],
 		properties: {
-			name: helpers.stringDef('Name of the field', 'Floor'),
-			type: helpers.stringDef('Field type', fieldTypes.ONE_OF, Object.values(fieldTypes)),
-			deprecated: helpers.boolDef('Denotes if this field is no longer in use', false),
-			required: helpers.boolDef('If this field is required (default: false)', true),
-			values: helpers.arrayDef(`list of possible values (only applicable if type is ${fieldTypes.ONE_OF} or ${fieldTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+			name: helpers.stringDef('Name of the prop', 'Floor'),
+			type: helpers.stringDef('Property type', propTypes.ONE_OF, Object.values(propTypes)),
+			deprecated: helpers.boolDef('Denotes if this prop is no longer in use', false),
+			required: helpers.boolDef('If this prop is required (default: false)', true),
+			values: helpers.arrayDef(`list of possible values (only applicable if type is ${propTypes.ONE_OF} or ${propTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
 		},
 	},
 };
@@ -152,15 +152,15 @@ Schemas.schemas.group = {
 			items: {
 				type: 'object',
 				properties: {
-					field: {
+					prop: {
 						type: 'string',
-						description: 'The BIM data field to query',
+						description: 'The BIM data prop to query',
 						example: 'Floor',
 					},
 					operator: {
 						type: 'string',
 						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
-						description: 'Operator value on this field',
+						description: 'Operator value on this prop',
 						example: 'EQUALS',
 					},
 					value: {

@@ -19,7 +19,7 @@ const { toConstantCase } = require('../../utils/helper/strings');
 
 const TemplateConstants = {};
 
-TemplateConstants.fieldTypes = {};
+TemplateConstants.propTypes = {};
 
 [
 	'text',
@@ -35,7 +35,7 @@ TemplateConstants.fieldTypes = {};
 	'attachments',
 	'safetibase',
 ].forEach((type) => {
-	TemplateConstants.fieldTypes[toConstantCase(type)] = type;
+	TemplateConstants.propTypes[toConstantCase(type)] = type;
 });
 
 TemplateConstants.presetModules = {};
@@ -59,32 +59,32 @@ TemplateConstants.presetEnumValues = {};
 
 TemplateConstants.presetModulesProperties = {
 	[TemplateConstants.presetModules.SEQUENCING]: [
-		{ name: 'Start Time', type: TemplateConstants.fieldTypes.DATE },
-		{ name: 'End Time', type: TemplateConstants.fieldTypes.DATE },
+		{ name: 'Start Time', type: TemplateConstants.propTypes.DATE },
+		{ name: 'End Time', type: TemplateConstants.propTypes.DATE },
 	],
 	[TemplateConstants.presetModules.SHAPES]: [
-		{ name: 'Shapes', type: TemplateConstants.fieldTypes.MEASUREMENTS },
+		{ name: 'Shapes', type: TemplateConstants.propTypes.MEASUREMENTS },
 	],
 	[TemplateConstants.presetModules.ATTACHMENTS]: [
-		{ name: 'Resources', type: TemplateConstants.fieldTypes.ATTACHMENTS },
+		{ name: 'Resources', type: TemplateConstants.propTypes.ATTACHMENTS },
 	],
 	[TemplateConstants.presetModules.SAFETIBASE]: [
-		{ name: 'Safetibase', type: TemplateConstants.fieldTypes.SAFETIBASE },
+		{ name: 'Safetibase', type: TemplateConstants.propTypes.SAFETIBASE },
 	],
 
 };
 
 TemplateConstants.defaultProperties = [
-	{ name: 'Description', type: TemplateConstants.fieldTypes.LONG_TEXT },
-	{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, readOnly: true },
-	{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
-	{ name: 'Updated at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
-	{ name: 'Default Image', type: TemplateConstants.fieldTypes.IMAGE },
-	{ name: 'Default View', type: TemplateConstants.fieldTypes.VIEW },
-	{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-	{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
-	{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: 'jobsAndUsers' },
-	{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE },
+	{ name: 'Description', type: TemplateConstants.propTypes.LONG_TEXT },
+	{ name: 'Owner', type: TemplateConstants.propTypes.TEXT, readOnly: true },
+	{ name: 'Created at', type: TemplateConstants.propTypes.DATE, readOnly: true },
+	{ name: 'Updated at', type: TemplateConstants.propTypes.DATE, readOnly: true },
+	{ name: 'Default Image', type: TemplateConstants.propTypes.IMAGE },
+	{ name: 'Default View', type: TemplateConstants.propTypes.VIEW },
+	{ name: 'Priority', type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
+	{ name: 'Status', type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
+	{ name: 'Assignees', type: TemplateConstants.propTypes.MANY_OF, values: 'jobsAndUsers' },
+	{ name: 'Due Date', type: TemplateConstants.propTypes.DATE },
 ];
 
 module.exports = TemplateConstants;

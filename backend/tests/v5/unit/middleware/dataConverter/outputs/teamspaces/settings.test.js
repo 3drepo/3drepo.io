@@ -26,7 +26,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TeamspaceSettings = require(`${src}/middleware/dataConverter/outputs/teamspaces/settings`);
 
@@ -35,23 +35,23 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testCastTicketSchemaOutput = () => {
 	describe('Casting ticket schema output', () => {
-		test('should convert all appropriate fields', () => {
+		test('should convert all appropriate properties', () => {
 			const templateData = {
 				_id: generateUUID(),
 				properties: [
 					{
 						name: generateRandomString(),
-						type: fieldTypes.TEXT,
+						type: propTypes.TEXT,
 						default: generateRandomString(),
 					},
 					{
 						name: generateRandomString(),
-						type: fieldTypes.DATE,
+						type: propTypes.DATE,
 						default: new Date(),
 					},
 					{
 						name: generateRandomString(),
-						type: fieldTypes.DATE,
+						type: propTypes.DATE,
 					},
 
 				],
@@ -60,17 +60,17 @@ const testCastTicketSchemaOutput = () => {
 					properties: [
 						{
 							name: generateRandomString(),
-							type: fieldTypes.TEXT,
+							type: propTypes.TEXT,
 							default: generateRandomString(),
 						},
 						{
 							name: generateRandomString(),
-							type: fieldTypes.DATE,
+							type: propTypes.DATE,
 							default: new Date(),
 						},
 						{
 							name: generateRandomString(),
-							type: fieldTypes.DATE,
+							type: propTypes.DATE,
 						},
 					] },
 				],

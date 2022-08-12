@@ -16,7 +16,7 @@
  */
 
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { fieldTypes } = require('../../../../schemas/tickets/templates.constants');
+const { propTypes } = require('../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -27,7 +27,7 @@ Settings.castTicketSchemaOutput = (req, res) => {
 	template._id = UUIDToString(template._id);
 
 	const convertDate = (prop) => {
-		if (prop.type === fieldTypes.DATE && prop.default) {
+		if (prop.type === propTypes.DATE && prop.default) {
 			// Convert date to ms since epoch
 			// eslint-disable-next-line no-param-reassign
 			prop.default = new Date(prop.default).getTime();

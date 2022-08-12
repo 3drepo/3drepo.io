@@ -32,7 +32,7 @@ const codeExists = (teamspace, code) => getTemplateByCode(teamspace, code, { _id
 
 const mergeProperties = (newProps, oldProps) => {
 	const newDataFields = {};
-	newProps.forEach((field) => { newDataFields[field.name] = field; });
+	newProps.forEach((prop) => { newDataFields[prop.name] = prop; });
 	oldProps.forEach(({ name, type, ...others }) => {
 		if (newDataFields[name]) {
 			if (newDataFields[name].type !== type) throw new Error(`Cannot change the value type of existing property "${name}"`);
@@ -44,7 +44,7 @@ const mergeProperties = (newProps, oldProps) => {
 
 const mergeModules = (newMods, oldMods) => {
 	const newModsLut = {};
-	newMods.forEach((field) => { newModsLut[field.name || field.type] = field; });
+	newMods.forEach((prop) => { newModsLut[prop.name || prop.type] = prop; });
 	oldMods.forEach(({ name, type, ...others }) => {
 		const id = name || type;
 		if (newModsLut[id]) {
