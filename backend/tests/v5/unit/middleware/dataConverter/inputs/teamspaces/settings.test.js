@@ -23,7 +23,7 @@ const { src } = require('../../../../../helper/path');
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 jest.mock('../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 
@@ -142,39 +142,39 @@ const checkMergedData = () => {
 		};
 
 		const data = { name: generateRandomString(), code: generateRandomString(3), properties: [], modules: [] };
-		const fieldName = generateRandomString();
-		const fieldList = [];
+		const propertyName = generateRandomString();
+		const propertyList = [];
 		times(3, () => {
-			fieldList.push({ name: generateRandomString(), type: fieldTypes.NUMBER });
+			propertyList.push({ name: generateRandomString(), type: propTypes.NUMBER });
 		});
 
 		const propertyTests = [
-			['A field that did not used to exist should just get copied over ',
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+			['A property that did not used to exist should just get copied over ',
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT }] },
 				data,
 				true,
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] }],
-			['A field that used to exist should now be marked deprecated',
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT }] }],
+			['A property that used to exist should now be marked deprecated',
 				data,
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT }] },
 				true,
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] }],
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT, deprecated: true }] }],
 
-			['A field that used to exist but now deprecated should be marked deprecated',
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] },
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+			['A property that used to exist but now deprecated should be marked deprecated',
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT, deprecated: true }] },
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT }] },
 				true,
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT, deprecated: true }] }],
-			['Order of fields should be preserved',
-				{ ...data, properties: fieldList },
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT, deprecated: true }] }],
+			['Order of propertys should be preserved',
+				{ ...data, properties: propertyList },
 				{ ...data, properties: [] },
 				true,
-				{ ...data, properties: fieldList }],
-			['A field that used to exist with a different type should throw an error',
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.NUMBER }] },
-				{ ...data, properties: [{ name: fieldName, type: fieldTypes.TEXT }] },
+				{ ...data, properties: propertyList }],
+			['A property that used to exist with a different type should throw an error',
+				{ ...data, properties: [{ name: propertyName, type: propTypes.NUMBER }] },
+				{ ...data, properties: [{ name: propertyName, type: propTypes.TEXT }] },
 				false,
-				createResponseCode(templates.invalidArguments, `Cannot change the value type of existing property "${fieldName}"`)],
+				createResponseCode(templates.invalidArguments, `Cannot change the value type of existing property "${propertyName}"`)],
 
 		];
 
@@ -255,16 +255,22 @@ const testValidateUpdateTicketSchema = () => {
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce({ name: generateRandomString() });
 			TemplateModelSchema.getTemplateByName.mockResolvedValueOnce({ });
 
-			TicketTemplateSchema.validate.mockReturnValueOnce({ name: generateRandomString() });
+			const teamspace = generateRandomString();
+			const name = generateRandomString();
+
+			TicketTemplateSchema.validate.mockReturnValueOnce({ name });
 
 			const req = {
-				body: { name: generateRandomString() },
-				params: { teamspace: generateRandomString(), template: generateRandomString() },
+				body: { name },
+				params: { teamspace, template: generateRandomString() },
 			};
 			const res = {};
 			const next = jest.fn();
 
 			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateByName).toHaveBeenCalledTimes(1);
+			expect(TemplateModelSchema.getTemplateByName).toHaveBeenCalledWith(teamspace, name, { _id: 1 });
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -280,17 +286,22 @@ const testValidateUpdateTicketSchema = () => {
 
 			TemplateModelSchema.getTemplateByName.mockRejectedValueOnce({ });
 			TemplateModelSchema.getTemplateByCode.mockResolvedValueOnce({ });
+			const code = generateRandomString();
+			const teamspace = generateRandomString();
 
-			TicketTemplateSchema.validate.mockReturnValueOnce({ code: generateRandomString() });
+			TicketTemplateSchema.validate.mockReturnValueOnce({ code });
 
 			const req = {
-				body: { code: generateRandomString() },
-				params: { teamspace: generateRandomString(), template: generateRandomString() },
+				body: { code },
+				params: { teamspace, template: generateRandomString() },
 			};
 			const res = {};
 			const next = jest.fn();
 
 			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateByCode).toHaveBeenCalledTimes(1);
+			expect(TemplateModelSchema.getTemplateByCode).toHaveBeenCalledWith(teamspace, code, { _id: 1 });
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);

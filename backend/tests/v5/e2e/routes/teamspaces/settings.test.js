@@ -22,7 +22,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { fieldTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 let server;
 let agent;
@@ -58,7 +58,7 @@ const generateTemplate = () => ({
 	properties: [
 		{
 			name: generateRandomString(),
-			type: fieldTypes.TEXT,
+			type: propTypes.TEXT,
 		},
 	],
 	modules: [],
@@ -111,7 +111,7 @@ const testUpdateTemplate = () => {
 			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, undefined, templateToUse, false, templates.teamspaceNotFound],
 			['user is a ts admin and there is a valid template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: 'abc' }, true, { ...templateToUse, name: 'abc' }],
 			['updated template should retain old properties as deprecated', tsAdmin.apiKey, undefined, undefined,
-				{ ...templateToUse, properties: [{ name: 'newProp', type: fieldTypes.NUMBER }] }, true, { ...templateToUse, properties: [{ name: 'newProp', type: fieldTypes.NUMBER }, { ...templateToUse.properties[0], deprecated: true }] }],
+				{ ...templateToUse, properties: [{ name: 'newProp', type: propTypes.NUMBER }] }, true, { ...templateToUse, properties: [{ name: 'newProp', type: propTypes.NUMBER }, { ...templateToUse.properties[0], deprecated: true }] }],
 			['template is invalid', tsAdmin.apiKey, undefined, undefined, {}, false, templates.invalidArguments],
 			['template name is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: templateThatClashes.name }, false, templates.invalidArguments],
 			['template code is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, code: templateThatClashes.code }, false, templates.invalidArguments],

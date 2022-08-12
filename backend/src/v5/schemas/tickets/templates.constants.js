@@ -26,7 +26,7 @@ const createConstantMapping = (values) => {
 	return res;
 };
 
-const fieldTypes = createConstantMapping([
+const propTypes = createConstantMapping([
 	'text',
 	'longText',
 	'boolean',
@@ -56,26 +56,26 @@ const presetEnumValues = createConstantMapping([
 const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
 const riskLevels = createConstantMapping(riskLevelsArr);
 
-const TemplateConstants = { fieldTypes, presetEnumValues, presetModules, riskLevels };
+const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels };
 
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
-		{ name: 'Start Time', type: fieldTypes.DATE },
-		{ name: 'End Time', type: fieldTypes.DATE },
+		{ name: 'Start Time', type: propTypes.DATE },
+		{ name: 'End Time', type: propTypes.DATE },
 	],
 	[presetModules.SHAPES]: [
-		{ name: 'Shapes', type: fieldTypes.MEASUREMENTS },
+		{ name: 'Shapes', type: propTypes.MEASUREMENTS },
 	],
 	[presetModules.ATTACHMENTS]: [
-		{ name: 'Resources', type: fieldTypes.ATTACHMENTS },
+		{ name: 'Resources', type: propTypes.ATTACHMENTS },
 	],
 	[presetModules.SAFETIBASE]: [
-		{ name: 'Risk Likelihood', type: fieldTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
-		{ name: 'Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
+		{ name: 'Risk Likelihood', type: propTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
+		{ name: 'Risk Consequence', type: propTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
 		{ name: 'Level of Risk', type: TemplateConstants.TEXT, readOnly: true },
-		{ name: 'Category', type: fieldTypes.ONE_OF, values: presetEnumValues.RISK_CATEGORIES },
+		{ name: 'Category', type: propTypes.ONE_OF, values: presetEnumValues.RISK_CATEGORIES },
 		{ name: 'Associated Activity', type: TemplateConstants.TEXT },
 		{ name: 'Element Type', type: TemplateConstants.TEXT },
 		{ name: 'Risk Factor', type: TemplateConstants.TEXT },
@@ -85,28 +85,29 @@ TemplateConstants.presetModulesProperties = {
 		{ name: 'Treatment Details', type: TemplateConstants.LONG_TEXT },
 		{ name: 'Stage', type: TemplateConstants.TEXT },
 		{ name: 'Type', type: TemplateConstants.TEXT },
-		{ name: 'Treatment Status', type: fieldTypes.ONE_OF, values: ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], default: 'Unmitigated' },
-		{ name: 'Treated Risk Likelihood', type: fieldTypes.ONE_OF, values: riskLevels },
-		{ name: 'Treated Risk Consequence', type: fieldTypes.ONE_OF, values: riskLevels },
-		{ name: 'Treated Level of Risk', type: fieldTypes.TEXT, readOnly: true },
+		{ name: 'Treatment Status', type: propTypes.ONE_OF, values: ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], default: 'Unmitigated' },
+		{ name: 'Treated Risk Likelihood', type: propTypes.ONE_OF, values: riskLevels },
+		{ name: 'Treated Risk Consequence', type: propTypes.ONE_OF, values: riskLevels },
+		{ name: 'Treated Level of Risk', type: propTypes.TEXT, readOnly: true },
 		{ name: 'Residual Risk', type: TemplateConstants.TEXT },
-
 	],
 
 };
 
 TemplateConstants.defaultProperties = [
-	{ name: 'Description', type: fieldTypes.LONG_TEXT },
-	{ name: 'Owner', type: fieldTypes.TEXT, readOnly: true },
-	{ name: 'Created at', type: fieldTypes.DATE, readOnly: true },
-	{ name: 'Updated at', type: fieldTypes.DATE, readOnly: true },
-	{ name: 'Default Image', type: fieldTypes.IMAGE, availableIf: ({ defaultImage }) => defaultImage },
-	{ name: 'Default View', type: fieldTypes.VIEW, availableIf: ({ defaultView }) => defaultView },
-	{ name: 'Priority', type: fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None', availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Status', type: fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open', availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Assignees', type: fieldTypes.MANY_OF, values: presetEnumValues.JOBS_AND_USERS, availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Due Date', type: fieldTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Pin', type: fieldTypes.COORDS, availableIf: ({ pin }) => pin },
+
+	{ name: 'Description', type: propTypes.LONG_TEXT },
+	{ name: 'Owner', type: propTypes.TEXT, readOnly: true },
+	{ name: 'Created at', type: propTypes.DATE, readOnly: true },
+	{ name: 'Updated at', type: propTypes.DATE, readOnly: true },
+	{ name: 'Default Image', type: propTypes.IMAGE, availableIf: ({ defaultImage }) => defaultImage },
+	{ name: 'Default View', type: propTypes.VIEW, availableIf: ({ defaultView }) => defaultView },
+	{ name: 'Priority', type: propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None', availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Status', type: propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open', availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Assignees', type: propTypes.MANY_OF, values: presetEnumValues.JOBS_AND_USERS, availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Due Date', type: propTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
+	{ name: 'Pin', type: propTypes.COORDS, availableIf: ({ pin }) => pin },
+
 ];
 
 TemplateConstants.basePropertyLabels = createConstantMapping(TemplateConstants.defaultProperties.map(

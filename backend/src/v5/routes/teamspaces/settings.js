@@ -140,6 +140,7 @@ const establishRoutes = () => {
 	*                     properties:
 	*                       _id:
 	*                         type: string
+	*                         description: id of the template
 	*                         format: uuid
 	*                       name:
 	*                         type: string
@@ -214,7 +215,7 @@ const establishRoutes = () => {
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: template has been successfully updated
+	*         description: returns the details of a template
 	*         content:
 	*           application/json:
 	*             schema:

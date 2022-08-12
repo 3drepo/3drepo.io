@@ -17,33 +17,34 @@
 
 const {
 	defaultProperties,
-	fieldTypes,
 	getApplicableDefaultProperties,
 	presetEnumValues,
 	presetModules,
-	presetModulesProperties } = require('./templates.constants');
+	presetModulesProperties,
+	propTypes } = require('./templates.constants');
+
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
-const { fieldTypesToValidator } = require('./validators');
 const { isString } = require('../../utils/helper/typeCheck');
+const { propTypesToValidator } = require('./validators');
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 
-const fieldSchema = Yup.object().shape({
+const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1),
-	type: Yup.string().oneOf(Object.values(fieldTypes)).required(),
+	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
-	values: Yup.mixed().when(['type'], (val, schema) => {
-		if (val === fieldTypes.MANY_OF || val === fieldTypes.ONE_OF) {
+	values: Yup.mixed().when('type', (val, schema) => {
+		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {
 				if (value === undefined) return false;
 				let typeToCheck;
 				if (isString(value)) {
 					typeToCheck = Yup.string().oneOf(Object.values(presetEnumValues)).required();
 				} else {
-					typeToCheck = Yup.array().of(fieldTypesToValidator[fieldTypes.ONE_OF]).min(1).required()
+					typeToCheck = Yup.array().of(propTypesToValidator[propTypes.ONE_OF]).min(1).required()
 						.strict(true);
 				}
 
@@ -59,8 +60,8 @@ const fieldSchema = Yup.object().shape({
 	}),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
-		const res = fieldTypesToValidator[type];
-		if (type === fieldTypes.MANY_OF) {
+		const res = propTypesToValidator[type];
+		if (type === propTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
 				if (defaultValues?.length) {
 					const seenValues = new Set();
@@ -72,22 +73,22 @@ const fieldSchema = Yup.object().shape({
 				}
 				return true;
 			});
-		} if (type === fieldTypes.ANY_OF) return res.oneOf(values);
+		} if (type === propTypes.ANY_OF) return res.oneOf(values);
 
 		return res;
 	}),
 
 });
 
-const propertyArray = Yup.array().of(fieldSchema).default([]).test('Property names', 'Property names must be unique inside the same context', (arr) => {
-	const fieldNames = new Set();
+const propertyArray = Yup.array().of(propSchema).default([]).test('Property names', 'Property names must be unique inside the same context', (arr) => {
+	const propNames = new Set();
 	let res = true;
 	arr.forEach(({ name }) => {
 		const id = name.toUpperCase();
-		if (fieldNames.has(id)) {
+		if (propNames.has(id)) {
 			res = false;
 		} else {
-			fieldNames.add(id);
+			propNames.add(id);
 		}
 	});
 
@@ -101,8 +102,14 @@ const moduleSchema = Yup.object().shape({
 	properties: propertyArray.when('type', (type, schema) => {
 		if (type) {
 			const propertiesToCheck = presetModulesProperties[type];
-			return schema.test('No name clash', 'Properties cannot have the same name as a default property',
-				(val) => val.every(({ name }) => !propertiesToCheck.includes(name)));
+			return schema.test((val, context) => {
+				for (const { name } of val) {
+					if (propertiesToCheck.find(({ name: usedName }) => name === usedName)) {
+						return context.createError({ message: `Property "${name}" has the same name as a default property.` });
+					}
+				}
+				return true;
+			});
 		}
 
 		return schema;
@@ -127,19 +134,17 @@ const schema = Yup.object().shape({
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
 		(val) => val.every(({ name }) => !defaultPropertyNames.includes(name))),
-	modules: Yup.array().default([]).of(moduleSchema).test('Module names', 'Module names must be unique', (arr) => {
+	modules: Yup.array().default([]).of(moduleSchema).test((arr, context) => {
 		const modNames = new Set();
-		let res = true;
-		arr.forEach(({ name, type }) => {
+		for (const { name, type } of arr) {
 			const id = (name || type).toUpperCase();
 			if (modNames.has(id)) {
-				res = false;
-			} else {
-				modNames.add(id);
+				return context.createError({ message: `Module "${id}" has been defined multiple times.` });
 			}
-		});
+			modNames.add(id);
+		}
 
-		return res;
+		return true;
 	}),
 
 }).noUnknown();

@@ -21,6 +21,6 @@ const Settings = {};
 
 Settings.addTicketTemplate = addTemplate;
 Settings.updateTicketTemplate = updateTemplate;
-Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1 });
+Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
 
 module.exports = Settings;

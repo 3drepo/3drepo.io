@@ -33,9 +33,10 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testCastTicketSchemaOutput = () => {
 	describe('Casting ticket schema output', () => {
-		test('should convert all appropriate fields', () => {
+		test('should convert all appropriate properties', () => {
 			const templateData = generateTemplate();
 			const castedTemplate = generateTemplate();
+
 			const req = { templateData };
 
 			TicketTemplateUtils.serialiseTicketSchema.mockReturnValueOnce(castedTemplate);

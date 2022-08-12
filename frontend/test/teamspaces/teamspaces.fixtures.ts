@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,34 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-	INITIAL_STATE,
-	teamspacesReducer,
-	TeamspacesActions
-} from '@/v5/store/teamspaces/teamspaces.redux';
+import { ITeamspace } from "@/v5/store/teamspaces/teamspaces.redux";
+import faker from "faker";
 
-describe('Teamspace: redux', () => {
-	const defaultState = {
-		...INITIAL_STATE,
-	};
-
-	describe('on fetchSuccess action', () => {
-		it('should set teamspaces', () => {
-			const teamspaces = [{
-				name: 'teamspace 1',
-				isAdmin: true,
-			}, {
-				name: 'teamspace-2',
-				isAdmin: true,
-			}, {
-				name: 'teamspace_3',
-				isAdmin: false,
-			}];
-
-			expect(teamspacesReducer(defaultState, TeamspacesActions.fetchSuccess(teamspaces))).toEqual({
-				...defaultState,
-				teamspaces,
-			});
-		});
-	});
+export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
+    name: faker.random.word(),
+	isAdmin: faker.datatype.boolean(),
 });
