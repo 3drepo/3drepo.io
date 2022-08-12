@@ -24,6 +24,18 @@ const { respond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
 
+const createNewTicket = async (req, res) => {
+	const { teamspace, project, container } = req.params;
+	try {
+		const _id = await createNewTicket(teamspace, project, container, req.body);
+
+		respond(req, res, templates.ok, { _id });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const getAllTemplates = async (req, res) => {
 	const { teamspace, project } = req.params;
 	const showDeprecated = req.query.showDeprecated === 'true';
@@ -150,7 +162,7 @@ const establishRoutes = () => {
 	 */
 	router.get('/templates/:template', hasReadAccessToContainer, templateExistsInProject, serialiseFullTicketTemplate);
 
-	router.post('/', hasCommenterAccessToContainer, validateNewTicket);
+	router.post('/', hasCommenterAccessToContainer, validateNewTicket, createNewTicket);
 
 	return router;
 };
