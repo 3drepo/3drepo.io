@@ -22,7 +22,7 @@ const { src } = require('../../../../../helper/path');
 
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
-const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TicketSchemaUtils = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
 
@@ -33,18 +33,18 @@ const testSerialiseTicketSchema = () => {
 			properties: [
 				{
 					name: generateRandomString(),
-					type: fieldTypes.TEXT,
+					type: propTypes.TEXT,
 					default: generateRandomString(),
 					deprecated: true,
 				},
 				{
 					name: generateRandomString(),
-					type: fieldTypes.DATE,
+					type: propTypes.DATE,
 					default: new Date(),
 				},
 				{
 					name: generateRandomString(),
-					type: fieldTypes.DATE,
+					type: propTypes.DATE,
 				},
 
 			],
@@ -53,17 +53,17 @@ const testSerialiseTicketSchema = () => {
 				properties: [
 					{
 						name: generateRandomString(),
-						type: fieldTypes.TEXT,
+						type: propTypes.TEXT,
 						default: generateRandomString(),
 					},
 					{
 						name: generateRandomString(),
-						type: fieldTypes.DATE,
+						type: propTypes.DATE,
 						default: new Date(),
 					},
 					{
 						name: generateRandomString(),
-						type: fieldTypes.DATE,
+						type: propTypes.DATE,
 						deprecated: true,
 					},
 				] },

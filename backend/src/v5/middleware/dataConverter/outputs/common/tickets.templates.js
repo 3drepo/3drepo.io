@@ -17,7 +17,7 @@
 
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { cloneDeep } = require('../../../../utils/helper/objects');
-const { fieldTypes } = require('../../../../schemas/tickets/templates.constants');
+const { propTypes } = require('../../../../schemas/tickets/templates.constants');
 
 const TicketTemplate = {};
 
@@ -27,7 +27,7 @@ TicketTemplate.serialiseTicketSchema = (template, dropDeprecated = false) => {
 
 	const processProperty = (prop) => {
 		if (dropDeprecated && prop.deprecated) return false;
-		if (prop.type === fieldTypes.DATE && prop.default) {
+		if (prop.type === propTypes.DATE && prop.default) {
 			// Convert date to ms since epoch
 			// eslint-disable-next-line no-param-reassign
 			prop.default = new Date(prop.default).getTime();

@@ -21,15 +21,15 @@ const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
 const testGetApplicableDefaultProperties = () => {
 	describe('Get applicable default properties', () => {
-		const basicProp = [{ name: 'Description', type: TemplateConstants.fieldTypes.LONG_TEXT },
-			{ name: 'Owner', type: TemplateConstants.fieldTypes.TEXT, readOnly: true },
-			{ name: 'Created at', type: TemplateConstants.fieldTypes.DATE, readOnly: true },
-			{ name: 'Updated at', type: TemplateConstants.fieldTypes.DATE, readOnly: true }];
+		const basicProp = [{ name: 'Description', type: TemplateConstants.propTypes.LONG_TEXT },
+			{ name: 'Owner', type: TemplateConstants.propTypes.TEXT, readOnly: true },
+			{ name: 'Created at', type: TemplateConstants.propTypes.DATE, readOnly: true },
+			{ name: 'Updated at', type: TemplateConstants.propTypes.DATE, readOnly: true }];
 
-		const issueProp = [{ name: 'Priority', type: TemplateConstants.fieldTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-			{ name: 'Status', type: TemplateConstants.fieldTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
-			{ name: 'Assignees', type: TemplateConstants.fieldTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
-			{ name: 'Due Date', type: TemplateConstants.fieldTypes.DATE }];
+		const issueProp = [{ name: 'Priority', type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
+			{ name: 'Status', type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
+			{ name: 'Assignees', type: TemplateConstants.propTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
+			{ name: 'Due Date', type: TemplateConstants.propTypes.DATE }];
 		test('Should only return the basic properties if none of the optional flags are configured', () => {
 			expect(TemplateConstants.getApplicableDefaultProperties({})).toEqual(basicProp);
 		});
@@ -41,7 +41,7 @@ const testGetApplicableDefaultProperties = () => {
 
 		test('Should return the basic, issue and pin properties if issueProperties  and pin is set to true', () => {
 			expect(TemplateConstants.getApplicableDefaultProperties({ issueProperties: true, pin: true }))
-				.toEqual([...basicProp, ...issueProp, { name: 'Pin', type: TemplateConstants.fieldTypes.COORDS }]);
+				.toEqual([...basicProp, ...issueProp, { name: 'Pin', type: TemplateConstants.propTypes.COORDS }]);
 		});
 	});
 };

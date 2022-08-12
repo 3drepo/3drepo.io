@@ -38,7 +38,7 @@ const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
 const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
-const { fieldTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
 const queue = {};
@@ -289,16 +289,16 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 	properties: [
 		{
 			name: ServiceHelper.generateRandomString(),
-			type: fieldTypes.TEXT,
+			type: propTypes.TEXT,
 		},
 		{
 			name: ServiceHelper.generateRandomString(),
-			type: fieldTypes.TEXT,
+			type: propTypes.TEXT,
 			deprecated: true,
 		},
 		{
 			name: ServiceHelper.generateRandomString(),
-			type: fieldTypes.NUMBER,
+			type: propTypes.NUMBER,
 			default: ServiceHelper.generateRandomNumber(),
 		},
 	],
@@ -313,17 +313,17 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 			properties: [
 				{
 					name: ServiceHelper.generateRandomString(),
-					type: fieldTypes.TEXT,
+					type: propTypes.TEXT,
 				},
 				{
 					name: ServiceHelper.generateRandomString(),
-					type: fieldTypes.NUMBER,
+					type: propTypes.NUMBER,
 					default: ServiceHelper.generateRandomNumber(),
 					deprecated: true,
 				},
 				{
 					name: ServiceHelper.generateRandomString(),
-					type: fieldTypes.NUMBER,
+					type: propTypes.NUMBER,
 					default: ServiceHelper.generateRandomNumber(),
 				},
 			],

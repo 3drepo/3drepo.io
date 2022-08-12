@@ -17,18 +17,18 @@
 
 const {
 	basePropertyLabels,
-	fieldTypes,
 	modulePropertyLabels,
 	presetEnumValues,
 	presetModules,
+	propTypes,
 	riskLevels,
 	riskLevelsToNum } = require('./templates.constants');
 const Yup = require('yup');
-const { fieldTypesToValidator } = require('./validators');
 const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
 const { getJobs } = require('../../models/jobs');
 const { logger } = require('../../utils/logger');
+const { propTypesToValidator } = require('./validators');
 const { types } = require('../../utils/helper/yup');
 
 const Tickets = {};
@@ -38,7 +38,7 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 
 	const proms = properties.map(async (prop) => {
 		if (prop.deprecated || prop.readOnly) return;
-		let validator = fieldTypesToValidator[prop.type];
+		let validator = propTypesToValidator[prop.type];
 		if (validator) {
 			if (prop.values) {
 				let values;
@@ -57,9 +57,9 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 					values = prop.values;
 				}
 
-				if (prop.type === fieldTypes.ONE_OF) {
+				if (prop.type === propTypes.ONE_OF) {
 					validator = validator.oneOf(values);
-				} else if (prop.type === fieldTypes.MANY_OF) {
+				} else if (prop.type === propTypes.MANY_OF) {
 					validator = Yup.array().of(types.strings.title.oneOf(values));
 				} else {
 					logger.logError(`Property values found for a non selection type (${prop.type})`);
