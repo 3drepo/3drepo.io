@@ -16,20 +16,21 @@
  */
 
 const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { templateExistsInProject, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
+const { addTicket } = require('../../../../processors/teamspaces/projects/models/containers');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
 const { respond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
 
-const createNewTicket = async (req, res) => {
+const createTicket = async (req, res) => {
 	const { teamspace, project, container } = req.params;
 	try {
-		const _id = await createNewTicket(teamspace, project, container, req.body);
+		const _id = await addTicket(teamspace, project, container, req.body);
 
-		respond(req, res, templates.ok, { _id });
+		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -160,9 +161,91 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/ticketTemplate"
 	 */
-	router.get('/templates/:template', hasReadAccessToContainer, templateExistsInProject, serialiseFullTicketTemplate);
+	router.get('/templates/:template', hasReadAccessToContainer, templateExists, serialiseFullTicketTemplate);
 
-	router.post('/', hasCommenterAccessToContainer, validateNewTicket, createNewTicket);
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets:
+	 *   post:
+	 *     description: Create a ticket. The Schema of the payload depends on the ticket template being used
+	 *     tags: [Containers]
+	 *     operationId: createContainerTicket
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *                 type:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: Template id this ticket is based on
+	 *                 title:
+	 *                   type: string
+	 *                   description: Title of the ticket
+	 *                   example: Doorway too narrow
+	 *                 properties:
+	 *                   type: object
+	 *                   description: properties within the ticket
+	 *                   properties:
+	 *                     Description:
+	 *                       type: string
+	 *                       description: A detailed description of the ticket
+	 *                       example: "The door way is too narrow for disable access"
+	 *                     CustomProperty1:
+	 *                       type: string
+	 *                       description: Any custom properties in the ticket should be filled in this way
+	 *                       example: "Data1"
+	 *                 modules:
+	 *                   type: object
+	 *                   description: modules within the ticket
+	 *                   properties:
+	 *                     Module1:
+	 *                       type: object
+	 *                       description: properties within Module1
+	 *                       properties:
+	 *                         Property1:
+	 *                           type: string
+	 *                           description: Any properties in the module should be filled in this way
+	 *                           example: "Data1"
+	 *
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: ticket has been successfully added, returns the id of the newly created template
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 */
+	router.post('/', hasCommenterAccessToContainer, validateNewTicket, createTicket);
 
 	return router;
 };

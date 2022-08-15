@@ -55,5 +55,6 @@ const templateIDToParams = async (req, res, next) => {
 };
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateNewTicket]);
+TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
 module.exports = TicketsMiddleware;
