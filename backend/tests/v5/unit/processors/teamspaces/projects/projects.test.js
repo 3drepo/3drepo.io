@@ -151,7 +151,8 @@ const testGetAllTemplates = () => {
 			await expect(Projects.getAllTemplates(teamspace, project, showDeprecated)).resolves.toEqual(expectedOutput);
 
 			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated, { name: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated,
+				{ name: 1, code: 1, deprecated: 1 });
 		});
 	});
 };

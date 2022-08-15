@@ -284,12 +284,14 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 
 ServiceHelper.generateTemplate = (deprecated) => ({
 	_id: ServiceHelper.generateUUIDString(),
+	code: ServiceHelper.generateRandomString(3),
 	name: ServiceHelper.generateRandomString(),
 	config: {},
 	properties: [
 		{
 			name: ServiceHelper.generateRandomString(),
-			type: propTypes.TEXT,
+			type: propTypes.DATE,
+			required: true,
 		},
 		{
 			name: ServiceHelper.generateRandomString(),
@@ -331,6 +333,41 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 	],
 	...deleteIfUndefined({ deprecated }),
 });
+
+const generateProperties = (propTemplate) => {
+	const properties = {};
+
+	propTemplate.forEach(({ name, deprecated, type }) => {
+		if (deprecated) return;
+		if (type === propTypes.TEXT) {
+			properties[name] = ServiceHelper.generateRandomString();
+		} else if (type === propTypes.DATE) {
+			properties[name] = Date.now();
+		} else if (type === propTypes.NUMBER) {
+			properties[name] = ServiceHelper.generateRandomNumber();
+		}
+	});
+
+	return properties;
+};
+
+ServiceHelper.generateTicket = (template) => {
+	const modules = {};
+	template.modules.forEach(({ name, type, deprecated, properties }) => {
+		if (deprecated) return;
+		const id = name ?? type;
+		modules[id] = generateProperties(properties);
+	});
+
+	const ticket = {
+		type: template._id,
+		title: ServiceHelper.generateRandomString(),
+		properties: generateProperties(template.properties),
+		modules,
+	};
+
+	return ticket;
+};
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
