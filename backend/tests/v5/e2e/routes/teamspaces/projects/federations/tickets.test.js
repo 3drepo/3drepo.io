@@ -153,6 +153,7 @@ const testAddTicket = () => {
 		['the templateId is not provided', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { type: undefined }],
 		['the ticket data does not confirm to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 		['the ticket data confirms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey],
+		['the ticket data confirms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
 	])('Add Ticket', (desc, success, expectedOutput, projectId, modelId, key, payloadChanges = {}) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const payload = { ...ServiceHelper.generateTicket(ticketTemplates[0]), ...payloadChanges };
