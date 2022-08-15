@@ -21,12 +21,66 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import byteSize from 'byte-size';
+import StorageIcon from '@assets/icons/storage.svg';
+import SeatsIcon from '@assets/icons/seats.svg';
 import { TeamspaceParams } from '../../../routes.constants';
-import { TeamspaceInfoContainer } from './teamspaceInfo.styles';
+import { LimitsContainer, TeamspaceInfoContainer } from './teamspaceInfo.styles';
+// import WarningIcon from '@assets/icons/warning.svg';
 
 type ByteSizeType = {
 	value: number,
 	unit: string
+};
+
+type QuotaInfoType = {
+	available: number | string;
+	used: number;
+};
+
+type SeatsInfoProps = {
+	seats: QuotaInfoType;
+};
+
+const SeatsText = ({ seats }: SeatsInfoProps) => {
+	if (seats.available === 'unlimited') {
+		return (<>Unlimited seats</>);
+	}
+
+	return (
+		<FormattedMessage
+			id="teamspace.info.storage"
+			defaultMessage="{used} of {available} seats assigned"
+			values={seats}
+		/>
+	);
+};
+
+type StorageInfoProps = {
+	storage: QuotaInfoType;
+};
+
+const StorageText = ({ storage }: StorageInfoProps) => {
+	if (storage.available === 'unlimited') {
+		return (<>Unlimited storage</>);
+	}
+
+	const availableReadableData = byteSize(storage.available) as ByteSizeType;
+	const usedReadableData = byteSize(storage.used) as ByteSizeType;
+
+	return (
+		<FormattedMessage
+			id="teamspace.info.storage"
+			defaultMessage="{used} {usedUnits} of {available} {availableUnits} used"
+			values={
+				{
+					used: usedReadableData.value,
+					usedUnits: usedReadableData.unit,
+					available: availableReadableData.value,
+					availableUnits: availableReadableData.unit,
+				}
+			}
+		/>
+	);
 };
 
 export const TeamspaceInfo = () => {
@@ -43,9 +97,6 @@ export const TeamspaceInfo = () => {
 		return <>loading...</>;
 	}
 
-	const availableReadableData = byteSize(quota.data.available) as ByteSizeType;
-	const usedReadableData = byteSize(quota.data.used) as ByteSizeType;
-
 	return (
 		<TeamspaceInfoContainer>
 			<Typography variant="h1">
@@ -55,23 +106,12 @@ export const TeamspaceInfo = () => {
 					values={{ teamspace }}
 				/>
 			</Typography>
-			<FormattedMessage
-				id="teamspace.info.storage"
-				defaultMessage="{used} {usedUnits} of {available} {availableUnits} used"
-				values={
-					{
-						used: usedReadableData.value,
-						usedUnits: usedReadableData.unit,
-						available: availableReadableData.value,
-						availableUnits: availableReadableData.unit,
-					}
-				}
-			/>
-			<FormattedMessage
-				id="teamspace.info.storage"
-				defaultMessage="{used} of {available} seats assigned"
-				values={quota.seats}
-			/>
+			<LimitsContainer>
+				<StorageIcon />
+				<StorageText storage={quota.data} />
+				<SeatsIcon />
+				<SeatsText seats={quota.seats} />
+			</LimitsContainer>
 		</TeamspaceInfoContainer>
 	);
 };

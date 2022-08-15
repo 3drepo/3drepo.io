@@ -25,3 +25,9 @@ export const TeamspaceInfoContainer = styled.div`
     color: ${({ theme }) => theme.palette.primary.contrast};
     margin-left: 29px;
 `;
+
+export const LimitsContainer = styled.div`
+display: flex;
+flex-direction: row;
+justify-content: flex-start;
+`;
