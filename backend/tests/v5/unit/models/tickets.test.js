@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
 const Ticket = require(`${src}/models/tickets`);
 const db = require(`${src}/handler/db`);
@@ -27,9 +27,12 @@ const ticketCol = 'tickets';
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		test('should add the ticket', async () => {
-			const data = { [generateRandomString()]: generateRandomString() };
+			const templateType = generateRandomString();
+			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
+			const number = generateRandomNumber();
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(data);
+			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValue({ number: number - 1 });
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -37,11 +40,36 @@ const testAddTicket = () => {
 			const _id = await Ticket.addTicket(teamspace, project, model, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...data, teamspace, project, model, _id });
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...data, teamspace, project, model, _id, number });
+
+			expect(getLastNumber).toHaveBeenCalledTimes(1);
+			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
+		});
+
+		test('should add the ticket with number set to 1 if this is the first ticket', async () => {
+			const templateType = generateRandomString();
+			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
+
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(data);
+			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const _id = await Ticket.addTicket(teamspace, project, model, data);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ ...data, teamspace, project, model, _id, number: 1 });
+
+			expect(getLastNumber).toHaveBeenCalledTimes(1);
+			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
 		});
 	});
 };
 
-describe('models/views', () => {
+describe('models/tickets', () => {
 	testAddTicket();
 });

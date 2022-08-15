@@ -22,9 +22,16 @@ const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 // const { templates } = require('../utils/responseCodes');
 
-Tickets.addTicket = async (teamspace, project, model, template) => {
+const determineTicketNumber = async (teamspace, project, model, type) => {
+	const lastTicket = await db.findOne(teamspace, TICKETS_COL,
+		{ teamspace, project, model, type }, { number: 1 }, { number: -1 });
+	return (lastTicket?.number ?? 0) + 1;
+};
+
+Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	const _id = generateUUID();
-	await db.insertOne(teamspace, TICKETS_COL, { ...template, teamspace, project, model, _id });
+	const number = await determineTicketNumber(teamspace, project, model, ticket.type);
+	await db.insertOne(teamspace, TICKETS_COL, { ...ticket, teamspace, project, model, _id, number });
 	return _id;
 };
 
