@@ -37,7 +37,7 @@ export const TeamspaceQuota = () => {
 	}, [quotaLoaded, teamspace]);
 
 	if (!quotaLoaded) {
-		return <>loading...</>;
+		return null;
 	}
 
 	const showContactLink = isQuotaExpired(quota) || isQuotaUnitCapped(quota.seats) || isQuotaUnitCapped(quota.data);
