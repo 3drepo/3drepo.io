@@ -1,0 +1,71 @@
+/**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import { isQuotaCapped, isQuotaUnlimited } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { QuotaInfoType } from '@/v5/store/teamspaces/teamspaces.redux';
+import { FormattedMessage } from 'react-intl';
+
+import StorageIcon from '@assets/icons/storage.svg';
+import byteSize from 'byte-size';
+import { QuotaValuesContainer, WarningIcon } from './teamspaceQuota.styles';
+
+export type ByteSizeType = {
+	value: number,
+	unit: string
+};
+
+type StorageQuotaProps = {
+	storage: QuotaInfoType;
+};
+
+export const StorageQuotaText = ({ storage }: StorageQuotaProps) => {
+	if (isQuotaUnlimited(storage)) {
+		return (
+			<FormattedMessage
+				id="teamspace.quota.unlimitedStorage"
+				defaultMessage="Unlimited storage"
+			/>
+		);
+	}
+
+	const availableReadableData = byteSize(storage.available) as ByteSizeType;
+	const usedReadableData = byteSize(storage.used) as ByteSizeType;
+
+	return (
+		<FormattedMessage
+			id="teamspace.info.storage"
+			defaultMessage="{used} {usedUnits} of {available} {availableUnits} used"
+			values={
+				{
+					used: usedReadableData.value,
+					usedUnits: usedReadableData.unit,
+					available: availableReadableData.value,
+					availableUnits: availableReadableData.unit,
+				}
+			}
+		/>
+	);
+};
+
+export const StorageQuota = ({ storage }: StorageQuotaProps) => {
+	const Icon = isQuotaCapped(storage) ? WarningIcon : StorageIcon;
+	return (
+		<QuotaValuesContainer $disabled={isQuotaUnlimited(storage)} $error={isQuotaCapped(storage)}>
+			<Icon /><StorageQuotaText storage={storage} />
+		</QuotaValuesContainer>
+	);
+};

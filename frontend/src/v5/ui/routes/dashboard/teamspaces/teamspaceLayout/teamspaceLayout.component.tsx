@@ -24,8 +24,10 @@ import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspace
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { Container, Content, TopBar, TeamspaceImage } from './teamspaceLayout.styles';
-import { TeamspaceInfo } from './teamspaceInfo.component';
+import { FormattedMessage } from 'react-intl';
+import { Typography } from '@mui/material';
+import { Container, Content, TopBar, TeamspaceImage, TeamspaceInfo } from './teamspaceLayout.styles';
+import { TeamspaceQuota } from './teamspaceQuota/teamspaceQuota.component';
 
 interface ITeamspaceLayout {
 	children: ReactNode;
@@ -55,7 +57,16 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 			<AppBar />
 			<TopBar>
 				<TeamspaceImage imgSrc={imgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
-				<TeamspaceInfo />
+				<TeamspaceInfo>
+					<Typography variant="h1">
+						<FormattedMessage
+							id="teamspace.info.name"
+							defaultMessage="{teamspace} Teamspace"
+							values={{ teamspace }}
+						/>
+					</Typography>
+					<TeamspaceQuota />
+				</TeamspaceInfo>
 			</TopBar>
 			<TeamspaceNavigation />
 			<Content>

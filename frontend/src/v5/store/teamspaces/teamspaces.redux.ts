@@ -66,17 +66,16 @@ export interface ITeamspacesState {
 	currentTeamspace: string;
 }
 
+export type QuotaInfoType = {
+	available: number | string;
+	used: number;
+};
+
 export type QuotaType = {
 	freeTier: Boolean;
 	expiryDate: number
-	data: {
-		used: number,
-		available: number
-	},
-	seats: {
-		used: number,
-		available: number
-	}
+	data: QuotaInfoType,
+	seats: QuotaInfoType
 };
 
 export interface ITeamspace {

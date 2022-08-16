@@ -46,3 +46,12 @@ export const TeamspaceImage = styled(CoverImage)`
 	height: 142px;
 	width: 142px;
 `;
+
+export const TeamspaceInfo = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	margin-left: 29px;
+`;

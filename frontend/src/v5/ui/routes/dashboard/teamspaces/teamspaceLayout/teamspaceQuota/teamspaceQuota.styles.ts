@@ -16,18 +16,26 @@
  */
 
 import styled from 'styled-components';
+import WarningIconSmall from '@assets/icons/warning_small.svg';
 
-export const TeamspaceInfoContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    color: ${({ theme }) => theme.palette.primary.contrast};
-    margin-left: 29px;
+export const TeamspaceQuotaLayout = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
 `;
 
-export const LimitsContainer = styled.div`
-display: flex;
-flex-direction: row;
-justify-content: flex-start;
+export const QuotaValuesContainer = styled.div<{$disabled:boolean, $error}>` 
+	${({ theme }) => (theme.typography.caption)}
+
+	color: ${({ $disabled, $error, theme }) => {
+		if ($error) return theme.palette.error.lightest;
+		if ($disabled) return theme.palette.base.main;
+		return theme.palette.primary.contrast;
+	}};
+
+	background-color: ${({ $error, theme }) => ($error ? theme.palette.error.main : 'inherit')};
+`;
+
+export const WarningIcon = styled(WarningIconSmall)`
+	transform: scale(1.5);
 `;

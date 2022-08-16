@@ -17,9 +17,14 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { QuotaInfoType } from './teamspaces.redux';
 
 export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
 
 export const getTeamspaceImgSrc = (teamspace: string) => (
 	generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API)
 );
+
+export const isQuotaUnlimited = (quota: QuotaInfoType) => quota.available === 'unlimited';
+
+export const isQuotaCapped = (quota: QuotaInfoType) => quota.available <= quota.used;
