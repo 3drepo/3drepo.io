@@ -871,6 +871,126 @@ export class UnityUtil {
 	}
 
 	/**
+	 * The amount of space the geometry streaming should leave in the 
+	 * unmanaged heap.
+	 * The unmanaged heap is not measured directly, but considered to be
+	 * the space between the top of the Unity heap (typically 2Gb) and the
+	 * top of the managed heap.
+	 * @category Streaming
+	 */
+	public static setStreamingMemoryThreshold(thresholdInMb: number)
+	{
+		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, thresholdInMb);
+	}
+
+	/**
+	 * Constraints the geometry streaming to use at most maxMemoryInMb
+	 * regardless of the available unmanaged memory allocated by 
+	 * thresholdInMb.
+	 * Use this to improve performance on weaker platforms.
+	 * @category Streaming
+	 */
+	public static setStreamingMemoryLimit(maxMemoryInMb: number)
+	{
+		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, maxMemoryInMb);
+	}
+
+	/**
+	 * Sets the colour of the bounding boxes representing yet-to-be-loaded Supermeshes
+	 * @category Streaming
+	 * @code UnityUtil.setStreamingBundlesColor([0.2,0.8,0.2]);
+	 */
+	public static setStreamingBundlesColor(colour: number[])
+	{
+		const params = {
+			color: colour,
+		};
+		UnityUtil.toUnity('SetStreamingBundlesColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Sets the colour of the bounding boxes representing yet-to-be-loaded individual model elements
+	 * @category Streaming
+	 * @code UnityUtil.setStreamingElementsColor([0.2,0.8,0.2]);
+	 */
+	public static setStreamingElementsColor(colour: number[])
+	{
+		const params = {
+			color: colour,
+		};
+		UnityUtil.toUnity('SetStreamingElementsColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Sets the three parameters that control the fade in and out of the Supermesh bounding boxes based on camera distance
+	 * @category Streaming
+	 * @param distance - how quickly the bounds fade-in with respect to the distance from the camera (to the far plane). (Does not have to be between 0 and 1 - making it larger will make the fade in more gradual.)
+	 * @param bias - distance from the far plane that the bounds should start to fade out. When this is zero the bounds will not fade out. Should otherwise be above 1.
+	 * @param power - how sharply the fade out occurs
+	 * @code UnityUtil.SetStreamingBundlesFade(0.7,1.6,5);
+	 */
+	public static SetStreamingBundlesFade(distance: number, bias: number, power: number)
+	{
+		const params = {
+			bias: bias,
+			distance: distance,
+			power: power
+		};
+		UnityUtil.toUnity('SetStreamingBundlesFade', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Sets the transparency of the Supermesh Bounding Boxes faces/sides. Setting both this and the Lines Alpha to zero
+	 * will disable the Supermesh Bounds.
+	 * @category Streaming
+	 */
+	public static SetStreamingBundlesFacesAlpha(alpha: number)
+	{
+		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	}
+
+	/**
+	 * Sets the transparency of the Supermesh Bounding Boxes edges/outlines. Setting both this and the Faces Alpha to zero
+	 * will disable the Supermesh Bounds.
+	 * @category Streaming
+	 */
+	public static SetStremingBundlesLinesAlpha(alpha: number)
+	{
+		UnityUtil.toUnity('SetStremingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	}
+
+	/**
+	 * Sets the transparency of the Elements Bounding Boxes faces/sides. Setting both this and the Lines Alpha to zero
+	 * will disable the Elements Bounds.
+	 * @category Streaming
+	 */
+	public static SetStreamingElementsFacesAlpha(alpha: number)
+	{
+		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	}
+
+	/**
+	 * Sets the transparency of the Elements Bounding Boxes edges/outlines. Setting both this and the Faces Alpha to zero
+	 * will disable the Elements Bounds.
+	 * @category Streaming
+	 */
+	public static SetStreamingElementsLinesAlpha(alpha: number)
+	{
+		UnityUtil.toUnity('SetStremingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	}
+
+	/**
+	 * Sets the radius - as fraction of the camera near/far plane - within which the bounding boxes of individual 
+	 * yet-to-be-loaded elemenets should be drawn.
+	 * @category Streaming
+	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
+	 */
+	public static SetStreamingElementRadius(radius: number)
+	{
+		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, radius);
+	}
+
+	/**
 	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
