@@ -54,5 +54,5 @@ export const TeamspaceInfo = styled.div`
 	align-items: flex-start;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	margin-left: 29px;
-	row-gap: 15px;
+	row-gap: 12px;
 `;

@@ -18,9 +18,10 @@ import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/t
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { isQuotaExpired } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { isQuotaExpired, isQuotaUnitCapped } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '../../../../routes.constants';
-import { TeamspaceQuotaLayout } from './teamspaceQuota.styles';
+import { ContactLink, TeamspaceQuotaLayout } from './teamspaceQuota.styles';
 import { StorageQuota } from './teamspaceStorageQuota.component';
 import { SeatsQuota } from './teamspaceSeatsQuota.component';
 import { TeamspaceQuotaExpired } from './teamspaceQuotaExpired.component';
@@ -39,14 +40,23 @@ export const TeamspaceQuota = () => {
 		return <>loading...</>;
 	}
 
+	const showContactLink = isQuotaExpired(quota) || isQuotaUnitCapped(quota.seats) || isQuotaUnitCapped(quota.data);
+
 	if (isQuotaExpired(quota)) {
 		return (<TeamspaceQuotaExpired />);
 	}
 
 	return (
-		<TeamspaceQuotaLayout>
-			<StorageQuota storage={quota.data} />
-			<SeatsQuota seats={quota.seats} />
-		</TeamspaceQuotaLayout>
+		<>
+			<TeamspaceQuotaLayout>
+				<StorageQuota storage={quota.data} />
+				<SeatsQuota seats={quota.seats} />
+			</TeamspaceQuotaLayout>
+			{showContactLink && (
+				<ContactLink href="https://3drepo.com/about/contact/">
+					<FormattedMessage id="teamspace.quota.contactSales" defaultMessage="Contact Sales" />
+				</ContactLink>
+			)}
+		</>
 	);
 };

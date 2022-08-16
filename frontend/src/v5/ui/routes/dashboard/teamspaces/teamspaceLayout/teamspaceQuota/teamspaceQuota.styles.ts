@@ -17,12 +17,13 @@
 
 import styled from 'styled-components';
 import WarningIconSmall from '@assets/icons/warning_small.svg';
+import { Link } from '@mui/material';
 
 export const TeamspaceQuotaLayout = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
-	column-gap: 10px;
+	column-gap: 15px;
 `;
 
 export const QuotaValuesContainer = styled.div<{$disabled?:boolean, $error?: boolean}>` 
@@ -43,5 +44,17 @@ export const QuotaValuesContainer = styled.div<{$disabled?:boolean, $error?: boo
 `;
 
 export const WarningIcon = styled(WarningIconSmall)`
-	margin-rop: -2px;
+	margin-top: -2px;
+`;
+
+export const ContactLink = styled(Link)`
+	${({ theme }) => (theme.typography.caption)}
+	text-decoration: underline;
+
+	color: ${({ theme }) => theme.palette.primary.contrast};
+
+	&:visited, &:link, &:hover {
+		text-decoration: underline;
+	}
+
 `;
