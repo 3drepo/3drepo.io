@@ -31,8 +31,8 @@ const testAddTicket = () => {
 			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
 			const number = generateRandomNumber();
 
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(data);
-			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValue({ number: number - 1 });
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(data);
+			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -51,8 +51,8 @@ const testAddTicket = () => {
 			const templateType = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
 
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(data);
-			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(data);
+			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -70,6 +70,21 @@ const testAddTicket = () => {
 	});
 };
 
+const testRemoveAllTickets = () => {
+	describe('Remove all tickets', () => {
+		test('Should remove all the tickets from the provided model', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+			await expect(Ticket.removeAllTicketsInModel(teamspace, project, model)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, model });
+		});
+	});
+};
+
 describe('models/tickets', () => {
 	testAddTicket();
+	testRemoveAllTickets();
 });

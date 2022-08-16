@@ -24,6 +24,9 @@ const ModelHelper = require(`${src}/utils/helper/models`);
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
+jest.mock('../../../../../src/v5/models/tickets');
+const Tickets = require(`${src}/models/tickets`);
+
 jest.mock('../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
@@ -53,6 +56,9 @@ const testRemoveModelData = () => {
 
 			expect(DB.listCollections).toHaveBeenCalledTimes(1);
 			expect(DB.listCollections).toHaveBeenCalledWith(teamspace);
+
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledWith(teamspace, project, model);
 
 			// We mocked listCollections to return empty array, so we shouldn't have removed any collections
 			expect(DB.dropCollection).not.toHaveBeenCalled();

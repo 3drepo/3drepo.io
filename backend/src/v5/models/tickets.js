@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Tickets = {};
-
-const TICKETS_COL = 'tickets';
-const db = require('../handler/db');
+const DbHandler = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 // const { templates } = require('../utils/responseCodes');
 
+const Tickets = {};
+const TICKETS_COL = 'tickets';
+
 const determineTicketNumber = async (teamspace, project, model, type) => {
-	const lastTicket = await db.findOne(teamspace, TICKETS_COL,
+	const lastTicket = await DbHandler.findOne(teamspace, TICKETS_COL,
 		{ teamspace, project, model, type }, { number: 1 }, { number: -1 });
 	return (lastTicket?.number ?? 0) + 1;
 };
@@ -31,8 +31,12 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	const _id = generateUUID();
 	const number = await determineTicketNumber(teamspace, project, model, ticket.type);
-	await db.insertOne(teamspace, TICKETS_COL, { ...ticket, teamspace, project, model, _id, number });
+	await DbHandler.insertOne(teamspace, TICKETS_COL, { ...ticket, teamspace, project, model, _id, number });
 	return _id;
+};
+
+Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
+	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
 };
 
 module.exports = Tickets;
