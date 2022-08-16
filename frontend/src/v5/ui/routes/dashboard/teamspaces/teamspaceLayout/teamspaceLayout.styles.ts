@@ -51,7 +51,8 @@ export const TeamspaceInfo = styled.div`
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	align-items: center;
+	align-items: flex-start;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	margin-left: 29px;
+	row-gap: 15px;
 `;

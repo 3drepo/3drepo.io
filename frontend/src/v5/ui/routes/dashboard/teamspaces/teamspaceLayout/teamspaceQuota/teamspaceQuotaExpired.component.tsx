@@ -14,12 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable jsx-a11y/control-has-associated-label */
 
 import { FormattedMessage } from 'react-intl';
 import { QuotaValuesContainer, WarningIcon } from './teamspaceQuota.styles';
 
 export const TeamspaceQuotaExpired = () => (
-	<QuotaValuesContainer $error>
-		<WarningIcon /> <FormattedMessage id="teamspace.quota.expired" defaultMessage="Quota expired" />
-	</QuotaValuesContainer>
+	<>
+		<QuotaValuesContainer $error>
+			<WarningIcon /> <FormattedMessage id="teamspace.quota.expired" defaultMessage="Quota expired" />
+		</QuotaValuesContainer>
+		<a href="mailto:sales"><FormattedMessage id="teamspace.quota.contactSales" defaultMessage="Contact sales" /></a>
+	</>
 );
