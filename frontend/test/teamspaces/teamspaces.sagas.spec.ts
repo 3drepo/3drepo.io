@@ -54,7 +54,7 @@ describe('Teamspaces: sagas', () => {
 
 		mockServer
 			.get(`/teamspaces/${teamspace}/quota`)
-			.reply(200, { quota });
+			.reply(200, quota);
 
 		await expectSaga(TeamspacesSaga.default)
 				.dispatch(TeamspacesActions.fetchQuota(teamspace))
