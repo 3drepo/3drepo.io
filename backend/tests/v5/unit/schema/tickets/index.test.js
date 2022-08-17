@@ -272,6 +272,30 @@ const testValidateTicket = () => {
 			await expect(TicketSchema.validateTicket(teamspace, template, input)).resolves.toEqual(input);
 		});
 
+		test('Should created default properties/modules object if it is not present', async () => {
+			const teamspace = generateRandomString();
+			const template = {
+				properties: [{
+					name: generateRandomString(),
+					type: propTypes.TEXT,
+				}],
+				modules: [{
+					name: generateRandomString(),
+					properties: [{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					}],
+
+				}],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: generateUUID() };
+			await expect(TicketSchema.validateTicket(teamspace, template, input))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
 		testPresetValues();
 	});
 };
