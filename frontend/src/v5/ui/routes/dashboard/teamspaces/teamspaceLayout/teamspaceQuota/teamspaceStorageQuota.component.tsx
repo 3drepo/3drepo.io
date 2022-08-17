@@ -32,7 +32,7 @@ type StorageQuotaProps = {
 	storage: QuotaUnit;
 };
 
-export const StorageQuotaText = ({ storage }: StorageQuotaProps) => {
+const StorageQuotaText = ({ storage }: StorageQuotaProps) => {
 	if (isQuotaUnitUnlimited(storage)) {
 		return (
 			<FormattedMessage

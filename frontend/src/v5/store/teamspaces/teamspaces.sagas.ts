@@ -49,7 +49,7 @@ export function* fetchQuota({ teamspace }) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
 				id: 'teamspaces.fetch.error.action',
-				defaultMessage: 'fetching the quoata',
+				defaultMessage: 'fetching the quota',
 			}),
 			error,
 			details: formatMessage({

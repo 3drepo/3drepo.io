@@ -26,7 +26,7 @@ type SeatsInfoProps = {
 	seats: QuotaUnit;
 };
 
-export const SeatsQuotaText = ({ seats }: SeatsInfoProps) => {
+const SeatsQuotaText = ({ seats }: SeatsInfoProps) => {
 	if (isQuotaUnitUnlimited(seats)) {
 		return (
 			<FormattedMessage
@@ -49,7 +49,7 @@ export const SeatsQuota = ({ seats }: SeatsInfoProps) => {
 	const Icon = isQuotaUnitCapped(seats) ? WarningIcon : SeatsIcon;
 	return (
 		<QuotaValuesContainer $disabled={isQuotaUnitUnlimited(seats)} $error={isQuotaUnitCapped(seats)}>
-			<Icon /><StorageQuotaText storage={seats} />
+			<Icon /><SeatsQuotaText seats={seats} />
 		</QuotaValuesContainer>
 	);
 };
