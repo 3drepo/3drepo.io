@@ -37,10 +37,10 @@ export const QuotaValuesContainer = styled.div<{$disabled?:boolean, $error?: boo
 
 	background-color: ${({ $error, theme }) => ($error ? theme.palette.error.main : 'inherit')};
 	display: flex;
-    column-gap: 4px;
-    align-items: center;
+	column-gap: 4px;
+	align-items: center;
 	padding:${({ $error }) => ($error ? '5px 10px 5px 3px' : '5px 0px')};
-    border-radius: 5px;
+	border-radius: 5px;
 `;
 
 export const WarningIcon = styled(WarningIconSmall)`
