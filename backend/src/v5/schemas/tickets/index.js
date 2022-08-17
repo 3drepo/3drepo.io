@@ -82,7 +82,7 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 
 	await Promise.all(proms);
 
-	return Yup.object(obj).required();
+	return Yup.object(obj).default({});
 };
 
 const generateModuleValidator = async (teamspace, modules) => {
@@ -108,7 +108,7 @@ Tickets.validateTicket = async (teamspace, template, data) => {
 		title: types.strings.title.required(),
 		type: Yup.mixed().required(),
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
-		modules: Yup.object(moduleSchema),
+		modules: Yup.object(moduleSchema).default({}),
 	});
 	return validator.validate(data, { stripUnknown: true });
 };
