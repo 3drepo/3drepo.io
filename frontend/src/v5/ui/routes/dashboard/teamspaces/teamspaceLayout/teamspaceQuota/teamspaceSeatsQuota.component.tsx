@@ -20,7 +20,6 @@ import { QuotaUnit } from '@/v5/store/teamspaces/teamspaces.redux';
 import { FormattedMessage } from 'react-intl';
 import SeatsIcon from '@assets/icons/seats.svg';
 import { WarningIcon, QuotaValuesContainer } from './teamspaceQuota.styles';
-import { StorageQuotaText } from './teamspaceStorageQuota.component';
 
 type SeatsInfoProps = {
 	seats: QuotaUnit;

@@ -48,12 +48,12 @@ export function* fetchQuota({ teamspace }) {
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
-				id: 'teamspaces.fetch.error.action',
+				id: 'teamspaces.fetchQuota.error.action',
 				defaultMessage: 'fetching the quota',
 			}),
 			error,
 			details: formatMessage({
-				id: 'teamspaces.fetch.error.details',
+				id: 'teamspaces.fetchQuota.error.details',
 				defaultMessage: 'If reloading the page doesn\'t work please contact support',
 			}),
 		}));
