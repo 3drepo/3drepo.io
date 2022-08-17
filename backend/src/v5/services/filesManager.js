@@ -119,7 +119,7 @@ FilesManager.removeFile = async (teamspace, collection, id) => {
 	}
 };
 
-FilesManager.storeFile = async (teamspace, collection, id, data) => {
+FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
 	await FilesManager.removeFile(teamspace, collection, id);
 	let refInfo;
 
@@ -135,7 +135,7 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 		throw templates.unknown;
 	}
 
-	await insertRef(teamspace, collection, { ...refInfo, _id: id });
+	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id });
 };
 
 module.exports = FilesManager;

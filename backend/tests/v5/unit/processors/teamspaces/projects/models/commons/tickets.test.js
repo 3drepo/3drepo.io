@@ -16,12 +16,103 @@
  */
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString } = require('../../../../../../helper/services');
+const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../helper/services');
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
+const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
+
+jest.mock('../../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+
+const imageTest = async (isView) => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+
+	const expectedOutput = generateRandomString();
+
+	const propName = generateRandomString();
+	const moduleName = generateRandomString();
+
+	const propTypeToTest = isView ? propTypes.VIEW : propTypes.IMAGE;
+
+	const template = {
+		properties: [
+			{
+				name: propName,
+				type: propTypeToTest,
+			},
+		],
+		modules: [
+			{
+				name: moduleName,
+				properties: [
+					{
+						name: propName,
+						type: propTypeToTest,
+					},
+				],
+			},
+		],
+	};
+
+	const propBuffer = Buffer.from(generateRandomString());
+	const modPropBuffer = Buffer.from(generateRandomString());
+
+	const generatePropData = (buffer) => (isView ? { screenshot: buffer } : buffer);
+
+	const ticket = {
+		title: generateRandomString(),
+		properties: {
+			[propName]: generatePropData(propBuffer),
+		},
+		modules: {
+			[moduleName]: {
+				[propName]: generatePropData(modPropBuffer),
+			},
+		},
+	};
+
+	TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+
+	await expect(Tickets.addTicket(teamspace, project, model, ticket, template))
+		.resolves.toEqual(expectedOutput);
+
+	expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
+	const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
+
+	const propRef = isView ? processedTicket.properties[propName].screenshot
+		: processedTicket.properties[propName];
+	const modPropRef = isView ? processedTicket.modules[moduleName][propName].screenshot
+		: processedTicket.modules[moduleName][propName];
+
+	expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model,
+		{
+			...ticket,
+			properties: { [propName]: generatePropData(propRef) },
+			modules: {
+				[moduleName]: {
+					[propName]: generatePropData(modPropRef),
+				},
+			},
+		});
+
+	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
+
+	const meta = { teamspace, project, model };
+
+	expect(FilesManager.storeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, propRef, propBuffer, meta,
+	);
+	expect(FilesManager.storeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, modPropRef, modPropBuffer, meta,
+	);
+};
 
 const testAddTicket = () => {
 	describe('Add ticket', () => {
@@ -29,17 +120,24 @@ const testAddTicket = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const ticket = generateRandomString();
+			const template = generateTemplate();
+			const ticket = generateTicket(template);
 
 			const expectedOutput = generateRandomString();
 
 			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Tickets.addTicket(teamspace, project, model, ticket)).resolves.toEqual(expectedOutput);
+			await expect(Tickets.addTicket(teamspace, project, model, ticket, template))
+				.resolves.toEqual(expectedOutput);
 
 			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, ticket);
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
+
+		test('should process image and store a ref', () => imageTest());
+		test('should process screenshot from view data and store a ref', () => imageTest(true));
 	});
 };
 
