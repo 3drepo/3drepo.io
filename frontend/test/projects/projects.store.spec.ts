@@ -19,7 +19,7 @@ import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjects } from '@/v5/store/projects/projects.selectors';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { times } from 'lodash';
-import { projectMockFactory } from './projects.fixture';
+import { projectMockFactory } from './projects.fixtures';
 import { createTestStore } from '../test.helpers';
 
 const projectListIncludesProject = (projectList, project) => (
