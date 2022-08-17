@@ -3416,7 +3416,7 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/contrast-color@^1.0.0":
+"@types/contrast-color@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/contrast-color/-/contrast-color-1.0.0.tgz#0b64c479f0cb698d4d76a8ea3e707fb2ef319175"
   integrity sha512-tQA3wqkn7zb0dpgSxjtTEShUsWEExOBWOQ3ByiUT3SzrMM5wEa55NnoGI9X3671Tf19vDQbU/Co2dWVniGqBpQ==
@@ -9108,6 +9108,11 @@ ignore@^5.0.4, ignore@^5.1.1, ignore@^5.1.8, ignore@^5.1.9, ignore@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.0.tgz#6d3bac8fa7fe0d45d9f9be7bac2fc279577e345a"
   integrity sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==
+
+immer@9.0.15:
+  version "9.0.15"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.15.tgz#0b9169e5b1d22137aba7d43f8a81a495dd1b62dc"
+  integrity sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==
 
 immutability-helper@^2.8.1:
   version "2.9.1"

@@ -16,8 +16,8 @@
  */
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
-import reducers from "@/v5/store/reducers";
-import { createStore, combineReducers } from "redux";
+import reducers from '@/v5/store/reducers';
+import { createStore, combineReducers } from 'redux';
 import { times } from 'lodash';
 import { selectCurrentTeamspace, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { teamspaceMockFactory } from './teamspaces.fixtures';
@@ -31,17 +31,17 @@ describe('Teamspaces: store', () => {
 		const store = createStore(combineReducers(reducers));
 		dispatch = store.dispatch;
 		getState = store.getState;
-	})
+	});
 
 
-	it('should fetch teamspaces succesfully', () => {
+	it('should fetch teamspaces successfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.fetchSuccess(mockTeamspaces));
 		const teamspaces = selectTeamspaces(getState());
 		expect(teamspaces).toEqual(mockTeamspaces);
 	});
 
-	it('should set the current teamspace succesfully', () => {
+	it('should set the current teamspace successfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.setCurrentTeamspace(mockTeamspaces[3].name));
 		const currentTeamspace = selectCurrentTeamspace(getState());
