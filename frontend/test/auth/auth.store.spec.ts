@@ -18,7 +18,7 @@
 import { AuthActions } from '@/v5/store/auth/auth.redux';
 import { authMockFactory } from './auth.fixtures';
 import { selectAuthenticationFetched, selectIsAuthenticated, selectIsPending, selectLoginError, selectReturnUrl } from '@/v5/store/auth/auth.selectors';
-import { createTestStore } from 'test/test.helpers';
+import { createTestStore } from '../test.helpers';
 
 describe('Auth: store', () => {
 	let dispatch, getState = null;
