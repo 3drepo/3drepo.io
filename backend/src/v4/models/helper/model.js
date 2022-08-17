@@ -17,11 +17,9 @@
 
 "use strict";
 
-const db = require("../../handler/db");
 const {
 	prepareDefaultView,
 	createNewSetting,
-	deleteModelSetting,
 	findModelSettingById,
 	findModelSettings,
 	findPermissionByUser,
@@ -45,7 +43,7 @@ const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
+const { addModelToProject, createProject, findOneProject } = require("../project");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
@@ -55,6 +53,9 @@ const { StreamBuffer } = require("./stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
+
+const {v5Path} = require("../../../interop");
+const { deleteModel } = require(`${v5Path}/processors/teamspaces/projects/models/common/modelList`);
 
 async function _fillInModelDetails(accountName, setting, permissions) {
 	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
@@ -668,25 +669,6 @@ function isSubModel(account, model) {
 	});
 }
 
-async function removeModelCollections(account, model) {
-	try {
-		await FileRef.removeAllFilesFromModel(account, model);
-	} catch (err) {
-		systemLogger.logError("Failed to remove files", err);
-	}
-
-	const collections = await db.listCollections(account);
-	const promises = [];
-
-	collections.forEach(collection => {
-		if(collection.name.startsWith(model + ".")) {
-			promises.push(db.dropCollection(account, collection));
-		}
-	});
-
-	return Promise.all(promises);
-}
-
 function removeModel(account, model, forceRemove) {
 	return findModelSettingById(account, model).then(setting => {
 		if (!setting) {
@@ -701,16 +683,14 @@ function removeModel(account, model, forceRemove) {
 			subModelCheckPromise = Promise.resolve(false);
 		}
 
-		return subModelCheckPromise.then((isSub) => {
+		return subModelCheckPromise.then(async (isSub) => {
 			if (isSub) {
-				return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
+				throw responseCodes.MODEL_IS_A_SUBMODEL;
 			}
-			return removeModelCollections(account, model).then(() => {
-				const deletePromises = [];
-				deletePromises.push(deleteModelSetting(account, model));
-				deletePromises.push(removeProjectModel(account, model));
-				return Promise.all(deletePromises);
-			}).catch((err) => {
+
+			const {_id: projectId} = await findOneProject(account, {models: model}, {_id: 1});
+
+			await deleteModel(account, projectId, model).catch((err) => {
 				systemLogger.logError("Failed to remove collections: ", err);
 				return Promise.reject(responseCodes.REMOVE_MODEL_FAILED);
 			});

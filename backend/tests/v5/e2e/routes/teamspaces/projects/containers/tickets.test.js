@@ -152,9 +152,9 @@ const testAddTicket = () => {
 		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
 		['the templateId provided does not exist', false, templates.templateNotFound, undefined, undefined, users.tsAdmin.apiKey, { type: ServiceHelper.generateRandomString() }],
 		['the templateId is not provided', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { type: undefined }],
-		['the ticket data does not confirm to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
-		['the ticket data confirms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey],
-		['the ticket data confirms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
+		['the ticket data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+		['the ticket data conforms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey],
+		['the ticket data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
 	])('Add Ticket', (desc, success, expectedOutput, projectId, modelId, key, payloadChanges = {}) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const payload = { ...ServiceHelper.generateTicket(ticketTemplates[0]), ...payloadChanges };

@@ -21,6 +21,8 @@ const { generateRandomString } = require('../../../helper/services');
 
 const ModelHelper = require(`${src}/utils/helper/models`);
 
+const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
+
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
@@ -38,7 +40,6 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const testRemoveModelData = () => {
 	describe('Remove model data', () => {
 		test(`should not return with error if deleteModel failed with ${templates.modelNotFound.code}`, async () => {
-			FilesManager.removeAllFilesFromModel.mockResolvedValueOnce();
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.modelNotFound);
 
@@ -51,6 +52,10 @@ const testRemoveModelData = () => {
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				{ teamspace, project, model });
+
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
 
@@ -60,12 +65,15 @@ const testRemoveModelData = () => {
 			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
 			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledWith(teamspace, project, model);
 
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, { teamspace, project, model });
+
 			// We mocked listCollections to return empty array, so we shouldn't have removed any collections
 			expect(DB.dropCollection).not.toHaveBeenCalled();
 		});
 
 		test(`should throw error if deleteModel threw an error that was not ${templates.modelNotFound.code}`, async () => {
-			FilesManager.removeAllFilesFromModel.mockResolvedValueOnce();
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.unknown);
 
