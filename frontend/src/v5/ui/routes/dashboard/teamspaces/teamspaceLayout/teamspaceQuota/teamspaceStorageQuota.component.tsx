@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isQuotaCapped, isQuotaUnlimited } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { QuotaInfoType } from '@/v5/store/teamspaces/teamspaces.redux';
+import { isQuotaUnitCapped, isQuotaUnitUnlimited } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { QuotaUnit } from '@/v5/store/teamspaces/teamspaces.redux';
 import { FormattedMessage } from 'react-intl';
 
 import StorageIcon from '@assets/icons/storage.svg';
@@ -29,11 +29,11 @@ export type ByteSizeType = {
 };
 
 type StorageQuotaProps = {
-	storage: QuotaInfoType;
+	storage: QuotaUnit;
 };
 
 export const StorageQuotaText = ({ storage }: StorageQuotaProps) => {
-	if (isQuotaUnlimited(storage)) {
+	if (isQuotaUnitUnlimited(storage)) {
 		return (
 			<FormattedMessage
 				id="teamspace.quota.unlimitedStorage"
@@ -62,9 +62,9 @@ export const StorageQuotaText = ({ storage }: StorageQuotaProps) => {
 };
 
 export const StorageQuota = ({ storage }: StorageQuotaProps) => {
-	const Icon = isQuotaCapped(storage) ? WarningIcon : StorageIcon;
+	const Icon = isQuotaUnitCapped(storage) ? WarningIcon : StorageIcon;
 	return (
-		<QuotaValuesContainer $disabled={isQuotaUnlimited(storage)} $error={isQuotaCapped(storage)}>
+		<QuotaValuesContainer $disabled={isQuotaUnitUnlimited(storage)} $error={isQuotaUnitCapped(storage)}>
 			<Icon /><StorageQuotaText storage={storage} />
 		</QuotaValuesContainer>
 	);

@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isQuotaCapped, isQuotaUnlimited } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { QuotaInfoType } from '@/v5/store/teamspaces/teamspaces.redux';
+import { isQuotaUnitCapped, isQuotaUnitUnlimited } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { QuotaUnit } from '@/v5/store/teamspaces/teamspaces.redux';
 import { FormattedMessage } from 'react-intl';
 import SeatsIcon from '@assets/icons/seats.svg';
 import { WarningIcon, QuotaValuesContainer } from './teamspaceQuota.styles';
 import { StorageQuotaText } from './teamspaceStorageQuota.component';
 
 type SeatsInfoProps = {
-	seats: QuotaInfoType;
+	seats: QuotaUnit;
 };
 
 export const SeatsQuotaText = ({ seats }: SeatsInfoProps) => {
-	if (isQuotaUnlimited(seats)) {
+	if (isQuotaUnitUnlimited(seats)) {
 		return (
 			<FormattedMessage
 				id="teamspace.quota.unlimitedSeats"
@@ -46,9 +46,9 @@ export const SeatsQuotaText = ({ seats }: SeatsInfoProps) => {
 };
 
 export const SeatsQuota = ({ seats }: SeatsInfoProps) => {
-	const Icon = isQuotaCapped(seats) ? WarningIcon : SeatsIcon;
+	const Icon = isQuotaUnitCapped(seats) ? WarningIcon : SeatsIcon;
 	return (
-		<QuotaValuesContainer $disabled={isQuotaUnlimited(seats)} $error={isQuotaCapped(seats)}>
+		<QuotaValuesContainer $disabled={isQuotaUnitUnlimited(seats)} $error={isQuotaUnitCapped(seats)}>
 			<Icon /><StorageQuotaText storage={seats} />
 		</QuotaValuesContainer>
 	);

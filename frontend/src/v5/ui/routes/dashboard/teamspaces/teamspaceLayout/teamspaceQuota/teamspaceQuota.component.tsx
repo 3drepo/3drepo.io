@@ -18,11 +18,12 @@ import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/t
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { isQuotaExpired } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { TeamspaceParams } from '../../../../routes.constants';
 import { TeamspaceQuotaLayout } from './teamspaceQuota.styles';
 import { StorageQuota } from './teamspaceStorageQuota.component';
 import { SeatsQuota } from './teamspaceSeatsQuota.component';
-// import WarningIcon from '@assets/icons/warning.svg';
+import { TeamspaceQuotaExpired } from './teamspaceQuotaExpired.component';
 
 export const TeamspaceQuota = () => {
 	const { teamspace } = useParams<TeamspaceParams>();
@@ -36,6 +37,10 @@ export const TeamspaceQuota = () => {
 
 	if (!quotaLoaded) {
 		return <>loading...</>;
+	}
+
+	if (isQuotaExpired(quota)) {
+		return (<TeamspaceQuotaExpired />);
 	}
 
 	return (

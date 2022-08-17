@@ -62,20 +62,20 @@ export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
  */
 export interface ITeamspacesState {
 	teamspaces: ITeamspace[];
-	quota: Record<string, QuotaType>;
+	quota: Record<string, Quota>;
 	currentTeamspace: string;
 }
 
-export type QuotaInfoType = {
+export type QuotaUnit = {
 	available: number | string;
 	used: number;
 };
 
-export type QuotaType = {
+export type Quota = {
 	freeTier: Boolean;
 	expiryDate: number
-	data: QuotaInfoType,
-	seats: QuotaInfoType
+	data: QuotaUnit,
+	seats: QuotaUnit
 };
 
 export interface ITeamspace {
@@ -86,7 +86,7 @@ export interface ITeamspace {
 export type FetchAction = Action<'FETCH'>;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { teamspaces: ITeamspace[] };
 export type FetchQuotaAction = Action<'FETCH_QUOTA'> & { teamspace: string };
-export type FetchQuotaSuccessAction = Action<'FETCH_QUOTA_SUCCESS'> & { teamspace: string, quota: QuotaType };
+export type FetchQuotaSuccessAction = Action<'FETCH_QUOTA_SUCCESS'> & { teamspace: string, quota: Quota };
 export type SetCurrentTeamspaceAction = Action<'SET_CURRENT_TEAMSPACE'> & { currentTeamspace: string };
 
 export interface ITeamspacesActionCreators {
@@ -94,5 +94,5 @@ export interface ITeamspacesActionCreators {
 	fetchSuccess: (teamspaces: ITeamspace[]) => FetchSuccessAction;
 	setCurrentTeamspace: (teamspace: string) => SetCurrentTeamspaceAction;
 	fetchQuota: (teamspace: string) => FetchQuotaAction;
-	fetchQuotaSuccess: (teamspace: string, quota: QuotaType) => FetchQuotaSuccessAction;
+	fetchQuotaSuccess: (teamspace: string, quota: Quota) => FetchQuotaSuccessAction;
 }

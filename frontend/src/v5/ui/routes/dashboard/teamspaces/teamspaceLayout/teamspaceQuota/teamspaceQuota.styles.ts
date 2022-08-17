@@ -24,7 +24,7 @@ export const TeamspaceQuotaLayout = styled.div`
 	justify-content: flex-start;
 `;
 
-export const QuotaValuesContainer = styled.div<{$disabled:boolean, $error}>` 
+export const QuotaValuesContainer = styled.div<{$disabled?:boolean, $error?: boolean}>` 
 	${({ theme }) => (theme.typography.caption)}
 
 	color: ${({ $disabled, $error, theme }) => {
