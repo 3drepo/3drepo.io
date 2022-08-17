@@ -199,7 +199,7 @@ export const updateFederationSuccess = (state = INITIAL_STATE, {
 	updatedFederation,
 }: UpdateFederationSuccessAction) => ({
 	...state,
-	federations: {
+	federationsByProject: {
 		...state.federationsByProject,
 		[projectId]: state.federationsByProject[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;
