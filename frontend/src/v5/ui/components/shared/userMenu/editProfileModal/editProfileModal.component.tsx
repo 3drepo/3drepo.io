@@ -19,8 +19,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { TabContext } from '@mui/lab';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
-import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
+import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
 const PERSONAL_TAB = 'personal';
@@ -85,7 +85,6 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			onSubmit={getTabSubmitFunction()}
 			isValid={getTabSubmitFunction()}
 			isSubmitting={isSubmitting}
-			$isPasswordTab={activeTab === PASSWORD_TAB}
 			disableClosing={isSubmitting}
 			hideSubmitButton={hideSubmitButton}
 		>
@@ -95,23 +94,23 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting} />
 					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
+				<TabPanel value={PERSONAL_TAB} $zeroPadding>
+					<EditProfilePersonalTab
+						setIsSubmitting={setIsSubmitting}
+						setSubmitFunction={setPersonalSubmitFunction}
+						user={user}
+					/>
+				</TabPanel>
+				<TabPanel value={PASSWORD_TAB}>
+					<EditProfilePasswordTab
+						setIsSubmitting={setIsSubmitting}
+						setSubmitFunction={setPasswordSubmitFunction}
+					/>
+				</TabPanel>
+				<TabPanel value={INTEGRATIONS_TAB}>
+					<EditProfileIntegrationsTab />
+				</TabPanel>
 			</TabContext>
-			<TabPanel hidden={activeTab !== PERSONAL_TAB} $zeroPadding>
-				<EditProfilePersonalTab
-					setIsSubmitting={setIsSubmitting}
-					setSubmitFunction={setPersonalSubmitFunction}
-					user={user}
-				/>
-			</TabPanel>
-			<TabPanel hidden={activeTab !== PASSWORD_TAB}>
-				<EditProfilePasswordTab
-					setIsSubmitting={setIsSubmitting}
-					setSubmitFunction={setPasswordSubmitFunction}
-				/>
-			</TabPanel>
-			<TabPanel hidden={activeTab !== INTEGRATIONS_TAB}>
-				<EditProfileIntegrationsTab />
-			</TabPanel>
 		</FormModal>
 	);
 };
