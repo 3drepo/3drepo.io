@@ -110,7 +110,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				/>
 			</TabPanel>
 			<TabPanel hidden={activeTab !== INTEGRATIONS_TAB}>
-				<EditProfileIntegrationsTab />
+				<EditProfileIntegrationsTab isActiveTab={activeTab === INTEGRATIONS_TAB} />
 			</TabPanel>
 		</FormModal>
 	);

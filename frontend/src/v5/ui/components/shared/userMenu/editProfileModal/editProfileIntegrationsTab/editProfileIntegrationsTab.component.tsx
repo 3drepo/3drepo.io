@@ -23,10 +23,16 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
-export const EditProfileIntegrationsTab = () => {
+type EditProfileIntegrationsTabProps = {
+	isActiveTab: boolean;
+};
+
+export const EditProfileIntegrationsTab = ({ isActiveTab }: EditProfileIntegrationsTabProps) => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
+
+	if (!isActiveTab) return (<></>);
 
 	return (
 		<>
