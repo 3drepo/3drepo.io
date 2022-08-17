@@ -18,7 +18,7 @@
 import { UsersActions } from '@/v5/store/users/users.redux';
 import { selectUser, selectUsersByTeamspace } from '@/v5/store/users/users.selectors';
 import { createTestStore } from '../test.helpers';
-import { userWithAvatarMockFactory, userWithoutAvatarMockFactory } from './users.fixture';
+import { userWithAvatarMockFactory, userWithoutAvatarMockFactory } from './users.fixtures';
 
 
 describe('Users: store', () => {
