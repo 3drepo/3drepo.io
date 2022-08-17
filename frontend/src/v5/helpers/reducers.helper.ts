@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import produce from 'immer';
 
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import faker from 'faker';
-
-export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
-    name: faker.random.word(),
-	isAdmin: faker.datatype.boolean(),
-});
+export const produceAll = (reducers: Record<string, any>) => (
+	Object.entries(reducers).reduce((reducerObject, [reducerName, reducerBody]) => ({
+		...reducerObject,
+		[reducerName]: produce(reducerBody),
+	}), {})
+);
