@@ -67,9 +67,6 @@ TemplateConstants.presetModulesProperties = {
 	[presetModules.SHAPES]: [
 		{ name: 'Shapes', type: propTypes.MEASUREMENTS },
 	],
-	[presetModules.ATTACHMENTS]: [
-		{ name: 'Resources', type: propTypes.ATTACHMENTS },
-	],
 	[presetModules.SAFETIBASE]: [
 		{ name: 'Risk Likelihood', type: propTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
 		{ name: 'Risk Consequence', type: propTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },

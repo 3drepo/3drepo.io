@@ -279,14 +279,7 @@ const testValidateTicket = () => {
 					name: generateRandomString(),
 					type: propTypes.TEXT,
 				}],
-				modules: [{
-					name: generateRandomString(),
-					properties: [{
-						name: generateRandomString(),
-						type: propTypes.TEXT,
-					}],
-
-				}],
+				modules: [],
 			};
 
 			const input = {
