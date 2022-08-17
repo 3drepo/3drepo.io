@@ -55,7 +55,7 @@ const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
 
 const {v5Path} = require("../../../interop");
-const { deleteModel } = require(`${v5Path}/processors/teamspaces/projects/models/common/modelList`);
+const { deleteModel } = require(`${v5Path}/processors/teamspaces/projects/models/commons/modelList`);
 
 async function _fillInModelDetails(accountName, setting, permissions) {
 	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
