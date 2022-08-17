@@ -15,23 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createStore, combineReducers } from 'redux';
 import { AuthActions } from '@/v5/store/auth/auth.redux';
 import { authMockFactory } from './auth.fixtures';
 import { selectAuthenticationFetched, selectIsAuthenticated, selectIsPending, selectLoginError, selectReturnUrl } from '@/v5/store/auth/auth.selectors';
-import reducers from '@/v5/store/reducers';
+import { createTestStore } from 'test/test.helpers';
 
 describe('Auth: store', () => {
 	let dispatch, getState = null;
 
 	const mockAuth = authMockFactory();
 
-	beforeEach(() => {
-		// resetting the store //
-		const store = createStore(combineReducers(reducers));
-		dispatch = store.dispatch;
-		getState = store.getState;
-	});
+	beforeEach(() => ({ dispatch, getState } = createTestStore()));
 
 	it('should set authentication status successfully', () => {
 		const authFetchedBefore = selectAuthenticationFetched(getState());
