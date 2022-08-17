@@ -44,7 +44,6 @@ const propTypes = createConstantMapping([
 const presetModules = createConstantMapping([
 	'sequencing',
 	'shapes',
-	'attachments',
 	'safetibase',
 ]);
 
