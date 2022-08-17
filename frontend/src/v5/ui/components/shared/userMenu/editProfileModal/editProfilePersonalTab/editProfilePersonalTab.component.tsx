@@ -35,7 +35,7 @@ import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/err
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
 
-interface IUpdatePersonalInputs {
+export interface IUpdatePersonalInputs {
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -45,12 +45,16 @@ interface IUpdatePersonalInputs {
 }
 
 type EditProfilePersonalTabProps = {
+	personalData: IUpdatePersonalInputs,
+	setPersonalData: (personalData: IUpdatePersonalInputs) => void,
 	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
 	user: ICurrentUser,
 };
 
 export const EditProfilePersonalTab = ({
+	personalData,
+	setPersonalData,
 	setSubmitFunction,
 	setIsSubmitting,
 	user,
@@ -67,11 +71,16 @@ export const EditProfilePersonalTab = ({
 		return trimmedValues;
 	};
 
-	const getDefaultPersonalValues = () => {
+	const getPersonalValuesFrom = (obj: any) => {
 		const values = trimPersonalValues(
-			pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
+			pick(obj, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		);
 		return defaults(values, { countryCode: 'GB', avatarFile: '' });
+	}
+
+	const getDefaultPersonalValues = () => {
+		if (personalData) return personalData;
+		return getPersonalValuesFrom(user);
 	};
 
 	const formMethods = useForm<IUpdatePersonalInputs>({
@@ -88,7 +97,7 @@ export const EditProfilePersonalTab = ({
 		watch,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isValid: formIsValid, dirtyFields, isSubmitted },
+		formState: { errors: formErrors, isValid: formIsValid, isSubmitted },
 	} = formMethods;
 
 	const getTrimmedNonEmptyValues = () => pickBy(trimPersonalValues(getValues()));
@@ -115,10 +124,7 @@ export const EditProfilePersonalTab = ({
 		CurrentUserActionsDispatchers.updatePersonalData(values, onSubmissionError);
 	};
 
-	const fieldsAreDirty = () => {
-		if (isEmpty(dirtyFields)) return false;
-		return !isMatch(user, getTrimmedNonEmptyValues());
-	};
+	const fieldsAreDirty = () => !isMatch(user, getTrimmedNonEmptyValues());
 
 	// enable submission only if form is valid and fields are dirty
 	useEffect(() => {
@@ -132,9 +138,14 @@ export const EditProfilePersonalTab = ({
 	useEffect(() => {
 		if (isSubmitted) {
 			reset(getDefaultPersonalValues(), { keepIsSubmitted: true });
+			setPersonalData(null);
 			setSubmitWasSuccessful(true);
 		}
 	}, [JSON.stringify(getDefaultPersonalValues()), user.avatarUrl]);
+
+	useEffect(() => () => {
+		setPersonalData({ ...personalData, ...getValues() });
+	}, []);
 
 	return (
 		<ScrollArea>

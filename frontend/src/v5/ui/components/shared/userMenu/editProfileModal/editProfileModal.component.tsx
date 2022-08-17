@@ -50,6 +50,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
 	const [hideSubmitButton, setHideSubmitButton] = useState(false);
+	const [personalData, setPersonalData] = useState<IUpdatePersonalInputs>(null);
+
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
 			case PERSONAL_TAB:
@@ -69,6 +71,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	useEffect(() => {
 		if (open) {
 			setActiveTab(PERSONAL_TAB);
+			setPersonalData(null);
 			setHideSubmitButton(false);
 		}
 	}, [open]);
@@ -96,6 +99,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				</TabList>
 				<TabPanel value={PERSONAL_TAB} $zeroPadding>
 					<EditProfilePersonalTab
+						personalData={personalData}
+						setPersonalData={setPersonalData}
 						setIsSubmitting={setIsSubmitting}
 						setSubmitFunction={setPersonalSubmitFunction}
 						user={user}
