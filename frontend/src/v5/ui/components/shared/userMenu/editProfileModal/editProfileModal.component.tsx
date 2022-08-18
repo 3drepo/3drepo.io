@@ -73,6 +73,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 		if (open) {
 			setActiveTab(PERSONAL_TAB);
 			setPersonalData(null);
+			setPasswordData(null);
 			setHideSubmitButton(false);
 		}
 	}, [open]);
