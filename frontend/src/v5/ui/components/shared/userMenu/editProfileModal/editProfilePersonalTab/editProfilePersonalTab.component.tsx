@@ -95,6 +95,7 @@ export const EditProfilePersonalTab = ({
 		handleSubmit,
 		reset,
 		watch,
+		setValue,
 		setError: setFormError,
 		control,
 		formState: { errors: formErrors, isValid: formIsValid, isSubmitted },
@@ -143,8 +144,12 @@ export const EditProfilePersonalTab = ({
 		}
 	}, [JSON.stringify(getDefaultPersonalValues()), user.avatarUrl]);
 
-	useEffect(() => () => {
-		setPersonalData({ ...personalData, ...getValues() });
+	useEffect(() => {
+		Object.entries(personalData || {}).forEach(([field, value]) => {
+			setValue(field as keyof IUpdatePersonalInputs, value, { shouldDirty: !!value });
+		});
+		trigger();
+		return () => setPersonalData(getValues());
 	}, []);
 
 	return (
