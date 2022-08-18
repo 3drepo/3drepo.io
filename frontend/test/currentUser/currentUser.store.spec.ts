@@ -20,7 +20,6 @@ import {
 	selectPersonalDataIsUpdating,
 	selectApiKeyIsUpdating,
 	selectCurrentUser,
-	selectFirstName,
 } from '@/v5/store/currentUser/currentUser.selectors';
 import { currentUserMockFactory, generatePersonalData } from './currentUser.fixtures';
 import { createTestStore } from '../test.helpers';
@@ -33,9 +32,12 @@ describe('CurrentUser: store', () => {
 	})
 
 	it('should set currentUser', () => {
+		let currentUser = selectCurrentUser(getState());
+		expect(Object.keys(currentUser).length).not.toBe(0);
+
 		const mockCurrentUser = currentUserMockFactory();
 		dispatch(CurrentUserActions.fetchUserSuccess(mockCurrentUser));
-		const currentUser = selectCurrentUser(getState());
+		currentUser = selectCurrentUser(getState());
 		expect(currentUser).toEqual(mockCurrentUser);
 	})
 
@@ -45,8 +47,8 @@ describe('CurrentUser: store', () => {
 			dispatch(CurrentUserActions.fetchUserSuccess(mockCurrentUser));
 			const { firstName: mockFirstName } = generatePersonalData();
 			dispatch(CurrentUserActions.updateUserSuccess({ firstName: mockFirstName }));
-			const firstName = selectFirstName(getState());
-			expect(firstName).toEqual(mockFirstName);
+			const currentUser = selectCurrentUser(getState());
+			expect(currentUser).toEqual({ ...mockCurrentUser, firstName: mockFirstName });
 		})
 	
 		// personalDataIsUpdating
