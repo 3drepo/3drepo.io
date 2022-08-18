@@ -22,15 +22,27 @@ import { userWithAvatarMockFactory, userWithoutAvatarMockFactory } from './users
 
 
 describe('Users: store', () => {
-	const teamspace = 'teamspaceA';
+	const teamspace = 'teamspace';
+	const username = 'username';
 	let dispatch, getState;
 
 	beforeEach(() => {
 		({ dispatch, getState } = createTestStore());
 	});
 
+	it('should not crash before setting users', () => {
+		const users = selectUsersByTeamspace(getState(), teamspace);
+		expect(users).toEqual([]);
+	})
+
+	it('should not crash when teamspace and/or username do not exist', () => {
+		const nonExistingUser = selectUser(getState(), teamspace, '');
+		const nonExistingTeamspace = selectUser(getState(), '', username);
+		expect(nonExistingUser).toBeFalsy();
+		expect(nonExistingTeamspace).toBeFalsy();
+	})
+
 	it('should set users', () => {
-		const username = 'username';
 		const mockUsers = [
 			userWithoutAvatarMockFactory({ user: username }),
 			userWithAvatarMockFactory({ user: username.toUpperCase() })
@@ -41,11 +53,7 @@ describe('Users: store', () => {
 		expect(users[0]).toEqual(mockUsers[0]);
 		expect(users[1]).toEqual(mockUsers[1]);
 
-		const existingUser = selectUser(getState(), teamspace, username);
-		const nonExistingUser = selectUser(getState(), teamspace, '');
-		const nonExistingTeamspace = selectUser(getState(), '', username);
-		expect(existingUser).toBeTruthy();
-		expect(nonExistingUser).toBeFalsy();
-		expect(nonExistingTeamspace).toBeFalsy();
+		const user = selectUser(getState(), teamspace, username);
+		expect(user).toBeTruthy();
 	});
 });
