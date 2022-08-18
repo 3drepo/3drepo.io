@@ -28,7 +28,7 @@ import * as API from '@/v5/services/api';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 
-interface IUpdatePasswordInputs {
+export interface IUpdatePasswordInputs {
 	oldPassword: string;
 	newPassword: string;
 	confirmPassword: string;
