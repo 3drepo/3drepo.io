@@ -669,7 +669,7 @@ function isSubModel(account, model) {
 	});
 }
 
-function removeModel(account, model, forceRemove) {
+function removeModel(account, model, forceRemove, projectId) {
 	return findModelSettingById(account, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
@@ -688,12 +688,15 @@ function removeModel(account, model, forceRemove) {
 				throw responseCodes.MODEL_IS_A_SUBMODEL;
 			}
 
-			const {_id: projectId} = await findOneProject(account, {models: model}, {_id: 1});
+			if(!projectId) {
+				projectId = (await findOneProject(account, {models: model}, {_id: 1}))._id;
+			}
 
 			await deleteModel(account, projectId, model).catch((err) => {
 				systemLogger.logError("Failed to remove collections: ", err);
 				return Promise.reject(responseCodes.REMOVE_MODEL_FAILED);
 			});
+			return {...setting, account, model};
 		});
 	});
 }
