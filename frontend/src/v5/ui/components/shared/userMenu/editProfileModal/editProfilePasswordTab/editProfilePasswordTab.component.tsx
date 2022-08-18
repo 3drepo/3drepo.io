@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EditProfileUpdatePasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { useFormContext } from 'react-hook-form';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
@@ -34,40 +32,33 @@ export interface IUpdatePasswordInputs {
 	confirmPassword: string;
 }
 
+export const EMPTY_PASSWORDS = {
+	oldPassword: '',
+	newPassword: '',
+	confirmPassword: '',
+};
+
 type EditProfilePasswordTabProps = {
-	passwordData: IUpdatePasswordInputs;
-	setPasswordData: (passwords: IUpdatePasswordInputs) => void;
+	incorrectPassword: boolean;
+	setIncorrectPassword: (isIncorrect: boolean) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
 };
 
 export const EditProfilePasswordTab = ({
-	passwordData,
-	setPasswordData,
+	incorrectPassword,
+	setIncorrectPassword,
 	setIsSubmitting,
 	setSubmitFunction,
 }: EditProfilePasswordTabProps) => {
-	const EMPTY_PASSWORDS = {
-		oldPassword: '',
-		newPassword: '',
-		confirmPassword: '',
-	};
-	const [incorrectPassword, setIncorrectPassword] = useState(false);
-
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
 		control,
 		trigger,
-		setValue,
-		getValues,
 		reset,
 		watch,
 		handleSubmit,
-	} = useForm<IUpdatePasswordInputs>({
-		reValidateMode: 'onChange',
-		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
-		defaultValues: EMPTY_PASSWORDS,
-	});
+	} = useFormContext();
 
 	const oldPassword = watch('oldPassword');
 	const newPassword = watch('newPassword');
@@ -76,7 +67,6 @@ export const EditProfilePasswordTab = ({
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
-		setPasswordData(null);
 		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 	};
 
@@ -111,13 +101,6 @@ export const EditProfilePasswordTab = ({
 	useEffect(() => {
 		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
 	}, [oldPassword, newPassword, confirmPassword]);
-
-	useEffect(() => {
-		Object.entries(passwordData || {}).forEach(([field, value]) => {
-			setValue(field as keyof IUpdatePasswordInputs, value, { shouldDirty: !!value });
-		});
-		return () => setPasswordData(getValues());
-	}, []);
 
 	return (
 		<>

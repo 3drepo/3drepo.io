@@ -14,14 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
-import { formatMessage } from '@/v5/services/intl';
-import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
-import { TabContext } from '@mui/lab';
-import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
-import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
-import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+ import { useState } from 'react';
+ import { formatMessage } from '@/v5/services/intl';
+ import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
+ import { TabContext } from '@mui/lab';
+ import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
+ import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
+ import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
+ import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+ import { FormProvider, useForm } from 'react-hook-form';
+ import { yupResolver } from '@hookform/resolvers/yup';
+ import { EditProfileUpdatePasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 
 const PERSONAL_TAB = 'personal';
 const PASSWORD_TAB = 'password';
@@ -50,7 +53,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
 	const [hideSubmitButton, setHideSubmitButton] = useState(false);
 	const [personalData, setPersonalData] = useState<IUpdatePersonalInputs>(null);
-	const [passwordData, setPasswordData] = useState<IUpdatePasswordInputs>(null);
+	const [incorrectPassword, setIncorrectPassword] = useState(false);
 
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
@@ -68,14 +71,11 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 		setHideSubmitButton(selectedTab === INTEGRATIONS_TAB);
 	};
 
-	useEffect(() => {
-		if (open) {
-			setActiveTab(PERSONAL_TAB);
-			setPersonalData(null);
-			setPasswordData(null);
-			setHideSubmitButton(false);
-		}
-	}, [open]);
+	const passwordFormData = useForm<IUpdatePasswordInputs>({
+		reValidateMode: 'onChange',
+		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
+		defaultValues: EMPTY_PASSWORDS,
+	});
 
 	return (
 		<FormModal
@@ -107,14 +107,16 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 						user={user}
 					/>
 				</TabPanel>
-				<TabPanel value={PASSWORD_TAB}>
-					<EditProfilePasswordTab
-						passwordData={passwordData}
-						setPasswordData={setPasswordData}
-						setIsSubmitting={setIsSubmitting}
-						setSubmitFunction={setPasswordSubmitFunction}
-					/>
-				</TabPanel>
+				<FormProvider {...passwordFormData}>
+					<TabPanel value={PASSWORD_TAB}>
+						<EditProfilePasswordTab
+							incorrectPassword={incorrectPassword}
+							setIncorrectPassword={setIncorrectPassword}
+							setIsSubmitting={setIsSubmitting}
+							setSubmitFunction={setPasswordSubmitFunction}
+						/>
+					</TabPanel>
+				</FormProvider>
 				<TabPanel value={INTEGRATIONS_TAB}>
 					<EditProfileIntegrationsTab />
 				</TabPanel>
