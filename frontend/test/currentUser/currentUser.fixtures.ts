@@ -30,7 +30,7 @@ export const currentUserMockFactory = (overrides?: Partial<ICurrentUser>): ICurr
 	...overrides,
 });
 
-export const generatePersonlData = (): UpdatePersonalData => ({
+export const generatePersonalData = (): UpdatePersonalData => ({
 	firstName: faker.name.firstName(),
 	lastName: faker.name.lastName(),
 	email: faker.internet.email(),
