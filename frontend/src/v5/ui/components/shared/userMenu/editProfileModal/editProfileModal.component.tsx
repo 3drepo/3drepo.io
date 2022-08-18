@@ -51,6 +51,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
 	const [hideSubmitButton, setHideSubmitButton] = useState(false);
 	const [personalData, setPersonalData] = useState<IUpdatePersonalInputs>(null);
+	const [passwordData, setPasswordData] = useState<IUpdatePasswordInputs>(null);
 
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
@@ -108,6 +109,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 				</TabPanel>
 				<TabPanel value={PASSWORD_TAB}>
 					<EditProfilePasswordTab
+						passwordData={passwordData}
+						setPasswordData={setPasswordData}
 						setIsSubmitting={setIsSubmitting}
 						setSubmitFunction={setPasswordSubmitFunction}
 					/>

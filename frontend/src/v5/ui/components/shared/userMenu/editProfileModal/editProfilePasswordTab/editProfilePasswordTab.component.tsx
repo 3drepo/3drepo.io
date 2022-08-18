@@ -35,11 +35,15 @@ interface IUpdatePasswordInputs {
 }
 
 type EditProfilePasswordTabProps = {
+	passwordData: IUpdatePasswordInputs;
+	setPasswordData: (passwords: IUpdatePasswordInputs) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
 };
 
 export const EditProfilePasswordTab = ({
+	passwordData,
+	setPasswordData,
 	setIsSubmitting,
 	setSubmitFunction,
 }: EditProfilePasswordTabProps) => {
@@ -54,6 +58,8 @@ export const EditProfilePasswordTab = ({
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
 		control,
 		trigger,
+		setValue,
+		getValues,
 		reset,
 		watch,
 		handleSubmit,
@@ -70,6 +76,7 @@ export const EditProfilePasswordTab = ({
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
+		setPasswordData(null);
 		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
 	};
 
@@ -104,6 +111,13 @@ export const EditProfilePasswordTab = ({
 	useEffect(() => {
 		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
 	}, [oldPassword, newPassword, confirmPassword]);
+
+	useEffect(() => {
+		Object.entries(passwordData || {}).forEach(([field, value]) => {
+			setValue(field as keyof IUpdatePasswordInputs, value, { shouldDirty: !!value });
+		});
+		return () => setPasswordData(getValues());
+	}, []);
 
 	return (
 		<>
