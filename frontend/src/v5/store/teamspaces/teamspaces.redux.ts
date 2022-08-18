@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
@@ -30,21 +31,18 @@ export const INITIAL_STATE: ITeamspacesState = {
 	currentTeamspace: null,
 };
 
-// eslint-disable-next-line max-len
-export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }: SetCurrentTeamspaceAction): ITeamspacesState => ({
-	...state,
-	currentTeamspace,
-});
+export const setCurrentTeamspace = (state, { currentTeamspace }: SetCurrentTeamspaceAction) => {
+	state.currentTeamspace = currentTeamspace;
+};
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }: FetchSuccessAction): ITeamspacesState => ({
-	...state,
-	teamspaces,
-});
+export const fetchSuccess = (state, { teamspaces }: FetchSuccessAction) => {
+	state.teamspaces = teamspaces;
+};
 
-export const teamspacesReducer = createReducer(INITIAL_STATE, {
+export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
 	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
-});
+}));
 
 /**
  * Types

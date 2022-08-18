@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
+import { IAuthState } from '@/v5/store/auth/auth.redux';
 import faker from 'faker';
 
-export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
-    name: faker.random.word(),
-	isAdmin: faker.datatype.boolean(),
+export const authMockFactory = (overrides?: Partial<IAuthState>): IAuthState => ({
+    isAuthenticated: faker.datatype.boolean(),
+	isPending: faker.datatype.boolean(),
+	errorMessage: faker.random.words(10),
+	returnUrl: {
+		pathname: faker.internet.url(),
+	},
 });

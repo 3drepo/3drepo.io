@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { CreateRevisionBody, IRevision } from '@/v5/store/revisions/revisions.types';
+import { CreateRevisionBody, IRevision, IRevisionUpdate } from '@/v5/store/revisions/revisions.types';
 
 export const revisionsMockFactory = (overrides?: Partial<IRevision>): IRevision => ({
 	_id: faker.datatype.uuid(),
@@ -40,5 +40,14 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateRevisionBody>):
 	containerUnit: 'cm',
 	containerDesc: faker.random.words(3),
 	containerCode: faker.random.words(1),
+	...overrides,
+});
+
+export const prepareRevisionData = (overrides?: IRevisionUpdate): IRevisionUpdate => ({
+	timestamp: faker.datatype.datetime(),
+	tag: faker.random.word(),
+	author: faker.random.word(),
+	desc: faker.random.word(),
+	void: faker.datatype.boolean(),
 	...overrides,
 });
