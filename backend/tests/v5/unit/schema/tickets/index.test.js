@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { cloneDeep } = require('lodash');
+const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const { generateRandomString, generateRandomNumber, generateUUID } = require('../../../helper/services');
@@ -30,7 +30,13 @@ jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspaceModel = require(`${src}/models/teamspaces`);
 
 const TicketSchema = require(`${src}/schemas/tickets`);
-const { basePropertyLabels, modulePropertyLabels, propTypes, riskLevels, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const {
+	basePropertyLabels,
+	modulePropertyLabels,
+	propTypes,
+	riskLevels,
+	presetEnumValues,
+	presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
@@ -147,11 +153,12 @@ const testPresetValues = () => {
 		const module = generateRandomString();
 		const prop = generateRandomString();
 		const prop2 = generateRandomString();
-		const template = {
+
+		const generateTemplate = (values) => ({
 			properties: [{
 				name: prop,
 				type: propTypes.ONE_OF,
-				values: 'jobsAndUsers',
+				values,
 				required: true,
 			}],
 			modules: [{
@@ -159,14 +166,11 @@ const testPresetValues = () => {
 				properties: [{
 					name: prop2,
 					type: propTypes.ONE_OF,
-					values: 'jobsAndUsers',
+					values,
 					required: true,
 				}],
 			}],
-		};
-
-		JobsModel.getJobs.mockResolvedValue(['JobA', 'JobB']);
-		TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(['UserA', 'UserB']);
+		});
 
 		const createData = (a, b) => ({
 
@@ -182,29 +186,56 @@ const testPresetValues = () => {
 			},
 		});
 
-		const testCases = [
-			['With existing jobs', createData('JobA', 'JobB'), true],
-			['With existing users', createData('UserA', 'UserB'), true],
-			['With non existing values', createData(generateRandomString(), generateRandomString()), false],
-		];
+		const runTestCases = (template, testCases) => {
+			const runTest = async (data) => {
+				try {
+					await TicketSchema.validateTicket(teamspace, template, data);
+				} catch (err) {
+					throw undefined;
+				}
+			};
 
-		const runTest = async (data) => {
-			try {
-				await TicketSchema.validateTicket(teamspace, template, data);
-			} catch (err) {
-				throw undefined;
+			for (const [desc, input, success] of testCases) {
+				test(`${desc} should ${success ? 'pass' : 'fail'}`, async () => {
+					if (success) {
+						await expect(runTest(input)).resolves.toBeUndefined();
+					} else {
+						await expect(runTest(input)).rejects.toBeUndefined();
+					}
+				});
 			}
 		};
 
-		for (const [desc, input, success] of testCases) {
-			test(`${desc} should ${success ? 'pass' : 'fail'}`, async () => {
-				if (success) {
-					await expect(runTest(input)).resolves.toBeUndefined();
-				} else {
-					await expect(runTest(input)).rejects.toBeUndefined();
-				}
-			});
-		}
+		describe(presetEnumValues.JOBS_AND_USERS, () => {
+			const template = generateTemplate(presetEnumValues.JOBS_AND_USERS);
+
+			const jobs = times(5, () => generateRandomString());
+			const users = times(5, () => generateRandomString());
+			JobsModel.getJobs.mockResolvedValue(jobs);
+			TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(users);
+
+			const testCases = [
+				['With existing jobs', createData(jobs[2], jobs[4]), true],
+				['With existing users', createData(users[0], users[4]), true],
+				['With non existing values', createData(() => generateRandomString()(), () => generateRandomString()()), false],
+			];
+
+			runTestCases(template, testCases);
+		});
+
+		describe(presetEnumValues.RISK_CATEGORIES, () => {
+			const template = generateTemplate(presetEnumValues.RISK_CATEGORIES);
+
+			const categories = times(5, () => generateRandomString());
+			TeamspaceModel.getRiskCategories.mockResolvedValue(categories);
+
+			const testCases = [
+				['With existing risk categories', createData(categories[2], categories[1]), true],
+				['With non existing values', createData(() => generateRandomString()(), () => generateRandomString()()), false],
+			];
+
+			runTestCases(template, testCases);
+		});
 	});
 };
 

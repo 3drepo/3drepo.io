@@ -15,7 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { ADD_ONS, SUBSCRIPTION_TYPES } = require('./teamspaces.constants');
+const {
+	ADD_ONS,
+	DEFAULT_RISK_CATEGORIES,
+	DEFAULT_TOPIC_TYPES,
+	SUBSCRIPTION_TYPES,
+} = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
@@ -31,35 +36,6 @@ const Teamspace = {};
 const teamspaceUpdate = (query, actions) => db.updateOne(USERS_DB_NAME, 'system.users', query, actions);
 const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
-
-const DEFAULT_RISK_CATEGORIES = [
-	'Commercial Issue',
-	'Environmental Issue',
-	'Health - Material effect',
-	'Health - Mechanical effect',
-	'Safety Issue - Fall',
-	'Safety Issue - Trapped',
-	'Safety Issue - Event',
-	'Safety Issue - Handling',
-	'Safety Issue - Struck',
-	'Safety Issue - Public',
-	'Social Issue',
-	'Other Issue',
-	'Unknown',
-];
-
-const DEFAULT_TOPIC_TYPES = [
-	'Clash',
-	'Diff',
-	'RFI',
-	'Risk',
-	'H&S',
-	'Design',
-	'Constructibility',
-	'GIS',
-	'For information',
-	'VR',
-];
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);

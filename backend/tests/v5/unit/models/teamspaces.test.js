@@ -20,13 +20,11 @@ const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaces`);
-const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
+const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { topicTypes } = require('../../../../src/v5/models/issues.constants');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
-const { riskCategories } = require('../../../../src/v5/models/risks.constants');
 const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const testHasAccessToTeamspace = () => {
@@ -386,7 +384,11 @@ const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
 			const teamspace = generateRandomString();
-			const expectedSettings = { _id: teamspace, topicTypes, riskCategories };
+			const expectedSettings = {
+				_id: teamspace,
+				topicTypes: DEFAULT_TOPIC_TYPES,
+				riskCategories: DEFAULT_RISK_CATEGORIES,
+			};
 
 			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
 			await Teamspace.createTeamspaceSettings(teamspace);

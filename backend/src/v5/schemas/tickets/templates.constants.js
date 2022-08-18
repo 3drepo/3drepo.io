@@ -99,13 +99,13 @@ TemplateConstants.defaultProperties = [
 	createPropertyEntry('Owner', propTypes.TEXT, undefined, undefined, true),
 	createPropertyEntry('Created at', propTypes.DATE, undefined, undefined, true),
 	createPropertyEntry('Updated at', propTypes.DATE, undefined, undefined, true),
-	createPropertyEntry('Default Image', propTypes.IMAGE, undefined, undefined, false, ({ defaultImage }) => defaultImage),
-	createPropertyEntry('Default View', propTypes.VIEW, undefined, undefined, false, ({ defaultView }) => defaultView),
-	createPropertyEntry('Priority', propTypes.ONE_OF, ['None', 'Low', 'Medium', 'High'], 'None', false, ({ issueProperties }) => issueProperties),
-	createPropertyEntry('Status', propTypes.ONE_OF, ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], 'Open', false, ({ issueProperties }) => issueProperties),
-	createPropertyEntry('Assignees', propTypes.MANY_OF, presetEnumValues.JOBS_AND_USERS, [], false, ({ issueProperties }) => issueProperties),
-	createPropertyEntry('Due Date', propTypes.DATE, undefined, undefined, false, ({ issueProperties }) => issueProperties),
-	createPropertyEntry('Pin', propTypes.COORDS, undefined, undefined, false, ({ pin }) => pin),
+	createPropertyEntry('Default Image', propTypes.IMAGE, undefined, undefined, undefined, ({ defaultImage }) => defaultImage),
+	createPropertyEntry('Default View', propTypes.VIEW, undefined, undefined, undefined, ({ defaultView }) => defaultView),
+	createPropertyEntry('Priority', propTypes.ONE_OF, ['None', 'Low', 'Medium', 'High'], 'None', undefined, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Status', propTypes.ONE_OF, ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], 'Open', undefined, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Assignees', propTypes.MANY_OF, presetEnumValues.JOBS_AND_USERS, undefined, undefined, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Due Date', propTypes.DATE, undefined, undefined, undefined, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Pin', propTypes.COORDS, undefined, undefined, undefined, ({ pin }) => pin),
 
 ];
 
