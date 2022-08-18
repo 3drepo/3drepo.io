@@ -20,13 +20,8 @@ import { QuotaUnit } from '@/v5/store/teamspaces/teamspaces.redux';
 import { FormattedMessage } from 'react-intl';
 
 import StorageIcon from '@assets/icons/storage.svg';
-import byteSize from 'byte-size';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { QuotaValuesContainer, WarningIcon } from './teamspaceQuota.styles';
-
-export type ByteSizeType = {
-	value: number,
-	unit: string
-};
 
 type StorageQuotaProps = {
 	storage: QuotaUnit;
@@ -42,21 +37,14 @@ const StorageQuotaText = ({ storage }: StorageQuotaProps) => {
 		);
 	}
 
-	const availableReadableData = byteSize(storage.available) as ByteSizeType;
-	const usedReadableData = byteSize(storage.used) as ByteSizeType;
+	const available = formatInfoUnit(storage.available as number);
+	const used = formatInfoUnit(storage.used);
 
 	return (
 		<FormattedMessage
 			id="teamspace.info.storage"
-			defaultMessage="{used} {usedUnits} of {available} {availableUnits} used"
-			values={
-				{
-					used: usedReadableData.value,
-					usedUnits: usedReadableData.unit,
-					available: availableReadableData.value,
-					availableUnits: availableReadableData.unit,
-				}
-			}
+			defaultMessage="{used} of {available} used"
+			values={{ used, available }}
 		/>
 	);
 };
