@@ -43,6 +43,8 @@ type EditProfilePasswordTabProps = {
 	setIncorrectPassword: (isIncorrect: boolean) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
+	unexpectedError: any,
+	setUnexpectedError: (error: any) => void,
 };
 
 export const EditProfilePasswordTab = ({
@@ -50,14 +52,17 @@ export const EditProfilePasswordTab = ({
 	setIncorrectPassword,
 	setIsSubmitting,
 	setSubmitFunction,
+	unexpectedError,
+	setUnexpectedError,
 }: EditProfilePasswordTabProps) => {
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
+		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitted, isSubmitSuccessful, dirtyFields },
 		control,
 		trigger,
 		reset,
 		watch,
 		handleSubmit,
+		getValues,
 	} = useFormContext();
 
 	const oldPassword = watch('oldPassword');
@@ -67,7 +72,7 @@ export const EditProfilePasswordTab = ({
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
-		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
+		reset(EMPTY_PASSWORDS);
 	};
 
 	const onSubmitError = (apiError) => {
@@ -86,14 +91,14 @@ export const EditProfilePasswordTab = ({
 	}, [formIsValid]);
 
 	useEffect(() => {
-		if (incorrectPassword) {
+		if (incorrectPassword && isSubmitted) {
 			setIncorrectPassword(false);
 		}
 	}, [oldPassword]);
 
 	// re-trigger validation on oldPassword when incorrect
 	useEffect(() => {
-		if (dirtyFields.oldPassword) {
+		if (oldPassword) {
 			trigger('oldPassword');
 		}
 	}, [incorrectPassword]);
@@ -101,6 +106,8 @@ export const EditProfilePasswordTab = ({
 	useEffect(() => {
 		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
 	}, [oldPassword, newPassword, confirmPassword]);
+
+	useEffect(() => () => reset(getValues(), { keepIsSubmitted: false }), []);
 
 	return (
 		<>
@@ -137,7 +144,11 @@ export const EditProfilePasswordTab = ({
 				formError={errors.confirmPassword}
 				required
 			/>
-			<UnhandledError expectedErrorValidators={[isPasswordIncorrect]} />
+			<UnhandledError
+				expectedErrorValidators={[isPasswordIncorrect]}
+				initialError={unexpectedError}
+				setError={setUnexpectedError}
+			/>
 			{isSubmitSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />

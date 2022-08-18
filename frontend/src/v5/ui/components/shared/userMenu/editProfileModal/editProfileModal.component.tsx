@@ -19,13 +19,13 @@ import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { defaults, pick } from 'lodash';
 import { TabContext } from '@mui/lab';
+import { FormProvider, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
-import { FormProvider, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 
 const PERSONAL_TAB = 'personal';
 const PASSWORD_TAB = 'password';
@@ -47,6 +47,12 @@ type EditProfileModalProps = {
 	onClose: () => void;
 };
 
+type EditProfileUnexpectedErrors = {
+	[PERSONAL_TAB]?: any;
+	[PASSWORD_TAB]?: any;
+	[INTEGRATIONS_TAB]?: any;
+};
+
 export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +60,11 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
+
+	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
+	const setUnexpectedTabError = (tab: keyof EditProfileUnexpectedErrors) => (
+		(value) => setUnexpectedErrors({ ...unexpectedErrors, [tab]: value })
+	);
 
 	const defaultPersonalValues = defaults(
 		pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
@@ -110,6 +121,8 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 							setAlreadyExistingEmails={setAlreadyExistingEmails}
 							setIsSubmitting={setIsSubmitting}
 							setSubmitFunction={setPersonalSubmitFunction}
+							unexpectedError={unexpectedErrors[PERSONAL_TAB]}
+							setUnexpectedError={setUnexpectedTabError(PERSONAL_TAB)}
 							user={user}
 						/>
 					</TabPanel>
@@ -121,11 +134,16 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 							setIncorrectPassword={setIncorrectPassword}
 							setIsSubmitting={setIsSubmitting}
 							setSubmitFunction={setPasswordSubmitFunction}
+							unexpectedError={unexpectedErrors[PASSWORD_TAB]}
+							setUnexpectedError={setUnexpectedTabError(PASSWORD_TAB)}
 						/>
 					</TabPanel>
 				</FormProvider>
 				<TabPanel value={INTEGRATIONS_TAB}>
-					<EditProfileIntegrationsTab />
+					<EditProfileIntegrationsTab
+						unexpectedError={unexpectedErrors[INTEGRATIONS_TAB]}
+						setUnexpectedError={setUnexpectedTabError(INTEGRATIONS_TAB)}
+					/>
 				</TabPanel>
 			</TabContext>
 		</FormModal>

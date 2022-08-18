@@ -47,6 +47,8 @@ type EditProfilePersonalTabProps = {
 	setAlreadyExistingEmails: (emails: string[]) => void;
 	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
+	unexpectedError: any,
+	setUnexpectedError: (error: any) => void,
 	user: ICurrentUser,
 };
 
@@ -55,6 +57,8 @@ export const EditProfilePersonalTab = ({
 	setAlreadyExistingEmails,
 	setSubmitFunction,
 	setIsSubmitting,
+	unexpectedError,
+	setUnexpectedError,
 	user,
 }: EditProfilePersonalTabProps) => {
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
@@ -72,7 +76,7 @@ export const EditProfilePersonalTab = ({
 	} = useFormContext();
 
 	const getTrimmedNonEmptyValues = (): IUpdatePersonalInputs => {
-		const trimmedValues = mapValues(getValues(), (value) => value?.trim?.() ?? value); 
+		const trimmedValues = mapValues(getValues(), (value) => value?.trim?.() ?? value);
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
 
@@ -80,7 +84,7 @@ export const EditProfilePersonalTab = ({
 		setSubmitWasSuccessful(true);
 		const { avatarFile, ...values } = getTrimmedNonEmptyValues();
 		reset(values);
-	}
+	};
 
 	const onSubmissionError = (apiError) => {
 		setSubmitWasSuccessful(false);
@@ -184,7 +188,11 @@ export const EditProfilePersonalTab = ({
 						/>
 					</SuccessMessage>
 				)}
-				<UnhandledError expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]} />
+				<UnhandledError
+					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+					initialError={unexpectedError}
+					setError={setUnexpectedError}
+				/>
 			</ScrollAreaPadding>
 		</ScrollArea>
 	);
