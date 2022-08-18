@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { toConstantCase } = require('../../utils/helper/strings');
 
 const createConstantMapping = (values) => {
@@ -55,54 +56,56 @@ const presetEnumValues = createConstantMapping([
 const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
 const riskLevels = createConstantMapping(riskLevelsArr);
 
+const createPropertyEntry = (name, type, values, defaultVal, readOnly, availableIf) => deleteIfUndefined({
+	name, type, values, default: defaultVal, readOnly, availableIf });
+
 const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels };
 
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
-		{ name: 'Start Time', type: propTypes.DATE },
-		{ name: 'End Time', type: propTypes.DATE },
+		createPropertyEntry('Start Time', propTypes.DATE),
+		createPropertyEntry('End Time', propTypes.DATE),
 	],
 	[presetModules.SHAPES]: [
-		{ name: 'Shapes', type: propTypes.MEASUREMENTS },
+		createPropertyEntry('Shapes', propTypes.MEASUREMENTS),
 	],
 	[presetModules.SAFETIBASE]: [
-		{ name: 'Risk Likelihood', type: propTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
-		{ name: 'Risk Consequence', type: propTypes.ONE_OF, values: riskLevelsArr, default: riskLevels.VERY_LOW },
-		{ name: 'Level of Risk', type: TemplateConstants.TEXT, readOnly: true },
-		{ name: 'Category', type: propTypes.ONE_OF, values: presetEnumValues.RISK_CATEGORIES },
-		{ name: 'Associated Activity', type: TemplateConstants.TEXT },
-		{ name: 'Element Type', type: TemplateConstants.TEXT },
-		{ name: 'Risk Factor', type: TemplateConstants.TEXT },
-		{ name: 'Construction Scope', type: TemplateConstants.TEXT },
-		{ name: 'Location', type: TemplateConstants.TEXT },
-		{ name: 'Treatment', type: TemplateConstants.TEXT },
-		{ name: 'Treatment Details', type: TemplateConstants.LONG_TEXT },
-		{ name: 'Stage', type: TemplateConstants.TEXT },
-		{ name: 'Type', type: TemplateConstants.TEXT },
-		{ name: 'Treatment Status', type: propTypes.ONE_OF, values: ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], default: 'Unmitigated' },
-		{ name: 'Treated Risk Likelihood', type: propTypes.ONE_OF, values: riskLevels },
-		{ name: 'Treated Risk Consequence', type: propTypes.ONE_OF, values: riskLevels },
-		{ name: 'Treated Level of Risk', type: propTypes.TEXT, readOnly: true },
-		{ name: 'Residual Risk', type: TemplateConstants.TEXT },
+		createPropertyEntry('Risk Likelihood', propTypes.ONE_OF, riskLevelsArr, riskLevels.VERY_LOW),
+		createPropertyEntry('Risk Consequence', propTypes.ONE_OF, riskLevelsArr, riskLevels.VERY_LOW),
+		createPropertyEntry('Level of Risk', propTypes.TEXT, undefined, undefined, true),
+		createPropertyEntry('Category', propTypes.ONE_OF, presetEnumValues.RISK_CATEGORIES),
+		createPropertyEntry('Associated Activity', propTypes.TEXT),
+		createPropertyEntry('Element Type', propTypes.TEXT),
+		createPropertyEntry('Risk Factor', propTypes.TEXT),
+		createPropertyEntry('Construction Scope', propTypes.TEXT),
+		createPropertyEntry('Location', propTypes.TEXT),
+		createPropertyEntry('Treatment', propTypes.TEXT),
+		createPropertyEntry('Treatment Details', propTypes.LONG_TEXT),
+		createPropertyEntry('Stage', propTypes.TEXT),
+		createPropertyEntry('Type', propTypes.TEXT),
+		createPropertyEntry('Treatment Status', propTypes.ONE_OF, ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], 'Unmitigated'),
+		createPropertyEntry('Treated Risk Likelihood', propTypes.ONE_OF, riskLevelsArr, riskLevels.VERY_LOW),
+		createPropertyEntry('Treated Risk Consequence', propTypes.ONE_OF, riskLevelsArr, riskLevels.VERY_LOW),
+		createPropertyEntry('Treated Level of Risk', propTypes.TEXT, undefined, undefined, true),
+		createPropertyEntry('Residual Risk', propTypes.TEXT),
 	],
 
 };
 
 TemplateConstants.defaultProperties = [
-
-	{ name: 'Description', type: propTypes.LONG_TEXT },
-	{ name: 'Owner', type: propTypes.TEXT, readOnly: true },
-	{ name: 'Created at', type: propTypes.DATE, readOnly: true },
-	{ name: 'Updated at', type: propTypes.DATE, readOnly: true },
-	{ name: 'Default Image', type: propTypes.IMAGE, availableIf: ({ defaultImage }) => defaultImage },
-	{ name: 'Default View', type: propTypes.VIEW, availableIf: ({ defaultView }) => defaultView },
-	{ name: 'Priority', type: propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None', availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Status', type: propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open', availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Assignees', type: propTypes.MANY_OF, values: presetEnumValues.JOBS_AND_USERS, availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Due Date', type: propTypes.DATE, availableIf: ({ issueProperties }) => issueProperties },
-	{ name: 'Pin', type: propTypes.COORDS, availableIf: ({ pin }) => pin },
+	createPropertyEntry('Description', propTypes.LONG_TEXT),
+	createPropertyEntry('Owner', propTypes.TEXT, undefined, undefined, true),
+	createPropertyEntry('Created at', propTypes.DATE, undefined, undefined, true),
+	createPropertyEntry('Updated at', propTypes.DATE, undefined, undefined, true),
+	createPropertyEntry('Default Image', propTypes.IMAGE, undefined, undefined, false, ({ defaultImage }) => defaultImage),
+	createPropertyEntry('Default View', propTypes.VIEW, undefined, undefined, false, ({ defaultView }) => defaultView),
+	createPropertyEntry('Priority', propTypes.ONE_OF, ['None', 'Low', 'Medium', 'High'], 'None', false, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Status', propTypes.ONE_OF, ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], 'Open', false, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Assignees', propTypes.MANY_OF, presetEnumValues.JOBS_AND_USERS, [], false, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Due Date', propTypes.DATE, undefined, undefined, false, ({ issueProperties }) => issueProperties),
+	createPropertyEntry('Pin', propTypes.COORDS, undefined, undefined, false, ({ pin }) => pin),
 
 ];
 

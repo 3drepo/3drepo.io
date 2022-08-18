@@ -27,6 +27,7 @@ const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
 const { getJobs } = require('../../models/jobs');
+const { getRiskCategories } = require('../../models/teamspaces');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 const { types } = require('../../utils/helper/yup');
@@ -52,6 +53,9 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 
 						values = [...jobs, ...users];
 					}
+					break;
+				case presetEnumValues.RISK_CATEGORIES:
+					values = await getRiskCategories(teamspace);
 					break;
 				default:
 					values = prop.values;

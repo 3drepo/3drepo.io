@@ -20,17 +20,46 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
-const { topicTypes } = require('./issues.constants');
 
 const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
+
+const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const Teamspace = {};
 
 const teamspaceUpdate = (query, actions) => db.updateOne(USERS_DB_NAME, 'system.users', query, actions);
 const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
+
+const DEFAULT_RISK_CATEGORIES = [
+	'Commercial Issue',
+	'Environmental Issue',
+	'Health - Material effect',
+	'Health - Mechanical effect',
+	'Safety Issue - Fall',
+	'Safety Issue - Trapped',
+	'Safety Issue - Event',
+	'Safety Issue - Handling',
+	'Safety Issue - Struck',
+	'Safety Issue - Public',
+	'Social Issue',
+	'Other Issue',
+	'Unknown',
+];
+
+const DEFAULT_TOPIC_TYPES = [
+	'Clash',
+	'Diff',
+	'RFI',
+	'Risk',
+	'H&S',
+	'Design',
+	'Constructibility',
+	'GIS',
+	'For information',
+	'VR',
+];
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);
@@ -150,8 +179,8 @@ Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
 };
 
 Teamspace.createTeamspaceSettings = async (teamspace) => {
-	const settings = { _id: teamspace, topicTypes, riskCategories };
-	await db.insertOne(teamspace, 'teamspace', settings);
+	const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES };
+	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
@@ -163,6 +192,13 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+};
+
+Teamspace.getRiskCategories = async (teamspace) => {
+	const { riskCategories } = await db.findOne(
+		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { riskCategories: 1 },
+	);
+	return riskCategories;
 };
 
 module.exports = Teamspace;
