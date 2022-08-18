@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- import { useState } from 'react';
- import { formatMessage } from '@/v5/services/intl';
- import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
- import { TabContext } from '@mui/lab';
- import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
- import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
- import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
- import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
- import { FormProvider, useForm } from 'react-hook-form';
- import { yupResolver } from '@hookform/resolvers/yup';
- import { EditProfileUpdatePasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
+import { useState } from 'react';
+import { formatMessage } from '@/v5/services/intl';
+import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
+import { defaults, pick } from 'lodash';
+import { TabContext } from '@mui/lab';
+import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
+import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
+import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+import { FormProvider, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 
 const PERSONAL_TAB = 'personal';
 const PASSWORD_TAB = 'password';
@@ -51,25 +52,29 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
-	const [hideSubmitButton, setHideSubmitButton] = useState(false);
-	const [personalData, setPersonalData] = useState<IUpdatePersonalInputs>(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
+	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
+
+	const defaultPersonalValues = defaults(
+		pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
+		{ countryCode: 'GB', avatarFile: '' },
+	);
 
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
-			case PERSONAL_TAB:
-				return personalSubmitFunction;
-			case PASSWORD_TAB:
-				return passwordSubmitFunction;
-			default:
-				return null;
+			case PERSONAL_TAB: return personalSubmitFunction;
+			case PASSWORD_TAB: return passwordSubmitFunction;
+			default: return null;
 		}
 	};
 
-	const onTabChange = (_, selectedTab) => {
-		setActiveTab(selectedTab);
-		setHideSubmitButton(selectedTab === INTEGRATIONS_TAB);
-	};
+	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
+
+	const personalFormData = useForm<IUpdatePersonalInputs>({
+		mode: 'all',
+		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
+		defaultValues: defaultPersonalValues,
+	});
 
 	const passwordFormData = useForm<IUpdatePasswordInputs>({
 		reValidateMode: 'onChange',
@@ -90,7 +95,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 			isValid={getTabSubmitFunction()}
 			isSubmitting={isSubmitting}
 			disableClosing={isSubmitting}
-			hideSubmitButton={hideSubmitButton}
+			hideSubmitButton={activeTab === INTEGRATIONS_TAB}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
@@ -98,15 +103,17 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting} />
 					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
-				<TabPanel value={PERSONAL_TAB} $zeroPadding>
-					<EditProfilePersonalTab
-						personalData={personalData}
-						setPersonalData={setPersonalData}
-						setIsSubmitting={setIsSubmitting}
-						setSubmitFunction={setPersonalSubmitFunction}
-						user={user}
-					/>
-				</TabPanel>
+				<FormProvider {...personalFormData}>
+					<TabPanel value={PERSONAL_TAB} $zeroPadding>
+						<EditProfilePersonalTab
+							alreadyExistingEmails={alreadyExistingEmails}
+							setAlreadyExistingEmails={setAlreadyExistingEmails}
+							setIsSubmitting={setIsSubmitting}
+							setSubmitFunction={setPersonalSubmitFunction}
+							user={user}
+						/>
+					</TabPanel>
+				</FormProvider>
 				<FormProvider {...passwordFormData}>
 					<TabPanel value={PASSWORD_TAB}>
 						<EditProfilePasswordTab
