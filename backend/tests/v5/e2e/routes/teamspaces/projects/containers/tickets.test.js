@@ -19,6 +19,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
+const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
@@ -45,11 +47,30 @@ const models = [
 const modelWithTemplates = models[0];
 const fed = models[2];
 
+const templateWithAllModulesAndPresetEnums = {
+	...ServiceHelper.generateTemplate(),
+	config: {
+		comments: true,
+		issueProperties: true,
+		attachments: true,
+		defaultView: true,
+		defaultImage: true,
+		pin: true,
+	},
+	properties: Object.values(presetEnumValues).map((values) => ({
+		name: ServiceHelper.generateRandomString(),
+		type: propTypes.ONE_OF,
+		values,
+	})),
+	modules: Object.values(presetModules).map((type) => ({ type, properties: [] })),
+};
+
 const ticketTemplates = [
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
+	templateWithAllModulesAndPresetEnums,
 ];
 
 const setupData = async () => {
@@ -155,6 +176,7 @@ const testAddTicket = () => {
 		['the ticket data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 		['the ticket data conforms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey],
 		['the ticket data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
+		['the ticket has a template that contains all preset modules, preset enums and configs', true, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
 	])('Add Ticket', (desc, success, expectedOutput, projectId, modelId, key, payloadChanges = {}) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const payload = { ...ServiceHelper.generateTicket(ticketTemplates[0]), ...payloadChanges };

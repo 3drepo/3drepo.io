@@ -118,6 +118,7 @@ const moduleSchema = Yup.object().shape({
 	({ name, type }) => (name && !type) || (!name && type));
 
 const configSchema = Yup.object().shape({
+	// If new configs are added, please ensure we add it to the e2e test case
 	comments: defaultFalse,
 	issueProperties: defaultFalse,
 	attachments: defaultFalse,

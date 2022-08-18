@@ -31,7 +31,8 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
+const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -70,7 +71,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
-db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
+db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
 db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
@@ -79,6 +80,7 @@ db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
 			{ permissions: breaking ? undefined : permissions, ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
+		createTeamspaceSettings(teamspace),
 	]);
 };
 

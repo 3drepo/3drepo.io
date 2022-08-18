@@ -45,7 +45,7 @@ Validators.propTypesToValidator = {
 			hiddenGroups: Yup.array().of(groupIdOrData),
 			shownGroups: Yup.array().of(groupIdOrData),
 			transformGroups: Yup.array().of(groupIdOrData),
-		}),
+		}).default(undefined),
 		camera: Yup.object({
 			type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
 				.default(CameraType.PERSPECTIVE),
@@ -53,8 +53,7 @@ Validators.propTypesToValidator = {
 			forward: types.position.required(),
 			up: types.position.required(),
 			size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
-
-		}),
+		}).default(undefined),
 	}),
 	[propTypes.MEASUREMENTS]: Yup.array().of(
 		Yup.object().shape({
