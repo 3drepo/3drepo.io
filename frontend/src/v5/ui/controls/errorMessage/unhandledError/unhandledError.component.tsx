@@ -23,23 +23,40 @@ import { UnexpectedError } from '../unexpectedError/unexpectedError.component';
 type UnhandledErrorProps = {
 	expectedErrorValidators?: Array<(err) => boolean>;
 	className?: string;
+	initialError?: any;
+	setError?: (error: any) => void;
 };
 
-export const UnhandledError = ({ expectedErrorValidators = [], className }: UnhandledErrorProps) => {
-	const [showNetworkError, setShowNetworkError] = useState(false);
-	const [showUnexpectedError, setShowUnexpectedError] = useState(false);
+export const UnhandledError = ({
+	expectedErrorValidators = [],
+	className,
+	initialError,
+	setError,
+}: UnhandledErrorProps) => {
+	const [showNetworkError, setShowNetworkError] = useState(null);
+	const [showUnexpectedError, setShowUnexpectedError] = useState(null);
 	const [interceptor, setInterceptor] = useState(null);
 
 	const isExpectedError = (err) => expectedErrorValidators.some((test) => test(err));
 
+	const onSuccess = (res) => {
+		setError(null);
+		setShowNetworkError(null);
+		setShowUnexpectedError(null);
+		return res;
+	};
+
+	const onError = (err) => {
+		setError?.(err);
+		setShowNetworkError(isNetworkError(err));
+		setShowUnexpectedError(!isExpectedError(err));
+		return Promise.reject(err);
+	};
+
 	const onMount = () => {
 		setInterceptor(axios.interceptors.response.use(
-			(res) => res,
-			(err) => {
-				setShowNetworkError(isNetworkError(err));
-				setShowUnexpectedError(!isExpectedError(err));
-				return Promise.reject(err);
-			},
+			onSuccess,
+			onError,
 		));
 	};
 
@@ -47,6 +64,7 @@ export const UnhandledError = ({ expectedErrorValidators = [], className }: Unha
 
 	useEffect(() => {
 		onMount();
+		if (initialError) onError(initialError);
 		return onUnmount;
 	}, []);
 
