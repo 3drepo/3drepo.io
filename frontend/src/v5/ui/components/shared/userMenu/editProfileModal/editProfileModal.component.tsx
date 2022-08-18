@@ -39,12 +39,11 @@ const TAB_LABELS = {
 };
 
 type EditProfileModalProps = {
-	open: boolean;
 	user: ICurrentUser;
 	onClose: () => void;
 };
 
-export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps) => {
+export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
@@ -80,7 +79,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 
 	return (
 		<FormModal
-			open={open}
+			open
 			title={formatMessage(
 				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
