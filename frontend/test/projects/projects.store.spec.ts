@@ -20,11 +20,7 @@ import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProject
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { times } from 'lodash';
 import { projectMockFactory } from './projects.fixtures';
-import { createTestStore } from '../test.helpers';
-
-const projectListIncludesProject = (projectList, project) => (
-	projectList.map(({ _id }) => _id).includes(project._id)
-);
+import { createTestStore, listContainsElementWithId } from '../test.helpers';
 
 describe('Projects: store', () => {
 	const teamspace = 'teamspace';
@@ -68,7 +64,7 @@ describe('Projects: store', () => {
 			dispatch(ProjectsActions.createProjectSuccess(teamspace, mockProject));
 
 			const projects = selectCurrentProjects(getState());
-			const projectIsIncluded = projectListIncludesProject(projects, mockProject);
+			const projectIsIncluded = listContainsElementWithId(projects, mockProject);
 			expect(projectIsIncluded).toBeTruthy();
 		});
 
@@ -77,7 +73,7 @@ describe('Projects: store', () => {
 			createAndAddProjectToStore({ _id: mockProjectId });
 			dispatch(ProjectsActions.deleteProjectSuccess(teamspace, mockProjectId));
 			const projects = selectCurrentProjects(getState());
-			const projectIsIncluded = projectListIncludesProject(projects, mockProjectId);
+			const projectIsIncluded = listContainsElementWithId(projects, mockProjectId);
 			expect(projectIsIncluded).toBeFalsy();
 		});
 	});
