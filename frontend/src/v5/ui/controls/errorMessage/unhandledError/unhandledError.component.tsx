@@ -40,7 +40,7 @@ export const UnhandledError = ({
 	const isExpectedError = (err) => expectedErrorValidators.some((test) => test(err));
 
 	const onSuccess = (res) => {
-		setError(null);
+		setError?.(null);
 		setShowNetworkError(null);
 		setShowUnexpectedError(null);
 		return res;
