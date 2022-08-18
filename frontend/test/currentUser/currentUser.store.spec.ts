@@ -22,7 +22,7 @@ import {
 	selectCurrentUser,
 	selectFirstName,
 } from '@/v5/store/currentUser/currentUser.selectors';
-import { currentUserMockFactory, generatePersonlData } from './currentUser.fixtures';
+import { currentUserMockFactory, generatePersonalData } from './currentUser.fixtures';
 import { createTestStore } from '../test.helpers';
 
 describe('CurrentUser: store', () => {
@@ -43,7 +43,7 @@ describe('CurrentUser: store', () => {
 		it('should update personal data', () => {
 			const mockCurrentUser = currentUserMockFactory();
 			dispatch(CurrentUserActions.fetchUserSuccess(mockCurrentUser));
-			const { firstName: mockFirstName } = generatePersonlData();
+			const { firstName: mockFirstName } = generatePersonalData();
 			dispatch(CurrentUserActions.updateUserSuccess({ firstName: mockFirstName }));
 			const firstName = selectFirstName(getState());
 			expect(firstName).toEqual(mockFirstName);
