@@ -17,6 +17,7 @@
 
 const { v5Path } = require('../../../interop');
 
+const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { find, updateOne } = require(`${v5Path}/handler/db`);
@@ -28,14 +29,14 @@ const processModel = async (teamspace, model) => {
 
 	const superMeshes = await superMeshesProm;
 
-	const meshUpdates = [];
 	const spanningMeshVerticesCounts = [];
+	let meshUpdates = [];
 
 	// eslint-disable-next-line camelcase
 	superMeshes.forEach(({ m_map }) => {
 		if (m_map.length > 1) {
 			// eslint-disable-next-line camelcase
-			meshUpdates.concat(m_map.map(({ map_id, v_from, v_to }) => {
+			meshUpdates = meshUpdates.concat(m_map.map(({ map_id, v_from, v_to }) => {
 				// eslint-disable-next-line camelcase
 				const verticesCount = v_to - v_from;
 				return updateOne(
@@ -47,21 +48,19 @@ const processModel = async (teamspace, model) => {
 			}));
 		} else if (m_map.length === 1) {
 			const verticesCount = m_map[0].v_to - m_map[0].v_from;
-			spanningMeshVerticesCounts[m_map[0].map_id] = (
-				spanningMeshVerticesCounts[m_map[0].map_id] || 0
+			spanningMeshVerticesCounts[UUIDToString(m_map[0].map_id)] = (
+				spanningMeshVerticesCounts[UUIDToString(m_map[0].map_id)] || 0
 			) + verticesCount;
 		}
 	});
 
 	// eslint-disable-next-line camelcase
-	for (const [map_id, verticesCount] of Object.entries(spanningMeshVerticesCounts)) {
-		meshUpdates.push(updateOne(
-			teamspace,
-			`${model}.scene`,
-			{ _id: map_id },
-			{ $set: { vertices_count: verticesCount } },
-		));
-	}
+	meshUpdates = meshUpdates.concat(Object.keys(spanningMeshVerticesCounts).map((map_id) => updateOne(
+		teamspace,
+		`${model}.scene`,
+		{ _id: stringToUUID(map_id) },
+		{ $set: { vertices_count: spanningMeshVerticesCounts[map_id] } },
+	)));
 
 	return Promise.all(meshUpdates);
 };
