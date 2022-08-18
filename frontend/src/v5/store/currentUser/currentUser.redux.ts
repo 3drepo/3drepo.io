@@ -25,7 +25,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	fetchUserSuccess: ['userData'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
-	updatePersonalData: ['personalData', 'onError'],
+	updatePersonalData: ['personalData', 'onSuccess', 'onError'],
 	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
 	generateApiKey: [],
 	deleteApiKey: [],
@@ -83,7 +83,11 @@ export interface ICurrentUserState {
 export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
 export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
-export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData, onError: (error: Error) => void };
+export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & {
+	personalData: UpdatePersonalData,
+	onSuccess: () => void,
+	onError: (error: Error) => void,
+};
 export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'>;
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
@@ -92,7 +96,11 @@ export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
 	updateUserSuccess: (userData: UpdateUserSuccess) => UpdateUserSuccessAction;
-	updatePersonalData: (personalData: UpdatePersonalData, onError: (error) => void) => UpdatePersonalDataAction;
+	updatePersonalData: (
+		personalData: UpdatePersonalData,
+		onSuccess: () => void,
+		onError: (error) => void,
+	) => UpdatePersonalDataAction;
 	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
 	generateApiKey: () => UpdateApiKeyAction;
 	deleteApiKey: () => UpdateApiKeyAction;
