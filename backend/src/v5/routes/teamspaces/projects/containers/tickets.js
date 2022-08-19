@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addTicket, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/containers');
 const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { templateExists, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { addTicket } = require('../../../../processors/teamspaces/projects/models/containers');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
-const { respond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -46,6 +46,25 @@ const getAllTemplates = async (req, res) => {
 
 		respond(req, res, templates.ok,
 			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketResource = async (req, res) => {
+	const { teamspace, project, container, ticket, resource } = req.params;
+
+	try {
+		const { readStream, size, mimeType } = await getTicketResourceAsStream(
+			teamspace,
+			project,
+			container,
+			ticket,
+			resource,
+		);
+
+		writeStreamRespond(req, res, templates.ok, readStream, UUIDToString(resource), size, { mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -246,6 +265,59 @@ const establishRoutes = () => {
 	 *                   format: uuid
 	 */
 	router.post('/', hasCommenterAccessToContainer, validateNewTicket, createTicket);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/{ticket}/resources/{resource}:
+	 *   get:
+	 *     description: Get the binary resource associated with the given ticket
+	 *     tags: [Containers]
+	 *     operationId: Get ticket resource
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - name: resource
+	 *         description: Resource ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the binary file
+	 *         content:
+	 *           application/octet-stream:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
+	router.get('/:ticket/resources/:resource', hasReadAccessToContainer, getTicketResource);
 
 	return router;
 };
