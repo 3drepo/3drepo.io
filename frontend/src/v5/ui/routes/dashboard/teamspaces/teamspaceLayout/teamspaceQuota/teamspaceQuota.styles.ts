@@ -48,13 +48,9 @@ export const WarningIcon = styled(WarningIconSmall)`
 `;
 
 export const ContactLink = styled(Link)`
-	${({ theme }) => (theme.typography.caption)}
-	text-decoration: underline;
-
-	color: ${({ theme }) => theme.palette.primary.contrast};
-
-	&:visited, &:link, &:hover {
+	&& {
+		${({ theme }) => (theme.typography.caption)}
 		text-decoration: underline;
+		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
-
 `;

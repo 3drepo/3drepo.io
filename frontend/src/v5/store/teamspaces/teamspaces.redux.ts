@@ -67,7 +67,7 @@ export type QuotaUnit = {
 };
 
 export type Quota = {
-	freeTier: Boolean;
+	freeTier: boolean;
 	expiryDate: number
 	data: QuotaUnit,
 	seats: QuotaUnit
