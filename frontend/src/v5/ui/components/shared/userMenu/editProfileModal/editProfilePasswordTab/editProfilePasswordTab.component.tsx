@@ -56,7 +56,7 @@ export const EditProfilePasswordTab = ({
 	setUnexpectedError,
 }: EditProfilePasswordTabProps) => {
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitted, isSubmitSuccessful, dirtyFields },
+		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
 		control,
 		trigger,
 		reset,
