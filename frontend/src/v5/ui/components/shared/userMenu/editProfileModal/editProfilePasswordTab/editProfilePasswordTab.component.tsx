@@ -91,7 +91,7 @@ export const EditProfilePasswordTab = ({
 	}, [formIsValid]);
 
 	useEffect(() => {
-		if (incorrectPassword && isSubmitted) {
+		if (incorrectPassword && dirtyFields.oldPassword) {
 			setIncorrectPassword(false);
 		}
 	}, [oldPassword]);
