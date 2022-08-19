@@ -20,10 +20,16 @@ const { v5Path } = require('../../../interop');
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { find, updateOne } = require(`${v5Path}/handler/db`);
+const { count, find, updateOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processModel = async (teamspace, model) => {
+	const unmigratedMeshesCount = await count(teamspace, `${model}.scene`, { type: 'mesh', vertices_count: { $exists: false } });
+
+	if (unmigratedMeshesCount === 0) {
+		return [];
+	}
+
 	const stashDB = `${model}.stash.3drepo`;
 	const superMeshesProm = find(teamspace, stashDB, { type: 'mesh' }, { m_map: 1 });
 
@@ -55,14 +61,14 @@ const processModel = async (teamspace, model) => {
 	});
 
 	// eslint-disable-next-line camelcase
-	meshUpdates = meshUpdates.concat(Object.keys(spanningMeshVerticesCounts).map((map_id) => updateOne(
+	const singularMeshUpdates = Object.keys(spanningMeshVerticesCounts).map((map_id) => updateOne(
 		teamspace,
 		`${model}.scene`,
 		{ _id: stringToUUID(map_id) },
 		{ $set: { vertices_count: spanningMeshVerticesCounts[map_id] } },
-	)));
+	));
 
-	return Promise.all(meshUpdates);
+	return Promise.all([...meshUpdates, ...singularMeshUpdates]);
 };
 
 const processTeamspace = async (teamspace) => {
@@ -72,7 +78,6 @@ const processTeamspace = async (teamspace) => {
 		logger.logInfo(`\t\t\t${model}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processModel(teamspace, model);
-		// eslint-disable-next-line no-await-in-loop
 	}
 };
 
