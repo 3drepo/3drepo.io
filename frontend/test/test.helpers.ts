@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import reducers from '@/v5/store/reducers';
+import { combineReducers, createStore } from 'redux';
+
 export const alertAction = (currentAction: string) => ({
 	action: {
 		type: 'MODALS/OPEN',
@@ -36,3 +39,5 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 		return methodFn(url, body.toString());
 	});
 };
+
+export const createTestStore = () => createStore(combineReducers(reducers));

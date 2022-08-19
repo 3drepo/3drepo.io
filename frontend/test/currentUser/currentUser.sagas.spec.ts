@@ -25,7 +25,7 @@ import {
 	generateFakeApiKey,
 	generateFakeAvatarFile,
 	generateFakeAvatarUrl,
-	generatePersonlData,
+	generatePersonalData,
 } from './currentUser.fixtures';
 import { spyOnAxiosApiCallWithFile } from '../test.helpers';
 import { mockServer } from '../../internals/testing/mockServer';
@@ -65,7 +65,7 @@ describe('Current User: sagas', () => {
 	})
 
 	describe('updatePersonalData', () => {
-		const userData = generatePersonlData();
+		const userData = generatePersonalData();
 		const avatarFile = generateFakeAvatarFile();
 		const avatarUrl = generateFakeAvatarUrl();
 		const personalData: UpdatePersonalData = { ...userData };

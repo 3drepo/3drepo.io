@@ -15,10 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import faker from 'faker';
+import { IUser } from '@/v5/store/users/users.redux';
+import * as faker from 'faker';
 
-export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
-    name: faker.random.word(),
-	isAdmin: faker.datatype.boolean(),
+const mockUser = (overrides) => ({
+	user: faker.random.word(),
+	firstName: faker.random.word(),
+	lastName: faker.random.word(),
+	company: faker.random.word(),
+	job: faker.random.word(),
+	email: faker.internet.email(),
+	...overrides,
+}); 
+
+export const userWithoutAvatarMockFactory = (overrides?: Partial<IUser>): IUser => ({
+	...mockUser(overrides),
+	hasAvatar: false,
+	avatarUrl: '',
+});
+
+export const userWithAvatarMockFactory = (overrides?: Partial<IUser>): IUser => ({
+	...mockUser(overrides),
+	hasAvatar: true,
+	avatarUrl: faker.image.image(),
 });
