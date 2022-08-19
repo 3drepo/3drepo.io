@@ -141,15 +141,17 @@ Scene.getMeshInfo = async (account, model, branch, rev, user) => {
 			vertices_count : 1,
 			faces_count: 1,
 			uv_channels_count: 1,
-			bounding_box: 1
+			bounding_box: 1,
+			primitive: 1
 		};
 		const results = await Scene.findStashNodesByType(account, model, branch, rev, "mesh", undefined, projection);
 		return {
-			superMeshes: results.map(({_id, vertices_count, faces_count, uv_channels_count, bounding_box}) => ({
+			superMeshes: results.map(({_id, vertices_count, faces_count, uv_channels_count, bounding_box, primitive}) => ({
 				_id: Utils.uuidToString(_id),
 				nVertices: vertices_count || 0,
 				nFaces: faces_count || 0,
 				nUVChannels: uv_channels_count || 0,
+				primitive: primitive || 0,
 				min: bounding_box[0],
 				max: bounding_box[1]
 			}))
