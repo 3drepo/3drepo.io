@@ -27,6 +27,7 @@ import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 
 interface ICreateProject {
 	open: boolean;
@@ -123,7 +124,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 				control={control}
 				formError={errors.projectName}
 			/>
-			<UnhandledError expectedErrorValidators={[projectAlreadyExists]} />
+			<UnhandledError expectedErrorValidators={[projectAlreadyExists]} error={useErrorInterceptor()} />
 		</FormModal>
 	);
 };

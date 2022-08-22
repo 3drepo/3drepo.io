@@ -26,6 +26,7 @@ import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
+import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledError } from './login.styles';
 import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, SIGN_UP_PATH } from '../routes.constants';
@@ -79,7 +80,7 @@ export const Login = () => {
 						defaultMessage: 'Password',
 					})}
 				/>
-				<UnhandledError expectedErrorValidators={[isExpectedError]} />
+				<UnhandledError expectedErrorValidators={[isExpectedError]} error={useErrorInterceptor()} />
 				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 				<OtherOptions>
 					<SignUpPrompt>

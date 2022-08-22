@@ -23,6 +23,7 @@ import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/user
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
+import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
@@ -175,7 +176,10 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			<UnhandledError expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
+			<UnhandledError
+				expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]}
+				error={useErrorInterceptor()}
+			/>
 			<CreateAccountButton
 				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
