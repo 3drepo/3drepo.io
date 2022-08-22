@@ -42,7 +42,7 @@ export const fetchUserSuccess = (state, { userData }: FetchUserSuccessAction) =>
 };
 
 export const updateUserSuccess = (state, { userData }: UpdateUserSuccessAction) => {
-	Object.assign(state.currentUser, userData);
+	state.currentUser = { ...state.currentUser, userData };
 };
 
 export const setPersonalDataIsUpdating = (state, { personalDataIsUpdating }: SetPersonalDataIsUpdatingAction) => {
