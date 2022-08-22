@@ -41,10 +41,6 @@ export const INITIAL_STATE: IRevisionsState = {
 	revisionsUploadStatus: {},
 };
 
-const createUploadRevisionIfMissing = (state, uploadId) => {
-	state.revisionsUploadStatus[uploadId] ||= {};
-};
-
 export const setVoidStatusSuccess = (state, {
 	containerId,
 	revisionId,
@@ -82,13 +78,12 @@ export const setUploadComplete = (state, {
 	isComplete,
 	errorMessage,
 }: SetUploadCompleteAction) => {
-	createUploadRevisionIfMissing(state, uploadId);
-	const revisionUploadStatus = state.revisionsUploadStatus[uploadId];
-	Object.assign(revisionUploadStatus, { isComplete, errorMessage });
+	let uploads = state.revisionsUploadStatus;
+	uploads[uploadId] ||= {};
+	Object.assign(uploads[uploadId], { isComplete, errorMessage });
 };
 
 export const setUploadProgress = (state, { uploadId, progress }: SetUploadProgressAction) => {
-	createUploadRevisionIfMissing(state, uploadId);
 	state.revisionsUploadStatus[uploadId].progress = progress;
 };
 
@@ -96,9 +91,9 @@ export const revisionProcessingSuccess = (state, {
 	containerId,
 	revision,
 }: RevisionProcessingSuccessAction) => {
-	let revisions = state.revisionsByContainer[containerId];
-	revisions ||= [];
-	revisions.push(revision);
+	let revisions = state.revisionsByContainer;
+	revisions[containerId] ||= [];
+	revisions[containerId].push(revision);
 };
 
 export const revisionsReducer = createReducer<IRevisionsState>(INITIAL_STATE, produceAll({
