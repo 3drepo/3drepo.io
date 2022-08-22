@@ -31,13 +31,16 @@ const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
 		setTimeout(() => DialogsActionsDispatchers.close(id), 500);
 	};
 
-	const ModalTemplate = MODAL_TEMPLATES[modalType];
-
-	return (
-		<Modal open={openState} onClickClose={onClickClose}>
-			<ModalTemplate onClickClose={onClickClose} {...props} />
-		</Modal>
-	);
+	if (typeof modalType === 'string') {
+		const ModalTemplate = MODAL_TEMPLATES[modalType];
+		return (
+			<Modal open={openState} onClickClose={onClickClose}>
+				<ModalTemplate onClickClose={onClickClose} {...props} />
+			</Modal>
+		);
+	}
+	const ModalType = modalType;
+	return (<ModalType open={openState} onClickClose={onClickClose} {...props} />);
 };
 
 export const ModalsDispatcher = (): JSX.Element => {
