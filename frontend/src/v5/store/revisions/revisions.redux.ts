@@ -78,7 +78,7 @@ export const setUploadComplete = (state, {
 	errorMessage,
 }: SetUploadCompleteAction) => {
 	const uploads = state.revisionsUploadStatus;
-	uploads[uploadId] = { ...(uploads[uploadId] || {}), isComplete, errorMessage };
+	uploads[uploadId] = { ...uploads[uploadId], isComplete, errorMessage };
 };
 
 export const setUploadProgress = (state, { uploadId, progress }: SetUploadProgressAction) => {
