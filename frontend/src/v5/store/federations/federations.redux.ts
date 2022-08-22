@@ -24,10 +24,9 @@ import {
 } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Action } from 'redux';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
-import { uniqueIds } from '../store.helpers';
-import { produceAll } from '@/v5/helpers/reducers.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
@@ -125,7 +124,7 @@ export const deleteFederationSuccess = (state, {
 	federationId,
 }: DeleteFederationSuccessAction) => {
 	state.federationsByProject[projectId] = state.federationsByProject[projectId].filter(
-		(federation) => federationId !== federation._id
+		(federation) => federationId !== federation._id,
 	);
 };
 
