@@ -55,7 +55,7 @@ export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 				-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
 			}
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			border: 0;
+			fieldset { border: 0; }
 		}
 	}
 `;
