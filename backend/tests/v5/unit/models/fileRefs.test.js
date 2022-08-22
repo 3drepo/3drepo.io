@@ -61,7 +61,7 @@ const testGetTotalSize = () => {
 
 const testGetAllRemovableEntriesByType = () => {
 	describe('Get all removable entries by type', () => {
-		const refCol = generateRandomString();
+		const refCol = `${generateRandomString()}.ref`;
 
 		test('should return all removable file entries from collection', async () => {
 			const teamspace = generateRandomString();
@@ -101,7 +101,7 @@ const testGetRefEntry = () => {
 			await expect(FileRefs.getRefEntry(teamspace, collection, id)).resolves.toEqual(output);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id }, undefined);
 		});
 
 		test('should throw error if the entry is not found', async () => {
@@ -126,7 +126,7 @@ const testInsertRef = () => {
 			await expect(FileRefs.insertRef(teamspace, collection, refInfo)).resolves.toEqual(undefined);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, collection, refInfo);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, refInfo);
 		});
 	});
 };
@@ -142,7 +142,7 @@ const testRemoveRef = () => {
 			await expect(FileRefs.removeRef(teamspace, collection, id)).resolves.toEqual(undefined);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, collection, { _id: id });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, { _id: id });
 		});
 	});
 };

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getFileAsStreamWithMeta, storeFile } = require('../../../../../services/filesManager');
+const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { addTicket } = require('../../../../../models/tickets');
 const { generateUUIDString } = require('../../../../../utils/helper/uuids');
@@ -71,7 +71,7 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 	return res;
 };
 
-Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileAsStreamWithMeta(
+Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
 	teamspace, TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket },
 );
 

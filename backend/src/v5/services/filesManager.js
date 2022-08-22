@@ -27,7 +27,7 @@ const {
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
 const config = require('../utils/config');
-const { fileMimeTypeFromBuffer } = require('../utils/helper/typeCheck');
+const { fileMimeFromBuffer } = require('../utils/helper/typeCheck');
 const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
@@ -146,7 +146,7 @@ const getFileAsStream = async (teamspace, collection, refEntry) => {
 	return { readStream, size, mimeType };
 };
 
-FilesManager.getFileAsStreamWithMeta = async (teamspace, collection, file, meta) => {
+FilesManager.getFileWithMetaAsStream = async (teamspace, collection, file, meta) => {
 	const refEntry = await getRefEntryByQuery(teamspace, collection, { ...meta, _id: file });
 	return getFileAsStream(teamspace, collection, refEntry);
 };
@@ -167,7 +167,7 @@ FilesManager.removeFile = async (teamspace, collection, id) => {
 };
 
 FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
-	const mimeTypeProm = fileMimeTypeFromBuffer(data);
+	const mimeTypeProm = fileMimeFromBuffer(data);
 	await FilesManager.removeFile(teamspace, collection, id);
 	let refInfo;
 

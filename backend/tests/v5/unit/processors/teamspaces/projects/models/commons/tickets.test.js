@@ -141,6 +141,36 @@ const testAddTicket = () => {
 	});
 };
 
+const testGetTicketResourceAsStream = () => {
+	describe('Get ticket resource', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const resource = generateRandomString();
+		const ticket = generateRandomString();
+		test('Should call getFileWithMetaAsStream and return whatever it returns', async () => {
+			const expectedOutput = generateRandomString();
+			FilesManager.getFileWithMetaAsStream.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketResourceAsStream(teamspace,
+				project, model, ticket, resource)).resolves.toEqual(expectedOutput);
+
+			expect(FilesManager.getFileWithMetaAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileWithMetaAsStream).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket });
+		});
+
+		test('Should throw whatever error getFileWithMetaAsStream thrown', async () => {
+			const expectedOutput = generateRandomString();
+			FilesManager.getFileWithMetaAsStream.mockRejectedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketResourceAsStream(teamspace,
+				project, model, ticket, resource)).rejects.toEqual(expectedOutput);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
+	testGetTicketResourceAsStream();
 });
