@@ -27,6 +27,7 @@ import { Action } from 'redux';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
 import { uniqueIds } from '../store.helpers';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
@@ -37,7 +38,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederations: ['teamspace', 'projectId'],
 	fetchFederationsSuccess: ['projectId', 'federations'],
 	fetchFederationStats: ['teamspace', 'projectId', 'federationId'],
-	fetchFederationStatsSuccess: ['projectId', 'federationId', 'federationStats'],
+	fetchFederationStatsSuccess: ['projectId', 'federationId', 'stats'],
 	fetchFederationViews: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
@@ -55,171 +56,108 @@ export const INITIAL_STATE: IFederationsState = {
 	federationsByProject: {},
 };
 
-export const createFederationSuccess = (state = INITIAL_STATE, {
+const getFederationFromState = (state, projectId, federationId) => (
+	state.federationsByProject[projectId].find((federation) => federation._id === federationId)
+);
+
+export const createFederationSuccess = (state, {
 	projectId,
 	newFederation,
 	federationId,
-}: CreateFederationSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: uniqueIds<IFederation>([
-			...state.federationsByProject[projectId],
-			{
-				...prepareNewFederation(newFederation, federationId),
-			},
-		]),
-	},
-});
+}: CreateFederationSuccessAction) => {
+	if (getFederationFromState(state, projectId, federationId)) return;
 
-export const setFavourite = (state = INITIAL_STATE, {
+	state.federationsByProject[projectId].push(prepareNewFederation(newFederation, federationId));
+};
+
+export const setFavouriteSuccess = (state, {
 	projectId,
 	federationId,
 	isFavourite,
-}: SetFavouriteSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => ({
-			...federation,
-			isFavourite: federation._id === federationId ? isFavourite : federation.isFavourite,
-		})),
-	},
-});
+}: SetFavouriteSuccessAction) => {
+	getFederationFromState(state, projectId, federationId).isFavourite = isFavourite;
+};
 
-export const fetchFederationsSuccess = (state = INITIAL_STATE, {
+export const fetchFederationsSuccess = (state, {
 	projectId,
 	federations,
-}: FetchFederationsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: federations,
-	},
-});
+}: FetchFederationsSuccessAction) => {
+	state.federationsByProject[projectId] = federations;
+};
 
-export const fetchStatsSuccess = (state = INITIAL_STATE, {
+export const fetchStatsSuccess = (state, {
 	projectId,
 	federationId,
-	federationStats,
-}: FetchFederationStatsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return prepareSingleFederationData(federation, federationStats);
-		}),
-	},
-});
+	stats,
+}: FetchFederationStatsSuccessAction) => {
+	const federation = getFederationFromState(state, projectId, federationId);
+	Object.assign(federation, prepareSingleFederationData(federation, stats));
+};
 
-export const fetchFederationViewsSuccess = (state = INITIAL_STATE, {
+export const fetchFederationViewsSuccess = (state, {
 	projectId,
 	federationId,
 	views,
-}: FetchFederationViewsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return {
-				...federation,
-				views,
-			};
-		}),
-	},
-});
+}: FetchFederationViewsSuccessAction) => {
+	getFederationFromState(state, projectId, federationId).views = views;
+};
 
-export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
+export const fetchFederationSettingsSuccess = (state, {
 	projectId,
 	federationId,
 	settings,
-}: FetchFederationSettingsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return {
-				...federation,
-				...settings,
-			};
-		}),
-	},
-});
+}: FetchFederationSettingsSuccessAction) => {
+	const federation = getFederationFromState(state, projectId, federationId);
+	Object.assign(federation, settings);
+};
 
-export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
+export const updateFederationSettingsSuccess = (state, {
 	projectId,
 	federationId,
 	settings,
-}: UpdateFederationSettingsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return {
-				...federation,
-				...settings,
-			};
-		}),
-	},
-});
+}: UpdateFederationSettingsSuccessAction) => {
+	const federation = getFederationFromState(state, projectId, federationId);
+	Object.assign(federation, settings);
+};
 
-export const deleteFederationSuccess = (state = INITIAL_STATE, {
+export const deleteFederationSuccess = (state, {
 	projectId,
 	federationId,
-}: DeleteFederationSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].filter((federation) => federationId !== federation._id),
-	},
-});
+}: DeleteFederationSuccessAction) => {
+	state.federationsByProject[projectId] = state.federationsByProject[projectId].filter(
+		(federation) => federationId !== federation._id
+	);
+};
 
-export const updateFederationContainersSuccess = (state = INITIAL_STATE, {
+export const updateFederationContainersSuccess = (state, {
 	projectId,
 	federationId,
 	containers,
-}: UpdateFederationContainersActionSuccess) => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => ({
-			...federation,
-			containers: federation._id === federationId ? containers : federation.containers,
-		})),
-	},
-});
+}: UpdateFederationContainersActionSuccess) => {
+	getFederationFromState(state, projectId, federationId).containers = containers;
+};
 
-export const updateFederationSuccess = (state = INITIAL_STATE, {
+export const updateFederationSuccess = (state, {
 	projectId,
 	federationId,
 	updatedFederation,
-}: UpdateFederationSuccessAction) => ({
-	...state,
-	federations: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return ({ ...federation, ...updatedFederation });
-		}),
-	},
-});
+}: UpdateFederationSuccessAction) => {
+	const federation = getFederationFromState(state, projectId, federationId);
+	Object.assign(federation, updatedFederation);
+};
 
-export const federationsReducer = createReducer<IFederationsState>(INITIAL_STATE, {
+export const federationsReducer = createReducer<IFederationsState>(INITIAL_STATE, produceAll({
 	[FederationsTypes.CREATE_FEDERATION_SUCCESS]: createFederationSuccess,
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
-	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
+	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
 	[FederationsTypes.FETCH_FEDERATION_VIEWS_SUCCESS]: fetchFederationViewsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SETTINGS_SUCCESS]: updateFederationSettingsSuccess,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_CONTAINERS_SUCCESS]: updateFederationContainersSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SUCCESS]: updateFederationSuccess,
-}) as (state: IFederationsState, action:any) => IFederationsState;
+})) as (state: IFederationsState, action:any) => IFederationsState;
 
 /**
  * Types
@@ -236,7 +174,7 @@ export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjec
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndFederationId & { isFavourite: boolean };
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & TeamspaceProjectAndFederationId;
-export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & ProjectAndFederationId & { federationStats: FederationStats };
+export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & ProjectAndFederationId & { stats: FederationStats };
 export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: string[] };
 export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & ProjectAndFederationId & { containers: string[] };
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & TeamspaceProjectAndFederationId;
@@ -267,7 +205,7 @@ export interface IFederationsActionCreators {
 	fetchFederationStatsSuccess: (
 		projectId: string,
 		federationId: string,
-		federationStats: FederationStats
+		stats: FederationStats
 	) => FetchFederationStatsSuccessAction;
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
