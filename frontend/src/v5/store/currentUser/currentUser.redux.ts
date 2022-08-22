@@ -16,6 +16,7 @@
  */
 
 import { Constants } from '@/v5/helpers/actions.helper';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { ICurrentUser, UpdateUser, UpdatePersonalData, UpdateUserSuccess } from './currentUser.types';
@@ -36,41 +37,28 @@ export const INITIAL_STATE: ICurrentUserState = {
 	currentUser: { username: '', email: '', firstName: '', lastName: '' },
 };
 
-export const fetchUserSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
-	...state,
-	currentUser: userData,
-});
+export const fetchUserSuccess = (state, { userData }: FetchUserSuccessAction) => {
+	state.currentUser = userData;
+};
 
-export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		...userData,
-	},
-});
+export const updateUserSuccess = (state, { userData }: UpdateUserSuccessAction) => {
+	Object.assign(state.currentUser, userData);
+};
 
-export const setPersonalDataIsUpdating = (state = INITIAL_STATE, { personalDataIsUpdating }): ICurrentUserState => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		personalDataIsUpdating,
-	},
-});
+export const setPersonalDataIsUpdating = (state, { personalDataIsUpdating }: SetPersonalDataIsUpdatingAction) => {
+	state.currentUser.personalDataIsUpdating = personalDataIsUpdating;
+};
 
-export const setApiKeyIsUpdating = (state = INITIAL_STATE, { apiKeyIsUpdating }): ICurrentUserState => ({
-	...state,
-	currentUser: {
-		...state.currentUser,
-		apiKeyIsUpdating,
-	},
-});
+export const setApiKeyIsUpdating = (state, { apiKeyIsUpdating }: SetApiKeyIsUpdatingAction) => {
+	state.currentUser.apiKeyIsUpdating = apiKeyIsUpdating;
+};
 
-export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
+export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, produceAll({
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
 	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
-}) as (state: ICurrentUserState, action: any) => ICurrentUserState;
+})) as (state: ICurrentUserState, action: any) => ICurrentUserState;
 
 /**
  * Types
@@ -86,7 +74,7 @@ export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData
 export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & { personalData: UpdatePersonalData, onError: (error: Error) => void };
 export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'>;
 export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
-export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { personalDataIsUpdating: boolean };
+export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { apiKeyIsUpdating: boolean };
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
