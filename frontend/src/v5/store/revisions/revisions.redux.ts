@@ -63,10 +63,9 @@ export const updateRevisionSuccess = (state, {
 	containerId,
 	data,
 }: UpdateRevisionSuccessAction) => {
-	const revision = state.revisionsByContainer[containerId].find(
-		({ _id }) => _id === data._id,
-	);
-	Object.assign(revision, data);
+	const revisions = state.revisionsByContainer[containerId];
+	const index = revisions.findIndex(({ _id }) => _id === data._id);
+	revisions[index] = { ...revisions[index], ...data };
 };
 
 export const setIsPending = (state, { isPending, containerId }: SetIsPendingAction) => {
@@ -78,9 +77,8 @@ export const setUploadComplete = (state, {
 	isComplete,
 	errorMessage,
 }: SetUploadCompleteAction) => {
-	let uploads = state.revisionsUploadStatus;
-	uploads[uploadId] ||= {};
-	Object.assign(uploads[uploadId], { isComplete, errorMessage });
+	const uploads = state.revisionsUploadStatus;
+	uploads[uploadId] = { ...(uploads[uploadId] || {}), isComplete, errorMessage };
 };
 
 export const setUploadProgress = (state, { uploadId, progress }: SetUploadProgressAction) => {
@@ -91,7 +89,7 @@ export const revisionProcessingSuccess = (state, {
 	containerId,
 	revision,
 }: RevisionProcessingSuccessAction) => {
-	let revisions = state.revisionsByContainer;
+	const revisions = state.revisionsByContainer;
 	revisions[containerId] ||= [];
 	revisions[containerId].push(revision);
 };
