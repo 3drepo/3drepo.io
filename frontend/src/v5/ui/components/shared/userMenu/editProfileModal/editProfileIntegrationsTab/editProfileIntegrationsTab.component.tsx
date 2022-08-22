@@ -25,12 +25,10 @@ import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileInte
 
 type EditProfileIntegrationsTabProps = {
 	unexpectedError: any,
-	setUnexpectedError: (error: any) => void,
 };
 
 export const EditProfileIntegrationsTab = ({
 	unexpectedError,
-	setUnexpectedError,
 }: EditProfileIntegrationsTabProps) => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
 
@@ -65,10 +63,7 @@ export const EditProfileIntegrationsTab = ({
 					/>
 				</Button>
 			</ButtonsContainer>
-			<UnhandledError
-				initialError={unexpectedError}
-				setError={setUnexpectedError}
-			/>
+			<UnhandledError error={unexpectedError} />
 		</>
 	);
 };

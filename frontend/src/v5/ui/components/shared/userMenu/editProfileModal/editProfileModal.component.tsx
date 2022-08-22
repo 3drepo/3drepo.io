@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { defaults, pick } from 'lodash';
 import { TabContext } from '@mui/lab';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
@@ -60,11 +61,8 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
-	const setUnexpectedTabError = (tab: keyof EditProfileUnexpectedErrors) => (
-		(value) => setUnexpectedErrors({ ...unexpectedErrors, [tab]: value })
-	);
+	const interceptedError = useErrorInterceptor();
 
 	const defaultPersonalValues = defaults(
 		pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
@@ -92,6 +90,10 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
 	});
+
+	useEffect(() => {
+		setUnexpectedErrors({ ...unexpectedErrors, [activeTab]: interceptedError });
+	}, [interceptedError]);
 
 	return (
 		<FormModal
@@ -122,7 +124,6 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 							setIsSubmitting={setIsSubmitting}
 							setSubmitFunction={setPersonalSubmitFunction}
 							unexpectedError={unexpectedErrors[PERSONAL_TAB]}
-							setUnexpectedError={setUnexpectedTabError(PERSONAL_TAB)}
 							user={user}
 						/>
 					</TabPanel>
@@ -135,14 +136,12 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 							setIsSubmitting={setIsSubmitting}
 							setSubmitFunction={setPasswordSubmitFunction}
 							unexpectedError={unexpectedErrors[PASSWORD_TAB]}
-							setUnexpectedError={setUnexpectedTabError(PASSWORD_TAB)}
 						/>
 					</TabPanel>
 				</FormProvider>
 				<TabPanel value={INTEGRATIONS_TAB}>
 					<EditProfileIntegrationsTab
 						unexpectedError={unexpectedErrors[INTEGRATIONS_TAB]}
-						setUnexpectedError={setUnexpectedTabError(INTEGRATIONS_TAB)}
 					/>
 				</TabPanel>
 			</TabContext>

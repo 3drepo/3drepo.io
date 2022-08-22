@@ -44,7 +44,6 @@ type EditProfilePasswordTabProps = {
 	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
 	unexpectedError: any,
-	setUnexpectedError: (error: any) => void,
 };
 
 export const EditProfilePasswordTab = ({
@@ -53,7 +52,6 @@ export const EditProfilePasswordTab = ({
 	setIsSubmitting,
 	setSubmitFunction,
 	unexpectedError,
-	setUnexpectedError,
 }: EditProfilePasswordTabProps) => {
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
@@ -145,9 +143,8 @@ export const EditProfilePasswordTab = ({
 				required
 			/>
 			<UnhandledError
+				error={unexpectedError}
 				expectedErrorValidators={[isPasswordIncorrect]}
-				initialError={unexpectedError}
-				setError={setUnexpectedError}
 			/>
 			{isSubmitSuccessful && (
 				<SuccessMessage>

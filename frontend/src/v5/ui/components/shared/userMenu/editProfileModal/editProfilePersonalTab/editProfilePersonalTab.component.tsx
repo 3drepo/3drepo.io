@@ -48,7 +48,6 @@ type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
 	unexpectedError: any,
-	setUnexpectedError: (error: any) => void,
 	user: ICurrentUser,
 };
 
@@ -58,7 +57,6 @@ export const EditProfilePersonalTab = ({
 	setSubmitFunction,
 	setIsSubmitting,
 	unexpectedError,
-	setUnexpectedError,
 	user,
 }: EditProfilePersonalTabProps) => {
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
@@ -189,9 +187,8 @@ export const EditProfilePersonalTab = ({
 					</SuccessMessage>
 				)}
 				<UnhandledError
+					error={unexpectedError}
 					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-					initialError={unexpectedError}
-					setError={setUnexpectedError}
 				/>
 			</ScrollAreaPadding>
 		</ScrollArea>
