@@ -14,11 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import faker from 'faker';
+import { ITeamspace, Quota } from "@/v5/store/teamspaces/teamspaces.redux";
+import faker from "faker";
 
 export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
     name: faker.random.word(),
 	isAdmin: faker.datatype.boolean(),
+    ...overrides
+});
+
+export const quotaMockFactory = (overrides: Partial<Quota> = {}): Quota => ({
+	freeTier: faker.datatype.boolean(),
+    expiryDate: faker.datatype.number(),
+    data: {
+        used:faker.datatype.number(),
+        available: faker.datatype.number(),
+    },
+    seats: {
+        used: faker.datatype.number(),
+        available: faker.datatype.number()
+    },
+    ...overrides
 });
