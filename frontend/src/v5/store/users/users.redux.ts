@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
@@ -29,17 +30,13 @@ export const INITIAL_STATE: IUsersState = {
 	usersByTeamspace: {},
 };
 
-export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }): IUsersState => ({
-	...state,
-	usersByTeamspace: {
-		...state.usersByTeamspace,
-		[teamspace]: users,
-	},
-});
+export const fetchUsersSuccess = (state, { teamspace, users }: FetchUsersSuccessAction) => {
+	state.usersByTeamspace[teamspace] = users;
+};
 
-export const usersReducer = createReducer(INITIAL_STATE, {
+export const usersReducer = createReducer(INITIAL_STATE, produceAll({
 	[UsersTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,
-});
+}));
 
 /**
  * Types

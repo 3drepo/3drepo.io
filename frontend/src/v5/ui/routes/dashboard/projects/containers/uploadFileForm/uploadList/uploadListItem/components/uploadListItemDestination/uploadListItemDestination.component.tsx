@@ -79,16 +79,14 @@ export const UploadListItemDestination = ({
 		<Autocomplete
 			value={value}
 			disableClearable={disableClearable}
-			onChange={async (event, newValue: IContainer) => {
+			onChange={(_, newValue: IContainer) => {
+				setValue(newValue || emptyOption);
+				onChange(newValue || emptyOption);
 				if (!newValue) {
-					setValue(emptyOption);
 					setNewOrExisting('unset');
-					onChange(emptyOption);
 					forceUpdate();
 				} else {
-					setValue(newValue);
-					setNewOrExisting(!newValue._id.length ? 'new' : 'existing');
-					onChange(newValue);
+					setNewOrExisting(!newValue._id ? 'new' : 'existing');
 				}
 				setDisableClearable(!newValue);
 			}}

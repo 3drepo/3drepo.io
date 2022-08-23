@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import faker from 'faker';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { UploadFileForm } from './uploadFileForm.component';
 
-export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
-    name: faker.random.word(),
-	isAdmin: faker.datatype.boolean(),
-});
+export const uploadToContainer = ({ presetContainerId }) => {
+	const f = document.createElement('input');
+	f.type = 'file';
+	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+	f.onchange = (e: Event) => {
+		const presetFile = (<HTMLInputElement>e.target).files[0];
+		DialogsActionsDispatchers.open(UploadFileForm, {
+			presetFile,
+			presetContainerId,
+		});
+	};
+	f.click();
+};
