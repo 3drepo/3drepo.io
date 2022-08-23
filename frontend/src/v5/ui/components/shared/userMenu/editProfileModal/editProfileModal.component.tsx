@@ -86,7 +86,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	});
 
 	const passwordFormData = useForm<IUpdatePasswordInputs>({
-		reValidateMode: 'onChange',
+		mode: 'all',
 		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
 	});

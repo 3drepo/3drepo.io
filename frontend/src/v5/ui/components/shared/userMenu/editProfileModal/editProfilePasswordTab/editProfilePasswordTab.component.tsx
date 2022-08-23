@@ -54,13 +54,12 @@ export const EditProfilePasswordTab = ({
 	unexpectedError,
 }: EditProfilePasswordTabProps) => {
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
+		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
 		trigger,
 		reset,
 		watch,
 		handleSubmit,
-		getValues,
 	} = useFormContext();
 
 	const oldPassword = watch('oldPassword');
@@ -89,7 +88,7 @@ export const EditProfilePasswordTab = ({
 	}, [formIsValid]);
 
 	useEffect(() => {
-		if (incorrectPassword && dirtyFields.oldPassword) {
+		if (incorrectPassword && touchedFields.oldPassword) {
 			setIncorrectPassword(false);
 		}
 	}, [oldPassword]);
@@ -102,10 +101,8 @@ export const EditProfilePasswordTab = ({
 	}, [incorrectPassword]);
 
 	useEffect(() => {
-		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
+		trigger(Object.keys(touchedFields) as Array<keyof IUpdatePasswordInputs>);
 	}, [oldPassword, newPassword, confirmPassword]);
-
-	useEffect(() => () => reset(getValues(), { keepIsSubmitted: false }), []);
 
 	return (
 		<>
