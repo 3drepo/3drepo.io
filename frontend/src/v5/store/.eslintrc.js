@@ -15,10 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import faker from 'faker';
-
-export const teamspaceMockFactory = (overrides?: Partial<ITeamspace>): ITeamspace => ({
-    name: faker.random.word(),
-	isAdmin: faker.datatype.boolean(),
-});
+module.exports = {
+	rules: {
+		// used in redux files with Immer.js
+		'no-param-reassign': [
+			'error',
+			{
+				'props': true,
+				'ignorePropertyModificationsFor': ['state'],
+			},
+		],
+	},
+};

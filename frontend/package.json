@@ -60,6 +60,7 @@
 		"formik": "1.5.7",
 		"history": "4.9.0",
 		"idb": "6.0.0",
+		"immer": "9.0.15",
 		"konva": "4.0.9",
 		"lodash": "4.17.21",
 		"make-plural": "7.0.0",
