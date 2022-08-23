@@ -62,14 +62,14 @@ describe('Revisions: store', () => {
 			const mockRevision = revisionsMockFactory();
 			const mockUploadProgress = 15;
 			const mockUploadError = 'ERROR!!!';
-			const mockIsComplete = true;
 			
 			let uploads = selectUploads(getState());
 			expect(uploads[uploadId]).toBeFalsy();
 		
 			dispatch(RevisionsActions.fetchSuccess(container._id, [mockRevision]));
+			dispatch(RevisionsActions.setUploadComplete(uploadId, false, mockUploadError));
 			dispatch(RevisionsActions.setUploadProgress(uploadId, mockUploadProgress));
-			dispatch(RevisionsActions.setUploadComplete(uploadId, mockIsComplete, mockUploadError));
+			dispatch(RevisionsActions.setUploadComplete(uploadId, true, mockUploadError));
 
 			uploads = selectUploads(getState());
 			const uploadProgress = selectUploadProgress(getState(), uploadId);
@@ -79,7 +79,7 @@ describe('Revisions: store', () => {
 			expect(uploads[uploadId]).toBeTruthy();
 			expect(uploadProgress).toEqual(mockUploadProgress);
 			expect(uploadError).toEqual(mockUploadError);
-			expect(uploadIsComplete).toBe(mockIsComplete);
+			expect(uploadIsComplete).toBe(true);
 		});
 
 		it('should add single revision', () => {
