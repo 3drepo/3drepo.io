@@ -119,13 +119,17 @@ export const countryCode = Yup.string()
 		}),
 	);
 
-export const email = (alreadyExistingEmails) => Yup.string()
+export const email = (alreadyExistingEmails) => trimmedString
 	.email(
 		formatMessage({
 			id: 'validation.email.error.invalid',
 			defaultMessage: 'Invalid email address',
 		}),
 	)
+	.max(254, formatMessage({
+		id: 'validation.email.error.max',
+		defaultMessage: 'Email is limited to 254 characters',
+	}))
 	.required(
 		formatMessage({
 			id: 'validation.email.error.required',

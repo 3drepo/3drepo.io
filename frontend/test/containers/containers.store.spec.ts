@@ -21,21 +21,16 @@ import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
 import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.types';
 import { revisionsMockFactory } from '../revisions/revisions.fixtures';
-import { combineReducers, createStore } from 'redux';
-import reducers from '@/v5/store/reducers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
-
-const containerListIncludesContainer = (containerList, container) => (
-	containerList.map(({ _id }) => _id).includes(container._id)
-);
+import { createTestStore, listContainsElementWithId } from '../test.helpers';
 
 describe('Containers: store', () => {
-	const { dispatch, getState } = createStore(combineReducers(reducers));
+	let dispatch, getState;
 	const projectId = 'projectId';
-	dispatch(ProjectsActions.setCurrentProject(projectId));
 
 	beforeEach(() => {
-		dispatch(ContainersActions.fetchContainersSuccess(projectId, []));
+		({ dispatch, getState } = createTestStore());
+		dispatch(ProjectsActions.setCurrentProject(projectId));
 	})
 
 	const createAndAddContainerToStore = (containerOverrides = {}) => {
@@ -56,7 +51,7 @@ describe('Containers: store', () => {
 			const newContainer = createAndAddContainerToStore({ isFavourite: false });
 			dispatch(ContainersActions.setFavouriteSuccess(projectId, newContainer._id, true));
 			const favouriteContainers = selectFavouriteContainers(getState());
-			const containerIsIncluded = containerListIncludesContainer(favouriteContainers, newContainer);
+			const containerIsIncluded = listContainsElementWithId(favouriteContainers, newContainer);
 
 			expect(containerIsIncluded).toBeTruthy();
 		});
@@ -65,7 +60,7 @@ describe('Containers: store', () => {
 			const newContainer = createAndAddContainerToStore({ isFavourite: true });
 			dispatch(ContainersActions.setFavouriteSuccess(projectId, newContainer._id, false));
 			const favouriteContainers = selectFavouriteContainers(getState());
-			const containerIsIncluded = containerListIncludesContainer(favouriteContainers, newContainer);
+			const containerIsIncluded = listContainsElementWithId(favouriteContainers, newContainer);
 
 			expect(containerIsIncluded).not.toBeTruthy();
 		});
