@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { clientConfigService } from '@/v4/services/clientConfig';
-import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { Quota, QuotaUnit } from './teamspaces.redux';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { UploadFileForm } from './uploadFileForm.component';
 
-export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
-
-export const getTeamspaceImgSrc = (teamspace: string) => (
-	generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API)
-);
-
-export const isQuotaUnitUnlimited = (quotaUnit: QuotaUnit) => quotaUnit.available === 'unlimited';
-
-export const isQuotaUnitCapped = (quotaUnit: QuotaUnit) => quotaUnit.available <= quotaUnit.used;
-
-export const isQuotaExpired = (quota:Quota) => quota.expiryDate >= +new Date();
+export const uploadToContainer = ({ presetContainerId }) => {
+	const f = document.createElement('input');
+	f.type = 'file';
+	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+	f.onchange = (e: Event) => {
+		const presetFile = (<HTMLInputElement>e.target).files[0];
+		DialogsActionsDispatchers.open(UploadFileForm, {
+			presetFile,
+			presetContainerId,
+		});
+	};
+	f.click();
+};
