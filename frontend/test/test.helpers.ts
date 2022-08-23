@@ -41,3 +41,7 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 };
 
 export const createTestStore = () => createStore(combineReducers(reducers));
+
+export const listContainsElementWithId = (list, element) => (	
+	list.map(({ _id }) => _id).includes(element._id)
+);
