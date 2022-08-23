@@ -268,11 +268,83 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/{ticket}:
+	 *   get:
+	 *     description: Get ticket by ID
+	 *     tags: [Containers]
+	 *     operationId: GetTicket
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+ 	 *       - name: showDeprecated
+	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the ticket as a json object
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               description: schema is subject to the template the ticket follows
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: id of the ticket
+	 *                title:
+	 *                  type: string
+	 *                  description: ticket title
+	 *                  example: "Missing door"
+	 *                number:
+	 *                  type: number
+	 *                  description: ticket number
+	 *                properties:
+	 *                  type: object
+	 *                  description: ticket properties
+	 *                modules:
+	 *                  type: object
+	 *                  description: ticket modules and their properties
+	 *
+	 */
+	router.get('/:ticket/resources/:resource', hasReadAccessToContainer, getTicketResource);
+
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/{ticket}/resources/{resource}:
 	 *   get:
 	 *     description: Get the binary resource associated with the given ticket
 	 *     tags: [Containers]
-	 *     operationId: Get ticket resource
+	 *     operationId: getTicketResource
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
