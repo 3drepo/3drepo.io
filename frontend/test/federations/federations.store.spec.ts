@@ -49,10 +49,12 @@ describe('Federations: store', () => {
 	});
 
 	it('should fetch federations successfully', () => {
+		const federationsBeforeFetch = selectFederations(getState());
+		expect(federationsBeforeFetch).toEqual([]);
 		const mockFederations = times(5, () => federationMockFactory());
 		dispatch(FederationsActions.fetchFederationsSuccess(projectId, mockFederations));
-		const federations = selectFederations(getState());
-		expect(federations).toEqual(mockFederations);
+		const federationsAfterFetch = selectFederations(getState());
+		expect(federationsAfterFetch).toEqual(mockFederations);
 	});
 
 	it('should set a federation as favourite', () => {
