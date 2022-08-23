@@ -15,18 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { clientConfigService } from '@/v4/services/clientConfig';
-import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { Quota, QuotaUnit } from './teamspaces.redux';
+const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
 
-export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
+const Settings = {};
 
-export const getTeamspaceImgSrc = (teamspace: string) => (
-	generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API)
-);
+Settings.addTicketTemplate = addTemplate;
+Settings.updateTicketTemplate = updateTemplate;
+Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
 
-export const isQuotaUnitUnlimited = (quotaUnit: QuotaUnit) => quotaUnit.available === 'unlimited';
-
-export const isQuotaUnitCapped = (quotaUnit: QuotaUnit) => quotaUnit.available <= quotaUnit.used;
-
-export const isQuotaExpired = (quota:Quota) => quota.expiryDate >= +new Date();
+module.exports = Settings;

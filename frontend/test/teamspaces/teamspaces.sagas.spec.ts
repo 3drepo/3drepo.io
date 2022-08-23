@@ -20,6 +20,7 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import * as TeamspacesSaga from '@/v5/store/teamspaces/teamspaces.sagas';
 import { mockServer } from '../../internals/testing/mockServer';
+import { quotaMockFactory } from './teamspaces.fixtures';
 
 describe('Teamspaces: sagas', () => {
 	const teamspaces = [];
@@ -45,5 +46,19 @@ describe('Teamspaces: sagas', () => {
 				.dispatch(TeamspacesActions.fetch())
 				.silentRun();
 		});
+	});
+
+	it('should fetch quota data and dispatch FETCH_QUOTA_SUCCESS', async () => {
+		const teamspace = 'MyTeamspace';
+		const quota = quotaMockFactory();
+
+		mockServer
+			.get(`/teamspaces/${teamspace}/quota`)
+			.reply(200, quota);
+
+		await expectSaga(TeamspacesSaga.default)
+				.dispatch(TeamspacesActions.fetchQuota(teamspace))
+				.put(TeamspacesActions.fetchQuotaSuccess(teamspace, quota))
+				.silentRun();
 	});
 });

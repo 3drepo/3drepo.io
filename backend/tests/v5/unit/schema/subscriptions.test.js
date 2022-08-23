@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../helper/path');
-const { generateRandomString } = require('../../../../helper/services');
+const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
-const SubscriptionSchema = require(`${src}/middleware/dataConverter/schemas/subscriptions`);
+const SubscriptionSchema = require(`${src}/schemas/subscriptions`);
 const { SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
 
 const formatData = (data) => {
@@ -82,7 +82,7 @@ const testIsValidType = () => {
 	});
 };
 
-describe('middleware/dataConverter/schema/subscriptions', () => {
+describe('schema/subscriptions', () => {
 	testSubscriptionSchema();
 	testIsValidType();
 });
