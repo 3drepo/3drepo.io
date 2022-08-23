@@ -83,7 +83,7 @@ describe('Federations: store', () => {
 		const mockViews = prepareMockViews();
 		dispatch(FederationsActions.fetchFederationViewsSuccess(projectId, federationId, mockViews));
 		const viewsFromState = selectFederationById(getState(), federationId).views;
-		expect(viewsFromState).toBe(mockViews);
+		expect(viewsFromState).toEqual(mockViews);
 	});
 
 	it('should fetch a federation\'s settings', () => {
