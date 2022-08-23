@@ -17,33 +17,47 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { useParams } from 'react-router';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Sidebar } from '@controls/sideBar';
-import { UploadFieldArray } from '@/v5/store/containers/containers.types';
+import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
+	presetContainerId?: string;
+	presetFile?: File;
 	open: boolean;
 	onClickClose: () => void;
 };
 
-export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+interface AddFilesProps {
+	files: File[];
+	container?: IContainer;
+}
 
+export const UploadFileForm = ({
+	presetContainerId,
+	presetFile,
+	open,
+	onClickClose,
+}: IUploadFileForm): JSX.Element => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
@@ -63,12 +77,6 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 		name: 'uploads',
 		keyName: 'uploadId',
 	});
-
-	useEffect(() => {
-		remove();
-		setSelectedIndex(null);
-		setIsUploading(false);
-	}, [open]);
 
 	const [fileError, setFileError] = useState(false);
 	useEffect(() => {
@@ -95,7 +103,7 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 		return noExceedingMax;
 	};
 
-	const processFiles = (files: File[]): void => {
+	const addFilesToList = ({ files, container }: AddFilesProps): void => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
@@ -103,12 +111,12 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 				progress: 0,
 				extension: file.name.split('.').slice(-1)[0],
 				revisionTag: parseFilename(file.name),
-				containerName: '',
-				containerId: '',
-				containerUnit: 'mm',
-				containerType: 'Uncategorised',
-				containerCode: '',
-				containerDesc: '',
+				containerName: container?.name || '',
+				containerId: container?._id || '',
+				containerUnit: container?.unit || 'mm',
+				containerType: container?.type || 'Uncategorised',
+				containerCode: container?.code || '',
+				containerDesc: container?.desc || '',
 				revisionDesc: '',
 				importAnimations: false,
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
@@ -117,15 +125,18 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 		append(filesToAppend);
 	};
 
+	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
+	useEffect(() => {
+		if (presetFile) addFilesToList({ files: [presetFile], container: presetContainer });
+	}, []);
+
 	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
 
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
 
-	const onClickEdit = (id: number) => {
-		setSelectedIndex(id);
-	};
+	const onClickEdit = (id: number) => setSelectedIndex(id);
 
 	const onClickDelete = (id: number) => {
 		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
@@ -215,7 +226,7 @@ export const UploadFileForm = ({ open, onClickClose }: IUploadFileForm): JSX.Ele
 										),
 									},
 								)}
-								processFiles={(files) => { processFiles(files); }}
+								processFiles={(files) => addFilesToList({ files })}
 								hidden={isUploading}
 							/>
 						</Padding>

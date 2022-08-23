@@ -107,6 +107,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		try {
 			setFormIsSubmitting(true);
 			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
+			newUser.email = newUser.email.trim();
 			if (!fields.company) delete newUser.company;
 			await registerNewUser(newUser);
 			const { email, firstName } = fields;
