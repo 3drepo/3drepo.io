@@ -18,6 +18,7 @@
 const { isSessionValid } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
+const { errorCodes } = require('../services/sso/sso.constants');
 
 const AuthMiddlewares = {};
 
@@ -42,7 +43,7 @@ AuthMiddlewares.isLoggedIn = (req, res, next) => {
 AuthMiddlewares.notLoggedInSso = (req, res, next) => {
 	const { headers, session } = req;
 	if (isSessionValid(session, headers.referer, true)) {
-		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${templates.alreadyLoggedIn.code}`);
+		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${errorCodes.alreadyLoggedin}`);
 	} else {
 		next();
 	}

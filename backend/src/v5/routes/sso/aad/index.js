@@ -22,7 +22,7 @@ const Users = require('../../../processors/users');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 const { createSessionSso } = require('../../../middleware/sessions');
-const { notLoggedIn } = require('../../../middleware/auth');
+const { notLoggedInSso } = require('../../../middleware/auth');
 
 const signUpPost = async (req, res, next) => {
 	try {
@@ -56,7 +56,7 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, redirectToStateURL);
+	router.get(authenticateRedirectEndpoint, checkIfMsAccountIsLinkedTo3DRepo, notLoggedInSso, createSessionSso, redirectToStateURL);
 
 	/**
 	 * @openapi
