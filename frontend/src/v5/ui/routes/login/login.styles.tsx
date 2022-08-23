@@ -17,9 +17,7 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import {
-	UnhandledErrorInterceptor as UnhandledErrorInterceptorBase,
-} from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { UnhandledErrorInterceptor as UnhandledErrorInterceptorBase } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 
 export const OtherOptions = styled.div`
 	display: flex;

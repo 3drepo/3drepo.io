@@ -24,10 +24,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import {
-	UnhandledErrorInterceptor,
-} from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/UnhandledErrorInterceptor/UnhandledErrorInterceptor.component';
 import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import {
 	CreateAccountButton,

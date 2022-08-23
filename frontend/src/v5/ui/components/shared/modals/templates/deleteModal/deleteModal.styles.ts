@@ -16,9 +16,7 @@
  */
 
 import styled from 'styled-components';
-import {
-	UnhandledErrorInterceptor as UnhandledErrorInterceptorBase,
-} from '@controls/errorMessage/UnhandledErrorInterceptor/UnhandledErrorInterceptor.component';
+import { UnhandledErrorInterceptor as UnhandledErrorInterceptorBase } from '@controls/errorMessage/UnhandledErrorInterceptor/UnhandledErrorInterceptor.component';
 
 export const UnhandledErrorInterceptor = styled(UnhandledErrorInterceptorBase)`
 	justify-content: center;

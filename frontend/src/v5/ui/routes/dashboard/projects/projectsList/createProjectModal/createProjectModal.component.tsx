@@ -26,9 +26,7 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
-import {
-	UnhandledErrorInterceptor,
-} from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 
 interface ICreateProject {
 	open: boolean;
