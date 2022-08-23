@@ -90,7 +90,7 @@ YupHelper.types.strings.password = Yup.string().max(65)
 			return true;
 		});
 
-YupHelper.types.strings.email = Yup.string().email();
+YupHelper.types.strings.email = Yup.string().email().max(254);
 
 YupHelper.types.strings.name = Yup.string().min(1).max(35);
 

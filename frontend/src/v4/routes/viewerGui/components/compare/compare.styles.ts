@@ -77,6 +77,7 @@ export const SliderContainer = styled.div`
 	flex-direction: column;
 	justify-content: center;
 	box-sizing: border-box;
+	position: relative;
 `;
 
 export const SliderWrapper = styled.div`
