@@ -23,7 +23,13 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
-export const EditProfileIntegrationsTab = () => {
+type EditProfileIntegrationsTabProps = {
+	unexpectedError: any,
+};
+
+export const EditProfileIntegrationsTab = ({
+	unexpectedError,
+}: EditProfileIntegrationsTabProps) => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
@@ -57,7 +63,7 @@ export const EditProfileIntegrationsTab = () => {
 					/>
 				</Button>
 			</ButtonsContainer>
-			<UnhandledError />
+			<UnhandledError error={unexpectedError} />
 		</>
 	);
 };

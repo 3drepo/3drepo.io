@@ -47,6 +47,7 @@
 		"@popperjs/core": "2.6.0",
 		"@webscopeio/react-textarea-autocomplete": "4.6.3",
 		"axios": "0.26.1",
+		"byte-size": "8.1.0",
 		"connected-react-router": "6.9.1",
 		"contrast-color": "1.0.1",
 		"copy-to-clipboard": "3.2.0",
