@@ -18,7 +18,7 @@
 const { addTicket, getTicketById } = require('../../../../../models/tickets');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
-const { generateUUIDString } = require('../../../../../utils/helper/uuids');
+const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
 
 const Tickets = {};
@@ -31,12 +31,12 @@ const extractEmbeddedBinary = (ticket, template) => {
 			if (properties[name]) {
 				const data = properties[name];
 				if (type === propTypes.IMAGE) {
-					const ref = generateUUIDString();
+					const ref = generateUUID();
 					// eslint-disable-next-line no-param-reassign
 					properties[name] = ref;
 					binaryData.push({ ref, data });
 				} else if (type === propTypes.VIEW && data.screenshot) {
-					const ref = generateUUIDString();
+					const ref = generateUUID();
 					const buffer = data.screenshot;
 					data.screenshot = ref;
 					binaryData.push({ ref, data: buffer });
@@ -64,7 +64,7 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 	const res = await addTicket(teamspace, project, model, ticket);
 	await Promise.all(
 		binaryData.map(({ ref, data }) => storeFile(
-			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket: res._id },
+			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket: res },
 		)),
 	);
 

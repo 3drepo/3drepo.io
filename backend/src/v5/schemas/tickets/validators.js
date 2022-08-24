@@ -54,7 +54,7 @@ Validators.propTypesToValidator = {
 			up: types.position.required(),
 			size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 		}).default(undefined),
-	}),
+	}).default(undefined),
 	[propTypes.MEASUREMENTS]: Yup.array().of(
 		Yup.object().shape({
 			positions: Yup.array().of(types.position).min(2).required(),

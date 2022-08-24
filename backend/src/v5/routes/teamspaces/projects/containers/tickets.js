@@ -335,19 +335,19 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: id of the ticket
-	 *                title:
-	 *                  type: string
-	 *                  description: ticket title
-	 *                  example: "Missing door"
-	 *                number:
-	 *                  type: number
-	 *                  description: ticket number
-	 *                properties:
-	 *                  type: object
-	 *                  description: ticket properties
-	 *                modules:
-	 *                  type: object
-	 *                  description: ticket modules and their properties
+	 *                 title:
+	 *                   type: string
+	 *                   description: ticket title
+	 *                   example: "Missing door"
+	 *                 number:
+	 *                   type: number
+	 *                   description: ticket number
+	 *                 properties:
+	 *                   type: object
+	 *                   description: ticket properties
+	 *                 modules:
+	 *                   type: object
+	 *                   description: ticket modules and their properties
 	 *
 	 */
 	router.get('/:ticket', hasReadAccessToContainer, getTicket, serialiseTicket);

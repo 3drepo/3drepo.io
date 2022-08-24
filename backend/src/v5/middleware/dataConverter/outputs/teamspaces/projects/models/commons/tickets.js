@@ -47,6 +47,8 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						transformGroups: Yup.array().of(uuidString),
 					}).default(undefined),
 				}).default(undefined);
+			} else if (type === propTypes.IMAGE) {
+				res[name] = uuidString;
 			}
 		});
 
@@ -66,6 +68,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 
 	return Yup.object({
 		_id: uuidString,
+		type: uuidString,
 		properties: castProps(properties),
 		modules: Yup.object(modulesCaster).default(undefined),
 	});
