@@ -76,8 +76,9 @@ export const EditProfilePersonalTab = ({
 
 	const formMethods = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
-		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
+		resolver: yupResolver(EditProfileUpdatePersonalSchema),
 		defaultValues: getDefaultPersonalValues(),
+		context: { alreadyExistingEmails },
 	});
 
 	const {

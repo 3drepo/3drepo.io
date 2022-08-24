@@ -42,7 +42,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 
-	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
+	const [alreadyExistingProjectsByTeamspace, setAlreadyExistingProjectsByTeamspace] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const DEFAULT_VALUES = {
@@ -53,24 +53,25 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	const {
 		control,
 		formState,
-		formState: { errors },
+		formState: { errors, touchedFields },
 		reset,
 		handleSubmit,
 		getValues,
 		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(CreateProjectSchema(existingProjectsByTeamspace)),
+		resolver: yupResolver(CreateProjectSchema),
+		context: { alreadyExistingProjectsByTeamspace },
 		defaultValues: DEFAULT_VALUES,
 	});
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
 			const { projectName, teamspace } = getValues();
-			setExistingProjectsByTeamspace({
-				...existingProjectsByTeamspace,
+			setAlreadyExistingProjectsByTeamspace({
+				...alreadyExistingProjectsByTeamspace,
 				[teamspace]: [
-					...(existingProjectsByTeamspace[teamspace] || []),
+					...(alreadyExistingProjectsByTeamspace[teamspace] || []),
 					projectName,
 				],
 			});
@@ -86,12 +87,18 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 
 	useEffect(() => {
 		reset(DEFAULT_VALUES);
-		setExistingProjectsByTeamspace({});
+		setAlreadyExistingProjectsByTeamspace({});
 	}, [open]);
 
 	useEffect(() => {
-		if (Object.keys(existingProjectsByTeamspace).length) trigger('projectName');
-	}, [errors, JSON.stringify(existingProjectsByTeamspace)]);
+		if (Object.keys(alreadyExistingProjectsByTeamspace).length) trigger('projectName');
+	}, [errors, JSON.stringify(alreadyExistingProjectsByTeamspace)]);
+
+	useEffect(() => {
+		if (touchedFields.projectName) {
+			trigger('projectName');
+		}
+	}, [getValues('teamspace')]);
 
 	return (
 		<FormModal

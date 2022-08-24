@@ -18,7 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '../../services/intl';
 
-export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, string[]>) => Yup.object().shape({
+export const CreateProjectSchema = Yup.object().shape({
 	teamspace: Yup.string()
 		.required(
 			formatMessage({
@@ -51,8 +51,8 @@ export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, s
 				id: 'createProject.name.error.alreadyExisting',
 				defaultMessage: 'This name is already taken',
 			}),
-			(projectName, testContext) => (
-				!(existingProjectByTeamspace?.[testContext.parent.teamspace] || []).includes(projectName)
+			(projectName, { options, parent }) => (
+				!(options.context.alreadyExistingProjectsByTeamspace[parent.teamspace] || []).includes(projectName)
 			),
 		),
 });
