@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { SUBSCRIPTION_TYPES } = require('../../../models/teamspaces.constants');
+const { SUBSCRIPTION_TYPES } = require('../models/teamspaces.constants');
 const Yup = require('yup');
 
 const Subscription = {};
