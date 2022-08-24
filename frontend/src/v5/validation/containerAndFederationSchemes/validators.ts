@@ -17,6 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import { trimmedString } from '../shared/validators';
 
 const stripIfBlankString = (value) => (
 	value === ''
@@ -30,7 +31,7 @@ export const numberField = Yup.number()
 		defaultMessage: 'Must be a number',
 	}));
 
-export const name = Yup.string()
+export const name = trimmedString
 	.max(120,
 		formatMessage({
 			id: 'validation.model.name.error.max',
@@ -41,6 +42,16 @@ export const name = Yup.string()
 			id: 'validation.model.name.error.required',
 			defaultMessage: 'Name is a required field',
 		}),
+	)
+	.test(
+		'alreadyExistingNames',
+		formatMessage({
+			id: 'validation.model.name.alreadyExisting',
+			defaultMessage: 'This name is already used within this project',
+		}),
+		(nameValue, testContext) => (
+			!testContext.options.context.alreadyExistingNames.includes(nameValue)
+		),
 	);
 
 export const unit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
