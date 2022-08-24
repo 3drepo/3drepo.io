@@ -23,7 +23,7 @@ import { BreadcrumbDropdown, BreadcrumbItem } from './breadcrumbDropdown/breadcr
 
 export interface BreadcrumbOptions {
 	options: BreadcrumbItem[];
-	secondary?: Boolean;
+	secondary?: boolean;
 }
 
 export type BreadcrumbItemOrOptions = BreadcrumbOptions | BreadcrumbItem;
