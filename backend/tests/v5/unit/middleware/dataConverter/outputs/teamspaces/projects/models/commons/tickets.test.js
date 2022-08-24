@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateTemplate } = require('../../../../../../../../helper/services');
+const { generateTemplate, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -26,10 +27,15 @@ const TicketTemplateHelper = require(`${src}/middleware/dataConverter/outputs/co
 
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates');
 const TicketTemplateSchema = require(`${src}/schemas/tickets/templates`);
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
+jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
+const TemplateModel = require(`${src}/models/tickets.templates`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
-const TicketOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets`);
+const TicketOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets`);
 
 const testSerialiseTicketTemplate = () => {
 	describe('Serialise full ticket template', () => {
@@ -42,7 +48,7 @@ const testSerialiseTicketTemplate = () => {
 			TicketTemplateHelper.serialiseTicketSchema.mockReturnValueOnce(serialisedTemplateData);
 
 			const req = { templateData };
-			TicketOutputMiddlewares.serialiseFullTicketTemplate(req, {});
+			TicketOutputMiddleware.serialiseFullTicketTemplate(req, {});
 
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(templateData);
@@ -62,7 +68,7 @@ const testSerialiseTicketTemplate = () => {
 			TicketTemplateHelper.serialiseTicketSchema.mockReturnValueOnce(serialisedTemplateData);
 
 			const req = { templateData, query: { showDeprecated: 'true' } };
-			TicketOutputMiddlewares.serialiseFullTicketTemplate(req, {});
+			TicketOutputMiddleware.serialiseFullTicketTemplate(req, {});
 
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(templateData);
@@ -74,13 +80,243 @@ const testSerialiseTicketTemplate = () => {
 		});
 
 		test('should catch the error and respond gracefully on error', () => {
-			TicketOutputMiddlewares.serialiseFullTicketTemplate(undefined, {});
+			TicketOutputMiddleware.serialiseFullTicketTemplate(undefined, {});
 
 			expect(Responder.respond).toHaveBeenCalledWith(undefined, {}, templates.unknown);
 		});
 	});
 };
 
+const testSerialiseTicket = () => {
+	describe('Serialise Ticket', () => {
+		const teamspace = generateRandomString();
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, async () => {
+			TemplateModel.getTemplateById.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			const ticket = { type: generateRandomString() };
+
+			const req = { params: { teamspace }, ticket };
+
+			await expect(TicketOutputMiddleware.serialiseTicket(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledWith(teamspace, ticket.type);
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+		});
+
+		test('Should remove deprecated values if showDeprecated is set to false', async () => {
+			const propName = generateRandomString();
+			const modName = generateRandomString();
+			const modName2 = generateRandomString();
+			const template = {
+				properties: [
+					{
+						name: propName,
+						deprecated: true,
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [
+					{
+						name: modName,
+						properties: [{
+							name: propName,
+							deprecated: true,
+							type: propTypes.TEXT,
+						},
+						],
+					},
+					{
+						name: modName2,
+						deprecated: true,
+						properties: [],
+					},
+				],
+			};
+
+			TemplateModel.getTemplateById.mockResolvedValueOnce(template);
+			TicketTemplateSchema.generateFullSchema.mockReturnValueOnce(template);
+
+			const ticket = {
+				_id: generateUUID(),
+				type: generateRandomString(),
+				properties: { [propName]: generateRandomString() },
+				modules: {
+					[modName]: {
+						[propName]: generateRandomString(),
+					},
+					[modName2]: {
+						[generateRandomString()]: generateRandomString(),
+					},
+				},
+			};
+
+			const req = { params: { teamspace }, ticket };
+
+			await expect(TicketOutputMiddleware.serialiseTicket(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledWith(teamspace, ticket.type);
+
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(template);
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok,
+				{ ...ticket, _id: UUIDToString(ticket._id), properties: {}, modules: { [modName]: {} } });
+		});
+		test('Should cast dates correctly', async () => {
+			const propName = generateRandomString();
+			const propName2 = generateRandomString();
+			const modName = generateRandomString();
+			const template = {
+				properties: [
+					{
+						name: propName,
+						type: propTypes.DATE,
+					},
+					{
+						name: propName2,
+						type: propTypes.DATE,
+					},
+					{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [
+					{
+						type: modName,
+						properties: [{
+							name: propName,
+							type: propTypes.DATE,
+						},
+						],
+					},
+				],
+			};
+
+			TemplateModel.getTemplateById.mockResolvedValueOnce(template);
+			TicketTemplateSchema.generateFullSchema.mockReturnValueOnce(template);
+
+			const ticket = {
+				_id: generateUUID(),
+				type: generateRandomString(),
+				properties: {
+					[propName]: generateRandomDate(),
+					[propName2]: undefined,
+					[generateRandomString()]: generateRandomString(),
+				},
+				modules: {
+					[modName]: {
+						[propName]: generateRandomDate(),
+						[generateRandomString()]: generateRandomString(),
+					},
+				},
+			};
+
+			const req = { params: { teamspace }, ticket };
+
+			await expect(TicketOutputMiddleware.serialiseTicket(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledWith(teamspace, ticket.type);
+
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(template);
+
+			const res = cloneDeep(ticket);
+
+			res._id = UUIDToString(res._id);
+			res.properties[propName] = res.properties[propName].getTime();
+			res.modules[modName][propName] = res.modules[modName][propName].getTime();
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);
+		});
+
+		test('Should cast uuids correctly', async () => {
+			const propName = generateRandomString();
+			const propName2 = generateRandomString();
+			const modName = generateRandomString();
+			const template = {
+				properties: [
+					{
+						name: propName,
+						type: propTypes.VIEW,
+					},
+					{
+						name: propName2,
+						type: propTypes.VIEW,
+					},
+				],
+				modules: [
+					{
+						name: modName,
+						properties: [{
+							name: propName,
+							type: propTypes.VIEW,
+						},
+						{
+							name: propName2,
+							type: propTypes.VIEW,
+						},
+						],
+					},
+				],
+			};
+
+			TemplateModel.getTemplateById.mockResolvedValueOnce(template);
+			TicketTemplateSchema.generateFullSchema.mockReturnValueOnce(template);
+
+			const ticket = {
+				_id: generateUUID(),
+				type: generateRandomString(),
+				properties: {
+					[propName2]: {
+						state: {},
+					},
+					[generateRandomString()]: generateRandomString(),
+				},
+				modules: {
+					[modName]: {
+						[propName]: {
+							state: {
+								highlightedGroups: times(5, () => generateUUID()),
+								colorOverrideGroups: times(2, () => generateUUID()),
+								hiddenGroups: [],
+								shownGroups: times(1, () => generateUUID()),
+								transformGroups: times(10, () => generateUUID()),
+							},
+						},
+						[generateRandomString()]: generateRandomString(),
+					},
+				},
+			};
+
+			const req = { params: { teamspace }, ticket };
+
+			await expect(TicketOutputMiddleware.serialiseTicket(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplateById).toHaveBeenCalledWith(teamspace, ticket.type);
+
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(template);
+
+			const res = cloneDeep(ticket);
+
+			res._id = UUIDToString(res._id);
+			Object.keys(res.modules[modName][propName].state).forEach((fieldName) => {
+				res.modules[modName][propName].state[fieldName] = res.modules[modName][propName].state[fieldName]
+					.map(UUIDToString);
+			});
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);
+		});
+	});
+};
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
 	testSerialiseTicketTemplate();
+	testSerialiseTicket();
 });

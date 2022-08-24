@@ -46,7 +46,7 @@ Tickets.getTicketById = async (
 	_id,
 	projection = { teamspace: 0, project: 0, model: 0 },
 ) => {
-	const ticket = await DbHandler.findOne(teamspace, TICKETS_COL, { teamspace, project, model, _id, projection });
+	const ticket = await DbHandler.findOne(teamspace, TICKETS_COL, { teamspace, project, model, _id }, projection);
 
 	if (!ticket) {
 		throw templates.ticketNotFound;

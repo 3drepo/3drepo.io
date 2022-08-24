@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/containers');
+const { addTicket, getTicketById, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/containers');
 const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
+const { serialiseFullTicketTemplate, serialiseTicket } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
-const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
 
 const createTicket = async (req, res) => {
@@ -46,6 +46,20 @@ const getAllTemplates = async (req, res) => {
 
 		respond(req, res, templates.ok,
 			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicket = async (req, res, next) => {
+	const { teamspace, project, container, ticket } = req.params;
+
+	try {
+		req.ticket = await getTicketById(teamspace, project, container, ticket);
+		req.showDeprecated = req.query.showDeprecated === 'true';
+
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -336,7 +350,7 @@ const establishRoutes = () => {
 	 *                  description: ticket modules and their properties
 	 *
 	 */
-	router.get('/:ticket/resources/:resource', hasReadAccessToContainer, getTicketResource);
+	router.get('/:ticket', hasReadAccessToContainer, getTicket, serialiseTicket);
 
 	/**
 	 * @openapi

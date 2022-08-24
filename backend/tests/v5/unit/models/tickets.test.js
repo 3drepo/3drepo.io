@@ -20,7 +20,7 @@ const { generateRandomString, generateRandomNumber } = require('../../helper/ser
 
 const Ticket = require(`${src}/models/tickets`);
 const db = require(`${src}/handler/db`);
-// const { templates } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const ticketCol = 'tickets';
 
@@ -84,7 +84,50 @@ const testRemoveAllTickets = () => {
 	});
 };
 
+const testGetTicketById = () => {
+	describe('Get ticket by ID', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+		test('should return whatever the database query returns', async () => {
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketById(teamspace, project, model, ticket, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, _id: ticket }, projection);
+		});
+
+		test('should impose default projection if projection is not provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketById(teamspace, project, model, ticket))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, _id: ticket }, { teamspace: 0, project: 0, model: 0 });
+		});
+
+		test(`should reject with ${templates.ticketNotFound.code} if ticket is not found`, async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			await expect(Ticket.getTicketById(teamspace, project, model, ticket))
+				.rejects.toEqual(templates.ticketNotFound);
+		});
+	});
+};
+
 describe('models/tickets', () => {
 	testAddTicket();
 	testRemoveAllTickets();
+	testGetTicketById();
 });

@@ -170,7 +170,29 @@ const testGetTicketResourceAsStream = () => {
 	});
 };
 
+const testGetTicketById = () => {
+	describe('Add ticket', () => {
+		test('should call getTicketById in model and return whatever it returns', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+
+			const expectedOutput = generateRandomString();
+
+			TicketsModel.getTicketById.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketById(teamspace, project, model, ticket))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.getTicketById).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getTicketById).toHaveBeenCalledWith(teamspace, project, model, ticket);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
 	testGetTicketResourceAsStream();
+	testGetTicketById();
 });
