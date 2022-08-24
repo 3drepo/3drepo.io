@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
+const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
 
 const Schemas = { responses: getSwaggerComponents(), schemas: {} };
@@ -28,10 +29,73 @@ Schemas.securitySchemes = {
 	},
 };
 
+const helpers = {
+	boolDef: (description, example) => ({ type: 'boolean', ...deleteIfUndefined({ description, example }) }),
+	numberDef: (description, example) => ({ type: 'number', ...deleteIfUndefined({ description, example }) }),
+	stringDef: (description, example, enumVal) => ({ type: 'string', ...deleteIfUndefined({ description, example, enum: enumVal }) }),
+	arrayDef: (description, items, example) => ({ type: 'array', ...deleteIfUndefined({ description, items, example }) }),
+};
+
 Schemas.schemas.roles = {
 	type: 'string',
 	enum: ['admin', 'collaborator', 'commenter', 'viewer'],
 	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
+};
+
+const ticketTemplatePropSchema = {
+	description: 'Properties within a ticket or module',
+	type: 'array',
+	items: {
+		type: 'object',
+		required: ['name', 'type'],
+		properties: {
+			name: helpers.stringDef('Name of the prop', 'Floor'),
+			type: helpers.stringDef('Property type', propTypes.ONE_OF, Object.values(propTypes)),
+			deprecated: helpers.boolDef('Denotes if this prop is no longer in use', false),
+			required: helpers.boolDef('If this prop is required (default: false)', true),
+			values: helpers.arrayDef(`list of possible values (only applicable if type is ${propTypes.ONE_OF} or ${propTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+		},
+	},
+};
+
+const ticketTemplateModSchema = {
+	description: 'Configure a custom or preset module',
+	type: 'array',
+	items: {
+		type: 'object',
+		properties: {
+			name: helpers.stringDef('Name of the module', 'BCF Reference'),
+			type: helpers.stringDef('Preset module name', undefined, undefined, Object.values(presetModules)),
+			deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
+			properties: ticketTemplatePropSchema,
+		},
+	},
+};
+
+const ticketTemplateConfigSchema = {
+	type: 'object',
+	properties: {
+		comments: helpers.boolDef('Comments enabled (default: false)'),
+		issueProperties: helpers.boolDef('Include issue properties (default: false)'),
+		defaultView: helpers.boolDef('Include a default view with image (default: false)'),
+		defaultImage: helpers.boolDef('Include a default image - this will be ignored if defaultView is set to true (default: false)'),
+		pin: helpers.boolDef('Include a pin (default: false)'),
+	},
+};
+
+Schemas.schemas.ticketTemplate = {
+	description: 'Custom ticket Template',
+	type: 'object',
+	required: ['name'],
+	properties: {
+		name: helpers.stringDef('Name of the ticket', 'Risk'),
+		code: { ...helpers.stringDef('A 3 character code for the template', 'RSK'), minLength: 3, maxLength: 3 },
+		config: ticketTemplateConfigSchema,
+		deprecated: helpers.boolDef('Denotes if this template is no longer in used', false),
+		properties: ticketTemplatePropSchema,
+		modules: ticketTemplateModSchema,
+
+	},
 };
 
 Schemas.schemas.group = {
@@ -88,15 +152,15 @@ Schemas.schemas.group = {
 			items: {
 				type: 'object',
 				properties: {
-					field: {
+					prop: {
 						type: 'string',
-						description: 'The BIM data field to query',
+						description: 'The BIM data prop to query',
 						example: 'Floor',
 					},
 					operator: {
 						type: 'string',
 						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
-						description: 'Operator value on this field',
+						description: 'Operator value on this prop',
 						example: 'EQUALS',
 					},
 					value: {

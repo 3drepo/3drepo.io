@@ -19,8 +19,8 @@ import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import reducers from '@/v5/store/reducers';
 import { createStore, combineReducers } from 'redux';
 import { times } from 'lodash';
-import { selectCurrentTeamspace, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
-import { teamspaceMockFactory } from './teamspaces.fixtures';
+import { selectCurrentQuota, selectCurrentTeamspace, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { quotaMockFactory, teamspaceMockFactory } from './teamspaces.fixtures';
 
 
 describe('Teamspaces: store', () => {
@@ -33,7 +33,6 @@ describe('Teamspaces: store', () => {
 		getState = store.getState;
 	});
 
-
 	it('should fetch teamspaces successfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.fetchSuccess(mockTeamspaces));
@@ -41,10 +40,24 @@ describe('Teamspaces: store', () => {
 		expect(teamspaces).toEqual(mockTeamspaces);
 	});
 
-	it('should set the current teamspace successfully', () => {
+	it('should set the current teamspace succesfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.setCurrentTeamspace(mockTeamspaces[3].name));
 		const currentTeamspace = selectCurrentTeamspace(getState());
 		expect(currentTeamspace).toEqual(mockTeamspaces[3].name);
 	});
+
+	it('should be loaded and retrievable', () => {
+		const teamspace = teamspaceMockFactory();
+		const quota = quotaMockFactory();
+		
+		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace.name));
+		dispatch(TeamspacesActions.fetchQuotaSuccess(teamspace.name, quota));
+	
+		expect(selectCurrentQuota(getState())).toBe(quota);
+
+		dispatch(TeamspacesActions.setCurrentTeamspace('anotherTeamspace'));
+		expect(selectCurrentQuota(getState())).toBeFalsy();
+	})
+
 });

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isNumber, isString } = require('../../../../utils/helper/typeCheck');
+const { isNumber, isString } = require('../utils/helper/typeCheck');
 const Yup = require('yup');
 
 const operators = {

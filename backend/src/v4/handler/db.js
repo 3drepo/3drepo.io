@@ -349,6 +349,11 @@
 		return collection.updateOne(query, data, options);
 	};
 
+	Handler.replaceOne = async function (database, colName, query, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.replaceOne(query, data);
+	};
+
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);

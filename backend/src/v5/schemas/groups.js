@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Rules = require('./components/rules');
+const Rules = require('./rules');
 
 const Yup = require('yup');
-const { types } = require('../../../utils/helper/yup');
+const { types } = require('../utils/helper/yup');
 
 const Group = {};
 
