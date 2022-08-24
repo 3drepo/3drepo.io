@@ -17,10 +17,15 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
+import { defaults, pick } from 'lodash';
 import { TabContext } from '@mui/lab';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
-import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
+import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
 const PERSONAL_TAB = 'personal';
@@ -39,43 +44,60 @@ const TAB_LABELS = {
 };
 
 type EditProfileModalProps = {
-	open: boolean;
 	user: ICurrentUser;
 	onClose: () => void;
 };
 
-export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps) => {
+type EditProfileUnexpectedErrors = {
+	[PERSONAL_TAB]?: any;
+	[PASSWORD_TAB]?: any;
+	[INTEGRATIONS_TAB]?: any;
+};
+
+export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
 	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
-	const [hideSubmitButton, setHideSubmitButton] = useState(false);
+	const [incorrectPassword, setIncorrectPassword] = useState(false);
+	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
+	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
+	const interceptedError = useErrorInterceptor();
+
+	const defaultPersonalValues = defaults(
+		pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
+		{ countryCode: 'GB', avatarFile: '' },
+	);
+
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
-			case PERSONAL_TAB:
-				return personalSubmitFunction;
-			case PASSWORD_TAB:
-				return passwordSubmitFunction;
-			default:
-				return null;
+			case PERSONAL_TAB: return personalSubmitFunction;
+			case PASSWORD_TAB: return passwordSubmitFunction;
+			default: return null;
 		}
 	};
 
-	const onTabChange = (_, selectedTab) => {
-		setActiveTab(selectedTab);
-		setHideSubmitButton(selectedTab === INTEGRATIONS_TAB);
-	};
+	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
+
+	const personalFormData = useForm<IUpdatePersonalInputs>({
+		resolver: yupResolver(EditProfileUpdatePersonalSchema),
+		context: { alreadyExistingEmails },
+		defaultValues: defaultPersonalValues,
+	});
+
+	const passwordFormData = useForm<IUpdatePasswordInputs>({
+		mode: 'all',
+		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
+		defaultValues: EMPTY_PASSWORDS,
+	});
 
 	useEffect(() => {
-		if (open) {
-			setActiveTab(PERSONAL_TAB);
-			setHideSubmitButton(false);
-		}
-	}, [open]);
+		setUnexpectedErrors({ ...unexpectedErrors, [activeTab]: interceptedError });
+	}, [interceptedError]);
 
 	return (
 		<FormModal
-			open={open}
+			open
 			title={formatMessage(
 				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
@@ -85,9 +107,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			onSubmit={getTabSubmitFunction()}
 			isValid={getTabSubmitFunction()}
 			isSubmitting={isSubmitting}
-			$isPasswordTab={activeTab === PASSWORD_TAB}
 			disableClosing={isSubmitting}
-			hideSubmitButton={hideSubmitButton}
+			hideSubmitButton={activeTab === INTEGRATIONS_TAB}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
@@ -95,23 +116,35 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting} />
 					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
+				<FormProvider {...personalFormData}>
+					<TabPanel value={PERSONAL_TAB} $zeroPadding>
+						<EditProfilePersonalTab
+							alreadyExistingEmails={alreadyExistingEmails}
+							setAlreadyExistingEmails={setAlreadyExistingEmails}
+							setIsSubmitting={setIsSubmitting}
+							setSubmitFunction={setPersonalSubmitFunction}
+							unexpectedError={unexpectedErrors[PERSONAL_TAB]}
+							user={user}
+						/>
+					</TabPanel>
+				</FormProvider>
+				<FormProvider {...passwordFormData}>
+					<TabPanel value={PASSWORD_TAB}>
+						<EditProfilePasswordTab
+							incorrectPassword={incorrectPassword}
+							setIncorrectPassword={setIncorrectPassword}
+							setIsSubmitting={setIsSubmitting}
+							setSubmitFunction={setPasswordSubmitFunction}
+							unexpectedError={unexpectedErrors[PASSWORD_TAB]}
+						/>
+					</TabPanel>
+				</FormProvider>
+				<TabPanel value={INTEGRATIONS_TAB}>
+					<EditProfileIntegrationsTab
+						unexpectedError={unexpectedErrors[INTEGRATIONS_TAB]}
+					/>
+				</TabPanel>
 			</TabContext>
-			<TabPanel hidden={activeTab !== PERSONAL_TAB} $zeroPadding>
-				<EditProfilePersonalTab
-					setIsSubmitting={setIsSubmitting}
-					setSubmitFunction={setPersonalSubmitFunction}
-					user={user}
-				/>
-			</TabPanel>
-			<TabPanel hidden={activeTab !== PASSWORD_TAB}>
-				<EditProfilePasswordTab
-					setIsSubmitting={setIsSubmitting}
-					setSubmitFunction={setPasswordSubmitFunction}
-				/>
-			</TabPanel>
-			<TabPanel hidden={activeTab !== INTEGRATIONS_TAB}>
-				<EditProfileIntegrationsTab />
-			</TabPanel>
 		</FormModal>
 	);
 };

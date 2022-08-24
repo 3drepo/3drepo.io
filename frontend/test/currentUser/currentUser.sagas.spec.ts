@@ -70,7 +70,12 @@ describe('Current User: sagas', () => {
 		const avatarUrl = generateFakeAvatarUrl();
 		const personalData: UpdatePersonalData = { ...userData };
 		const personalDataWithAvatar: UpdatePersonalData = { ...userData, avatarFile };
-		const onError = jest.fn();
+		let onSuccess, onError;
+
+		beforeEach(() => {
+			onSuccess = jest.fn();
+			onError = jest.fn();
+		});
 
 		it('should update user data (without avatar)', async () => {
 			mockServer
@@ -78,11 +83,12 @@ describe('Current User: sagas', () => {
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalData, onError))
+				.dispatch(CurrentUserActions.updatePersonalData(personalData, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
 
@@ -97,13 +103,14 @@ describe('Current User: sagas', () => {
 				.reply(200, { avatarUrl });
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, onError))
+				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }))
 				.put(CurrentUserActions.updateUserSuccess(userData))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 
 			spy.mockClear();
@@ -115,11 +122,12 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(userData, onError))
+				.dispatch(CurrentUserActions.updatePersonalData(userData, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})
 
@@ -131,11 +139,12 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, onError))
+				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})
 	})
