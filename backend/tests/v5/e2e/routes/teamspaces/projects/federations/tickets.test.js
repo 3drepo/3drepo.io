@@ -15,13 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { cloneDeep } = require('lodash');
 const SuperTest = require('supertest');
+const FS = require('fs');
 const ServiceHelper = require('../../../../../helper/services');
-const { src } = require('../../../../../helper/path');
+const { src, image } = require('../../../../../helper/path');
+
+const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { updateOne } = require(`${src}/handler/db`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
-const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 let server;
 let agent;
@@ -38,13 +43,13 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
 
 const models = [
-	ServiceHelper.generateRandomModel({ isFederation: true, viewers: [users.viewer.user] }),
-	ServiceHelper.generateRandomModel({ isFederation: true, viewers: [users.viewer.user] }),
+	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], isFederation: true }),
+	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], isFederation: true }),
 	ServiceHelper.generateRandomModel({ }),
 ];
 
 const modelWithTemplates = models[0];
-const container = models[2];
+const con = models[2];
 
 const templateWithAllModulesAndPresetEnums = {
 	...ServiceHelper.generateTemplate(),
@@ -64,12 +69,21 @@ const templateWithAllModulesAndPresetEnums = {
 	modules: Object.values(presetModules).map((type) => ({ type, properties: [] })),
 };
 
+const templateWithImage = {
+	...ServiceHelper.generateTemplate(),
+	properties: [{
+		name: ServiceHelper.generateRandomString(),
+		type: propTypes.IMAGE,
+	}],
+};
+
 const ticketTemplates = [
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
 	templateWithAllModulesAndPresetEnums,
+	templateWithImage,
 ];
 
 const setupData = async () => {
@@ -96,7 +110,7 @@ const testGetAllTemplates = () => {
 		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, users.nobody.apiKey],
 		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
 		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-		['the federation provided is a container', false, templates.federationNotFound, project.id, container._id, users.tsAdmin.apiKey],
+		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, users.tsAdmin.apiKey],
 		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
 		['should provide the list of templates that are not deprecated', true,
 			{ templates: ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated ? []
@@ -111,6 +125,7 @@ const testGetAllTemplates = () => {
 			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 			const endpoint = route(key, projectId, modelId);
 			const res = await agent.get(`${endpoint}${showDeprecated ? '&showDeprecated=true' : ''}`).expect(expectedStatus);
+
 			if (success) {
 				expect(res.body).toEqual(expectedOutput);
 			} else {
@@ -139,7 +154,7 @@ const testGetTemplateDetails = () => {
 		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
 		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
 		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-		['the federation provided is a container', false, templates.federationNotFound, project.id, container._id, undefined, users.tsAdmin.apiKey],
+		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, undefined, users.tsAdmin.apiKey],
 		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
 		['the template id is invalid', false, templates.templateNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
 		['should return the full template', true, generateFullSchema(ticketTemplates[0]), undefined, undefined, undefined, users.tsAdmin.apiKey, true],
@@ -159,15 +174,17 @@ const testGetTemplateDetails = () => {
 	});
 };
 
-const testAddTicket = () => {
-	const route = (key, projectId = project.id, modelId = modelWithTemplates._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets${key ? `?key=${key}` : ''}`;
+const addTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets${key ? `?key=${key}` : ''}`;
 
+const getTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
+
+const testAddTicket = () => {
 	describe.each([
 		['the user does not have a valid session', false, templates.notLoggedIn],
 		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, users.nobody.apiKey],
 		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
 		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-		['the federation provided is a container', false, templates.federationNotFound, project.id, container._id, users.tsAdmin.apiKey],
+		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, users.tsAdmin.apiKey],
 		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
 		['the templateId provided does not exist', false, templates.templateNotFound, undefined, undefined, users.tsAdmin.apiKey, { type: ServiceHelper.generateRandomString() }],
 		['the templateId is not provided', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { type: undefined }],
@@ -180,16 +197,177 @@ const testAddTicket = () => {
 			const payload = { ...ServiceHelper.generateTicket(ticketTemplates[0]), ...payloadChanges };
 
 			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-			const endpoint = route(key, projectId, modelId);
+			const endpoint = addTicketRoute(key, projectId, modelId);
 
 			const res = await agent.post(endpoint).send(payload).expect(expectedStatus);
 
 			if (success) {
-				// TODO : should check ticket is saved (when we have coded in the Get ticket function)
 				expect(res.body._id).not.toBeUndefined();
+
+				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey,
+					project.id, modelWithTemplates._id, res.body._id);
+				await agent.get(getEndpoint).expect(templates.ok.status);
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}
+		});
+	});
+};
+
+const testGetTicketResource = () => {
+	const route = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId, resourceId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/resources/${resourceId}${key ? `?key=${key}` : ''}`;
+	describe('Get ticket resource', () => {
+		let ticketID;
+		let resourceID;
+
+		beforeAll(async () => {
+			const ticket = {
+				title: ServiceHelper.generateRandomString(),
+				type: templateWithImage._id,
+				properties: {
+					[templateWithImage.properties[0].name]: FS.readFileSync(image, { encoding: 'base64' }),
+				},
+			};
+			const endpoint = addTicketRoute(users.tsAdmin.apiKey);
+			const res = await agent.post(endpoint).send(ticket);
+			ticketID = res.body._id;
+
+			const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticketID);
+			const { body } = await agent.get(getEndpoint);
+			resourceID = body.properties[templateWithImage.properties[0].name];
+		});
+
+		describe.each([
+			['the user does not have a valid session', templates.notLoggedIn],
+			['the user is not a member of the teamspace', templates.teamspaceNotFound, undefined, undefined, undefined, undefined, users.nobody.apiKey],
+			['the project does not exist', templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, undefined, users.tsAdmin.apiKey],
+			['the federation does not exist', templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+			['the federation provided is a container', templates.federationNotFound, project.id, con._id, undefined, undefined, users.tsAdmin.apiKey],
+			['the user does not have access to the federation', templates.notAuthorized, undefined, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+			['the ticket does not exist', templates.fileNotFound, undefined, undefined, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+			['the resource does not exist', templates.fileNotFound, undefined, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
+		])('Error checks', (desc, expectedOutput, projectId, modelId, ticket, resource, key) => {
+			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
+				const endpoint = route(key, projectId, modelId, ticket ?? ticketID, resource ?? resourceID);
+
+				const res = await agent.get(endpoint).expect(expectedOutput.status);
+				expect(res.body.code).toEqual(expectedOutput.code);
+			});
+		});
+
+		test('should get the resource successfully given the correct resource id', async () => {
+			const endpoint = route(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticketID, resourceID);
+			await agent.get(endpoint).expect(templates.ok.status);
+		});
+	});
+};
+
+const testGetTicket = () => {
+	describe('Get ticket', () => {
+		const deprecatedPropName = ServiceHelper.generateRandomString();
+		const deprecatedModule = ServiceHelper.generateRandomString();
+		const moduleName = ServiceHelper.generateRandomString();
+
+		const templateToUse = {
+			...ServiceHelper.generateTemplate(),
+			properties: [
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.TEXT,
+				},
+				{
+					name: deprecatedPropName,
+					type: propTypes.TEXT,
+					deprecated: true,
+				},
+			],
+			modules: [
+				{
+					name: moduleName,
+					properties: [
+						{
+							name: ServiceHelper.generateRandomString(),
+							type: propTypes.TEXT,
+						},
+						{
+							name: deprecatedPropName,
+							type: propTypes.TEXT,
+							deprecated: true,
+						},
+					],
+				},
+				{
+					name: deprecatedModule,
+					properties: [
+						{
+							name: deprecatedPropName,
+							type: propTypes.TEXT,
+							deprecated: true,
+						},
+					],
+					deprecated: true,
+				},
+			],
+		};
+		let ticket; let
+			ticketWithDepData;
+		beforeAll(async () => {
+			await ServiceHelper.db.createTemplates(teamspace, [templateToUse]);
+			ticket = ServiceHelper.generateTicket(templateToUse);
+			const endpoint = addTicketRoute(users.tsAdmin.apiKey);
+
+			const res = await agent.post(endpoint).send(ticket);
+			ticket._id = res.body._id;
+
+			ticketWithDepData = cloneDeep(ticket);
+
+			ticketWithDepData.properties[deprecatedPropName] = ServiceHelper.generateRandomString();
+			ticketWithDepData.modules[moduleName][deprecatedPropName] = ServiceHelper.generateRandomString();
+			ticketWithDepData.modules[deprecatedModule] = {
+				[deprecatedPropName]: ServiceHelper.generateRandomString(),
+			};
+
+			const depFieldsToAdd = {
+				[`properties.${deprecatedPropName}`]: ticketWithDepData.properties[deprecatedPropName],
+				[`modules.${moduleName}.${deprecatedPropName}`]: ticketWithDepData.modules[moduleName][deprecatedPropName],
+				[`modules.${deprecatedModule}`]: ticketWithDepData.modules[deprecatedModule],
+			};
+
+			await updateOne(teamspace, 'tickets', { _id: stringToUUID(ticket._id) }, { $set: depFieldsToAdd });
+		});
+
+		describe.each([
+			['the user does not have a valid session', templates.notLoggedIn],
+			['the user is not a member of the teamspace', templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
+			['the project does not exist', templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+			['the federation does not exist', templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+			['the federation provided is a container', templates.federationNotFound, project.id, con._id, undefined, users.tsAdmin.apiKey],
+			['the user does not have access to the federation', templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+			['the ticket does not exist', templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
+		])('Error checks', (desc, expectedOutput, projectId, modelId, ticketId, key) => {
+			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
+				const endpoint = getTicketRoute(key, projectId, modelId, ticketId ?? ticket._id);
+				const res = await agent.get(endpoint).expect(expectedOutput.status);
+				expect(res.body.code).toEqual(expectedOutput.code);
+			});
+		});
+
+		test('Should get ticket with valid id', async () => {
+			const endpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, ticket._id);
+			const { body: ticketOut } = await agent.get(endpoint).expect(templates.ok.status);
+			const expectedTicket = cloneDeep(ticket);
+			expectedTicket.number = ticketOut.number;
+			expectedTicket.properties = { ...ticketOut.properties, ...expectedTicket.properties };
+			expect(ticketOut).toEqual(expectedTicket);
+		});
+
+		test('Should get ticket along with deprecated fields if showDeprecated is set to true', async () => {
+			const endpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, ticket._id);
+			const { body: ticketOut } = await agent.get(`${endpoint}&showDeprecated=true`).expect(templates.ok.status);
+			const expectedTicket = cloneDeep(ticketWithDepData);
+			expectedTicket.number = ticketOut.number;
+			expectedTicket.properties = { ...ticketOut.properties, ...expectedTicket.properties };
+			expect(ticketOut).toEqual(expectedTicket);
 		});
 	});
 };
@@ -205,4 +383,6 @@ describe('E2E routes/teamspaces/projects/federations/tickets', () => {
 	testGetAllTemplates();
 	testGetTemplateDetails();
 	testAddTicket();
+	testGetTicket();
+	testGetTicketResource();
 });

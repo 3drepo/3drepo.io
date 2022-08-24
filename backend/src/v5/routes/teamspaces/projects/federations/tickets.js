@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addTicket, getTicketById, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/federations');
 const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
+const { respond, writeStreamRespond } = require('../../../../utils/responder');
+const { serialiseFullTicketTemplate, serialiseTicket } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { addTicket } = require('../../../../processors/teamspaces/projects/models/federations');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
-const { respond } = require('../../../../utils/responder');
-const { serialiseFullTicketTemplate } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templates } = require('../../../../utils/responseCodes');
 
 const createTicket = async (req, res) => {
@@ -46,6 +46,39 @@ const getAllTemplates = async (req, res) => {
 
 		respond(req, res, templates.ok,
 			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicket = async (req, res, next) => {
+	const { teamspace, project, federation, ticket } = req.params;
+
+	try {
+		req.ticket = await getTicketById(teamspace, project, federation, ticket);
+		req.showDeprecated = req.query.showDeprecated === 'true';
+
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketResource = async (req, res) => {
+	const { teamspace, project, federation, ticket, resource } = req.params;
+
+	try {
+		const { readStream, size, mimeType } = await getTicketResourceAsStream(
+			teamspace,
+			project,
+			federation,
+			ticket,
+			resource,
+		);
+
+		writeStreamRespond(req, res, templates.ok, readStream, UUIDToString(resource), size, { mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -246,6 +279,131 @@ const establishRoutes = () => {
 	 *                   format: uuid
 	 */
 	router.post('/', hasCommenterAccessToFederation, validateNewTicket, createTicket);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
+	 *   get:
+	 *     description: Get ticket by ID
+	 *     tags: [Federations]
+	 *     operationId: GetTicket
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+ 	 *       - name: showDeprecated
+	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the ticket as a json object
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               description: schema is subject to the template the ticket follows
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: id of the ticket
+	 *                 title:
+	 *                   type: string
+	 *                   description: ticket title
+	 *                   example: "Missing door"
+	 *                 number:
+	 *                   type: number
+	 *                   description: ticket number
+	 *                 properties:
+	 *                   type: object
+	 *                   description: ticket properties
+	 *                 modules:
+	 *                   type: object
+	 *                   description: ticket modules and their properties
+	 *
+	 */
+	router.get('/:ticket', hasReadAccessToFederation, getTicket, serialiseTicket);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}/resources/{resource}:
+	 *   get:
+	 *     description: Get the binary resource associated with the given ticket
+	 *     tags: [Federations]
+	 *     operationId: getTicketResource
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - name: resource
+	 *         description: Resource ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the binary file
+	 *         content:
+	 *           application/octet-stream:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
+	router.get('/:ticket/resources/:resource', hasReadAccessToFederation, getTicketResource);
 
 	return router;
 };
