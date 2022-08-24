@@ -173,6 +173,7 @@ export const SettingsForm = ({
 			fetchSettings(teamspace, project, containerOrFederation._id);
 			fetchViews(teamspace, project, containerOrFederation._id);
 			reset(getDefaultValues(containerOrFederation, isContainer));
+			setAlreadyExistingNames([]);
 		}
 	}, [open]);
 
