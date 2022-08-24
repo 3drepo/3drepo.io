@@ -15,42 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isNetworkError } from '@/v5/validation/errors.helpers';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { NetworkError } from './networkError/networkError.component';
+import { NetworkError } from '../networkError/networkError.component';
 import { UnexpectedError } from '../unexpectedError/unexpectedError.component';
 
-type UnhandledErrorProps = {
+export type UnhandledErrorProps = {
+	error: any;
 	expectedErrorValidators?: Array<(err) => boolean>;
 	className?: string;
 };
 
-export const UnhandledError = ({ expectedErrorValidators = [], className }: UnhandledErrorProps) => {
-	const [showNetworkError, setShowNetworkError] = useState(false);
-	const [showUnexpectedError, setShowUnexpectedError] = useState(false);
-	const [interceptor, setInterceptor] = useState(null);
-
+export const UnhandledError = ({
+	expectedErrorValidators = [],
+	className,
+	error,
+}: UnhandledErrorProps) => {
 	const isExpectedError = (err) => expectedErrorValidators.some((test) => test(err));
 
-	const onMount = () => {
-		setInterceptor(axios.interceptors.response.use(
-			(res) => res,
-			(err) => {
-				setShowNetworkError(isNetworkError(err));
-				setShowUnexpectedError(!isExpectedError(err));
-				return Promise.reject(err);
-			},
-		));
-	};
-
-	const onUnmount = () => axios.interceptors.request.eject(interceptor);
-
-	useEffect(() => {
-		onMount();
-		return onUnmount;
-	}, []);
-
-	if (showNetworkError) return (<NetworkError className={className} />);
-	if (showUnexpectedError) return (<UnexpectedError className={className} />);
+	if (!error) return (<></>);
+	if (isNetworkError(error)) return (<NetworkError className={className} />);
+	if (!isExpectedError(error)) return (<UnexpectedError className={className} />);
 	return (<></>);
 };

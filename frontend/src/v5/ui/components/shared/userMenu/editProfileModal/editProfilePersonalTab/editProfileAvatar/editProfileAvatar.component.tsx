@@ -37,11 +37,12 @@ type EditProfilePersonalTabProps = {
 };
 
 export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
-	const { getValues, formState: { errors }, control } = useFormContext();
+	const { setValue, getValues, formState: { errors }, control } = useFormContext();
 
 	const addImage = (event, field) => {
 		if (!event.target.files.length) return;
 		const file = event.target.files[0];
+		setValue('avatarFile', file);
 		field.onChange(file);
 	};
 
