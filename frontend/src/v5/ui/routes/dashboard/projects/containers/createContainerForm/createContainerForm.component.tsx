@@ -79,7 +79,10 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 		ContainersActionsDispatchers.createContainer(teamspace, project, body, onClickClose, onSubmitError);
 	};
 
-	useEffect(reset, [open]);
+	useEffect(() => {
+		reset();
+		setAlreadyExistingNames([]);
+	}, [open]);
 
 	return (
 		<FormModal

@@ -64,7 +64,14 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [includedContainers, setIncludedContainers] = useState([]);
 
-	useEffect(() => (open ? setModalPhase('settings') : reset()), [open]);
+	useEffect(() => {
+		if (open) {
+			setModalPhase('settings');
+		} else {
+			reset();
+		}
+		setAlreadyExistingNames([]);
+	}, [open]);
 
 	const onSubmitError = (err) => {
 		setIsSubmitting(false);
