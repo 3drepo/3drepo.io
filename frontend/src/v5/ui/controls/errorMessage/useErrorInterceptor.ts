@@ -14,15 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormattedMessage } from 'react-intl';
-import { ErrorMessage } from '../../errorMessage.component';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
-type NetworkErrorProps = {
-	className?: string;
+export const useErrorInterceptor = () => {
+	const [interceptor, setInterceptor] = useState(null);
+	const [error, setError] = useState(null);
+
+	const handleSuccess = (res) => {
+		setError(null);
+		return res;
+	};
+
+	const handleError = (err) => {
+		setError(err);
+		return Promise.reject(err);
+	};
+
+	const onMount = () => {
+		setInterceptor(axios.interceptors.response.use(
+			handleSuccess,
+			handleError,
+		));
+	};
+
+	const onUnmount = () => axios.interceptors.request.eject(interceptor);
+
+	useEffect(() => {
+		onMount();
+		return onUnmount;
+	}, []);
+
+	return error;
 };
-
-export const NetworkError = ({ className }: NetworkErrorProps) => (
-	<ErrorMessage className={className}>
-		<FormattedMessage id="errorMessage.networkError" defaultMessage="Network Error" />
-	</ErrorMessage>
-);
