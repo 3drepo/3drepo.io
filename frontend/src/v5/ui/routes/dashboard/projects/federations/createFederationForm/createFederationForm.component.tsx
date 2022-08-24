@@ -26,7 +26,7 @@ import { NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
-import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { EditFederation } from '../editFederationModal/editFederation';
 import { CreateFederationFormSettings } from './createFederationSettings';
 
@@ -132,7 +132,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 					onContainersChange={setIncludedContainers}
 				/>
 			)}
-			<UnhandledError expectedErrorValidators={[nameAlreadyExists]} />
+			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };

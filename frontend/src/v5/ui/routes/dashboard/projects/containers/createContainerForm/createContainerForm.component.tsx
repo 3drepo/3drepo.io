@@ -28,7 +28,7 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
-import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface ICreateContainer {
@@ -143,7 +143,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
 				formError={errors.code}
 			/>
-			<UnhandledError expectedErrorValidators={[nameAlreadyExists]} />
+			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };

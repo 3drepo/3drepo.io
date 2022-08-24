@@ -32,7 +32,7 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
-import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -348,7 +348,7 @@ export const SettingsForm = ({
 					required
 				/>
 			</FlexContainer>
-			<UnhandledError expectedErrorValidators={[nameAlreadyExists]} />
+			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };
