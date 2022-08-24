@@ -104,7 +104,7 @@ const imageTest = async (isView) => {
 
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
 
-	const meta = { teamspace, project, model };
+	const meta = { teamspace, project, model, ticket: expectedOutput };
 
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
 		teamspace, TICKETS_RESOURCES_COL, propRef, propBuffer, meta,

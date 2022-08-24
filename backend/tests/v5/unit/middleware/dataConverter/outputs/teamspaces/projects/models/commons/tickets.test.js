@@ -237,6 +237,7 @@ const testSerialiseTicket = () => {
 		test('Should cast uuids correctly', async () => {
 			const propName = generateRandomString();
 			const propName2 = generateRandomString();
+			const imageProp = generateRandomString();
 			const modName = generateRandomString();
 			const template = {
 				properties: [
@@ -247,6 +248,10 @@ const testSerialiseTicket = () => {
 					{
 						name: propName2,
 						type: propTypes.VIEW,
+					},
+					{
+						name: imageProp,
+						type: propTypes.IMAGE,
 					},
 				],
 				modules: [
@@ -260,6 +265,10 @@ const testSerialiseTicket = () => {
 							name: propName2,
 							type: propTypes.VIEW,
 						},
+						{
+							name: imageProp,
+							type: propTypes.IMAGE,
+						},
 						],
 					},
 				],
@@ -272,6 +281,7 @@ const testSerialiseTicket = () => {
 				_id: generateUUID(),
 				type: generateRandomString(),
 				properties: {
+					[imageProp]: generateUUID(),
 					[propName2]: {
 						state: {},
 					},
@@ -288,6 +298,7 @@ const testSerialiseTicket = () => {
 								transformGroups: times(10, () => generateUUID()),
 							},
 						},
+						[imageProp]: generateUUID(),
 						[generateRandomString()]: generateRandomString(),
 					},
 				},
@@ -310,6 +321,9 @@ const testSerialiseTicket = () => {
 				res.modules[modName][propName].state[fieldName] = res.modules[modName][propName].state[fieldName]
 					.map(UUIDToString);
 			});
+
+			res.properties[imageProp] = UUIDToString(res.properties[imageProp]);
+			res.modules[modName][imageProp] = UUIDToString(res.modules[modName][imageProp]);
 
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);
 		});
