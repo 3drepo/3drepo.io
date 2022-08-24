@@ -44,6 +44,8 @@ const defaultValues = {
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
 	const methods = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
@@ -65,6 +67,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	useEffect(() => (open ? setModalPhase('settings') : reset()), [open]);
 
 	const onSubmitError = (err) => {
+		setIsSubmitting(false);
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
 			setModalPhase('settings');
@@ -79,6 +82,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const onClickContinue = (): void => setModalPhase('edit');
 
 	const onClickSubmit = (newFederation: NewFederation): void => {
+		setIsSubmitting(true);
 		FederationsActionsDispatchers.createFederation(
 			teamspace,
 			project,
@@ -108,6 +112,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			isValid={isValid}
 			open={open}
 			onClickClose={onClickClose}
+			isSubmitting={isSubmitting}
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
 		>
 			{modalPhase === 'settings' ? (
