@@ -25,6 +25,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { EditFederation } from '../editFederationModal/editFederation';
 import { CreateFederationFormSettings } from './createFederationSettings';
 
@@ -41,15 +43,18 @@ const defaultValues = {
 };
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
+	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const methods = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(NewFederationSettingsSchema),
+		context: { alreadyExistingNames },
 	});
 	const {
 		handleSubmit,
 		getValues,
 		reset,
+		trigger,
 		formState: { isValid },
 	} = methods;
 
@@ -58,6 +63,14 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const [includedContainers, setIncludedContainers] = useState([]);
 
 	useEffect(() => (open ? setModalPhase('settings') : reset()), [open]);
+
+	const onSubmitError = (err) => {
+		if (nameAlreadyExists(err)) {
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			setModalPhase('settings');
+			trigger('name');
+		}
+	};
 
 	const onClickBack = (): void => {
 		setModalPhase('settings');
@@ -71,8 +84,9 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			project,
 			newFederation,
 			includedContainers.map((container) => container._id),
+			onClickClose,
+			onSubmitError,
 		);
-		onClickClose();
 	};
 
 	const SettingsModalProps = {
@@ -106,6 +120,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 					onContainersChange={setIncludedContainers}
 				/>
 			)}
+			<UnhandledError expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };

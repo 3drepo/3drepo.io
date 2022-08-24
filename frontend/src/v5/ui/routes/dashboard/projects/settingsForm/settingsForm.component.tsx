@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
@@ -31,6 +31,8 @@ import { ShareTextField } from '@controls/shareTextField';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -129,6 +131,8 @@ type ISettingsForm = {
 		project: string,
 		containerOrFederationId: string,
 		settings: ContainerSettings | FederationSettings,
+		onSuccess: () => void,
+		onError: (error) => void,
 	) => void;
 };
 
@@ -142,11 +146,14 @@ export const SettingsForm = ({
 	updateSettings,
 	onClose,
 }: ISettingsForm) => {
+	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const DEFAULT_VALUES = getDefaultValues(containerOrFederation, isContainer) as any;
 	const {
 		handleSubmit,
 		reset,
 		watch,
+		getValues,
+		trigger,
 		control,
 		formState,
 		formState: { errors, dirtyFields },
@@ -154,6 +161,7 @@ export const SettingsForm = ({
 		mode: 'onChange',
 		resolver: yupResolver(settingsSchema),
 		defaultValues: DEFAULT_VALUES,
+		context: { alreadyExistingNames },
 	});
 
 	const currentUnit = watch('unit');
@@ -164,14 +172,16 @@ export const SettingsForm = ({
 		if (open) {
 			fetchSettings(teamspace, project, containerOrFederation._id);
 			fetchViews(teamspace, project, containerOrFederation._id);
-		}
-	}, [open]);
-
-	useEffect(() => {
-		if (open) {
 			reset(getDefaultValues(containerOrFederation, isContainer));
 		}
 	}, [open]);
+
+	const onSubmitError = (err) => {
+		if (nameAlreadyExists(err)) {
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			trigger('name');
+		}
+	};
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
@@ -190,8 +200,9 @@ export const SettingsForm = ({
 			project,
 			containerOrFederation._id,
 			settings,
+			onClose,
+			onSubmitError,
 		);
-		onClose();
 	};
 
 	const fieldsHaveChanged = Object.keys(dirtyFields).length > 0;
@@ -336,6 +347,7 @@ export const SettingsForm = ({
 					required
 				/>
 			</FlexContainer>
+			<UnhandledError expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };
