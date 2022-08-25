@@ -21,11 +21,12 @@ import { StyledIconButton } from './ellipsisButton.styles';
 
 export type IEllipsisButton = IconButtonProps & {
 	isOn?: boolean;
+	variant?: 'primary' | 'secondary';
 };
 
 export const EllipsisButton = forwardRef(
-	({ isOn, ...props }: IEllipsisButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
-		<StyledIconButton $isOn={isOn} {...props} ref={ref}>
+	({ isOn, variant = 'primary', ...props }: IEllipsisButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
+		<StyledIconButton variant={variant} $isOn={isOn} {...props} ref={ref}>
 			<EllipsisIcon />
 		</StyledIconButton>
 	),

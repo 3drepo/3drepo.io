@@ -40,6 +40,10 @@ module.exports = {
           '@components': PATHS.COMPONENTS,
           '@controls': PATHS.CONTROLS,
         }
+      },
+      module: {
+        ...config.module,
+        strictExportPresence: true,
       }
     };
 

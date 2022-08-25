@@ -742,8 +742,6 @@ async function _createAccounts(roles, userName) {
 	roles.forEach(async role => {
 		promises.push(User.findByUserName(role.db).then(async user => {
 			if (!user) {
-				// skip missing user account
-				systemLogger.logError("User account (" + role.db + ") not found; skipping...");
 				return;
 			}
 
@@ -754,7 +752,7 @@ async function _createAccounts(roles, userName) {
 				// Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-				const hasAvatar = await fileExists("admin", "avatars.ref" , userName);
+				const hasAvatar = await fileExists("admin", "avatars.ref" , user.user);
 				const account = {
 					account: user.user,
 					firstName: user.customData.firstName,

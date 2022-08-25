@@ -49,6 +49,7 @@ export const Breadcrumb: typeof Link = styled(Button).attrs({
 
 export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 	variant: 'text',
+	component: 'div',
 })`
 	&& {
 		${({ theme }) => theme.typography.h3};
@@ -56,7 +57,7 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 		max-width: 100%;
 		padding-right: 9px;
 		margin-right: 0;
-		${({ secondary }) => secondary && css`
+		${({ $secondary }) => $secondary && css`
 		font-weight: ${FONT_WEIGHT.SLIM}
 		`};
 	}

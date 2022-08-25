@@ -47,6 +47,7 @@ import {
 interface IProps {
 	viewer: any;
 	className?: string;
+	currentTeamspace: string;
 	modelSettings: any;
 	isModelPending: boolean;
 	isPresentationActive: boolean;
@@ -71,6 +72,7 @@ interface IProps {
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
 	fetchData: (teamspace, model) => void;
+	fetchTeamspaces: (username) => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
@@ -112,7 +114,14 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId, presenter }, match: { params }, viewer, leftPanels } = this.props;
+		const {
+			queryParams: { issueId, riskId, presenter },
+			match: { params },
+			viewer,
+			leftPanels,
+			currentTeamspace,
+			fetchTeamspaces,
+		} = this.props;
 
 		viewer.init();
 
@@ -133,6 +142,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		if (presenter) {
 			this.props.joinPresentation(presenter);
 		}
+
+		fetchTeamspaces(currentTeamspace);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {

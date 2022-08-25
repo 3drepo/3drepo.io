@@ -38,6 +38,10 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 
 		${BodyWrapper} .simplebar-content {
 			overflow: hidden;
+
+			${Row} ${Name} {
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
 		
 			${Row}.selected {
 

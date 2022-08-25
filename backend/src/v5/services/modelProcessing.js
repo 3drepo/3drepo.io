@@ -109,26 +109,27 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 };
 
 ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
-	const corId = generateUUIDString();
+	const revId = generateUUIDString();
 	try {
 		const data = {
 			...info,
 			database: teamspace,
 			project: federation,
 			subProjects: info.containers.map((container) => ({ database: teamspace, project: container })),
+			revId,
 		};
 		delete data.containers;
 
-		const filePath = `${SHARED_SPACE_TAG}/${corId}/obj.json`;
+		const filePath = `${SHARED_SPACE_TAG}/${revId}/obj.json`;
 
-		await mkdir(`${sharedDir}/${corId}`);
-		await writeFile(`${sharedDir}/${corId}/obj.json`, JSON.stringify(data));
+		await mkdir(`${sharedDir}/${revId}`);
+		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
 
-		await queueMessage(jobq, corId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId, status: 'queued' });
+		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId: revId, status: 'queued' });
 	} catch (err) {
 		// Clean up files we created
-		rm(`${sharedDir}/${corId}/obj.json`).catch((cleanUpErr) => {
+		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
 		});
 

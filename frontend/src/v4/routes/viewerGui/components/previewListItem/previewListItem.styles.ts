@@ -44,7 +44,7 @@ export const ArrowButton = styled(Button)`
 		right: 0;
 		top: 0;
 		width: 28px;
-		min-width: 28px;
+		min-width: 37px;
 		height: 100%;
 		display: flex;
 		align-items: center;
@@ -113,6 +113,9 @@ export const Name = styled(Typography)`
 		overflow: hidden;
 		text-overflow: ellipsis;
 		line-height: 1;
+	}
+	&:hover {
+		text-decoration: underline;
 	}
 `;
 

@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export default (props) => (
-	// eslint-disable-next-line react/destructuring-assignment
-	<svg width="18" height="18" viewBox="0 0 18 18" className={props.className} xmlns="http://www.w3.org/2000/svg">
+export default ({ className = '', borderColor }) => (
+	<svg width="16" height="16" className={className} style={{ borderRadius: 0 }} viewBox="0 0 16 16" stroke="none" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path
-			id="rect2"
-			fill="currentColor"
-			d="M 3 0 C 1.338 0 0 1.338 0 3 L 0 15 C 0 16.662 1.338 18 3 18 L 15 18 C 16.662 18 18 16.662 18 15 L 18 3 C 18 1.338 16.662 0 15 0 L 3 0 z M 5 8 L 13 8 C 13.554 8 14 8.446 14 9 C 14 9.554 13.554 10 13 10 L 5 10 C 4.446 10 4 9.554 4 9 C 4 8.446 4.446 8 5 8 z "
+			d="M 2,0 C 0.90064972,0 0,0.90064972 0,2 v 12 c 0,1.09935 0.90064972,2 2,2 h 12 c 1.09935,0 2,-0.90065 2,-2 V 2 C 16,0.90064972 15.09935,0 14,0 Z m 0,1 h 12 c 0.562648,0 1,0.4373519 1,1 v 12 c 0,0.562648 -0.437352,1 -1,1 H 2 C 1.4373519,15 1,14.562648 1,14 V 2 C 1,1.4373519 1.4373519,1 2,1 Z"
+			fill={borderColor}
 		/>
+		<rect x="4" y="4" width="8" height="8" fill="currentColor" strokeWidth="0" />
 	</svg>
 );

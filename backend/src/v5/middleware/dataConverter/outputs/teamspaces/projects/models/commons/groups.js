@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { castSchema } = require('../../../../../schemas/groups');
+const { castSchema } = require('../../../../../../../schemas/groups');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 

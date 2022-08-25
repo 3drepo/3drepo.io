@@ -21,17 +21,15 @@ import { createSelector } from 'reselect';
 
 const selectCurrentUserDomain = (state) => ({...state.currentUser, ...(isV5() && state.currentUser2)});
 
-const selectCurrentTeampspaceV5 = createSelector(
-	// @ts-ignore
-	(state) => state.teamspaces2,
-	(state) => state.currentTeamspace
+const selectCurrentTeamspaceV5 = createSelector(
+	selectCurrentUserDomain, (state) => state.currentUser.username
 );
 
 const selectCurrentTeamspaceV4 = createSelector(
 	selectCurrentUserDomain, (state) => state.currentTeamspace
 );
 
-export const selectCurrentTeamspace = isV5() ? selectCurrentTeampspaceV5 : selectCurrentTeamspaceV4;
+export const selectCurrentTeamspace = isV5() ? selectCurrentTeamspaceV5 : selectCurrentTeamspaceV4;
 
 export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {}

@@ -250,14 +250,16 @@ const subscribeToV5Events = () => {
 
 	});
 
-	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, ({ ids }) => {
-		const msg = {
-			event: "message",
-			recipients: ids.map((sessionId) => `sessions::${sessionId}`),
-			data: { event: "loggedOut", reason: "You have logged in else where" }
-		};
+	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, ({ ids, elective }) => {
+		if(!elective) {
+			const msg = {
+				event: "message",
+				recipients: ids.map((sessionId) => `sessions::${sessionId}`),
+				data: { event: "loggedOut", reason: "You have logged in else where" }
+			};
 
-		return Queue.insertEventMessage(msg);
+			return Queue.insertEventMessage(msg);
+		}
 	});
 
 };

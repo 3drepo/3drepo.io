@@ -15,6 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AxiosResponse } from 'axios';
 import api from './default';
 
 export const fetchProjects = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects`);
+
+export const createProject = async (teamspace: string, projectName: string): Promise<any> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects`, { name: projectName });
+	return data._id;
+};
+
+export const deleteProject = (teamspace: string, projectId: string): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}`)
+);

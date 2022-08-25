@@ -16,7 +16,6 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { CircleButton as Button } from '@controls/circleButton';
-import IntercomIcon from '@assets/icons/intercom.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
 
 export default {
@@ -36,19 +35,8 @@ export default {
 	},
 } as ComponentMeta<typeof Button>;
 
-const TemplateIntercom: ComponentStory<typeof Button> = (args) => <Button {...args}><IntercomIcon /></Button>;
 const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
 	<Button {...args}><NotificationsIcon /></Button>);
-
-export const IntercomMain = TemplateIntercom.bind({});
-IntercomMain.args = {
-	variant: 'main',
-};
-
-export const IntercomContrast = TemplateIntercom.bind({});
-IntercomContrast.args = {
-	variant: 'contrast',
-};
 
 export const NotificationsMain = TemplateNotifications.bind({});
 NotificationsMain.args = {

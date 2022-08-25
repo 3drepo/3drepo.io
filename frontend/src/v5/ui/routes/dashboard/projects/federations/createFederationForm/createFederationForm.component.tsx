@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
-import { NewFederationSettingsSchema } from '@/v5/validation/schemes';
+import { NewFederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -35,7 +35,9 @@ interface ICreateFederation {
 
 const defaultValues = {
 	name: '',
+	desc: '',
 	unit: 'mm',
+	code: '',
 };
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
@@ -55,15 +57,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [includedContainers, setIncludedContainers] = useState([]);
 
-	const closeAndReset = (): void => {
-		onClickClose();
-		reset();
-		setModalPhase('settings');
-	};
-
-	useEffect(() => {
-		if (!open) closeAndReset();
-	}, [open, reset]);
+	useEffect(() => (open ? setModalPhase('settings') : reset()), [open]);
 
 	const onClickBack = (): void => {
 		setModalPhase('settings');
@@ -78,7 +72,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			newFederation,
 			includedContainers.map((container) => container._id),
 		);
-		closeAndReset();
+		onClickClose();
 	};
 
 	const SettingsModalProps = {
@@ -99,7 +93,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 		<FormModal
 			isValid={isValid}
 			open={open}
-			onClickClose={closeAndReset}
+			onClickClose={onClickClose}
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
 		>
 			{modalPhase === 'settings' ? (

@@ -11,6 +11,7 @@ Note: This is currently a work in progress, new events will be added as they are
   * [Leaving a room](#leaving-a-room)
   * [Room types](#room-types)
     + [User Notifications](#user-notifications)
+    + [Project notifications](#project-notifications)
     + [Container/Federation notifications](#containerfederation-notifications)
 - [Events](#events)
   * [General Events](#general-events)
@@ -19,7 +20,15 @@ Note: This is currently a work in progress, new events will be added as they are
     + [logged out event](#logged-out-event)
   * [Container/Federation events](#containerfederation-events)
     + [Container Settings Update](#container-settings-update)
+    + [Container New Revision](#container-new-revision)
+    + [Container Revision Update](#container-revision-update)
+    + [Container Removed](#container-removed)
     + [Federation Settings Update](#federation-settings-update)
+    + [Federation New Revision](#federation-new-revision)
+    + [Federation Removed](#federation-removed)
+  * [Project events](#project-events)
+    + [New Container](#new-container)
+    + [New Federation](#new-federation)
 
 ## Connecting to the service
 You will need to use utilise a [Socket.io client library](https://socket.io/docs/v4/client-installation/) to connect to this service. Please check our [package.json](../../../../package.json) to see which version of Socket.io we are currently using.
@@ -99,10 +108,14 @@ To leave a room (unsubscribe to that type of events), emit a `leave` event with 
   - Event parameters: `{ notifications: true }`
   - Description: Subscribe to new notifications sent to the authenticated user (e.g. import failures/success, issues assigned to user)
 
+#### Project notifications
+  - Event parameters: `{ teamspace: "<name of teamspace>", project: "<project id>" }`
+  - Description: Subscribe to new activity within the project (e.g. new container, new federation)
+
 #### Container/Federation notifications
   - Event parameters: `{ teamspace: "<name of teamspace>", project: "<project id>", model: "<federation/container id>" }`
   - Description: Subscribe to new activity within the model (e.g. new revision, model settings update, new issues)
-
+  
 ## Events
 Provided the client has subscribed to the room (where neccessary), the server will emit events when available. The client can [subscribe onto these events](https://socket.io/docs/v4/client-api/#socketoneventname-callback) just like regular Socket.io events
 
@@ -132,10 +145,45 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { /* Changes on container settings */}}`
   - Description: Used to notify the user of any changes on the container settings. This will be triggered if there is a PATCH request, or any changes on the model status (i.e. updates from processing a new revision)
 
+#### Container New Revision
+  - Event name: `containerNewRevision`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  author: "author name" }}`
+  - Description: Used to notify the user of a new container revision addition. This will be triggered when a new container revision has been processed successfully
+
+#### Container Revision Update
+  - Event name: `containerRevisionUpdate`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "revId", void: "true" }}`
+  - Description: Used to notify the user of any changes on a revision. This will be triggered when some data has changed within a revision (currently only void status can be changed)
+
+#### Container Removed
+  - Event name: `containerRemoved`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { }}`
+  - Description: Used to notify the user of a container deletion. This will be triggered when a container has been removed from a project
+
 #### Federation Settings Update
   - Event name: `federationSettingsUpdate`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { /* Changes on federation settings */}}`
   - Description: Used to notify the user of any changes on the federation settings. This will be triggered if there is a PATCH request, or any changes on the model status (i.e. updates from processing editing the federation)
 
+#### Federation New Revision
+  - Event name: `federationNewRevision`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { _id: "revId", tag: "tag", timestamp: 123, // epoch ts  owner: "owner name" }}`
+  - Description: Used to notify the user of a new federation revision addition. This will be triggered when a new federation revision has been processed successfully
  
+#### Federation Removed
+  - Event name: `federationRemoved`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { }}`
+  - Description: Used to notify the user of a federation deletion. This will be triggered when a federation has been removed from a project
 
+### Project events
+The following events will be emitted if the user has subscribed to [Project notifications](#project-notifications).
+
+#### New Container
+  - Event name: `newContainer`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "container id", name: "container name", code: "container code", type: "container type" }}`
+  - Description: Used to notify the user of a container creation. This will be triggered when a container has been added from a project
+
+#### New Federation
+  - Event name: `newFederation`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "federation id", name: "federation name", code: "federation code", desc: "federation description" }}`
+  - Description: Used to notify the user of a federation creation. This will be triggered when a federation has been added from a project

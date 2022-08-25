@@ -29,6 +29,7 @@ interface IProps {
 	PopoverProps?: any;
 	PaperProps?: any;
 	container?: any;
+	className?: string;
 	renderButton?: (props?) => ReactNode;
 	renderContent?: (props?) => ReactNode;
 	onClose?: () => void;
@@ -104,6 +105,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 			PaperProps,
 			IconProps,
 			ripple,
+			className,
 		} = this.props;
 		const { activeMenu } = this.state;
 
@@ -119,7 +121,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 
 		return (
 			<>
-				<Container ref={this.ref}>
+				<Container ref={this.ref} className={className}>
 					{renderButton(buttonProps)}
 				</Container>
 				<StyledPopover

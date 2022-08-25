@@ -16,29 +16,31 @@
  */
 
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
-import { DialogsActions, IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
+import { IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
 import { Modal } from '@/v5/ui/controls/modal';
 import { MODAL_TEMPLATES } from './templates';
 
 const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
 	const [openState, setOpenState] = useState(true);
 
-	const dispatch = useDispatch();
-
 	const onClickClose = () => {
 		setOpenState(false);
-		setTimeout(() => dispatch(DialogsActions.close(id)), 500);
+		setTimeout(() => DialogsActionsDispatchers.close(id), 500);
 	};
 
-	const ModalTemplate = MODAL_TEMPLATES[modalType];
-
-	return (
-		<Modal open={openState} onClickClose={onClickClose}>
-			<ModalTemplate onClickClose={onClickClose} {...props} />
-		</Modal>
-	);
+	if (typeof modalType === 'string') {
+		const ModalTemplate = MODAL_TEMPLATES[modalType];
+		return (
+			<Modal open={openState} onClickClose={onClickClose}>
+				<ModalTemplate onClickClose={onClickClose} {...props} />
+			</Modal>
+		);
+	}
+	const ModalType = modalType;
+	return (<ModalType open={openState} onClickClose={onClickClose} {...props} />);
 };
 
 export const ModalsDispatcher = (): JSX.Element => {

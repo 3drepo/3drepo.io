@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
 
 const addFederation = (req, res) => {
 	const { teamspace, project } = req.params;
+
 	Federations.addFederation(teamspace, project, req.body).then((federationId) => {
 		respond(req, res, templates.ok, { _id: federationId });
 	}).catch(
@@ -37,6 +37,7 @@ const addFederation = (req, res) => {
 
 const deleteFederation = (req, res) => {
 	const { teamspace, project, federation } = req.params;
+
 	Federations.deleteFederation(teamspace, project, federation).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
@@ -65,10 +66,14 @@ const appendFavourites = (req, res) => {
 const deleteFavourites = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToRemove = req.body.federations;
+	if (req.query.ids?.length) {
+		const favouritesToRemove = req.query.ids.split(',');
 
-	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
+			.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+	} else {
+		respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
+	}
 };
 
 const getFederationStats = (req, res) => {
@@ -83,18 +88,17 @@ const getFederationStats = (req, res) => {
 	);
 };
 
-const updateSettings = (req, res) => {
+const updateFederationSettings = (req, res) => {
 	const { teamspace, project, federation } = req.params;
-	const sender = req.headers[SOCKET_HEADER];
 
-	Federations.updateSettings(teamspace, project, federation, req.body, sender)
+	Federations.updateSettings(teamspace, project, federation, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),
 		);
 };
 
-const getSettings = (req, res, next) => {
+const getFederationSettings = (req, res, next) => {
 	const { teamspace, federation } = req.params;
 
 	Federations.getSettings(teamspace, federation)
@@ -119,15 +123,13 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: addFederation
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
@@ -220,21 +222,18 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: getFederationList
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -261,7 +260,7 @@ const establishRoutes = () => {
 	 *                         description: name of the federation
 	 *                         example: Complete structure
 	 *                       role:
-	 *                         $ref: "#/components/roles"
+	 *                         $ref: "#/components/schemas/roles"
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the federation is a favourited item for the user
@@ -278,15 +277,13 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: appendFederations
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: ID of project
 	 *         in: path
 	 *         required: true
@@ -321,31 +318,24 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: deleteFederations
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: ID of project
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               federations:
-	 *                 type: array
-	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
+	 *       - name: ids
+	 *         description: list of federation ids to remove (comma separated)
+	 *         in: query
+	 *         schema:
+	 *           type: string
+	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -364,28 +354,24 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: getFederationStats
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - federation:
-	 *         name: federation
+   	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -440,22 +426,19 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: deleteFederation
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - federation:
-	 *         name: federation
+   	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
@@ -477,24 +460,21 @@ const establishRoutes = () => {
 	 *   patch:
 	 *     description: Updates the settings of a federation
 	 *     tags: [Federations]
-	 *     operationId: updateSettings
+	 *     operationId: updateFederationSettings
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: ID of project
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - federation:
-	 *         name: federation
+	 *       - name: federation
 	 *         description: ID of federation
 	 *         in: path
 	 *         required: true
@@ -507,10 +487,10 @@ const establishRoutes = () => {
 	 *             type: object
 	 *             properties:
 	 *               name:
-	 *                 type: String
+	 *                 type: string
 	 *                 example: federation1
 	 *               desc:
-	 *                 type: String
+	 *                 type: string
 	 *                 example: description1
 	 *               surveyPoints:
 	 *                 type: array
@@ -550,7 +530,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the settings of the federation
 	 */
-	router.patch('/:federation', hasAdminAccessToFederation, validateUpdateSettingsData, updateSettings);
+	router.patch('/:federation', hasAdminAccessToFederation, validateUpdateSettingsData, updateFederationSettings);
 
 	/**
 	 * @openapi
@@ -558,24 +538,21 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the model settings of federation
 	 *     tags: [Federations]
-	 *     operationId: getSettings
+	 *     operationId: getFederationSettings
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	*       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - federation:
-	 *         name: federation
+	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
@@ -593,7 +570,7 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:federation', hasReadAccessToFederation, getSettings, formatModelSettings);
+	router.get('/:federation', hasReadAccessToFederation, getFederationSettings, formatModelSettings);
 	return router;
 };
 

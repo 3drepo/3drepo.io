@@ -21,10 +21,9 @@ import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
 import {
 	emailAlreadyExists,
-	getRegistrationErrorMessage,
 	isInvalidArguments,
 	usernameAlreadyExists,
-} from '@/v5/store/auth/auth.helpers';
+} from '@/v5/validation/errors.helpers';
 import { INewUser } from '@/v5/store/auth/auth.types';
 import { omit } from 'lodash';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
@@ -52,13 +51,13 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [hasUnexpectedError, setHasUnexpectedError] = useState(false);
 	const [erroredStep, setErroredStep] = useState<number>();
+	const [formIsSubmitting, setFormIsSubmitting] = useState(false);
 
 	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
 
 	const addCompletedStep = (stepIndex: number) => {
-		if (stepIndex === LAST_STEP && hasUnexpectedError) return;
+		if (stepIndex === LAST_STEP) return;
 		completedSteps.add(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
 	};
@@ -66,11 +65,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const removeCompletedStep = (stepIndex: number) => {
 		completedSteps.delete(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
-	};
-
-	const updateUnexpectedError = () => {
-		setHasUnexpectedError(true);
-		removeCompletedStep(LAST_STEP);
 	};
 
 	const canReachStep = (stepToReach: number): boolean => {
@@ -95,13 +89,13 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const moveToNextStep = () => moveToStep(activeStep + 1);
 
-	const handleInvalidArgumentsError = (errorMessage: string) => {
-		setHasUnexpectedError(false);
-		if (usernameAlreadyExists(errorMessage)) {
+	const handleInvalidArgumentsError = (error) => {
+		if (usernameAlreadyExists(error)) {
 			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
-		} else if (emailAlreadyExists(errorMessage)) {
+		} else if (emailAlreadyExists(error)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, fields.email]);
-		}
+		} else return;
+
 		updateFields({ password: '', confirmPassword: '' });
 		setActiveStep(0);
 		setErroredStep(0);
@@ -111,17 +105,19 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const createAccount = async () => {
 		try {
+			setFormIsSubmitting(true);
 			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
+			newUser.email = newUser.email.trim();
 			if (!fields.company) delete newUser.company;
 			await registerNewUser(newUser);
 			const { email, firstName } = fields;
 			completeRegistration({ email, firstName });
 		} catch (error) {
-			const errorMessage = getRegistrationErrorMessage(error);
+			setFormIsSubmitting(false);
 			if (isInvalidArguments(error)) {
-				handleInvalidArgumentsError(errorMessage);
+				handleInvalidArgumentsError(error);
 			} else {
-				updateUnexpectedError();
+				removeCompletedStep(LAST_STEP);
 			}
 		}
 	};
@@ -199,7 +195,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
-							hasUnexpectedError={hasUnexpectedError}
+							formIsSubmitting={formIsSubmitting}
 							isActiveStep={activeStep === LAST_STEP}
 						/>
 					</UserSignupFormStep>
