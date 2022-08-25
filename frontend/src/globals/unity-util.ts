@@ -871,30 +871,28 @@ export class UnityUtil {
 	}
 
 	/**
-	 * The amount of space the geometry streaming should leave in the 
+	 * The amount of space the geometry streaming should leave in the
 	 * unmanaged heap.
 	 * The unmanaged heap is not measured directly, but considered to be
 	 * the space between the top of the Unity heap (typically 2Gb) and the
 	 * top of the managed heap.
-	 * (The available space for geometry will shrink dynamically as the 
-	 * managed heap grows, always leaving thresholdInMb available to 
+	 * (The available space for geometry will shrink dynamically as the
+	 * managed heap grows, always leaving thresholdInMb available to
 	 * Unity for other uses).
 	 * @category Streaming
 	 */
-	public static setStreamingMemoryThreshold(thresholdInMb: number)
-	{
+	public static setStreamingMemoryThreshold(thresholdInMb: number) {
 		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, thresholdInMb);
 	}
 
 	/**
 	 * Constrains the geometry streaming to use at most maxMemoryInMb
-	 * regardless of the available unmanaged memory allocated by 
+	 * regardless of the available unmanaged memory allocated by
 	 * thresholdInMb.
 	 * Use this to improve performance on weaker platforms.
 	 * @category Streaming
 	 */
-	public static setStreamingMemoryLimit(maxMemoryInMb: number)
-	{
+	public static setStreamingMemoryLimit(maxMemoryInMb: number) {
 		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, maxMemoryInMb);
 	}
 
@@ -903,8 +901,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 * @code UnityUtil.setStreamingBundlesColor([0.2,0.8,0.2]);
 	 */
-	public static setStreamingBundlesColor(colour: number[])
-	{
+	public static setStreamingBundlesColor(colour: number[]) {
 		const params = {
 			color: colour,
 		};
@@ -916,8 +913,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 * @code UnityUtil.setStreamingElementsColor([0.2,0.8,0.2]);
 	 */
-	public static setStreamingElementsColor(colour: number[])
-	{
+	public static setStreamingElementsColor(colour: number[]) {
 		const params = {
 			color: colour,
 		};
@@ -932,12 +928,11 @@ export class UnityUtil {
 	 * @param power - how sharply the fade out occurs
 	 * @code UnityUtil.SetStreamingBundlesFade(0.7,1.6,5);
 	 */
-	public static SetStreamingBundlesFade(distance: number, bias: number, power: number)
-	{
+	public static SetStreamingBundlesFade(distance: number, bias: number, power: number) {
 		const params = {
-			bias: bias,
-			distance: distance,
-			power: power
+			bias,
+			distance,
+			power,
 		};
 		UnityUtil.toUnity('SetStreamingBundlesFade', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 	}
@@ -947,8 +942,7 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingBundlesFacesAlpha(alpha: number)
-	{
+	public static SetStreamingBundlesFacesAlpha(alpha: number) {
 		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
 	}
 
@@ -957,8 +951,7 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStremingBundlesLinesAlpha(alpha: number)
-	{
+	public static SetStremingBundlesLinesAlpha(alpha: number) {
 		UnityUtil.toUnity('SetStremingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
 	}
 
@@ -967,8 +960,7 @@ export class UnityUtil {
 	 * will disable the Elements Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingElementsFacesAlpha(alpha: number)
-	{
+	public static SetStreamingElementsFacesAlpha(alpha: number) {
 		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
 	}
 
@@ -977,19 +969,17 @@ export class UnityUtil {
 	 * will disable the Elements Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingElementsLinesAlpha(alpha: number)
-	{
+	public static SetStreamingElementsLinesAlpha(alpha: number) {
 		UnityUtil.toUnity('SetStremingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
 	}
 
 	/**
-	 * Sets the radius - as fraction of the camera near/far plane - within which the bounding boxes of individual 
+	 * Sets the radius - as fraction of the camera near/far plane - within which the bounding boxes of individual
 	 * yet-to-be-loaded elemenets should be drawn.
 	 * @category Streaming
 	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
 	 */
-	public static SetStreamingElementRadius(radius: number)
-	{
+	public static SetStreamingElementRadius(radius: number) {
 		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, radius);
 	}
 
