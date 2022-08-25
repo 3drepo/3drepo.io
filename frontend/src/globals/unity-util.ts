@@ -876,6 +876,9 @@ export class UnityUtil {
 	 * The unmanaged heap is not measured directly, but considered to be
 	 * the space between the top of the Unity heap (typically 2Gb) and the
 	 * top of the managed heap.
+	 * (The available space for geometry will shrink dynamically as the 
+	 * managed heap grows, always leaving thresholdInMb available to 
+	 * Unity for other uses).
 	 * @category Streaming
 	 */
 	public static setStreamingMemoryThreshold(thresholdInMb: number)
@@ -884,7 +887,7 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Constraints the geometry streaming to use at most maxMemoryInMb
+	 * Constrains the geometry streaming to use at most maxMemoryInMb
 	 * regardless of the available unmanaged memory allocated by 
 	 * thresholdInMb.
 	 * Use this to improve performance on weaker platforms.
