@@ -99,6 +99,9 @@ export const MainRoute = () => {
 						<Viewer />
 					</DashboardLayout>
 				</AuthenticatedRoute>
+				<AuthenticatedRoute exact path={path}>
+					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
+				</AuthenticatedRoute>
 				<AuthenticatedRoute path="*">
 					<DashboardLayout>
 						<NotFound />
