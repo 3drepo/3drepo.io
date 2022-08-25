@@ -17,12 +17,13 @@
 
 const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
+const { hasReadAccessToModel, isProjectAdmin, isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projectSettings');
-const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const socketIdToSocket = {};
+const sessionIdToSockets = {};
 const SocketsManager = {};
 
 const getUserNameFromSocket = (socket) => socket.session?.user?.username;
@@ -49,6 +50,16 @@ const joinRoom = async (socket, data) => {
 		channelName = `${teamspace}::${project}::${model}`;
 		try {
 			if (!await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
+				throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
+			}
+		} catch (err) {
+			throw { code: ERRORS.ROOM_NOT_FOUND, message: err.message };
+		}
+	} else if (teamspace && project) {
+		channelName = `${teamspace}::${project}`;
+		try {
+			const isProjAdmin = await isProjectAdmin(teamspace, stringToUUID(project), username);
+			if (!isProjAdmin && !await isTeamspaceAdmin(teamspace, username)) {
 				throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
 			}
 		} catch (err) {
@@ -94,6 +105,8 @@ const leaveRoom = (socket, data) => {
 		channelName = `notifications::${getUserNameFromSocket(socket)}`;
 	} else if (teamspace && model && project) {
 		channelName = `${teamspace}::${project}::${model}`;
+	} else if (teamspace && project) {
+		channelName = `${teamspace}::${project}`;
 	} else {
 		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
@@ -151,6 +164,8 @@ SocketsManager.getSocketById = (id) => socketIdToSocket[id];
 
 SocketsManager.addSocketToSession = (session, socket) => {
 	socket.join(`${SESSION_CHANNEL_PREFIX}${session}`);
+	sessionIdToSockets[session] = sessionIdToSockets[session] || [];
+	sessionIdToSockets[session].push(socket);
 };
 
 SocketsManager.addSocket = (socket) => {
@@ -160,6 +175,15 @@ SocketsManager.addSocket = (socket) => {
 	if (getUserNameFromSocket(socket)) {
 		SocketsManager.addSocketToSession(socket.session.id, socket);
 	}
+};
+
+SocketsManager.resetSocketsBySessionIds = (sessionIds) => {
+	sessionIds.forEach((sessionId) => {
+		if (sessionIdToSockets[sessionId]) {
+			sessionIdToSockets[sessionId].forEach((socket) => socket.leaveAll());
+			delete sessionIdToSockets[sessionId];
+		}
+	});
 };
 
 // Used for testing only - should not be called in real life.

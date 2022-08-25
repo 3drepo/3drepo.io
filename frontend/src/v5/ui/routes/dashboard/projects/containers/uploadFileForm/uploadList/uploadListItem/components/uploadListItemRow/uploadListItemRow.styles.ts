@@ -19,6 +19,8 @@ import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashbo
 import styled from 'styled-components';
 
 export const Content = styled(DashboardListItemRow)`
-	padding: 0 15px 0 5px;
-	height: 51px;
+	padding: 8px 15px 8px 5px;
+	height: auto;
+	cursor: default;
+	overflow: hidden;
 `;

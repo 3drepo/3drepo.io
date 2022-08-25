@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useContext, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -30,49 +30,46 @@ import {
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { SearchInput } from '@controls/searchInput';
+import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
+import { UploadFileForm } from '../uploadFileForm';
 
 interface IContainersList {
 	emptyMessage: ReactNode;
-	containers: IContainer[];
 	title: ReactNode;
 	titleTooltips: {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	hasContainers: boolean;
 	showBottomButton?: boolean;
-	onFilterQueryChange? : (query: string) => void;
-	filterQuery?: string;
 	onClickCreate: () => void;
-	onClickUpload: () => void;
 }
 
 export const ContainersList = ({
-	containers,
 	emptyMessage,
 	title,
 	titleTooltips,
 	onClickCreate,
-	filterQuery,
-	onFilterQueryChange,
-	onClickUpload,
-	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
+	// eslint-disable-next-line max-len
+	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
+	const hasContainers = containers.length > 0;
+
+	const { sortedList, setSortConfig } = useOrderedList(filteredContainers, DEFAULT_SORT_CONFIG);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
@@ -98,9 +95,6 @@ export const ContainersList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => onFilterQueryChange('')}
-							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
-							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
 						<Button
@@ -115,7 +109,7 @@ export const ContainersList = ({
 							startIcon={<ArrowUpCircleIcon />}
 							variant="contained"
 							color="primary"
-							onClick={onClickUpload}
+							onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
 						>
 							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 						</Button>
@@ -147,15 +141,14 @@ export const ContainersList = ({
 								key={container._id}
 								isSelected={container._id === selectedItemId}
 								container={container}
-								filterQuery={filterQuery}
 								onFavouriteChange={setFavourite}
 								onSelectOrToggleItem={selectOrToggleItem}
 							/>
 						))
 					) : (
 						<DashboardListEmptyContainer>
-							{filterQuery && hasContainers ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							{hasContainers ? (
+								<DashboardListEmptySearchResults />
 							) : emptyMessage}
 						</DashboardListEmptyContainer>
 					)}

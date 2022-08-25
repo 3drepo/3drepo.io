@@ -24,10 +24,9 @@ import { theme } from '@/v5/ui/themes/theme';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
-import { getIntlProviderProps } from '@/v5/services/intl';
-import { IntlProvider } from 'react-intl';
 import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
 import { ModalsDispatcher } from '@components/shared/modals';
+import { Intercom } from '@components/intercom/intercom.component';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
@@ -53,12 +52,11 @@ export const Root = () => {
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
 				<StylesProvider injectFirst>
-					<IntlProvider {...getIntlProviderProps()}>
-						<V4Adapter>
-							<MainRoute />
-							<ModalsDispatcher />
-						</V4Adapter>
-					</IntlProvider>
+					<V4Adapter>
+						<MainRoute />
+						<ModalsDispatcher />
+						<Intercom />
+					</V4Adapter>
 				</StylesProvider>
 			</MuiThemeProvider>
 		</ThemeProvider>

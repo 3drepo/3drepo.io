@@ -38,6 +38,7 @@ import issueAttachments from './overrides/cards/issues/attachments.overrides';
 import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
+import gis from './overrides/cards/gis.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -78,6 +79,7 @@ export const V4OverridesContainer = styled.div`
 	${safetiBase}
 
 	${views}
+	${gis}
 
 	${RevisionsSwitchContainer} {
 		display: none;

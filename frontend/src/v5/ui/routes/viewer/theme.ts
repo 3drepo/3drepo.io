@@ -36,6 +36,9 @@ export const theme = createTheme(
 								lineHeight: 34,
 							},
 						},
+						notchedOutline: {
+							height: '100%',
+						},
 					},
 				},
 				MuiInput: {
@@ -55,14 +58,29 @@ export const theme = createTheme(
 							':first-letter': {
 								textTransform: 'uppercase',
 							},
+							'&.Mui-focused': {
+								color: COLOR.BASE_MAIN,
+							},
 						},
 					},
 				},
 				MuiInputBase: {
 					styleOverrides: {
 						root: {
-							'&.Mui-focused fieldset': {
-								borderWidth: '1px !important',
+							'&&': {
+								borderRadius: 5,
+							},
+							'&.Mui-focused': {
+								'.MuiSelect-select': {
+									height: '100%',
+									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
+									boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
+									boxSizing: 'border-box',
+									overflow: 'visible',
+								},
+								fieldset: {
+									borderWidth: '1px !important',
+								},
 							},
 							'& input': {
 								padding: '0px 12px !important',
@@ -77,7 +95,7 @@ export const theme = createTheme(
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
 								opacity: '1 !important',
-								color: '#C1C8D5', // TODO: fix after new palette is released
+								color: COLOR.BASE_LIGHTER,
 							},
 						},
 					},
@@ -96,6 +114,7 @@ export const theme = createTheme(
 				MuiSelect: {
 					styleOverrides: {
 						select: {
+							border: `1px solid ${COLOR.BASE_LIGHTER}`,
 							lineHeight: '22px',
 							height: '24px',
 							padding: '0 10px',
@@ -136,6 +155,10 @@ export const theme = createTheme(
 							},
 							'&.color-picker__panel': { // Colour picker modal
 								'.MuiInput-root': {
+									'&.Mui-focused': {
+										border: `1px solid ${COLOR.PRIMARY_MAIN}`,
+										boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
+									},
 									border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 									borderRadius: 5,
 									padding: '0 7px',
@@ -298,6 +321,11 @@ export const theme = createTheme(
 								color: `${COLOR.BASE_MAIN} !important`,
 							},
 						},
+					},
+				},
+				MuiTooltip: {
+					defaultProps: {
+						disableInteractive: true,
 					},
 				},
 				MuiDialog: {

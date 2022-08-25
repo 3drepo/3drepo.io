@@ -29,21 +29,16 @@ const EXTENSION_COLOUR_MAP = {
 	dxf: '#1D1D1B',
 	nwd: '#007628',
 };
+const ICON_SIZE = 35;
 
 export const StyledIconButton = styled(Avatar)<{ extension: string}>`
-	width: 32px;
-	height: 32px;
-	display: flex;
-	overflow: hidden;
-	position: relative;
-	font-size: 14px;
-	align-items: center;
-	flex-shrink: 0;
-	font-family: Inter, Arial, sans-serif;
+	${({ theme }) => theme.typography.fontFamily};
 	font-weight: 600;
-	line-height: 1.125rem;
-	justify-content: center;
-	user-select: none;
+	font-size: 14px;
+	margin: 0 7px;
+	width: ${ICON_SIZE}px;
+	height: ${ICON_SIZE}px;
+	box-sizing: border-box;
 	text-transform: uppercase;
 
 	color: ${({ extension, theme }) => EXTENSION_COLOUR_MAP[extension] || theme.palette.tertiary.main};

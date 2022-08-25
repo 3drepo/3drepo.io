@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import reducers from '@/v5/store/reducers';
+import { combineReducers, createStore } from 'redux';
+
 export const alertAction = (currentAction: string) => ({
 	action: {
 		type: 'MODALS/OPEN',
@@ -24,3 +27,21 @@ export const alertAction = (currentAction: string) => ({
 		},
 	},
 });
+
+// A different Node version between the backend and the frontend
+// is causing a problem with axios when files are sent to an endpoint.
+// This is a workaround for that.
+export const spyOnAxiosApiCallWithFile = (api, method) => {
+	const methodFn = api[method];
+	return jest.spyOn(api, method).mockImplementation((url, body) => {
+		// Transforms the formData to a string to avoid a problem with axios
+		// in its node implementation.
+		return methodFn(url, body.toString());
+	});
+};
+
+export const createTestStore = () => createStore(combineReducers(reducers));
+
+export const listContainsElementWithId = (list, element) => (	
+	list.map(({ _id }) => _id).includes(element._id)
+);

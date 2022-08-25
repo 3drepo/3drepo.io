@@ -18,41 +18,31 @@
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 
-export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, $largeIcon?: boolean }>`
-	&& {
-		padding: 0;
+const getSizeInPixels = (size?: string) => {
+	if (size === 'large') return '115px';
+	if (size === 'medium') return '48px';
+	// 'small' or default
+	return '38px';
+};
+
+export const StyledIconButton = styled(IconButton)<{ $isButton?: boolean, disabled?: boolean, size?: string }>`
+	padding: 0;
+	margin: 8px 7px;
+
+	cursor: ${({ $isButton }) => ($isButton ? 'pointer' : 'default')};
+
+	.MuiAvatar-circular {
 		margin: 0;
-
-		${({ $isButton, theme }) => ($isButton ? `
-			cursor: pointer;
-			
-			&:hover {
-				.MuiAvatar-root {
-					background-color: ${theme.palette.tertiary.mid};
-				}
-			}
-
-			&:active {
-				.MuiAvatar-root {
-					background-color: ${theme.palette.tertiary.main};
-				}
-			}
-		` : `
-			cursor: default;
-		`)}
-	}
-
-	.MuiAvatar-circle {
-		margin: 0;
-		${({ $largeIcon }) => `
-			height: ${$largeIcon ? '48px' : '38px'};
-			width: ${$largeIcon ? '48px' : '38px'};
+		${({ size }) => `
+			height: ${getSizeInPixels(size)};
+			width: ${getSizeInPixels(size)};
+			font-size: calc(${getSizeInPixels(size)} / 3.1);
 		`}
 	}
 
 	${({ disabled }) => disabled && css`
 		&& {
-		pointer-events: none;
+			pointer-events: none;
 			.MuiAvatar-root {
 				background-color: ${({ theme }) => theme.palette.secondary.mid};
 				color: ${({ theme }) => theme.palette.secondary.light};

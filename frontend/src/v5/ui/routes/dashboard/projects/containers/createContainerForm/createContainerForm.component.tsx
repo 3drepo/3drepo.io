@@ -22,7 +22,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
-import { CreateContainerSchema } from '@/v5/validation/containers';
+import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
@@ -46,6 +46,13 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
+		defaultValues: {
+			name: '',
+			unit: 'mm',
+			type: 'Uncategorised',
+			desc: '',
+			code: '',
+		},
 	});
 	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
@@ -53,9 +60,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 		onClickClose();
 	};
 
-	useEffect(() => {
-		if (formState.isSubmitSuccessful) reset();
-	}, [formState, reset]);
+	useEffect(reset, [open]);
 
 	return (
 		<FormModal
@@ -80,7 +85,6 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					control={control}
 					name="unit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
-					defaultValue="mm"
 				>
 					{
 						CONTAINER_UNITS.map((unit) => (
@@ -94,7 +98,6 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					required
 					control={control}
 					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
-					defaultValue="Uncategorised"
 					name="type"
 				>
 					{

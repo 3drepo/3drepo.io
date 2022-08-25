@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import styled from 'styled-components';
 
-export const Container = styled(ScrollArea)`
+export const ScrollArea = styled(ScrollAreaBase)`
 	padding: 0;
 	${({ theme }) => theme.typography.body1};
 	font-weight: 500;

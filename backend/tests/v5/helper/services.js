@@ -21,11 +21,14 @@ const http = require('http');
 
 const { src, srcV4 } = require('./path');
 
-const { createApp } = require(`${srcV4}/services/api`);
+const { createApp: createServer } = require(`${srcV4}/services/api`);
+const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
@@ -164,11 +167,13 @@ db.createAvatar = async (username, type, avatarData) => {
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
-ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
+ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+
+ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -309,7 +314,9 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = () => createApp().listen(8080);
+ServiceHelper.app = () => createServer().listen(8080);
+
+ServiceHelper.frontend = () => createFrontend().listen(8080);
 
 ServiceHelper.chatApp = () => {
 	const server = http.createServer();
@@ -371,6 +378,8 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();
 	if (server) await server.close();
+	EventsManager.reset();
+	QueueHandler.close();
 };
 
 module.exports = ServiceHelper;

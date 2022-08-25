@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { getAllRemovableEntriesByType, getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
@@ -26,9 +25,9 @@ const { templates } = require('../utils/responseCodes');
 
 const FilesManager = {};
 
-FilesManager.fileExists = async (filename) => {
+FilesManager.fileExists = async (teamspace, collection, filename) => {
 	try {
-		await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, filename);
+		await getRefEntry(teamspace, collection, filename);
 		return true;
 	} catch {
 		return false;
@@ -62,10 +61,8 @@ const removeAllFilesInCol = async (teamspace, collection) => {
 	return Promise.all(deletePromises);
 };
 
-FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
+const removeFilesFromTeamspace = async (teamspace, regex) => {
 	const collList = await listCollections(teamspace);
-	// eslint-disable-next-line security/detect-non-literal-regexp
-	const regex = new RegExp(`^${model}.*\\.ref$`);
 	const removeProms = collList.map(async ({ name }) => {
 		const isModelRefCol = !!name.match(regex)?.length;
 		if (isModelRefCol) {
@@ -75,6 +72,10 @@ FilesManager.removeAllFilesFromModel = async (teamspace, model) => {
 
 	await Promise.all(removeProms);
 };
+
+// eslint-disable-next-line security/detect-non-literal-regexp
+FilesManager.removeAllFilesFromModel = (teamspace, model) => removeFilesFromTeamspace(teamspace, new RegExp(`^${model}.*\\.ref$`));
+FilesManager.removeAllFilesFromTeamspace = (teamspace) => removeFilesFromTeamspace(teamspace, new RegExp('.*\\.ref$'));
 
 FilesManager.getFile = async (teamspace, collection, fileName) => {
 	const { type, link } = await getRefEntry(teamspace, collection, fileName);
@@ -108,14 +109,18 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 	return { readStream, size };
 };
 
-FilesManager.storeFile = async (teamspace, collection, id, data) => {
+FilesManager.removeFile = async (teamspace, collection, id) => {
 	try {
-		const existingRef = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, id);
-		await removeRef(USERS_DB_NAME, AVATARS_COL_NAME, id);
-		await removeFiles(USERS_DB_NAME, AVATARS_COL_NAME, existingRef.type, [existingRef.link]);
+		const existingRef = await getRefEntry(teamspace, collection, id);
+		await removeRef(teamspace, collection, id);
+		await removeFiles(teamspace, collection, existingRef.type, [existingRef.link]);
 	} catch {
-		// do nothing if existing avatar does not exist
+		// do nothing if file does not exist
 	}
+};
+
+FilesManager.storeFile = async (teamspace, collection, id, data) => {
+	await FilesManager.removeFile(teamspace, collection, id);
 	let refInfo;
 
 	switch (config.defaultStorage) {

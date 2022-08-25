@@ -16,40 +16,33 @@
  */
 
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@mui/material';
-import { Container, Filename, Filesize, FlexContainer } from './uploadListItemTitle.styles';
+import { DashboardListItemTitle } from './uploadListItemTitle.styles';
 
 type IUploadListItemTitle = {
 	name: string;
 	filesize: string;
-	selectedrow: boolean;
+	isSelected: boolean;
 	errorMessage: string;
 };
 
 export const UploadListItemTitle = ({
 	name,
 	filesize,
-	selectedrow,
+	isSelected,
 	errorMessage,
 }: IUploadListItemTitle): JSX.Element => (
-	<FixedOrGrowContainer>
-		<Container>
-			<FlexContainer $selectedrow={selectedrow} error={errorMessage}>
-				<Tooltip title={name} placement="bottom-start">
-					<Filename>
-						{name}
-					</Filename>
-				</Tooltip>
-				{errorMessage && (
-					<ErrorTooltip>
-						{errorMessage}
-					</ErrorTooltip>
-				)}
-			</FlexContainer>
-			<Filesize>
-				{filesize}
-			</Filesize>
-		</Container>
-	</FixedOrGrowContainer>
+	<DashboardListItemTitle
+		subtitle={filesize}
+		selected={isSelected}
+	>
+		<Tooltip title={name} placement="bottom-start">
+			<span>{name}</span>
+		</Tooltip>
+		{errorMessage && (
+			<ErrorTooltip>
+				{errorMessage}
+			</ErrorTooltip>
+		)}
+	</DashboardListItemTitle>
 );

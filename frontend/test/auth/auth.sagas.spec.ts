@@ -35,7 +35,7 @@ describe('Auth: sagas', () => {
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.authenticate())
 				.put(AuthActions.setPendingStatus(true))
-				.put(CurrentUserActions.getProfile())
+				.put(CurrentUserActions.fetchUser())
 				.put(AuthActions.setAuthenticationStatus(true))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
@@ -57,6 +57,7 @@ describe('Auth: sagas', () => {
 	});
 
 	describe('login', () => {
+
 		it('should login successfully', async () => {
 			mockServer
 				.post('/login')
@@ -65,25 +66,45 @@ describe('Auth: sagas', () => {
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.login(username, password))
 				.put(AuthActions.setPendingStatus(true))
-				.put(CurrentUserActions.getProfile())
+				.put(CurrentUserActions.fetchUser())
 				.put(AuthActions.setAuthenticationStatus(true))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
 		});
-		it('should fail to log in', async () => {
-			const errorMessage = 'unexpected error';
+
+		it('should fail to log in with unexpected error', async () => {
 			mockServer
 				.post('/login')
-				.replyWithError({
-					message: errorMessage,
-				});
+				.reply(500);
+			ClientConfig.loginPolicy = { lockoutDuration: 10 };
 
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.login(username, password))
 				.put(AuthActions.setPendingStatus(true))
-				.put(AuthActions.loginFailed(errorMessage))
+				.put(AuthActions.loginFailed(null))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
+			
+			delete ClientConfig.loginPolicy;
+		});
+
+		it('should fail to log in with expected error', async () => {
+			const errorCode = { code: 'INCORRECT_USERNAME_OR_PASSWORD' };
+			const expectedErrorMessage = 'Incorrect username or password. Please try again.';
+
+			mockServer
+				.post('/login')
+				.reply(400, errorCode);
+			ClientConfig.loginPolicy = { lockoutDuration: 10 };
+
+			await expectSaga(AuthSaga.default)
+				.dispatch(AuthActions.login(username, password))
+				.put(AuthActions.setPendingStatus(true))
+				.put(AuthActions.loginFailed(expectedErrorMessage))
+				.put(AuthActions.setPendingStatus(false))
+				.silentRun();
+
+			delete ClientConfig.loginPolicy;
 		});
 	});
 

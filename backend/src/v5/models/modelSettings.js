@@ -24,7 +24,7 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const SETTINGS_COL = 'settings';
-const deleteOneModel = (ts, query) => db.deleteOne(ts, SETTINGS_COL, query);
+const findAndDeleteOneModel = (ts, query, projection) => db.findOneAndDelete(ts, SETTINGS_COL, query, projection);
 const findOneModel = (ts, query, projection) => db.findOne(ts, SETTINGS_COL, query, projection);
 const findModels = (ts, query, projection, sort) => db.find(ts, SETTINGS_COL, query, projection, sort);
 const insertOneModel = (ts, data) => db.insertOne(ts, SETTINGS_COL, data);
@@ -36,23 +36,34 @@ const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUp
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
 
-Models.addModel = async (ts, data) => {
+Models.addModel = async (teamspace, project, data) => {
 	const _id = generateUUIDString();
-	await insertOneModel(ts, { ...data, _id });
+	await insertOneModel(teamspace, { ...data, _id });
 
-	publish(events.NEW_MODEL, { teamspace: ts, model: _id });
+	const eventData = { code: data.properties?.code, name: data.name, unit: data.properties?.unit };
+	if (data.federate) {
+		eventData.desc = data.desc;
+	} else {
+		eventData.type = data.type;
+	}
+
+	publish(events.NEW_MODEL, { teamspace,
+		project,
+		model: _id,
+		data: eventData,
+		isFederation: !!data.federate });
 
 	return _id;
 };
 
-Models.deleteModel = async (ts, model) => {
-	const { deletedCount } = await deleteOneModel(ts, { _id: model });
+Models.deleteModel = async (teamspace, project, model) => {
+	const deletedModel = await findAndDeleteOneModel(teamspace, { _id: model }, { federate: 1 });
 
-	if (deletedCount === 0) {
+	if (!deletedModel) {
 		throw templates.modelNotFound;
 	}
 
-	publish(events.DELETE_MODEL, { teamspace: ts, model });
+	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: !!deletedModel.federate });
 };
 
 Models.getModelByQuery = async (ts, query, projection) => {
@@ -167,10 +178,16 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			model,
 			data,
 			isFederation: !!containers });
+
+		publish(events.NEW_REVISION, { teamspace,
+			project,
+			model,
+			revision: corId,
+			isFederation: !!containers });
 	}
 };
 
-Models.updateModelSettings = async (teamspace, project, model, data, sender) => {
+Models.updateModelSettings = async (teamspace, project, model, data) => {
 	const toUpdate = {};
 	const toUnset = {};
 
@@ -209,7 +226,6 @@ Models.updateModelSettings = async (teamspace, project, model, data, sender) => 
 			project,
 			model,
 			data,
-			sender,
 			isFederation: !!result.federate });
 	}
 };

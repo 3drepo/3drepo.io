@@ -25,6 +25,7 @@ import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
 import { isV5 } from '@/v4/helpers/isV5';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
@@ -47,7 +48,8 @@ import {
 	StyledChip,
 	StyledIconButton,
 	StyledTextField,
-	SuggestionsList
+	SuggestionsList,
+	SuggestionsScrollArea,
 } from './filterPanel.styles';
 import { FILTER_TYPES, IDataType, IFilter, ISelectedFilter } from './filterPanel';
 
@@ -391,10 +393,11 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		>
 			<Paper
 				square
-				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
-				{options.children}
+				<SuggestionsScrollArea {...options.containerProps}>
+					{options.children}
+				</SuggestionsScrollArea>
 			</Paper>
 		</SuggestionsList>
 	)
@@ -513,25 +516,31 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 	public renderSelectedFilters = () => {
 		const { selectedFilters, filtersOpen, removableFilterIndex } = this.state;
 		return (
-			<SelectedFilters
-				empty={!selectedFilters.length}
-				filtersOpen={selectedFilters.length && filtersOpen}
+			<ViewerScrollArea
+				autoHeight
+				autoHeightMax={240}
+				autoHeightMin={!selectedFilters.length ? 0 : 45}
 			>
-				{selectedFilters.length ? this.renderFilterButton() : null}
-				<Chips filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
-					{selectedFilters.map(
-						(filter, index) => (
-							<StyledChip
-								key={index}
-								color={index === removableFilterIndex ? 'primary' : 'default'}
-								label={getSelectedFilterLabel(filter)}
-								onDelete={() => this.onDeselectFilter(filter)}
-							/>
+				<SelectedFilters
+					empty={!selectedFilters.length}
+					filtersOpen={selectedFilters.length && filtersOpen}
+				>
+					{selectedFilters.length ? this.renderFilterButton() : null}
+					<Chips filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
+						{selectedFilters.map(
+							(filter, index) => (
+								<StyledChip
+									key={index}
+									color={index === removableFilterIndex ? 'primary' : 'default'}
+									label={getSelectedFilterLabel(filter)}
+									onDelete={() => this.onDeselectFilter(filter)}
+								/>
+							)
 						)
-					)
-					}
-				</Chips>
-			</SelectedFilters>
+						}
+					</Chips>
+				</SelectedFilters>
+			</ViewerScrollArea>
 		);
 	}
 

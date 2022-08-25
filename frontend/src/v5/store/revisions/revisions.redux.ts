@@ -17,9 +17,10 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { TeamspaceProjectAndContainerId, ContainerId } from '../store.types';
-import { IRevision, IUploadStatus } from './revisions.types';
+import { IRevision, IRevisionUpdate, IUploadStatus } from './revisions.types';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
@@ -30,6 +31,8 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	createRevision: ['teamspace', 'projectId', 'uploadId', 'body'],
 	setUploadComplete: ['uploadId', 'isComplete', 'errorMessage'],
 	setUploadProgress: ['uploadId', 'progress'],
+	updateRevisionSuccess: ['containerId', 'data'],
+	revisionProcessingSuccess: ['containerId', 'revision'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
@@ -38,74 +41,68 @@ export const INITIAL_STATE: IRevisionsState = {
 	revisionsUploadStatus: {},
 };
 
-export const setVoidStatusSuccess = (state = INITIAL_STATE, {
+export const setVoidStatusSuccess = (state, {
 	containerId,
 	revisionId,
 	isVoid,
-}): IRevisionsState => ({
-	...state,
-	revisionsByContainer: {
-		...state.revisionsByContainer,
-		[containerId]: state.revisionsByContainer[containerId].map((revision) => ({
-			...revision,
-			void: [revision.tag, revision._id].includes(revisionId) ? isVoid : revision.void,
-		})),
-	},
-});
+}: SetRevisionVoidStatusSuccessAction) => {
+	const revisions = state.revisionsByContainer[containerId];
+	revisions.find(
+		(revision) => [revision.tag, revision._id].includes(revisionId),
+	).void = isVoid;
+};
 
-export const fetchSuccess = (state = INITIAL_STATE, {
+export const fetchSuccess = (state, {
 	containerId,
 	revisions,
-}): IRevisionsState => ({
-	...state,
-	revisionsByContainer: {
-		...state.revisionsByContainer,
-		[containerId]: revisions,
-	},
-});
+}: FetchSuccessAction) => {
+	state.revisionsByContainer[containerId] = revisions;
+};
 
-export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }): IRevisionsState => ({
-	...state,
-	isPending: {
-		...state.isPending,
-		[containerId]: isPending,
-	},
-});
+export const updateRevisionSuccess = (state, {
+	containerId,
+	data,
+}: UpdateRevisionSuccessAction) => {
+	const revisions = state.revisionsByContainer[containerId];
+	const index = revisions.findIndex(({ _id }) => _id === data._id);
+	revisions[index] = { ...revisions[index], ...data };
+};
 
-export const setUploadComplete = (state = INITIAL_STATE, {
+export const setIsPending = (state, { isPending, containerId }: SetIsPendingAction) => {
+	state.isPending[containerId] = isPending;
+};
+
+export const setUploadComplete = (state, {
 	uploadId,
 	isComplete,
 	errorMessage,
-}): IRevisionsState => ({
-	...state,
-	revisionsUploadStatus: {
-		...state.revisionsUploadStatus,
-		[uploadId]: {
-			...state.revisionsUploadStatus[uploadId],
-			isComplete,
-			errorMessage,
-		},
-	},
-});
+}: SetUploadCompleteAction) => {
+	const uploads = state.revisionsUploadStatus;
+	uploads[uploadId] = { ...uploads[uploadId], isComplete, errorMessage };
+};
 
-export const setUploadProgress = (state = INITIAL_STATE, { uploadId, progress }): IRevisionsState => ({
-	...state,
-	revisionsUploadStatus: {
-		...state.revisionsUploadStatus,
-		[uploadId]: {
-			...state.revisionsUploadStatus[uploadId],
-			progress,
-		},
-	},
-});
+export const setUploadProgress = (state, { uploadId, progress }: SetUploadProgressAction) => {
+	state.revisionsUploadStatus[uploadId].progress = progress;
+};
 
-export const revisionsReducer = createReducer<IRevisionsState>(INITIAL_STATE, {
+export const revisionProcessingSuccess = (state, {
+	containerId,
+	revision,
+}: RevisionProcessingSuccessAction) => {
+	const revisions = state.revisionsByContainer;
+	revisions[containerId] ||= [];
+	revisions[containerId].push(revision);
+};
+
+export const revisionsReducer = createReducer<IRevisionsState>(INITIAL_STATE, produceAll({
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,
 	[RevisionsTypes.SET_UPLOAD_COMPLETE]: setUploadComplete,
 	[RevisionsTypes.SET_UPLOAD_PROGRESS]: setUploadProgress,
-});
+	[RevisionsTypes.UPDATE_REVISION_SUCCESS]: updateRevisionSuccess,
+	[RevisionsTypes.REVISION_PROCESSING_SUCCESS]: revisionProcessingSuccess,
+}));
 
 /**
  * Types
@@ -146,8 +143,11 @@ export type FetchAction = Action<'FETCH'> & TeamspaceProjectAndContainerId;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & ContainerId & { revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & ContainerId & { isPending: boolean };
 export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
-export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { containerId: string, isComplete: boolean, errorMessage?: string };
-export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { containerId: string, progress: number };
+export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { uploadId: string, isComplete: boolean, errorMessage?: string };
+export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { uploadId: string, progress: number };
+export type UpdateRevisionSuccessAction = Action<'FETCH_REVISION_STATS_SUCCESS'> & ContainerId & { data: IRevisionUpdate };
+export type RevisionProcessingSuccessAction = Action<'REVISION_PROCESSING_SUCCESS'> & ContainerId & { revision: IRevision };
+
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
 	SetRevisionVoidStatusAction;
@@ -161,6 +161,8 @@ export interface IRevisionsActionCreators {
 		uploadId: string,
 		body: CreateRevisionBody,
 	) => CreateRevisionAction;
-	setUploadComplete: (containerId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
-	setUploadProgress: (containerId: string, progress: number) => SetUploadProgressAction
+	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
+	setUploadProgress: (uploadId: string, progress: number) => SetUploadProgressAction;
+	updateRevisionSuccess: (containerId: string, data: IRevisionUpdate) => UpdateRevisionSuccessAction;
+	revisionProcessingSuccess: (containerId: string, revision: IRevision) => RevisionProcessingSuccessAction;
 }

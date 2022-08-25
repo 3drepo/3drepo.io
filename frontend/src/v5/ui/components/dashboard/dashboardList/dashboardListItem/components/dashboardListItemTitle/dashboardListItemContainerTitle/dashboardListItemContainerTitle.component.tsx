@@ -19,14 +19,16 @@ import { viewerRoute } from '@/v5/services/routing/routing';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
+import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
+import { SearchContext } from '@controls/search/searchContext';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 
-interface IContainerTitle extends IFixedOrGrowContainer {
+interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
 	isSelected?: boolean;
 	filterQuery?: string;
@@ -36,10 +38,11 @@ interface IContainerTitle extends IFixedOrGrowContainer {
 export const DashboardListItemContainerTitle = ({
 	container,
 	isSelected = false,
-	filterQuery = '',
 	openInNewTab = false,
 }: IContainerTitle): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const { query: filterQuery } = useContext(SearchContext);
+
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
 		to: hasRevisions ? viewerRoute(teamspace, project, container) : '#',
@@ -51,7 +54,11 @@ export const DashboardListItemContainerTitle = ({
 		<DashboardListItemTitle
 			subtitle={(
 				<LatestRevision
-					name={container.latestRevision}
+					name={(
+						<Highlight search={filterQuery}>
+							{container.latestRevision}
+						</Highlight>
+					)}
 					status={container.status}
 					error={container.errorResponse}
 					hasRevisions={hasRevisions}

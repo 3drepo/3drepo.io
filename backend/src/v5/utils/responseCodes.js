@@ -32,6 +32,7 @@ ResponseCodes.templates = {
 	userNotVerified: { message: 'Account not yet verified. Please check your email', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
+	ssoNotAvailable: { message: 'SSO provider not available', status: 500 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -57,6 +58,9 @@ ResponseCodes.templates = {
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
 	metadataNotFound: { message: 'Metadata not found.', status: 404 },
+
+	// Custom ticket related error
+	templateNotFound: { message: 'Template not found', status: 404 },
 
 	// File upload related error
 	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },

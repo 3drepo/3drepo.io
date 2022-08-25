@@ -53,8 +53,8 @@ export const Stepper = styled(StepperBase)`
 	${MainContentStyling}
 `;
 
-export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`
-	${({ reachable }) => reachable && `
+export const StepLabel = styled(StepLabelBase)<{ $reachable?: boolean }>`
+	${({ $reachable }) => $reachable && `
 		&& {
 			cursor: pointer;
 		}
