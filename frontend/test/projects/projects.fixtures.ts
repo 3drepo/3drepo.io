@@ -14,15 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormattedMessage } from 'react-intl';
-import { ErrorMessage } from '../../errorMessage.component';
 
-type NetworkErrorProps = {
-	className?: string;
-};
+import { IProject } from '@/v5/store/projects/projects.types';
+import faker from 'faker';
 
-export const NetworkError = ({ className }: NetworkErrorProps) => (
-	<ErrorMessage className={className}>
-		<FormattedMessage id="errorMessage.networkError" defaultMessage="Network Error" />
-	</ErrorMessage>
-);
+export const projectMockFactory = (overrides?: Partial<IProject>): IProject => ({
+	_id: faker.datatype.uuid(),
+	name: faker.random.word(),
+	isAdmin: faker.datatype.boolean(),
+	...overrides,
+});

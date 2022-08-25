@@ -20,7 +20,7 @@ const Yup = require('yup');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
-const { validateSchema } = require('../../../../../schemas/groups');
+const { validateSchema } = require('../../../../../../../schemas/groups');
 
 const Groups = {};
 
