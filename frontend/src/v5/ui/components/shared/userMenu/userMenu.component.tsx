@@ -137,11 +137,12 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 					</ActionMenuSection>
 				</ActionMenu>
 			</AvatarContainer>
-			<EditProfileModal
-				user={user}
-				open={isEditProfileModalOpen}
-				onClose={() => setIsEditProfileModalOpen(false)}
-			/>
+			{isEditProfileModalOpen && (
+				<EditProfileModal
+					user={user}
+					onClose={() => setIsEditProfileModalOpen(false)}
+				/>
+			)}
 		</>
 	);
 };
