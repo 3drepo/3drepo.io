@@ -427,6 +427,17 @@ const testRemoveUserFromAdminPrivileges = () => {
 	});
 };
 
+const testGetAllTeamspacesWithActiveLicenses = () => {
+	describe('Get all teamspaces with active licenses', () => {
+		test('Should perform a query to find all teamspaces with active subscriptions', async () => {
+			const expectedRes = [generateRandomString()];
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedRes);
+			await expect(Teamspace.getAllTeamspacesWithActiveLicenses()).resolves.toEqual(expectedRes);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
@@ -440,4 +451,5 @@ describe('models/teamspaces', () => {
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
+	testGetAllTeamspacesWithActiveLicenses();
 });

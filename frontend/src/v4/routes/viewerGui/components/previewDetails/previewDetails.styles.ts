@@ -29,7 +29,9 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { isV5 } from '@/v4/helpers/isV5';
+import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
+import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
 import { COLOR } from '../../../../styles';
 import { Container as MessageListContainer } from '../../../components/messagesList/messagesList.styles';
@@ -215,8 +217,16 @@ const unexpandedStyles  = css`
 	}
 `;
 
-export const ScrollableContainer = styled.div`
+export const ScrollableContainer = styled(ViewerScrollArea)`
 	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
+`;
+
+export const TextField = styled(TextFieldBase)<{ mutable: boolean }>`
+	${({ mutable }) => mutable && css`
+		input {
+			max-width: calc(100% - ${isV5() ? 66 : 58}px);
+		}
+	`}
 `;

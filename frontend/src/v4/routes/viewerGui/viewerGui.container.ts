@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { CompareActions } from '../../modules/compare';
 
-import { selectCurrentUser } from '../../modules/currentUser';
+import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
 import { IssuesActions } from '../../modules/issues';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
@@ -37,6 +38,7 @@ import { withViewer } from '../../services/viewer/viewer';
 import { ViewerGui } from './viewerGui.component';
 
 const mapStateToProps = createStructuredSelector({
+	currentTeamspace: selectCurrentTeamspace,
 	queryParams: selectQueryParams,
 	currentUser: selectCurrentUser,
 	modelSettings: selectSettings,
@@ -56,6 +58,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
 	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
 	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin,
+	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
 	resetModel: ModelActions.reset,
 	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,

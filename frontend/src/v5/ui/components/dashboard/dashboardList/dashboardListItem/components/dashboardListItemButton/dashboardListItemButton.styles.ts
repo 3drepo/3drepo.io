@@ -23,4 +23,13 @@ export const Button = styled(ButtonComponent).attrs({
 })`
 	margin: 0;
 	width: 135px;
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	}
+
+	&.Mui-disabled {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.base.lightest};
+	}
 `;

@@ -648,7 +648,7 @@ function* zoomToHighlightedNodes() {
 	yield waitForTreeToBeReady();
 
 	try {
-		yield call(delay, 100);
+		yield delay(100);
 		Viewer.zoomToHighlightedMeshes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));

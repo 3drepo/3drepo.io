@@ -24,12 +24,10 @@ import {
 	ContainerSettings,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import filesize from 'filesize';
+import { formatMessage } from '@/v5/services/intl';
 
-export const filterContainers = (federations: IContainer[], filterQuery: string) => (
-	federations.filter((
-		{ name, code, type },
-	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
-);
+export const CONTAINERS_SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
 
 export const canUploadToBackend = (status?: UploadStatuses): boolean => {
 	const statusesForUpload = [
@@ -82,3 +80,11 @@ export const prepareContainerSettingsForBackend = ({
 	surveyPoints: [surveyPoint],
 	...otherProps,
 });
+
+export const filesizeTooLarge = (file: File): string => {
+	const { uploadSizeLimit } = ClientConfig;
+	return (file.size > uploadSizeLimit) && formatMessage({
+		id: 'validation.revisions.file.error.tooLarge',
+		defaultMessage: 'File exceeds size limit of {sizeLimit}',
+	}, { sizeLimit: filesize(uploadSizeLimit) });
+};

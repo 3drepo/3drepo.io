@@ -207,51 +207,120 @@ const testGetFederations = () => {
 
 const testAddModel = () => {
 	describe('Add model', () => {
-		test('should return inserted ID on success', async () => {
+		test('should return inserted ID on success when a container is added', async () => {
 			const fn = jest.spyOn(db, 'insertOne');
 
-			const teamspace = 'someTS';
-			const res = await Model.addModel(teamspace, {});
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const data = { properties: { code: generateRandomString(), unit: generateRandomString() },
+				name: generateRandomString(),
+				type: generateRandomString(),
+				federate: false };
+			const res = await Model.addModel(teamspace, project, data);
 
-			expect(fn.mock.calls.length).toBe(1);
+			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('settings');
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
-
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
+				project,
+				model: fn.mock.calls[0][2]._id,
+				data: { code: data.properties.code, type: data.type, unit: data.properties.unit, name: data.name },
+				isFederation: false,
+			});
+		});
+
+		test('should return inserted ID on success when a federation is added', async () => {
+			const fn = jest.spyOn(db, 'insertOne');
+
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const data = { properties: { code: generateRandomString(), unit: generateRandomString() },
+				desc: generateRandomString(),
+				name: generateRandomString(),
+				federate: true };
+			const res = await Model.addModel(teamspace, project, data);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
+			expect(res).toEqual(fn.mock.calls[0][2]._id);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, {
+				teamspace,
+				project,
+				model: fn.mock.calls[0][2]._id,
+				data: {
+					code: data.properties.code,
+					desc: data.desc,
+					unit: data.properties.unit,
+					name: data.name,
+				},
+				isFederation: true });
 		});
 	});
 };
 
 const testDeleteModel = () => {
 	describe('Delete model', () => {
-		test('should succeed', async () => {
-			const expectedData = { deletedCount: 1 };
-			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+		test('should succeed (federation)', async () => {
+			const expectedData = { _id: generateRandomString(), federate: true };
+			const fn = jest.spyOn(db, 'findOneAndDelete').mockResolvedValue(expectedData);
 
-			const teamspace = 'someTS';
-			const modelId = 'someModel';
-			const res = await Model.deleteModel(teamspace, modelId);
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const res = await Model.deleteModel(teamspace, project, model);
 			expect(res).toEqual(undefined);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
+				teamspace,
+				project,
+				model,
+				isFederation: true,
+			});
+		});
+
+		test('should succeed (container)', async () => {
+			const expectedData = { _id: generateRandomString(), federate: false };
+			const fn = jest.spyOn(db, 'findOneAndDelete').mockResolvedValue(expectedData);
+
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const res = await Model.deleteModel(teamspace, project, model);
+			expect(res).toEqual(undefined);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
+				teamspace,
+				project,
+				model,
+				isFederation: false,
+			});
 		});
 
 		test('should return model not found with invalid model ID', async () => {
-			const expectedData = { deletedCount: 0 };
-			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'findOneAndDelete').mockResolvedValue(undefined);
 
-			const teamspace = 'someTS';
-			const modelId = 'badModel';
-			await expect(Model.deleteModel(teamspace, modelId))
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			await expect(Model.deleteModel(teamspace, project, model))
 				.rejects.toEqual(templates.modelNotFound);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings', { _id: model }, { federate: 1 });
+			expect(EventsManager.publish).toHaveBeenCalledTimes(0);
 		});
 	});
 };
@@ -317,51 +386,61 @@ const testNewRevisionProcessed = () => {
 		const user = generateRandomString();
 		const corId = generateRandomString();
 		const { success, message, userErr } = getInfoFromCode(retVal);
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
-			async () => {
-				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
-				publishFn.mockClear();
-				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, retVal, user,
-				)).resolves.toBe(undefined);
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED},
+			a ${events.MODEL_SETTINGS_UPDATE} and a ${events.NEW_REVISION} event`,
+		async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+			publishFn.mockClear();
+			await expect(Model.newRevisionProcessed(
+				teamspace, project, model, corId, retVal, user,
+			)).resolves.toBe(undefined);
 
-				expect(fn.mock.calls.length).toBe(1);
-				const action = fn.mock.calls[0][3];
-				if (success) {
-					expect(action.$set.status).toBe(undefined);
-					expect(action.$set).toHaveProperty('timestamp');
-				} else {
-					expect(action.$set.status).toEqual('failed');
-					expect(action.$set).not.toHaveProperty('timestamp');
-					expect(action.$set).toHaveProperty('errorReason');
-					expect(action.$set.errorReason.message).toEqual(message);
-					expect(action.$set.errorReason.errorCode).toEqual(retVal);
-					expect(action.$set.errorReason).toHaveProperty('timestamp');
-				}
-				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			if (success) {
+				expect(action.$set.status).toBe(undefined);
+				expect(action.$set).toHaveProperty('timestamp');
+			} else {
+				expect(action.$set.status).toEqual('failed');
+				expect(action.$set).not.toHaveProperty('timestamp');
+				expect(action.$set).toHaveProperty('errorReason');
+				expect(action.$set.errorReason.message).toEqual(message);
+				expect(action.$set.errorReason.errorCode).toEqual(retVal);
+				expect(action.$set.errorReason).toHaveProperty('timestamp');
+			}
+			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn).toHaveBeenCalledTimes(2);
-				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
-					{
-						teamspace,
-						model,
-						corId,
-						userErr,
-						message,
-						success,
-						errCode: retVal,
-						user,
-					});
+			expect(publishFn).toHaveBeenCalledTimes(3);
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+				{
+					teamspace,
+					model,
+					corId,
+					userErr,
+					message,
+					success,
+					errCode: retVal,
+					user,
+				});
 
-				expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-					{
-						teamspace,
-						project,
-						model,
-						data: { ...action.$set, status: action.$set.status || 'ok' },
-						isFederation: false,
-					});
-			});
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{
+					teamspace,
+					project,
+					model,
+					data: { ...action.$set, status: action.$set.status || 'ok' },
+					isFederation: false,
+				});
+
+			expect(publishFn).toHaveBeenCalledWith(events.NEW_REVISION,
+				{
+					teamspace,
+					project,
+					model,
+					revision: corId,
+					isFederation: false,
+				});
+		});
 	});
 
 	describe('Update with new revision (Federation)', () => {
@@ -390,7 +469,7 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn).toHaveBeenCalledTimes(2);
+				expect(publishFn).toHaveBeenCalledTimes(3);
 				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -415,6 +494,15 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
+						isFederation: true,
+					});
+
+				expect(publishFn).toHaveBeenCalledWith(events.NEW_REVISION,
+					{
+						teamspace,
+						project,
+						model,
+						revision: corId,
 						isFederation: true,
 					});
 			});

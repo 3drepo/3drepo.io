@@ -380,8 +380,6 @@ const establishRoutes = () => {
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
 	*         description: Gets the avatar of the user
-	*         produces:
-	*           image/png:
 	*         content:
 	*           image/png:
 	*             schema:
@@ -482,53 +480,52 @@ const establishRoutes = () => {
 	*         application/json:
 	*           schema:
 	*             type: object
+	*             required:
+	*             - username
+	*             - email
+	*             - password
+	*             - firstName
+	*             - lastName
+	*             - countryCode
+	*             - mailListAgreed
 	*             properties:
 	*               username:
 	*                 type: string
 	*                 description: The username of the user
 	*                 example: username123
-	*                 required: true
 	*               email:
 	*                 type: string
 	*                 description: The email of the user
 	*                 example: example@email.com
 	*                 format: email
-	*                 required: true
 	*               password:
 	*                 type: string
 	*                 description: The password of the user
 	*                 example: newPassword123!
-	*                 required: true
 	*               firstName:
 	*                 type: string
 	*                 description: The first name of the user
 	*                 example: Nick
-	*                 required: true
 	*               lastName:
 	*                 type: string
 	*                 description: The last name of the user
 	*                 example: Wilson
-	*                 required: true
 	*               countryCode:
 	*                 type: string
 	*                 description: The country code of the user
 	*                 example: GB
-	*                 required: true
 	*               company:
 	*                 type: string
 	*                 description: The company of the user
 	*                 example: 3D Repo
-	*                 required: false
 	*               mailListAgreed:
 	*                 type: boolean
-	*                 description: Whether the user has signed yp for the latest news and tutorials
+	*                 description: Whether the user has signed up for the latest news and tutorials
 	*                 example: true
-	*                 required: true
 	*               captcha:
 	*                 type: string
 	*                 description: The reCAPTCHA token generated from the sign up form
 	*                 example: 5LcN0ysfAAAAAHpnld1tAweI7DKU7dswmwnHWYcB
-	*                 required: false
 	*     responses:
 	*       400:
 	*         $ref: "#/components/responses/invalidArguments"
@@ -549,17 +546,18 @@ const establishRoutes = () => {
 	*         application/json:
 	*           schema:
 	*             type: object
+	*             required:
+	*             - username
+	*             - token
 	*             properties:
 	*               username:
 	*                 type: string
 	*                 description: The username of the user
 	*                 example: username123
-	*                 required: true
 	*               token:
 	*                 type: string
 	*                 description: The verification token of the user
 	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
-	*                 required: true
 	*     responses:
 	*       400:
 	*         $ref: "#/components/responses/invalidArguments"

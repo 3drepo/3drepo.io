@@ -18,18 +18,13 @@
 import styled from 'styled-components';
 import UnstyledIcon from '@assets/icons/add_circle.svg';
 
-export const Container = styled.div`
+export const NewContainerOption = styled.div`
 	&& {
-		color: ${({ theme }) => theme.palette.primary.dark};
 		display: inline-flex;
-		width: 100%;
+		color: ${({ theme }) => theme.palette.primary.dark};
 		flex-flow: row;
 		align-items: flex-start;
 		padding: 12px;
-	}
-
-	&:hover,&:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
 `;
 
@@ -37,9 +32,7 @@ export const AddCircleIcon = styled(UnstyledIcon)`
 	height: 18px;
 	width: 18px;
 	box-sizing: border-box;
-	margin: 0 6px 6px 0;
-	flex-shrink: 0;
-
+	margin-right: 6px;
 `;
 
 export const Message = styled.div`

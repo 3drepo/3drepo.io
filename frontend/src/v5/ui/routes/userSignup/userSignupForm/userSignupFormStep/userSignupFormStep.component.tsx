@@ -50,7 +50,7 @@ export const UserSignupFormStep = ({
 					error={error}
 				/>
 			)}
-			reachable={canReachStep(stepIndex)}
+			$reachable={canReachStep(stepIndex)}
 		>
 			{label}
 		</StepLabel>

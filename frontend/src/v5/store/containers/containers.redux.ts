@@ -17,12 +17,15 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
-import { View } from '@/v5/store/store.types';
+import { SuccessAndErrorCallbacks, View } from '@/v5/store/store.types';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
+import { IRevision } from '../revisions/revisions.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
@@ -31,7 +34,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
 	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
-	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
+	fetchContainerStatsSuccess: ['projectId', 'containerId', 'stats'],
 	fetchContainerViews: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerViewsSuccess: ['projectId', 'containerId', 'views'],
 	fetchContainerSettings: ['teamspace', 'projectId', 'containerId'],
@@ -40,165 +43,128 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	updateContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
 	createContainer: ['teamspace', 'projectId', 'newContainer'],
 	createContainerSuccess: ['projectId', 'container'],
-	deleteContainer: ['teamspace', 'projectId', 'containerId'],
+	deleteContainer: ['teamspace', 'projectId', 'containerId', 'onSuccess', 'onError'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 	setContainerStatus: ['projectId', 'containerId', 'status'],
+	containerProcessingSuccess: ['projectId', 'containerId', 'revision'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containersByProject: {},
 };
 
-export const setFavourite = (state = INITIAL_STATE, {
+const getContainerFromState = (state, projectId, containerId) => (
+	state.containersByProject[projectId].find((container) => container._id === containerId)
+);
+
+export const setFavouriteSuccess = (state, {
 	projectId,
 	containerId,
 	isFavourite,
-}: SetFavouriteSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => ({
-			...container,
-			isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
-		})),
-	},
-});
+}) => {
+	getContainerFromState(state, projectId, containerId).isFavourite = isFavourite;
+};
 
-export const fetchContainersSuccess = (state = INITIAL_STATE, {
+export const fetchContainersSuccess = (state, {
 	projectId,
 	containers,
-}: FetchContainersSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: containers,
-	},
-});
+}) => {
+	state.containersByProject[projectId] = containers;
+};
 
-export const fetchStatsSuccess = (state = INITIAL_STATE, {
+export const fetchContainerStatsSuccess = (state, {
 	projectId,
 	containerId,
-	containerStats,
-}: FetchContainerStatsSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => {
-			if (containerId !== container._id) return container;
-			return prepareSingleContainerData(container, containerStats);
-		}),
-	},
-});
+	stats,
+}) => {
+	const container = getContainerFromState(state, projectId, containerId);
+	Object.assign(container, prepareSingleContainerData(container, stats));
+};
 
-export const fetchContainerViewsSuccess = (state = INITIAL_STATE, {
+export const fetchContainerViewsSuccess = (state, {
 	projectId,
 	containerId,
 	views,
-}: FetchContainerViewsSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => {
-			if (containerId !== container._id) return container;
-			return {
-				...container,
-				views,
-			};
-		}),
-	},
-});
+}) => {
+	getContainerFromState(state, projectId, containerId).views = views;
+};
 
-export const fetchContainerSettingsSuccess = (state = INITIAL_STATE, {
+export const fetchContainerSettingsSuccess = (state, {
 	projectId,
 	containerId,
 	settings,
-}: FetchContainerSettingsSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => {
-			if (containerId !== container._id) return container;
-			return {
-				...container,
-				...settings,
-			};
-		}),
-	},
-});
+}) => {
+	const container = getContainerFromState(state, projectId, containerId);
+	Object.assign(container, settings);
+};
 
-export const updateContainerSettingsSuccess = (state = INITIAL_STATE, {
+export const updateContainerSettingsSuccess = (state, {
 	projectId,
 	containerId,
 	settings,
-}: UpdateContainerSettingsSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => {
-			if (containerId !== container._id) return container;
-			return {
-				...container,
-				...settings,
-			};
-		}),
-	},
-});
+}) => {
+	const container = getContainerFromState(state, projectId, containerId);
+	Object.assign(container, settings);
+};
 
-export const createContainerSuccess = (state = INITIAL_STATE, {
+export const createContainerSuccess = (state, {
 	projectId,
 	container,
-}: CreateContainerSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: [
-			...state.containersByProject[projectId],
-			{
-				...container,
-				revisionsCount: 0,
-				status: UploadStatuses.OK,
-			},
-		],
-	},
-});
+}) => {
+	// a container with that id already exists in the store
+	if (getContainerFromState(state, projectId, container._id)) return;
 
-export const deleteContainerSuccess = (state = INITIAL_STATE, {
+	state.containersByProject[projectId].push({
+		...container,
+		isFavourite: false,
+		revisionsCount: 0,
+		status: UploadStatuses.OK,
+	});
+};
+
+export const deleteContainerSuccess = (state, {
 	projectId,
 	containerId,
-}: DeleteContainerSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].filter((container) => containerId !== container._id),
-	},
-});
+}) => {
+	state.containersByProject[projectId] = state.containersByProject[projectId].filter(
+		(container) => containerId !== container._id,
+	);
+};
 
-export const setContainerStatus = (state = INITIAL_STATE, {
+export const setContainerStatus = (state, {
 	projectId,
 	containerId,
 	status,
-}: SetContainerStatusAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => ({
-			...container,
-			status: container._id === containerId ? status : container.status,
-		})),
-	},
-});
+}) => {
+	getContainerFromState(state, projectId, containerId).status = status;
+};
 
-export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, {
+export const containerProcessingSuccess = (state, {
+	projectId,
+	containerId,
+	revision,
+}) => {
+	const container = getContainerFromState(state, projectId, containerId);
+	const newRevisionProperties = {
+		revisionsCount: container.revisionsCount + 1,
+		lastUpdated: getNullableDate(revision.timestamp),
+		latestRevision: revision.tag,
+	};
+	Object.assign(container, newRevisionProperties);
+};
+
+export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, produceAll({
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
-	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
-	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
+	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
+	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchContainerStatsSuccess,
 	[ContainersTypes.FETCH_CONTAINER_VIEWS_SUCCESS]: fetchContainerViewsSuccess,
 	[ContainersTypes.FETCH_CONTAINER_SETTINGS_SUCCESS]: fetchContainerSettingsSuccess,
 	[ContainersTypes.UPDATE_CONTAINER_SETTINGS_SUCCESS]: updateContainerSettingsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 	[ContainersTypes.SET_CONTAINER_STATUS]: setContainerStatus,
-}) as (state: IContainersState, action: any) => IContainersState;
+	[ContainersTypes.CONTAINER_PROCESSING_SUCCESS]: containerProcessingSuccess,
+})) as (state: IContainersState, action: any) => IContainersState;
 
 /**
  * Types
@@ -223,9 +189,10 @@ export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> 
 export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & { newContainer: NewContainer };
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
-export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
+export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
 export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
+export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
 
 export interface IContainersActionCreators {
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
@@ -237,7 +204,7 @@ export interface IContainersActionCreators {
 	fetchContainerStatsSuccess: (
 		projectId: string,
 		containerId: string,
-		containerStats: ContainerStats
+		stats: ContainerStats,
 	) => FetchContainerStatsSuccessAction;
 	createContainer: (
 		teamspace: string,
@@ -246,7 +213,7 @@ export interface IContainersActionCreators {
 	) => CreateContainerAction;
 	createContainerSuccess: (
 		projectId: string,
-		container: NewContainer & { _id: string},
+		container: NewContainer,
 	) => CreateContainerSuccessAction;
 	fetchContainerViews: (teamspace: string, projectId: string, containerId: string) => FetchContainerViewsAction;
 	fetchContainerViewsSuccess: (
@@ -275,7 +242,17 @@ export interface IContainersActionCreators {
 		containerId: string,
 		settings: ContainerSettings,
 	) => UpdateContainerSettingsSuccessAction;
-	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
+	deleteContainer: (teamspace: string,
+		projectId: string,
+		containerId: string,
+		onSuccess: () => void,
+		onError: (error) => void,
+	) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 	setContainerStatus: (projectId: string, containerId: string, status: UploadStatuses) => SetContainerStatusAction;
+	containerProcessingSuccess: (
+		projectId: string,
+		containerId: string,
+		revision: IRevision
+	) => ContainerProcessingSuccessAction;
 }

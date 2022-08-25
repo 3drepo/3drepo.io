@@ -20,6 +20,7 @@ import Fab from '@mui/material/Fab';
 import Tab from '@mui/material/Tab';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
+import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 
 export const Head = styled.div`
 	font-size: 14px;
@@ -68,7 +69,9 @@ export const MenuButton = styled(Fab).attrs({
 		background: ${COLOR.LIGHT_GRAY_89};
 		color: ${COLOR.GRAY_60};
 	}
+`;
 
+export const MenuButtonContainer = styled(ButtonMenu)`
 	&& {
 		position: absolute;
 		bottom: -22px;

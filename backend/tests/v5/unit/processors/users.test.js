@@ -24,14 +24,28 @@ const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
+
 jest.mock('../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+
+jest.mock('../../../../src/v5/models/loginRecords');
+const LoginRecords = require(`${src}/models/loginRecords`);
+
+jest.mock('../../../../src/v5/models/notifications');
+const Notifications = require(`${src}/models/notifications`);
+
+jest.mock('../../../../src/v5/services/intercom');
+const Intercom = require(`${src}/services/intercom`);
+
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
+
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { generateRandomString } = require('../../helper/services');
 
@@ -88,7 +102,7 @@ const testLogin = () => {
 	});
 };
 
-const formatUser = (userProfile, hasAvatar) => ({
+const formatUser = (userProfile, hasAvatar, hash) => ({
 	username: userProfile.user,
 	firstName: userProfile.customData.firstName,
 	lastName: userProfile.customData.lastName,
@@ -97,6 +111,7 @@ const formatUser = (userProfile, hasAvatar) => ({
 	apiKey: userProfile.customData.apiKey,
 	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
+	...(hash ? { intercomRef: hash } : {}),
 });
 
 const tesGetProfileByUsername = () => {
@@ -114,6 +129,27 @@ const tesGetProfileByUsername = () => {
 			FilesManager.fileExists.mockResolvedValueOnce(false);
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, false));
+			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+		});
+
+		test('should return user profile with intercom reference if configured', async () => {
+			const projection = {
+				user: 1,
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.apiKey': 1,
+				'customData.billing.billingInfo.countryCode': 1,
+				'customData.billing.billingInfo.company': 1,
+			};
+			FilesManager.fileExists.mockResolvedValueOnce(false);
+
+			const hash = generateRandomString();
+			Intercom.generateUserHash.mockReturnValueOnce(hash);
+
+			const res = await Users.getProfileByUsername(user.user);
+			expect(res).toEqual(formatUser(user, false, hash));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
 			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
 		});
@@ -213,6 +249,25 @@ const testSignUp = () => {
 				username: newUserData.username,
 			});
 		});
+
+		test('should generate a password and sign a user up', async () => {
+			const sso = { id: generateRandomString() };
+			await Users.signUp({ ...newUserData, sso });
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				...newUserData,
+				password: exampleHashString,
+				token: exampleHashString,
+				sso,
+			});
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
+				token: exampleHashString,
+				email: newUserData.email,
+				firstName: newUserData.firstName,
+				username: newUserData.username,
+			});
+		});
 	});
 };
 
@@ -261,6 +316,27 @@ const testUploadAvatar = () => {
 	});
 };
 
+const testRemoveUser = () => {
+	describe('Removing a user', () => {
+		test('Should call all relevant functions to clean up user data', async () => {
+			const username = generateRandomString();
+			await Users.remove(username);
+
+			expect(UsersModel.removeUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.removeUser).toHaveBeenCalledWith(username);
+
+			expect(FilesManager.removeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
+
+			expect(LoginRecords.removeAllUserRecords).toHaveBeenCalledTimes(1);
+			expect(LoginRecords.removeAllUserRecords).toHaveBeenCalledWith(username);
+
+			expect(Notifications.removeAllUserNotifications).toHaveBeenCalledTimes(1);
+			expect(Notifications.removeAllUserNotifications).toHaveBeenCalledWith(username);
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
@@ -270,4 +346,5 @@ describe('processors/users', () => {
 	testVerify();
 	testGetAvatarStream();
 	testUploadAvatar();
+	testRemoveUser();
 });

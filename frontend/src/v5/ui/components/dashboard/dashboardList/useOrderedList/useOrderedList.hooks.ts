@@ -38,8 +38,8 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 				return aValue - bValue;
 			}
 
-			if (aValue instanceof Date) {
-				return aValue.getTime() - bValue.getTime();
+			if (aValue instanceof Date || bValue instanceof Date) {
+				return (aValue || new Date(0)).getTime() - (bValue || new Date(0)).getTime();
 			}
 
 			return 0;

@@ -20,6 +20,7 @@ export interface BreadcrumbItem {
 	title: string;
 	to?: string;
 	selected?: boolean;
+	disabled?: boolean;
 }
 
 interface INavigationMenu {
@@ -45,12 +46,13 @@ export const BreadcrumbDropdown = ({
 			horizontal: 'left',
 		}}
 	>
-		{options.map(({ title, to, selected }) => (
+		{options.map(({ title, to, selected, disabled }) => (
 			<MenuItem
 				key={title}
 				to={to}
 				onClick={handleClose}
 				selected={selected}
+				disabled={disabled}
 			>
 				{title}
 			</MenuItem>

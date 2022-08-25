@@ -22,12 +22,11 @@ import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { LoginSchema } from '@/v5/validation/auth';
+import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import ErrorIcon from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt } from './login.styles';
+import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, SIGN_UP_PATH } from '../routes.constants';
 
@@ -50,6 +49,15 @@ export const Login = () => {
 		AuthActionsDispatchers.login(username, password);
 	};
 
+	const isExpectedError = (err) => (
+		[
+			'NOT_LOGGED_IN',
+			'INCORRECT_USERNAME_OR_PASSWORD',
+			'ALREADY_LOGGED_IN',
+			'TOO_MANY_LOGIN_ATTEMPTS',
+		].includes(err.response?.data?.code)
+	);
+
 	return (
 		<AuthTemplate
 			footer={(
@@ -71,7 +79,8 @@ export const Login = () => {
 						defaultMessage: 'Password',
 					})}
 				/>
-				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
+				<UnhandledErrorInterceptor expectedErrorValidators={[isExpectedError]} />
+				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage

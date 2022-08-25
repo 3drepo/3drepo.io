@@ -16,39 +16,81 @@
  */
 
 import { Constants } from '@/v5/helpers/actions.helper';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser } from './currentUser.types';
+import { ICurrentUser, UpdateUser, UpdatePersonalData, UpdateUserSuccess } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
-	getProfile: [],
-	getProfileSuccess: ['userData'],
+	fetchUser: [],
+	fetchUserSuccess: ['userData'],
+	updateUser: ['userData'],
+	updateUserSuccess: ['userData'],
+	updatePersonalData: ['personalData', 'onSuccess', 'onError'],
+	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
+	generateApiKey: [],
+	deleteApiKey: [],
+	setApiKeyIsUpdating: ['apiKeyIsUpdating'],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
-	currentUser: { username: '' },
+	currentUser: { username: '', email: '', firstName: '', lastName: '' },
 };
 
-export const getProfileSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
-	...state,
-	currentUser: userData,
-});
+export const fetchUserSuccess = (state, { userData }: FetchUserSuccessAction) => {
+	state.currentUser = userData;
+};
 
-export const currentUserReducer = createReducer(INITIAL_STATE, {
-	[CurrentUserTypes.GET_PROFILE_SUCCESS]: getProfileSuccess,
-});
+export const updateUserSuccess = (state, { userData }: UpdateUserSuccessAction) => {
+	state.currentUser = { ...state.currentUser, ...userData };
+};
+
+export const setPersonalDataIsUpdating = (state, { personalDataIsUpdating }: SetPersonalDataIsUpdatingAction) => {
+	state.currentUser.personalDataIsUpdating = personalDataIsUpdating;
+};
+
+export const setApiKeyIsUpdating = (state, { apiKeyIsUpdating }: SetApiKeyIsUpdatingAction) => {
+	state.currentUser.apiKeyIsUpdating = apiKeyIsUpdating;
+};
+
+export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, produceAll({
+	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
+	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
+	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
+	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
+})) as (state: ICurrentUserState, action: any) => ICurrentUserState;
 
 /**
  * Types
 */
 
-interface ICurrentUserState {
+export interface ICurrentUserState {
 	currentUser: ICurrentUser;
 }
 
-export type GetProfileSuccessAction = Action<'GET_PROFILE_SUCCESS'> & { userData: any };
+export type FetchUserAction = Action<'FETCH_USER'>;
+export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
+export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
+export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & {
+	personalData: UpdatePersonalData,
+	onSuccess: () => void,
+	onError: (error: Error) => void,
+};
+export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'>;
+export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
+export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { apiKeyIsUpdating: boolean };
 
 export interface ICurrentUserActionCreators {
-	getProfile: () => Action<'GET_PROFILE'>;
-	getProfileSuccess: (userData: Object) => GetProfileSuccessAction;
+	fetchUser: () => FetchUserAction;
+	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
+	updateUserSuccess: (userData: UpdateUserSuccess) => UpdateUserSuccessAction;
+	updatePersonalData: (
+		personalData: UpdatePersonalData,
+		onSuccess: () => void,
+		onError: (error) => void,
+	) => UpdatePersonalDataAction;
+	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
+	generateApiKey: () => UpdateApiKeyAction;
+	deleteApiKey: () => UpdateApiKeyAction;
+	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => SetApiKeyIsUpdatingAction;
 }

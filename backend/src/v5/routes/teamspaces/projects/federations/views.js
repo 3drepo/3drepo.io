@@ -58,32 +58,29 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: FederationViewsList
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - federation:
-	 *         name: federation
+	 *           type: string
+	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/federationsNotFound"
+	 *         $ref: "#/components/responses/federationNotFound"
 	 *       200:
 	 *         description: returns list of views
 	 *         content:
@@ -118,37 +115,32 @@ const establishRoutes = () => {
 	 *     tags: [Federations]
 	 *     operationId: FederationViewThumbnail
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
-	 *         name: project
+   	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - federation:
-	 *         name: federation
+	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - view:
-	 *         name: view
+	 *       - name: view
 	 *         description: View ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *         type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

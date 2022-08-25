@@ -17,9 +17,13 @@
 
 const { src } = require('../../helper/path');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Revisions = require(`${src}/models/revisions`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { generateRandomString } = require('../../helper/services');
 
 const testGetRevisionCount = () => {
 	describe('GetRevisionCount', () => {
@@ -125,17 +129,30 @@ const testUpdateRevisionStatus = () => {
 	};
 
 	describe('UpdateRevisionStatus', () => {
-		const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
 		test('Should update the void status of a revision', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Revisions.updateRevisionStatus('someTS', 'someModel', 1, false);
-			checkResults(fn, revision._id, false);
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
+			const newStatus = false;
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
+			const publishFn = EventsManager.publish.mockImplementationOnce(() => { });
+			await Revisions.updateRevisionStatus(teamspace, project, model, revision._id, newStatus);
+			checkResults(fn, revision._id, newStatus);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.REVISION_UPDATED,
+				{ teamspace, project, model, data: { _id: revision._id, void: newStatus } });
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
-			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
-			checkResults(fn, -1, true);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
+			const publishFn = EventsManager.publish.mockImplementationOnce(() => { });
+			const revisionId = generateRandomString();
+			const newStatus = true;
+			await expect(Revisions.updateRevisionStatus(generateRandomString(), generateRandomString(),
+				generateRandomString(), revisionId, newStatus)).rejects.toEqual(templates.revisionNotFound);
+			checkResults(fn, revisionId, newStatus);
+			expect(publishFn).toHaveBeenCalledTimes(0);
 		});
 	});
 };

@@ -17,21 +17,22 @@
 
 import { FormattedMessage } from 'react-intl';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { SearchContext } from '@controls/search/searchContext';
+import { useContext } from 'react';
 import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
 
-type IDashboardListEmptySearchResults = {
-	searchPhrase: string;
-};
+export const DashboardListEmptySearchResults = (): JSX.Element => {
+	const { query: searchPhrase } = useContext(SearchContext);
 
-export const DashboardListEmptySearchResults = ({ searchPhrase }: IDashboardListEmptySearchResults): JSX.Element => (
-	<DashboardListEmptyText>
-		<FormattedMessage
-			id="containers.noSearchResults"
-			defaultMessage="We couldn't find a match for <SearchPhrase>“{searchPhrase}”</SearchPhrase>. Please try another search."
-			values={{
-				SearchPhrase: (val: string) => <SearchPhrase>{val}</SearchPhrase>,
-				searchPhrase,
-			}}
-		/>
-	</DashboardListEmptyText>
-);
+	return (
+		<DashboardListEmptyText>
+			<FormattedMessage
+				id="dashboardList.noSearchResults"
+				defaultMessage="We couldn't find a match for {searchPhrase}. Please try another search."
+				values={{
+					searchPhrase: <SearchPhrase>&quot;{searchPhrase}&quot;</SearchPhrase>,
+				}}
+			/>
+		</DashboardListEmptyText>
+	);
+};

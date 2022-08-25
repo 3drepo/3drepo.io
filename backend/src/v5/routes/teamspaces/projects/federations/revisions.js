@@ -23,7 +23,7 @@ const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 
-const newRevision = async (req, res) => {
+const createNewFederationRevision = async (req, res) => {
 	const revInfo = req.body;
 	const { teamspace, federation } = req.params;
 	const owner = getUserFromSession(req.session);
@@ -44,29 +44,26 @@ const establishRoutes = () => {
 	 *   post:
 	 *     description: Create a new revision.
 	 *     tags: [Federations]
-	 *     operationId: createNewRevision
+	 *     operationId: createNewFederationRevision
 	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
+	 *       - name: teamspace
 	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - project:
-	 *         name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
-	 *       - federation:
-	 *         name: federation
+	 *           type: string
+	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
@@ -89,7 +86,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: The request is sent successfully.
 	 */
-	router.post('', hasWriteAccessToFederation, validateNewRevisionData, newRevision);
+	router.post('', hasWriteAccessToFederation, validateNewRevisionData, createNewFederationRevision);
 	return router;
 };
 

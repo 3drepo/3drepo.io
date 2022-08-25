@@ -17,6 +17,7 @@
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AppBar } from '@components/shared/appBar';
+import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { useEffect, useRef, useState } from 'react';
@@ -30,11 +31,9 @@ export const TeamspaceSelection = (): JSX.Element => {
 
 	useEffect(() => {
 		if (welcomeRef.current) {
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach((entry) => setIsVisible(entry.isIntersecting));
-			});
+			const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting));
 			observer.observe(welcomeRef.current);
-			return () => observer.unobserve(welcomeRef.current);
+			return () => observer.disconnect();
 		}
 		return null;
 	}, []);
@@ -45,7 +44,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 			<ScrollBar>
 				<HomeContent>
 					<FadeMessageTrigger ref={welcomeRef}>
-						<WelcomeMessage visible={isVisible}>
+						<WelcomeMessage $visible={isVisible}>
 							{
 								firstName ? (
 									<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
@@ -57,6 +56,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 					</FadeMessageTrigger>
 					<TeamspaceList />
 				</HomeContent>
+				<DashboardFooter variant="dark" />
 			</ScrollBar>
 			<ModalsDispatcher />
 		</>

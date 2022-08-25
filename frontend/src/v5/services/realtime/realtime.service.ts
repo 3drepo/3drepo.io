@@ -50,7 +50,8 @@ interface IChatConfig {
 export const joinRoom = (roomType : IRoomType) => {
 	const joinedCount = (roomsJoined[roomTypeToId(roomType)] || 0);
 	roomsJoined[roomTypeToId(roomType)] = joinedCount + 1;
-	if (joinedCount > 0) return;
+
+	if (joinedCount > 0 || !socket.connected) return;
 
 	socket.emit('join', roomType);
 };
@@ -116,6 +117,15 @@ export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callbac
 		leaveRoom(roomType);
 	};
 };
+
+/**
+ * This function combines all functions passed as parameter and return a function that when called will
+ * execute all functions.
+ * @param unsubscribeFunctions The functions used for unsubscribe to an event
+ * @returns A function that when executed will call of the functions to unsubscribe
+ */
+// eslint-disable-next-line max-len
+export const combineSubscriptions = (...unsubscribeFunctions: (() => void)[]) => () => unsubscribeFunctions.forEach((f) => f());
 
 interface IDirectMessage {
 	event: string;
