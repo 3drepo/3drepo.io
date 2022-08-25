@@ -27,7 +27,7 @@ const processModel = async (teamspace, model) => {
 	const unmigratedMeshesCount = await count(teamspace, `${model}.scene`, { type: 'mesh', vertices_count: { $exists: false } });
 
 	if (unmigratedMeshesCount === 0) {
-		return [];
+		return;
 	}
 
 	const stashDB = `${model}.stash.3drepo`;
@@ -67,7 +67,7 @@ const processModel = async (teamspace, model) => {
 		{ $set: { vertices_count: spanningMeshVerticesCounts[map_id] } },
 	));
 
-	return Promise.all([...meshUpdates, ...singularMeshUpdates]);
+	await Promise.all([...meshUpdates, ...singularMeshUpdates]);
 };
 
 const processTeamspace = async (teamspace) => {
