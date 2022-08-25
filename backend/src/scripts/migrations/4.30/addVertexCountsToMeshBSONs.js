@@ -31,18 +31,16 @@ const processModel = async (teamspace, model) => {
 	}
 
 	const stashDB = `${model}.stash.3drepo`;
-	const superMeshesProm = find(teamspace, stashDB, { type: 'mesh' }, { m_map: 1 });
-
-	const superMeshes = await superMeshesProm;
+	const superMeshes = await find(teamspace, stashDB, { type: 'mesh' }, { m_map: 1 });
 
 	const spanningMeshVerticesCounts = [];
-	let meshUpdates = [];
+	const meshUpdates = [];
 
 	// eslint-disable-next-line camelcase
 	superMeshes.forEach(({ m_map }) => {
 		if (m_map.length > 1) {
 			// eslint-disable-next-line camelcase
-			meshUpdates = meshUpdates.concat(m_map.map(({ map_id, v_from, v_to }) => {
+			meshUpdates.push(...m_map.map(({ map_id, v_from, v_to }) => {
 				// eslint-disable-next-line camelcase
 				const verticesCount = v_to - v_from;
 				return updateOne(
@@ -53,9 +51,10 @@ const processModel = async (teamspace, model) => {
 				);
 			}));
 		} else if (m_map.length === 1) {
+			const idString = UUIDToString(m_map[0].map_id);
 			const verticesCount = m_map[0].v_to - m_map[0].v_from;
-			spanningMeshVerticesCounts[UUIDToString(m_map[0].map_id)] = (
-				spanningMeshVerticesCounts[UUIDToString(m_map[0].map_id)] || 0
+			spanningMeshVerticesCounts[idString] = (
+				spanningMeshVerticesCounts[idString] || 0
 			) + verticesCount;
 		}
 	});
