@@ -107,6 +107,9 @@ const establishRoutes = () => {
 	 *                   name:
 	 *                     type: string
 	 *                     example: Risk
+	 *                   code:
+	 *                     type: string
+	 *                     example: RSK
 	 */
 	router.get('/templates', hasReadAccessToFederation, getAllTemplates);
 
