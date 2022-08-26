@@ -297,11 +297,11 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets:
 	 *   get:
-	 *     description: Get ticket by ID
+	 *     description: Get all tickets within the federation
 	 *     tags: [Federations]
-	 *     operationId: GetTicket
+	 *     operationId: GetTicketList
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -321,18 +321,6 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: ticket
-	 *         description: Ticket ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
- 	 *       - name: showDeprecated
-	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
-	 *         in: query
-	 *         required: false
-	 *         schema:
-	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
