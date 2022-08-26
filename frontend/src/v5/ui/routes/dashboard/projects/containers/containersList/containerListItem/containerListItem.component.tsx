@@ -16,7 +16,6 @@
  */
 
 import { memo, useContext, useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import {
@@ -175,4 +174,4 @@ export const ContainerListItem = memo(({
 			/>
 		</DashboardListItem>
 	);
-}, isEqual);
+});

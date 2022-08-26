@@ -16,7 +16,6 @@
  */
 
 import { memo, useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
@@ -181,4 +180,4 @@ export const FederationListItem = memo(({
 			</DashboardListItem>
 		</>
 	);
-}, isEqual);
+});
