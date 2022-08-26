@@ -78,7 +78,7 @@ const serialiseTicket = async (teamspace, ticket, template, stripDeprecated) => 
 	if (!templateData) {
 		templateData = generateFullSchema(await getTemplateById(teamspace, ticket.type));
 	}
-	const caster = generateCastObject(template, stripDeprecated);
+	const caster = generateCastObject(templateData, stripDeprecated);
 	return caster.cast(ticket);
 };
 
