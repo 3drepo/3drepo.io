@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { createStore, combineReducers } from 'redux';
 import reducers from '@/v5/store/reducers';
-import { combineReducers, createStore } from 'redux';
 
 export const alertAction = (currentAction: string) => ({
 	action: {
