@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById } = require('../../../../../models/tickets');
+const { addTicket, getAllTickets, getTicketById } = require('../../../../../models/tickets');
+const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
-const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
 
 const Tickets = {};
 
@@ -76,5 +76,29 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 );
 
 Tickets.getTicketById = getTicketById;
+
+Tickets.getTicketList = (teamspace, project, model) => {
+	const { SAFETIBASE } = presetModules;
+	const { [SAFETIBASE]: safetibaseProps } = modulePropertyLabels;
+	const projection = {
+		_id: 1,
+		number: 1,
+		type: 1,
+		[`properties.${basePropertyLabels.OWNER}`]: 1,
+		[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
+		[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,
+		[`properties.${basePropertyLabels.DUE_DATE}`]: 1,
+		[`properties.${basePropertyLabels.PIN}`]: 1,
+		[`properties.${basePropertyLabels.STATUS}`]: 1,
+		[`properties.${basePropertyLabels.PRIORITY}`]: 1,
+		[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
+		[`modules.${SAFETIBASE}.${safetibaseProps.LEVEL_OF_RISK}`]: 1,
+		[`modules.${SAFETIBASE}.${safetibaseProps.TREATED_LEVEL_OF_RISK}`]: 1,
+		[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
+
+	};
+
+	return getAllTickets(teamspace, project, model, projection, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+};
 
 module.exports = Tickets;

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/federations');
+const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/federations');
 const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTicket } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -59,6 +59,18 @@ const getTicket = async (req, res, next) => {
 		req.ticket = await getTicketById(teamspace, project, federation, ticket);
 		req.showDeprecated = req.query.showDeprecated === 'true';
 
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketsInFederation = async (req, res, next) => {
+	const { teamspace, project, federation } = req.params;
+
+	try {
+		req.tickets = await getTicketList(teamspace, project, federation);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -282,6 +294,83 @@ const establishRoutes = () => {
 	 *                   format: uuid
 	 */
 	router.post('/', hasCommenterAccessToFederation, validateNewTicket, createTicket);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
+	 *   get:
+	 *     description: Get ticket by ID
+	 *     tags: [Federations]
+	 *     operationId: GetTicket
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+ 	 *       - name: showDeprecated
+	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the ticket as a json object
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 tickets:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     description: schema is subject to the template the ticket follows
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: id of the ticket
+	 *                       title:
+	 *                         type: string
+	 *                         description: ticket title
+	 *                         example: "Missing door"
+	 *                       number:
+	 *                         type: number
+	 *                         description: ticket number
+	 *                       properties:
+	 *                         type: object
+	 *                         description: ticket properties
+	 *                       modules:
+	 *                         type: object
+	 *                         description: ticket modules and their properties
+	 *
+	 */
+	router.get('/', hasReadAccessToFederation, getTicketsInFederation, serialiseTicketList);
 
 	/**
 	 * @openapi
