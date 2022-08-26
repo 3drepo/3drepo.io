@@ -38,7 +38,6 @@ const propTypes = createConstantMapping([
 	'image',
 	'view',
 	'measurements',
-	'safetibase',
 	'coords',
 ]);
 
