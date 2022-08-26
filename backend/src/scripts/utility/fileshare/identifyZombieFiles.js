@@ -35,19 +35,20 @@ const Path = require('path');
 
 const joinPath = (a, b) => (a && b ? Path.posix.join(a, b) : a || b);
 
-const processTeamspace = async (teamspace, files) => {
-	const cols = await getCollectionsEndsWith(teamspace, '.ref');
+const processDatabase = async (database, files) => {
+	const cols = await getCollectionsEndsWith(database, '.ref');
 	await Promise.all(cols.map(async ({ name }) => {
-		const refs = await find(teamspace, name, { type: 'fs' }, { link: 1 });
+		const refs = await find(database, name, { type: 'fs' }, { link: 1 });
 		refs.forEach(({ link }) => files.delete(link));
 	}));
 };
 
 const removeEntriesWithRef = async (files) => {
 	const teamspaces = await getTeamspaceList();
-	for (const ts of teamspaces) {
+	const databases = ['admin', ...teamspaces];
+	for (const db of databases) {
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(ts, files);
+		await processDatabase(db, files);
 	}
 };
 
