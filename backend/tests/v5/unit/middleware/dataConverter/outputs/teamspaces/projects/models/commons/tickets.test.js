@@ -330,7 +330,30 @@ const testSerialiseTicket = () => {
 	});
 };
 
+const testSerialiseTicketList = () => {
+	describe('Serialise ticket list', () => {
+		const teamspace = generateRandomString();
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, async () => {
+			TemplateModel.getTemplatesByQuery.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			const tickets = times(5, () => ({ type: generateRandomString() }));
+
+			const req = { params: { teamspace }, tickets };
+
+			await expect(TicketOutputMiddleware.serialiseTicketList(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledWith(
+				teamspace, { _id: { $in: tickets.map(({ type }) => type) } },
+			);
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+		});
+	});
+};
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
+	testSerialiseTicketList();
 });
