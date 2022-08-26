@@ -173,6 +173,10 @@ export const SettingsForm = ({
 		}
 	}, [open]);
 
+	useEffect(() => {
+		reset(getDefaultValues(containerOrFederation, isContainer));
+	}, [containerOrFederation]);
+
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
 		x, y, z,
