@@ -97,16 +97,19 @@ const establishRoutes = () => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: array
-	 *               items:
-	 *                 type: object
-	 *                 properties:
-	 *                   _id:
-	 *                     type: string
-	 *                     format: uuid
-	 *                   name:
-	 *                     type: string
-	 *                     example: Risk
+	 *               type: object
+	 *               properties:
+	 *                 templates:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         format: uuid
+	 *                       name:
+	 *                         type: string
+	 *                         example: Risk
 	 */
 	router.get('/templates', hasReadAccessToContainer, getAllTemplates);
 
