@@ -82,6 +82,7 @@ Tickets.getTicketList = (teamspace, project, model) => {
 	const { [SAFETIBASE]: safetibaseProps } = modulePropertyLabels;
 	const projection = {
 		_id: 1,
+		title: 1,
 		number: 1,
 		type: 1,
 		[`properties.${basePropertyLabels.OWNER}`]: 1,
