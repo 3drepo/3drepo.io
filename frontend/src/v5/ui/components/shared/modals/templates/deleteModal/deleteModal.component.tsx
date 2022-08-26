@@ -29,7 +29,7 @@ import {
 } from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
-import { UnhandledError } from './deleteModal.styles';
+import { UnhandledErrorInterceptor } from './deleteModal.styles';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -90,7 +90,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 						/>
 					</RetypeCheck>
 				)}
-				<UnhandledError />
+				<UnhandledErrorInterceptor />
 			</Message>
 			<Actions>
 				<Button onClick={onClickClose} variant="contained" color="primary">

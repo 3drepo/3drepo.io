@@ -36,7 +36,7 @@ const validateNewTicket = async (req, res, next) => {
 		const { teamspace } = req.params;
 
 		req.body = await validateTicket(teamspace, template, ticket);
-		await processReadOnlyValues(req.body, user);
+		processReadOnlyValues(req.body, user);
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err.message);
@@ -50,7 +50,7 @@ const templateIDToParams = async (req, res, next) => {
 		req.params.template = req.body.type;
 		await next();
 	} else {
-		respond(req, res, createResponseCode(templates.invalidArguments, 'template type must be provided'));
+		respond(req, res, createResponseCode(templates.invalidArguments, 'Template type must be provided'));
 	}
 };
 

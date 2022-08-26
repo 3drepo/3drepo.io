@@ -496,7 +496,7 @@ const testRemoveFilesWithMeta = () => {
 		const meta = { [generateRandomString()]: generateRandomString() };
 		const teamspace = generateRandomString();
 		const collection = generateRandomString();
-		test('Should remove all files that satisfies the query', async () => {
+		test('Should remove all files that satisfy the query', async () => {
 			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
@@ -524,7 +524,7 @@ const testRemoveFilesWithMeta = () => {
 			expect(FileRefs.removeRefsByQuery).not.toHaveBeenCalled();
 		});
 
-		test('Should manage not file refs properly', async () => {
+		test('Should manage non file refs properly', async () => {
 			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 

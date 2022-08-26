@@ -278,11 +278,44 @@ const testValidate = () => {
 				deprecated: true,
 			}],
 		};
-		const expectedData = { ...cloneDeep(data) };
+		const expectedData = cloneDeep(data);
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
 		expectedData.config = { defaultView: true };
+		const output = TemplateSchema.validate(data);
+
+		expect(output).toEqual(expectedData);
+	});
+
+	test('Image field will have the default field stripped if provided', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+			},
+			properties: [
+				{
+					name: generateRandomString(),
+					type: propTypes.IMAGE,
+					default: generateRandomString(),
+				},
+
+			],
+			modules: [
+				{
+					type: presetModules.SAFETIBASE,
+					properties: [
+						{
+							name: generateRandomString(),
+							type: propTypes.IMAGE,
+							default: generateRandomString(),
+						}],
+				}],
+		};
+		const expectedData = cloneDeep(data);
+		delete expectedData.properties[0].default;
+		delete expectedData.modules[0].properties[0].default;
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();

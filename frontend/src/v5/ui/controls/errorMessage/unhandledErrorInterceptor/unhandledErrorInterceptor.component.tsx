@@ -14,10 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { UnhandledError, UnhandledErrorProps } from '../unhandledError/unhandledError.component';
+import { useErrorInterceptor } from '../useErrorInterceptor';
 
-import styled from 'styled-components';
-import { UnhandledErrorInterceptor as UnhandledErrorInterceptorBase } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+type UnhandledErrorInterceptorProps = Omit<UnhandledErrorProps, 'error'>;
 
-export const UnhandledErrorInterceptor = styled(UnhandledErrorInterceptorBase)`
-	justify-content: center;
-`;
+export const UnhandledErrorInterceptor = (props: UnhandledErrorInterceptorProps) => {
+	const error = useErrorInterceptor();
+	return (<UnhandledError {...props} error={error} />);
+};

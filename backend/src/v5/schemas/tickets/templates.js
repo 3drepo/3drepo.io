@@ -73,7 +73,11 @@ const propSchema = Yup.object().shape({
 				}
 				return true;
 			});
-		} if (type === propTypes.ANY_OF) return res.oneOf(values);
+		}
+
+		if (type === propTypes.ANY_OF) return res.oneOf(values);
+
+		if (type === propTypes.IMAGE) return Yup.mixed().strip();
 
 		return res;
 	}),

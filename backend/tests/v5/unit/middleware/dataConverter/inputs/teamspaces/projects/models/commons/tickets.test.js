@@ -41,7 +41,7 @@ const testValidateNewTicket = () => {
 			expect(fn).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'template type must be provided'));
+				createResponseCode(templates.invalidArguments, 'Template type must be provided'));
 		});
 
 		test('Should not call next if template doesn\'t exist', async () => {
@@ -117,7 +117,7 @@ const testValidateNewTicket = () => {
 
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.processReadOnlyValues.mockRejectedValueOnce(new Error(errMsg));
+			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
 
 			await Tickets.validateNewTicket(req, res, fn);
 
