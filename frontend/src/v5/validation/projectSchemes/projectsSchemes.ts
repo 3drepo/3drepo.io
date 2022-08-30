@@ -29,7 +29,7 @@ export const CreateProjectSchema = Yup.object().shape({
 	projectName: Yup.string()
 		.transform((value) => value.trim())
 		.max(120, formatMessage({
-			id: 'createProject.teamspace.error.max',
+			id: 'createProject.name.error.max',
 			defaultMessage: 'Project name is limited to 120 characters',
 		}))
 		.required(
@@ -41,7 +41,7 @@ export const CreateProjectSchema = Yup.object().shape({
 		.matches(
 			/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
 			formatMessage({
-				id: 'createProject.teamspace.error.illegalCharacters',
+				id: 'createProject.name.error.illegalCharacters',
 				defaultMessage: 'Project name cannot contains the following characters: / ? = # +',
 			}),
 		)
