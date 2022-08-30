@@ -16,6 +16,7 @@
  */
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
 export const getErrorCode = (error: any) => error.response?.data?.code;
+export const getErrorStatus = (error: any) => error.response?.data?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
 
