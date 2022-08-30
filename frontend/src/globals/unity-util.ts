@@ -951,8 +951,8 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStremingBundlesLinesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStremingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static SetStreamingBundlesLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
 	}
 
 	/**
@@ -970,7 +970,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 */
 	public static SetStreamingElementsLinesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStremingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+		UnityUtil.toUnity('SetStreamingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
 	}
 
 	/**
