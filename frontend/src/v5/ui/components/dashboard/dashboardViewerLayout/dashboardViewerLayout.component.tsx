@@ -14,10 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
+import { DashboardLayout } from '../dashboardLayout/dashboardLayout.component';
 
-import styled from 'styled-components';
-import { UnhandledErrorInterceptor as UnhandledErrorInterceptorBase } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-
-export const UnhandledErrorInterceptor = styled(UnhandledErrorInterceptorBase)`
-	justify-content: center;
-`;
+export const DashboardViewerLayout = ({ children }) => (
+	<DashboardLayout>
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				{children}
+			</MuiThemeProvider>
+		</ThemeProvider>
+	</DashboardLayout>
+);

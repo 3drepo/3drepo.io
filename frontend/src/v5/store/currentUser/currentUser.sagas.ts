@@ -45,6 +45,7 @@ export function* fetchUser() {
 
 export function* updatePersonalData({
 	personalData: { avatarFile, ...restOfPersonalData },
+	onSuccess,
 	onError,
 }: UpdatePersonalDataAction) {
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
@@ -58,6 +59,7 @@ export function* updatePersonalData({
 			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }));
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
+		onSuccess();
 	} catch (error) {
 		onError(error);
 	}

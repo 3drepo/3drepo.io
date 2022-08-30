@@ -21,6 +21,7 @@ import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing'
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
 import { TeamspaceSelection } from '../teamspaceSelection';
@@ -95,9 +96,12 @@ export const MainRoute = () => {
 					</DashboardLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute path={VIEWER_ROUTE}>
-					<DashboardLayout>
+					<DashboardViewerLayout>
 						<Viewer />
-					</DashboardLayout>
+					</DashboardViewerLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute exact path={path}>
+					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
 				</AuthenticatedRoute>
 				<AuthenticatedRoute path="*">
 					<DashboardLayout>

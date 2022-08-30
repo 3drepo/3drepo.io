@@ -22,11 +22,11 @@ import {
 	FederationSettings,
 	FederationStats,
 	IFederation,
+	NewFederation,
 } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 import { FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
@@ -37,7 +37,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
-	containers: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
+	containers: prepareMockContainers(),
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
@@ -74,7 +74,7 @@ export const prepareMockStatsReply = (federation: IFederation): FederationStats 
 });
 
 export const prepareMockContainers = (min = 1, max = 10): string[] => (
-	times(faker.datatype.number({ max, min }), () => faker.random.uuid())
+	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
 );
 
 export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
@@ -99,3 +99,24 @@ export const prepareMockRawSettingsReply = (federation: IFederation): Federation
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoints: [federation.surveyPoint],
 });
+
+export const prepareMockNewFederation = (federation: IFederation): NewFederation => ({
+	unit: federation.unit,
+	name: federation.name,
+	code: federation.code,
+	desc: federation.desc,
+});
+
+export const federationMockStats = (overrides?: Partial<FederationStats>) => ({
+	code: faker.datatype.uuid(),
+	desc: faker.random.words(3),
+	status: UploadStatuses.OK,
+	containers: prepareMockContainers(),
+	tickets: {
+		issues: faker.datatype.number(),
+		risks: faker.datatype.number(),
+	},
+	category: faker.random.word(),
+	lastUpdated: faker.datatype.number(),
+	...overrides,
+})
