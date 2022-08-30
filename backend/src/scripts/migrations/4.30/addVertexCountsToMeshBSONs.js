@@ -34,22 +34,26 @@ const processModel = async (teamspace, model) => {
 	const superMeshes = await find(teamspace, stashDB, { type: 'mesh' }, { m_map: 1 });
 
 	const spanningMeshVerticesCounts = [];
-	const meshUpdates = [];
 
 	// eslint-disable-next-line camelcase
-	superMeshes.forEach(({ m_map }) => {
+	superMeshes.forEach(async ({ m_map }) => {
 		if (m_map.length > 1) {
 			// eslint-disable-next-line camelcase
-			meshUpdates.push(...m_map.map(({ map_id, v_from, v_to }) => {
+			for (let j = 0; j < m_map.length; j++) {
+				// eslint-disable-next-line camelcase
+				const { map_id, v_from, v_to } = m_map[j];
 				// eslint-disable-next-line camelcase
 				const verticesCount = v_to - v_from;
-				return updateOne(
+				// Executing the following `updateOne` concurrently causes
+				// JS heap to run out of memory in some instances
+				// eslint-disable-next-line no-await-in-loop
+				await updateOne(
 					teamspace,
 					`${model}.scene`,
 					{ _id: map_id },
 					{ $set: { vertices_count: verticesCount } },
 				);
-			}));
+			}
 		} else if (m_map.length === 1) {
 			const idString = UUIDToString(m_map[0].map_id);
 			const verticesCount = m_map[0].v_to - m_map[0].v_from;
@@ -67,7 +71,7 @@ const processModel = async (teamspace, model) => {
 		{ $set: { vertices_count: spanningMeshVerticesCounts[map_id] } },
 	));
 
-	await Promise.all([...meshUpdates, ...singularMeshUpdates]);
+	await Promise.all(singularMeshUpdates);
 };
 
 const processTeamspace = async (teamspace) => {
