@@ -25,6 +25,7 @@ import filesize from 'filesize';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { ListItemSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -57,6 +58,7 @@ export const UploadListItem = ({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
+		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name) },
 	});
 
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
@@ -101,7 +103,8 @@ export const UploadListItem = ({
 			/>
 			<Destination
 				disabled={isUploading}
-				errorMessage={errors.containerName?.message}
+				errors={errors}
+				control={control}
 				defaultValue={defaultValues.containerName}
 				onChange={onDestinationChange}
 			/>
@@ -111,7 +114,7 @@ export const UploadListItem = ({
 				isSelected={isSelected}
 				errorMessage={errors.revisionTag?.message}
 			/>
-			{ isUploading
+			{isUploading
 				? <UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />
 				: (
 					<>

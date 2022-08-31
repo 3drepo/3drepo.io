@@ -22,15 +22,17 @@ import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { Autocomplete, createFilterOptions } from '@mui/material';
-import { DestinationInput } from './uploadListItemDestination.styles';
-import { NewContainer } from './options/newContainer';
-import { ExistingContainer } from './options/existingContainer';
+import { createFilterOptions } from '@mui/material';
+import { Autocomplete, DestinationInput } from './uploadListItemDestination.styles';
+import { NewContainer } from './options/newContainer/newContainer.component';
+import { UnavailableContainer } from './options/unavailableContainer/unavailableContainer.component';
+import { ExistingContainer } from './options/existingContainer/existingContainer.component';
 import { OptionsBox } from './options';
 
 interface IUploadListItemDestination {
 	onChange: (option) => void;
-	errorMessage: string;
+	control?: any;
+	errors?: any;
 	disabled?: boolean;
 	className?: string;
 	defaultValue: string;
@@ -45,7 +47,8 @@ const emptyOption = prepareSingleContainerData({
 const filter = createFilterOptions<IContainer>();
 
 export const UploadListItemDestination = ({
-	errorMessage,
+	control,
+	errors,
 	disabled = false,
 	className,
 	onChange,
@@ -55,15 +58,13 @@ export const UploadListItemDestination = ({
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!value.name);
 	const containers = ContainersHooksSelectors.selectContainers();
-	const processingContainers = containers
-		.filter((container) => !canUploadToBackend(container.status));
+	const processingContainers = containers.filter((container) => !canUploadToBackend(container.status));
 	const [newOrExisting, setNewOrExisting] = useState(() => {
 		if (value.name) {
 			return containers.find((c) => c.name === value.name) ? 'existing' : 'new';
 		}
-		return 'unset';
+		return '';
 	});
-
 	const [containersInUse, setContainersInUse] = useState(processingContainers);
 	const { getValues } = useFormContext();
 	const forceUpdate = useCallback(() => {
@@ -75,69 +76,90 @@ export const UploadListItemDestination = ({
 		}
 	}, []);
 
+	const errorMessage = errors.containerName?.message;
+
+	const onAutocompleteChange = (_, newValue: IContainer) => {
+		setValue(newValue || emptyOption);
+		onChange(newValue || emptyOption);
+		if (!newValue) {
+			setNewOrExisting('');
+			forceUpdate();
+		} else {
+			setNewOrExisting(!newValue._id ? 'new' : 'existing');
+		}
+		setDisableClearable(!newValue);
+	};
+
+	const onAutocompleteInputChange = (_, name: string) => {
+		if (name === value.name) onChange(value);
+	};
+
+	const getFilterOptions = (options: IContainer[], params) => {
+		let filtered: IContainer[] = filter(options, params);
+		const { inputValue } = params;
+
+		const isExisting = options.some((option: IContainer) => inputValue === option.name);
+		filtered = filtered.filter((x) => x.name !== value.name);
+		if (containersInUse.length === containers.length && !inputValue) {
+			filtered = [];
+		}
+		if (inputValue !== '' && !isExisting) {
+			filtered = [{
+				...emptyOption,
+				name: inputValue,
+			}, ...filtered];
+		}
+
+		return filtered;
+	};
+
+	const optionIsUsed = ({ name }: IContainer) => containersInUse.some((c) => c.name === name);
+
+	const getOptionDisabled = (option: IContainer) => !!option.name && optionIsUsed(option);
+
+	const getRenderOption = (optionProps, option: IContainer) => {
+		if (option._id) {
+			return (
+				<ExistingContainer
+					inUse={optionIsUsed(option)}
+					container={option}
+					latestRevision={option.latestRevision}
+					{...optionProps}
+				/>
+			);
+		}
+
+		if (errorMessage) return (<UnavailableContainer />);
+
+		return (<NewContainer containerName={option.name} {...optionProps} />);
+	};
+
 	return (
 		<Autocomplete
 			value={value}
 			disableClearable={disableClearable}
-			onChange={(_, newValue: IContainer) => {
-				setValue(newValue || emptyOption);
-				onChange(newValue || emptyOption);
-				if (!newValue) {
-					setNewOrExisting('unset');
-					forceUpdate();
-				} else {
-					setNewOrExisting(!newValue._id ? 'new' : 'existing');
-				}
-				setDisableClearable(!newValue);
-			}}
+			onChange={onAutocompleteChange}
+			onInputChange={onAutocompleteInputChange}
 			onOpen={forceUpdate}
 			options={containers}
-			filterOptions={(options: IContainer[], params) => {
-				let filtered: IContainer[] = filter(options, params);
-				const { inputValue } = params;
-
-				const isExisting = options.some((option: IContainer) => inputValue === option.name);
-				filtered = filtered.filter((x) => x.name !== value.name);
-				if (containersInUse.length === containers.length && !inputValue) {
-					filtered = [];
-				}
-				if (inputValue !== '' && !isExisting) {
-					filtered = [{
-						...emptyOption,
-						name: inputValue,
-					}, ...filtered];
-				}
-
-				return filtered;
-			}}
+			filterOptions={getFilterOptions}
 			getOptionLabel={(option: IContainer) => option.name}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
+					control={control}
+					formError={errors.containerName}
+					name="containerName"
 					neworexisting={newOrExisting}
-					error={!!errorMessage}
 					{...params}
 					{...props}
-					InputProps={{ ...InputProps,
-						startAdornment: !!errorMessage && (
-							<ErrorTooltip>
-								{errorMessage}
-							</ErrorTooltip>
-						),
+					InputProps={{
+						...InputProps,
+						startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
 					}}
 				/>
 			)}
-			getOptionDisabled={(option: IContainer) => !!option.name
-				&& containersInUse.some((c) => c.name === option.name)}
-			renderOption={(optionProps, option) => (!option._id
-				? <NewContainer containerName={option.name} {...optionProps} />
-				: (
-					<ExistingContainer
-						inUse={containersInUse.some((c) => c.name === option.name)}
-						container={option}
-						latestRevision={option.latestRevision}
-						{...optionProps}
-					/>
-				))}
+			getOptionDisabled={getOptionDisabled}
+			renderOption={getRenderOption}
 			ListboxComponent={OptionsBox}
 			noOptionsText={formatMessage({
 				id: 'uploads.destination.noOptions',

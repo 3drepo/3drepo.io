@@ -15,4 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ExistingContainer } from './existingContainer.component';
+import styled from 'styled-components';
+
+export const UnavailableContainerOption = styled.div`
+	color: ${({ theme }) => theme.palette.error.main};
+	padding: 12px;
+`;

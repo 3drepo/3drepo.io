@@ -15,4 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NewContainer } from './newContainer.component';
+import { FormattedMessage } from 'react-intl';
+import { UnavailableContainerOption } from './unavailableContainer.styles';
+
+export const UnavailableContainer = () => (
+	<UnavailableContainerOption>
+		<FormattedMessage
+			id="uploads.destination.name.error.alreadyExists"
+			defaultMessage="This name is already used within this project"
+		/>
+	</UnavailableContainerOption>
+);
