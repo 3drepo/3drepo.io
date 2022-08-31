@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useContext, useState } from 'react';
-import { useParams } from 'react-router';
+import { ReactNode, useCallback, useContext, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import {
@@ -33,17 +32,16 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm';
+import { SkeletonListItem } from './skeletonListItem';
 
 interface IContainersList {
 	emptyMessage: ReactNode;
@@ -63,7 +61,6 @@ export const ContainersList = ({
 	onClickCreate,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	// eslint-disable-next-line max-len
 	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
@@ -74,17 +71,9 @@ export const ContainersList = ({
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
-	const selectOrToggleItem = (id: string) => {
+	const selectOrToggleItem = useCallback((id: string) => {
 		setSelectedItemId((state) => (state === id ? null : id));
-	};
-
-	const setFavourite = (id: string, value: boolean) => {
-		if (value) {
-			ContainersActionsDispatchers.addFavourite(teamspace, project, id);
-		} else {
-			ContainersActionsDispatchers.removeFavourite(teamspace, project, id);
-		}
-	};
+	}, []);
 
 	return (
 		<Container>
@@ -135,16 +124,16 @@ export const ContainersList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (
+						sortedList.map((container, index) => (container.hasStatsPending ? (
+							<SkeletonListItem delay={index / 10} key={container._id} />
+						) : (
 							<ContainerListItem
-								index={index}
 								key={container._id}
 								isSelected={container._id === selectedItemId}
 								container={container}
-								onFavouriteChange={setFavourite}
 								onSelectOrToggleItem={selectOrToggleItem}
 							/>
-						))
+						)))
 					) : (
 						<DashboardListEmptyContainer>
 							{hasContainers ? (
