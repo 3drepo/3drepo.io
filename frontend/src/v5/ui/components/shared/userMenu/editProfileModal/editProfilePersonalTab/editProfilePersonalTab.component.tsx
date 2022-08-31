@@ -27,11 +27,10 @@ import { useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
-import { ScrollArea } from '@controls/scrollArea';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
-import { ScrollAreaPadding } from './editProfilePersonalTab.styles';
+import { ScrollArea } from './editProfilePersonalTab.styles';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -122,75 +121,73 @@ export const EditProfilePersonalTab = ({
 
 	return (
 		<ScrollArea>
-			<ScrollAreaPadding>
-				<EditProfileAvatar user={user} />
-				<FormTextField
-					name="firstName"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.firstName',
-						defaultMessage: 'First Name',
-					})}
-					required
-					formError={formErrors.firstName}
-				/>
-				<FormTextField
-					name="lastName"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.lastName',
-						defaultMessage: 'Last Name',
-					})}
-					required
-					formError={formErrors.lastName}
-				/>
-				<FormTextField
-					name="email"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.email',
-						defaultMessage: 'Email',
-					})}
-					required
-					formError={formErrors.email}
-				/>
-				<FormTextField
-					name="company"
-					control={control}
-					label={formatMessage({
-						id: 'editProfile.form.company',
-						defaultMessage: 'Company',
-					})}
-					formError={formErrors.company}
-				/>
-				<FormSelect
-					name="countryCode"
-					control={control}
-					label={formatMessage({
-						id: 'userSignup.form.countryCode',
-						defaultMessage: 'Country',
-					})}
-					required
-				>
-					{clientConfigService.countries.map((country) => (
-						<MenuItem key={country.code} value={country.code}>
-							{country.name}
-						</MenuItem>
-					))}
-				</FormSelect>
-				{submitWasSuccessful && (
-					<SuccessMessage>
-						<FormattedMessage
-							id="editProfile.form.success"
-							defaultMessage="Your profile has been changed successfully."
-						/>
-					</SuccessMessage>
-				)}
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-				/>
-			</ScrollAreaPadding>
+			<EditProfileAvatar user={user} />
+			<FormTextField
+				name="firstName"
+				control={control}
+				label={formatMessage({
+					id: 'editProfile.form.firstName',
+					defaultMessage: 'First Name',
+				})}
+				required
+				formError={formErrors.firstName}
+			/>
+			<FormTextField
+				name="lastName"
+				control={control}
+				label={formatMessage({
+					id: 'editProfile.form.lastName',
+					defaultMessage: 'Last Name',
+				})}
+				required
+				formError={formErrors.lastName}
+			/>
+			<FormTextField
+				name="email"
+				control={control}
+				label={formatMessage({
+					id: 'editProfile.form.email',
+					defaultMessage: 'Email',
+				})}
+				required
+				formError={formErrors.email}
+			/>
+			<FormTextField
+				name="company"
+				control={control}
+				label={formatMessage({
+					id: 'editProfile.form.company',
+					defaultMessage: 'Company',
+				})}
+				formError={formErrors.company}
+			/>
+			<FormSelect
+				name="countryCode"
+				control={control}
+				label={formatMessage({
+					id: 'userSignup.form.countryCode',
+					defaultMessage: 'Country',
+				})}
+				required
+			>
+				{clientConfigService.countries.map((country) => (
+					<MenuItem key={country.code} value={country.code}>
+						{country.name}
+					</MenuItem>
+				))}
+			</FormSelect>
+			{submitWasSuccessful && (
+				<SuccessMessage>
+					<FormattedMessage
+						id="editProfile.form.success"
+						defaultMessage="Your profile has been changed successfully."
+					/>
+				</SuccessMessage>
+			)}
+			<UnhandledError
+				error={unexpectedError}
+				expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+			/>
 		</ScrollArea>
 	);
 };
