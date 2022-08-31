@@ -25,15 +25,15 @@ const { validateMany } = require('../../../../../../common');
 
 const TicketsMiddleware = {};
 
-const validateNewTicket = async (req, res, next) => {
+const validate = async (req, res, next, isNew) => {
 	try {
-		const ticket = req.body;
 		const template = req.templateData;
-		const user = getUserFromSession(req.session);
-
-		if (template.deprecated) throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
+		if (isNew && template.deprecated) 
+			throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
 
 		const { teamspace } = req.params;
+		const ticket = req.body;		
+		const user = getUserFromSession(req.session);
 
 		req.body = await validateTicket(teamspace, template, ticket);
 		processReadOnlyValues(req.body, user);
@@ -54,7 +54,9 @@ const templateIDToParams = async (req, res, next) => {
 	}
 };
 
-TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateNewTicket]);
+TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validate(true)]);
+TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketTemplateExists, validate]);
+
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
 module.exports = TicketsMiddleware;

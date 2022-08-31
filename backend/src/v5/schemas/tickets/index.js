@@ -142,12 +142,15 @@ const calculateLevelOfRisk = (likelihood, consequence) => {
 	return levelOfRisk;
 };
 
-Tickets.processReadOnlyValues = (ticket, user) => {
+Tickets.processReadOnlyValues = (ticket, user, newTicket) => {
 	const { properties, modules } = ticket;
 	const currTime = new Date();
 
-	properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
-	properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
+	if(newTicket){
+		properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
+		properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
+	}
+	
 	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
 
 	if (modules[presetModules.SAFETIBASE]) {
