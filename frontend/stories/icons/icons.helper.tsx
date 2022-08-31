@@ -51,5 +51,5 @@ export const getIcons = (context, dir?) => {
 		Icon: () => <img src={require(`@assets/icons/${formattedDir}${name}`)} alt={name} />,
 		name: getDisplayName(name),
 	}));
-	return [...tsxIcons, ...svgIcons];
+	return [...tsxIcons, ...svgIcons].sort((a, b) => a.name.localeCompare(b.name));
 };
