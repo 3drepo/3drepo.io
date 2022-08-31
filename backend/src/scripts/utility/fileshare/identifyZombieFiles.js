@@ -23,12 +23,12 @@ const { v5Path } = require('../../../interop');
 const Yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getCollectionsEndsWith } = require('../../common/utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { fs: fsConfig } = require(`${v5Path}/utils/config`);
 const { path: fsPath } = fsConfig;
-const { find } = require(`${v5Path}/handler/db`);
+const { find, listDatabases } = require(`${v5Path}/handler/db`);
 const { readdirSync } = require('fs');
 const { unlink } = require('fs/promises');
 const Path = require('path');
@@ -44,8 +44,7 @@ const processDatabase = async (database, files) => {
 };
 
 const removeEntriesWithRef = async (files) => {
-	const teamspaces = await getTeamspaceList();
-	const databases = ['admin', ...teamspaces];
+	const databases = (await listDatabases()).map(({ name }) => name);
 	for (const db of databases) {
 		// eslint-disable-next-line no-await-in-loop
 		await processDatabase(db, files);

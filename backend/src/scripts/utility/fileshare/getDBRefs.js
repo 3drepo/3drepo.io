@@ -28,7 +28,8 @@ const run = async (dbName) => {
 	}
 	const collections = await getCollectionsEndsWith(dbName, '.ref');
 	for (let i = 0; i < collections.length; ++i) {
-		const coll = await find(dbName, collections[i].name, {}, {link:1});
+		// eslint-disable-next-line no-await-in-loop
+		const coll = await find(dbName, collections[i].name, {}, { link: 1 });
 		for (let j = 0; j < coll.length; ++j) {
 			// eslint-disable-next-line no-console
 			console.log(coll[j].link);
