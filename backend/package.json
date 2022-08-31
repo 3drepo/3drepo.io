@@ -52,7 +52,7 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.24",
     "moment": "2.29.2",
-    "moment-timezone": "0.5.23",
+    "moment-timezone": "0.5.35",
     "mongodb": "3.6.12",
     "multer": "1.4.1",
     "nodemailer": "6.6.3",
