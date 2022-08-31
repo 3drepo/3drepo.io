@@ -16,7 +16,6 @@
  */
 
 import { ReactNode, useContext } from 'react';
-import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
@@ -30,7 +29,6 @@ import {
 } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SearchInput } from '@controls/search/searchInput';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
@@ -38,8 +36,8 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
@@ -61,8 +59,6 @@ export const FederationsList = ({
 	onClickCreate,
 	showBottomButton = false,
 }: IFederationsList): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
 	// eslint-disable-next-line max-len
 	const { items: federations, filteredItems: filteredFederations } = useContext<SearchContextType<IFederation>>(SearchContext);
 	const hasFederations = federations.length > 0;
@@ -71,14 +67,6 @@ export const FederationsList = ({
 
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
-
-	const setFavourite = (id: string, value: boolean) => {
-		if (value) {
-			FederationsActionsDispatchers.addFavourite(teamspace, project, id);
-		} else {
-			FederationsActionsDispatchers.removeFavourite(teamspace, project, id);
-		}
-	};
 
 	return (
 		<Container>
@@ -126,14 +114,14 @@ export const FederationsList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((federation, index) => (
+						sortedList.map((federation, index) => (federation.hasStatsPending ? (
+							<SkeletonListItem delay={index / 10} key={federation._id} />
+						) : (
 							<FederationListItem
-								index={index}
 								key={federation._id}
 								federation={federation}
-								onFavouriteChange={setFavourite}
 							/>
-						))
+						)))
 					) : (
 						<DashboardListEmptyContainer>
 							{ hasFederations ? (
