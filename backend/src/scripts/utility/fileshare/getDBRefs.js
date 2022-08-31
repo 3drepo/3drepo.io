@@ -17,25 +17,36 @@
 
 const { v5Path } = require('../../../interop');
 
+const { getCollectionsEndsWith } = require('../../utils');
+
 const { find } = require(`${v5Path}/handler/db`);
 const Path = require('path');
 
-const run = async () => {
-	const teamspaces = await find('admin', 'avatars.ref', {});
-	for (let i = 0; i < teamspaces.length; ++i) {
-		// eslint-disable-next-line no-console
-		console.log(teamspaces[i].link);
+const run = async (dbName) => {
+	if (!dbName) {
+		throw new Error('Database name must be provided to execute this script');
+	}
+	const collections = await getCollectionsEndsWith(dbName, '.ref');
+	for (let i = 0; i < collections.length; ++i) {
+		const coll = await find(dbName, collections[i].name, {}, {link:1});
+		for (let j = 0; j < coll.length; ++j) {
+			// eslint-disable-next-line no-console
+			console.log(coll[j].link);
+		}
 	}
 };
 
 const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-
+	const argsSpec = (subYargs) => subYargs.positional('database', {
+		describe: 'Database name',
+		type: 'string',
+	});
 	return yargs.command(
 		commandName,
-		'Get all avatar ref links and output to console',
-		{},
-		(argv) => run(),
+		'Get all ref links from database and output to console',
+		argsSpec,
+		(argv) => run(argv._[1]),
 	);
 };
 
