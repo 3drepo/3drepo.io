@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
@@ -38,28 +39,28 @@ export const INITIAL_STATE: IAuthState = {
 	returnUrl: null,
 };
 
-export const setAuthenticationStatus = (state = INITIAL_STATE, { status }) => (
-	{ ...state,
-		isAuthenticated: status,
-	}
-);
+export const setAuthenticationStatus = (state, { status }: SetAuthenticationStatusAction) => {
+	state.isAuthenticated = status;
+};
 
-export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+export const setPendingStatus = (state, { isPending }: SetPendingStatusAction) => {
+	state.isPending = isPending;
+};
 
-export const loginFailed = (state = INITIAL_STATE, { errorMessage }): IAuthState => (
-	{ ...state,
-		errorMessage,
-	}
-);
+export const loginFailed = (state, { errorMessage }: LoginFailedAction) => {
+	state.errorMessage = errorMessage;
+};
 
-export const setReturnUrl = (state = INITIAL_STATE, { url }):IAuthState => ({ ...state, returnUrl: url });
+export const setReturnUrl = (state, { url }: SetReturnUrlAction) => {
+	state.returnUrl = url;
+};
 
-export const authReducer = createReducer(INITIAL_STATE, {
+export const authReducer = createReducer(INITIAL_STATE, produceAll({
 	[AuthTypes.LOGIN_FAILED]: loginFailed,
 	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
 	[AuthTypes.SET_AUTHENTICATION_STATUS]: setAuthenticationStatus,
 	[AuthTypes.SET_RETURN_URL]: setReturnUrl,
-});
+}));
 
 /**
  * Types
@@ -76,17 +77,19 @@ export interface IAuthState {
 	}
 }
 
+export type AuthenticateAction = Action<'AUTHENTICATE'>;
 export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
 export type LoginFailedAction = Action<'LOGIN_FAILED'> & { errorMessage: string };
+export type LogoutAction = Action<'LOGOUT'>;
 export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
 export type SetAuthenticationStatusAction = Action<'SET_AUTHENTICATION_STATUS'> & { status: boolean };
-export type SetReturnUrlAction = Action<'SET_RETURN_URL'> & { url:string };
+export type SetReturnUrlAction = Action<'SET_RETURN_URL'> & { url: string };
 
 export interface IAuthActionCreators {
-	authenticate: () => Action<'AUTHENTICATE'>;
+	authenticate: () => AuthenticateAction;
 	login: (username: string, password: string) => LoginAction;
 	loginFailed: (errorMessage: string) => LoginFailedAction,
-	logout: () => Action<'LOGOUT'>;
+	logout: () => LogoutAction;
 	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
 	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
 	sessionExpired: () => void;
