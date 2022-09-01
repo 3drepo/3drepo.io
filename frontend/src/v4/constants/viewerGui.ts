@@ -23,6 +23,8 @@ import SequencesIcon from '@mui/icons-material/Movie';
 import ViewsIcon from '@mui/icons-material/PhotoCamera';
 import IssuesIcon from '@mui/icons-material/Place';
 import MeasureIcon from '@mui/icons-material/Straighten';
+import TicketsIcon from '@mui/icons-material/FormatListBulleted';
+
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 
 import { clientConfigService } from '../services/clientConfig';
@@ -31,6 +33,7 @@ export const VIEWER_PANELS = {
 	GIS: 'gis',
 	ISSUES: 'issues',
 	RISKS: 'risks',
+	TICKETS: 'tickets',
 	BIM: 'bim',
 	TREE: 'tree',
 	GROUPS: 'groups',
@@ -45,6 +48,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
 	[VIEWER_PANELS.RISKS]: RisksIcon,
+	[VIEWER_PANELS.TICKETS]: TicketsIcon,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,
@@ -57,6 +61,7 @@ export const VIEWER_PANELS_ICONS = {
 export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.ISSUES]: 200,
 	[VIEWER_PANELS.RISKS]: 200,
+	[VIEWER_PANELS.TICKETS]: 200,
 	[VIEWER_PANELS.GROUPS]: 200,
 	[VIEWER_PANELS.VIEWS]: 200,
 	[VIEWER_PANELS.TREE]: 80,
@@ -69,6 +74,7 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.ISSUES]: 'Issues',
 	[VIEWER_PANELS.RISKS]: 'SafetiBase',
+	[VIEWER_PANELS.TICKETS]: 'Tickets',
 	[VIEWER_PANELS.GROUPS]: 'Groups',
 	[VIEWER_PANELS.VIEWS]: 'Views',
 	[VIEWER_PANELS.TREE]: 'Tree',
@@ -87,6 +93,7 @@ const getPanelConfig = (panelType) => ({
 export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.ISSUES,
 	VIEWER_PANELS.RISKS,
+	VIEWER_PANELS.TICKETS,
 	VIEWER_PANELS.GROUPS,
 	VIEWER_PANELS.VIEWS,
 	VIEWER_PANELS.TREE,
