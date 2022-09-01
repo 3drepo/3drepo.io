@@ -15,22 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RisksConstants = {};
+const Tickets = {};
 
-RisksConstants.riskCategories = [
-	'Commercial Issue',
-	'Environmental Issue',
-	'Health - Material effect',
-	'Health - Mechanical effect',
-	'Safety Issue - Fall',
-	'Safety Issue - Trapped',
-	'Safety Issue - Event',
-	'Safety Issue - Handling',
-	'Safety Issue - Struck',
-	'Safety Issue - Public',
-	'Social Issue',
-	'Other Issue',
-	'Unknown',
-];
+Tickets.TICKETS_RESOURCES_COL = 'tickets.resources';
 
-module.exports = RisksConstants;
+module.exports = Tickets;
