@@ -14,21 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
+import { DashboardLayout } from '../dashboardLayout/dashboardLayout.component';
 
-const { respond } = require('../../../../utils/responder');
-const { serialiseTicketTemplate } = require('../common/tickets.templates');
-const { templates } = require('../../../../utils/responseCodes');
-
-const Settings = {};
-
-Settings.castTicketSchemaOutput = (req, res) => {
-	try {
-		const template = serialiseTicketTemplate(req.templateData);
-
-		respond(req, res, templates.ok, template);
-	} catch (err) {
-		respond(req, res, templates.unknown);
-	}
-};
-
-module.exports = Settings;
+export const DashboardViewerLayout = ({ children }) => (
+	<DashboardLayout>
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				{children}
+			</MuiThemeProvider>
+		</ThemeProvider>
+	</DashboardLayout>
+);

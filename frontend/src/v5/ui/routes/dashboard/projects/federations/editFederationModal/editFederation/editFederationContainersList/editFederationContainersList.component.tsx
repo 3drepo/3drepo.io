@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, ComponentType, useState, useContext } from 'react';
+import { ReactNode, ComponentType, useState, useContext, useCallback } from 'react';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -30,22 +30,18 @@ import { Display } from '@/v5/ui/themes/media';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ButtonProps } from '@mui/material/Button';
+import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
-import { EditFederationContainersListItem } from './editFederationContainersListItem/editFederationContainersListItem.component';
+import { EditFederationContainersListItem, IconButtonProps } from './editFederationContainersListItem/editFederationContainersListItem.component';
 import { Container } from './editFederationContainersList.styles';
 
 export type ActionButtonProps = {
 	children: ReactNode;
 	disabled?: boolean;
 	filteredContainers?: IContainer[];
-};
-
-export type IconButtonProps = {
-	container: IContainer;
-	isSelected?: boolean;
 };
 
 type EditFederationContainersProps = {
@@ -83,9 +79,9 @@ export const EditFederationContainers = ({
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
-	const selectOrToggleItem = (id: string) => {
+	const selectOrToggleItem = useCallback((id: string) => {
 		setSelectedItemId((state) => (state === id ? null : id));
-	};
+	}, []);
 
 	return (
 		<Container>
@@ -125,19 +121,18 @@ export const EditFederationContainers = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (
+						sortedList.map((container, index) => (container.hasStatsPending ? (
+							<SkeletonListItem delay={index / 10} key={container._id} />
+						) : (
 							<EditFederationContainersListItem
-								index={index}
-								icon={() => (
-									<IconButton container={container} isSelected={container._id === selectedItemId} />
-								)}
+								icon={IconButton}
 								key={container._id}
 								isSelected={container._id === selectedItemId}
 								container={container}
 								filterQuery={query}
 								onSelectOrToggleItem={selectOrToggleItem}
 							/>
-						))
+						)))
 					) : (
 						<DashboardListEmptyContainer>
 							{ hasContainers ? (
