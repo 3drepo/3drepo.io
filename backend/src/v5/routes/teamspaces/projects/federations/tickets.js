@@ -132,19 +132,19 @@ const establishRoutes = () => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: array
-	 *               items:
-	 *                 type: object
-	 *                 properties:
-	 *                   _id:
-	 *                     type: string
-	 *                     format: uuid
-	 *                   name:
-	 *                     type: string
-	 *                     example: Risk
-	 *                   code:
-	 *                     type: string
-	 *                     example: RSK
+	 *               type: object
+	 *               properties:
+	 *                 templates:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         format: uuid
+	 *                       name:
+	 *                         type: string
+	 *                         example: Risk
 	 */
 	router.get('/templates', hasReadAccessToFederation, getAllTemplates);
 
