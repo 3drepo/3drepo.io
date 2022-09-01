@@ -21,6 +21,7 @@ const {
 	hasReadAccessToModel,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
+const { getAllTemplates } = require('../../../models/tickets.templates');
 const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
@@ -49,6 +50,11 @@ Projects.deleteProject = async (teamspace, projectId) => {
 
 	await deleteProject(teamspace, projectId);
 };
+
+// passing project in to future proof this - the list will be filtered by project settings configurations
+Projects.getAllTemplates = (teamspace, project, showDeprecated) => getAllTemplates(
+	teamspace, showDeprecated, { name: 1, deprecated: 1, code: 1 },
+);
 
 Projects.getProjectSettings = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0 });
 
