@@ -39,7 +39,7 @@ const testCastTicketSchemaOutput = () => {
 
 			const req = { templateData };
 
-			TicketTemplateUtils.serialiseTicketSchema.mockReturnValueOnce(castedTemplate);
+			TicketTemplateUtils.serialiseTicketTemplate.mockReturnValueOnce(castedTemplate);
 
 			const next = jest.fn();
 			TeamspaceSettings.castTicketSchemaOutput(req, {}, next);
@@ -53,7 +53,7 @@ const testCastTicketSchemaOutput = () => {
 			const templateData = generateTemplate();
 			const req = { templateData };
 
-			TicketTemplateUtils.serialiseTicketSchema.mockImplementationOnce(() => { throw new Error(); });
+			TicketTemplateUtils.serialiseTicketTemplate.mockImplementationOnce(() => { throw new Error(); });
 
 			const next = jest.fn();
 			TeamspaceSettings.castTicketSchemaOutput(req, {}, next);

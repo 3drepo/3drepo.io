@@ -22,7 +22,7 @@ const { generateFullSchema } = require('../../../../../../../schemas/tickets/tem
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
-const { serialiseTicketSchema } = require('../../../../common/tickets.templates');
+const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Tickets = {};
@@ -85,7 +85,7 @@ Tickets.serialiseFullTicketTemplate = (req, res) => {
 		const showDeprecated = query?.showDeprecated === 'true';
 		const fullTemplate = generateFullSchema(templateData);
 
-		respond(req, res, templates.ok, serialiseTicketSchema(fullTemplate, !showDeprecated));
+		respond(req, res, templates.ok, serialiseTicketTemplate(fullTemplate, !showDeprecated));
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}

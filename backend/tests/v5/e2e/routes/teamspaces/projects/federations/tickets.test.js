@@ -257,7 +257,10 @@ const testGetTicketResource = () => {
 
 		test('should get the resource successfully given the correct resource id', async () => {
 			const endpoint = route(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticketID, resourceID);
-			await agent.get(endpoint).expect(templates.ok.status);
+			const res = await agent.get(endpoint).expect(templates.ok.status);
+			expect(res.header).toEqual(expect.objectContaining({ 'content-type': 'image/png' }));
+			expect(res.body).not.toBeUndefined();
+			expect(Buffer.isBuffer(res.body)).toBeTruthy();
 		});
 	});
 };

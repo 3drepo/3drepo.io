@@ -26,7 +26,7 @@ const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.c
 
 const TicketSchemaUtils = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
 
-const testSerialiseTicketSchema = () => {
+const testSerialiseTicketTemplate = () => {
 	describe('Serialising ticket template', () => {
 		const templateData = {
 			_id: generateUUID(),
@@ -82,7 +82,7 @@ const testSerialiseTicketSchema = () => {
 			expectedOutput.properties[1].default = expectedOutput.properties[1].default.getTime();
 			expectedOutput.modules[0].properties[1].default = expectedOutput.modules[0].properties[1].default.getTime();
 
-			expect(TicketSchemaUtils.serialiseTicketSchema(templateData)).toEqual(expectedOutput);
+			expect(TicketSchemaUtils.serialiseTicketTemplate(templateData)).toEqual(expectedOutput);
 		});
 
 		test('should convert all appropriate fields and prune deprecated properties', () => {
@@ -99,11 +99,11 @@ const testSerialiseTicketSchema = () => {
 				mod.properties = mod.properties.filter(({ deprecated }) => !deprecated);
 			});
 
-			expect(TicketSchemaUtils.serialiseTicketSchema(templateData, true)).toEqual(expectedOutput);
+			expect(TicketSchemaUtils.serialiseTicketTemplate(templateData, true)).toEqual(expectedOutput);
 		});
 	});
 };
 
 describe('middleware/dataConverter/outputs/common/tickets.templates', () => {
-	testSerialiseTicketSchema();
+	testSerialiseTicketTemplate();
 });

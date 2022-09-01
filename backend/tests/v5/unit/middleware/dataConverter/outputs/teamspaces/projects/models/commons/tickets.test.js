@@ -39,13 +39,13 @@ const TicketOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/
 
 const testSerialiseTicketTemplate = () => {
 	describe('Serialise full ticket template', () => {
-		test('should show all fields if show deprecated is set to false', () => {
+		test('should not show all fields if show deprecated is set to false', () => {
 			const templateData = generateTemplate();
 			const fullTemplateData = generateTemplate();
 			const serialisedTemplateData = generateTemplate();
 
 			TicketTemplateSchema.generateFullSchema.mockReturnValueOnce(fullTemplateData);
-			TicketTemplateHelper.serialiseTicketSchema.mockReturnValueOnce(serialisedTemplateData);
+			TicketTemplateHelper.serialiseTicketTemplate.mockReturnValueOnce(serialisedTemplateData);
 
 			const req = { templateData };
 			TicketOutputMiddleware.serialiseFullTicketTemplate(req, {});
@@ -53,8 +53,8 @@ const testSerialiseTicketTemplate = () => {
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(templateData);
 
-			expect(TicketTemplateHelper.serialiseTicketSchema).toHaveBeenCalledTimes(1);
-			expect(TicketTemplateHelper.serialiseTicketSchema).toHaveBeenCalledWith(fullTemplateData, true);
+			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledTimes(1);
+			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledWith(fullTemplateData, true);
 
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, serialisedTemplateData);
 		});
@@ -65,7 +65,7 @@ const testSerialiseTicketTemplate = () => {
 			const serialisedTemplateData = generateTemplate();
 
 			TicketTemplateSchema.generateFullSchema.mockReturnValueOnce(fullTemplateData);
-			TicketTemplateHelper.serialiseTicketSchema.mockReturnValueOnce(serialisedTemplateData);
+			TicketTemplateHelper.serialiseTicketTemplate.mockReturnValueOnce(serialisedTemplateData);
 
 			const req = { templateData, query: { showDeprecated: 'true' } };
 			TicketOutputMiddleware.serialiseFullTicketTemplate(req, {});
@@ -73,8 +73,8 @@ const testSerialiseTicketTemplate = () => {
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(templateData);
 
-			expect(TicketTemplateHelper.serialiseTicketSchema).toHaveBeenCalledTimes(1);
-			expect(TicketTemplateHelper.serialiseTicketSchema).toHaveBeenCalledWith(fullTemplateData, false);
+			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledTimes(1);
+			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledWith(fullTemplateData, false);
 
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, serialisedTemplateData);
 		});
