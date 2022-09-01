@@ -108,12 +108,14 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: federation
 	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated schemas (default is false)
 	 *         in: query

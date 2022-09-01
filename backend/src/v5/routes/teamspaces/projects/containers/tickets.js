@@ -108,12 +108,14 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
+   	 *           format: uuid
 	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated schemas (default is false)
 	 *         in: query
@@ -335,6 +337,10 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: id of the ticket
+	 *                type:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: template id
 	 *                 title:
 	 *                   type: string
 	 *                   description: ticket title
