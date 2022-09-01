@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { respond } = require('../../../../utils/responder');
-const { serialiseTicketSchema } = require('../common/tickets.templates');
-const { templates } = require('../../../../utils/responseCodes');
+const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
+const { respond } = require('../../../../../../../utils/responder');
+const { serialiseTicketSchema } = require('../../../../common/tickets.templates');
+const { templates } = require('../../../../../../../utils/responseCodes');
 
-const Settings = {};
+const Tickets = {};
 
-Settings.castTicketSchemaOutput = (req, res) => {
+Tickets.serialiseFullTicketTemplate = (req, res) => {
 	try {
-		const template = serialiseTicketSchema(req.templateData);
+		const { templateData, query } = req;
+		const showDeprecated = query?.showDeprecated === 'true';
+		const fullTemplate = generateFullSchema(templateData);
 
-		respond(req, res, templates.ok, template);
+		respond(req, res, templates.ok, serialiseTicketSchema(fullTemplate, !showDeprecated));
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}
 };
 
-module.exports = Settings;
+module.exports = Tickets;

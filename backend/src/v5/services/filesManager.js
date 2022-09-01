@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllRemovableEntriesByType, getRefEntry, insertRef, removeRef } = require('../models/fileRefs');
+const { getAllRemovableEntriesByType, getRefEntry, getRefsByQuery, insertRef, removeRef, removeRefsByQuery } = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
 const config = require('../utils/config');
@@ -34,7 +34,7 @@ FilesManager.fileExists = async (teamspace, collection, filename) => {
 	}
 };
 
-const removeFiles = (teamspace, collection, storageType, links) => {
+const removeFilesByStorageType = (teamspace, collection, storageType, links) => {
 	switch (storageType) {
 	case 'fs':
 		return FSHandler.removeFiles(links);
@@ -46,15 +46,29 @@ const removeFiles = (teamspace, collection, storageType, links) => {
 	}
 };
 
+const removeFiles = async (teamspace, collection, refs) => {
+	const refByType = {};
+
+	refs.forEach(({ type, link }) => {
+		if (type === 'http') return;
+		refByType[type] = refByType[type] ?? [];
+		refByType[type].push(link);
+	});
+
+	const proms = Object.keys(refByType).map((type) => removeFilesByStorageType(
+		teamspace, collection, type, refByType[type],
+	));
+	await Promise.all(proms);
+};
+
 const removeAllFilesInCol = async (teamspace, collection) => {
 	const refsByType = await getAllRemovableEntriesByType(teamspace, collection);
 
 	const deletePromises = refsByType.map(
-		({ _id, links }) => {
+		async ({ _id, links }) => {
 			if (_id && links?.length) {
-				return removeFiles(teamspace, collection, _id, links);
+				await removeFilesByStorageType(teamspace, collection, _id, links);
 			}
-			return Promise.resolve();
 		},
 	);
 
@@ -73,9 +87,21 @@ const removeFilesFromTeamspace = async (teamspace, regex) => {
 	await Promise.all(removeProms);
 };
 
+const removeFilesWithQuery = async (teamspace, collection, query) => {
+	const refs = await getRefsByQuery(teamspace, collection, query);
+	if (refs.length) {
+		await Promise.all([
+			removeFiles(teamspace, collection, refs),
+			removeRefsByQuery(teamspace, collection, query),
+		]);
+	}
+};
+
 // eslint-disable-next-line security/detect-non-literal-regexp
 FilesManager.removeAllFilesFromModel = (teamspace, model) => removeFilesFromTeamspace(teamspace, new RegExp(`^${model}.*\\.ref$`));
 FilesManager.removeAllFilesFromTeamspace = (teamspace) => removeFilesFromTeamspace(teamspace, new RegExp('.*\\.ref$'));
+
+FilesManager.removeFilesWithMeta = removeFilesWithQuery;
 
 FilesManager.getFile = async (teamspace, collection, fileName) => {
 	const { type, link } = await getRefEntry(teamspace, collection, fileName);
@@ -113,13 +139,13 @@ FilesManager.removeFile = async (teamspace, collection, id) => {
 	try {
 		const existingRef = await getRefEntry(teamspace, collection, id);
 		await removeRef(teamspace, collection, id);
-		await removeFiles(teamspace, collection, existingRef.type, [existingRef.link]);
+		await removeFilesByStorageType(teamspace, collection, existingRef.type, [existingRef.link]);
 	} catch {
 		// do nothing if file does not exist
 	}
 };
 
-FilesManager.storeFile = async (teamspace, collection, id, data) => {
+FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
 	await FilesManager.removeFile(teamspace, collection, id);
 	let refInfo;
 
@@ -135,7 +161,7 @@ FilesManager.storeFile = async (teamspace, collection, id, data) => {
 		throw templates.unknown;
 	}
 
-	await insertRef(teamspace, collection, { ...refInfo, _id: id });
+	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id });
 };
 
 module.exports = FilesManager;

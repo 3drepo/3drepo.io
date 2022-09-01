@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
 const { generateRandomString } = require('../../helper/services');
@@ -432,7 +433,65 @@ const testFileExists = () => {
 	});
 };
 
+const testRemoveFilesWithMeta = () => {
+	describe('Remove files with meta', () => {
+		const meta = { [generateRandomString()]: generateRandomString() };
+		const teamspace = generateRandomString();
+		const collection = generateRandomString();
+		test('Should remove all files that satisfy the query', async () => {
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
+			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
+
+			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
+
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+
+			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FSHandler.removeFiles).toHaveBeenCalledWith(expectedRefs.map(({ link }) => link));
+
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+		});
+
+		test('Should do nothing if no files are found', async () => {
+			FileRefs.getRefsByQuery.mockResolvedValueOnce([]);
+
+			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
+
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+
+			expect(FSHandler.removeFiles).not.toHaveBeenCalled();
+			expect(FileRefs.removeRefsByQuery).not.toHaveBeenCalled();
+		});
+
+		test('Should manage non file refs properly', async () => {
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
+			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
+
+			expectedRefs.push({ _id: generateRandomString(), type: 'http', link: generateRandomString() });
+			expectedRefs.push({ _id: generateRandomString(), type: 'gridfs', link: generateRandomString() });
+
+			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
+
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+
+			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FSHandler.removeFiles).toHaveBeenCalledWith(expectedRefs.flatMap(({ type, link }) => (type === 'fs' ? link : [])));
+
+			expect(GridFSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, collection, expectedRefs.flatMap(({ type, link }) => (type === 'gridfs' ? link : [])));
+
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+		});
+	});
+};
+
 describe('services/filesManager', () => {
+	testRemoveFilesWithMeta();
 	testRemoveAllFilesFromModel();
 	testRemoveAllFilesFromTeamspace();
 	testGetFile();

@@ -147,10 +147,45 @@ const testRemoveRef = () => {
 	});
 };
 
+const testGetRefsByQuery = () => {
+	describe('Get file refs by query', () => {
+		test('should get file refs if query is satisfied', async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const query = { [generateRandomString()]: generateRandomString() };
+
+			const expectedRes = generateRandomString();
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedRes);
+			await expect(FileRefs.getRefsByQuery(teamspace, collection, query)).resolves.toEqual(expectedRes);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, query, undefined);
+		});
+	});
+};
+
+const testRemoveRefsByQuery = () => {
+	describe('Remove file refs by query', () => {
+		test('should remove file refs if query is satisfied', async () => {
+			const teamspace = generateRandomString();
+			const collection = `${generateRandomString()}.ref`;
+			const query = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+			await expect(FileRefs.removeRefsByQuery(teamspace, collection, query)).resolves.toEqual(undefined);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, collection, query);
+		});
+	});
+};
+
 describe('models/fileRefs', () => {
 	testGetTotalSize();
 	testGetAllRemovableEntriesByType();
 	testGetRefEntry();
 	testInsertRef();
 	testRemoveRef();
+	testGetRefsByQuery();
+	testRemoveRefsByQuery();
 });
