@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ScrollArea } from '@controls/scrollArea';
 import styled from 'styled-components';
 
 export const CardContainer = styled.div`
@@ -24,8 +25,8 @@ export const CardContainer = styled.div`
 	height: 100%;
 	flex-direction: column;
 
-	background: #FFFFFF;
-	border-radius: 10px 10px 0px 0px;
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	border-radius: 10px;
 
 	margin-bottom: 20px;
 
@@ -38,10 +39,12 @@ export const CardHeader = styled.div`
 	align-items: center;
 	height: 48px;
 	padding: 0px 15px;
-    border-bottom: 1px solid #E0E5F0;
+    border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
+	gap: 4px;
 `;
 
-export const CardContent = styled.div`
-	padding: 15px;
-	
+export const CardContent = styled(ScrollArea)`
+	& > div {
+		padding: 15px;
+	}
 `;
