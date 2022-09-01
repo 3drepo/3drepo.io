@@ -31,4 +31,33 @@ TeamspaceConstants.ADD_ONS = {
 	HERE: 'hereEnabled',
 };
 
+TeamspaceConstants.DEFAULT_RISK_CATEGORIES = [
+	'Commercial Issue',
+	'Environmental Issue',
+	'Health - Material effect',
+	'Health - Mechanical effect',
+	'Safety Issue - Fall',
+	'Safety Issue - Trapped',
+	'Safety Issue - Event',
+	'Safety Issue - Handling',
+	'Safety Issue - Struck',
+	'Safety Issue - Public',
+	'Social Issue',
+	'Other Issue',
+	'Unknown',
+];
+
+TeamspaceConstants.DEFAULT_TOPIC_TYPES = [
+	'Clash',
+	'Diff',
+	'RFI',
+	'Risk',
+	'H&S',
+	'Design',
+	'Constructibility',
+	'GIS',
+	'For information',
+	'VR',
+];
+
 module.exports = TeamspaceConstants;
