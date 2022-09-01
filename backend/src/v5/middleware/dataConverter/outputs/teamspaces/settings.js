@@ -16,14 +16,14 @@
  */
 
 const { respond } = require('../../../../utils/responder');
-const { serialiseTicketSchema } = require('../common/tickets.templates');
+const { serialiseTicketTemplate } = require('../common/tickets.templates');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Settings = {};
 
 Settings.castTicketSchemaOutput = (req, res) => {
 	try {
-		const template = serialiseTicketSchema(req.templateData);
+		const template = serialiseTicketTemplate(req.templateData);
 
 		respond(req, res, templates.ok, template);
 	} catch (err) {

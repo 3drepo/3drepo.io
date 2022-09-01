@@ -21,7 +21,7 @@ const { propTypes } = require('../../../../schemas/tickets/templates.constants')
 
 const TicketTemplate = {};
 
-TicketTemplate.serialiseTicketSchema = (template, dropDeprecated = false) => {
+TicketTemplate.serialiseTicketTemplate = (template, dropDeprecated = false) => {
 	const res = cloneDeep(template);
 	res._id = UUIDToString(res._id);
 

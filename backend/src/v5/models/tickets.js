@@ -17,7 +17,7 @@
 
 const DbHandler = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
-// const { templates } = require('../utils/responseCodes');
+const { templates } = require('../utils/responseCodes');
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
@@ -37,6 +37,22 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
 	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
+};
+
+Tickets.getTicketById = async (
+	teamspace,
+	project,
+	model,
+	_id,
+	projection = { teamspace: 0, project: 0, model: 0 },
+) => {
+	const ticket = await DbHandler.findOne(teamspace, TICKETS_COL, { teamspace, project, model, _id }, projection);
+
+	if (!ticket) {
+		throw templates.ticketNotFound;
+	}
+
+	return ticket;
 };
 
 module.exports = Tickets;

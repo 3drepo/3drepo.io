@@ -104,7 +104,7 @@ const imageTest = async (isView) => {
 
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
 
-	const meta = { teamspace, project, model };
+	const meta = { teamspace, project, model, ticket: expectedOutput };
 
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
 		teamspace, TICKETS_RESOURCES_COL, propRef, propBuffer, meta,
@@ -141,6 +141,58 @@ const testAddTicket = () => {
 	});
 };
 
+const testGetTicketResourceAsStream = () => {
+	describe('Get ticket resource', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const resource = generateRandomString();
+		const ticket = generateRandomString();
+		test('Should call getFileWithMetaAsStream and return whatever it returns', async () => {
+			const expectedOutput = generateRandomString();
+			FilesManager.getFileWithMetaAsStream.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketResourceAsStream(teamspace,
+				project, model, ticket, resource)).resolves.toEqual(expectedOutput);
+
+			expect(FilesManager.getFileWithMetaAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileWithMetaAsStream).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket });
+		});
+
+		test('Should throw whatever error getFileWithMetaAsStream thrown', async () => {
+			const expectedOutput = generateRandomString();
+			FilesManager.getFileWithMetaAsStream.mockRejectedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketResourceAsStream(teamspace,
+				project, model, ticket, resource)).rejects.toEqual(expectedOutput);
+		});
+	});
+};
+
+const testGetTicketById = () => {
+	describe('Add ticket', () => {
+		test('should call getTicketById in model and return whatever it returns', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+
+			const expectedOutput = generateRandomString();
+
+			TicketsModel.getTicketById.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketById(teamspace, project, model, ticket))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.getTicketById).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getTicketById).toHaveBeenCalledWith(teamspace, project, model, ticket);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
+	testGetTicketResourceAsStream();
+	testGetTicketById();
 });

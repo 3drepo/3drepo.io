@@ -15,15 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllRemovableEntriesByType, getRefEntry, getRefsByQuery, insertRef, removeRef, removeRefsByQuery } = require('../models/fileRefs');
+const {
+	getAllRemovableEntriesByType,
+	getRefEntry,
+	getRefEntryByQuery,
+	getRefsByQuery,
+	insertRef,
+	removeRef,
+	removeRefsByQuery,
+} = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
 const config = require('../utils/config');
+const { fileMimeFromBuffer } = require('../utils/helper/typeCheck');
 const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
 const FilesManager = {};
+
+const DEFAULT_MIME_TYPE = 'application/octet-stream';
 
 FilesManager.fileExists = async (teamspace, collection, filename) => {
 	try {
@@ -117,8 +128,8 @@ FilesManager.getFile = async (teamspace, collection, fileName) => {
 	}
 };
 
-FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
-	const { type, link, size } = await getRefEntry(teamspace, collection, fileName);
+const getFileAsStream = async (teamspace, collection, refEntry) => {
+	const { type, link, size, mimeType = DEFAULT_MIME_TYPE } = refEntry;
 	let readStream;
 
 	switch (type) {
@@ -132,7 +143,17 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
 		logger.logError(`Unrecognised external service: ${type}`);
 		throw templates.fileNotFound;
 	}
-	return { readStream, size };
+	return { readStream, size, mimeType };
+};
+
+FilesManager.getFileWithMetaAsStream = async (teamspace, collection, file, meta) => {
+	const refEntry = await getRefEntryByQuery(teamspace, collection, { ...meta, _id: file });
+	return getFileAsStream(teamspace, collection, refEntry);
+};
+
+FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
+	const refEntry = await getRefEntry(teamspace, collection, fileName);
+	return getFileAsStream(teamspace, collection, refEntry);
 };
 
 FilesManager.removeFile = async (teamspace, collection, id) => {
@@ -146,6 +167,7 @@ FilesManager.removeFile = async (teamspace, collection, id) => {
 };
 
 FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
+	const mimeTypeProm = fileMimeFromBuffer(data);
 	await FilesManager.removeFile(teamspace, collection, id);
 	let refInfo;
 
@@ -161,7 +183,8 @@ FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
 		throw templates.unknown;
 	}
 
-	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id });
+	const mimeType = (await mimeTypeProm) ?? DEFAULT_MIME_TYPE;
+	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id, mimeType });
 };
 
 module.exports = FilesManager;

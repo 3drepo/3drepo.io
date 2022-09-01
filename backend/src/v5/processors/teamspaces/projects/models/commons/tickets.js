@@ -14,11 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+const { addTicket, getTicketById } = require('../../../../../models/tickets');
+const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
-const { addTicket } = require('../../../../../models/tickets');
-const { generateUUIDString } = require('../../../../../utils/helper/uuids');
+const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
-const { storeFile } = require('../../../../../services/filesManager');
 
 const Tickets = {};
 
@@ -30,12 +31,12 @@ const extractEmbeddedBinary = (ticket, template) => {
 			if (properties[name]) {
 				const data = properties[name];
 				if (type === propTypes.IMAGE) {
-					const ref = generateUUIDString();
+					const ref = generateUUID();
 					// eslint-disable-next-line no-param-reassign
 					properties[name] = ref;
 					binaryData.push({ ref, data });
 				} else if (type === propTypes.VIEW && data.screenshot) {
-					const ref = generateUUIDString();
+					const ref = generateUUID();
 					const buffer = data.screenshot;
 					data.screenshot = ref;
 					binaryData.push({ ref, data: buffer });
@@ -60,14 +61,20 @@ const extractEmbeddedBinary = (ticket, template) => {
 
 Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 	const binaryData = extractEmbeddedBinary(ticket, template);
-	const [res] = await Promise.all([
-		addTicket(teamspace, project, model, ticket),
-		...binaryData.map(({ ref, data }) => storeFile(
-			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model },
+	const res = await addTicket(teamspace, project, model, ticket);
+	await Promise.all(
+		binaryData.map(({ ref, data }) => storeFile(
+			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket: res },
 		)),
-	]);
+	);
 
 	return res;
 };
+
+Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
+	teamspace, TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket },
+);
+
+Tickets.getTicketById = getTicketById;
 
 module.exports = Tickets;
