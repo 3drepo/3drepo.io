@@ -166,7 +166,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the full definition of a template
 	 *     tags: [Containers]
-	 *     operationId: getTicketTemplateDetails
+	 *     operationId: getContainerTicketTemplateDetails
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -303,7 +303,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get all tickets within the container
 	 *     tags: [Containers]
-	 *     operationId: GetTicketList
+	 *     operationId: GetContainerTicketList
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -345,6 +345,10 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         format: uuid
 	 *                         description: id of the ticket
+	 *                       type:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: template id
 	 *                       title:
 	 *                         type: string
 	 *                         description: ticket title
@@ -368,7 +372,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get ticket by ID
 	 *     tags: [Containers]
-	 *     operationId: GetTicket
+	 *     operationId: GetContainerTicket
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -417,7 +421,7 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: id of the ticket
-	 *                type:
+	 *                 type:
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: template id
@@ -434,7 +438,6 @@ const establishRoutes = () => {
 	 *                 modules:
 	 *                   type: object
 	 *                   description: ticket modules and their properties
-	 *
 	 */
 	router.get('/:ticket', hasReadAccessToContainer, getTicket, serialiseTicket);
 
@@ -444,7 +447,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the binary resource associated with the given ticket
 	 *     tags: [Containers]
-	 *     operationId: getTicketResource
+	 *     operationId: getContainerTicketResource
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
