@@ -17,7 +17,8 @@
 
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { FormattedMessage } from 'react-intl';
-import { CardContainer, CardContent, CardHeader } from '../../../components/viewer/cards/card.styles';
+import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
+import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 
 export const Tickets = () => (
 	<CardContainer>

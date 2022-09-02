@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets';
+import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty } from 'lodash';
 import { PureComponent } from 'react';
 

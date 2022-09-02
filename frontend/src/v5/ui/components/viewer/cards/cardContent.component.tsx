@@ -14,33 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-export const CardContainer = styled.div`
-	display: flex;
+import { ScrollArea } from '@controls/scrollArea';
+import { CardContentContainer } from './card.styles';
 
+export const CardContent: typeof ScrollArea = ({ children, ...props }) => (
+	<ScrollArea {...props} autoHide>
+		<CardContentContainer>
+			{children}
+		</CardContentContainer>
 
-	height: 100%;
-	flex-direction: column;
-
-	background: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 10px;
-
-	margin-bottom: 20px;
-
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_2};
-`;
-
-export const CardHeader = styled.div`
-	${({ theme }) => theme.typography.h3}
-	display: flex;
-	align-items: center;
-	height: 48px;
-	padding: 0px 15px;
-    border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
-	gap: 4px;
-`;
-
-export const CardContentContainer = styled.div`
-	padding: 15px;
-`;
+	</ScrollArea>
+);
