@@ -165,7 +165,7 @@ export const EditProfilePersonalTab = ({
 				name="countryCode"
 				control={control}
 				label={formatMessage({
-					id: 'userSignup.form.countryCode',
+					id: 'editProfile.form.countryCode',
 					defaultMessage: 'Country',
 				})}
 				required
@@ -179,7 +179,7 @@ export const EditProfilePersonalTab = ({
 			{submitWasSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage
-						id="editProfile.form.success"
+						id="editProfile.form.updateProfileSuccess"
 						defaultMessage="Your profile has been changed successfully."
 					/>
 				</SuccessMessage>
