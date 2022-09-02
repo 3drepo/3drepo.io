@@ -35,7 +35,7 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { EditFederationContainersListItem } from './editFederationContainersListItem/editFederationContainersListItem.component';
-import { Container } from './editFederationContainersList.styles';
+import { Container, ContainerListMainTitle, ContainerCount } from './editFederationContainersList.styles';
 
 export type ActionButtonProps = {
 	children: ReactNode;
@@ -90,7 +90,12 @@ export const EditFederationContainers = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${sortedList.length})`}</>}
+				title={(
+					<>
+						<ContainerListMainTitle>{title}</ContainerListMainTitle>
+						{!isListPending && <ContainerCount>({sortedList.length})</ContainerCount>}
+					</>
+				)}
 				isLoading={areStatsPending}
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
