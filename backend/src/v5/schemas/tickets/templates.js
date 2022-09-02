@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { defaultProperties, presetEnumValues, presetModules, presetModulesProperties, propTypes } = require('./templates.constants');
+const {
+	defaultProperties,
+	getApplicableDefaultProperties,
+	presetEnumValues,
+	presetModules,
+	presetModulesProperties,
+	propTypes } = require('./templates.constants');
+
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
+const { cloneDeep } = require('../../utils/helper/objects');
 const { isString } = require('../../utils/helper/typeCheck');
-
-const typeNameToType = {
-	[propTypes.TEXT]: types.strings.title,
-	[propTypes.LONG_TEXT]: types.strings.longDescription,
-	[propTypes.BOOLEAN]: Yup.boolean(),
-	[propTypes.DATE]: types.date,
-	[propTypes.NUMBER]: Yup.number(),
-	[propTypes.ONE_OF]: types.strings.title,
-	[propTypes.MANY_OF]: Yup.array().of(types.strings.title),
-};
+const { propTypesToValidator } = require('./validators');
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 
@@ -45,7 +44,7 @@ const propSchema = Yup.object().shape({
 				if (isString(value)) {
 					typeToCheck = Yup.string().oneOf(Object.values(presetEnumValues)).required();
 				} else {
-					typeToCheck = Yup.array().of(typeNameToType[propTypes.ONE_OF]).min(1).required()
+					typeToCheck = Yup.array().of(propTypesToValidator[propTypes.ONE_OF]).min(1).required()
 						.strict(true);
 				}
 
@@ -61,7 +60,7 @@ const propSchema = Yup.object().shape({
 	}),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
-		const res = typeNameToType[type];
+		const res = propTypesToValidator[type];
 		if (type === propTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
 				if (defaultValues?.length) {
@@ -74,7 +73,11 @@ const propSchema = Yup.object().shape({
 				}
 				return true;
 			});
-		} if (type === propTypes.ANY_OF) return res.oneOf(values);
+		}
+
+		if (type === propTypes.ANY_OF) return res.oneOf(values);
+
+		if (type === propTypes.IMAGE) return Yup.mixed().strip();
 
 		return res;
 	}),
@@ -119,8 +122,10 @@ const moduleSchema = Yup.object().shape({
 	({ name, type }) => (name && !type) || (!name && type));
 
 const configSchema = Yup.object().shape({
+	// If new configs are added, please ensure we add it to the e2e test case
 	comments: defaultFalse,
 	issueProperties: defaultFalse,
+	attachments: defaultFalse,
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: defaultFalse,
@@ -152,5 +157,18 @@ const schema = Yup.object().shape({
 const TemplateSchema = {};
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
+
+TemplateSchema.generateFullSchema = (template) => {
+	const result = cloneDeep(template);
+	result.properties = [...getApplicableDefaultProperties(template.config), ...result.properties];
+	result.modules.forEach((module) => {
+		if (module.type && presetModulesProperties[module.type]) {
+			// eslint-disable-next-line no-param-reassign
+			module.properties = [...presetModulesProperties[module.type], ...module.properties];
+		}
+	});
+
+	return result;
+};
 
 module.exports = TemplateSchema;
