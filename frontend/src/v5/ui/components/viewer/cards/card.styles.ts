@@ -18,16 +18,11 @@ import styled from 'styled-components';
 
 export const CardContainer = styled.div`
 	display: flex;
-
-
 	height: 100%;
 	flex-direction: column;
-
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 10px;
-
 	margin-bottom: 20px;
-
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_2};
 `;
 
@@ -36,8 +31,8 @@ export const CardHeader = styled.div`
 	display: flex;
 	align-items: center;
 	height: 48px;
-	padding: 0px 15px;
-    border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
+	padding: 0 15px;
+	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
 	gap: 4px;
 `;
 
