@@ -76,7 +76,7 @@ export const Subtitle = styled(Typography).attrs({
 export const FormDialogContent = styled(DialogContent)`
 	padding: 27px 58px 65px;
 	display: block;
-    overflow: visible;
+	overflow: visible;
 `;
 
 export const FormDialogActions = styled(DialogActions)`

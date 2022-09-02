@@ -47,7 +47,7 @@ export const Container = styled.div`
 	}
 	${CollapseSideElementGroup} {
 		width: 100%;
-		${TextField} { // Search box
+		${TextField} { /* Search box */
 			padding: 0;
 			width: 100%;
 			min-width: 200px;
