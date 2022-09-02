@@ -44,7 +44,7 @@ const emptyOption = prepareSingleContainerData({
 	role: '',
 	isFavourite: false,
 });
-const filter = createFilterOptions<IContainer>();
+const filter = createFilterOptions<IContainer>({ trim: true });
 
 export const UploadListItemDestination = ({
 	control,
@@ -131,7 +131,11 @@ export const UploadListItemDestination = ({
 
 		if (errorMessage) return (<UnavailableContainer />);
 
-		return (<NewContainer containerName={option.name} {...optionProps} />);
+		if (!containers.some((c) => c.name === option.name.trim())) {
+			return (<NewContainer containerName={option.name} {...optionProps} />);
+		}
+
+		return (<></>);
 	};
 
 	return (
