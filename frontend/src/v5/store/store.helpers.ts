@@ -17,7 +17,7 @@
 import { uniqWith, isArray, isEqual } from 'lodash';
 import { IContainer } from './containers/containers.types';
 import { IFederation } from './federations/federations.types';
-import { View } from './store.types';
+import { ITicket, ITicketRaw, View } from './store.types';
 
 type CF = IContainer | IFederation;
 export const EMPTY_VIEW: View = {
@@ -39,3 +39,16 @@ export const compByColum = (columns: string[]) => (a, b) => {
 	if (a === undefined || b === undefined) return undefined;
 	return columns.every((col) => isEqual(a[col], b[col]));
 };
+
+const prepareSingleTicketForFrontend = (rawTicket: ITicketRaw): ITicket => ({
+	...rawTicket,
+	properties: {
+		...rawTicket.proprties,
+		createdAt: new Date(rawTicket.proprties.createdAt), //epoch ts
+		dueDate: new Date(rawTicket.proprties.dueDate), //epoch ts
+	}
+});
+
+export const prepareTicketsForFrontend = (rawTickets: ITicketRaw[]): ITicket[] => (
+	rawTickets.map(prepareSingleTicketForFrontend)
+);
