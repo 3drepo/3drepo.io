@@ -28,7 +28,7 @@ import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.h
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
-import { PASSWORD_FORGOT_PATH, SIGN_UP_PATH } from '../routes.constants';
+import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -61,9 +61,9 @@ export const Login = () => {
 	return (
 		<AuthTemplate
 			footer={(
-				<Link to="/releaseNotes">
+				<a href={RELEASE_NOTES_ROUTE}>
 					<FormattedMessage id="auth.login.versionFooter" defaultMessage="Version: {version}" values={{ version: APP_VERSION }} />
-				</Link>
+				</a>
 			)}
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
