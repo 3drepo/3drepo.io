@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { checkTicketExists, checkTicketTemplateExists } = require('../../../settings');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { processReadOnlyValues, validateTicket } = require('../../../../../../../schemas/tickets');
-const { checkTicketTemplateExists } = require('../../../settings');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
@@ -25,18 +25,17 @@ const { validateMany } = require('../../../../../../common');
 
 const TicketsMiddleware = {};
 
-const validate = async (req, res, next, isNew) => {
+const validate = (isNewTicket) => async (req, res, next) => {
 	try {
+		const ticket = req.body;
 		const template = req.templateData;
-		if (isNew && template.deprecated) 
-			throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
-
-		const { teamspace } = req.params;
-		const ticket = req.body;		
 		const user = getUserFromSession(req.session);
+		const { teamspace } = req.params;
 
-		req.body = await validateTicket(teamspace, template, ticket);
-		processReadOnlyValues(req.body, user);
+		if (isNewTicket && template.deprecated) { throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated'); }
+
+		req.body = await validateTicket(teamspace, template, ticket, isNewTicket);
+		processReadOnlyValues(req.body, user, isNewTicket);
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err.message);
@@ -54,8 +53,19 @@ const templateIDToParams = async (req, res, next) => {
 	}
 };
 
+const setSafetibaseValues = (req, res, next) => {
+	const oldTicketSafetibaseMod = req.ticketData.modules?.safetibase;
+	const updatedTicketSafetibaseMod = req.body.modules?.safetibase;
+
+	if (oldTicketSafetibaseMod) {
+		req.body.modules.safetibase = { ...oldTicketSafetibaseMod, ...updatedTicketSafetibaseMod };
+	}
+
+	next();
+};
+
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validate(true)]);
-TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketTemplateExists, validate]);
+TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, setSafetibaseValues, validate(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

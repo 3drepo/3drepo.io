@@ -35,6 +35,49 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
+Tickets.updateTicket = async (teamspace, ticketId, updatedTicket) => {
+	const updateObj = { toUpdate: {}, toUnset: {} };
+
+	Object.keys(updatedTicket).forEach((key) => {
+		const value = updatedTicket[key];
+		if (value) {
+			if (key === 'modules') {
+				Object.keys(value).forEach((moduleName) => {
+					const module = value[moduleName];
+					Object.keys(module).forEach((moduleProp) => {
+						const modulePropValue = module[moduleProp];
+						if (modulePropValue) {
+							updateObj.toUpdate[`modules.${moduleName}.${moduleProp}`] = modulePropValue;
+						} else {
+							updateObj.toUnset[`modules.${moduleName}.${moduleProp}`] = 1;
+						}
+					});
+				});
+			} else if (key === 'properties') {
+				Object.keys(value).forEach((propKey) => {
+					const propValue = value[propKey];
+					if (propValue) {
+						updateObj.toUpdate[`properties.${propKey}`] = propValue;
+					} else {
+						updateObj.toUnset[`properties.${propKey}`] = 1;
+					}
+				});
+			} else {
+				updateObj.toUpdate[key] = value;
+			}
+		} else {
+			updateObj.toUnset[key] = 1;
+		}
+	});
+
+	if (Object.keys(updateObj.toUpdate).length) {
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, { $set: updateObj.toUpdate });
+	}
+	if (Object.keys(updateObj.toUnset).length) {
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, { $unset: updateObj.toUnset });
+	}
+};
+
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
 	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
 };

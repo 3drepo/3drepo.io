@@ -15,13 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById } = require('../../../../../models/tickets');
+const { addTicket, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
+const FilesManager = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
 
 const Tickets = {};
+
+const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket) => {
+	const promises = [];
+
+	const removeFiles = (templateProperties, oldProperties, newProperties) => {
+		templateProperties.forEach(({ type, name }) => {
+			if (type === propTypes.IMAGE || type === propTypes.VIEW) {
+				const oldProp = oldProperties[name];
+				const newProp = newProperties[name];
+
+				if (oldProp && newProp !== undefined) {
+					promises.push(FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, oldProp));
+				}
+			}
+		});
+	};
+
+	removeFiles(template.properties, oldTicket.properties, updatedTicket.properties);
+
+	template.modules.forEach(({ properties, name, type }) => {
+		const id = name ?? type;
+		const oldModule = oldTicket.modules?.[id];
+		const updatedModule = updatedTicket.modules[id];
+		if (oldModule && updatedModule) {
+			removeFiles(properties, oldModule.properties, updatedModule.properties);
+		}
+	});
+
+	await Promise.all(promises);
+};
 
 const extractEmbeddedBinary = (ticket, template) => {
 	const binaryData = [];
@@ -69,6 +100,18 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 	);
 
 	return res;
+};
+
+Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updatedTicket) => {
+	await removeExistingFiles(teamspace, template, oldTicket, updatedTicket);
+	const binaryData = extractEmbeddedBinary(updatedTicket, template);
+	const ticket = oldTicket._id;
+	await updateTicket(teamspace, ticket, updatedTicket);
+	await Promise.all(
+		binaryData.map(({ ref, data }) => storeFile(
+			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
+		)),
+	);
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

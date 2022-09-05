@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/containers');
+const { addTicket, getTicketById, getTicketResourceAsStream, updateTicket: update } = require('../../../../processors/teamspaces/projects/models/containers');
 const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
@@ -86,9 +86,13 @@ const getTicketResource = async (req, res) => {
 };
 
 const updateTicket = async (req, res) => {
-	const { teamspace, project, container, ticket } = req.params;
+	const { teamspace, project, container } = req.params;
+	const template = req.templateData;
+	const oldTicket = req.ticketData;
+	const updatedTicket = req.body;
+
 	try {
-		await updateTicket(teamspace, project, container, req.body, req.templateData);
+		await update(teamspace, project, container, template, oldTicket, updatedTicket);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -463,7 +467,7 @@ const establishRoutes = () => {
 	 *         application/json:
 	 *           schema:
 	 *             type: object
-	 *             properties:       
+	 *             properties:
 	 *                 title:
 	 *                   type: string
 	 *                   description: Title of the ticket
@@ -500,7 +504,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: ticket has been successfully updated
 	 */
-	 router.patch('/', hasCommenterAccessToContainer, validateUpdateTicket, updateTicket);
+	router.patch('/:ticket', hasCommenterAccessToContainer, validateUpdateTicket, updateTicket);
 
 	return router;
 };

@@ -34,7 +34,7 @@ const { types } = require('../../utils/helper/yup');
 
 const Tickets = {};
 
-const generatePropertiesValidator = async (teamspace, properties) => {
+const generatePropertiesValidator = async (teamspace, properties, isNewTicket) => {
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
@@ -72,6 +72,8 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 
 			if (prop.required) {
 				validator = validator.required();
+			} else if (!isNewTicket) {
+				validator = validator.nullable();
 			}
 
 			if (prop.default) {
@@ -89,12 +91,12 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, modules) => {
+const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties);
+			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties, isNewTicket);
 		}
 	});
 
@@ -103,17 +105,18 @@ const generateModuleValidator = async (teamspace, modules) => {
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, template, data) => {
+Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const fullTem = generateFullSchema(template);
 
-	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules);
+	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
 
 	const validator = Yup.object().shape({
-		title: types.strings.title.required(),
-		type: Yup.mixed().required(),
-		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
+		...(isNewTicket ? { title: types.strings.title.required() } : { title: types.strings.title }),
+		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
 		modules: Yup.object(moduleSchema).default({}),
+		...(isNewTicket ? { type: Yup.mixed().required() } : {}),
 	});
+
 	return validator.validate(data, { stripUnknown: true });
 };
 
@@ -142,15 +145,15 @@ const calculateLevelOfRisk = (likelihood, consequence) => {
 	return levelOfRisk;
 };
 
-Tickets.processReadOnlyValues = (ticket, user, newTicket) => {
+Tickets.processReadOnlyValues = (ticket, user, isNewTicket) => {
 	const { properties, modules } = ticket;
 	const currTime = new Date();
 
-	if(newTicket){
+	if (isNewTicket) {
 		properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
 		properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
 	}
-	
+
 	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
 
 	if (modules[presetModules.SAFETIBASE]) {
