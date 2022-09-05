@@ -31,19 +31,20 @@ module.exports.createApp = function () {
 	const express = require("express");
 	const compression = require("compression");
 	const bodyParser = require("body-parser");
-	const compress = require("compression");
 	const favicon = require("serve-favicon");
 	const app = express();
 	const path = require("path");
 	const configRoute = require("../routes/config");
 	const cors = require("cors");
 
-	app.use(favicon(`${__dirname}/../../../resources/images/favicon.ico`));
+	app.use(compression({ level: 9 }));
+	const publicDir =  __dirname + "/../../../../public";
+	app.use(favicon(`${publicDir}/assets/images/favicon.ico`));
 
-	app.use(compression());
+	app.use(express.static(publicDir));
+
 	app.use("/config", configRoute);
 
-	app.use(compress({ level: 9 }));
 	app.use(cors({ origin: true, credentials: true }));
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -53,10 +54,6 @@ module.exports.createApp = function () {
 	docsService(app);
 
 	app.locals.pretty = true;
-
-	const publicDir =  __dirname + "/../../../../public";
-
-	app.use(express.static(publicDir));
 
 	app.use(function(req, res, next) {
 
