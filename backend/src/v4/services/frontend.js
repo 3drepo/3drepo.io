@@ -38,6 +38,8 @@ module.exports.createApp = function () {
 	const configRoute = require("../routes/config");
 	const cors = require("cors");
 
+	app.use(favicon(`${__dirname}/../../../resources/images/favicon.ico`));
+
 	app.use(compression());
 	app.use("/config", configRoute);
 
@@ -47,7 +49,6 @@ module.exports.createApp = function () {
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(favicon(`${__dirname}/../../../resources/images/favicon.ico`));
 
 	docsService(app);
 
