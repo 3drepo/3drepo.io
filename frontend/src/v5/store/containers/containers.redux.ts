@@ -20,7 +20,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
-import { SuccessAndErrorCallbacks, View } from '@/v5/store/store.types';
+import { ITicket, SuccessAndErrorCallbacks, View } from '@/v5/store/store.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
@@ -47,6 +47,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	deleteContainerSuccess: ['projectId', 'containerId'],
 	setContainerStatus: ['projectId', 'containerId', 'status'],
 	containerProcessingSuccess: ['projectId', 'containerId', 'revision'],
+	fetchContainerTickets: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerTicketsSuccess: ['teamspace', 'projectId', 'containerId', 'tickets'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -153,6 +155,14 @@ export const containerProcessingSuccess = (state, {
 	Object.assign(container, newRevisionProperties);
 };
 
+export const fetchContainerTicketsSuccess = (state, {
+	projectId,
+	containerId,
+	tickets,
+}) => {
+	getContainerFromState(state, projectId, containerId).tickets = tickets;
+};
+
 export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, produceAll({
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
@@ -164,6 +174,7 @@ export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, 
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 	[ContainersTypes.SET_CONTAINER_STATUS]: setContainerStatus,
 	[ContainersTypes.CONTAINER_PROCESSING_SUCCESS]: containerProcessingSuccess,
+	[ContainersTypes.FETCH_CONTAINER_TICKETS_SUCCESS]: fetchContainerTicketsSuccess,
 })) as (state: IContainersState, action: any) => IContainersState;
 
 /**
@@ -193,6 +204,8 @@ export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContai
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
 export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
 export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
+export type FetchContainersTicketsAction = Action<'FETCH_CONTAINERS_TICKETS'> & TeamspaceProjectAndContainerId;
+export type FetchContainersTicketsSuccessAction = Action<'FETCH_CONTAINERS_TICKETS_SUCCESS'> & ProjectAndContainerId & { tickets: ITicket[] };
 
 export interface IContainersActionCreators {
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
@@ -255,4 +268,14 @@ export interface IContainersActionCreators {
 		containerId: string,
 		revision: IRevision
 	) => ContainerProcessingSuccessAction;
+	fetchContainerTickets: (
+		teamspace: string,
+		projectId: string,
+		containerId: string,
+	) => FetchContainersTicketsAction;
+	fetchContainerTicketsSuccess: (
+		projectId: string,
+		containerId: string,
+		tickets: ITicket[],
+	) => FetchContainersTicketsSuccessAction;
 }

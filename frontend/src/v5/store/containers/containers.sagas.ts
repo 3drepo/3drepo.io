@@ -26,6 +26,7 @@ import {
 	FetchContainersAction,
 	FetchContainerSettingsAction,
 	FetchContainerStatsAction,
+	FetchContainersTicketsAction,
 	FetchContainerViewsAction,
 	RemoveFavouriteAction,
 	UpdateContainerSettingsAction,
@@ -37,7 +38,7 @@ import { isEqualWith } from 'lodash';
 import { FetchContainerViewsResponseView } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
-import { compByColum } from '../store.helpers';
+import { compByColum, prepareTicketsForFrontend } from '../store.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -203,6 +204,25 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 	}
 }
 
+export function* fetchContainerTickets({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainersTicketsAction) {
+	try {
+		const rawTickets = yield API.Containers.fetchContainerTickets({
+			teamspace, projectId, containerId,
+		});
+		const tickets = prepareTicketsForFrontend(rawTickets);
+		yield put(ContainersActions.fetchContainerTicketsSuccess(projectId, containerId, tickets));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchTickets.error', defaultMessage: 'trying to fetch container tickets' }),
+			error,
+		}));
+	}
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -213,4 +233,5 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
 	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
+	yield takeLatest(ContainersTypes.FETCH_CONTAINER_TICKETS, fetchContainerTickets);
 }

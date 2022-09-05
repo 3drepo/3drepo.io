@@ -26,6 +26,7 @@ import {
 	FetchFederationsAction,
 	FetchFederationSettingsAction,
 	FetchFederationStatsAction,
+	FetchFederationsTicketsAction,
 	FetchFederationViewsAction,
 	RemoveFavouriteAction,
 	UpdateFederationContainersAction,
@@ -37,7 +38,7 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { isEqualWith } from 'lodash';
-import { compByColum } from '../store.helpers';
+import { compByColum, prepareTicketsForFrontend } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
 
 export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
@@ -223,6 +224,25 @@ export function* updateFederationContainers({
 	}
 }
 
+export function* fetchFederationTickets({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationsTicketsAction) {
+	try {
+		const rawTickets = yield API.Federations.fetchFederationTickets({
+			teamspace, projectId, federationId,
+		});
+		const tickets = prepareTicketsForFrontend(rawTickets);
+		yield put(FederationsActions.fetchFederationTicketsSuccess(projectId, federationId, tickets));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchTickets.error', defaultMessage: 'trying to fetch federation tickets' }),
+			error,
+		}));
+	}
+}
+
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.CREATE_FEDERATION, createFederation);
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
@@ -234,4 +254,5 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);
+	yield takeLatest(FederationsTypes.FETCH_FEDERATION_TICKETS, fetchFederationTickets);
 }

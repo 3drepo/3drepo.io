@@ -26,7 +26,7 @@ import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/fe
 import { Action } from 'redux';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '../../helpers/actions.helper';
-import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks, ITicket } from '../store.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
@@ -49,6 +49,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	updateFederationContainers: ['teamspace', 'projectId', 'federationId', 'containers'],
 	updateFederationContainersSuccess: ['projectId', 'federationId', 'containers'],
 	updateFederationSuccess: ['projectId', 'federationId', 'updatedFederation'],
+	fetchFederationTickets: ['teamspace', 'projectId', 'federationId'],
+	fetchFederationTicketsSuccess: ['teamspace', 'projectId', 'federationId', 'tickets'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
@@ -145,6 +147,14 @@ export const updateFederationSuccess = (state, {
 	Object.assign(federation, updatedFederation);
 };
 
+export const fetchFederationTicketsSuccess = (state, {
+	projectId,
+	federationId,
+	tickets,
+}) => {
+	getFederationFromState(state, projectId, federationId).tickets = tickets;
+};
+
 export const federationsReducer = createReducer<IFederationsState>(INITIAL_STATE, produceAll({
 	[FederationsTypes.CREATE_FEDERATION_SUCCESS]: createFederationSuccess,
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
@@ -156,6 +166,7 @@ export const federationsReducer = createReducer<IFederationsState>(INITIAL_STATE
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_CONTAINERS_SUCCESS]: updateFederationContainersSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SUCCESS]: updateFederationSuccess,
+	[FederationsTypes.FETCH_FEDERATION_TICKETS_SUCCESS]: fetchFederationTicketsSuccess,
 })) as (state: IFederationsState, action:any) => IFederationsState;
 
 /**
@@ -185,6 +196,8 @@ export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SE
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & TeamspaceProjectAndFederationId & SuccessAndErrorCallbacks;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & ProjectAndFederationId;
 export type UpdateFederationSuccessAction = Action<'UPDATE_FEDERATION'> & ProjectAndFederationId & { updatedFederation: IFederation};
+export type FetchFederationsTicketsAction = Action<'FETCH_FEDERATIONS_TICKETS'> & TeamspaceProjectAndFederationId;
+export type FetchFederationsTicketsSuccessAction = Action<'FETCH_FEDERATIONS_TICKETS_SUCCESS'> & ProjectAndFederationId & { tickets: ITicket[] };
 
 export interface IFederationsActionCreators {
 	createFederation: (
@@ -260,4 +273,14 @@ export interface IFederationsActionCreators {
 		federationId: string,
 		updatedFederation: Partial<IFederation>
 	) => UpdateFederationSuccessAction;
+	fetchFederationTickets: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+	) => FetchFederationsTicketsAction;
+	fetchFederationTicketsSuccess: (
+		projectId: string,
+		federationId: string,
+		tickets: ITicket[],
+	) => FetchFederationsTicketsSuccessAction;
 }
