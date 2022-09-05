@@ -355,7 +355,7 @@ export class SubscriptionForm extends PureComponent<IProps, IState> {
 								<FormInfo>** Subject to VAT where applicable</FormInfo>
 							</FormInfoContainer>
 							<PayPalInfoContainer>
-								<ConfirmContainer>
+								{/* <ConfirmContainer>
 									<PayPalLogo src="/images/paypal.png" />
 									<StyledButton
 										color="secondary"
@@ -364,9 +364,9 @@ export class SubscriptionForm extends PureComponent<IProps, IState> {
 										type="submit">
 										Confirm
 									</StyledButton>
-								</ConfirmContainer>
+								</ConfirmContainer> */}
 								<PayPalWarning>
-									Paypal payment is currently unavailable
+									Online payment is currently unavailable
 									please <a target="_blank" href="https://3drepo.com/contact/" rel="noreferrer">contact us</a> if you
 									would like to purchase a license.
 								</PayPalWarning>
