@@ -31,7 +31,6 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		if (!ticketIsSelected(ticket)) {
 			setSelectedTicket(ticket);
 		} else {
-			// navigate to expanded ticket
 			// eslint-disable-next-line
 			console.log('navigating to ticket');
 		}
