@@ -15,12 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from '../icons.component';
+import { getIcons } from '../icons.helper';
 
-export const ScrollArea = styled(ScrollAreaBase)`
-	& > :first-child {
-		padding: 30px 58px;
-		box-sizing: border-box;
-	}
-`;
+export default {
+	title: 'Icons/\\Outlined',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
+
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/outlined/', false, /\.*(svg)/), 'outlined'),
+};
