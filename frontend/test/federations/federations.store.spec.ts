@@ -23,10 +23,10 @@ import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { federationMockFactory, prepareMockContainers, prepareMockNewFederation, prepareMockSettingsReply, federationMockStats } from './federations.fixtures';
 import { createTestStore } from '../test.helpers';
 import { containerMockFactory, prepareMockViews } from '../containers/containers.fixtures';
+import { ticketMockFactory } from 'test/store.helpers';
 
 describe('Federations: store', () => {
-	let dispatch; let
-		getState;
+	let dispatch, getState;
 	const projectId = 'projectId';
 
 	beforeEach(() => {
@@ -126,6 +126,15 @@ describe('Federations: store', () => {
 		dispatch(FederationsActions.updateFederationSuccess(projectId, federationId, federationUpdate));
 		const federationFromState = selectFederationById(getState(), federationId);
 		expect(federationFromState).toEqual({ _id: federationId, ...federationUpdate });
+	});
+
+	it('should update a federation tickets', () => {
+		const ticket = ticketMockFactory();
+		const newFederation = createAndAddFederationToStore();
+		dispatch(FederationsActions.fetchFederationTicketsSuccess(projectId, newFederation._id, [ticket]));
+		const federationFromState = selectFederationById(getState(), newFederation._id);
+
+		expect(federationFromState.tickets[0]).toEqual(ticket);
 	});
 
 	// Selectors

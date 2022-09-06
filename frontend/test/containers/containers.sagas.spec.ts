@@ -27,6 +27,7 @@ import { omit } from 'lodash';
 import { prepareMockViewsReply } from './containers.fixtures';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
 import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
+import { alertAction } from '../test.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -292,6 +293,32 @@ describe('Containers: sagas', () => {
 				.silentRun();
 
 			expect(onError).toBeCalled();
+		})
+	})
+
+	describe('fetchTickets', () => {
+		const tickets = [];
+
+		it('should call fetchContainerTickets endpoint', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`)
+				.reply(200, { tickets });
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.fetchContainerTickets(teamspace, projectId, containerId))
+				.put(ContainersActions.fetchContainerTicketsSuccess(projectId, containerId, tickets))
+				.silentRun();
+		})
+
+		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`)
+				.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.fetchContainerTickets(teamspace, projectId, containerId))
+				.put.like(alertAction('trying to fetch container tickets'))
+				.silentRun();
 		})
 	})
 })
