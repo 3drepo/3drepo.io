@@ -56,3 +56,9 @@ export const selectContainersByFederationId = createSelector(
 		(containerId) => containers.find((container) => container._id === containerId),
 	) ?? [],
 );
+
+export const selectFederationTickets = createSelector(
+	selectFederations,
+	selectFederationById,
+	(_, federation) => federation.tickets || [],
+);
