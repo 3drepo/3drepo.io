@@ -46,5 +46,11 @@ export const selectAreStatsPending = createSelector(
 export const selectContainerById = createSelector(
 	selectContainers,
 	(_, id) => id,
-	(containers, id): IContainer | null => containers.find((federation) => (federation._id === id)),
+	(containers, id): IContainer | null => containers.find((container) => (container._id === id)),
+);
+
+export const selectContainerTickets = createSelector(
+	selectContainers,
+	selectContainerById,
+	(_, container) => container.tickets || [],
 );
