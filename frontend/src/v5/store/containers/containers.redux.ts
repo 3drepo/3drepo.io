@@ -48,7 +48,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	setContainerStatus: ['projectId', 'containerId', 'status'],
 	containerProcessingSuccess: ['projectId', 'containerId', 'revision'],
 	fetchContainerTickets: ['teamspace', 'projectId', 'containerId'],
-	fetchContainerTicketsSuccess: ['teamspace', 'projectId', 'containerId', 'tickets'],
+	fetchContainerTicketsSuccess: ['projectId', 'containerId', 'tickets'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
