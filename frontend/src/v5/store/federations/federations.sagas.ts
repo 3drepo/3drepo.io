@@ -38,8 +38,9 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { isEqualWith } from 'lodash';
-import { compByColum, prepareTicketsForFrontend } from '../store.helpers';
+import { compByColum } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
+import { fakeTickets } from '../teamspaces/deleteMeWhenTicketApiWork';
 
 export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
 	try {
@@ -230,10 +231,12 @@ export function* fetchFederationTickets({
 	federationId,
 }: FetchFederationsTicketsAction) {
 	try {
-		const rawTickets = yield API.Federations.fetchFederationTickets({
-			teamspace, projectId, federationId,
-		});
-		const tickets = prepareTicketsForFrontend(rawTickets);
+		// TODO - uncomment after endpoint is ready
+		// const rawTickets = yield API.Federations.fetchFederationTickets({
+		// 	teamspace, projectId, federationId,
+		// });
+		// const tickets = prepareTicketsForFrontend(rawTickets)
+		const tickets = fakeTickets;
 		yield put(FederationsActions.fetchFederationTicketsSuccess(projectId, federationId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

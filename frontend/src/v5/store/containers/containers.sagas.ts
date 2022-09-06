@@ -38,7 +38,8 @@ import { isEqualWith } from 'lodash';
 import { FetchContainerViewsResponseView } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
-import { compByColum, prepareTicketsForFrontend } from '../store.helpers';
+import { compByColum } from '../store.helpers';
+import { fakeTickets } from '../teamspaces/deleteMeWhenTicketApiWork';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -210,10 +211,12 @@ export function* fetchContainerTickets({
 	containerId,
 }: FetchContainersTicketsAction) {
 	try {
-		const rawTickets = yield API.Containers.fetchContainerTickets({
-			teamspace, projectId, containerId,
-		});
-		const tickets = prepareTicketsForFrontend(rawTickets);
+		// TODO - uncomment after endpoint is ready
+		// const rawTickets = yield API.Containers.fetchContainerTickets({
+		// 	teamspace, projectId, containerId,
+		// });
+		// const tickets = prepareTicketsForFrontend(rawTickets)
+		const tickets = fakeTickets;
 		yield put(ContainersActions.fetchContainerTicketsSuccess(projectId, containerId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
