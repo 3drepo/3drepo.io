@@ -226,14 +226,14 @@ export function* updateFederationContainers({
 }
 
 export function* fetchFederationTickets({
-	teamspace,
+	// teamspace,
 	projectId,
 	federationId,
 }: FetchFederationsTicketsAction) {
 	try {
 		// TODO - uncomment after endpoint is ready
 		// const rawTickets = yield API.Federations.fetchFederationTickets({
-		// 	teamspace, projectId, federationId,
+		// teamspace, projectId, federationId,
 		// });
 		// const tickets = prepareTicketsForFrontend(rawTickets)
 		const tickets = fakeTickets;
