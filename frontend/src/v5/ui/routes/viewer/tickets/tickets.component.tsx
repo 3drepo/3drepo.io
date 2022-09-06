@@ -65,12 +65,12 @@ export const Tickets = () => {
 		<CardContainer>
 			<CardHeader>
 				<TicketsIcon fontSize="small" />
-				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
+				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 			</CardHeader>
 			<CardContent autoHeightMax="100%">
 				{!tickets?.length ? (
 					<EmptyCardMessage>
-						<FormattedMessage id="viewer.tickets.emptyList" defaultMessage="No entries have been created yet" />
+						<FormattedMessage id="viewer.cards.tickets.emptyList" defaultMessage="No entries have been created yet" />
 					</EmptyCardMessage>
 				) : (
 					<>
