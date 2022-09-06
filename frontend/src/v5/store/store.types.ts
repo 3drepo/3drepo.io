@@ -46,7 +46,6 @@ export type View = {
 	hasThumbnail: boolean;
 };
 
-
 // Tickets
 type Priority = 'None' | 'Low' | 'Medium' | 'High';
 type Status = 'Open' | 'In progress' | 'For approval' | 'Closed' | 'Void';
@@ -59,8 +58,8 @@ export interface ITicket {
 	properties: {
 		owner: string,
 		defaultView: View,
-		createdAt: Date, //epoch ts
-		dueDate: Date, //epoch ts
+		createdAt: Date,
+		dueDate: Date,
 		pin: any[]
 		status: Status,
 		priority : Priority,

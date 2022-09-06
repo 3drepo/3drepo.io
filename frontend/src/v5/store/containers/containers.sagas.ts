@@ -204,14 +204,14 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 }
 
 export function* fetchContainerTickets({
-	teamspace,
+	// teamspace,
 	projectId,
 	containerId,
 }: FetchContainersTicketsAction) {
 	try {
 		// TODO - uncomment after endpoint is ready
 		// const rawTickets = yield API.Containers.fetchContainerTickets({
-		// 	teamspace, projectId, containerId,
+		// teamspace, projectId, containerId,
 		// });
 		// const tickets = prepareTicketsForFrontend(rawTickets)
 		const tickets = fakeTickets;

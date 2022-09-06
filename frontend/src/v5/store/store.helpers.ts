@@ -44,9 +44,9 @@ const prepareSingleTicketForFrontend = (rawTicket: ITicketRaw): ITicket => ({
 	...rawTicket,
 	properties: {
 		...rawTicket.proprties,
-		createdAt: new Date(rawTicket.proprties.createdAt), //epoch ts
-		dueDate: new Date(rawTicket.proprties.dueDate), //epoch ts
-	}
+		createdAt: new Date(rawTicket.proprties.createdAt),
+		dueDate: new Date(rawTicket.proprties.dueDate),
+	},
 });
 
 export const prepareTicketsForFrontend = (rawTickets: ITicketRaw[]): ITicket[] => (
