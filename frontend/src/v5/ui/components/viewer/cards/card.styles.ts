@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
+import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
 export const CardContainer = styled.div`
 	display: flex;
@@ -23,6 +24,7 @@ export const CardContainer = styled.div`
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 10px;
 	margin-bottom: 20px;
+	overflow: hidden;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_2};
 `;
 
@@ -30,7 +32,7 @@ export const CardHeader = styled.div`
 	${({ theme }) => theme.typography.h3}
 	display: flex;
 	align-items: center;
-	height: 48px;
+	min-height: 48px;
 	padding: 0 15px;
 	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
 	gap: 4px;
@@ -38,4 +40,21 @@ export const CardHeader = styled.div`
 
 export const CardContentContainer = styled.div`
 	padding: 15px;
+`;
+
+export const EmptyCardMessage = styled(DashedContainer).attrs({
+	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	borderRadius: 5,
+	dashSize: 2,
+	gapSize: 2,
+	strokeWidth: 2,
+	zeroPadding: true,
+})`
+	text-align: center;
+	font-size: 13px;
+	background-color: transparent;
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 10px;
+	box-sizing: border-box;
+	width: 100%;
 `;
