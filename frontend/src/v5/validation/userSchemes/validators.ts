@@ -49,7 +49,7 @@ export const username = trimmedString
 			defaultMessage: 'This username is already taken',
 		}),
 		(usernameValue, testContext) => (
-			!testContext.options.context.alreadyExistingUsernames.includes(usernameValue)
+			!testContext.options.context.alreadyExistingUsernames.map((u) => u.trim()).includes(usernameValue)
 		),
 	);
 
@@ -145,7 +145,7 @@ export const email = trimmedString
 			defaultMessage: 'This email is already taken',
 		}),
 		(emailValue, testContext) => (
-			!testContext.options.context.alreadyExistingEmails.includes(emailValue)
+			!testContext.options.context.alreadyExistingEmails.map((e) => e.trim()).includes(emailValue)
 		),
 	);
 
