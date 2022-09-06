@@ -50,7 +50,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	updateFederationContainersSuccess: ['projectId', 'federationId', 'containers'],
 	updateFederationSuccess: ['projectId', 'federationId', 'updatedFederation'],
 	fetchFederationTickets: ['teamspace', 'projectId', 'federationId'],
-	fetchFederationTicketsSuccess: ['teamspace', 'projectId', 'federationId', 'tickets'],
+	fetchFederationTicketsSuccess: ['projectId', 'federationId', 'tickets'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
