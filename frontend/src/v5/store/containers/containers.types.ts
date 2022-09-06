@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { SurveyPoint, View } from '../store.types';
+import { ITicket, SurveyPoint, View } from '../store.types';
 
 export enum UploadStatuses {
 	OK = 'ok',
@@ -124,6 +124,7 @@ export interface IContainer {
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
+	tickets?: ITicket[];
 }
 
 export interface MinimumContainer {

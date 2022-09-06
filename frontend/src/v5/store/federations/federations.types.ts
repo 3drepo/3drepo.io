@@ -16,7 +16,7 @@
  */
 
 import { UploadStatuses } from '../containers/containers.types';
-import { SurveyPoint, View } from '../store.types';
+import { ITicket, SurveyPoint, View } from '../store.types';
 
 export interface IFederation {
 	_id: string;
@@ -37,6 +37,7 @@ export interface IFederation {
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
+	tickets?: ITicket[];
 }
 
 export type NewFederation = {
