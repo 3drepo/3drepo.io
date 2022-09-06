@@ -26,6 +26,8 @@ import {
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import filesize from 'filesize';
 import { formatMessage } from '@/v5/services/intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { UploadFileForm } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm';
 
 export const CONTAINERS_SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
 
@@ -87,4 +89,18 @@ export const filesizeTooLarge = (file: File): string => {
 		id: 'validation.revisions.file.error.tooLarge',
 		defaultMessage: 'File exceeds size limit of {sizeLimit}',
 	}, { sizeLimit: filesize(uploadSizeLimit) });
+};
+
+export const uploadToContainer = (presetContainerId: string) => {
+	const f = document.createElement('input');
+	f.type = 'file';
+	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+	f.onchange = (e: Event) => {
+		const presetFile = (<HTMLInputElement>e.target).files[0];
+		DialogsActionsDispatchers.open(UploadFileForm, {
+			presetFile,
+			presetContainerId,
+		});
+	};
+	f.click();
 };

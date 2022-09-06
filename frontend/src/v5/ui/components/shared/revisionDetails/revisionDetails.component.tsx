@@ -29,8 +29,7 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
+import { canUploadToBackend, uploadToContainer } from '@/v5/store/containers/containers.helpers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import {
 	Container,
@@ -76,7 +75,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 									startIcon={<ArrowUpCircleIcon />}
 									variant="contained"
 									color="primary"
-									onClick={() => uploadToContainer({ presetContainerId: containerId })}
+									onClick={() => uploadToContainer(containerId)}
 								>
 									<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
 								</Button>
