@@ -23,6 +23,7 @@ import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/conta
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { Autocomplete, DestinationInput } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { UnavailableContainer } from './options/unavailableContainer/unavailableContainer.component';
@@ -36,6 +37,8 @@ interface IUploadListItemDestination {
 	disabled?: boolean;
 	className?: string;
 	defaultValue: string;
+	containersNamesInUse: string[];
+	setContainersNamesInUse: (names: string[]) => void;
 }
 
 const emptyOption = prepareSingleContainerData({
@@ -53,28 +56,30 @@ export const UploadListItemDestination = ({
 	className,
 	onChange,
 	defaultValue,
+	containersNamesInUse,
+	setContainersNamesInUse,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!value.name);
 	const containers = ContainersHooksSelectors.selectContainers();
-	const processingContainers = containers.filter((container) => !canUploadToBackend(container.status));
+	const processingContainersNames = containers
+		.filter((container) => !canUploadToBackend(container.status))
+		.map(({ name }) => name);
 	const [newOrExisting, setNewOrExisting] = useState(() => {
 		if (value.name) {
 			return containers.find((c) => c.name === value.name) ? 'existing' : 'new';
 		}
 		return '';
 	});
-	const [containersInUse, setContainersInUse] = useState(processingContainers);
 	const { getValues } = useFormContext();
 	const forceUpdate = useCallback(() => {
-		const containerIdsInModal = getValues().uploads.map((upload) => upload.containerId).filter(Boolean);
-		if (containerIdsInModal) {
-			const containersInModal = containerIdsInModal.map((idInUse) => containers
-				.find((cont) => cont._id === idInUse));
-			setContainersInUse([...processingContainers, ...containersInModal]);
+		const containerNamesInModal = getValues().uploads.map((upload) => upload.containerName.trim()).filter(Boolean);
+		if (containerNamesInModal) {
+			setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 		}
 	}, []);
+	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
 
 	const errorMessage = errors.containerName?.message;
 
@@ -100,7 +105,7 @@ export const UploadListItemDestination = ({
 
 		const isExisting = options.some((option: IContainer) => inputValue === option.name);
 		filtered = filtered.filter((x) => x.name !== value.name);
-		if (containersInUse.length === containers.length && !inputValue) {
+		if (containersNamesInUse.length === containers.length && !inputValue) {
 			filtered = [];
 		}
 		if (inputValue !== '' && !isExisting) {
@@ -113,12 +118,16 @@ export const UploadListItemDestination = ({
 		return filtered;
 	};
 
-	const optionIsUsed = ({ name }: IContainer) => containersInUse.some((c) => c.name === name);
+	const optionIsUsed = ({ name }: IContainer) => (
+		containersNamesInUse.includes(name.trim())
+	);
+
+	const nameAlreadyExists = (name) => containersNamesInUse.concat(federationsNames).includes(name.trim());
 
 	const getOptionDisabled = (option: IContainer) => !!option.name && optionIsUsed(option);
 
 	const getRenderOption = (optionProps, option: IContainer) => {
-		if (option._id) {
+		if (option._id || optionIsUsed(option)) {
 			return (
 				<ExistingContainer
 					inUse={optionIsUsed(option)}
@@ -129,10 +138,13 @@ export const UploadListItemDestination = ({
 			);
 		}
 
-		if (errorMessage) return (<UnavailableContainer />);
+		const { name } = option;
+		if (nameAlreadyExists(name)) {
+			return (<UnavailableContainer {...optionProps} />);
+		}
 
-		if (!containers.some((c) => c.name === option.name.trim())) {
-			return (<NewContainer containerName={option.name} {...optionProps} />);
+		if (name && !nameAlreadyExists(name) && !errorMessage) {
+			return (<NewContainer containerName={name} {...optionProps} />);
 		}
 
 		return (<></>);

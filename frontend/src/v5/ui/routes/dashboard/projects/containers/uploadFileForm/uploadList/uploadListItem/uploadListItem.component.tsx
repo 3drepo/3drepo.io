@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { useForm } from 'react-hook-form';
@@ -54,11 +54,13 @@ export const UploadListItem = ({
 	isUploading,
 	onChange,
 }: IUploadListItem): JSX.Element => {
+	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
+	const [containersNamesInUse, setContainersNamesInUse] = useState([]);
 	const { control, formState: { errors }, setValue, trigger, watch, setError } = useForm<UploadItemFields>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
-		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name) },
+		context: { alreadyExistingNames: containersNamesInUse.concat(federationsNames) },
 	});
 
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
@@ -107,6 +109,8 @@ export const UploadListItem = ({
 				control={control}
 				defaultValue={defaultValues.containerName}
 				onChange={onDestinationChange}
+				containersNamesInUse={containersNamesInUse}
+				setContainersNamesInUse={setContainersNamesInUse}
 			/>
 			<RevisionTag
 				control={control}
