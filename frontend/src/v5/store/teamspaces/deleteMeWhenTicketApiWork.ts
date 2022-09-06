@@ -16,52 +16,100 @@
  */
 import { EMPTY_VIEW } from '../store.helpers';
 import { ITicket } from '../store.types';
- 
+
+// eslint-ignore
 // TODO - delete me when endpoint is developed
 export const fakeTickets: ITicket[] = [
 	{
-		_id: "ticket id",
+		_id: 'ticket id',
 		title: 'type 1',
 		number: 1,
-		type: "template 1",
+		type: 'RISK',
 		properties: {
-			owner: "owner name",
+			owner: 'owner name',
 			createdAt: new Date(),
 			defaultView: EMPTY_VIEW,
 			dueDate: new Date(),
 			pin: [],
-			status: "Open",
-			priority : "High",
+			status: 'Open',
+			priority: 'High',
 			assignes: [],
 		},
 		modules: {
 			safetibase: {
-				"Level of Risk": "High",
-				"Treated Level of Risk" : "Low",
-				"Treatment Status": "Proposed",
+				'Level of Risk': 'High',
+				'Treated Level of Risk': 'Low',
+				'Treatment Status': 'Proposed',
 			},
 		},
-	},{
-		_id: "ticket id2",
+	},
+	{
+		_id: 'ticket id2',
 		title: 'type 2',
 		number: 2,
-		type: "template 2",
+		type: 'CLASH',
 		properties: {
-			owner: "owner name",
+			owner: 'owner name',
 			createdAt: new Date(),
 			defaultView: EMPTY_VIEW,
 			dueDate: new Date(),
 			pin: [],
-			status: "In progress",
-			priority : "Low",
+			status: 'In progress',
+			priority: 'Low',
 			assignes: [],
 		},
 		modules: {
 			safetibase: {
-				"Level of Risk": "Low",
-				"Treated Level of Risk" : "High",
-				"Treatment Status": "Proposed",
+				'Level of Risk': 'Low',
+				'Treated Level of Risk': 'High',
+				'Treatment Status': 'Proposed',
 			},
 		},
-	}
+	},
+	{
+		_id: 'ticket id3',
+		title: 'type 3',
+		number: 3,
+		type: 'CLASH',
+		properties: {
+			owner: 'owner name',
+			createdAt: new Date(),
+			defaultView: EMPTY_VIEW,
+			dueDate: new Date(),
+			pin: [],
+			status: 'In progress',
+			priority: 'Low',
+			assignes: [],
+		},
+		modules: {
+			safetibase: {
+				'Level of Risk': 'Low',
+				'Treated Level of Risk': 'High',
+				'Treatment Status': 'Proposed',
+			},
+		},
+	},
+	{
+		_id: 'ticket id4',
+		title: 'type 4',
+		number: 4,
+		type: 'CONSTRUCTABILITY',
+		properties: {
+			owner: 'owner name',
+			createdAt: new Date(),
+			defaultView: EMPTY_VIEW,
+			dueDate: new Date(),
+			pin: [],
+			status: 'In progress',
+			priority: 'Low',
+			assignes: [],
+		},
+		modules: {
+			safetibase: {
+				'Level of Risk': 'Low',
+				'Treated Level of Risk': 'High',
+				'Treatment Status': 'Proposed',
+			},
+		},
+	},
 ];
