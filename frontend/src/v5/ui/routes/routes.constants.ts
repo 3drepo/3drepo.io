@@ -36,6 +36,8 @@ export const PRIVACY_ROUTE = '/v5/privacy';
 export const COOKIES_ROUTE = '/v5/cookies';
 export const TERMS_ROUTE = '/v5/terms';
 
+export const RELEASE_NOTES_ROUTE = 'https://help.3drepo.io/en/collections/3358238';
+
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
 
