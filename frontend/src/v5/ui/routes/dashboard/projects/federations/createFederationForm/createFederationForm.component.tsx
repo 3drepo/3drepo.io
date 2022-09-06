@@ -69,6 +69,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			setModalPhase('settings');
 		} else {
 			reset();
+			setIsSubmitting(false);
 		}
 		setAlreadyExistingNames([]);
 	}, [open]);
