@@ -36,6 +36,7 @@ import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsS
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
+import { uploadModalLabels } from './uploadFileForm.helpers';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
@@ -166,24 +167,10 @@ export const UploadFileForm = ({
 				open={open}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
-				confirmLabel={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' })
-						: formatMessage({ id: 'uploads.modal.buttonText.preparing', defaultMessage: 'Upload files' })
-				}
-				title={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.title.uploading', defaultMessage: 'Uploading files' })
-						: formatMessage({ id: 'uploads.modal.title.preparing', defaultMessage: 'Prepare files for upload' })
-				}
-				subtitle={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.subtitle.uploading', defaultMessage: 'Do not close this window until uploads are complete' })
-						: formatMessage({ id: 'uploads.modal.subtitle.preparing', defaultMessage: 'Select a file to add Container/Revision details' })
-				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
 				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadsContainer>
 					<UploadsListScroll>

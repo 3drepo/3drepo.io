@@ -15,19 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
-import { UploadFileForm } from './uploadFileForm.component';
+import { formatMessage } from '@/v5/services/intl';
 
-export const uploadToContainer = ({ presetContainerId }) => {
-	const f = document.createElement('input');
-	f.type = 'file';
-	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
-	f.onchange = (e: Event) => {
-		const presetFile = (<HTMLInputElement>e.target).files[0];
-		DialogsActionsDispatchers.open(UploadFileForm, {
-			presetFile,
-			presetContainerId,
-		});
-	};
-	f.click();
+type UploadModalLabelTypes = {
+	isUploading: boolean;
+	fileCount: number;
 };
+
+export const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
+	? {
+		title: formatMessage({
+			id: 'uploads.modal.title.uploading',
+			defaultMessage: '{fileCount, plural, one {Uploading file} other {Uploading files}}',
+		}, { fileCount }),
+		subtitle: formatMessage({
+			id: 'uploads.modal.subtitle.uploading',
+			defaultMessage: '{fileCount, plural, one {Do not close this window until the upload is complete} other {Do not close this window until uploads are complete}}',
+		}, { fileCount }),
+		confirmLabel: formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
+	}
+	: {
+		title: formatMessage({
+			id: 'uploads.modal.title.preparing',
+			defaultMessage: '{fileCount, plural, =0 {Add files for upload} one {Prepare file for upload} other {Prepare files for upload}}',
+		}, { fileCount }),
+		subtitle: formatMessage({
+			id: 'uploads.modal.title.preparing',
+			defaultMessage: '{fileCount, plural, =0 {Drag and drop or browse your computer} other {Select a file to add Container/Revision details}}',
+		}, { fileCount }),
+		confirmLabel: formatMessage({
+			id: 'uploads.modal.buttonText.preparing',
+			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
+		}, { fileCount }),
+	});
