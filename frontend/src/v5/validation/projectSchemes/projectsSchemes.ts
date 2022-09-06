@@ -51,8 +51,9 @@ export const CreateProjectSchema = Yup.object().shape({
 				id: 'createProject.name.error.alreadyExisting',
 				defaultMessage: 'This name is already taken',
 			}),
-			(projectName, { options, parent }) => (
-				!(options.context.alreadyExistingProjectsByTeamspace[parent.teamspace] || []).includes(projectName)
-			),
+			(projectName, { options, parent }) => {
+				const existingNames = options.context.alreadyExistingProjectsByTeamspace[parent.teamspace] || [];
+				return !existingNames.map((name) => name.trim()).includes(projectName);
+			},
 		),
 });
