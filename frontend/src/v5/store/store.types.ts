@@ -48,11 +48,12 @@ export type View = {
 
 
 // Tickets
-type Priority = 'none' | 'low' | 'medium' | 'high';
-type Status =  'open' | 'in progress' | 'for approval' | 'closed' | 'void';
+type Priority = 'None' | 'Low' | 'Medium' | 'High';
+type Status = 'Open' | 'In progress' | 'For approval' | 'Closed' | 'Void';
 
 export interface ITicket {
 	_id: string,
+	title: string,
 	number: number,
 	type: string,
 	properties: {
