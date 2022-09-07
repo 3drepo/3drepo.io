@@ -38,7 +38,7 @@ const SeatsQuotaText = ({ seats }: SeatsInfoProps) => {
 	return (
 		<FormattedMessage
 			id="teamspace.quota.seats"
-			defaultMessage="{used} of {available} seats assigned"
+			defaultMessage="{available, plural, one {{used} of # seat assigned} other {{used} of # seats assigned}}"
 			values={seats}
 		/>
 	);

@@ -110,7 +110,7 @@ export const FederationListItem = memo(({
 					>
 						<FormattedMessage
 							id="federations.list.item.issues"
-							defaultMessage="{count} issues"
+							defaultMessage="{count, plural, =0 {No issues} one {# issue} other {# issues}}"
 							values={{ count: federation.issues }}
 						/>
 					</DashboardListItemButton>
@@ -128,7 +128,7 @@ export const FederationListItem = memo(({
 					>
 						<FormattedMessage
 							id="federations.list.item.risks"
-							defaultMessage="{count} risks"
+							defaultMessage="{count, plural, =0 {No risks} one {# risk} other {# risks}}"
 							values={{ count: federation.risks }}
 						/>
 					</DashboardListItemButton>
@@ -142,7 +142,7 @@ export const FederationListItem = memo(({
 					>
 						<FormattedMessage
 							id="federations.list.item.containers"
-							defaultMessage="{count} containers"
+							defaultMessage="{count, plural, =0 {No containers} one {# container} other {# containers}}"
 							values={{ count: federation.containers.length }}
 						/>
 					</DashboardListItemButton>
