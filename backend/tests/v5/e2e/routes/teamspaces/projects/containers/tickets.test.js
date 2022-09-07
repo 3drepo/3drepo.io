@@ -378,7 +378,7 @@ const testGetTicket = () => {
 	});
 };
 
-const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId = ticket._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/ticket/${ticketId}${key ? `?key=${key}` : ''}`;
+const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId = ticket._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 
 const testUpdateTicket = () => {
 	describe.each([
