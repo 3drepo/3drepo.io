@@ -20,10 +20,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
-import { canUploadToBackend, uploadToContainer } from '@/v5/store/containers/containers.helpers';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,

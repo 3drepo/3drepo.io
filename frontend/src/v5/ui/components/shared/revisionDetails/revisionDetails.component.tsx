@@ -29,8 +29,9 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { canUploadToBackend, uploadToContainer } from '@/v5/store/containers/containers.helpers';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
 import {
 	Container,
 	RevisionsListHeaderContainer,
