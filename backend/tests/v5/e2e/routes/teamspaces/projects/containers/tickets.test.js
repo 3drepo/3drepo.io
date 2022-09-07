@@ -383,18 +383,18 @@ const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTempl
 const testUpdateTicket = () => {
 	describe.each([
 		['the user does not have a valid session', false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, users.nobody.apiKey],
-		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-		['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-		['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, users.tsAdmin.apiKey],
-		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
-		['the templateId provided does not exist', false, templates.templateNotFound, undefined, undefined, users.tsAdmin.apiKey, { type: ServiceHelper.generateRandomString() }],
-		['the templateId is not provided', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { type: undefined }],
+		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
+		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+		['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+		['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, undefined, users.tsAdmin.apiKey],
+		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+
 		['the ticket data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 		['the ticket data conforms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey],
 		['the ticket data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
 		['the ticket has a template that contains all preset modules, preset enums and configs', true, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
-	])('Add Ticket', (desc, success, expectedOutput, projectId, modelId, key, payloadChanges = {}) => {
+	])('Add Ticket', (desc, success, expectedOutput, projectId, modelId, ticketId, key, payloadChanges = {}) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const payload = { ...ServiceHelper.generateTicket(ticketTemplates[0]), ...payloadChanges };
 
