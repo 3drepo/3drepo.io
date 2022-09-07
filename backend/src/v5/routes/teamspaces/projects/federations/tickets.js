@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketResourceAsStream } = require('../../../../processors/teamspaces/projects/models/federations');
+const { addTicket, getTicketById, getTicketResourceAsStream, updateTicket: update } = require('../../../../processors/teamspaces/projects/models/federations');
 const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
@@ -79,6 +79,22 @@ const getTicketResource = async (req, res) => {
 		);
 
 		writeStreamRespond(req, res, templates.ok, readStream, UUIDToString(resource), size, { mimeType });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const updateTicket = async (req, res) => {
+	const { teamspace, project, federation } = req.params;
+	const template = req.templateData;
+	const oldTicket = req.ticketData;
+	const updatedTicket = req.body;
+
+	try {
+		await update(teamspace, project, federation, template, oldTicket, updatedTicket);
+
+		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -409,6 +425,81 @@ const establishRoutes = () => {
 	 *               format: binary
 	 */
 	router.get('/:ticket/resources/:resource', hasReadAccessToFederation, getTicketResource);
+
+	/* @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
+	 *   patch:
+	 *     description: Update a ticket. The Schema of the payload depends on the ticket template being used
+	 *     tags: [Federations]
+	 *     operationId: updateFederationTicket
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *                 title:
+	 *                   type: string
+	 *                   description: Title of the ticket
+	 *                   example: Doorway too narrow
+	 *                 properties:
+	 *                   type: object
+	 *                   description: properties within the ticket
+	 *                   properties:
+	 *                     Description:
+	 *                       type: string
+	 *                       description: A detailed description of the ticket
+	 *                       example: "The door way is too narrow for disable access"
+	 *                     CustomProperty1:
+	 *                       type: string
+	 *                       description: Any custom properties in the ticket should be filled in this way
+	 *                       example: "Data1"
+	 *                 modules:
+	 *                   type: object
+	 *                   description: modules within the ticket
+	 *                   properties:
+	 *                     Module1:
+	 *                       type: object
+	 *                       description: properties within Module1
+	 *                       properties:
+	 *                         Property1:
+	 *                           type: string
+	 *                           description: Any properties in the module should be filled in this way
+	 *                           example: "Data1"
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: ticket has been successfully updated
+	 */
+	router.patch('/:ticket', hasCommenterAccessToFederation, validateUpdateTicket, updateTicket);
 
 	return router;
 };

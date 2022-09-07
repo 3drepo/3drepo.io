@@ -62,7 +62,7 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 				}
 
 				if (prop.type === propTypes.ONE_OF) {
-					validator = validator.oneOf(values);
+					validator = validator.oneOf(isNewTicket ? values : values.concat(null));
 				} else if (prop.type === propTypes.MANY_OF) {
 					validator = Yup.array().of(types.strings.title.oneOf(values));
 				} else {
@@ -70,14 +70,15 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 				}
 			}
 
-			if (prop.required) {
-				validator = validator.required();
-			} else if (!isNewTicket) {
-				validator = validator.nullable();
-			}
-
-			if (prop.default) {
-				validator = validator.default(prop.default);
+			if (isNewTicket) {
+				if (prop.default) {
+					validator = validator.default(prop.default);
+				}
+				if (prop.required) {
+					validator = validator.required();
+				}
+			} else if (!prop.required) {
+				validator = validator.nullable(true);
 			}
 
 			obj[prop.name] = validator;

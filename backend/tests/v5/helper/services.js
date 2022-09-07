@@ -362,6 +362,7 @@ ServiceHelper.generateTicket = (template) => {
 	});
 
 	const ticket = {
+		_id: ServiceHelper.generateUUIDString(),
 		type: template._id,
 		title: ServiceHelper.generateRandomString(),
 		properties: generateProperties(template.properties),

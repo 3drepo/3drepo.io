@@ -24,8 +24,12 @@ jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+
 jest.mock('../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../../../src/v5/models/tickets');
+const TicketModelSchema = require(`${src}/models/tickets`);
 
 jest.mock('../../../../../../../src/v5/schemas/tickets/templates');
 const TicketTemplateSchema = require(`${src}/schemas/tickets/templates`);
@@ -397,7 +401,7 @@ const testValidateUpdateTicketSchema = () => {
 
 const testCheckTicketTemplateExists = () => {
 	describe('Check if template exists', () => {
-		test('Should call next if the ticket exists', async () => {
+		test('Should call next if the template exists', async () => {
 			const output = {
 				name: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
@@ -419,8 +423,8 @@ const testCheckTicketTemplateExists = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
-		test(`Should respond with ${templates.templatesNotFound} if template does not exist`, async () => {
-			TemplateModelSchema.getTemplateById.mockRejectedValueOnce(templates.templatesNotfound);
+		test(`Should respond with ${templates.templateNotFound} if template does not exist`, async () => {
+			TemplateModelSchema.getTemplateById.mockRejectedValueOnce(templates.templateNotFound);
 
 			const req = {
 				params: { teamspace: generateRandomString(), template: generateRandomString() },
@@ -433,9 +437,115 @@ const testCheckTicketTemplateExists = () => {
 
 			expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledWith(req.params.teamspace, req.params.template);
 			expect(next).not.toHaveBeenCalled();
-			expect(req.templiateData).toBeUndefined();
+			expect(req.templateData).toBeUndefined();
 			expect(Responder.respond).toHaveBeenCalledWith(
-				req, res, templates.templatesNotFound,
+				req, res, templates.templateNotFound,
+			);
+		});
+	});
+};
+
+const testCheckTicketExists = () => {
+	describe('Check if ticket exists', () => {
+		test('Should call next if the ticket exists', async () => {
+			const template = {
+				type: generateRandomString(),
+				[generateRandomString()]: generateRandomString(),
+			};
+			const ticket = {
+				type: generateRandomString(),
+				name: generateRandomString(),
+				[generateRandomString()]: generateRandomString(),
+			};
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					container: generateRandomString(),
+					project: generateRandomString(),
+					ticket: generateRandomString(),
+				},
+			};
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.checkTicketExists(req, res, next);
+
+			expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledWith(req.params.teamspace, ticket.type,
+				{ properties: 1, modules: 1, config: 1 });
+			expect(TicketModelSchema.getTicketById).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
+				req.params.container, req.params.ticket, { type: 1, modules: 1, properties: 1 });
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(req.templateData).toEqual(template);
+			expect(req.ticketData).toEqual(ticket);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test(`Should respond with ${templates.ticketNotFound} if ticket does not exist`, async () => {
+			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
+
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					federation: generateRandomString(),
+					project: generateRandomString(),
+					ticket: generateRandomString(),
+				},
+			};
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.checkTicketExists(req, res, next);
+
+			expect(TicketModelSchema.getTicketById).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
+				req.params.federation, req.params.ticket, { type: 1, modules: 1, properties: 1 });
+			expect(TemplateModelSchema.getTemplateById).not.toHaveBeenCalled();
+
+			expect(next).not.toHaveBeenCalled();
+			expect(req.ticketData).toBeUndefined();
+			expect(req.templateData).toBeUndefined();
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, templates.ticketNotFound,
+			);
+		});
+
+		test(`Should respond with ${templates.templateNotFound.code} if template does not exist`, async () => {
+			const ticket = {
+				type: generateRandomString(),
+				name: generateRandomString(),
+				[generateRandomString()]: generateRandomString(),
+			};
+			TemplateModelSchema.getTemplateById.mockRejectedValueOnce(templates.templateNotFound);
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					container: generateRandomString(),
+					project: generateRandomString(),
+					ticket: generateRandomString(),
+				},
+			};
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.checkTicketExists(req, res, next);
+
+			expect(TicketModelSchema.getTicketById).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
+				req.params.container, req.params.ticket, { type: 1, modules: 1, properties: 1 });
+			expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledWith(req.params.teamspace, ticket.type,
+				{ properties: 1, modules: 1, config: 1 });
+
+			expect(next).not.toHaveBeenCalled();
+			expect(req.ticketData).toBeUndefined();
+			expect(req.templateData).toBeUndefined();
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, templates.templateNotFound,
 			);
 		});
 	});
@@ -445,4 +555,5 @@ describe('middleware/dataConverter/inputs/teamspaces', () => {
 	testValidateNewTicketSchema();
 	testValidateUpdateTicketSchema();
 	testCheckTicketTemplateExists();
+	testCheckTicketExists();
 });

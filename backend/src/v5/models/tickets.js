@@ -35,11 +35,11 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, ticketId, updatedTicket) => {
+Tickets.updateTicket = async (teamspace, ticketId, data) => {
 	const updateObj = { toUpdate: {}, toUnset: {} };
 
-	Object.keys(updatedTicket).forEach((key) => {
-		const value = updatedTicket[key];
+	Object.keys(data).forEach((key) => {
+		const value = data[key];
 		if (value) {
 			if (key === 'modules') {
 				Object.keys(value).forEach((moduleName) => {

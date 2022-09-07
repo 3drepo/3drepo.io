@@ -141,7 +141,6 @@ const testValidateNewTicket = () => {
 			});
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.validateTicket.mockResolvedValueOnce();
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -151,6 +150,139 @@ const testValidateNewTicket = () => {
 	});
 };
 
+const testValidateUpdateTicket = () => {
+	describe('Validate update ticket', () => {
+		test('Should not call next if ticket doesn\'t exist', async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+
+			SettingsMW.checkTicketExists.mockImplementationOnce(() => {});
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+
+			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
+				/* eslint-disable no-param-reassign */
+				_req.templateData = { };
+				_req.ticketData = { };
+				/* eslint-enable no-param-reassign */
+
+				await next();
+			});
+
+			const errMsg = generateRandomString();
+			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, errMsg));
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+
+			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
+				/* eslint-disable no-param-reassign */
+				_req.templateData = { };
+				_req.ticketData = { };
+				/* eslint-enable no-param-reassign */
+				await next();
+			});
+
+			const errMsg = generateRandomString();
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, errMsg));
+
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test('Should call next if validation succeeded', async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+
+			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
+				/* eslint-disable no-param-reassign */
+				_req.templateData = { };
+				_req.ticketData = { };
+				/* eslint-enable no-param-reassign */
+				await next();
+			});
+
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(fn).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('Should call next and set safetibase module props if user wants to update safetibase module', async () => {
+			const safetiBaseProp1 = generateRandomString();
+			const safetiBaseProp2 = generateRandomString();
+			const fn = jest.fn();
+			const req = { params: {}, body: { modules: { safetibase: { safetiBaseProp2 } } } };
+			const res = {};
+
+			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
+				/* eslint-disable no-param-reassign */
+				_req.templateData = { };
+				_req.ticketData = { modules: { safetibase: { safetiBaseProp1 } } };
+				/* eslint-enable no-param-reassign */
+				await next();
+			});
+
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(fn).toHaveBeenCalled();
+			expect(req.body.modules.safetibase).toEqual({ safetiBaseProp1, safetiBaseProp2 });
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('Should call next if validation succeeded and the template is deprecated', async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+
+			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
+				/* eslint-disable no-param-reassign */
+				_req.templateData = { deprecated: true };
+				_req.ticketData = { };
+				/* eslint-enable no-param-reassign */
+				await next();
+			});
+
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(fn).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets', () => {
 	testValidateNewTicket();
+	testValidateUpdateTicket();
 });

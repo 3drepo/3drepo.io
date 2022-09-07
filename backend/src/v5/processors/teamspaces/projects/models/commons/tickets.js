@@ -29,13 +29,18 @@ const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket
 
 	const removeFiles = (templateProperties, oldProperties, newProperties) => {
 		templateProperties.forEach(({ type, name }) => {
-			if (type === propTypes.IMAGE || type === propTypes.VIEW) {
-				const oldProp = oldProperties[name];
-				const newProp = newProperties[name];
+			let oldProp; 
+			let	newProp;
+			if (type === propTypes.IMAGE) {
+				oldProp = oldProperties[name];
+				newProp = newProperties[name];
+			} else if (type === propTypes.VIEW) {
+				oldProp = oldProperties[name]?.screenshot;
+				newProp = newProperties[name];
+			}
 
-				if (oldProp && newProp !== undefined) {
-					promises.push(FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, oldProp));
-				}
+			if (oldProp && newProp !== undefined) {
+				promises.push(FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, oldProp));
 			}
 		});
 	};
@@ -45,9 +50,9 @@ const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket
 	template.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
 		const oldModule = oldTicket.modules?.[id];
-		const updatedModule = updatedTicket.modules[id];
+		const updatedModule = updatedTicket.modules?.[id];
 		if (oldModule && updatedModule) {
-			removeFiles(properties, oldModule.properties, updatedModule.properties);
+			removeFiles(properties, oldModule, updatedModule);
 		}
 	});
 
@@ -80,7 +85,7 @@ const extractEmbeddedBinary = (ticket, template) => {
 
 	template.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
-		const module = ticket.modules[id];
+		const module = ticket.modules?.[id];
 
 		if (module) {
 			replaceBinaryDataWithRef(module, properties);
@@ -90,28 +95,25 @@ const extractEmbeddedBinary = (ticket, template) => {
 	return binaryData;
 };
 
+const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
+	binaryData.map(({ ref, data }) => storeFile(
+		teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
+	)),
+);
+
 Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 	const binaryData = extractEmbeddedBinary(ticket, template);
 	const res = await addTicket(teamspace, project, model, ticket);
-	await Promise.all(
-		binaryData.map(({ ref, data }) => storeFile(
-			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket: res },
-		)),
-	);
-
+	await storeFiles(teamspace, project, model, res, binaryData);
 	return res;
 };
 
-Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updatedTicket) => {
-	await removeExistingFiles(teamspace, template, oldTicket, updatedTicket);
-	const binaryData = extractEmbeddedBinary(updatedTicket, template);
-	const ticket = oldTicket._id;
-	await updateTicket(teamspace, ticket, updatedTicket);
-	await Promise.all(
-		binaryData.map(({ ref, data }) => storeFile(
-			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
-		)),
-	);
+Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
+	await removeExistingFiles(teamspace, template, oldTicket, updateData);
+	const binaryData = extractEmbeddedBinary(updateData, template);
+	const ticketId = oldTicket._id;
+	await updateTicket(teamspace, ticketId, updateData);
+	await storeFiles(teamspace, project, model, ticketId, binaryData);
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

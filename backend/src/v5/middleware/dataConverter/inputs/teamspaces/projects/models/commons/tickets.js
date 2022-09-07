@@ -53,11 +53,11 @@ const templateIDToParams = async (req, res, next) => {
 	}
 };
 
-const setSafetibaseValues = (req, res, next) => {
+const setSafetibaseModValues = (req, res, next) => {
 	const oldTicketSafetibaseMod = req.ticketData.modules?.safetibase;
 	const updatedTicketSafetibaseMod = req.body.modules?.safetibase;
 
-	if (oldTicketSafetibaseMod) {
+	if (oldTicketSafetibaseMod && updatedTicketSafetibaseMod) {
 		req.body.modules.safetibase = { ...oldTicketSafetibaseMod, ...updatedTicketSafetibaseMod };
 	}
 
@@ -65,7 +65,7 @@ const setSafetibaseValues = (req, res, next) => {
 };
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validate(true)]);
-TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, setSafetibaseValues, validate(false)]);
+TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, setSafetibaseModValues, validate(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

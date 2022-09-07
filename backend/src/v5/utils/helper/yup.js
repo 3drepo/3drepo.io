@@ -100,7 +100,7 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-YupHelper.types.embeddedImage = Yup.mixed().transform((n, orgVal) => Buffer.from(orgVal, 'base64'))
+YupHelper.types.embeddedImage = Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : null))
 	.test('Image', `must be smaller than ${fileUploads.resourceSizeLimit} Bytes`, (buffer) => !buffer || buffer.length <= fileUploads.resourceSizeLimit)
 	.test('Image', `must be of type ${fileUploads.imageExtensions.join(',')}`, async (buffer) => {
 		if (!buffer) return true;
