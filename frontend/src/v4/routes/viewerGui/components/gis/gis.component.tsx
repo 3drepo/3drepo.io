@@ -114,7 +114,7 @@ export class Gis extends PureComponent<IProps, IState> {
 	}
 
 	public getTitleIcon = () => {
-		if (this.state.settingsModeActive) {
+		if (this.state.settingsModeActive && this.props.hasGISCoordinates) {
 			return (
                 <IconButton
                     disabled={!this.props.hasGISCoordinates}
@@ -151,7 +151,7 @@ export class Gis extends PureComponent<IProps, IState> {
 				type={this.type}
 				menuLabel="Show GIS menu"
 				menuActions={this.renderActionsMenu}
-				menuDisabled={this.props.isPending || this.state.settingsModeActive}
+				hideMenu={this.props.isPending || this.state.settingsModeActive || !this.props.hasGISCoordinates}
 				hideSearch
 				{...menuOpenProp}
 			/>
