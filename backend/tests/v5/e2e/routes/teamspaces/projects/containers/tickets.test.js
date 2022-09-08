@@ -86,8 +86,7 @@ const ticketTemplates = [
 	templateWithImage,
 ];
 
-const ticketTemplate = ticketTemplates[0];
-const ticket = ServiceHelper.generateTicket(ticketTemplate);
+const ticket = ServiceHelper.generateTicket(templateWithImage);
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -104,6 +103,7 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 		ServiceHelper.db.createTemplates(teamspace, ticketTemplates),
+		ServiceHelper.db.createTicket(teamspace, project.id, modelWithTemplates._id, ticket)
 	]);
 };
 const testGetAllTemplates = () => {
@@ -382,17 +382,18 @@ const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTempl
 
 const testUpdateTicket = () => {
 	describe.each([
-		['the user does not have a valid session', false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
-		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
-		['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-		['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, undefined, users.tsAdmin.apiKey],
-		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
-		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
-		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
-		['the update data conforms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
-		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
-		['the update has a template that contains all preset modules, preset enums and configs', true, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
+		// ['the user does not have a valid session', false, templates.notLoggedIn],
+		// ['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
+		// ['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+		// ['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+		// ['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, undefined, users.tsAdmin.apiKey],
+		// ['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+		// ['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		
+		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+		// ['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		// ['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey],
+		// ['the update has a template that contains all preset modules, preset enums and configs', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
 	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, ticketId, key, payloadChanges = {}) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
@@ -419,10 +420,10 @@ describe('E2E routes/teamspaces/projects/containers/tickets', () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 
-	testGetAllTemplates();
-	testGetTemplateDetails();
-	testAddTicket();
-	testGetTicket();
-	testGetTicketResource();
+	// testGetAllTemplates();
+	// testGetTemplateDetails();
+	// testAddTicket();
+	// testGetTicket();
+	// testGetTicketResource();
 	testUpdateTicket();
 });
