@@ -59,9 +59,9 @@ module.exports.createApp = function () {
 
 		if (req.path.indexOf(".") !== -1) {
 			next();
+		} else {
+			res.sendFile(path.resolve(publicDir + "/index.html"));
 		}
-		res.sendFile(path.resolve(publicDir + "/index.html"));
-
 	});
 
 	return app;
