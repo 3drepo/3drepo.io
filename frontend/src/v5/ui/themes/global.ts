@@ -58,7 +58,7 @@ export const GlobalStyle = createGlobalStyle`
 
 	#viewer #unityViewer {
 		position: absolute;
-		height: 100% !important;
+		height: calc(100% - 62px) !important;
 		width: 100% !important;
 		overflow: hidden;
 		margin-top: 62px;

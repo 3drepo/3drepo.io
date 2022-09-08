@@ -58,7 +58,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
 				})}
-				onClick={() => uploadToContainer({ presetContainerId: container._id })}
+				onClick={() => uploadToContainer(container._id)}
 				disabled={!canUploadToBackend(container.status)}
 			/>
 			<EllipsisMenuItem

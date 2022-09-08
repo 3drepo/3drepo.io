@@ -75,7 +75,7 @@ export const EditFederationContainersListItem = memo(({
 			>
 				<FormattedMessage
 					id="modal.editFederation.list.item.revisions"
-					defaultMessage="{count} revisions"
+					defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
 					values={{ count: container.revisionsCount }}
 				/>
 			</DashboardListItemButton>
