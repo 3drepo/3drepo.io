@@ -22,8 +22,8 @@ const FileRefs = {};
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
-FileRefs.getRefEntry = async (teamspace, collection, id) => {
-	const entry = await db.findOne(teamspace, collectionName(collection), { _id: id });
+FileRefs.getRefEntryByQuery = async (teamspace, collection, query, projection) => {
+	const entry = await db.findOne(teamspace, collectionName(collection), query, projection);
 
 	if (!entry) {
 		throw templates.fileNotFound;
@@ -31,6 +31,10 @@ FileRefs.getRefEntry = async (teamspace, collection, id) => {
 
 	return entry;
 };
+
+FileRefs.getRefEntry = (teamspace, collection, _id) => FileRefs.getRefEntryByQuery(
+	teamspace, collection, { _id },
+);
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
@@ -49,15 +53,23 @@ FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
 		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 	];
 
-	return db.aggregate(teamspace, collection, pipeline);
+	return db.aggregate(teamspace, collectionName(collection), pipeline);
 };
 
 FileRefs.insertRef = async (teamspace, collection, refInfo) => {
-	await db.insertOne(teamspace, collection, refInfo);
+	await db.insertOne(teamspace, collectionName(collection), refInfo);
 };
 
 FileRefs.removeRef = async (teamspace, collection, id) => {
-	await db.deleteOne(teamspace, collection, { _id: id });
+	await db.deleteOne(teamspace, collectionName(collection), { _id: id });
 };
+
+FileRefs.getRefsByQuery = (teamspace, collection, query, projection) => db.find(
+	teamspace, collectionName(collection), query, projection,
+);
+
+FileRefs.removeRefsByQuery = (teamspace, collection, query) => db.deleteMany(
+	teamspace, collectionName(collection), query,
+);
 
 module.exports = FileRefs;

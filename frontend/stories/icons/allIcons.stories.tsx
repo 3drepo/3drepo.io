@@ -15,22 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RisksConstants = {};
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from './icons.component';
+import { getIcons } from './icons.helper';
 
-RisksConstants.riskCategories = [
-	'Commercial Issue',
-	'Environmental Issue',
-	'Health - Material effect',
-	'Health - Mechanical effect',
-	'Safety Issue - Fall',
-	'Safety Issue - Trapped',
-	'Safety Issue - Event',
-	'Safety Issue - Handling',
-	'Safety Issue - Struck',
-	'Safety Issue - Public',
-	'Social Issue',
-	'Other Issue',
-	'Unknown',
-];
+export default {
+	title: 'Icons/All Icons',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
 
-module.exports = RisksConstants;
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/', true, /\.*(svg)/)),
+};

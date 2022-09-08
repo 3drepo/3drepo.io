@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import {
@@ -41,31 +41,24 @@ import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
 import { IsMainList } from '../../containers.component';
 
 interface IContainerListItem {
-	index: number;
 	isSelected: boolean;
 	container: IContainer;
-	onFavouriteChange: (id: string, value: boolean) => void;
 	onSelectOrToggleItem: (id: string) => void;
 }
 
-export const ContainerListItem = ({
-	index,
+export const ContainerListItem = memo(({
 	isSelected,
 	container,
 	onSelectOrToggleItem,
-	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
-	if (container.hasStatsPending) {
-		return <SkeletonListItem delay={index / 10} key={container._id} />;
-	}
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 
@@ -82,6 +75,14 @@ export const ContainerListItem = ({
 	}, [container._id]);
 
 	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
+
+	const onChangeFavourite = ({ currentTarget: { checked } }) => {
+		if (checked) {
+			ContainersActionsDispatchers.addFavourite(teamspace, project, container._id);
+		} else {
+			ContainersActionsDispatchers.removeFavourite(teamspace, project, container._id);
+		}
+	};
 
 	const onClickShare = () => {
 		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
@@ -119,7 +120,7 @@ export const ContainerListItem = ({
 				>
 					<FormattedMessage
 						id="containers.list.item.revisions"
-						defaultMessage="{count} revisions"
+						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
@@ -146,12 +147,7 @@ export const ContainerListItem = ({
 					<FavouriteCheckbox
 						checked={container.isFavourite}
 						selected={isSelected}
-						onChange={(event) => {
-							onFavouriteChange(
-								container._id,
-								!!event.currentTarget.checked,
-							);
-						}}
+						onChange={onChangeFavourite}
 					/>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
@@ -178,4 +174,4 @@ export const ContainerListItem = ({
 			/>
 		</DashboardListItem>
 	);
-};
+});
