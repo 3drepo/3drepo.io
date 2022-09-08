@@ -110,11 +110,10 @@ Settings.checkTicketExists = async (req, res, next) => {
 	const model = req.params.container ?? req.params.federation;
 
 	try {
-		const ticketData = await getTicketById(teamspace, project, model, ticket,
+		req.ticketData = await getTicketById(teamspace, project, model, ticket,
 			{ type: 1, modules: 1, properties: 1 });
-		req.templateData = await getTemplateById(teamspace, ticketData.type,
+		req.templateData = await getTemplateById(teamspace, req.ticketData.type,
 			{ properties: 1, modules: 1, config: 1 });
-		req.ticketData = ticketData;
 
 		await next();
 	} catch (err) {

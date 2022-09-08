@@ -32,7 +32,8 @@ const validate = (isNewTicket) => async (req, res, next) => {
 		const user = getUserFromSession(req.session);
 		const { teamspace } = req.params;
 
-		if (isNewTicket && template.deprecated) { throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated'); }
+		if (isNewTicket && template.deprecated) 
+			{ throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated'); }
 
 		req.body = await validateTicket(teamspace, template, ticket, isNewTicket);
 		processReadOnlyValues(req.body, user, isNewTicket);

@@ -27,19 +27,16 @@ const Tickets = {};
 const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket) => {
 	const promises = [];
 
-	const removeFiles = (templateProperties, oldProperties, newProperties) => {
+	const removeFiles = (templateProperties, oldProperties, updatedProperties) => {
 		templateProperties.forEach(({ type, name }) => {
 			let oldProp; 
-			let	newProp;
 			if (type === propTypes.IMAGE) {
 				oldProp = oldProperties[name];
-				newProp = newProperties[name];
 			} else if (type === propTypes.VIEW) {
 				oldProp = oldProperties[name]?.screenshot;
-				newProp = newProperties[name];
 			}
 
-			if (oldProp && newProp !== undefined) {
+			if (oldProp && updatedProperties[name] !== undefined) {
 				promises.push(FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, oldProp));
 			}
 		});
