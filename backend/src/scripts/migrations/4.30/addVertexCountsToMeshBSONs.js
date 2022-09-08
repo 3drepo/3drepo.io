@@ -70,7 +70,11 @@ const processModel = async (teamspace, model) => {
 		},
 	}));
 
-	await bulkWrite(teamspace, `${model}.scene`, [...meshUpdates, ...singularMeshUpdates]);
+	try {
+		await bulkWrite(teamspace, `${model}.scene`, [...meshUpdates, ...singularMeshUpdates]);
+	} catch (err) {
+		logger.logError(err);
+	}
 };
 
 const processTeamspace = async (teamspace) => {
