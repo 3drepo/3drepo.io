@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * This script is used to create the roles used in the admin permissions system.
- */
-const Path = require('path');
+const instantiateSystemRoles = require('./instantiateSystemRoles');
 
-const { v5Path } = require('../../../interop');
+const scripts = [
+	{ script: instantiateSystemRoles, desc: 'Adding the system and service roles' },
+];
 
-const run = require(`${v5Path}/../scripts/migrations/4.28/instantiateSystemRoles`);
-
-const genYargs = (yargs) => {
-	const commandName = Path.basename(__filename, Path.extname(__filename));
-	return yargs.command(commandName,
-		'Instantiate all the system roles',
-		(argv) => run(argv.username, argv.role));
-};
-
-module.exports = { run, genYargs };
+module.exports = scripts;

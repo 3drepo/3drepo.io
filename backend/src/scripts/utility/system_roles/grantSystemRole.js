@@ -19,44 +19,66 @@
  * This script is used to add admin role permissions to a named account to bootstrap the admin API.
  */
 
+const Path = require('path');
+
 const { v5Path } = require('../../../interop');
 
-const { getUserByUsername, grantAdministrativeRole } = require(`${v5Path}/models/users`);
-const { hideBin } = require('yargs/helpers');
+const { getUserByUsernameOrEmail, grantAdministrativeRole } = require(`${v5Path}/models/users`);
+
 const { logger } = require(`${v5Path}/utils/logger`);
 const { SYSTEM_ROLES } = require(`${v5Path}/utils/permissions/permissions.constants`);
-const yargs = require('yargs/yargs');
 
-const { argv } = yargs(hideBin(process.argv));
-
-const run = async () => {
-	const { username } = argv;
+const run = async (username, role) => {
 	let isUser;
 	try {
-		isUser = getUserByUsername(username);
+		isUser = await getUserByUsernameOrEmail(username);
 	} catch (error) {
 		logger.logError(`${username} not found, please check and try again.`);
-	}
-	if (!SYSTEM_ROLES.includes(argv.role)) {
-		logger.logError(`${argv.role} not found, can't grant ${argv.role}.`);
 		return false;
 	}
+	if (!SYSTEM_ROLES.includes(role)) {
+		logger.logError(`System role ${role} not found, can't grant ${role}.`);
+		return false;
+	}
+
 	if (isUser) {
-		logger.logInfo(`Adding ${argv.role} to ${username}`);
+		logger.logInfo(`Adding ${role} to ${isUser.user}`);
 		try {
-			await grantAdministrativeRole(username, argv.role);
+			await grantAdministrativeRole(isUser.user, role);
 		} catch (error) {
 			logger.logError('We encountered an unexpected error.', error);
+			return false;
 		}
 	} else {
-		logger.logError(`${username} not found, can't grant ${argv.role}.`);
+		logger.logError(`${username} not found, can't grant ${role}.`);
+		return false;
 	}
 	return true;
 };
 
-if (!argv.username || !argv.role) {
-	logger.logError(`Not enough arguments. call grantAdminRole --username <adminUsername> --role [${SYSTEM_ROLES}]`);
-} else {
-	// eslint-disable-next-line no-console
-	run().catch(console.log).finally(process.exit);
-}
+const genYargs = (yargs) => {
+	const commandName = Path.basename(__filename, Path.extname(__filename));
+	const argsSpec = (subYargs) => subYargs.option('username',
+		{
+			describe: 'username to grant the system role to',
+			type: 'string',
+			demandOption: true,
+
+		})
+		.option('role',
+			{
+				describe: `Valid System Role from one of these options [${SYSTEM_ROLES}]`,
+				type: 'string',
+				demandOption: true,
+
+			});
+	return yargs.command(commandName,
+		'Grant Administrative role to a specific user',
+		argsSpec,
+		(argv) => run(argv.username, argv.role));
+};
+
+module.exports = {
+	run,
+	genYargs,
+};
