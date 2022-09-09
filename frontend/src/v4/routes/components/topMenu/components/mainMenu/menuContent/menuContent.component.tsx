@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, Fragment } from 'react';
-import Divider from '@material-ui/core/Divider';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import LogoutIcon from '@material-ui/icons/ExitToApp';
-import PATIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import SettingsIcon from '@material-ui/icons/Settings';
-import TeamspacesIcon from '@material-ui/icons/ViewList';
+import Divider from '@mui/material/Divider';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import LogoutIcon from '@mui/icons-material/ExitToApp';
+import PATIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import SettingsIcon from '@mui/icons-material/Settings';
+import TeamspacesIcon from '@mui/icons-material/ViewList';
 
 import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../../services/staticPages';
 import { COLOR } from '../../../../../../styles';
@@ -29,26 +29,33 @@ import { NestedMenuItem } from '../../nestedMenuItem/nestedMenuItem.component';
 import { IUserData } from '../mainMenu.helpers';
 import { MenuIcon, MenuItem, MenuText, MenuUser } from './menuContent.styles';
 
-const ExternalLink = ({ ...props }) => {
-	const Icon = props.icon || Fragment;
-	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
+type ExternalLinkProps = {
+	label: string;
+	icon?: any;
+	submenu?: any;
+	onButtonClick: () => void;
+}
+
+const ExternalLink = ({ label, icon, onButtonClick, submenu }: ExternalLinkProps) => {
+	const Icon = icon || Fragment;
+	const iconProps = icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
-		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem aria-label={label} onClick={onButtonClick}>
 			<MenuIcon>
 				<Icon {...iconProps} />
 			</MenuIcon>
-			<MenuText primary={props.label} submenu={props.submenu} />
+			<MenuText primary={label} submenu={submenu} />
 		</MenuItem>
 	);
 };
 
-const UserMenuButton = ({ Icon, ...props }) => {
+const UserMenuButton = ({ Icon, label, onButtonClick }) => {
 	return (
-		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem aria-label={label} onClick={onButtonClick}>
 			<MenuIcon>
 				<Icon />
 			</MenuIcon>
-			<MenuText primary={props.label} />
+			<MenuText primary={label} />
 		</MenuItem>
 	);
 };

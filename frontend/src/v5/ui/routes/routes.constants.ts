@@ -14,5 +14,44 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { matchPath } from 'react-router';
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
+export const LOGIN_PATH = '/v5/login';
+export const PASSWORD_FORGOT_PATH = '/v5/password-forgot';
+export const SIGN_UP_PATH = '/v5/signup';
+export const PASSWORD_CHANGE_PATH = '/v5/password-change';
+export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
+export const DASHBOARD_ROUTE = '/v5/dashboard';
+export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
+export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
+export const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project`;
+
+const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
+export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
+export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
+export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
+
+export const PRIVACY_ROUTE = '/v5/privacy';
+export const COOKIES_ROUTE = '/v5/cookies';
+export const TERMS_ROUTE = '/v5/terms';
+
+export const RELEASE_NOTES_ROUTE = 'https://help.3drepo.io/en/collections/3358238';
+
+// eslint-disable-next-line no-restricted-globals
+export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
+
+export interface TeamspaceParams {
+	teamspace?: string;
+}
+
+export interface DashboardParams {
+	teamspace?: string;
+	project?: string;
+}
+
+export interface ViewerParams {
+	teamspace?: string;
+	containerOrFederation?: string;
+	revision?: string;
+}

@@ -18,6 +18,7 @@
 "use strict";
 (function() {
 	const config	  = require("../config.js");
+	const C = require("../constants");
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
@@ -107,11 +108,13 @@
 	};
 
 	Handler.dropCollection = function (database, collection) {
-		Handler.getDB(database).then(dbConn => {
-			dbConn.dropCollection(collection.name);
+		return Handler.getDB(database).then(dbConn => {
+			return dbConn.dropCollection(collection.name || collection);
 		}).catch(err => {
-			Handler.disconnect();
-			return Promise.reject(err);
+			if(err.message !== "ns not found") {
+				Handler.disconnect();
+				return Promise.reject(err);
+			}
 		});
 	};
 
@@ -154,6 +157,12 @@
 		return await Handler.findOne("admin", "system.roles", { role: id });
 	};
 
+	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.findOneAndUpdate(query, action, {projection});
+		return findResult.value;
+	};
+
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
@@ -191,6 +200,11 @@
 			Handler.disconnect();
 			return Promise.reject(err);
 		});
+	};
+
+	Handler.getDatabaseStats = async (database) => {
+		const dbConn = await Handler.getDB(database);
+		return dbConn.stats();
 	};
 
 	Handler.getCollectionStats = function (database, colName) {
@@ -272,6 +286,11 @@
 		return collection.createIndex(indexDef);
 	};
 
+	Handler.createIndices = async (database, colName, indicesDef) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.createIndexes(indicesDef);
+	};
+
 	Handler.dropIndex = async (database, colName, indexName) => {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.dropIndex(indexName);
@@ -282,9 +301,9 @@
 		return collection.distinct(key);
 	};
 
-	Handler.listDatabases = async () => {
+	Handler.listDatabases = async (nameOnly = true) => {
 		try {
-			const res = await Handler.runCommand("admin", {listDatabases :1 });
+			const res = await Handler.runCommand("admin", {listDatabases :1, nameOnly });
 			return res.databases;
 		} catch (err) {
 			Handler.disconnect();
@@ -313,13 +332,15 @@
 		});
 	};
 
-	Handler.getSessionStore = function (session) {
-		const MongoDBStore = require("connect-mongodb-session")(session);
-		return new MongoDBStore({
-			uri: getURL(),
-			databaseName:"admin",
-			collection: "sessions"
+	Handler.getSessionStore = () => {
+		const MongoStore = require("connect-mongo");
+		const sessionStore = MongoStore.create({
+			clientPromise: connect(),
+			dbName: "admin",
+			collectionName: "sessions",
+			stringify: false
 		});
+		return Promise.resolve(sessionStore);
 	};
 
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
@@ -332,6 +353,11 @@
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;
 		return collection.updateOne(query, data, options);
+	};
+
+	Handler.replaceOne = async function (database, colName, query, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.replaceOne(query, data);
 	};
 
 	Handler.count = async function (database, colName, query, options) {
@@ -356,6 +382,55 @@
 			"roles": roles
 		};
 		return await Handler.runCommand("admin", createRoleCmd);
+	};
+
+	let defaultRoleProm;
+
+	const ensureDefaultRoleExists = async () => {
+		if(!defaultRoleProm) {
+
+			const createDefaultRole = async () => {
+
+				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_ROLE_OBJ.role}` });
+
+				// istanbul ignore next
+				if (!roleFound) {
+					const createRoleCmd = { createRole: C.DEFAULT_ROLE_OBJ.role, privileges: [], roles: [] };
+					await Handler.runCommand("admin", createRoleCmd);
+				}
+			};
+
+			defaultRoleProm = createDefaultRole();
+		}
+		return defaultRoleProm;
+	};
+
+	Handler.dropDatabase = async (database) => {
+		if(!["config", "admin"].includes(database)) {
+			try {
+				const dbConn = await Handler.getDB(database);
+				await dbConn.dropDatabase();
+			} catch (err) {
+				if(err.message !== "ns not found") {
+					Handler.disconnect();
+					throw err;
+				}
+			}
+		}
+	};
+
+	Handler.createUser = async function (username, password, customData, roles = []) {
+		const [adminDB] = await Promise.all([
+			Handler.getAuthDB(),
+			ensureDefaultRoleExists()
+		]);
+
+		roles.push(C.DEFAULT_ROLE_OBJ);
+		await adminDB.addUser(username, password, { customData, roles});
+	};
+
+	Handler.dropUser = async (user) => {
+		await Handler.deleteOne("admin", "system.users", { user });
 	};
 
 	module.exports = Handler;

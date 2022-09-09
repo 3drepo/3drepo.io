@@ -15,38 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FC } from 'react';
-import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
 import { AxiosError } from 'axios';
+import { getErrorCode, getErrorMessage, getErrorStatus } from '@/v5/validation/errors.helpers';
 
 interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
-	errorMessage?: string;
 	error: AxiosError;
 	details?: string
 }
 
-export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
-	let message; let code;
-
-	const { response } = error;
-	const { status, headers } = response;
-	const responseType = headers['content-type'];
-
-	if (responseType === 'application/json; charset=utf-8') {
-		const { data } = response;
-		message = data.message;
-		code = data.code;
-	} else {
-		code = response.statusText;
-	}
+export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details }) => {
+	const message = getErrorMessage(error);
+	const code = getErrorCode(error);
+	const status = getErrorStatus(error);
 	const errorStatus = status && code ? `${status} - ${code}` : '';
 
 	return (
-		<Container>
+		<DialogContainer>
 			<WarningIcon />
 			<DialogTitle>
 				<FormattedMessage
@@ -57,11 +47,11 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>
-					{message || errorMessage}
+					{message}
 				</DialogContentText>
 				{!!status && <Status>{errorStatus}</Status>}
 			</DialogContent>
-			<Actions bottomMargin={!details}>
+			<Actions>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
 					<FormattedMessage
 						id="alertModal.action.ok"
@@ -76,6 +66,6 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 				</Button>
 			</Actions>
 			{details && <Details>{details}</Details>}
-		</Container>
+		</DialogContainer>
 	);
 };

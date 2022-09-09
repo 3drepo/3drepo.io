@@ -86,12 +86,12 @@ export class Legend extends PureComponent<IProps, IState> {
 
 	public renderActionsMenu = () => (
 		<MenuList>
-			<StyledListItem disabled={this.props.isCurrentLegendDefault} button onClick={this.props.setDefault}>
+			<StyledListItem disabled={this.props.isCurrentLegendDefault} onClick={this.props.setDefault}>
 				<StyledItemText>
 					Set as default
 				</StyledItemText>
 			</StyledListItem>
-			<StyledListItem disabled={this.props.isCurrentLegendDefault} button onClick={this.props.reset}>
+			<StyledListItem disabled={this.props.isCurrentLegendDefault} onClick={this.props.reset}>
 				<StyledItemText>
 					Reset to default
 				</StyledItemText>

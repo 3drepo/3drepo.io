@@ -18,28 +18,23 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const useFederationsData = () => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	const federations = FederationsHooksSelectors.selectFederations();
 	const favouriteFederations = FederationsHooksSelectors.selectFavouriteFederations();
-	const hasFederations = FederationsHooksSelectors.selectHasFederations();
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
-	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
-		if (hasFederations.all || currentProject !== project) return;
-
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
-	}, [currentProject]);
+	}, [project]);
 
 	return {
 		federations,
 		favouriteFederations,
-		hasFederations,
 		isListPending,
 	};
 };

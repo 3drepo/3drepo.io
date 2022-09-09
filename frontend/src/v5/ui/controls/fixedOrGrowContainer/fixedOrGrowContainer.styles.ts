@@ -17,13 +17,29 @@
 
 import styled, { css } from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
+import { isString } from 'lodash';
 
-export const Container = styled.div<{width?: number}>`
-	min-width: ${({ minWidth }) => minWidth || 0}px;
+type WidthType = number | string;
+
+export interface ContainerProps {
+	width?: WidthType;
+	minWidth?: WidthType;
+	maxWidth?: WidthType;
+	tabletWidth?: WidthType;
+	mobileWidth?: WidthType;
+	hideWhenSmallerThan?: Display;
+}
+
+const withDefaultUnits = (width: WidthType) => (isString(width) ? width : `${width}px`);
+
+export const Container = styled.div<ContainerProps>`
+	min-width: ${({ minWidth }) => withDefaultUnits(minWidth || 0)};
+
+	${({ maxWidth }) => maxWidth && css`max-width: ${withDefaultUnits(maxWidth)};`}
 
 	${({ width }) => (width
 		? css`
-		width: ${width}px;
+		width: ${withDefaultUnits(width)};
 		display: block;
 	`
 		: css`
@@ -33,19 +49,19 @@ export const Container = styled.div<{width?: number}>`
 
 	${({ tabletWidth }) => tabletWidth && css`
 		@media (max-width: ${Display.Desktop}px) {
-			width: ${tabletWidth}px;
+			width: ${withDefaultUnits(tabletWidth)};
 			display: block;
 		}
 	`}
 
 	${({ mobileWidth }) => mobileWidth && css`
 		@media (max-width: ${Display.Tablet}px) {
-			width: ${mobileWidth}px;
+			width: ${withDefaultUnits(mobileWidth)};
 			display: block;
 		}
 	`}
 
-	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+	${({ hideWhenSmallerThan }) => hideWhenSmallerThan && css`
 		@media (max-width: ${hideWhenSmallerThan}px) {
 			display: none;
 		}

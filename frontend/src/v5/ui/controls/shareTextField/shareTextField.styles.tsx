@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { TextField } from '@material-ui/core';
-import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
+import { TextField } from '@mui/material';
+import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
-import tick from '@assets/icons/tick';
+import tick from '@assets/icons/tick.svg';
 
 const SVG_PADDING_IN_PX = 9;
 
@@ -37,38 +37,18 @@ export const CopyToClipboardIconContainer = styled.div`
 `;
 
 export const LinkBar = styled(TextField)`
-
-	& > label:not(.Mui-error).Mui-focused {
-		color: ${({ theme }) => theme.palette.base.main};
-	}
-
 	.MuiInputBase-root {
-		cursor: pointer;
+		${({ disabled }) => !disabled && `
+			cursor: pointer;
+		`}
 		margin-top: 0;
 		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 
-		&:hover .MuiOutlinedInput-notchedOutline {
-			border-color: ${({ theme }) => theme.palette.base.lightest};
-		} 
-
-		&.Mui-focused {
-			input {
-				color: ${({ theme }) => theme.palette.base.main};
-			}
-			
-			.MuiOutlinedInput-notchedOutline {
-				border-color: ${({ theme }) => theme.palette.base.lightest};
-			}
-		}
 
 		.MuiOutlinedInput-input {
 			pointer-events: none;
 			user-select: none;
 			padding-right: ${9 - SVG_PADDING_IN_PX}px;
-	
-			&:active {
-				color: ${({ theme }) => theme.palette.base.main};
-			}
 		}
 	}
 
@@ -91,9 +71,7 @@ export const CopyToClipboardTooltip = styled(
 			{props.children}
 		</Tooltip>
 	),
-)`
-	margin-top: -${SVG_PADDING_IN_PX}px;
-`;
+)``;
 
 export const CopiedToClipboardTooltip = styled(CopyToClipboardTooltip)`
 	& .MuiTooltip-tooltip {

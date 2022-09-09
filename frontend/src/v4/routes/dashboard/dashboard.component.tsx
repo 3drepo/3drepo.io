@@ -126,7 +126,7 @@ export class Dashboard extends PureComponent<IProps, any> {
 			<Container
 				container
 				direction="row"
-				justify="space-between"
+				justifyContent="space-between"
 				alignContent="flex-start"
 			>
 				<Sidebar>

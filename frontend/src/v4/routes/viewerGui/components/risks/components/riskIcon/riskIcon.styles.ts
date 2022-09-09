@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import IconComponent from '@material-ui/core/SvgIcon';
+import IconComponent from '@mui/material/SvgIcon';
 
 export const Icon = styled(IconComponent)`
 	&& {

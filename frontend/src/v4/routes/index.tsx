@@ -16,12 +16,12 @@
  */
 
 import { Component } from 'react';
-
-import DayJsUtils from '@date-io/dayjs';
-import { MuiThemeProvider } from '@material-ui/core';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { Route } from 'react-router-dom';
+import AdapterDayjs from '@mui/lab/AdapterDayjs';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import { StyledEngineProvider } from '@mui/material/styles';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ThemeProvider } from 'styled-components';
+import { Route } from 'react-router-dom';
 
 import { theme, MuiTheme } from '../styles';
 import { GlobalStyle } from '../styles/global';
@@ -31,14 +31,16 @@ import { App } from './app';
 export class RootContainer extends Component {
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={DayJsUtils}>
+			<LocalizationProvider dateAdapter={AdapterDayjs}>
 				<ThemeProvider theme={theme}>
 					<MuiThemeProvider theme={MuiTheme}>
-						<GlobalStyle />
-						<Route component={App} />
+						<StyledEngineProvider injectFirst>
+							<GlobalStyle />
+							<Route component={App} />
+						</StyledEngineProvider>
 					</MuiThemeProvider>
 				</ThemeProvider>
-			</MuiPickersUtilsProvider>
+			</LocalizationProvider>
 		);
 	}
 }

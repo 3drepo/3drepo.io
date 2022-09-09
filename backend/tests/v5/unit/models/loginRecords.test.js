@@ -16,24 +16,23 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
 const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 
-UserAgentHelper.isUserAgentFromPlugin.mockImplementation((userAgent) => userAgent.split(' ')[0] === 'PLUGIN:');
-UserAgentHelper.getUserAgentInfoFromBrowser.mockImplementation(() => ({ data: 'browser ua data' }));
-UserAgentHelper.getUserAgentInfoFromPlugin.mockImplementation(() => ({ data: 'plugin ua data' }));
+UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua data' }));
 
-const sessionId = '123456';
-const username = 'someUsername';
-const ipAddress = '290.241.146.180';
-const browserUserAgent = 'browser user agent';
-const pluginUserAgent = 'PLUGIN: plugin user agent';
-const referrer = 'www.google.com';
-const LoginRecord = require(`${src}/models/loginRecord`);
+const LoginRecord = require(`${src}/models/loginRecords`);
 
 const testSaveLoginRecord = () => {
+	const sessionId = generateRandomString();
+	const username = generateRandomString();
+	const ipAddress = generateRandomString();
+	const browserUserAgent = generateRandomString();
+	const pluginUserAgent = `PLUGIN: ${generateRandomString()}`;
+	const referrer = generateRandomString();
 	const formatLoginRecord = (userAgentInfo, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
 			_id: sessionId,
@@ -61,33 +60,55 @@ const testSaveLoginRecord = () => {
 
 		test('Should save a new login record if user agent is from plugin', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, pluginUserAgent, referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromPlugin(),
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 				referrer);
 			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if user agent is from browser', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent, referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser(),
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
+				referrer);
+			checkResults(fn, username, formattedLoginRecord);
+		});
+
+		test('Should save a new login record if user agent empty', async () => {
+			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, '', referrer);
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 				referrer);
 			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if there is no referrer', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser());
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo());
 			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if there is no location', async () => {
 			await LoginRecord.saveLoginRecord(username, sessionId, '0.0.0.0', browserUserAgent);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser(),
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 				undefined, '0.0.0.0');
 			checkResults(fn, username, formattedLoginRecord);
 		});
 	});
 };
 
-describe('models/loginRecord', () => {
+const testRemoveAllUserRecords = () => {
+	describe('Remove all user login records', () => {
+		test('Should just drop the user collection within loginRecords', async () => {
+			const fn = jest.spyOn(db, 'dropCollection').mockResolvedValue(undefined);
+
+			const username = generateRandomString();
+			await expect(LoginRecord.removeAllUserRecords(username)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('loginRecords', username);
+		});
+	});
+};
+
+describe('models/loginRecords', () => {
 	testSaveLoginRecord();
+	testRemoveAllUserRecords();
 });

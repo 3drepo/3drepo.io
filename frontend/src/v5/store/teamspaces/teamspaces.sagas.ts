@@ -28,12 +28,39 @@ export function* fetch() {
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'teamspaces.fetch.error', defaultMessage: 'trying to fetch teamspaces' }),
+			currentActions: formatMessage({
+				id: 'teamspaces.fetch.error.action',
+				defaultMessage: 'loading your Teamspaces',
+			}),
 			error,
+			details: formatMessage({
+				id: 'teamspaces.fetch.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
+export function* fetchQuota({ teamspace }) {
+	try {
+		const { data } = yield API.Teamspaces.fetchQuota(teamspace);
+		yield put(TeamspacesActions.fetchQuotaSuccess(teamspace, data));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'teamspaces.fetchQuota.error.action',
+				defaultMessage: 'fetching the quota',
+			}),
+			error,
+			details: formatMessage({
+				id: 'teamspaces.fetchQuota.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
 		}));
 	}
 }
 
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH as any, fetch);
+	yield takeLatest(TeamspacesTypes.FETCH_QUOTA as any, fetchQuota);
 }

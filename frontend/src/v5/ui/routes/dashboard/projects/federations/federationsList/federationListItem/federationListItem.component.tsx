@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
@@ -24,44 +24,67 @@ import {
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
-	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { Highlight } from '@controls/highlight';
-import { Tooltip } from '@material-ui/core';
+import { DashboardListItemFederationTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
-import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
+
+import { useParams } from 'react-router-dom';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
-	share: 'share',
 	editFederation: 'editFederation',
 	federationSettings: 'federationSettings',
 	none: 'none',
 };
 interface IFederationListItem {
-	index: number;
 	federation: IFederation;
-	filterQuery: string;
-	onFavouriteChange: (id: string, value: boolean) => void;
 }
 
-export const FederationListItem = ({
-	index,
+export const FederationListItem = memo(({
 	federation,
-	filterQuery,
-	onFavouriteChange,
 }: IFederationListItem): JSX.Element => {
-	if (federation.hasStatsPending) {
-		return <SkeletonListItem delay={index / 10} key={federation._id} />;
-	}
+	const { teamspace, project } = useParams<DashboardParams>();
+
 	const [openModal, setOpenModal] = useState(MODALS.none);
 	const closeModal = () => setOpenModal(MODALS.none);
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, federation));
+		const subject = formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' });
+		const title = formatMessage({ id: 'shareModal.federation.title', defaultMessage: 'Share Federation' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: federation.name,
+			subject,
+			title,
+			link,
+		});
+	};
+
+	const onChangeFavourite = ({ currentTarget: { checked } }) => {
+		if (checked) {
+			FederationsActionsDispatchers.addFavourite(teamspace, project, federation._id);
+		} else {
+			FederationsActionsDispatchers.removeFavourite(teamspace, project, federation._id);
+		}
+	};
+
+	useEffect(() => combineSubscriptions(
+		enableRealtimeFederationUpdateSettings(teamspace, project, federation._id),
+		enableRealtimeFederationRemoved(teamspace, project, federation._id),
+		enableRealtimeFederationNewRevision(teamspace, project, federation._id),
+	), [federation._id]);
 
 	return (
 		<>
@@ -69,17 +92,10 @@ export const FederationListItem = ({
 				key={federation._id}
 			>
 				<DashboardListItemRow>
-					<DashboardListItemTitle
-						tooltipTitle={
-							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
-						}
-						subtitle={federation.desc}
+					<DashboardListItemFederationTitle
 						minWidth={90}
-					>
-						<Highlight search={filterQuery}>
-							{federation.name}
-						</Highlight>
-					</DashboardListItemTitle>
+						federation={federation}
+					/>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
 						onClick={() => {
@@ -90,10 +106,11 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
 						}
+						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.issues"
-							defaultMessage="{count} issues"
+							defaultMessage="{count, plural, =0 {No issues} one {# issue} other {# issues}}"
 							values={{ count: federation.issues }}
 						/>
 					</DashboardListItemButton>
@@ -107,19 +124,17 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
 						}
+						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.risks"
-							defaultMessage="{count} risks"
+							defaultMessage="{count, plural, =0 {No risks} one {# risk} other {# risks}}"
 							values={{ count: federation.risks }}
 						/>
 					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={Display.Tablet}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('handle containers button');
-						}}
+						onClick={() => setOpenModal(MODALS.editFederation)}
 						width={165}
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
@@ -127,56 +142,31 @@ export const FederationListItem = ({
 					>
 						<FormattedMessage
 							id="federations.list.item.containers"
-							defaultMessage="{count} containers"
+							defaultMessage="{count, plural, =0 {No containers} one {# container} other {# containers}}"
 							values={{ count: federation.containers.length }}
 						/>
 					</DashboardListItemButton>
 					<DashboardListItemText width={188}>
-						<Highlight search={filterQuery}>
-							{federation.code}
-						</Highlight>
+						{federation.code}
 					</DashboardListItemText>
 					<DashboardListItemText width={97} minWidth={73}>
 						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 					</DashboardListItemText>
 					<DashboardListItemIcon>
-						<Tooltip
-							title={
-								<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
-							}
-						>
-							<FavouriteCheckbox
-								checked={federation.isFavourite}
-								onClick={(event) => {
-									event.stopPropagation();
-								}}
-								onChange={(event) => {
-									onFavouriteChange(
-										federation._id,
-										!!event.currentTarget.checked,
-									);
-								}}
-							/>
-						</Tooltip>
+						<FavouriteCheckbox
+							checked={federation.isFavourite}
+							onChange={onChangeFavourite}
+						/>
 					</DashboardListItemIcon>
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
 							federation={federation}
-							openShareModal={() => setOpenModal(MODALS.share)}
+							openShareModal={onClickShare}
 							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
 							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
-				<ShareModal
-					openState={openModal === MODALS.share}
-					onClickClose={closeModal}
-					title={formatMessage({
-						id: 'ShareModal.federation.title',
-						defaultMessage: 'Share Federation URL',
-					})}
-					containerOrFederation={federation}
-				/>
 				<EditFederationModal
 					openState={openModal === MODALS.editFederation}
 					federation={federation}
@@ -190,4 +180,4 @@ export const FederationListItem = ({
 			</DashboardListItem>
 		</>
 	);
-};
+});

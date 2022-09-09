@@ -17,12 +17,12 @@
 
 import styled from 'styled-components';
 
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import ArrowBack from '@material-ui/icons/ArrowBack';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 import { Form } from 'formik';
 import { COLOR } from '../../styles';
 
@@ -48,8 +48,8 @@ export const FieldsRow = styled(Grid)`
 	}
 `;
 
-export const StyledGrid = styled(Grid)`
-	padding: ${(props: any) => props.paddingBottom ? '12px 24px 24px' : '12px 24px'};
+export const StyledGrid = styled(Grid)<{ gridPaddingBottom?: boolean }>`
+	padding: ${({ gridPaddingBottom }) => gridPaddingBottom ? '12px 24px 24px' : '12px 24px'};
 `;
 
 export const SuggestionsContainer = styled(Grid)`
@@ -149,7 +149,7 @@ export const InfoColumnWrapper = styled(Grid)`
 	}
 `;
 
-export const StyledIconButton = styled(IconButton)`
+export const StyledIconButton = styled(IconButton)<{ component?: string }>`
 	&& {
 		padding: 6px;
 	}

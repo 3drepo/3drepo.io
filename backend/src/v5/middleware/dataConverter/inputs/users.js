@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery } = require('../../../models/users');
+const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
+const config = require('../../../utils/config');
+const { formatPronouns } = require('../../../utils/helper/strings');
+const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -36,7 +39,7 @@ Users.validateLoginData = async (req, res, next) => {
 		await schema.validate(req.body);
 
 		const usernameOrEmail = req.body.user;
-		const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail }] });
+		const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1 });
 		req.body.user = user;
 
 		next();
@@ -113,6 +116,155 @@ Users.validateUpdateData = async (req, res, next) => {
 const validateAvatarData = async (req, res, next) => {
 	try {
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateForgotPasswordData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		user: Yup.string().required(),
+	}).strict(true).noUnknown()
+		.required();
+
+	try {
+		await schema.validate(req.body);
+
+		try {
+			const usernameOrEmail = req.body.user;
+			const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0 });
+			req.body.user = user;
+			next();
+		} catch {
+			respond(req, res, templates.ok);
+		}
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateResetPasswordData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		token: Yup.string().required(),
+		newPassword: types.strings.password.required(),
+		user: Yup.string().required(),
+	}).strict(true).noUnknown()
+		.required()
+		.test('token-validity', 'Token is invalid or expired', async () => {
+			try {
+				await getUserByQuery({
+					user: req.body.user,
+					'customData.resetPasswordToken.token': req.body.token,
+					'customData.resetPasswordToken.expiredAt': { $gt: new Date() },
+				});
+
+				return true;
+			} catch {
+				return false;
+			}
+		});
+
+	try {
+		await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+const generateSignUpSchema = (isSSO) => {
+	const captchaEnabled = config.auth.captcha;
+
+	const nonSSOFields = {
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByEmail(value, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		password: types.strings.password.required(),
+		firstName: types.strings.name.transform(formatPronouns).required(),
+		lastName: types.strings.name.transform(formatPronouns).required(),
+	};
+	const schema = Yup.object().shape({
+		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByUsername(value, { _id: 1 });
+						return false;
+					} catch {
+					// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		countryCode: types.strings.countryCode.required(),
+		company: types.strings.title.optional(),
+		mailListAgreed: Yup.bool().required(),
+		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
+		...(isSSO ? {} : nonSSOFields),
+	}).noUnknown().required();
+
+	return captchaEnabled
+		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
+			const checkCaptcha = post(config.captcha.validateUrl, {
+				secret: config.captcha.secretKey,
+				response: body.captcha,
+			});
+
+			const result = await checkCaptcha;
+
+			return result.success;
+		})
+		: schema;
+};
+
+const validateSignUpData = (isSSO) => async (req, res, next) => {
+	try {
+		const schema = generateSignUpSchema(isSSO);
+		req.body = await schema.validate(req.body);
+		delete req.body.captcha;
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateSignUpData = validateSignUpData(false);
+Users.validateSsoSignUpData = validateSignUpData(true);
+
+Users.validateVerifyData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		username: types.strings.username.required(),
+		token: Yup.string().required(),
+	}).strict(true).noUnknown()
+		.required()
+		.test('token-validity', 'Token is invalid or expired', async () => {
+			try {
+				await getUserByQuery({
+					user: req.body.username,
+					'customData.emailVerifyToken.token': req.body.token,
+					'customData.emailVerifyToken.expiredAt': { $gt: new Date() },
+					'customData.inactive': true,
+				}, { _id: 1 });
+
+				return true;
+			} catch {
+				return false;
+			}
+		});
+
+	try {
+		req.body = await schema.validate(req.body);
 
 		await next();
 	} catch (err) {

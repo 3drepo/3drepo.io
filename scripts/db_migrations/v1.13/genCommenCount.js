@@ -7,7 +7,7 @@ db.adminCommand({listDatabases:1}).databases.forEach(function(database){
             var collCur = dbCur.getCollection(collection);
             collCur.find().forEach(function(issue){
                 if(Array.isArray(issue.comments)){
-                    collCur.update({_id: issue._id}, { '$set' : { commentCount: issue.comments.length } });
+                    collCur.updateOne({_id: issue._id}, { '$set' : { commentCount: issue.comments.length } });
                 }
             })
         }

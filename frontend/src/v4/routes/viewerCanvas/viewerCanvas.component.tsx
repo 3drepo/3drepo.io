@@ -16,6 +16,7 @@
  */
 import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
+import { isV5 } from '@/v4/helpers/isV5';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -60,7 +61,7 @@ interface IProps {
 }
 
 export class ViewerCanvas extends PureComponent<IProps, any> {
-	private containerRef = createRef<HTMLElement>();
+	private containerRef = createRef<HTMLDivElement>();
 
 	constructor(props) {
 		super(props);
@@ -74,6 +75,9 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { viewer } = this.props;
 		viewer.setupInstance(this.containerRef.current);
+		if (isV5()) {
+			viewer.setBackgroundColor([0.949, 0.965, 0.988, 1])
+		}
 	}
 
 	public renderGisCoordinates(coordinates) {

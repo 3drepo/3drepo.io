@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationsActions } from '@/v5/store/federations/federations.redux';
-import { IFederationsActionCreators } from '@/v5/store/federations/federations.types';
+import { FederationsActions, IFederationsActionCreators } from '@/v5/store/federations/federations.redux';
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);

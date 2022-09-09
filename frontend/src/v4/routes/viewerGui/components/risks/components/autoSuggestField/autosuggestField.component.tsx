@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, useState, useEffect } from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import Portal from '@material-ui/core/Portal';
-import TextField from '@material-ui/core/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Portal from '@mui/material/Portal';
+import TextField from '@mui/material/TextField';
 import Autosuggest from 'react-autosuggest';
 import { usePopper } from 'react-popper';
 

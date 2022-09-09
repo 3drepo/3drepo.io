@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Select } from '@material-ui/core';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
+import { isV5 } from '@/v4/helpers/isV5';
+import { Select } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import { Field, Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
 import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { formatDateTime } from '../../../../../../services/formatting/formatDate';
+import { formatDateTime, formatDateTimeV5 } from '../../../../../../services/formatting/formatDate';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { Description, FieldsRow, LongLabel, StyledFormControl, StyledTextField } from './groupDetails.styles';
 
@@ -60,7 +60,6 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 	}
 
 	public handleFieldChange = (onChange, form) => (event) => {
-		event.persist();
 		onChange(event);
 		this.props.handleChange(event);
 	}
@@ -90,12 +89,12 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 					<FieldsRow>
 						<StyledTextField
 							label={<LongLabel>Number of objects</LongLabel>}
-							value={totalSavedMeshes || 0}
+							value={(totalSavedMeshes || 0).toString()}
 							disabled
 						/>
 						<StyledTextField
 							label="Last updated"
-							value={formatDateTime(updatedAt)}
+							value={isV5() ? formatDateTimeV5(updatedAt) : formatDateTime(updatedAt)}
 							disabled
 						/>
 						<StyledFormControl>

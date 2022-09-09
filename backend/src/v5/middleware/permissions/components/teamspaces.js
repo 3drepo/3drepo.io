@@ -15,12 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../utils/permissions/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const TeamspacePerms = {};
+
+TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace } = params;
+
+	try {
+		const isAdmin = await isTeamspaceAdmin(teamspace, user);
+
+		if (isAdmin) {
+			next();
+		} else {
+			throw templates.notAuthorized;
+		}
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
 
 TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 	const { session, params } = req;

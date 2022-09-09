@@ -18,26 +18,29 @@
 import { Dispatch, ReactNode } from 'react';
 import ArrowIcon from '@assets/icons/arrow.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
+import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Container, Button, Indicator, Label } from './dashboardListHeaderLabel.styles';
 
-interface IDashboardListHeaderLabel extends IFixedOrGrowContainer{
+interface IDashboardListHeaderLabel extends FixedOrGrowContainerProps{
 	children?: ReactNode;
 	sortingDirection?: SortingDirection;
 	sort?: boolean;
 	name?: string;
 	onClick?: Dispatch<void>;
+	hidden?: boolean;
 }
 
 export const DashboardListHeaderLabel = ({
 	children,
 	sortingDirection,
 	onClick,
+	hidden = false,
 	sort = false,
 	...containerProps
 }: IDashboardListHeaderLabel): JSX.Element => (
 	<Container
 		{...containerProps}
+		hidden={hidden}
 	>
 		{sort ? (
 			<Button onClick={onClick}>

@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-export const Block = styled.div`
+export const Block = styled.div<{ width?: number, widthPercentage?: number, delay?: number }>`
 	height: 15px;
 	width: ${({ width }) => width}px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};

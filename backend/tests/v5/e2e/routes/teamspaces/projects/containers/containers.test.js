@@ -37,11 +37,7 @@ const nobody = ServiceHelper.generateUserCredentials();
 
 const teamspace = ServiceHelper.generateRandomString();
 
-const project = {
-	id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	permissions: [{ user: users.projectAdmin.user, permissions: ['admin_project'] }],
-};
+const project = ServiceHelper.generateRandomProject();
 
 const views = [
 	{
@@ -69,50 +65,34 @@ const legends = [
 
 const models = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		...ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], commenters: [users.commenter.user] }),
 		isFavourite: true,
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: ServiceHelper.generateRandomModelProperties(),
 	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+	{ ...ServiceHelper.generateRandomModel(), isFavourite: true },
+	ServiceHelper.generateRandomModel({ isFederation: true }),
+	ServiceHelper.generateRandomModel({
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
 			status: 'failed',
 			errorReason: {
 				message: ServiceHelper.generateRandomString(),
 				timestamp: new Date(),
-			} },
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			},
+		},
+	}),
+	ServiceHelper.generateRandomModel({
+		properties: {
 			errorReason: {
 				message: ServiceHelper.generateRandomString(),
 				errorCode: 1,
 			},
 		},
-	},
+	}),
+	// NOTE: this model gets deleted after deleteContainer test
 	{
-		// NOTE: this model gets deleted after deleteContainer test
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		...ServiceHelper.generateRandomModel({
+			viewers: [users.viewer.user], commenters: [users.commenter.user],
+		}),
 		isFavourite: true,
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 ];
 
@@ -402,44 +382,44 @@ const testDeleteFavourites = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/favourites`;
 	describe('Remove Favourite Containers', () => {
 		test('should fail without a valid session', async () => {
-			const res = await agent.delete(route)
-				.expect(templates.notLoggedIn.status).send({ containers: [models[0]._id] });
+			const res = await agent.delete(`${route}?ids=${models[0]._id}`)
+				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.delete(`${route}?key=${nobody.apiKey}`)
-				.expect(templates.teamspaceNotFound.status).send({ containers: [models[0]._id] });
+			const res = await agent.delete(`${route}?key=${nobody.apiKey}&ids=${models[0]._id}`)
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the project does not exist', async () => {
-			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/favourites?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.projectNotFound.status).send({ containers: [models[0]._id] });
+			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/favourites?key=${users.tsAdmin.apiKey}&ids=${models[0]._id}`)
+				.expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
 		test('should fail if the user has no access to one or more containers', async () => {
-			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ containers: [models[1]._id] });
+			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}&ids=${models[1]._id}`)
+				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the list contains a federation', async () => {
-			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ containers: [federation._id] });
+			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}&ids=${federation._id}`)
+				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the favourites list provided is empty', async () => {
 			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ containers: [] });
+				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should remove a container from the user favourites', async () => {
-			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status).send({ containers: [models[0]._id] });
+			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}&ids=${models[0]._id},${models[1]._id}`)
+				.expect(templates.ok.status);
 		});
 	});
 };

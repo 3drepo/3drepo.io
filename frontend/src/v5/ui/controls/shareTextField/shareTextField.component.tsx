@@ -17,7 +17,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@mui/material';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { formatMessage } from '@/v5/services/intl';
 import {
@@ -30,69 +30,82 @@ import {
 } from './shareTextField.styles';
 
 type IShareTextField = {
-	label: string,
+	/**
+	 * The label on top of the control
+	 */
+	label: string | JSX.Element,
+
+	/**
+	 * the value to be copied
+	 */
 	value: string,
+	hideValue?: boolean,
 	className?: string,
+	disabled?: boolean,
 };
 
 const IS_COPYING_DURATION_MS = 3000;
 
-export const ShareTextField = ({ label, value, className }: IShareTextField) => {
-	let isCopiedTimer;
+export const ShareTextField = ({ label, value, className, hideValue, disabled = false }: IShareTextField) => {
+	const [timeoutId, setTimeoutId] = useState(0);
 	const [isCopying, setIsCopying] = useState(true);
 
 	const handleCopyToClipboard = () => {
-		if (!isCopying) {
-			return;
-		}
+		if (!isCopying || disabled) return;
+
 		setIsCopying(false);
-		clearTimeout(isCopiedTimer);
-		isCopiedTimer = setTimeout(() => {
+		setTimeoutId(window.setTimeout(() => {
 			setIsCopying(true);
-		}, IS_COPYING_DURATION_MS);
+		}, IS_COPYING_DURATION_MS));
 	};
-	useEffect(() => () => clearTimeout(isCopiedTimer), []);
+
+	useEffect(() => () => clearTimeout(timeoutId), [timeoutId]);
+
 	return (
 		<>
 			<CopyToClipboard
 				onCopy={handleCopyToClipboard}
 				text={value}
+				disabled={disabled}
 			>
 				<LinkBar
+					disabled={disabled}
 					value={value}
 					label={label}
 					className={className}
+					{...(hideValue ? { type: 'password' } : {})}
 					InputProps={{
 						readOnly: true,
-						endAdornment: (
-							<InputAdornment position="end">
-								{isCopying
-									? (
-										<CopyToClipboardTooltip
-											title={formatMessage({
-												id: 'shareTextField.copyToClipboard',
-												defaultMessage: 'Copy to clipboard',
-											})}
-										>
-											<CopyToClipboardIconContainer>
-												<CopyToClipboardIcon />
-											</CopyToClipboardIconContainer>
-										</CopyToClipboardTooltip>
-									) : (
-										<CopiedToClipboardTooltip
-											title={formatMessage({
-												id: 'shareTextField.copied',
-												defaultMessage: 'Copied to clipboard',
-											})}
-											open
-										>
-											<CopyToClipboardIconContainer>
-												<Tick />
-											</CopyToClipboardIconContainer>
-										</CopiedToClipboardTooltip>
-									)}
-							</InputAdornment>
-						),
+						endAdornment:
+							disabled ? null : (
+								<InputAdornment position="end">
+									{isCopying
+										? (
+											<CopyToClipboardTooltip
+												title={formatMessage({
+													id: 'shareTextField.copyToClipboard',
+													defaultMessage: 'Copy to clipboard',
+												})}
+											>
+												<CopyToClipboardIconContainer>
+													<CopyToClipboardIcon />
+												</CopyToClipboardIconContainer>
+											</CopyToClipboardTooltip>
+										) : (
+											<CopiedToClipboardTooltip
+												title={formatMessage({
+													id: 'shareTextField.copied',
+													defaultMessage: 'Copied to clipboard',
+												})}
+												open
+											>
+												<CopyToClipboardIconContainer>
+													<Tick />
+												</CopyToClipboardIconContainer>
+											</CopiedToClipboardTooltip>
+										)}
+								</InputAdornment>
+							),
 					}}
 				/>
 			</CopyToClipboard>

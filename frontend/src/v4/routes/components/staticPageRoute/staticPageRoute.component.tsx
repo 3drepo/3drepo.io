@@ -44,7 +44,7 @@ export default class PageTemplate extends PureComponent<IProps, IState> {
 			<Container>
 				<Header>
 					<Title>{this.props.title}</Title>
-					<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
+					<Logo src="assets/images/3drepo-logo-white.png" alt="3D Repo" />
 					<MenuContainer>
 						<MainMenu isAuthenticated={false} />
 					</MenuContainer>

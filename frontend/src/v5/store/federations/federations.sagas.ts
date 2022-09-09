@@ -15,30 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
-	FetchFederationsAction,
-	FetchFederationsResponse,
-	FetchFederationStatsResponse,
 	AddFavouriteAction,
-	RemoveFavouriteAction,
-	FetchFederationStatsAction,
-	UpdateFederationSettingsAction,
-	FetchFederationViewsAction,
-	FetchFederationViewsResponse,
-	FetchFederationSettingsAction,
+	CreateFederationAction,
 	DeleteFederationAction,
+	FederationsActions,
+	FederationsTypes,
+	FetchFederationsAction,
+	FetchFederationSettingsAction,
+	FetchFederationStatsAction,
+	FetchFederationViewsAction,
+	RemoveFavouriteAction,
 	UpdateFederationContainersAction,
-} from '@/v5/store/federations/federations.types';
-import {
-	prepareFederationsData,
-	prepareFederationSettingsForFrontend,
-	prepareFederationSettingsForBackend,
-} from '@/v5/store/federations/federations.helpers';
+	UpdateFederationSettingsAction,
+} from '@/v5/store/federations/federations.redux';
+import { FederationStats } from '@/v5/store/federations/federations.types';
+import { prepareFederationsData, prepareFederationSettingsForBackend, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
+import { isEqualWith } from 'lodash';
+import { compByColum } from '../store.helpers';
+import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
+
+export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
+	try {
+		const federationId = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
+		yield put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId));
+		if (containers.length) {
+			yield put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, containers));
+		}
+		yield put(FederationsActions.fetchFederationStats(teamspace, projectId, federationId));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'federation.create.error',
+				defaultMessage: 'trying to create federation',
+			}),
+			error,
+		}));
+	}
+}
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -73,8 +92,12 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 			projectId,
 		});
 		const federationsWithoutStats = prepareFederationsData(federations);
+		const storedFederations = yield select(selectFederations);
+		const isPending = yield select(selectIsListPending);
 
-		yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));
+		if (isPending || !isEqualWith(storedFederations, federationsWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));
+		}
 
 		yield all(
 			federations.map(
@@ -91,11 +114,19 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 export function* fetchFederationStats({ teamspace, projectId, federationId }: FetchFederationStatsAction) {
 	try {
-		const stats: FetchFederationStatsResponse = yield API.Federations.fetchFederationStats({
+		const stats: FederationStats = yield API.Federations.fetchFederationStats({
 			teamspace, projectId, federationId,
 		});
 
-		yield put(FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats));
+		const federation = yield select(selectFederationById, federationId);
+
+		const sameTickets = stats?.tickets?.issues === federation?.issues
+							&& stats?.tickets?.risks === federation?.risks;
+		const defaultStat = { desc: '', code: '', containers: [], status: 'ok' };
+
+		if (!isEqualWith(federation, { ...defaultStat, ...stats }, compByColum(['name', 'code', 'desc', 'containers', 'status'])) || !sameTickets) {
+			yield put(FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats));
+		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to fetch federations',
@@ -162,15 +193,13 @@ export function* updateFederationSettings({
 	}
 }
 
-export function* deleteFederation({ teamspace, projectId, federationId }: DeleteFederationAction) {
+export function* deleteFederation({ teamspace, projectId, federationId, onSuccess, onError }: DeleteFederationAction) {
 	try {
 		yield API.Federations.deleteFederation({ teamspace, projectId, federationId });
 		yield put(FederationsActions.deleteFederationSuccess(projectId, federationId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'federation.delete.error', defaultMessage: 'trying to delete federation' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 
@@ -195,6 +224,7 @@ export function* updateFederationContainers({
 }
 
 export default function* FederationsSagas() {
+	yield takeLatest(FederationsTypes.CREATE_FEDERATION, createFederation);
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);

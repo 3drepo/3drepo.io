@@ -15,25 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField } from '@material-ui/core';
+import { isV5 } from '@/v4/helpers/isV5';
+import { TextField } from '@mui/material';
 import { Field } from 'formik';
 import { get } from 'lodash';
 import {
 	FieldsRow,
 	StyledFormControl
 } from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { RemoveButton } from '../resources.component';
-import {  ResourceListItem } from './attachResourcesDialog.styles';
+import { RemoveButton } from '../removeButton.component';
+import { ResourceIcon } from "../resourceIcon";
+import { ResourceListItem } from './attachResourcesDialog.styles';
 
 export const FileEntry = ({onClickRemove, index, entry}) => {
 	const nameFieldName = `files.${index}.name`;
 	const fileFieldName = `files.${index}.file`;
 
 	return (
-		<FieldsRow container justify="space-between" flex={0.5}>
+		<FieldsRow container justifyContent="space-between" flex={0.5}>
 			<StyledFormControl>
 				<Field name={nameFieldName} render={({ field, form }) => (
-					<TextField {...field}
+					<TextField
+						{...field}
 						fullWidth
 						error={Boolean(get(form.errors, nameFieldName))}
 						helperText={get(form.errors, nameFieldName)}
@@ -42,6 +45,7 @@ export const FileEntry = ({onClickRemove, index, entry}) => {
 
 			</StyledFormControl>
 			<StyledFormControl>
+				{isV5() && <ResourceIcon type={entry.type} />}
 				<Field type="hidden" name={fileFieldName} />
 				<ResourceListItem>
 					<span> {entry.file.name} </span>

@@ -14,13 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, SyntheticEvent } from 'react';
+import { PureComponent, SyntheticEvent, MouseEvent } from 'react';
 import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
 import { useState } from 'react';
 import * as Yup from 'yup';
-import { Menu, MenuItem, Tooltip } from '@material-ui/core';
-import MoreVert from '@material-ui/icons/MoreVert';
+import { Menu, MenuItem, Tooltip } from '@mui/material';
+import MoreVert from '@mui/icons-material/MoreVert';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
@@ -40,7 +41,8 @@ import {
 	StyledSaveIcon,
 	StyledShareIcon,
 	ThumbnailPlaceholder,
-	ViewpointItem
+	ViewpointItem,
+	SaveButton,
 } from './viewItem.styles';
 
 interface IProps {
@@ -130,7 +132,7 @@ export class ViewItem extends PureComponent<IProps, any> {
 
 	public renderViewpointName = renderWhenTrue(() => (
 		<Tooltip title={this.props.viewpoint.name} placement="bottom">
-			<Name active={Number(this.props.active)}>
+			<Name active={Boolean(this.props.active)}>
 				{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}
 			</Name>
 		</Tooltip>
@@ -207,9 +209,13 @@ export class ViewItem extends PureComponent<IProps, any> {
 					)} />
 					<IconsGroup disabled={this.state.isDeletePending}>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
-						<SaveIconButton type="submit" disableRipple id="views-card-save-button">
-							<StyledSaveIcon />
-						</SaveIconButton>
+						{isV5() ? (
+							<SaveButton type="submit" disableRipple id="views-card-save-button"> Save </SaveButton>
+						) : (
+							<SaveIconButton type="submit" disableRipple id="views-card-save-button">
+								<StyledSaveIcon />
+							</SaveIconButton>
+						)}
 					</IconsGroup>
 				</StyledForm>
 			</Formik>

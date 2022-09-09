@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FormControl from '@material-ui/core/FormControl';
-import TableCell from '@material-ui/core/TableCell';
+import FormControl from '@mui/material/FormControl';
+import TableCell from '@mui/material/TableCell';
 import { Field } from 'formik';
 import styled from 'styled-components';
 import { COLOR } from '../../../../styles';

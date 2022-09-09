@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, ReactNode } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 
 import { FileLabel, HiddenFileInput } from './fileInputField.styles';
 

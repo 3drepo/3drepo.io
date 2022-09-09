@@ -17,13 +17,14 @@
 
 import { PureComponent } from 'react';
 
-import { Tab } from '@material-ui/core';
-import InfoIcon from '@material-ui/icons/Info';
+import { Tab } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { isEmpty } from 'lodash';
 
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
 import { getFilters, sortMetadata, transformMetadataToNestedList } from '@/v4/helpers/bim';
 import { renderWhenTrue } from '@/v4/helpers/rendering';
+import { isV5 } from '@/v4/helpers/isV5';
 import { IMetaRecord } from '@/v4/modules/bim/bim.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
@@ -31,11 +32,11 @@ import {
 	StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { ISelectedFilter } from '../../../components/filterPanel/filterPanel';
 import { PanelBarActions } from '../panelBarActions';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
-import { Container, Tabs } from './bim.styles';
+import { Container, Tabs, ViewerPanel } from './bim.styles';
 import { MetaRecord } from './components/metaRecord/';
 
 interface IProps {
@@ -173,10 +174,10 @@ export class Bim extends PureComponent<IProps, any> {
 					value={Number(showStarred)}
 					onChange={this.handleTabChange}
 				>
-					<Tab label="All" />
+					<Tab label={isV5() ? 'All data' : 'All'} />
 					<Tab label="Starred" />
 				</Tabs>
-				<ViewerPanelContent>
+				<ViewerPanelContent autoHeight autoHeightMax={'100%'}>
 					<Container>
 						{this.renderMetadata()}
 						{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
@@ -191,7 +192,7 @@ export class Bim extends PureComponent<IProps, any> {
 		return(
 			<MenuList>
 				{BIM_ACTIONS_MENU.map(({ name, label }) => (
-					<StyledListItem key={name} button onClick={(e) => {
+					<StyledListItem key={name} onClick={(e) => {
 						menu.close(e);
 						this.menuActionsMap[name]();
 					}}>

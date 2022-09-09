@@ -18,6 +18,8 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
+const { generateUUID } = require('../../../../../helper/services');
+const { UUIDToString } = require('../../../../../../../src/v5/utils/helper/uuids');
 
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -77,12 +79,13 @@ const modelSettings = [
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			subModels: [{ model: modelWithRevId }],
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
+		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			subModels: [{ model: modelWithoutRevId }],
 		},
@@ -120,6 +123,19 @@ const modelSettings = [
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			errorReason: {
 				message: 'error reason',
+				errorCode: 1,
+			},
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(true),
+			defaultView: generateUUID(),
+			timestamp: new Date(),
+			errorReason: {
+				message: 'error reason',
+				timestamp: new Date(),
 				errorCode: 1,
 			},
 		},
@@ -190,7 +206,8 @@ const revisions = [
 const federationWithRev = modelSettings[0];
 const federationWithoutRev = modelSettings[1];
 const federationWithoutSubModels = modelSettings[2];
-const federationToDelete = modelSettings[7];
+const federationToDelete = modelSettings[8];
+const federationWithUUIDView = modelSettings[7];
 const federationWithRevIssues = [issues[0], issues[1]];
 const federationWithRevRisks = [risks[0], risks[1]];
 const federationWithoutRevIssues = [issues[2]];
@@ -474,44 +491,44 @@ const testDeleteFavourites = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/favourites`;
 	describe('Remove Favourite Federations', () => {
 		test('should fail without a valid session', async () => {
-			const res = await agent.delete(route)
-				.expect(templates.notLoggedIn.status).send({ federations: [modelSettings[0]._id] });
+			const res = await agent.delete(`${route}?ids=${modelSettings[0]._id}`)
+				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.delete(`${route}?key=${nobody.apiKey}`)
-				.expect(templates.teamspaceNotFound.status).send({ federations: [modelSettings[0]._id] });
+			const res = await agent.delete(`${route}?key=${nobody.apiKey}&ids=${modelSettings[0]._id}`)
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the project does not exist', async () => {
-			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/favourites?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.projectNotFound.status).send({ federations: [modelSettings[0]._id] });
+			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/favourites?key=${users.tsAdmin.apiKey}&ids=${modelSettings[0]._id}`)
+				.expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
 		test('should fail if the user has no access to one or more federations', async () => {
-			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [modelSettings[1]._id] });
+			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}&ids=${modelSettings[1]._id}`)
+				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the favourites list provided has a container', async () => {
-			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
+			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}&ids=${container._id}`)
+				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the favourites list provided is empty', async () => {
 			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [] });
+				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should remove a federation from the user favourites', async () => {
-			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status).send({ federations: [modelSettings[0]._id] });
+			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}&ids=${modelSettings[0]._id},${modelSettings[1]._id}`)
+				.expect(templates.ok.status);
 		});
 	});
 };
@@ -723,6 +740,18 @@ const testGetSettings = () => {
 		test('should return the federation settings correctly if the user has access (no timestamp)', async () => {
 			const res = await agent.get(`${route(modelSettings[6]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToSettings(modelSettings[6]));
+		});
+
+		test('should return the federation settings correctly if the user has access (with UUID default view)', async () => {
+			const res = await agent.get(`${route(federationWithUUIDView._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const federationWithStringView = {
+				...federationWithUUIDView,
+				properties: {
+					...federationWithUUIDView.properties,
+					defaultView: UUIDToString(federationWithUUIDView.properties.defaultView),
+				},
+			};
+			expect(res.body).toEqual(formatToSettings(federationWithStringView));
 		});
 	});
 };

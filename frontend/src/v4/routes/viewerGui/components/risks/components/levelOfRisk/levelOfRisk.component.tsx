@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, ComponentType } from 'react';
-import { SvgIconProps } from '@material-ui/core/SvgIcon';
+import { SvgIconProps } from '@mui/material/SvgIcon';
 
 import { LEVELS_OF_RISK } from '../../../../../../constants/risks';
 import { getRiskStatus } from '../../../../../../helpers/risks';

@@ -16,9 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { Divider as DividerComponent } from '@material-ui/core';
+import { Divider as DividerComponent } from '@mui/material';
 import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
+import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
 export const ListContainer = styled.ul`
 	display: flex;
@@ -28,13 +29,11 @@ export const ListContainer = styled.ul`
 	padding: 0;
 `;
 
-export const DashboardListEmptyContainer = styled.div`
+export const DashboardListEmptyContainer = styled(DashedContainer)`
 	display: flex;
 	align-items: center;
 	height: 80px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px dashed ${({ theme }) => theme.palette.base.light};
-	border-radius: 5px;
 	padding-left: 30px;
 `;
 
@@ -51,14 +50,20 @@ export const Divider = styled(DividerComponent)`
 `;
 
 export const DashboardListButton = styled(Button).attrs({
-	variant: 'outlined',
-	color: 'primary',
+	variant: 'contained',
+	color: 'secondary',
 })`
 	${({ theme }) => theme.typography.h3}
+	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	color: ${({ theme }) => theme.palette.primary.main};
+	:hover, :focus {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+		color: ${({ theme }) => theme.palette.primary.dark};
+	}
 	width: 100%;
-	margin: 18px 0 0;
+	margin: 0;
 	height: 80px;
-	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
+	margin-top: 18px;
 
 	svg {
 		width: 34px;

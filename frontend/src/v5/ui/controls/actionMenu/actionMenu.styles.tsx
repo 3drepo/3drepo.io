@@ -16,10 +16,7 @@
  */
 
 import styled from 'styled-components';
-import {
-	Paper as PaperBase,
-	Popper as PopperBase,
-} from '@material-ui/core';
+import { Paper as PaperBase } from '@mui/material';
 
 export const ActionMenuSection = styled.div`
 	display: flex;
@@ -31,15 +28,9 @@ export const ActionMenuSection = styled.div`
 	}
 `;
 
-export const ActionMenuTriggerButton = styled.div``;
-ActionMenuTriggerButton.name = 'ActionMenuTriggerButton';
-
-export const Popper = styled(PopperBase)`
-	&& {
-		z-index: 1101;
-		margin-top: -2px;
-	}
-`;
+export const ActionMenuTriggerButton = styled.div.attrs({
+	isActionMenuTriggerButton: true,
+})``;
 
 export const Paper = styled(PaperBase)`
 	border-radius: 5px;

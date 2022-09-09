@@ -37,6 +37,9 @@ Logger.labels = {
 	network: 'NET',
 	event: 'EVENT',
 	queue: 'AMQP',
+	chat: 'CHAT',
+	modelProcessing: 'MODPRO',
+	aad: 'AAD',
 };
 
 module.exports = Logger;

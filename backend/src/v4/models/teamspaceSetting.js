@@ -104,7 +104,7 @@ class TeamspaceSettings {
 
 			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 			const updatedAt = new Date();
-			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
+			await settingsCol.updateOne({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
 
 			return { "status":"ok", mitigationsUpdatedAt: updatedAt, records: importedMitigations.length };
 		} else {

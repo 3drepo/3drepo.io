@@ -15,22 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
+import styled from 'styled-components';
 
-export const DashboardListItemIcon = styled.div`
+export const DashboardListItemIcon = styled.div<{ selected?: boolean }>`
 	width: 36px;
 	margin-right: 10px;
 
 	> * {
 		margin: 0;
 	}
-	
-	${({ selected }) => selected && css`
-		${EllipsisButtonStyles.StyledIconButton} {
-			circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
-			}
-		}
-	`}
 `;

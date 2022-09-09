@@ -15,13 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, useState, Children, ReactElement, cloneElement } from 'react';
-import { ClickAwayListener, Grow } from '@material-ui/core';
-import { ActionMenuTriggerButton } from '@controls/actionMenu';
-import {
-	Menu,
-	Popper,
-	Paper,
-} from './actionMenu.styles';
+import { ClickAwayListener, Popover } from '@mui/material';
+import { Menu } from './actionMenu.styles';
 
 const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
 	if (el?.type?.isActionMenuClosingElement) {
@@ -57,7 +52,7 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 	}
 	const [triggerButton, ...menuChildren] = Children.toArray(children);
 
-	if ((triggerButton as any)?.type?.name !== ActionMenuTriggerButton.name) {
+	if ((triggerButton as any)?.type?.ActionMenuTriggerButton) {
 		throw new Error('ActionMenu\'s first child must be of type ActionMenuTriggerButton');
 	}
 
@@ -70,31 +65,25 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 	return (
 		<>
 			{TriggerButton}
-			<Popper
+			<Popover
 				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
-				transition
-				disablePortal
 				className={className}
-				placement="bottom-end"
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'center',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'center',
+				}}
 			>
-				{({ TransitionProps, placement }) => (
-					<Grow
-						{...TransitionProps}
-						style={{
-							transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom',
-						}}
-					>
-						<Paper>
-							<ClickAwayListener onClickAway={handleClose}>
-								<Menu>
-									{MenuChildren}
-								</Menu>
-							</ClickAwayListener>
-						</Paper>
-					</Grow>
-				)}
-			</Popper>
+				<ClickAwayListener onClickAway={handleClose}>
+					<Menu>
+						{MenuChildren}
+					</Menu>
+				</ClickAwayListener>
+			</Popover>
 		</>
 	);
 };

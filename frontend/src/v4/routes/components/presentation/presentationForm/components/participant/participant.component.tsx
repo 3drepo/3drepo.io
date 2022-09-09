@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FC } from 'react';
-import PauseIcon from '@material-ui/icons/Pause';
-import PlayIcon from '@material-ui/icons/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayIcon from '@mui/icons-material/PlayArrow';
 
 import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
 import { ButtonContainer, Container, SecondaryButton, StopButton, StyledDivider } from '../../presentationForm.styles';
@@ -30,11 +29,11 @@ interface IProps {
 }
 
 const renderPlayButtonContent = (isPaused: boolean) => renderWhenTrueOtherwise(
-() => <><PlayIcon /> Resume</>,
-() => <><PauseIcon /> Pause</>,
+	() => <><PlayIcon /> Resume</>,
+	() => <><PauseIcon /> Pause</>,
 )(isPaused);
 
-export const Participant: FC<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
+export const Participant = ({ leavePresentation, isPaused, togglePause }: IProps) => (
 	<Container>
 		<SessionTop />
 		<ButtonContainer>

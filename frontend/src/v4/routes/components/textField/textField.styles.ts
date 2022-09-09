@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { IconButton, InputLabel, TextField } from '@material-ui/core';
+import { IconButton, InputLabel, TextField } from '@mui/material';
 
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { LinkableField } from '../linkableField/linkableField.component';
@@ -62,7 +62,7 @@ export const StyledTextField = styled(TextField)`
 	}
 `;
 
-export const StyledMarkdownField = styled(MarkdownField)`
+export const StyledMarkdownField = styled(MarkdownField)<{ $isPlaceholder?: boolean }>`
 	&& {
 		display: block;
 		position: relative;
@@ -70,6 +70,8 @@ export const StyledMarkdownField = styled(MarkdownField)`
 		min-height: 14px;
 		font-size: 14px;
 		overflow: hidden;
+
+		${({ $isPlaceholder }) => $isPlaceholder && css`color: ${({ theme }) => theme.palette.base.lighter};`}
 	}
 `;
 
@@ -84,7 +86,7 @@ export const StyledLinkableField = styled(LinkableField)`
 	}
 `;
 
-export const FieldWrapper = styled.div`
+export const FieldWrapper = styled.div<{ line: number }>`
 	position: relative;
 	width: 100%;
 
@@ -94,7 +96,7 @@ export const FieldWrapper = styled.div`
 		bottom: 0;
 		content: '';
 		position: absolute;
-		border-bottom: ${(props: any) => props.line ? `1px solid rgba(0, 0, 0, 0.12);` : `none`};
+		border-bottom: ${({ line }) => line ? `1px solid rgba(0, 0, 0, 0.12);` : `none`};
 		pointer-events: none;
 	}
 `;
@@ -119,4 +121,12 @@ export const CopyButton = styled(ContainedButton)`
 	&& {
 		margin-left: 8px;
 	}
+`;
+
+export const ExpandAction = styled.span<{ top?: boolean }>`
+	font-size: 11px;
+	cursor: pointer;
+	display: block;
+	text-align: center;
+	margin-top: ${({ top }) => top ? '5px' : 0};
 `;

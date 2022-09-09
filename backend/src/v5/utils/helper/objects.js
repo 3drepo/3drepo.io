@@ -25,4 +25,13 @@ Objects.removeFields = _.omit;
 
 Objects.isEmpty = _.isEmpty;
 
+Objects.deleteIfUndefined = (obj) => {
+	const res = { ...obj };
+	Object.keys(obj).forEach((key) => {
+		if (obj[key] === undefined) delete res[key];
+	});
+
+	return res;
+};
+
 module.exports = Objects;

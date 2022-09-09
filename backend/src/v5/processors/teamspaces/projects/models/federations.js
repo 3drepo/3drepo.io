@@ -19,14 +19,15 @@ const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
+const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
-const { getProjectById } = require('../../../../models/projects');
+const { getProjectById } = require('../../../../models/projectSettings');
 const { getRisksCount } = require('../../../../models/risks');
-const { queueFederationUpdate } = require('../../../../services/queue');
+const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
-const Federations = { ...Groups, ...Views };
+const Federations = { ...Groups, ...Views, ...Tickets };
 
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });

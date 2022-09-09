@@ -17,7 +17,8 @@
 
 import styled from 'styled-components';
 import { Button } from '@controls/button';
-import { Link } from '@material-ui/core';
+import { Link } from '@mui/material';
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 
 export const AvatarContainer = styled.div`
 	&& {
@@ -34,9 +35,18 @@ export const AvatarSection = styled.div`
 	margin-bottom: 11px;
 `;
 
+export const TruncatableName = styled(Truncate).attrs({
+	lines: 1,
+	width: 210,
+})`
+	text-align: center;
+	display: inline-block;
+`;
+
 export const UserFullName = styled.div`
 	${({ theme }) => theme.typography.h3};
 	color: ${({ theme }) => theme.palette.secondary.main};
+	text-align: center;
 `;
 
 export const UserUserName = styled.div`
@@ -52,6 +62,10 @@ export const EditProfileButton = styled(Link)`
 	text-align: center;
 	${({ theme }) => theme.typography.link};
 	text-underline-offset: 2px;
+	
+	&:hover {
+		text-decoration: underline;
+	}
 `;
 
 export const SignOutButton = styled(Button).attrs({

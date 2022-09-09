@@ -154,6 +154,25 @@ module.exports = {
 		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
-	termsUpdatedAt: 12345678
+	termsUpdatedAt: 12345678,
 
+	mail: {
+		smtpConfig: {
+		    host: 'smtp.ethereal.email',
+		    port: 587,
+    		auth: {
+	    	    user: 'delaney.koch69@ethereal.email',
+	    	    pass: '1GxDbgfgQEygb2Ts7W'
+		    }
+		},
+		sender: '"3D Repo" <dummyEmail@3drepo.org>'
+	},
+
+	sso: {
+		aad: {
+			clientId: "abc",
+			authority: "https://login.microsoftonline.com/common",
+			clientSecret: "xyz"
+		}
+	}
 }

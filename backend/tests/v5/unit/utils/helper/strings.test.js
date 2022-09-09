@@ -67,18 +67,6 @@ const testToConstantCase = () => {
 	});
 };
 
-const testHasEmailFormat = () => {
-	describe('Has email format', () => {
-		test('with email format should return true', () => {
-			matchHelper(StringHelper.hasEmailFormat, 'example@email.com', true);
-		});
-
-		test('with non email format should return false', () => {
-			matchHelper(StringHelper.hasEmailFormat, 'nonEmail', false);
-		});
-	});
-};
-
 const testGenerateHashString = () => {
 	describe('Generate Hash String', () => {
 		test('with no length parameter passed', () => {
@@ -93,10 +81,32 @@ const testGenerateHashString = () => {
 	});
 };
 
+const testFormatPronouns = () => {
+	describe('Format string pronouns', () => {
+		test('with two words all lowercase', () => {
+			const name = 'will smith';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will Smith');
+		});
+
+		test('with two words all capital case', () => {
+			const name = 'WILL SMITH';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will Smith');
+		});
+
+		test('with a single word', () => {
+			const name = 'will';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will');
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
-	testHasEmailFormat();
 	testGenerateHashString();
+	testFormatPronouns();
 });

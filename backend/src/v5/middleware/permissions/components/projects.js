@@ -16,7 +16,7 @@
  */
 
 const { isProjectAdmin, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
-const { getProjectById } = require('../../../models/projects');
+const { getProjectById } = require('../../../models/projectSettings');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');

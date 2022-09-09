@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
-import SelectComponent from '@material-ui/core/Select';
-import Typography from '@material-ui/core/Typography';
+import FormControl from '@mui/material/FormControl';
+import SelectComponent from '@mui/material/Select';
+import Typography from '@mui/material/Typography';
 
 import { COLOR } from '../../../styles';
 

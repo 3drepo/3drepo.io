@@ -17,8 +17,8 @@
 
 import { memo } from 'react';
 
-import Star from '@material-ui/icons/Star';
-import StarBorder from '@material-ui/icons/StarBorder';
+import Star from '@mui/icons-material/Star';
+import StarBorder from '@mui/icons-material/StarBorder';
 
 import { IconWrapper } from './starIcon.styles';
 
@@ -32,7 +32,7 @@ export const StarIcon = memo(({ active, onClick, className }: IProps) => {
 	const IconComponent = active ? Star : StarBorder;
 
 	return (
-		<IconWrapper className={className} active={Number(active)}>
+		<IconWrapper className={className} active={Boolean(active)}>
 			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
 		</IconWrapper>
 	);

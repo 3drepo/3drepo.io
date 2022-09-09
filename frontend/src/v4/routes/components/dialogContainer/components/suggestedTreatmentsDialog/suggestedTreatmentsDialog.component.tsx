@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, useState, useMemo } from 'react';
-import Grid from '@material-ui/core/Grid';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
+import Grid from '@mui/material/Grid';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
 import { isEmpty } from 'lodash';
 import { forOwn, pick, uniq } from 'lodash';
+import { TypographyProps } from '@mui/material';
 
 import { LabelButton } from '../../../../viewerGui/components/labelButton/labelButton.styles';
 import { EmptyStateInfo } from '../../../components.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
 import {
-	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
+	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography, ViewerScrollArea,
 } from './suggestedTreatmentsDialog.styles';
 import { SuggestionDetails } from './suggestionDetails/suggestionDetails.component';
 
@@ -35,13 +36,18 @@ interface ITextWrapper {
 	noWrap?: boolean;
 	inline?: boolean;
 	color?: string;
-	variant?: string;
+	variant?: TypographyProps['variant'];
 }
 
 const TextWrapper: FunctionComponent<ITextWrapper> = ({
 	children, color = 'textPrimary', variant = 'caption', inline, ...props
 }) => (
-	<StyledTypography component="span" inline={inline ? 1 : 0} variant={variant} color={color} {...props}>
+	<StyledTypography
+		inline={inline}
+		variant={variant}
+		color={color}
+		{...props}
+	>
 		{children}
 	</StyledTypography>
 );
@@ -115,7 +121,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 	return (
 		<Container>
 			<StyledGrid container>
-				<Label container justify="flex-end" alignItems="center">
+				<Label container justifyContent="flex-end" alignItems="center">
 					<TextWrapper>
 						Stage:&nbsp;
 					</TextWrapper>
@@ -127,7 +133,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						onChange={handleStageChange}
 					/>
 				</Grid>
-				<Label container justify="flex-end" alignItems="center">
+				<Label container justifyContent="flex-end" alignItems="center">
 					<TextWrapper>
 						Type:&nbsp;
 					</TextWrapper>
@@ -140,10 +146,12 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 					/>
 				</Grid>
 			</StyledGrid>
-			<StyledDialogContent>
-				{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
-				{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
-			</StyledDialogContent>
+			<ViewerScrollArea>
+				<StyledDialogContent>
+					{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
+					{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
+				</StyledDialogContent>
+			</ViewerScrollArea>
 		</Container>
 	);
 };

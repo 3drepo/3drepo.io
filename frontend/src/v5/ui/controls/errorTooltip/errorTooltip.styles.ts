@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Tooltip as TooltipComponent, withStyles } from '@material-ui/core';
+import { Tooltip as TooltipComponent } from '@mui/material';
+
+import withStyles from '@mui/styles/withStyles';
 
 export const Container = styled.div`
 	display: inline-block;
+	height: 15px;
 `;
 
 export const Tooltip = withStyles((theme: any) => ({
@@ -29,7 +32,7 @@ export const Tooltip = withStyles((theme: any) => ({
 		backgroundColor: theme.palette.primary.contrast,
 		color: theme.palette.error.main,
 		fontSize: theme.typography.pxToRem(12),
-		boxShadow: theme.palette.shadows.level_6,
+		boxShadow: theme.palette.shadows.level_5,
 		border: 'none',
 		borderRadius: 5,
 		padding: '15px 15px 17px 15px',
@@ -42,9 +45,8 @@ export const Tooltip = withStyles((theme: any) => ({
 export const IconWrapper = styled.div`
 	height: max-content;
 	width: max-content;
-	margin-left: 6px;
+	margin: 0 5px;
 
-	svg {
-		transform: translateY(20%);
-	}
+	align-items: center;
+	display: flex;
 `;

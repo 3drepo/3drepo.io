@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentType } from 'react';
-import Tooltip from '@material-ui/core/Tooltip';
-import { TooltipProps } from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
+import { TooltipProps } from '@mui/material/Tooltip';
+import { isV5 } from '@/v4/helpers/isV5';
 import { StyledIconButton } from './tooltipButton.styles';
-
 interface IProps {
 	label: string;
 	Icon: ComponentType;
@@ -31,6 +31,8 @@ interface IProps {
 	action?: (event) => void;
 	onClick?: (event) => void;
 	id?: string;
+	children?: any;
+	notOverlap?: boolean;
 }
 
 export const TooltipButton = (props: IProps) => {
@@ -44,7 +46,9 @@ export const TooltipButton = (props: IProps) => {
 		className,
 		active = false,
 		placement,
-		disableFocusListener
+		disableFocusListener,
+		children,
+		notOverlap,
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
@@ -57,23 +61,37 @@ export const TooltipButton = (props: IProps) => {
 			active={Number(active)}
 		>
 			<Icon {...iconProps} />
+			{children}
 		</StyledIconButton>
 	);
 
+	const v5PopperProps = isV5() && notOverlap && {
+		PopperProps: {
+			sx: {
+				top: '14px !important',
+				left: '-24px !important',
+			}
+		}
+	}
+
 	return (
 		<>
-			{ disabled ?
-				renderButton() :
+			{ disabled
+				? renderButton()
+				: (
+					// @ts-ignore
 					<Tooltip
-							title={label}
-							disableHoverListener={disabled}
-							placement={placement}
-							disableFocusListener={disableFocusListener}
+						title={label}
+						disableHoverListener={disabled}
+						placement={placement}
+						disableFocusListener={disableFocusListener}
+						{...v5PopperProps}
 					>
-					<span>
-						{renderButton()}
-					</span>
-				</Tooltip>
+						<span>
+							{renderButton()}
+						</span>
+					</Tooltip>
+				)
 			}
 		</>
 	);

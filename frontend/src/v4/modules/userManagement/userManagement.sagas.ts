@@ -123,7 +123,8 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish, on
 					return projectPermissions;
 				}
 
-				projectPermissions.models = models.map(({ model, key: permission }) => ({
+				projectPermissions.models = models.filter(({ key }) => Boolean(key))
+					.map(({ model, key: permission }) => ({
 					model, permission
 				}));
 				return projectPermissions;

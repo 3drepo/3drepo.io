@@ -22,6 +22,7 @@ const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
+const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 
 describe("Logout", function () {
 	const User = require("../../../src/v4/models/user");
@@ -113,7 +114,7 @@ describe("Logout", function () {
 		agent.post("/logout")
 			.send({})
 			.expect(401, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.NOT_LOGGED_IN.value);
+				expect(res.body.code).to.equal(responseCodesV5.notLoggedIn.code);
 				done(err);
 			});
 	});

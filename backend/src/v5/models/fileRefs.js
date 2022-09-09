@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ExternalServices = require('../handler/externalServices');
 const db = require('../handler/db');
-const { logger } = require('../utils/logger');
-const { sendFileMissingError } = require('../services/mailer');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
-const getRefEntry = async (account, collection, id) => {
-	const entry = await db.findOne(account, collection, { _id: id });
+FileRefs.getRefEntryByQuery = async (teamspace, collection, query, projection) => {
+	const entry = await db.findOne(teamspace, collectionName(collection), query, projection);
 
 	if (!entry) {
 		throw templates.fileNotFound;
@@ -35,41 +32,9 @@ const getRefEntry = async (account, collection, id) => {
 	return entry;
 };
 
-const removeAllFiles = async (teamspace, collection) => {
-	const pipeline = [
-		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
-		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
-	];
-	const results = await db.aggregate(teamspace, collection, pipeline);
-
-	const deletePromises = results.map(
-		({ _id, links }) => {
-			if (_id && links?.length) {
-				return ExternalServices.removeFiles(teamspace, collection, _id, links);
-			}
-			return Promise.resolve();
-		},
-	);
-
-	return Promise.all(deletePromises);
-};
-
-FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
-	const collection = `${model}.${extension}`;
-	const entry = await getRefEntry(teamspace, collection, fileName);
-	try {
-		const stream = await ExternalServices.getFileStream(teamspace, collection, entry.type, entry.link);
-		return { readStream: stream, size: entry.size };
-	} catch {
-		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		sendFileMissingError({ teamspace, model, collection, refId: entry._id, link: entry.link }).catch((err) => {
-			logger.logError(`Failed to send file missing error: ${err.message}`);
-		});
-
-		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, 'gridfs', fileName);
-		return { readStream: stream, size: entry.size };
-	}
-};
+FileRefs.getRefEntry = (teamspace, collection, _id) => FileRefs.getRefEntryByQuery(
+	teamspace, collection, { _id },
+);
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
@@ -82,14 +47,29 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 	return res.length > 0 ? res[0].total : 0;
 };
 
-FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
-	const collList = await db.listCollections(teamspace);
-	const refCols = collList.filter(({ name }) => {
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
-		return !!res?.length;
-	});
-	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
+FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
+	const pipeline = [
+		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
+		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+	];
+
+	return db.aggregate(teamspace, collectionName(collection), pipeline);
 };
+
+FileRefs.insertRef = async (teamspace, collection, refInfo) => {
+	await db.insertOne(teamspace, collectionName(collection), refInfo);
+};
+
+FileRefs.removeRef = async (teamspace, collection, id) => {
+	await db.deleteOne(teamspace, collectionName(collection), { _id: id });
+};
+
+FileRefs.getRefsByQuery = (teamspace, collection, query, projection) => db.find(
+	teamspace, collectionName(collection), query, projection,
+);
+
+FileRefs.removeRefsByQuery = (teamspace, collection, query) => db.deleteMany(
+	teamspace, collectionName(collection), query,
+);
 
 module.exports = FileRefs;

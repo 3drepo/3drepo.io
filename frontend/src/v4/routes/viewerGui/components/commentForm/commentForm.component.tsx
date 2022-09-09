@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InputLabel from '@material-ui/core/InputLabel';
-import CameraIcon from '@material-ui/icons/AddAPhoto';
-import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
-import CloseIcon from '@material-ui/icons/Close';
-import ReportProblemIcon from '@material-ui/icons/ReportProblem';
-import SaveIcon from '@material-ui/icons/Save';
-import ShortTextIcon from '@material-ui/icons/ShortText';
+import InputLabel from '@mui/material/InputLabel';
+import CameraIcon from '@mui/icons-material/AddAPhoto';
+import AddPhoto from '@mui/icons-material/AddPhotoAlternate';
+import CloseIcon from '@mui/icons-material/Close';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import SaveIcon from '@mui/icons-material/Save';
+import ShortTextIcon from '@mui/icons-material/ShortText';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 import { Field, Formik } from 'formik';
 import { lowerCase, pick, values as _values } from 'lodash';
 import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -37,6 +38,12 @@ import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import {
+	TicketPopover as TicketSuggestion
+} from '../../../components/messagesList/components/message/components/markdownMessage/ticketReference/ticketPopover/ticketPopover.component';
+import {
+	UserPopover as UserSuggestion,
+} from '../../../components/messagesList/components/message/components/userPopover/userPopover.component';
 import { COMMENT_FIELD_NAME } from './commentForm.constants';
 import {
 	Actions,
@@ -49,8 +56,6 @@ import {
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper,
-	TicketSuggestion,
-	UserSuggestion,
 } from './commentForm.styles';
 
 interface IProps {
@@ -91,7 +96,9 @@ const CommentSchema = Yup.object().shape({
 
 interface ISuggestionItem {
 	entity: {
-		user: string
+		user: string;
+		firstName: string;
+		lastName: string;
 	};
 }
 
@@ -101,8 +108,8 @@ const UserSuggestionItem = ({ entity: { ...userData } }: ISuggestionItem) => (
 	</UserSuggestion>
 );
 
-const TicketSuggestionItem = ({ entity: { ... ticketData } }) => (
-	<TicketSuggestion {...ticketData} />
+const TicketSuggestionItem = ({ entity }) => (
+	<TicketSuggestion {...entity} />
 );
 
 export class CommentForm extends PureComponent<IProps, IState> {
@@ -116,7 +123,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	get commentPlaceholder() {
 		if (this.props.canComment) {
-			return 'Write your comment here';
+			return isV5() ? 'Leave a comment' : 'Write your comment here';
 		}
 		return 'You are not able to comment';
 	}
@@ -264,7 +271,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	public renderResidualRiskFields = renderWhenTrue(() => (
 		<Container>
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
 					<Field name="likelihood" render={({ field }) => (
@@ -404,7 +411,8 @@ export class CommentForm extends PureComponent<IProps, IState> {
 								{this.renderUploadImageButton(!hideUploadButton)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
-							<Field render={({ form }) => (
+							<Field
+								render={({ form }) => (
 									<ViewerPanelButton
 										variant="fab"
 										color="secondary"

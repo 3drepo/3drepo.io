@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <base href="/">
     <!-- Meta, title, CSS, favicons, etc.-->
     <meta charset="utf-8">
@@ -15,48 +16,67 @@
     <!-- Styling used in the Angular Material demos-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  </head>
-  <body class="threeDRepo">
+    <!-- MUI (v5) required links -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+</head>
+
+<body class="threeDRepo">
 
     <!-- Inline CSS if CSS fails, also faster-->
     <style>
-      html, body {
-        padding: 0;
-        margin: 0;
-        height: 100%;
-      }
-
-      body .unsupported-page {
-        max-width: 100%;
-        max-height: 100%;
-        overflow: hidden;
-        position: absolute;
-        background: #0c2f54;
-        color: white;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-        z-index: 10;
-        font-size: 20px;
-      }
-
-      body .unsupported-page a {
-      	color: #289874;
-      }
-
-      body .unsupported-page img {
-      	margin: 4%;
-      	width: 90%;
-      	max-width: 500px;
-      }
-
-      body .unsupported-page div {
-      	margin: 4%;
-      	text-align: center;
-      }
-
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+        }
+        
+        @media print {
+            html,
+            body {
+                height: initial !important;
+                overflow: initial !important;
+            }
+            body * {
+                overflow: visible !important;
+            }
+        }
+        
+        body .unsupported-page {
+            max-width: 100%;
+            max-height: 100%;
+            overflow: hidden;
+            position: absolute;
+            background: #0c2f54;
+            color: white;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            z-index: 10;
+            font-size: 20px;
+        }
+        
+        body .unsupported-page a {
+            color: #289874;
+        }
+        
+        body .unsupported-page img {
+            margin: 4%;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        body .unsupported-page div {
+            margin: 4%;
+            text-align: center;
+        }
+        
+        .material-icons {
+            display: flex;
+        }
     </style>
 
     <noscript>
@@ -73,44 +93,39 @@
     </noscript>
 
     <div class="unsupported-page" style="visibility: hidden;" aria-label="Not Supported">
-      <div>
-        <img
-          src="assets/images/3drepo-logo-white.png"
-          longdesc="3DRepoBuildingInformationModellingSoftware"
-          alt="3D Repo"
-        />
-      </div>
-      <div>
-        Your browser is not supported.
-        Please upgrade to the latest version of
-        <a href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a>,
-        <a href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a> or
-        <a href="https://www.microsoft.com/edge" rel="noopener" target="_blank">Edge</a>
-      </div>
+        <div>
+            <img src="assets/images/3drepo-logo-white.png" longdesc="3DRepoBuildingInformationModellingSoftware" alt="3D Repo" />
+        </div>
+        <div>
+            Your browser is not supported. Please upgrade to the latest version of
+            <a href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a>,
+            <a href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a> or
+            <a href="https://www.microsoft.com/edge" rel="noopener" target="_blank">Edge</a>
+        </div>
     </div>
 
 
     <div id="maintenanceMode" style='height: 100%; display: none; background-color:rgb(12,47,84); color: white; overflow-y: hidden;'>
-      <div style='width:100%; height:100%; margin: 0; text-align: center;'>
-        <img style="margin: 10vh;" src="assets/images/3drepo-logo-white.png" longdesc="3DRepoBuildingInformationModellingSoftware" alt="3D Repo">
-        <table style="margin: 0 auto;  margin-top: 5vh; text-align: center;">
-          <tr>
-            <td style='padding:60px'>
-              <img src="assets/images/maintenance.svg" longdesc="maintenanceMode" alt="Hammer and Wrench">
-            </td>
+        <div style='width:100%; height:100%; margin: 0; text-align: center;'>
+            <img style="margin: 10vh;" src="assets/images/3drepo-logo-white.png" longdesc="3DRepoBuildingInformationModellingSoftware" alt="3D Repo">
+            <table style="margin: 0 auto;  margin-top: 5vh; text-align: center;">
+                <tr>
+                    <td style='padding:60px'>
+                        <img src="assets/images/maintenance.svg" longdesc="maintenanceMode" alt="Hammer and Wrench">
+                    </td>
 
-            <td style='padding: 30px; width: 50vw; font-family: Roboto; font-size: 40px;'>
-              <h4 style="font-weight: lighter;">
-                Apologies, but the site is currently down for maintenance. We'll be back up as soon as possible.
-              </h4>
-            </td>
+                    <td style='padding: 30px; width: 50vw; font-family: Roboto; font-size: 40px;'>
+                        <h4 style="font-weight: lighter;">
+                            Apologies, but the site is currently down for maintenance. We'll be back up as soon as possible.
+                        </h4>
+                    </td>
 
-            <td style='padding:60px'>
-              <img src="assets/images/maintenance.svg" longdesc="maintenanceMode" alt="Hammer and Wrench">
-            </td>
-          </tr>
-          </table>
-      </div>
+                    <td style='padding:60px'>
+                        <img src="assets/images/maintenance.svg" longdesc="maintenanceMode" alt="Hammer and Wrench">
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <div id="app"></div>
@@ -123,17 +138,18 @@
 
     <!-- Load LiveReload if on Dev-->
     <script>
-      if (window) {
+        if (window) {
 
-        if (window.ClientConfig && window.ClientConfig.development === true) {
-          console.debug("Development Environment");
-          console.debug("Development - Loading livereload.js");
-          var src = "//localhost:35729/livereload.js";
-          var script = document.createElement("script");
-          script.setAttribute("src", src);
-          document.head.appendChild(script);
+            if (window.ClientConfig && window.ClientConfig.development === true) {
+                console.debug("Development Environment");
+                console.debug("Development - Loading livereload.js");
+                var src = "http://localhost:35729/livereload.js";
+                var script = document.createElement("script");
+                script.setAttribute("src", src);
+                document.head.appendChild(script);
+            }
         }
-      }
     </script>
-  </body>
+</body>
+
 </html>

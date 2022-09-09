@@ -21,7 +21,7 @@ import { orderBy } from 'lodash';
 import * as queryString from 'query-string';
 import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
-import { ROUTES } from '../../constants/routes';
+import { RouteParams, ROUTES } from '../../constants/routes';
 import { sortByField } from '../../helpers/sorting';
 import { selectCurrentUser } from '../currentUser';
 import { selectLocation } from '../router/router.selectors';
@@ -43,10 +43,10 @@ export const selectProjectsPending = createSelector(
 export const selectCurrentTeamspace = createSelector(
 	selectLocation, (location) =>  {
 		/** getting the teamspace from v5 routing  */
-		const v5Params = matchPath(location.pathname, { path: '/v5/dashboard/:teamspace' });
+		const v5Params = matchPath<RouteParams>(location.pathname, { path: '/v5/dashboard/:teamspace' });
 		/*******************************************/
 
-		const userManagementParams = matchPath(location.pathname, { path: ROUTES.USER_MANAGEMENT_TEAMSPACE });
+		const userManagementParams = matchPath<RouteParams>(location.pathname, { path: ROUTES.USER_MANAGEMENT_TEAMSPACE });
 		return ((userManagementParams || v5Params || {}).params || {}).teamspace;
 	}
 );

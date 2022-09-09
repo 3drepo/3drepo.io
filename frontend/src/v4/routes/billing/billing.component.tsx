@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Tabs from '@material-ui/core/Tabs';
+import Tabs from '@mui/material/Tabs';
 import { values } from 'lodash';
 import * as queryString from 'query-string';
 import { PureComponent } from 'react';

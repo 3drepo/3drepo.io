@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, Component } from 'react';
-import Input from '@material-ui/core/Input';
+import Input from '@mui/material/Input';
 import { Item, StyledSelect } from './cellSelect.styles';
 
 interface IProps {

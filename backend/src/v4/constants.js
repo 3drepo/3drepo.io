@@ -41,6 +41,7 @@
 	define("MASTER_BRANCH", "00000000-0000-0000-0000-000000000000");
 	define("MASTER_UUID", utils.stringToUUID(module.exports.MASTER_BRANCH));
 
+	define("DEFAULT_ROLE_OBJ", { db: "admin", role: "user" });
 	define("DEFAULT_MEMBER_ROLE", "team_member");
 
 	// Main collections (tables) in 3D Repo
@@ -630,7 +631,10 @@
 		"signup": () => "/sign-up"
 	});
 
+	define("DEFAULT_OWNER_JOB",  "Admin");
+
 	define("DEFAULT_JOBS",[
+		{ _id: "Admin", "color": "#f7f7b2" },
 		{ _id: "Client", "color": "#a6cee3" },
 		{ _id: "Architect", "color": "#213f99"},
 		{ _id: "Structural Engineer", "color" : "#33a02c"},

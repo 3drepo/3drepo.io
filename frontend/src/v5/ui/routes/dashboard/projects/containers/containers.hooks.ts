@@ -19,22 +19,18 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const useContainersData = () => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 
 	const containers = ContainersHooksSelectors.selectContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
-	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
-	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
-		if (hasContainers.all || currentProject !== project) return;
-
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
-	}, [currentProject]);
+	}, [project]);
 
-	return { containers, favouriteContainers, hasContainers, isListPending };
+	return { containers, favouriteContainers, isListPending };
 };

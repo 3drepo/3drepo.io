@@ -18,16 +18,20 @@ import { useParams } from 'react-router';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
 	container: IContainer,
 	onSelectOrToggleItem: (id: string) => void,
 	openShareModal: () => void,
+	openContainerSettings: () => void,
 };
 
 export const ContainerEllipsisMenu = ({
@@ -35,37 +39,33 @@ export const ContainerEllipsisMenu = ({
 	container,
 	onSelectOrToggleItem,
 	openShareModal,
+	openContainerSettings,
 }: ContainerEllipsisMenuProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	const dispatch = useDispatch();
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	return (
-		<EllipsisMenu>
+		<EllipsisMenu selected={selected}>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-			/>
-			<EllipsisMenuItem
-				title={formatMessage({
-					id: 'containers.ellipsisMenu.loadContainer',
-					defaultMessage: 'Load Container in 3D Viewer',
-				})}
-				to={`/${container._id}`}
+				to={viewerRoute(teamspace, project, container)}
+				disabled={!container.revisionsCount}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
 				})}
+				onClick={() => uploadToContainer(container._id)}
+				disabled={!canUploadToBackend(container.status)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
-
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -101,27 +101,31 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
+				onClick={openContainerSettings}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				onClick={() => dispatch(DialogsActions.open('delete', {
-					title: formatMessage(
-						{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
-						{ name: container.name },
-					),
-					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(
-						teamspace,
-						project,
-						container._id,
+				onClick={() => DialogsActionsDispatchers.open('delete', {
+					name: container.name,
+					onClickConfirm: () => new Promise<void>(
+						(accept, reject) => {
+							ContainersActionsDispatchers.deleteContainer(
+								teamspace,
+								project,
+								container._id,
+								accept,
+								reject,
+							);
+						},
 					),
 					message: formatMessage({
 						id: 'deleteModal.container.message',
 						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
 					}),
-				}))}
+				})}
 			/>
 		</EllipsisMenu>
 	);

@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { IRevision } from '@/v5/store/revisions/revisions.types';
+import { CreateRevisionBody, IRevision, IRevisionUpdate } from '@/v5/store/revisions/revisions.types';
 
 export const revisionsMockFactory = (overrides?: Partial<IRevision>): IRevision => ({
 	_id: faker.datatype.uuid(),
@@ -24,6 +24,30 @@ export const revisionsMockFactory = (overrides?: Partial<IRevision>): IRevision 
 	tag: faker.random.words(1),
 	author: faker.name.findName(),
 	desc: faker.random.words(3),
+	void: faker.datatype.boolean(),
+	...overrides,
+});
+
+export const mockCreateRevisionBody = (overrides?: Partial<CreateRevisionBody>): CreateRevisionBody => ({
+	revisionTag: faker.random.words(1),
+	revisionDesc: faker.random.words(3),
+	file: new File(['file'], 'filename.obj'),
+	importAnimations: false,
+	timezone: 'Europe/London',
+	containerId: faker.datatype.uuid(),
+	containerName: faker.random.words(1),
+	containerType: 'Other',
+	containerUnit: 'cm',
+	containerDesc: faker.random.words(3),
+	containerCode: faker.random.words(1),
+	...overrides,
+});
+
+export const prepareRevisionData = (overrides?: IRevisionUpdate): IRevisionUpdate => ({
+	timestamp: faker.datatype.datetime(),
+	tag: faker.random.word(),
+	author: faker.random.word(),
+	desc: faker.random.word(),
 	void: faker.datatype.boolean(),
 	...overrides,
 });

@@ -22,6 +22,7 @@ const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
+const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
 
@@ -176,7 +177,7 @@ describe("Updating user info", function () {
 		const { body } = await agent.get(`/${username}/avatar`)
 			.expect(404);
 
-		expect(body.value).to.equal(responseCodes.USER_DOES_NOT_HAVE_AVATAR.value);
+		expect(body.code).to.equal(responseCodesV5.fileNotFound.code);
 	})
 
 	it("should succeed to update the avatar", async function() {

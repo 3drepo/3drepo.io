@@ -15,13 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { fade } from '@material-ui/core/styles';
+import { alpha } from '@mui/material/styles';
 import * as ButtonStyles from '@controls/button/button.styles';
-import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
-import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
-export const Container = styled.div`
+export const Container = styled.div<{ selected?: boolean }>`
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -31,23 +29,12 @@ export const Container = styled.div`
 	cursor: pointer;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 
-	:hover {
-		background-color: ${({ theme }) => theme.palette.primary.accent};
-		${ButtonStyles.LabelButton} {
-			${ButtonStyles.labelButtonSecondaryStyles};
-		}
-	}
-
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.secondary.main};
 
 		::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
-		}
-
-		:hover {
-			background-color: ${theme.palette.secondary.main};
 		}
 		
 		${TextOverflowStyles.Container} {
@@ -58,31 +45,7 @@ export const Container = styled.div`
 
 		${ButtonStyles.LabelButton} {
 			${ButtonStyles.labelButtonSecondaryStyles};
-			background-color: ${fade(theme.palette.tertiary.lightest, 0.8)};
-		}
-
-		${FavouriteCheckboxStyles.Checkbox} {
-			&:hover {
-				background-color: ${theme.palette.secondary.light};
-			}
-
-			&:active {
-				background-color: ${theme.palette.base.lightest};
-			}
-		}
-
-		${EllipsisButtonStyles.StyledIconButton} {
-			&:hover {
-				background-color: ${theme.palette.secondary.light} !important;
-
-				circle {
-					fill: ${theme.palette.primary.contrast} !important;
-				}
-			}
-
-			&:active {
-				background-color: ${theme.palette.base.lightest} !important;
-			}
+			background-color: ${alpha(theme.palette.tertiary.lightest, 0.8)};
 		}
 	`}
 `;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import { Link as LinkBase } from 'react-router-dom';
 
 export const Link = styled(LinkBase)`

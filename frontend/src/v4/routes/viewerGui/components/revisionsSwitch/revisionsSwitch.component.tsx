@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';

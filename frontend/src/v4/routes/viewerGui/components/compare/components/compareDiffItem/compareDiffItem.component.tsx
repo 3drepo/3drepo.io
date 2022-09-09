@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from '@mui/material/Checkbox';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';

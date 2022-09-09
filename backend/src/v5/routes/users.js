@@ -17,10 +17,11 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { validateAvatarFile, validateLoginData,
-	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
+const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
+	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
+const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
@@ -78,22 +79,74 @@ const deleteApiKey = (req, res) => {
 	);
 };
 
-const getAvatar = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.getAvatar(user).then((avatar) => {
-		req.params.format = 'png';
-		respond(req, res, templates.ok, avatar.data.buffer);
-	}).catch((err) => respond(req, res, err));
+const getAvatar = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		const buffer = await Users.getAvatar(user);
+		const fileExt = await fileExtensionFromBuffer(buffer);
+		req.params.format = fileExt || 'png';
+		respond(req, res, templates.ok, buffer);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
-const uploadAvatar = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.uploadAvatar(user, req.file.buffer).then(() => {
+const uploadAvatar = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		await Users.uploadAvatar(user, req.file.buffer);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
+};
+
+const forgotPassword = async (req, res) => {
+	const { user } = req.body;
+
+	try {
+		await Users.generateResetPasswordToken(user);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const resetPassword = async (req, res) => {
+	const { newPassword, user } = req.body;
+
+	try {
+		await Users.updatePassword(user, newPassword);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const signUp = async (req, res) => {
+	try {
+		await Users.signUp(req.body);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const verify = async (req, res) => {
+	const { username, token } = req.body;
+
+	try {
+		await Users.verify(username, token);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const establishRoutes = () => {
@@ -327,8 +380,6 @@ const establishRoutes = () => {
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
 	*         description: Gets the avatar of the user
-	*         produces:
-	*           image/png:
 	*         content:
 	*           image/png:
 	*             schema:
@@ -361,6 +412,159 @@ const establishRoutes = () => {
 	*/
 	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
 
+	/**
+	* @openapi
+	* /user/password:
+	*   post:
+	*     description: Sends an email to the user with a reset password link
+	*     tags: [User]
+	*     operationId: forgotPassword
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               user:
+	*                 type: string
+	*                 description: The username or email of the user
+	*                 example: nick.wilson@email.com
+	*     responses:
+	*       200:
+	*         description: Sends an email to the user with a reset password link
+	*/
+	router.post('/user/password', validateForgotPasswordData, forgotPassword);
+
+	/**
+	* @openapi
+	* /user/password:
+	*   put:
+	*     description: Resets the user password
+	*     tags: [User]
+	*     operationId: resetPassword
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               user:
+	*                 type: string
+	*                 description: The username of the user
+	*                 example: username123
+	*               newPassword:
+	*                 type: string
+	*                 description: The new password of the user
+	*                 example: newPassword123!
+	*               token:
+	*                 type: string
+	*                 description: The reset password token
+	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
+	*     responses:
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
+	*       200:
+	*         description: Resets the user password
+	*/
+	router.put('/user/password', validateResetPasswordData, resetPassword);
+
+	/**
+	* @openapi
+	* /user:
+	*   post:
+	*     description: Signs a user up and sends a verification email to the email address provided
+	*     tags: [User]
+	*     operationId: signUp
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             required:
+	*             - username
+	*             - email
+	*             - password
+	*             - firstName
+	*             - lastName
+	*             - countryCode
+	*             - mailListAgreed
+	*             properties:
+	*               username:
+	*                 type: string
+	*                 description: The username of the user
+	*                 example: username123
+	*               email:
+	*                 type: string
+	*                 description: The email of the user
+	*                 example: example@email.com
+	*                 format: email
+	*               password:
+	*                 type: string
+	*                 description: The password of the user
+	*                 example: newPassword123!
+	*               firstName:
+	*                 type: string
+	*                 description: The first name of the user
+	*                 example: Nick
+	*               lastName:
+	*                 type: string
+	*                 description: The last name of the user
+	*                 example: Wilson
+	*               countryCode:
+	*                 type: string
+	*                 description: The country code of the user
+	*                 example: GB
+	*               company:
+	*                 type: string
+	*                 description: The company of the user
+	*                 example: 3D Repo
+	*               mailListAgreed:
+	*                 type: boolean
+	*                 description: Whether the user has signed up for the latest news and tutorials
+	*                 example: true
+	*               captcha:
+	*                 type: string
+	*                 description: The reCAPTCHA token generated from the sign up form
+	*                 example: 5LcN0ysfAAAAAHpnld1tAweI7DKU7dswmwnHWYcB
+	*     responses:
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
+	*       200:
+	*         description: Signs a user up and sends a verification email to the email address provided
+	*/
+	router.post('/user', validateSignUpData, signUp);
+
+	/**
+	* @openapi
+	* /user/verify:
+	*   post:
+	*     description: Verifies a user and the user teamspace is initialised
+	*     tags: [User]
+	*     operationId: verify
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             required:
+	*             - username
+	*             - token
+	*             properties:
+	*               username:
+	*                 type: string
+	*                 description: The username of the user
+	*                 example: username123
+	*               token:
+	*                 type: string
+	*                 description: The verification token of the user
+	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
+	*     responses:
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
+	*       200:
+	*         description: Verifies a user and the user teamspace is initialised
+	*/
+	router.post('/user/verify', validateVerifyData, verify);
 	return router;
 };
 

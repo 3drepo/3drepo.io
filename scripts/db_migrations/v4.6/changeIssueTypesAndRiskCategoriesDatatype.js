@@ -25,7 +25,7 @@ function updateTeamspaceSetting(dbConn) {
 		});
 
 		if(!dryRun) {
-			dbConn.getCollection("teamspace").update({}, {$set:{riskCategories: newRiskCat, topicTypes: newTypes}});
+			dbConn.getCollection("teamspace").updateMany({}, {$set:{riskCategories: newRiskCat, topicTypes: newTypes}});
 		}
 		return {riskMapping, issueMapping};
 	}
@@ -82,7 +82,7 @@ function updateTicket(dbConn, mapping, colName, typeLabel) {
 					setObj.comments = ticket.comments;
 				}
 				setObj[typeLabel] = ticket[typeLabel];
-				dbConn.getCollection(colName).update({_id: ticket._id}, {$set:setObj});
+				dbConn.getCollection(colName).updateOne({_id: ticket._id}, {$set:setObj});
 			}
 
 	});

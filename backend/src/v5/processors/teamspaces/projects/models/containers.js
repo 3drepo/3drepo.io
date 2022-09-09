@@ -20,16 +20,17 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
+const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { fetchFileStream } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
-const { getProjectById } = require('../../../../models/projects');
+const { getFileAsStream } = require('../../../../services/filesManager');
+const { getProjectById } = require('../../../../models/projectSettings');
 const { logger } = require('../../../../utils/logger');
-const { queueModelUpload } = require('../../../../services/queue');
+const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups, ...Views };
+const Containers = { ...Groups, ...Views, ...Tickets };
 
 Containers.addContainer = addModel;
 
@@ -96,7 +97,7 @@ Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
 	// We currently only support single file fetches
 	const fileName = rev.rFile[0];
 	const fileNameFormatted = fileName.substr(36).replace(/_([^_]*)$/, '.$1');
-	const file = await fetchFileStream(teamspace, container, 'history.ref', fileName);
+	const file = await getFileAsStream(teamspace, `${container}.history.ref`, fileName);
 	return { ...file, filename: fileNameFormatted };
 };
 

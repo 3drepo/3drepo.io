@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { Panel } from '../components/panel/panel.component';
 
 import { Container, Paragraph } from './registerRequest.styles';
@@ -28,7 +28,7 @@ export class RegisterRequest extends PureComponent<any, any> {
 				direction="column"
 				alignItems="center"
 				wrap="nowrap"
-				>
+			>
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Sign up request">
 						<Paragraph>

@@ -16,28 +16,20 @@
  */
 
 import { createSelector } from 'reselect';
-import { IContainersState } from '@/v5/store/containers/containers.types';
-import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { IContainersState } from './containers.redux';
+import { IContainer } from './containers.types';
 
-const selectContainersDomain = (state): IContainersState => state.containers;
+const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
 export const selectContainers = createSelector(
 	selectContainersDomain, selectCurrentProject,
-	(state, currentProject) => state.containersByProject[currentProject] ?? [],
+	(state, currentProject) => state?.containersByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteContainers = createSelector(
 	selectContainers,
 	(containers) => containers.filter(({ isFavourite }) => isFavourite),
-);
-
-export const selectHasContainers = createSelector(
-	selectContainers, selectFavouriteContainers,
-	(containers, favouriteContainers) => ({
-		favourites: !isEmpty(favouriteContainers),
-		all: !isEmpty(containers),
-	}),
 );
 
 export const selectIsListPending = createSelector(
@@ -49,4 +41,10 @@ export const selectIsListPending = createSelector(
 export const selectAreStatsPending = createSelector(
 	selectContainers,
 	(containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
+);
+
+export const selectContainerById = createSelector(
+	selectContainers,
+	(_, id) => id,
+	(containers, id): IContainer | null => containers.find((federation) => (federation._id === id)),
 );

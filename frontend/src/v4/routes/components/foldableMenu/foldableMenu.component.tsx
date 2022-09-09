@@ -17,15 +17,15 @@
 
 import { ReactNode, PureComponent, useRef, useEffect, useState } from 'react';
 
-import { ListItemProps } from '@material-ui/core/ListItem';
-import { Check } from '@material-ui/icons';
+import { ListItemProps } from '@mui/material/ListItem';
+import { Check } from '@mui/icons-material';
 
 import { IconWrapper, MenuList, NestedWrapper, StyledItemText, StyledListItem, Wrapper } from './foldableMenu.style';
 
 /**
 // Example:
 
-import Upload from '@material-ui/icons/CloudUpload';
+import Upload from '@mui/icons-material/CloudUpload';
 
 export const TestFold = () => (
 	<FoldableMenu>
@@ -78,20 +78,22 @@ export const SubMenu = (props: ISubMenuProps) => {
 	);
 };
 
-export interface IFoldableMenuItemProps extends ListItemProps {
+export interface IFoldableMenuItemProps {
 	icon?: ReactNode;
 	checked?: boolean;
 	arrow?: boolean;
+	onClick: (event?) => void;
+	children?: any;
 }
 
 export const FoldableMenuItem = ({children, ...props}: IFoldableMenuItemProps) => (
-		<StyledListItem {...props}>
-			{props.icon  && <IconWrapper>{props.icon}</IconWrapper>}
-			<StyledItemText>
-				{children}
-				{props.checked && <Check fontSize="small" />}
-			</StyledItemText>
-		</StyledListItem>
+	<StyledListItem {...props}>
+		{props.icon  && <IconWrapper>{props.icon}</IconWrapper>}
+		<StyledItemText>
+			{children}
+			{props.checked && <Check fontSize="small" />}
+		</StyledItemText>
+	</StyledListItem>
 );
 
 interface IProps {

@@ -16,15 +16,23 @@
  */
 import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import { TextField, MenuItem, InputLabel, Select } from '@material-ui/core';
-import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { SelectColumn } from './createContainerForm.styles';
+import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { MenuItem } from '@mui/material';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { FlexContainer } from './createContainerForm.styles';
+
+interface ICreateContainer {
+	open: boolean;
+	onClickClose: () => void;
+}
 
 interface IFormInput {
 	name: string;
@@ -34,161 +42,84 @@ interface IFormInput {
 	type: string;
 }
 
-const ContainerSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'containers.creation.name.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'containers.creation.name.error.max',
-				defaultMessage: 'Container Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'containers.creation.name.error.required',
-				defaultMessage: 'Container Name is a required field',
-			}),
-		),
-	unit: Yup.string().required().default('mm'),
-	type: Yup.string().required().default('Uncategorised'),
-	code: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.code.error.max',
-				defaultMessage: 'Code is limited to 50 characters',
-			}))
-		.matches(/^[A-Za-z0-9]*$/,
-			formatMessage({
-				id: 'containers.creation.code.error.characters',
-				defaultMessage: 'Code can only consist of letters and numbers',
-			})),
-	desc: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.desc.error.max',
-				defaultMessage: 'Container Description is limited to 50 characters',
-			})).default('Uncategorised'),
-});
-
-export const CreateContainerForm = ({ open, close }): JSX.Element => {
-	const { register, handleSubmit, formState, reset, formState: { errors } } = useForm<IFormInput>({
+export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
+	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(ContainerSchema),
+		resolver: yupResolver(CreateContainerSchema),
+		defaultValues: {
+			name: '',
+			unit: 'mm',
+			type: 'Uncategorised',
+			desc: '',
+			code: '',
+		},
 	});
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body);
-		close();
+		onClickClose();
 	};
 
-	useEffect(() => { reset(); }, [!open]);
+	useEffect(reset, [open]);
 
 	return (
 		<FormModal
 			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			open={open}
-			onClickClose={close}
+			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}
 			isValid={formState.isValid}
+			maxWidth="sm"
 		>
-			<TextField
+			<FormTextField
+				control={control}
+				name="name"
 				label={formatMessage({ id: 'containers.creation.form.name', defaultMessage: 'Name' })}
+				formError={errors.name}
 				required
-				error={!!errors.name}
-				helperText={errors.name?.message}
-				{...register('name')}
 			/>
-			<SelectColumn>
-				<InputLabel id="unit-label" required>
-					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
-				</InputLabel>
-				<Select
-					labelId="unit-label"
-					defaultValue="mm"
-					{...register('unit')}
+			<FlexContainer>
+				<FormSelect
+					required
+					control={control}
+					name="unit"
+					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 				>
-					<MenuItem value="mm">
-						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
-					</MenuItem>
-					<MenuItem value="cm">
-						<FormattedMessage id="containers.creation.form.unit.cm" defaultMessage="Centimetres" />
-					</MenuItem>
-					<MenuItem value="dm">
-						<FormattedMessage id="containers.creation.form.unit.dm" defaultMessage="Decimetres" />
-					</MenuItem>
-					<MenuItem value="m">
-						<FormattedMessage id="containers.creation.form.unit.m" defaultMessage="Metres" />
-					</MenuItem>
-					<MenuItem value="ft">
-						<FormattedMessage id="containers.creation.form.unit.ft" defaultMessage="Feet and inches" />
-					</MenuItem>
-				</Select>
-			</SelectColumn>
-
-			<SelectColumn>
-				<InputLabel id="category-label" required>
-					<FormattedMessage id="containers.creation.form.category" defaultMessage="Category" />
-				</InputLabel>
-				<Select
-					labelId="category-label"
-					defaultValue="Uncategorised"
-					{...register('type')}
+					{
+						CONTAINER_UNITS.map((unit) => (
+							<MenuItem key={unit.value} value={unit.value}>
+								{unit.name}
+							</MenuItem>
+						))
+					}
+				</FormSelect>
+				<FormSelect
+					required
+					control={control}
+					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
+					name="type"
 				>
-					<MenuItem value="Uncategorised">
-						<FormattedMessage id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
-					</MenuItem>
-					<MenuItem value="Architectural">
-						<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
-					</MenuItem>
-					<MenuItem value="Existing">
-						<FormattedMessage id="containers.creation.form.type.existing" defaultMessage="Existing" />
-					</MenuItem>
-					<MenuItem value="GIS">
-						<FormattedMessage id="containers.creation.form.type.gis" defaultMessage="GIS" />
-					</MenuItem>
-					<MenuItem value="Infrastructure">
-						<FormattedMessage id="containers.creation.form.type.infrastructure" defaultMessage="Infrastructure" />
-					</MenuItem>
-					<MenuItem value="Interior">
-						<FormattedMessage id="containers.creation.form.type.interior" defaultMessage="Interior" />
-					</MenuItem>
-					<MenuItem value="Landscape">
-						<FormattedMessage id="containers.creation.form.type.ladscape" defaultMessage="Landscape" />
-					</MenuItem>
-					<MenuItem value="MEP">
-						<FormattedMessage id="containers.creation.form.type.mep" defaultMessage="MEP" />
-					</MenuItem>
-					<MenuItem value="Mechanical">
-						<FormattedMessage id="containers.creation.form.type.mechanical" defaultMessage="Mechanical" />
-					</MenuItem>
-					<MenuItem value="Structural">
-						<FormattedMessage id="containers.creation.form.type.structural" defaultMessage="Structural" />
-					</MenuItem>
-					<MenuItem value="Survey">
-						<FormattedMessage id="containers.creation.form.type.survey" defaultMessage="Survey" />
-					</MenuItem>
-					<MenuItem value="Other">
-						<FormattedMessage id="containers.creation.form.type.other" defaultMessage="Other" />
-					</MenuItem>
-				</Select>
-			</SelectColumn>
-
-			<TextField
-				label={formatMessage({ id: 'containers.creation.form.desc', defaultMessage: 'Description' })}
-				error={!!errors.desc}
-				helperText={errors.desc?.message}
-				{...register('desc')}
+					{
+						CONTAINER_TYPES.map((unit) => (
+							<MenuItem key={unit.value} value={unit.value}>
+								{unit.value}
+							</MenuItem>
+						))
+					}
+				</FormSelect>
+			</FlexContainer>
+			<FormTextField
+				control={control}
+				name="desc"
+				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
+				formError={errors.desc}
 			/>
-
-			<TextField
+			<FormTextField
+				control={control}
+				name="code"
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
-				error={!!errors.code}
-				helperText={errors.code?.message}
-				{...register('code')}
+				formError={errors.code}
 			/>
 		</FormModal>
 	);

@@ -19,10 +19,10 @@ import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
-import { ModalsDispatcher } from '@components/shared/modals';
-import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
+import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
@@ -30,7 +30,7 @@ interface IDashboardLayout {
 }
 
 export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project, containerOrFederation } = useParams<DashboardParams>();
 
 	useEffect(() => {
 		if (teamspace) {
@@ -48,11 +48,10 @@ export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => 
 	return (
 		<>
 			<AppBar />
-			{project && <ProjectHeader />}
+			{project && !containerOrFederation && <ProjectNavigation />}
 			<Content>
 				{children}
 			</Content>
-			<ModalsDispatcher />
 		</>
 	);
 };

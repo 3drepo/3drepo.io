@@ -16,6 +16,8 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
+const { DEFAULT_JOBS } = require('../../../../src/v5/models/jobs.constants');
 
 const Jobs = require(`${src}/models/jobs`);
 const db = require(`${src}/handler/db`);
@@ -37,6 +39,66 @@ const testGetJobsToUsers = () => {
 	});
 };
 
+const testAddDefaultJobs = () => {
+	describe('Add default jobs', () => {
+		test('should add the default jobs', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
+			await Jobs.addDefaultJobs(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+		});
+	});
+};
+
+const testAssignUserToJob = () => {
+	describe('Assign user to job', () => {
+		test('should assign a user to a job', async () => {
+			const teamspace = generateRandomString();
+			const job = generateRandomString();
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await Jobs.assignUserToJob(teamspace, job, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { _id: job }, { $push: { users: username } });
+		});
+	});
+};
+
+const testRemoveUserFromJobs = () => {
+	describe('Remove user from job', () => {
+		test('should remove user from jobs', async () => {
+			const teamspace = generateRandomString();
+			const userToRemove = generateRandomString();
+			const fn = jest.spyOn(db, 'updateMany').mockImplementation(() => {});
+			await Jobs.removeUserFromJobs(teamspace, userToRemove);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { users: userToRemove }, { $pull: { users: userToRemove } });
+		});
+	});
+};
+
+const testGetJobs = () => {
+	describe('Get jobs', () => {
+		test('return names of all available jobs', async () => {
+			const teamspace = generateRandomString();
+			const jobs = [generateRandomString(), generateRandomString(), generateRandomString()];
+			jest.spyOn(db, 'find').mockResolvedValueOnce(jobs.map((_id) => ({ _id })));
+			await expect(Jobs.getJobs(teamspace)).resolves.toEqual(jobs);
+		});
+
+		test('return an empty array if there are no jobs', async () => {
+			const teamspace = generateRandomString();
+			jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(Jobs.getJobs(teamspace)).resolves.toEqual([]);
+		});
+	});
+};
+
 describe('models/jobs', () => {
 	testGetJobsToUsers();
+	testAddDefaultJobs();
+	testAssignUserToJob();
+	testRemoveUserFromJobs();
+	testGetJobs();
 });

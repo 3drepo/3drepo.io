@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MovieIcon from '@material-ui/icons/Movie';
+import MovieIcon from '@mui/icons-material/Movie';
 
 import { DATE_FIELDS } from './timeIcon.constants';
 import { StyledIconButton } from './timeIcon.styles';

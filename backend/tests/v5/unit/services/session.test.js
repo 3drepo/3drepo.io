@@ -17,13 +17,22 @@
 
 const { src } = require('../../helper/path');
 
+// Need to mock these 2 to ensure we are not trying to create a real session configuration
+jest.mock('express-session', () => () => {});
+jest.mock('../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../src/v5/handler/db'),
+	getSessionStore: () => {},
+}));
 const Sessions = require(`${src}/services/sessions`);
 const db = require(`${src}/handler/db`);
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const testGetSessions = () => {
 	describe('Get sessions by username', () => {
 		test('Should return sessions by username', async () => {
-			jest.spyOn(db, 'find').mockResolvedValue([{ id: '1' }, { id: '2' }]);
+			jest.spyOn(db, 'find').mockResolvedValueOnce([{ _id: '1' }, { _id: '2' }]);
 			await Sessions.getSessions('username1');
 		});
 	});
@@ -32,13 +41,22 @@ const testGetSessions = () => {
 const testRemoveOldSessions = () => {
 	describe('Remove sessions', () => {
 		test('Should remove the sessions that have the provided ids', async () => {
+			jest.spyOn(db, 'find').mockResolvedValueOnce([{ _id: '1' }, { _id: '2' }]);
 			jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
 			await Sessions.removeOldSessions(['1', '2'], 'a', 'ref');
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED, { ids: ['1', '2'] });
+		});
+
+		test('Should process correctly if there are no old sessions', async () => {
+			jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await Sessions.removeOldSessions(['1', '2'], 'a', 'ref');
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 
 		test('Should not remove the sessions if there is no referrer', async () => {
-			jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
 			await Sessions.removeOldSessions(['1', '2'], 'a');
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 	});
 };

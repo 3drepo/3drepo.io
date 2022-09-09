@@ -20,8 +20,9 @@ import { LabelButton } from '../../../viewerGui/components/labelButton/labelButt
 import { LinkEntry } from './attachResourceLinkEntry.component';
 import {
 	AddLinkContainer,
+	ResourcesContainer,
 	ResourcesListContainer,
-	ResourcesListScroller
+	ResourcesListScroller,
 } from './attachResourcesDialog.styles';
 
 interface IProps {
@@ -43,26 +44,26 @@ export class AttachResourceUrls extends PureComponent<IProps, IState> {
 
 		return (
 			<FieldArray
-			name="links"
-			render={(arrayHelpers) => (
-				<div>
-					<ResourcesListScroller>
-						<ResourcesListContainer>
-						{(links && links.length > 0) && (
-							links.map((link, index) => (
-								<LinkEntry key={index}
-									index={index}
-									onClickRemove={() => arrayHelpers.remove(index)}
-								/>
-							))
-						)}
-						</ResourcesListContainer>
-					</ResourcesListScroller>
-					<AddLinkContainer>
-						<LabelButton onClick={() => arrayHelpers.insert(0, {name: '', link: ''})}>Add link</LabelButton>
-					</AddLinkContainer>
-				</div>
-			)}
+				name="links"
+				render={(arrayHelpers) => (
+					<ResourcesContainer>
+						<ResourcesListScroller>
+							<ResourcesListContainer>
+								{(links && links.length > 0) && (
+									links.map((link, index) => (
+										<LinkEntry key={index}
+											index={index}
+											onClickRemove={() => arrayHelpers.remove(index)}
+										/>
+									))
+								)}
+							</ResourcesListContainer>
+						</ResourcesListScroller>
+						<AddLinkContainer>
+							<LabelButton onClick={() => arrayHelpers.insert(0, {name: '', link: ''})}>Add link</LabelButton>
+						</AddLinkContainer>
+					</ResourcesContainer>
+				)}
 			/>
 		);
 	}

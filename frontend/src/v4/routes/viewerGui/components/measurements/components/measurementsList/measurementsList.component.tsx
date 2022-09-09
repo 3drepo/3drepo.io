@@ -17,14 +17,21 @@
 
 import { useState } from 'react';
 
-import MoreIcon from '@material-ui/icons/ChevronRight';
-import LessIcon from '@material-ui/icons/ExpandMore';
+import MoreIcon from '@mui/icons-material/ChevronRight';
+import LessIcon from '@mui/icons-material/ExpandMore';
 
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measurements/measurements.constants';
 import { MeasureItem } from '../measureItem/';
 import { getUnits, getValue, IMeasure } from '../measureItem/measureItem.component';
 import {
-	List, SectionHeader, StyledCheckboxCell, StyledIconButton, Title, Total, Units,
+	List,
+	SectionHeader,
+	StyledCheckboxCell,
+	StyledIconButton,
+	Title,
+	Total,
+	Units,
+	Container,
 } from './measurementsList.styles';
 
 interface IProps {
@@ -54,13 +61,13 @@ export const MeasurementsList = ({
 	const isCountable = ![MEASURE_TYPE.POINT].includes(measureType);
 
 	return (
-		<>
+		<Container>
 			<SectionHeader>
 				<StyledIconButton onClick={handleOnClick}>
 					{expanded ? <LessIcon /> : <MoreIcon />}
 				</StyledIconButton>
 
-				<Title >{MEASURE_TYPE_NAME[measureType]}</Title>
+				<Title>{MEASURE_TYPE_NAME[measureType]}</Title>
 				{
 					isCountable &&
 					<>
@@ -89,6 +96,6 @@ export const MeasurementsList = ({
 					))}
 				</List>
 			}
-		</>
+		</Container>
 	);
 };

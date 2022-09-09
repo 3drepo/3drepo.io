@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactChild, useState } from 'react';
-import { PopoverProps as PopoverType } from '@material-ui/core/Popover';
 import { renderWhenTrueOtherwise } from '../../../../../../../../helpers/rendering';
 
 import { TicketPopover } from './ticketPopover/ticketPopover.component';
@@ -23,7 +22,7 @@ import { Link, Popover, Reference } from './ticketReference.styles';
 
 interface IReferenceLink {
 	isBoardView: boolean;
-	onPopoverOpen: (event: React.MouseEvent<PopoverType, MouseEvent>) => void;
+	onPopoverOpen: (event: React.MouseEvent<any, MouseEvent>) => void;
 	onPopoverClose: () => void;
 	onCardChange: () => void;
 	to: string;
@@ -67,7 +66,7 @@ interface IProps {
 }
 
 export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...props }: IProps): JSX.Element => {
-	const [anchorEl, setAnchorEl] = useState<PopoverType | null>(null);
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const ticketData = issuesMap[id] ? issuesMap[id] : risksMap[id];
 	const { teamspace, type } = urlParams;
 	const isBoardView = Boolean(type);
@@ -78,7 +77,7 @@ export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...p
 
 	const { _id: ticketId, model, number: ticketNumber, name, desc, statusColor, StatusIconComponent } = ticketData;
 
-	const handlePopoverOpen = (event: React.MouseEvent<PopoverType, MouseEvent>) => setAnchorEl(event.currentTarget);
+	const handlePopoverOpen = (event: React.MouseEvent<any, MouseEvent>) => setAnchorEl(event.currentTarget);
 
 	const handlePopoverClose = () => setAnchorEl(null);
 

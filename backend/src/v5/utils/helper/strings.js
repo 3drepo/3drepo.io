@@ -17,7 +17,6 @@
 
 const { camelCase, snakeCase } = require('lodash');
 const crypto = require('crypto');
-const { types } = require('./yup');
 
 const StringHelper = {};
 // Turns thisIsUs to THIS_IS_US
@@ -32,8 +31,11 @@ StringHelper.getURLDomain = (url) => {
 	return domainRegexMatch ? domainRegexMatch[0].replace(/\/\s*$/, '') : url;
 };
 
-StringHelper.hasEmailFormat = (str) => types.strings.email.isValidSync(str, { strict: true });
-
 StringHelper.generateHashString = (length = 32) => crypto.randomBytes(length / 2).toString('hex');
+
+StringHelper.formatPronouns = (str) => {
+	const strArr = str.toLowerCase().split(' ');
+	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+};
 
 module.exports = StringHelper;

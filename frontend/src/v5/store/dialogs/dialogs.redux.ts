@@ -15,25 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { produceAll } from '@/v5/helpers/reducers.helper';
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 
 import { Constants } from '../../helpers/actions.helper';
-
-interface IDialogActions {
-	open: (type?: string, props?: any) => any;
-	close: (id: string) => any;
-}
-
-export interface IDialogConfig {
-	id: string;
-	modalType?: 'error' | 'info' | 'alert';
-	props: any;
-}
-
-export interface IDialogState {
-	dialogs: IDialogConfig[];
-}
 
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
@@ -42,25 +29,44 @@ export const INITIAL_STATE: IDialogState = {
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	open: ['modalType', 'props'],
 	close: ['dialogId'],
-}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogActions>; Creators: IDialogActions };
+}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
-export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {
+export const openHandler = (state, { modalType, props }: OpenAction) => {
 	const dialog = {
 		id: uuid(),
 		modalType,
 		props,
 	};
 
-	const dialogs = [...state.dialogs, dialog];
-	return { ...state, dialogs };
+	state.dialogs = [...state.dialogs, dialog];
 };
 
-export const closeHandler = (state = INITIAL_STATE, { dialogId }): IDialogState => {
-	const dialogs = dialogId ? state.dialogs.filter(({ id }) => (id !== dialogId)) : [];
-	return { ...state, dialogs };
+export const closeHandler = (state, { dialogId }: CloseAction) => {
+	state.dialogs = state.dialogs.filter(({ id }) => (id !== dialogId));
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const dialogsReducer = createReducer(INITIAL_STATE, produceAll({
 	[DialogsTypes.OPEN]: openHandler,
 	[DialogsTypes.CLOSE]: closeHandler,
-});
+}));
+
+/**
+ * Types
+ */
+type OpenAction = Action<'OPEN'> & { modalType: string | ((any) => JSX.Element), props: any };
+type CloseAction = Action<'CLOSE'> & { dialogId: string };
+
+export interface IDialogsActionCreators {
+	open: (type?: string | ((any) => JSX.Element), props?: any) => OpenAction;
+	close: (id: string) => CloseAction;
+}
+
+export interface IDialogConfig {
+	id: string;
+	modalType?: 'delete' | 'warning' | 'alert' | 'info' | ((any) => JSX.Element);
+	props: any;
+}
+
+export interface IDialogState {
+	dialogs: IDialogConfig[];
+}

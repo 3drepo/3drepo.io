@@ -21,12 +21,14 @@ import { ISortConfig } from '../useOrderedList';
 import { DashboardListHeaderContainer } from './dashboardListHeader.styles';
 
 type IDashboardListHeader = {
+	className?: string;
 	onSortingChange: Dispatch<ISortConfig>;
 	children: JSX.Element[];
-	defaultSortConfig: ISortConfig;
+	defaultSortConfig?: ISortConfig;
 };
 
 export const DashboardListHeader = ({
+	className,
 	onSortingChange,
 	children,
 	defaultSortConfig,
@@ -50,13 +52,13 @@ export const DashboardListHeader = ({
 			onSortingChange({ column: colName, direction: directionState });
 		};
 
-		const sortingDirection = (colName === sort.column ? sort.direction : undefined);
+		const sortingDirection = (colName === sort?.column ? sort.direction : undefined);
 
 		return { sortingDirection, onClick, sort: true };
 	};
 
 	return (
-		<DashboardListHeaderContainer>
+		<DashboardListHeaderContainer className={className}>
 			{children.map((child) => (
 				cloneElement(child, {
 					key: child.props.name,

@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+import * as SearchInputStyles from '@controls/search/searchInput/searchInput.styles';
 import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
@@ -27,21 +27,17 @@ export const CollapseSideElementGroup = styled.div`
 	display: flex;
 	align-items: center;
 
+	& > :last-child {
+		margin-right: 0;
+	}
+
 	${SearchInputStyles.TextField} {
-		margin-right: 15px;
-		
+		width: 405px;
+
 		@media (max-width: ${Display.Tablet}px) {
 			width: 225px;
 			padding-left: 25px;
 			box-sizing: border-box;
-		}
-		
-		@media (max-width: ${Display.Desktop}px) {
-			max-width: 405px;
-		}
-		
-		@media (min-width: ${Display.Desktop}px) {
-			width: 405px;
 		}
 	}
 `;

@@ -38,9 +38,9 @@ interface IProps {
 export const UpdateButtons = ({
 	isNew, canEditViewpoint, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, hasPin, ...props
 }: IProps) => (
-	<FieldsRow container alignItems="center" justify="space-between">
+	<FieldsRow container alignItems="center" justifyContent="space-between">
 		{renderWhenTrueOtherwise(() => (
-			<UpdateButtonsContainer center={!isNew ? 1 : 0}>
+			<UpdateButtonsContainer center={!isNew}>
 				<PinButton
 					onChange={onChangePin}
 					onSave={onSavePin}

@@ -15,22 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CompareIcon from '@material-ui/icons/Compare';
-import TreeIcon from '@material-ui/icons/DeviceHub';
-import GroupsIcon from '@material-ui/icons/GroupWork';
-import GisIcon from '@material-ui/icons/Layers';
-import SequencesIcon from '@material-ui/icons/Movie';
-import ViewsIcon from '@material-ui/icons/PhotoCamera';
-import IssuesIcon from '@material-ui/icons/Place';
-import MeasureIcon from '@material-ui/icons/Straighten';
+import CompareIcon from '@mui/icons-material/Compare';
+import TreeIcon from '@mui/icons-material/DeviceHub';
+import GroupsIcon from '@mui/icons-material/GroupWork';
+import GisIcon from '@mui/icons-material/Layers';
+import SequencesIcon from '@mui/icons-material/Movie';
+import ViewsIcon from '@mui/icons-material/PhotoCamera';
+import IssuesIcon from '@mui/icons-material/Place';
+import MeasureIcon from '@mui/icons-material/Straighten';
+import TicketsIcon from '@mui/icons-material/FormatListBulleted';
+
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 
 import { clientConfigService } from '../services/clientConfig';
+import { isV5 } from '../helpers/isV5';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',
 	ISSUES: 'issues',
 	RISKS: 'risks',
+	TICKETS: 'tickets',
 	BIM: 'bim',
 	TREE: 'tree',
 	GROUPS: 'groups',
@@ -45,6 +49,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
 	[VIEWER_PANELS.RISKS]: RisksIcon,
+	[VIEWER_PANELS.TICKETS]: TicketsIcon,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,
@@ -57,6 +62,7 @@ export const VIEWER_PANELS_ICONS = {
 export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.ISSUES]: 200,
 	[VIEWER_PANELS.RISKS]: 200,
+	[VIEWER_PANELS.TICKETS]: 200,
 	[VIEWER_PANELS.GROUPS]: 200,
 	[VIEWER_PANELS.VIEWS]: 200,
 	[VIEWER_PANELS.TREE]: 80,
@@ -69,6 +75,7 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.ISSUES]: 'Issues',
 	[VIEWER_PANELS.RISKS]: 'SafetiBase',
+	[VIEWER_PANELS.TICKETS]: 'Tickets',
 	[VIEWER_PANELS.GROUPS]: 'Groups',
 	[VIEWER_PANELS.VIEWS]: 'Views',
 	[VIEWER_PANELS.TREE]: 'Tree',
@@ -87,6 +94,7 @@ const getPanelConfig = (panelType) => ({
 export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.ISSUES,
 	VIEWER_PANELS.RISKS,
+	VIEWER_PANELS.TICKETS,
 	VIEWER_PANELS.GROUPS,
 	VIEWER_PANELS.VIEWS,
 	VIEWER_PANELS.TREE,
@@ -94,7 +102,10 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.GIS,
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
-].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
+].filter((panel) =>
+(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES)
+&& (isV5() || panel !== VIEWER_PANELS.TICKETS) // If is not in v5 dont add the tickets button
+).map(getPanelConfig);
 
 export const VIEWER_DRAGGABLE_PANELS = [
 	VIEWER_PANELS.LEGEND,

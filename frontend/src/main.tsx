@@ -31,11 +31,13 @@ import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { initializeIntl } from '@/v5/services/intl';
+import { getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { IntlProvider } from 'react-intl';
 import { Version, VersionContext } from './versionContext';
-import { getSocketId, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
+import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocketIdHeader } from './v4/services/api';
+import { setSocket } from './v4/modules/chat/chat.sagas';
 
 window.UnityUtil = UnityUtil;
 
@@ -44,24 +46,30 @@ initializeActionsDispatchers(dispatch);
 initializeIntl(navigator.language);
 
 initializeSocket(clientConfigService.chatConfig);
-subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocketId()));
+
+// Injecting the instance of socket from v5 into v4
+setSocket(getSocket());
+
+subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocket().id));
 
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
-				<Switch>
-					<Route path="/v5">
-						<VersionContext.Provider value={Version.V5}>
-							<V5Root />
-						</VersionContext.Provider>
-					</Route>
-					<Route>
-						<VersionContext.Provider value={Version.V4}>
-							<V4Root />
-						</VersionContext.Provider>
-					</Route>
-				</Switch>
+				<IntlProvider {...getIntlProviderProps()}>
+					<Switch>
+						<Route path="/v5">
+							<VersionContext.Provider value={Version.V5}>
+								<V5Root />
+							</VersionContext.Provider>
+						</Route>
+						<Route>
+							<VersionContext.Provider value={Version.V4}>
+								<V4Root />
+							</VersionContext.Provider>
+						</Route>
+					</Switch>
+				</IntlProvider>
 			</ConnectedRouter>
 		</Provider>,
 		document.getElementById('app'),

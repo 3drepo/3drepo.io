@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Fab from '@material-ui/core/Fab';
-import FormControlBase from '@material-ui/core/FormControl';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import Fab from '@mui/material/Fab';
+import FormControlBase from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
@@ -187,8 +187,8 @@ export const LoaderContainer = styled.div`
 	left: 0;
 `;
 
-export const FormWrapper = styled.div`
-	width: ${(props: any) => props.size === 'sm' ? 400 : 800}px;
+export const FormWrapper = styled.div<{ size: string }>`
+	width: ${({ size }) => size === 'sm' ? 400 : 800}px;
 
 	${ViewerPanelContent} {
 		display: flex;

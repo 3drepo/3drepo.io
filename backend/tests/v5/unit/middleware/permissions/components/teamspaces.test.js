@@ -30,6 +30,7 @@ const TSMiddlewares = require(`${src}/middleware/permissions/components/teamspac
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
+Permissions.isTeamspaceAdmin.mockImplementation((teamspace) => teamspace === 'ts');
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
@@ -59,6 +60,33 @@ const testIsTeamspaceMember = () => {
 	});
 };
 
+const testIsTeamspaceAdmin = () => {
+	describe('isTeamspaceAdmin', () => {
+		test('next() should be called if the user is admin', async () => {
+			const mockCB = jest.fn(() => {});
+			await TSMiddlewares.isTeamspaceAdmin(
+				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('should respond with not authorized if the user is not admin', async () => {
+			const mockCB = jest.fn(() => {});
+			await TSMiddlewares.isTeamspaceAdmin(
+				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
+		});
+	});
+};
+
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
+	testIsTeamspaceAdmin();
 });

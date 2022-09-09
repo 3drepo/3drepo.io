@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 
@@ -60,12 +60,10 @@ export const StyledButtonContainer = styled.div`
 `;
 
 export const DeleteButton = styled(Button)`
-	&& {
-		color: ${COLOR.WHITE_87};
-		background-color:  rgba(234, 57, 57, 0.87);
-	}
+	color: ${COLOR.WHITE_87};
+	background-color:  rgba(234, 57, 57, 0.87);
 
-	&&:hover {
+	&:hover {
 		background-color:  rgba(234, 57, 57, 1);
 	}
 `;
@@ -135,8 +133,8 @@ export const DropzoneMessage = styled.div`
 	box-sizing: border-box;
 `;
 
-export const DropzonePreview = styled.div`
-	background-image: ${(props: any) => props.src ? `url('${(props.src)}')` : 'transparent'};
+export const DropzonePreview = styled.div<{ src?: any }>`
+	background-image: ${({ src }) => src ? `url('${(src)}')` : 'transparent'};
 	width: 100%;
 	height: 100%;
 	background-size: cover;
