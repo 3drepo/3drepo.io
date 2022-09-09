@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket } from '@/v5/store/store.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useState } from 'react';
 import { List, Ticket, Id, Title } from './ticketsList.styles';
 

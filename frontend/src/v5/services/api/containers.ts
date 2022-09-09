@@ -22,7 +22,7 @@ import {
 	MinimumContainer,
 	NewContainer,
 } from '@/v5/store/containers/containers.types';
-import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId, View, ITicketRaw } from '@/v5/store/store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId, View } from '@/v5/store/store.types';
 import api from './default';
 
 export const addFavourites = (
@@ -98,15 +98,6 @@ export const deleteContainer = (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 );
 
-export const fetchContainerTickets = async ({
-	teamspace,
-	projectId,
-	containerId,
-}: TeamspaceProjectAndContainerId): Promise<FetchContainerTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`);
-	return data.tickets;
-};
-
 /**
  * Types
 */
@@ -115,4 +106,3 @@ type UpdateContainerSettingsParams = TeamspaceProjectAndContainerId & { settings
 
 export type FetchContainersResponse = { containers: Array<MinimumContainer> };
 export type FetchContainerViewsResponse = { views: View[] };
-export type FetchContainerTicketsResponse = { tickets: ITicketRaw[] };

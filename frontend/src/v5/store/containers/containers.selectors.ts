@@ -48,9 +48,3 @@ export const selectContainerById = createSelector(
 	(_, id) => id,
 	(containers, id): IContainer | null => containers.find((container) => (container._id === id)),
 );
-
-export const selectContainerTickets = createSelector(
-	selectContainers,
-	selectContainerById,
-	(_, container) => container.tickets || [],
-);
