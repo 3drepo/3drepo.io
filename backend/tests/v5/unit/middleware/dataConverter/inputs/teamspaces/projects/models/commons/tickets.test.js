@@ -235,7 +235,7 @@ const testValidateUpdateTicket = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
-		test('Should call next and set safetibase module props if user wants to update safetibase module', async () => {
+		test('Should call next and after setting safetibase module props if user wants to update safetibase module', async () => {
 			const safetiBaseProp1 = generateRandomString();
 			const safetiBaseProp2 = generateRandomString();
 			const fn = jest.fn();
@@ -271,8 +271,6 @@ const testValidateUpdateTicket = () => {
 				/* eslint-enable no-param-reassign */
 				await next();
 			});
-
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
