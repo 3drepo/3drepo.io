@@ -82,7 +82,7 @@ const templateWithRequiredProp = {
 	properties: [{
 		name: ServiceHelper.generateRandomString(),
 		type: propTypes.TEXT,
-		required: true
+		required: true,
 	}],
 };
 
@@ -93,7 +93,7 @@ const ticketTemplates = [
 	ServiceHelper.generateTemplate(true),
 	templateWithAllModulesAndPresetEnums,
 	templateWithImage,
-	templateWithRequiredProp
+	templateWithRequiredProp,
 ];
 
 const requiredProp = templateWithRequiredProp.properties[0];
@@ -114,7 +114,7 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 		ServiceHelper.db.createTemplates(teamspace, ticketTemplates),
-		ServiceHelper.db.createTicket(teamspace, project.id, modelWithTemplates._id, ticket)
+		ServiceHelper.db.createTicket(teamspace, project.id, modelWithTemplates._id, ticket),
 	]);
 };
 const testGetAllTemplates = () => {
@@ -235,7 +235,7 @@ const testGetTicketResource = () => {
 		let resourceID;
 
 		beforeAll(async () => {
-			const ticket = {
+			const tick = {
 				title: ServiceHelper.generateRandomString(),
 				type: templateWithImage._id,
 				properties: {
@@ -243,7 +243,7 @@ const testGetTicketResource = () => {
 				},
 			};
 			const endpoint = addTicketRoute(users.tsAdmin.apiKey);
-			const res = await agent.post(endpoint).send(ticket);
+			const res = await agent.post(endpoint).send(tick);
 			ticketID = res.body._id;
 
 			const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticketID);
@@ -260,9 +260,9 @@ const testGetTicketResource = () => {
 			['the user does not have access to the federation', templates.notAuthorized, undefined, undefined, undefined, undefined, users.noProjectAccess.apiKey],
 			['the ticket does not exist', templates.fileNotFound, undefined, undefined, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
 			['the resource does not exist', templates.fileNotFound, undefined, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-		])('Error checks', (desc, expectedOutput, projectId, modelId, ticket, resource, key) => {
+		])('Error checks', (desc, expectedOutput, projectId, modelId, tick, resource, key) => {
 			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
-				const endpoint = route(key, projectId, modelId, ticket ?? ticketID, resource ?? resourceID);
+				const endpoint = route(key, projectId, modelId, tick ?? ticketID, resource ?? resourceID);
 
 				const res = await agent.get(endpoint).expect(expectedOutput.status);
 				expect(res.body.code).toEqual(expectedOutput.code);
@@ -326,17 +326,17 @@ const testGetTicket = () => {
 				},
 			],
 		};
-		let ticket; let
+		let tick; let
 			ticketWithDepData;
 		beforeAll(async () => {
 			await ServiceHelper.db.createTemplates(teamspace, [templateToUse]);
-			ticket = ServiceHelper.generateTicket(templateToUse);
+			tick = ServiceHelper.generateTicket(templateToUse);
 			const endpoint = addTicketRoute(users.tsAdmin.apiKey);
 
-			const res = await agent.post(endpoint).send(ticket);
-			ticket._id = res.body._id;
+			const res = await agent.post(endpoint).send(tick);
+			tick._id = res.body._id;
 
-			ticketWithDepData = cloneDeep(ticket);
+			ticketWithDepData = cloneDeep(tick);
 
 			ticketWithDepData.properties[deprecatedPropName] = ServiceHelper.generateRandomString();
 			ticketWithDepData.modules[moduleName][deprecatedPropName] = ServiceHelper.generateRandomString();
@@ -350,7 +350,7 @@ const testGetTicket = () => {
 				[`modules.${deprecatedModule}`]: ticketWithDepData.modules[deprecatedModule],
 			};
 
-			await updateOne(teamspace, 'tickets', { _id: stringToUUID(ticket._id) }, { $set: depFieldsToAdd });
+			await updateOne(teamspace, 'tickets', { _id: stringToUUID(tick._id) }, { $set: depFieldsToAdd });
 		});
 
 		describe.each([
@@ -363,23 +363,23 @@ const testGetTicket = () => {
 			['the ticket does not exist', templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
 		])('Error checks', (desc, expectedOutput, projectId, modelId, ticketId, key) => {
 			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
-				const endpoint = getTicketRoute(key, projectId, modelId, ticketId ?? ticket._id);
+				const endpoint = getTicketRoute(key, projectId, modelId, ticketId ?? tick._id);
 				const res = await agent.get(endpoint).expect(expectedOutput.status);
 				expect(res.body.code).toEqual(expectedOutput.code);
 			});
 		});
 
 		test('Should get ticket with valid id', async () => {
-			const endpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, ticket._id);
+			const endpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tick._id);
 			const { body: ticketOut } = await agent.get(endpoint).expect(templates.ok.status);
-			const expectedTicket = cloneDeep(ticket);
+			const expectedTicket = cloneDeep(tick);
 			expectedTicket.number = ticketOut.number;
 			expectedTicket.properties = { ...ticketOut.properties, ...expectedTicket.properties };
 			expect(ticketOut).toEqual(expectedTicket);
 		});
 
 		test('Should get ticket along with deprecated fields if showDeprecated is set to true', async () => {
-			const endpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, ticket._id);
+			const endpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tick._id);
 			const { body: ticketOut } = await agent.get(`${endpoint}&showDeprecated=true`).expect(templates.ok.status);
 			const expectedTicket = cloneDeep(ticketWithDepData);
 			expectedTicket.number = ticketOut.number;
@@ -394,7 +394,7 @@ const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTempl
 const testUpdateTicket = () => {
 	describe.each([
 		['the user does not have a valid session', false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
+		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
 		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
 		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
 		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, undefined, users.tsAdmin.apiKey],
@@ -410,13 +410,13 @@ const testUpdateTicket = () => {
 
 			const res = await agent.patch(endpoint).send(payloadChanges).expect(expectedStatus);
 
-			if (success) {				
+			if (success) {
 				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey,
 					project.id, modelWithTemplates._id, existingTicket._id);
-				const res = await agent.get(getEndpoint).expect(templates.ok.status);	
-				expect(res.body.properties).toHaveProperty('Updated at');
-				delete res.body.properties['Updated at']; 
-				expect({...res.body}).toEqual({...existingTicket, ...payloadChanges});
+				const updatedTicket = await agent.get(getEndpoint).expect(templates.ok.status);
+				expect(updatedTicket.body.properties).toHaveProperty('Updated at');
+				delete updatedTicket.body.properties['Updated at'];
+				expect({ ...updatedTicket.body }).toEqual({ ...existingTicket, ...payloadChanges });
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}

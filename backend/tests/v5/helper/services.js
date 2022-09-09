@@ -149,14 +149,14 @@ db.createTemplates = (teamspace, data = []) => {
 	return DbHandler.insertMany(teamspace, 'templates', toInsert);
 };
 
-db.createTicket = (teamspace, project, model, ticket) => {	
-	const formattedTicket = { 
-		...ticket, 
+db.createTicket = (teamspace, project, model, ticket) => {
+	const formattedTicket = {
+		...ticket,
 		_id: stringToUUID(ticket._id),
-		type: stringToUUID(ticket.type), 
-		project: stringToUUID(project), 
-		teamspace, 
-		model,		
+		type: stringToUUID(ticket.type),
+		project: stringToUUID(project),
+		teamspace,
+		model,
 	};
 	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
 };

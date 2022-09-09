@@ -29,7 +29,7 @@ const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket
 
 	const removeFiles = (templateProperties, oldProperties, updatedProperties) => {
 		templateProperties.forEach(({ type, name }) => {
-			let oldProp; 
+			let oldProp;
 			if (type === propTypes.IMAGE) {
 				oldProp = oldProperties[name];
 			} else if (type === propTypes.VIEW) {
