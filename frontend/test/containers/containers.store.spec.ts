@@ -23,7 +23,6 @@ import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.t
 import { revisionsMockFactory } from '../revisions/revisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
-import { ticketMockFactory } from '../store.helpers';
 
 describe('Containers: store', () => {
 	let dispatch, getState;
@@ -125,15 +124,6 @@ describe('Containers: store', () => {
 			expect(containerFromState.revisionsCount).toEqual(newContainer.revisionsCount + 1);
 			expect(containerFromState.latestRevision).toEqual(newRevision.tag);
 			expect(containerFromState.lastUpdated).toEqual(newRevision.timestamp);
-		});
-
-		it('should update the tickets', () => {
-			const ticket = ticketMockFactory();
-			const newContainer = createAndAddContainerToStore();
-			dispatch(ContainersActions.fetchContainerTicketsSuccess(projectId, newContainer._id, [ticket]));
-			const containerFromState = selectContainerById(getState(), newContainer._id);
-
-			expect(containerFromState.tickets[0]).toEqual(ticket);
 		});
 	});
 

@@ -16,7 +16,7 @@
  */
 
  import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { ITicket } from '@/v5/store/store.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 
 export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
@@ -26,8 +26,6 @@ export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
 	properties: {
 		owner: faker.random.word(),
 		defaultView: EMPTY_VIEW,
-		createdAt: faker.datatype.datetime(),
-		dueDate: faker.datatype.datetime(),
 		pin: [],
 		status: faker.random.arrayElement(['None', 'Low', 'Medium', 'High']),
 		priority : faker.random.arrayElement(['Open', 'In progress', 'For approval', 'Closed', 'Void']),

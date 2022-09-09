@@ -331,30 +331,5 @@ describe('Federations: sagas', () => {
 			expect(onError).toHaveBeenCalled();
 		})
 	})
-
-	describe('fetchTickets', () => {
-		const tickets = [];
-		it('should call fetchFederationTickets endpoint', async () => {
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`)
-				.reply(200, { tickets });
-
-			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.fetchFederationTickets(teamspace, projectId, federationId))
-				.put(FederationsActions.fetchFederationTicketsSuccess(projectId, federationId, tickets))
-				.silentRun();
-		})
-
-		it('should call deleteFederation endpoint with 404 and open alert modal', async () => {
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`)
-				.reply(404);
-
-			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.fetchFederationTickets(teamspace, projectId, federationId))
-				.put.like(alertAction('trying to fetch federation tickets'))
-				.silentRun();
-		})
-	})
 })
 
