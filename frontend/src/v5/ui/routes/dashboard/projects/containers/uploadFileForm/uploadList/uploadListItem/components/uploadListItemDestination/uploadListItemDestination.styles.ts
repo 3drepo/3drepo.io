@@ -25,7 +25,8 @@ export const Autocomplete = styled(AutocompleteBase)`
 	}
 `;
 
-export const DestinationInput = styled(FormTextField)<{ neworexisting: string }>`
+export type NewOrExisting = '' | 'new' | 'existing';
+export const DestinationInput = styled(FormTextField)<{ neworexisting: NewOrExisting }>`
 	margin: 0;
 	border: none;
 	border-radius: 6px;

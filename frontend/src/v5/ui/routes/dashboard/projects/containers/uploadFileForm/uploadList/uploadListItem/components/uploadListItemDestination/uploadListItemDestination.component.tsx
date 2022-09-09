@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { useFormContext } from 'react-hook-form';
@@ -24,14 +24,14 @@ import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { Autocomplete, DestinationInput } from './uploadListItemDestination.styles';
+import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
-import { UnavailableContainer } from './options/unavailableContainer/unavailableContainer.component';
+import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
 import { OptionsBox } from './options';
 
 interface IUploadListItemDestination {
-	onChange: (option) => void;
+	onValueChange: (option) => void;
 	control?: any;
 	errors?: any;
 	disabled?: boolean;
@@ -47,14 +47,18 @@ const emptyOption = prepareSingleContainerData({
 	role: '',
 	isFavourite: false,
 });
-const filter = createFilterOptions<IContainer>({ trim: true });
+const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
+const NO_OPTIONS_TEXT = formatMessage({
+	id: 'uploads.destination.noOptions',
+	defaultMessage: 'Start typing to create a new Container.',
+});
 
 export const UploadListItemDestination = ({
 	control,
 	errors,
 	disabled = false,
 	className,
-	onChange,
+	onValueChange,
 	defaultValue,
 	containersNamesInUse,
 	setContainersNamesInUse,
@@ -66,123 +70,134 @@ export const UploadListItemDestination = ({
 	const processingContainersNames = containers
 		.filter((container) => !canUploadToBackend(container.status))
 		.map(({ name }) => name);
-	const [newOrExisting, setNewOrExisting] = useState(() => {
-		if (value.name) {
-			return containers.find((c) => c.name === value.name) ? 'existing' : 'new';
+	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
+	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>(() => {
+		if (defaultValue) {
+			return containers.find((c) => c.name === defaultValue) ? 'existing' : 'new';
 		}
 		return '';
 	});
 	const { getValues } = useFormContext();
-	const forceUpdate = useCallback(() => {
-		const containerNamesInModal = getValues().uploads.map((upload) => upload.containerName.trim()).filter(Boolean);
-		if (containerNamesInModal) {
-			setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
-		}
-	}, []);
-	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
 
 	const errorMessage = errors.containerName?.message;
 
-	const onAutocompleteChange = (_, newValue: IContainer) => {
-		setValue(newValue || emptyOption);
-		onChange(newValue || emptyOption);
-		if (!newValue) {
-			setNewOrExisting('');
-			forceUpdate();
-		} else {
-			setNewOrExisting(!newValue._id ? 'new' : 'existing');
-		}
-		setDisableClearable(!newValue);
+	const onFocus = () => {
+		const containerNamesInModal = getValues('uploads')
+			.map(({ containerName }) => containerName.trim())
+			.filter(Boolean)
+			.filter((name) => name !== value.name);
+		setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 	};
 
-	const onAutocompleteInputChange = (_, name: string) => {
-		if (name === value.name) onChange(value);
+	const onChange = (_, newValue: IContainer) => {
+		setDisableClearable(!newValue);
+		if (!newValue) {
+			setNewOrExisting('');
+		} else {
+			setNewOrExisting(newValue._id === '' ? 'new' : 'existing');
+		}
+
+		const newValueOrEmptyOption = newValue ? {
+			...newValue,
+			name: newValue.name.trim(),
+		} : emptyOption;
+
+		setValue(newValueOrEmptyOption);
+		onValueChange(newValueOrEmptyOption);
+	};
+
+	const onBlur = () => {
+		setContainersNamesInUse(containersNamesInUse.concat(value.name));
 	};
 
 	const getFilterOptions = (options: IContainer[], params) => {
-		let filtered: IContainer[] = filter(options, params);
-		const { inputValue } = params;
-
-		const isExisting = options.some((option: IContainer) => inputValue === option.name);
-		filtered = filtered.filter((x) => x.name !== value.name);
+		const inputValue = params.inputValue.trim();
 		if (containersNamesInUse.length === containers.length && !inputValue) {
-			filtered = [];
-		}
-		if (inputValue !== '' && !isExisting) {
-			filtered = [{
-				...emptyOption,
-				name: inputValue,
-			}, ...filtered];
+			// all the containers have been allocated already
+			return [];
 		}
 
-		return filtered;
+		const filteredOptions = getFilteredContainersOptions(options, params)
+			.filter((c) => c.name !== value.name);
+
+		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
+		if (inputValue && !containerNameExists) {
+			// create an extra option to transform into a
+			// "add new container" OR "name already used" option
+			filteredOptions.unshift({
+				...emptyOption,
+				name: inputValue.trim(),
+			});
+		}
+		return filteredOptions;
 	};
 
-	const optionIsUsed = ({ name }: IContainer) => (
-		containersNamesInUse.includes(name.trim())
-	);
+	const optionIsUsed = ({ name }: IContainer) => {
+		const trimmedName = name.trim();
+		if (trimmedName === value.name) return false;
+		return containersNamesInUse.includes(trimmedName);
+	};
 
 	const nameAlreadyExists = (name) => containersNamesInUse.concat(federationsNames).includes(name.trim());
 
-	const getOptionDisabled = (option: IContainer) => !!option.name && optionIsUsed(option);
-
 	const getRenderOption = (optionProps, option: IContainer) => {
-		if (option._id || optionIsUsed(option)) {
+		const trimmedName = option?.name?.trim();
+
+		if (option?._id === '') {
+			// option is an extra
+			if (nameAlreadyExists(trimmedName)) {
+				return (<AlreadyUsedName {...optionProps} />);
+			}
+
+			if (!errorMessage && !containers.map(({ name }) => name).includes(trimmedName)) {
+				return (<NewContainer containerName={trimmedName} {...optionProps} />);
+			}
+		}
+
+		// option is an existing container
+		if (option._id || trimmedName === value.name) {
 			return (
 				<ExistingContainer
-					inUse={optionIsUsed(option)}
 					container={option}
 					latestRevision={option.latestRevision}
+					inUse={optionIsUsed(option)}
 					{...optionProps}
 				/>
 			);
 		}
-
-		const { name } = option;
-		if (nameAlreadyExists(name)) {
-			return (<UnavailableContainer {...optionProps} />);
-		}
-
-		if (name && !nameAlreadyExists(name) && !errorMessage) {
-			return (<NewContainer containerName={name} {...optionProps} />);
-		}
-
 		return (<></>);
 	};
 
 	return (
 		<Autocomplete
-			value={value}
+			className={className}
 			disableClearable={disableClearable}
-			onChange={onAutocompleteChange}
-			onInputChange={onAutocompleteInputChange}
-			onOpen={forceUpdate}
-			options={containers}
+			disabled={disabled}
 			filterOptions={getFilterOptions}
-			getOptionLabel={(option: IContainer) => option.name}
+			getOptionDisabled={optionIsUsed}
+			getOptionLabel={({ name }: IContainer) => name}
+			ListboxComponent={OptionsBox}
+			noOptionsText={NO_OPTIONS_TEXT}
+			onBlur={onBlur}
+			onChange={onChange}
+			onFocus={onFocus}
+			options={containers}
+			renderOption={getRenderOption}
+			value={value}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
+					{...params}
+					{...props}
+					neworexisting={newOrExisting}
 					control={control}
 					formError={errors.containerName}
 					name="containerName"
-					neworexisting={newOrExisting}
-					{...params}
-					{...props}
 					InputProps={{
 						...InputProps,
 						startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
 					}}
 				/>
 			)}
-			getOptionDisabled={getOptionDisabled}
-			renderOption={getRenderOption}
-			ListboxComponent={OptionsBox}
-			noOptionsText={formatMessage({
-				id: 'uploads.destination.noOptions',
-				defaultMessage: 'Start typing to create a new Container.',
-			})}
-			className={className}
-			disabled={disabled}
 		/>
 	);
 };

@@ -56,7 +56,15 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
 	const [containersNamesInUse, setContainersNamesInUse] = useState([]);
-	const { control, formState: { errors }, setValue, trigger, watch, setError } = useForm<UploadItemFields>({
+	const {
+		control,
+		formState: { errors },
+		getValues,
+		setValue,
+		trigger,
+		watch,
+		setError,
+	} = useForm<UploadItemFields>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
@@ -79,8 +87,11 @@ export const UploadListItem = ({
 			setValue(key, conversion[key]);
 			updateValue(key);
 		});
-		trigger('containerName');
 	};
+
+	useEffect(() => {
+		if (getValues('containerName')) trigger('containerName');
+	}, [watch('containerName')]);
 
 	useEffect(() => {
 		trigger('revisionTag');
@@ -108,7 +119,7 @@ export const UploadListItem = ({
 				errors={errors}
 				control={control}
 				defaultValue={defaultValues.containerName}
-				onChange={onDestinationChange}
+				onValueChange={onDestinationChange}
 				containersNamesInUse={containersNamesInUse}
 				setContainersNamesInUse={setContainersNamesInUse}
 			/>

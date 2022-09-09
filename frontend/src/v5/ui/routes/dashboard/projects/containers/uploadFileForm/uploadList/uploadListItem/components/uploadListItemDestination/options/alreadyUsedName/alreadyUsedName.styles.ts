@@ -15,14 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { UnavailableContainerOption } from './unavailableContainer.styles';
+import styled from 'styled-components';
 
-export const UnavailableContainer = () => (
-	<UnavailableContainerOption>
-		<FormattedMessage
-			id="uploads.destination.name.error.alreadyExists"
-			defaultMessage="This name is already used within this project"
-		/>
-	</UnavailableContainerOption>
-);
+export const AlreadyUsedNameContainer = styled.div`
+	color: ${({ theme }) => theme.palette.error.main};
+	padding: 12px;
+`;
