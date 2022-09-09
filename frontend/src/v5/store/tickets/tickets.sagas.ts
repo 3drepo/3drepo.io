@@ -16,30 +16,30 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-// import * as API from '@/v5/services/api';
+import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsTypes, TicketsActions, FetchModelTicketsAction } from './tickets.redux';
 import { fakeTickets } from './deleteMeWhenTicketApiWork';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-// import { isFederation } from './tickets.helpers';
  
 export function* fetchModelTickets({
-	// teamspace,
-	// projectId,
+	teamspace,
+	projectId,
 	modelId,
+	isFederation,
 }: FetchModelTicketsAction) {
 	try {
-		alert("calling sagas")
-		// TODO - uncomment after endpoint is ready
-		// const fetchTickets = isFederation(modelId)
-		// 	? API.Tickets.fetchFederationTickets
-		// 	: API.Tickets.fetchContainerTickets;
-		// const tickets = yield fetchTickets({ teamspace, projectId, modelId });
-		const tickets = fakeTickets;
+		// TODO - uncomment after endpoint is  (ALSO FIX TESTS!!)
+		const fetchTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
+		const tickets = yield fetchTickets({ teamspace, projectId, modelId });
+		// const tickets = fakeTickets;
 		yield put(TicketsActions.fetchModelTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'ticekts.fetchTickets.error', defaultMessage: 'trying to fetch model tickets' }),
+			currentActions: formatMessage(
+				{ id: 'ticekts.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
 			error,
 		}));
 	}
