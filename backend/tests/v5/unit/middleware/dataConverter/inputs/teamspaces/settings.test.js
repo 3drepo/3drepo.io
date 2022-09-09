@@ -542,7 +542,7 @@ const testCheckTicketExists = () => {
 				{ properties: 1, modules: 1, config: 1 });
 
 			expect(next).not.toHaveBeenCalled();
-			expect(req.ticketData).toBeUndefined();
+			expect(req.ticketData).toBe(ticket);
 			expect(req.templateData).toBeUndefined();
 			expect(Responder.respond).toHaveBeenCalledWith(
 				req, res, templates.templateNotFound,

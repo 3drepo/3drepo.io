@@ -77,6 +77,15 @@ const templateWithImage = {
 	}],
 };
 
+const templateWithRequiredProp = {
+	...ServiceHelper.generateTemplate(),
+	properties: [{
+		name: ServiceHelper.generateRandomString(),
+		type: propTypes.TEXT,
+		required: true
+	}],
+};
+
 const ticketTemplates = [
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
@@ -84,9 +93,11 @@ const ticketTemplates = [
 	ServiceHelper.generateTemplate(true),
 	templateWithAllModulesAndPresetEnums,
 	templateWithImage,
+	templateWithRequiredProp
 ];
 
-const ticket = ServiceHelper.generateTicket(templateWithImage);
+const requiredProp = templateWithRequiredProp.properties[0];
+const ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -378,33 +389,34 @@ const testGetTicket = () => {
 	});
 };
 
-const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId = ticket._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
+const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 
 const testUpdateTicket = () => {
 	describe.each([
-		// ['the user does not have a valid session', false, templates.notLoggedIn],
-		// ['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
-		// ['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
-		// ['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-		// ['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, undefined, users.tsAdmin.apiKey],
-		// ['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
-		// ['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
-		
-		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
-		// ['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
-		// ['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey],
-		// ['the update has a template that contains all preset modules, preset enums and configs', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
-	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, ticketId, key, payloadChanges = {}) => {
+		['the user does not have a valid session', false, templates.notLoggedIn],
+		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
+		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+		['the container does not exist', false, templates.containerNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+		['the container provided is a federation', false, templates.containerNotFound, project.id, fed._id, undefined, users.tsAdmin.apiKey],
+		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [requiredProp.name]: null } }],
+		['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey, { title: ServiceHelper.generateRandomString() }],
+	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, existingTicket = ticket, key, payloadChanges = {}) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-			const endpoint = updateTicketRoute(key, projectId, modelId, ticketId);
+			const endpoint = updateTicketRoute(key, projectId, modelId, existingTicket._id);
 
 			const res = await agent.patch(endpoint).send(payloadChanges).expect(expectedStatus);
 
 			if (success) {				
 				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey,
-					project.id, modelWithTemplates._id, res.body._id);
-				await agent.get(getEndpoint).expect(templates.ok.status);
+					project.id, modelWithTemplates._id, existingTicket._id);
+				const res = await agent.get(getEndpoint).expect(templates.ok.status);	
+				expect(res.body.properties).toHaveProperty('Updated at');
+				delete res.body.properties['Updated at']; 
+				expect({...res.body}).toEqual({...existingTicket, ...payloadChanges});
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}
@@ -420,10 +432,10 @@ describe('E2E routes/teamspaces/projects/containers/tickets', () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 
-	// testGetAllTemplates();
-	// testGetTemplateDetails();
-	// testAddTicket();
-	// testGetTicket();
-	// testGetTicketResource();
+	testGetAllTemplates();
+	testGetTemplateDetails();
+	testAddTicket();
+	testGetTicket();
+	testGetTicketResource();
 	testUpdateTicket();
 });

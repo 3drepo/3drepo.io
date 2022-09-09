@@ -77,6 +77,15 @@ const templateWithImage = {
 	}],
 };
 
+const templateWithRequiredProp = {
+	...ServiceHelper.generateTemplate(),
+	properties: [{
+		name: ServiceHelper.generateRandomString(),
+		type: propTypes.TEXT,
+		required: true
+	}],
+};
+
 const ticketTemplates = [
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
@@ -84,7 +93,11 @@ const ticketTemplates = [
 	ServiceHelper.generateTemplate(true),
 	templateWithAllModulesAndPresetEnums,
 	templateWithImage,
+	templateWithRequiredProp
 ];
+
+const requiredProp = templateWithRequiredProp.properties[0];
+const ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -101,6 +114,7 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 		ServiceHelper.db.createTemplates(teamspace, ticketTemplates),
+		ServiceHelper.db.createTicket(teamspace, project.id, modelWithTemplates._id, ticket)
 	]);
 };
 const testGetAllTemplates = () => {
@@ -375,6 +389,41 @@ const testGetTicket = () => {
 	});
 };
 
+const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
+
+const testUpdateTicket = () => {
+	describe.each([
+		['the user does not have a valid session', false, templates.notLoggedIn],
+		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined,undefined , users.nobody.apiKey],
+		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, undefined, users.tsAdmin.apiKey],
+		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [requiredProp.name]: null } }],
+		['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey, { title: ServiceHelper.generateRandomString() }],
+	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, existingTicket = ticket, key, payloadChanges = {}) => {
+		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+			const endpoint = updateTicketRoute(key, projectId, modelId, existingTicket._id);
+
+			const res = await agent.patch(endpoint).send(payloadChanges).expect(expectedStatus);
+
+			if (success) {				
+				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey,
+					project.id, modelWithTemplates._id, existingTicket._id);
+				const res = await agent.get(getEndpoint).expect(templates.ok.status);	
+				expect(res.body.properties).toHaveProperty('Updated at');
+				delete res.body.properties['Updated at']; 
+				expect({...res.body}).toEqual({...existingTicket, ...payloadChanges});
+			} else {
+				expect(res.body.code).toEqual(expectedOutput.code);
+			}
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/federations/tickets', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -388,4 +437,5 @@ describe('E2E routes/teamspaces/projects/federations/tickets', () => {
 	testAddTicket();
 	testGetTicket();
 	testGetTicketResource();
+	testUpdateTicket();
 });
