@@ -295,30 +295,4 @@ describe('Containers: sagas', () => {
 			expect(onError).toBeCalled();
 		})
 	})
-
-	describe('fetchTickets', () => {
-		const tickets = [];
-
-		it('should call fetchContainerTickets endpoint', async () => {
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`)
-				.reply(200, { tickets });
-
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerTickets(teamspace, projectId, containerId))
-				.put(ContainersActions.fetchContainerTicketsSuccess(projectId, containerId, tickets))
-				.silentRun();
-		})
-
-		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`)
-				.reply(404);
-
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerTickets(teamspace, projectId, containerId))
-				.put.like(alertAction('trying to fetch container tickets'))
-				.silentRun();
-		})
-	})
 })
