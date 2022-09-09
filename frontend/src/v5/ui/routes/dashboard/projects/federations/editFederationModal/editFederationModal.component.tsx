@@ -73,6 +73,7 @@ export const EditFederationModal = ({
 			onSubmit={saveChanges}
 			isValid={includedContainers.length > 0}
 			maxWidth="lg"
+			hideHorizontalScroll={false}
 			{...otherProps}
 		>
 			<EditFederation
