@@ -84,7 +84,7 @@ export function* deleteApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
-export default function* AuthSaga() {
+export default function* CurrentUserSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.UPDATE_PERSONAL_DATA, updatePersonalData);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
