@@ -117,7 +117,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
 				<FormProvider {...personalFormData}>
-					<TabPanel value={PERSONAL_TAB} $zeroPadding>
+					<TabPanel value={PERSONAL_TAB} $personalTab>
 						<EditProfilePersonalTab
 							alreadyExistingEmails={alreadyExistingEmails}
 							setAlreadyExistingEmails={setAlreadyExistingEmails}

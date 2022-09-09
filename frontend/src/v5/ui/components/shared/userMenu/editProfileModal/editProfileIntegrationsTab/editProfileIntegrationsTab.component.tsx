@@ -40,7 +40,7 @@ export const EditProfileIntegrationsTab = ({
 				label={(
 					<ShareTextFieldLabel>
 						<FormattedMessage
-							id="editProfile.apiKey"
+							id="editProfile.form.apiKey"
 							defaultMessage="API KEY"
 						/>
 					</ShareTextFieldLabel>
@@ -52,13 +52,13 @@ export const EditProfileIntegrationsTab = ({
 			<ButtonsContainer>
 				<Button variant="outlined" color="primary" onClick={generateApiKey}>
 					<FormattedMessage
-						id="editProfile.generateApiKey"
+						id="editProfile.form.generateApiKey"
 						defaultMessage="Generate"
 					/>
 				</Button>
 				<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!apiKey}>
 					<FormattedMessage
-						id="editProfile.deleteApiKey"
+						id="editProfile.form.deleteApiKey"
 						defaultMessage="Delete"
 					/>
 				</Button>
