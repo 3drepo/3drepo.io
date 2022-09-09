@@ -66,7 +66,7 @@ export const UploadFileForm = ({
 	const methods = useForm<UploadFieldArray>({
 		mode: 'onBlur',
 		resolver: yupResolver(UploadsSchema),
-		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name)},
+		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name) },
 	});
 	const {
 		control,
