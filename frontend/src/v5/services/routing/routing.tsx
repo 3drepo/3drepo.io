@@ -17,13 +17,17 @@
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { Route, useHistory, useLocation } from 'react-router-dom';
+import { Route as BaseRoute, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { LOGIN_PATH, VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
+import { ProjectsHooksSelectors } from '../selectorsHooks/projectsSelectors.hooks';
+import { ContainersHooksSelectors } from '../selectorsHooks/containersSelectors.hooks';
+import { FederationsHooksSelectors } from '../selectorsHooks/federationsSelectors.hooks';
+import { formatMessage } from '../intl';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
@@ -76,6 +80,8 @@ export const viewerRoute = (
 };
 
 interface RouteProps {
+	computedMatch?: any;
+	title?: string;
 	path?: string;
 	exact?: boolean;
 	children?: any;
@@ -100,6 +106,49 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	}
 
 	return children;
+};
+
+const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
+const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
+
+const truncateValue = (str = '', max = 10) => {
+	let truncatedStr = str.substring(0, max);
+	if (str.length > truncatedStr.length) truncatedStr += '...';
+	return truncatedStr;
+};
+
+export const Route = ({ title, children, computedMatch: { params }, ...props }: RouteProps) => {
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
+	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
+	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
+	const containerOrFederationName = containerName || federationName || '';
+
+	const parseTitle = (string) => string.replace(/:(\S+)/g, (_, match) => {
+		if (match === 'project') {
+			return truncateValue(projectName) || LOADING_TEXT;
+		}
+		if (match === 'revision') {
+			return params.revision ? `(${truncateValue(params.revision)})` : '';
+		}
+		if (match === 'containerOrFederation') {
+			return truncateValue(containerOrFederationName) || LOADING_TEXT;
+		}
+
+		return truncateValue(params[match]) || '';
+	});
+
+	const titleParsed = title ? parseTitle(title) : '';
+
+	useEffect(() => {
+		if (titleParsed) {
+			document.title = titleParsed;
+		}
+		return () => {
+			document.title = DEFAULT_TITLE;
+		};
+	}, [titleParsed]);
+
+	return <BaseRoute {...props}>{children}</BaseRoute>;
 };
 
 export const AuthenticatedRoute = ({ children, ...props }: RouteProps) => (
