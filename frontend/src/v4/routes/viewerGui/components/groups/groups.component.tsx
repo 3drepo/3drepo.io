@@ -17,6 +17,7 @@
 import { PureComponent, createRef, SyntheticEvent, MouseEvent } from 'react';
 import fileDialog from 'file-dialog';
 
+import { FormattedMessage } from 'react-intl';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -186,7 +187,11 @@ export class Groups extends PureComponent<IProps, IState> {
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justifyContent="space-between">
 				<Summary>
-					{`${this.props.groups.length} groups displayed`}
+					<FormattedMessage
+						id="groups.list.numberOfGroups"
+						defaultMessage="{groups, plural, =0 {No groups displayed} one {# group displayed} other {# groups displayed}}"
+						values={{ groups: this.props.groups.length }}
+					/>
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
