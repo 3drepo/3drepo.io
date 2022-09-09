@@ -60,14 +60,13 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	FederationsActionsDispatchers.fetchFederations(teamspace, project);
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
 		mode: 'onBlur',
 		resolver: yupResolver(UploadsSchema),
-		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations() },
+		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name)},
 	});
 	const {
 		control,
@@ -134,6 +133,7 @@ export const UploadFileForm = ({
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 	useEffect(() => {
 		if (presetFile) addFilesToList({ files: [presetFile], container: presetContainer });
+		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
 	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
