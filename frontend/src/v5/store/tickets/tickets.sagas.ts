@@ -16,23 +16,23 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-import * as API from '@/v5/services/api';
+// import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsTypes, TicketsActions, FetchModelTicketsAction } from './tickets.redux';
 import { fakeTickets } from './deleteMeWhenTicketApiWork';
 import { DialogsActions } from '../dialogs/dialogs.redux';
- 
+
+// TODO - uncomment comments after endpoints are ready (ALSO UCCOMENT tickets.sagas.spec.ts!!)
 export function* fetchModelTickets({
-	teamspace,
-	projectId,
+	// teamspace,
+	// projectId,
 	modelId,
 	isFederation,
 }: FetchModelTicketsAction) {
 	try {
-		// TODO - uncomment after endpoint is  (ALSO FIX TESTS!!)
-		const fetchTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchTickets({ teamspace, projectId, modelId });
-		// const tickets = fakeTickets;
+		// const fetchTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
+		// const tickets = yield fetchTickets({ teamspace, projectId, modelId });
+		const tickets = fakeTickets;
 		yield put(TicketsActions.fetchModelTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
