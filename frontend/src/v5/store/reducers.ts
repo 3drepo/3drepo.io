@@ -23,18 +23,20 @@ import { teamspacesReducer } from '@/v5/store/teamspaces/teamspaces.redux';
 import { usersReducer } from '@/v5/store/users/users.redux';
 import { currentUserReducer } from '@/v5/store/currentUser/currentUser.redux';
 import { authReducer } from '@/v5/store/auth/auth.redux';
-
+import { ticketsReducer } from '@/v5/store/tickets/tickets.redux';
 import { revisionsReducer } from '@/v5/store/revisions/revisions.redux';
+
 // <-- IMPORT MODULE REDUCER -->
 
 export default {
-	dialogsV5: dialogsReducer,
-	teamspaces2: teamspacesReducer,
 	auth2: authReducer,
-	currentUser2: currentUserReducer,
-	projects: projectsReducer,
 	containers: containersReducer,
+	currentUser2: currentUserReducer,
+	dialogsV5: dialogsReducer,
 	federations: federationsReducer,
+	projects: projectsReducer,
 	revisions: revisionsReducer,
+	teamspaces2: teamspacesReducer,
+	tickets: ticketsReducer,
 	users: usersReducer,
 };

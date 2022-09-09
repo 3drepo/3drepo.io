@@ -26,7 +26,6 @@ import {
 	FetchFederationsAction,
 	FetchFederationSettingsAction,
 	FetchFederationStatsAction,
-	FetchFederationsTicketsAction,
 	FetchFederationViewsAction,
 	RemoveFavouriteAction,
 	UpdateFederationContainersAction,
@@ -40,7 +39,6 @@ import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/ser
 import { isEqualWith } from 'lodash';
 import { compByColum } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
-import { fakeTickets } from '../teamspaces/deleteMeWhenTicketApiWork';
 
 export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
 	try {
@@ -225,27 +223,6 @@ export function* updateFederationContainers({
 	}
 }
 
-export function* fetchFederationTickets({
-	// teamspace,
-	projectId,
-	federationId,
-}: FetchFederationsTicketsAction) {
-	try {
-		// TODO - uncomment after endpoint is ready
-		// const rawTickets = yield API.Federations.fetchFederationTickets({
-		// teamspace, projectId, federationId,
-		// });
-		// const tickets = prepareTicketsForFrontend(rawTickets)
-		const tickets = fakeTickets;
-		yield put(FederationsActions.fetchFederationTicketsSuccess(projectId, federationId, tickets));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'federations.fetchTickets.error', defaultMessage: 'trying to fetch federation tickets' }),
-			error,
-		}));
-	}
-}
-
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.CREATE_FEDERATION, createFederation);
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
@@ -257,5 +234,4 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);
-	yield takeLatest(FederationsTypes.FETCH_FEDERATION_TICKETS, fetchFederationTickets);
 }

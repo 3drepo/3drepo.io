@@ -21,7 +21,7 @@ import {
 	FederationStats,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, View, ITicketRaw } from '@/v5/store/store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, View } from '@/v5/store/store.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
 
@@ -109,15 +109,6 @@ export const updateFederationContainers = async ({
 	})
 );
 
-export const fetchFederationTickets = async ({
-	teamspace,
-	projectId,
-	federationId,
-}: TeamspaceProjectAndFederationId): Promise<FetchFederationTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`);
-	return data.tickets;
-};
-
 /**
  * Types
 */
@@ -128,4 +119,3 @@ type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & { settin
 export type CreateFederationResponse = { _id: string };
 export type FetchFederationsResponse = { federations: Array<MinimumFederation> };
 export type FetchFederationViewsResponse = { views: View[] };
-export type FetchFederationTicketsResponse = { tickets: ITicketRaw[] };

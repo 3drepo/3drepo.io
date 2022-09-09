@@ -45,32 +45,3 @@ export type View = {
 	name: string;
 	hasThumbnail: boolean;
 };
-
-// Tickets
-type Priority = 'None' | 'Low' | 'Medium' | 'High';
-type Status = 'Open' | 'In progress' | 'For approval' | 'Closed' | 'Void';
-
-export interface ITicket {
-	_id: string,
-	title: string,
-	number: number,
-	type: string,
-	properties: {
-		owner: string,
-		defaultView: View,
-		createdAt: Date,
-		dueDate: Date,
-		pin: any[]
-		status: Status,
-		priority : Priority,
-		assignes: any[],
-	},
-	modules: any,
-}
-
-export interface ITicketRaw extends Omit<ITicket, 'properties'> {
-	proprties: Omit<ITicket['properties'], 'createdAt' | 'dueDate'> & {
-		createdAt: number;
-		dueDate: number;
-	}
-}

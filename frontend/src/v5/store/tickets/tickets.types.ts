@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as CurrentUser from './currentUser';
-import * as Auth from './auth';
-import * as Teamspaces from './teamspaces';
-import * as Projects from './projects';
-import * as Containers from './containers';
-import * as Federations from './federations';
-import * as Revisions from './revisions';
-import * as Users from './users';
-import * as Tickets from './tickets';
-
-export { Auth, CurrentUser, Teamspaces, Projects, Containers, Federations, Revisions, Users, Tickets };
+export interface ITicket {
+	_id: string,
+	title: string,
+	number: number,
+	type: string,
+	properties: any,
+	modules: any,
+}

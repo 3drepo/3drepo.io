@@ -21,27 +21,18 @@ import { CardContainer, CardHeader, EmptyCardMessage } from '@/v5/ui/components/
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { countBy } from 'lodash';
 import { TicketsList } from './ticketsList/ticketsList.component';
 import { SearchValue, SearchValues, CardContent } from './tickets.styles';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation)?.length === 1;
-	const tickets = isFederation
-		? FederationsHooksSelectors.selectFederationTickets(containerOrFederation)
-		: ContainersHooksSelectors.selectContainerTickets(containerOrFederation);
+	const tickets = TicketsHooksSelectors.selectModelTickets(containerOrFederation);
 
 	useEffect(() => {
-		if (isFederation) {
-			FederationsActionsDispatchers.fetchFederationTickets(teamspace, project, containerOrFederation);
-		} else {
-			ContainersActionsDispatchers.fetchContainerTickets(teamspace, project, containerOrFederation);
-		}
+		TicketsActionsDispatchers.fetchModelTickets(teamspace, project, containerOrFederation);
 	}, [containerOrFederation]);
 
 	const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
