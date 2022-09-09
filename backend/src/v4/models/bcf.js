@@ -715,7 +715,8 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
 								);
 							}
-							if (vpComponents[componentsIdx][componentType][i].Exceptions) {
+							if (vpComponents[componentsIdx][componentType][i].Exceptions &&
+								vpComponents[componentsIdx][componentType][i].Exceptions.Component) {
 								exceptionIfcs = vpComponents[componentsIdx][componentType][i].Exceptions[0].Component.map(component =>
 									parseViewpointComponentIfc(groupDbCol.model, component, ifcToModelMap, isFederation)
 								);
