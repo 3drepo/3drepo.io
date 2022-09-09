@@ -22,17 +22,23 @@ import { useEffect, useState } from 'react';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { countBy } from 'lodash';
-import { TicketsList } from './ticketsList/ticketsList.component';
-import { SearchValue, SearchValues, CardContent } from './tickets.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
+import { isFederation } from '@/v5/store/tickets/tickets.helpers';
+import { TicketsList } from './ticketsList/ticketsList.component';
+import { SearchValue, SearchValues, CardContent } from './tickets.styles';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectModelTickets(containerOrFederation);
 
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchModelTickets(teamspace, project, containerOrFederation);
+		TicketsActionsDispatchers.fetchModelTickets(
+			teamspace,
+			project,
+			containerOrFederation,
+			isFederation(containerOrFederation),
+		);
 	}, [containerOrFederation]);
 
 	const [selectedTypes, setSelectedTypes] = useState<string[]>([]);

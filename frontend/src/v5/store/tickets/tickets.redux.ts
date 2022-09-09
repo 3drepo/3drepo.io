@@ -23,7 +23,7 @@ import { TeamspaceAndProjectId } from '../store.types';
 import { ITicket } from './tickets.types';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
-	fetchModelTickets: ['teamspace', 'projectId', 'modelId'],
+	fetchModelTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchModelTicketsSuccess: ['modelId', 'tickets'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
@@ -32,7 +32,7 @@ export const INITIAL_STATE: ITicketsState = {
 };
 
 export const fetchModelTicketsSuccess = (state, { modelId, tickets }) => {
-	state.ticketsByModelId[modelId].tickets = tickets;
+	state.ticketsByModelId[modelId] = tickets;
 };
 
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
@@ -43,7 +43,7 @@ export interface ITicketsState {
 	ticketsByModelId: Record<string, ITicket[]>;
 }
 
-export type FetchModelTicketsAction = Action<'FETCH_MODEL_TICKETS'> & TeamspaceAndProjectId & { modelId: string };
+export type FetchModelTicketsAction = Action<'FETCH_MODEL_TICKETS'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
 export type FetchModelTicketsSuccessAction = Action<'FETCH_MODEL_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
 
 
@@ -52,6 +52,7 @@ export interface ITicketsActionCreators {
 		teamspace: string,
 		projectId: string,
 		modelId: string,
+		isFederation: boolean,
 	) => FetchModelTicketsAction;
 	fetchModelTicketsSuccess: (
 		modelId: string,
