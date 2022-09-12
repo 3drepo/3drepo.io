@@ -14,28 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import { css } from 'styled-components';
-import { StyledTextField } from '@/v4/routes/viewerGui/components/gis/components/settingsForm/settingsForm.styles';
-import { StyledSelect } from '@/v4/routes/viewerGui/components/gis/gis.styles';
+export const CardContainer = styled.div`
+	display: flex;
+	height: 100%;
+	flex-direction: column;
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	border-radius: 10px;
+	margin-bottom: 20px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_2};
+`;
 
-export default css`
-	#gis-card {
-		${StyledTextField} {
-			margin: 16px 0;
+export const CardHeader = styled.div`
+	${({ theme }) => theme.typography.h3}
+	display: flex;
+	align-items: center;
+	height: 48px;
+	padding: 0 15px;
+	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
+	gap: 4px;
+`;
 
-			.MuiFormHelperText-root {
-				top: 22px;
-			}
-		}
-		${StyledSelect} {
-			[role="button"] {
-				margin: 0;
-				padding: 0 10px;
-			}
-			svg {
-				margin: 0;
-			}
-		}
-	}
+export const CardContentContainer = styled.div`
+	padding: 15px;
 `;

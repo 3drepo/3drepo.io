@@ -15,27 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { css } from 'styled-components';
-import { StyledTextField } from '@/v4/routes/viewerGui/components/gis/components/settingsForm/settingsForm.styles';
-import { StyledSelect } from '@/v4/routes/viewerGui/components/gis/gis.styles';
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from '../icons.component';
+import { getIcons } from '../icons.helper';
 
-export default css`
-	#gis-card {
-		${StyledTextField} {
-			margin: 16px 0;
+export default {
+	title: 'Icons/\\Outlined',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
 
-			.MuiFormHelperText-root {
-				top: 22px;
-			}
-		}
-		${StyledSelect} {
-			[role="button"] {
-				margin: 0;
-				padding: 0 10px;
-			}
-			svg {
-				margin: 0;
-			}
-		}
-	}
-`;
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/outlined/', false, /\.*(svg)/), 'outlined'),
+};

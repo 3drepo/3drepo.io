@@ -15,27 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { css } from 'styled-components';
-import { StyledTextField } from '@/v4/routes/viewerGui/components/gis/components/settingsForm/settingsForm.styles';
-import { StyledSelect } from '@/v4/routes/viewerGui/components/gis/gis.styles';
+import { ScrollArea } from '@controls/scrollArea';
+import { CardContentContainer } from './card.styles';
 
-export default css`
-	#gis-card {
-		${StyledTextField} {
-			margin: 16px 0;
+export const CardContent: typeof ScrollArea = ({ children, ...props }) => (
+	<ScrollArea {...props} autoHide>
+		<CardContentContainer>
+			{children}
+		</CardContentContainer>
 
-			.MuiFormHelperText-root {
-				top: 22px;
-			}
-		}
-		${StyledSelect} {
-			[role="button"] {
-				margin: 0;
-				padding: 0 10px;
-			}
-			svg {
-				margin: 0;
-			}
-		}
-	}
-`;
+	</ScrollArea>
+);

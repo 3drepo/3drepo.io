@@ -73,9 +73,10 @@ export const Subtitle = styled(Typography).attrs({
 	color: ${({ theme }) => hexToOpacity(theme.palette.secondary.lightest, 60)};
 `;
 
-export const FormDialogContent = styled(DialogContent)<{ $smallPadding?: boolean }>`
+export const FormDialogContent = styled(DialogContent)`
 	padding: 27px 58px 65px;
 	display: block;
+	overflow: visible;
 `;
 
 export const FormDialogActions = styled(DialogActions)`

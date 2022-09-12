@@ -110,7 +110,7 @@ export const EditProfilePasswordTab = ({
 				control={control}
 				name="oldPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.oldPassword',
+					id: 'editProfile.form.oldPassword',
 					defaultMessage: 'Current Password',
 				})}
 				type="password"
@@ -121,7 +121,7 @@ export const EditProfilePasswordTab = ({
 				control={control}
 				name="newPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.newPassword',
+					id: 'editProfile.form.newPassword',
 					defaultMessage: 'New Password',
 				})}
 				type="password"
@@ -132,7 +132,7 @@ export const EditProfilePasswordTab = ({
 				control={control}
 				name="confirmPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.confirmPassword',
+					id: 'editProfile.form.confirmPassword',
 					defaultMessage: 'Confirm Password',
 				})}
 				type="password"
@@ -145,7 +145,10 @@ export const EditProfilePasswordTab = ({
 			/>
 			{isSubmitSuccessful && (
 				<SuccessMessage>
-					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
+					<FormattedMessage
+						id="editProfile.form.updatePasswordSuccess"
+						defaultMessage="Your password has been changed successfully."
+					/>
 				</SuccessMessage>
 			)}
 		</>
