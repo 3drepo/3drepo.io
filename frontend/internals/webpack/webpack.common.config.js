@@ -38,6 +38,7 @@ module.exports = (env, options) => ({
 				{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
 				{ from: 'manifest.json', to: '../' },
 				{ from: 'assets/images/**', to: '../' },
+				{ from: 'assets/icons/favicon/*', to: '../' },
 				{ from: 'assets/icons/*', to: '../' },
 				{ from: 'assets/email-resources/*', to: '../' },
 				{ from: 'unity/**', to: '../' },
