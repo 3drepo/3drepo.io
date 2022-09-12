@@ -122,13 +122,14 @@ export const Route = ({ title, children, computedMatch: { params }, ...props }: 
 	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
 	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
 	const containerOrFederationName = containerName || federationName || '';
+	const revisionTag = useSelector(selectCurrentRevision)?.tag || LOADING_TEXT;
 
 	const parseTitle = (string) => string.replace(/:(\S+)/g, (_, match) => {
 		if (match === 'project') {
 			return truncateValue(projectName) || LOADING_TEXT;
 		}
 		if (match === 'revision') {
-			return params.revision ? `(${truncateValue(params.revision)})` : '';
+			return params.revision ? `(${truncateValue(revisionTag)})` : '';
 		}
 		if (match === 'containerOrFederation') {
 			return truncateValue(containerOrFederationName) || LOADING_TEXT;
