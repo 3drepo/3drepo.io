@@ -168,20 +168,11 @@ const updateTicketImageTest = async (isView) => {
 		teamspace, TICKETS_RESOURCES_COL, modPropRef, updateModPropBuffer, meta,
 	);
 	expect(FilesManager.removeFile).toHaveBeenCalledTimes(2);
-
-	const imagePropBuffer = isView
-		? imageTestData.ticket.properties[imageTestData.propName].screenshot
-		: imageTestData.ticket.properties[imageTestData.propName];
-
-	const viewPropBuffer = isView
-		? imageTestData.ticket.modules[imageTestData.moduleName][imageTestData.propName].screenshot
-		: imageTestData.ticket.modules[imageTestData.moduleName][imageTestData.propName];
-
 	expect(FilesManager.removeFile).toHaveBeenCalledWith(
-		teamspace, TICKETS_RESOURCES_COL, imagePropBuffer,
+		teamspace, TICKETS_RESOURCES_COL, imageTestData.propBuffer,
 	);
 	expect(FilesManager.removeFile).toHaveBeenCalledWith(
-		teamspace, TICKETS_RESOURCES_COL, viewPropBuffer,
+		teamspace, TICKETS_RESOURCES_COL, imageTestData.propBuffer,
 	);
 };
 
