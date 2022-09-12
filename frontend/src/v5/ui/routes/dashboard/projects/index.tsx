@@ -17,12 +17,13 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
+import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
 
-import { discardSlash } from '@/v5/services/routing/routing';
+import { discardSlash, Route } from '@/v5/services/routing/routing';
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
+import { formatMessage } from '@/v5/services/intl';
 import { Federations } from './federations';
 import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
@@ -45,22 +46,22 @@ export const ProjectContent = () => {
 					<Route exact path={path}>
 						project content
 					</Route>
-					<Route exact path={`${path}/t/federations`}>
+					<Route title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })} exact path={`${path}/t/federations`}>
 						<Federations />
 					</Route>
-					<Route exact path={`${path}/t/containers`}>
+					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
 						<Containers />
 					</Route>
-					<Route exact path={`${path}/t/tasks`}>
+					<Route title={formatMessage({ id: 'pageTitle.tasks', defaultMessage: ':project - Tasks' })} exact path={`${path}/t/tasks`}>
 						Tasks
 					</Route>
-					<Route exact path={`${path}/t/project_settings`}>
+					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} exact path={`${path}/t/project_settings`}>
 						Project settings
 					</Route>
-					<Route exact path={`${path}/t/project_permissions`}>
+					<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} exact path={`${path}/t/project_permissions`}>
 						<ProjectPermissions />
 					</Route>
-					<Route exact path={`${path}/t/user_permissions`}>
+					<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} exact path={`${path}/t/user_permissions`}>
 						<UserPermissions />
 					</Route>
 					<Route path="*">

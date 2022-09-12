@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
+import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { AuthenticatedRoute, discardSlash } from '@/v5/services/routing/routing';
+import { formatMessage } from '@/v5/services/intl';
+import { AuthenticatedRoute, discardSlash, Route } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
@@ -44,25 +45,25 @@ export const MainRoute = () => {
 			<GlobalStyle />
 			<ViewerCanvas location={{ pathname }} />
 			<Switch>
-				<Route exact path={`${path}/login`}>
+				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={`${path}/login`}>
 					<Login />
 				</Route>
-				<Route exact path={`${path}/signup`}>
+				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup`}>
 					<UserSignup />
 				</Route>
-				<Route exact path={`${path}/register-verify`}>
+				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={`${path}/register-verify`}>
 					<UserVerification />
 				</Route>
-				<Route exact path={`${path}/password-forgot`}>
+				<Route title={formatMessage({ id: 'pageTitle.passwordForgot', defaultMessage: 'Forgotten Password' })} exact path={`${path}/password-forgot`}>
 					<PasswordForgot />
 				</Route>
-				<Route exact path={`${path}/password-change`}>
+				<Route title={formatMessage({ id: 'pageTitle.passwordChange', defaultMessage: 'Change Password' })} exact path={`${path}/password-change`}>
 					<PasswordChange />
 				</Route>
 				<Route exact path={`${path}/(terms|privacy|cookies)`}>
 					<LegalRoutes path={path} />
 				</Route>
-				<AuthenticatedRoute exact path={`${path}/dashboard/`}>
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} exact path={`${path}/dashboard/`}>
 					<TeamspaceSelection />
 				</AuthenticatedRoute>
 				<AuthenticatedRoute exact path={`${path}/dashboard/:teamspace/(t|t/.*)?`}>
@@ -95,7 +96,7 @@ export const MainRoute = () => {
 						</Switch>
 					</DashboardLayout>
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path={VIEWER_ROUTE}>
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>
 						<Viewer />
 					</DashboardViewerLayout>
@@ -103,7 +104,7 @@ export const MainRoute = () => {
 				<AuthenticatedRoute exact path={path}>
 					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path="*">
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
 					<DashboardLayout>
 						<NotFound />
 					</DashboardLayout>
