@@ -37,11 +37,6 @@ export const CopyToClipboardIconContainer = styled.div`
 `;
 
 export const LinkBar = styled(TextField)`
-
-	& > label:not(.Mui-error).Mui-focused {
-		color: ${({ theme }) => theme.palette.base.main};
-	}
-
 	.MuiInputBase-root {
 		${({ disabled }) => !disabled && `
 			cursor: pointer;
@@ -49,28 +44,11 @@ export const LinkBar = styled(TextField)`
 		margin-top: 0;
 		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 
-		&:hover .MuiOutlinedInput-notchedOutline {
-			border-color: ${({ theme }) => theme.palette.base.lightest};
-		} 
-
-		&.Mui-focused {
-			input {
-				color: ${({ theme }) => theme.palette.base.main};
-			}
-			
-			.MuiOutlinedInput-notchedOutline {
-				border-color: ${({ theme }) => theme.palette.base.lightest};
-			}
-		}
 
 		.MuiOutlinedInput-input {
 			pointer-events: none;
 			user-select: none;
 			padding-right: ${9 - SVG_PADDING_IN_PX}px;
-	
-			&:active {
-				color: ${({ theme }) => theme.palette.base.main};
-			}
 		}
 	}
 
@@ -93,9 +71,7 @@ export const CopyToClipboardTooltip = styled(
 			{props.children}
 		</Tooltip>
 	),
-)`
-	margin-top: -${SVG_PADDING_IN_PX}px;
-`;
+)``;
 
 export const CopiedToClipboardTooltip = styled(CopyToClipboardTooltip)`
 	& .MuiTooltip-tooltip {

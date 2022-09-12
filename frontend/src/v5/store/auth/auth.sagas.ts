@@ -48,34 +48,31 @@ export function* login({ username, password }: LoginAction) {
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
 		const data = error.response?.data;
+		const lockoutDuration = Math.round(ClientConfig.loginPolicy.lockoutDuration / 1000 / 60);
 
-		if (data?.status === 400) {
-			const lockoutDuration = Math.round(ClientConfig.loginPolicy.lockoutDuration / 1000 / 60);
-
-			switch (data?.code) {
-				case 'INCORRECT_USERNAME_OR_PASSWORD':
-					yield put(AuthActions.loginFailed(
-						formatMessage({ id: 'auth.login.error.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
-					));
-					break;
-				case 'ALREADY_LOGGED_IN':
-					yield put(AuthActions.authenticate());
-					break;
-				case 'TOO_MANY_LOGIN_ATTEMPTS':
-					yield put(AuthActions.loginFailed(
-						formatMessage(
-							{
-								id: 'auth.login.error.tooManyAttempts',
-								defaultMessage: 'Too many unsuccessful login attempts! Account locked for {time} minutes.',
-							}, { time: lockoutDuration },
-						),
-					));
-					break;
-				default:
-					yield put(AuthActions.loginFailed(error.message));
-					break;
-			}
-		} else yield put(AuthActions.loginFailed(error.message));
+		switch (data?.code) {
+			case 'INCORRECT_USERNAME_OR_PASSWORD':
+				yield put(AuthActions.loginFailed(
+					formatMessage({ id: 'auth.login.error.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
+				));
+				break;
+			case 'ALREADY_LOGGED_IN':
+				yield put(AuthActions.authenticate());
+				break;
+			case 'TOO_MANY_LOGIN_ATTEMPTS':
+				yield put(AuthActions.loginFailed(
+					formatMessage(
+						{
+							id: 'auth.login.error.tooManyAttempts',
+							defaultMessage: 'Too many unsuccessful login attempts! Account locked for {time} minutes.',
+						}, { time: lockoutDuration },
+					),
+				));
+				break;
+			default:
+				// network or unexpected error
+				yield put(AuthActions.loginFailed(null));
+		}
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }

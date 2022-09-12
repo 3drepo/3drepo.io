@@ -21,8 +21,13 @@ const { generateRandomString } = require('../../../helper/services');
 
 const ModelHelper = require(`${src}/utils/helper/models`);
 
+const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
+
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../src/v5/models/tickets');
+const Tickets = require(`${src}/models/tickets`);
 
 jest.mock('../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
@@ -35,40 +40,48 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const testRemoveModelData = () => {
 	describe('Remove model data', () => {
 		test(`should not return with error if deleteModel failed with ${templates.modelNotFound.code}`, async () => {
-			FilesManager.removeAllFilesFromModel.mockResolvedValueOnce();
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.modelNotFound);
 
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
 			const model = generateRandomString();
 
-			await ModelHelper.removeModelData(teamspace, model);
+			await ModelHelper.removeModelData(teamspace, project, model);
 
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				{ teamspace, project, model });
+
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, model);
+			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
 
 			expect(DB.listCollections).toHaveBeenCalledTimes(1);
 			expect(DB.listCollections).toHaveBeenCalledWith(teamspace);
 
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledWith(teamspace, project, model);
+
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, { teamspace, project, model });
+
 			// We mocked listCollections to return empty array, so we shouldn't have removed any collections
 			expect(DB.dropCollection).not.toHaveBeenCalled();
-
-			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, model);
 		});
 
 		test(`should throw error if deleteModel threw an error that was not ${templates.modelNotFound.code}`, async () => {
-			FilesManager.removeAllFilesFromModel.mockResolvedValueOnce();
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.unknown);
 
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
 			const model = generateRandomString();
 
-			await expect(ModelHelper.removeModelData(teamspace, model)).rejects.toEqual(templates.unknown);
+			await expect(ModelHelper.removeModelData(teamspace, project, model)).rejects.toEqual(templates.unknown);
 		});
 	});
 };

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from 'react';
-import { useParams } from 'react-router';
+import { ReactNode, useContext } from 'react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
@@ -29,8 +28,7 @@ import {
 	DashboardListHeaderLabel,
 } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { SearchInput } from '@controls/searchInput';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { SearchInput } from '@controls/search/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
@@ -38,50 +36,37 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { SearchContextType, SearchContext } from '@controls/search/searchContext';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
 	emptyMessage: ReactNode;
-	federations: IFederation[];
 	title: ReactNode;
 	titleTooltips: {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	hasFederations: boolean;
 	showBottomButton?: boolean;
 	onClickCreate: () => void;
-	onFilterQueryChange? : (query: string) => void;
-	filterQuery?: string;
 };
 
 export const FederationsList = ({
 	emptyMessage,
-	federations,
 	title,
 	titleTooltips,
-	filterQuery,
-	onFilterQueryChange,
 	onClickCreate,
 	showBottomButton = false,
-	hasFederations,
 }: IFederationsList): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
+	// eslint-disable-next-line max-len
+	const { items: federations, filteredItems: filteredFederations } = useContext<SearchContextType<IFederation>>(SearchContext);
+	const hasFederations = federations.length > 0;
 
-	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
+	const { sortedList, setSortConfig } = useOrderedList(filteredFederations, DEFAULT_SORT_CONFIG);
 
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
-
-	const setFavourite = (id: string, value: boolean) => {
-		if (value) {
-			FederationsActionsDispatchers.addFavourite(teamspace, project, id);
-		} else {
-			FederationsActionsDispatchers.removeFavourite(teamspace, project, id);
-		}
-	};
 
 	return (
 		<Container>
@@ -92,9 +77,6 @@ export const FederationsList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => onFilterQueryChange('')}
-							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
-							value={filterQuery}
 							placeholder={formatMessage({ id: 'federations.search.placeholder',
 								defaultMessage: 'Search...' })}
 							disabled={isListPending}
@@ -132,19 +114,18 @@ export const FederationsList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((federation, index) => (
+						sortedList.map((federation, index) => (federation.hasStatsPending ? (
+							<SkeletonListItem delay={index / 10} key={federation._id} />
+						) : (
 							<FederationListItem
-								index={index}
 								key={federation._id}
 								federation={federation}
-								filterQuery={filterQuery}
-								onFavouriteChange={setFavourite}
 							/>
-						))
+						)))
 					) : (
 						<DashboardListEmptyContainer>
-							{filterQuery && hasFederations ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							{ hasFederations ? (
+								<DashboardListEmptySearchResults />
 							) : emptyMessage}
 						</DashboardListEmptyContainer>
 					)}

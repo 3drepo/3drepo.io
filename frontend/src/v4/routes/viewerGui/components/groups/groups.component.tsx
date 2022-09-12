@@ -17,6 +17,7 @@
 import { PureComponent, createRef, SyntheticEvent, MouseEvent } from 'react';
 import fileDialog from 'file-dialog';
 
+import { FormattedMessage } from 'react-intl';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -25,6 +26,7 @@ import InvertColors from '@mui/icons-material/InvertColors';
 import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
 
+import { GroupsListComponent } from '@/v5/ui/routes/viewer/groups/groupsList.component';
 import {
 	DEFAULT_OVERRIDE_COLOR,
 	GROUP_PANEL_NAME,
@@ -49,10 +51,10 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
-import { ListContainer, Summary } from '../risks/risks.styles';
+import {  Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { GroupDetails } from './components/groupDetails';
-import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon, GroupActions } from './groups.styles';
+import { GroupsContainer, GroupIcon } from './groups.styles';
 
 interface IProps {
 	viewer: any;
@@ -85,7 +87,6 @@ interface IProps {
 	setShowStandardGroups: (enabled) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
-	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
 	exportGroups: (teamspace, model) => void;
 	importGroups: (teamspace, model, file) => void;
@@ -96,7 +97,14 @@ interface IProps {
 	id?: string	;
 }
 
-export class Groups extends PureComponent<IProps> {
+interface IState {
+	collapse: object;
+}
+
+export class Groups extends PureComponent<IProps, IState> {
+	public state = {
+		collapse: {},
+	};
 
 	get type() {
 		return VIEWER_PANELS.GROUPS;
@@ -152,29 +160,13 @@ export class Groups extends PureComponent<IProps> {
 		);
 	}
 
-	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.props.groups.map((group) => (
-				<GroupListItem
-					{...group}
-					created=""
-					key={group._id}
-					hideThumbnail
-					statusColor={this.getOverriddenColor(group._id, group.color)}
-					highlighted={this.isHighlighted(group)}
-					roleColor={group.color}
-					onItemClick={this.setActiveGroup(group)}
-					onArrowClick={this.handleShowGroupDetails(group)}
-					active={this.isActive(group)}
-					modelLoaded={this.props.isModelLoaded}
-					renderActions={this.renderGroupActions(group)}
-					hasViewPermission={stubTrue}
-					panelName={GROUP_PANEL_NAME}
-					extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-				/>
-		));
-
-		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
-	});
+	public renderGroupsList = renderWhenTrue(() =>
+		<GroupsListComponent
+			groups={this.props.groups}
+			collapse={[this.state.collapse, (collapse) => this.setState({collapse})]}
+			disabled={!this.props.isModelLoaded}
+		/>
+	);
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No groups have been created yet</EmptyStateInfo>
@@ -195,7 +187,11 @@ export class Groups extends PureComponent<IProps> {
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justifyContent="space-between">
 				<Summary>
-					{`${this.props.groups.length} groups displayed`}
+					<FormattedMessage
+						id="groups.list.numberOfGroups"
+						defaultMessage="{groups, plural, =0 {No groups displayed} one {# group displayed} other {# groups displayed}}"
+						values={{ groups: this.props.groups.length }}
+					/>
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
@@ -273,11 +269,6 @@ export class Groups extends PureComponent<IProps> {
 		if (this.props.viewer) {
 		this.props.viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
 		}
-	}
-
-	public getOverriddenColor = (groupId, color) => {
-		const overridden = this.isOverridden(groupId);
-		return overridden ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
 	}
 
 	public handleCloseSearchMode = () => {
@@ -361,10 +352,8 @@ export class Groups extends PureComponent<IProps> {
 		this.props.showGroupDetails(group, this.props.revision);
 	}
 
-	public isOverridden = (groupId) => this.props.colorOverrides.includes(groupId);
-
 	public isHighlighted = (group) => {
-		return Boolean(this.props.highlightedGroups[group._id]);
+		return Boolean(this.props.highlightedGroups.has(group._id));
 	}
 
 	public isActive = (group) => {
@@ -378,46 +367,6 @@ export class Groups extends PureComponent<IProps> {
 		} else {
 			closeDetails();
 		}
-	}
-
-	public handleColorOverride = (group) => (e: SyntheticEvent) => {
-		e.stopPropagation();
-		this.props.toggleColorOverride(group._id);
-	}
-
-	public handleGroupIsolate = (group) => (e: SyntheticEvent) => {
-		e.stopPropagation();
-		this.props.isolateGroup(group);
-	}
-
-	public renderGroupActions = (group) => () => (
-		<GroupActions>
-			<TooltipButton
-				label="Toggle Colour Override"
-				action={this.handleColorOverride(group)}
-				Icon={this.renderTintIcon(group)}
-				disabled={!this.props.isModelLoaded}
-			/>
-			<TooltipButton
-				label="Isolate"
-				action={this.handleGroupIsolate(group)}
-				Icon={Visibility}
-				disabled={!this.props.isModelLoaded}
-			/>
-		</GroupActions>
-	)
-
-	public renderTintIcon = (group) => () => (
-		<StyledIcon color={this.getOverriddenColor(group._id, group.color)}>
-			<InvertColors color="inherit" fontSize="inherit" />
-		</StyledIcon>
-	)
-
-	public renderObjectsNumber = (objectsNumber) => {
-		if (objectsNumber === 1) {
-			return `${objectsNumber} object`;
-		}
-		return `${objectsNumber} objects`;
 	}
 
 	public handleFilterChange = (selectedFilters) => {

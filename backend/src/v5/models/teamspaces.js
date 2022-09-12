@@ -15,16 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { ADD_ONS } = require('./teamspaces.constants');
+const {
+	ADD_ONS,
+	DEFAULT_RISK_CATEGORIES,
+	DEFAULT_TOPIC_TYPES,
+	SUBSCRIPTION_TYPES,
+} = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
-const { topicTypes } = require('./issues.constants');
 
 const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
+
+const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const Teamspace = {};
 
@@ -141,9 +146,17 @@ Teamspace.getMembersInfo = async (teamspace) => {
 	});
 };
 
+Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
+	const currentDate = new Date();
+	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`${SUBSCRIPTION_PATH}.${type}`]: { $exists: true }, [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: null },
+		{ [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: { $gt: currentDate } },
+	]) };
+	return findMany(query, projection);
+};
+
 Teamspace.createTeamspaceSettings = async (teamspace) => {
-	const settings = { _id: teamspace, topicTypes, riskCategories };
-	await db.insertOne(teamspace, 'teamspace', settings);
+	const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES };
+	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
@@ -155,6 +168,13 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+};
+
+Teamspace.getRiskCategories = async (teamspace) => {
+	const { riskCategories } = await db.findOne(
+		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { riskCategories: 1 },
+	);
+	return riskCategories;
 };
 
 module.exports = Teamspace;

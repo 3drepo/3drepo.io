@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty } from 'lodash';
 import { PureComponent } from 'react';
 
@@ -47,6 +48,7 @@ import {
 interface IProps {
 	viewer: any;
 	className?: string;
+	currentTeamspace: string;
 	modelSettings: any;
 	isModelPending: boolean;
 	isPresentationActive: boolean;
@@ -71,6 +73,7 @@ interface IProps {
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
 	fetchData: (teamspace, model) => void;
+	fetchTeamspaces: (username) => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
@@ -112,7 +115,14 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId, presenter }, match: { params }, viewer, leftPanels } = this.props;
+		const {
+			queryParams: { issueId, riskId, presenter },
+			match: { params },
+			viewer,
+			leftPanels,
+			currentTeamspace,
+			fetchTeamspaces,
+		} = this.props;
 
 		viewer.init();
 
@@ -133,6 +143,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		if (presenter) {
 			this.props.joinPresentation(presenter);
 		}
+
+		fetchTeamspaces(currentTeamspace);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -237,6 +249,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 	private panelsMap = {
 		[VIEWER_PANELS.ISSUES]: Issues,
 		[VIEWER_PANELS.RISKS]: Risks,
+		[VIEWER_PANELS.TICKETS]: Tickets,
 		[VIEWER_PANELS.GROUPS]: Groups,
 		[VIEWER_PANELS.VIEWS]: Views,
 		[VIEWER_PANELS.TREE]: Tree,

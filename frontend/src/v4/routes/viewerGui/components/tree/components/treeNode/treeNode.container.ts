@@ -16,6 +16,7 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -44,4 +45,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	zoomToHighlightedNodes: TreeActions.zoomToHighlightedNodes
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(TreeNode);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(TreeNode));

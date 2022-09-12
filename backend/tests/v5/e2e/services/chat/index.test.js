@@ -150,9 +150,11 @@ const testTSAdmin = () => {
 			['should not be able to join someone else\'s notification room (v4)', { account: nobody.user }, ERRORS.UNAUTHORISED],
 			['should be able to join a model room', { teamspace, project: project.id, model: container._id }],
 			['should be able to join a model room (v4)', { account: teamspace, model: container._id }],
-			['should be able to join a model room that doesn\'t exist', { teamspace, project: project.id, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should be able to join a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should be able to join a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a model room that doesn\'t exist', { teamspace, project: project.id, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should be able to join a project room', { teamspace, project: project.id }],
+			['should not be able to join a project room that doesn\'t exist', { teamspace, project: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -171,8 +173,9 @@ const testTSAdmin = () => {
 			['should be able to leave the notification room (v4)', { account: tsAdmin.user }],
 			['should be able to leave a model room', { teamspace, project: project.id, model: container._id }],
 			['should be able to leave a model room (v4)', { account: teamspace, model: container._id }],
-			['should be able to leave a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should be able to leave a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be be able to leave a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should be able to leave a project room', { teamspace, project: project.id }],
+			['should not be be able to leave a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Leave room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -200,7 +203,8 @@ const testNobody = () => {
 		});
 
 		describe.each([
-			['should be not able to join a model room', { teamspace, project: project.id, model: container._id }, ERRORS.ROOM_NOT_FOUND],
+			['should not be not able to join a model room', { teamspace, project: project.id, model: container._id }, ERRORS.ROOM_NOT_FOUND],
+			['should not be not able to join a project room', { teamspace, project: project.id }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -229,6 +233,11 @@ const broadcastErrorTests = () => {
 				broadcastMessage(eventExchange, ServiceHelper.generateRandomString()),
 				broadcastMessage(eventExchange,
 					JSON.stringify({ [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() })),
+				broadcastMessage(eventExchange,
+					JSON.stringify({
+						[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+						internal: true,
+					})),
 			]);
 		});
 	});

@@ -65,6 +65,7 @@ export const VisibilityButton = styled(IconButton)`
 		color: '${COLOR.BLACK_60}';
 		position: absolute;
 		right: -12px;
+		z-index: 1;
 	}
 `;
 
@@ -93,5 +94,7 @@ export const MapName = styled.div`
 `;
 
 export const MapLayers = styled(ViewerPanelContent)`
-	padding: 24px;
+	& > div {
+		padding: 24px;
+	}
 `;

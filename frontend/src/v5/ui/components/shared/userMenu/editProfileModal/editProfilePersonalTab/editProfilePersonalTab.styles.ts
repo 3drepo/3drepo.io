@@ -16,7 +16,11 @@
  */
 
 import styled from 'styled-components';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 
-export const ScrollAreaPadding = styled.div`
-	padding: 30px 58px;
+export const ScrollArea = styled(ScrollAreaBase)`
+	& > :first-child {
+		padding: 30px 58px;
+		box-sizing: border-box;
+	}
 `;

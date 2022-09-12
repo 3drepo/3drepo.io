@@ -20,13 +20,13 @@ export interface IRevision {
 	timestamp: Date;
 	tag: string;
 	author: string;
-	desc: string;
+	desc?: string;
 	void?: boolean;
 }
 
 export interface IUploadStatus {
 	isComplete: boolean;
-	errorMessage: string;
+	errorMessage?: string;
 	progress: number;
 }
 
@@ -64,4 +64,8 @@ export type CreateRevisionPayload = {
 	projectId: string;
 	uploadId: string;
 	body: CreateRevisionBody;
+};
+
+export type IRevisionUpdate = Partial<Omit<IRevision, '_id'>> & {
+	_id: string;
 };

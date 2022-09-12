@@ -24,7 +24,9 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
+import { TERMS_ROUTE, PRIVACY_ROUTE, COOKIES_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -48,9 +50,9 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	hasUnexpectedError: boolean;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
+	formIsSubmitting: boolean;
 };
 
 export const UserSignupFormStepTermsAndSubmit = ({
@@ -58,9 +60,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	hasUnexpectedError,
 	fields,
 	isActiveStep,
+	formIsSubmitting,
 }: UserSignupFormStepTermsAndSubmitProps) => {
 	const DEFAULT_FIELDS: MinimalTermsAndSubmitFormInput = {
 		termsAgreed: false,
@@ -85,18 +87,17 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	});
 
 	const captchaRef = useRef<ReCAPTCHA>();
-	const [submitButtonIsPending, setSubmitButtonIsPending] = useState(false);
+	const [captchaIsPending, setCaptchaIsPending] = useState(false);
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		setSubmitButtonIsPending(true);
 		onSubmitStep();
 	};
 
 	const handleCaptchaChange = async (captcha) => {
 		if (!fields.captcha && captcha) {
-			setSubmitButtonIsPending(true);
+			setCaptchaIsPending(true);
 			updateFields({ captcha });
-			setSubmitButtonIsPending(false);
+			setCaptchaIsPending(false);
 		}
 	};
 
@@ -126,8 +127,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		}
 	}, [formState]);
 
-	useEffect(() => setSubmitButtonIsPending(false), [hasUnexpectedError]);
-
 	return (
 		<>
 			<TermsContainer>
@@ -145,9 +144,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 										<cookiesLink>Cookies Policy</cookiesLink>.
 									`}
 									values={{
-										termsLink: (label) => <Link to="/terms" target="_blank">{label}</Link>,
-										privacyLink: (label) => <Link to="/privacy" target="_blank">{label}</Link>,
-										cookiesLink: (label) => <Link to="/cookies" target="_blank">{label}</Link>,
+										termsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
+										privacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank">{label}</Link>,
+										cookiesLink: (label) => <Link to={COOKIES_ROUTE} target="_blank">{label}</Link>,
 									}}
 								/>
 							</CheckboxMessage>
@@ -177,11 +176,11 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			{ hasUnexpectedError && <UnexpectedError />}
+			<UnhandledErrorInterceptor expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
 			<CreateAccountButton
-				isPending={submitButtonIsPending}
+				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
-				disabled={!formIsValid || !fields.captcha || hasUnexpectedError}
+				disabled={!formIsValid || !fields.captcha}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage

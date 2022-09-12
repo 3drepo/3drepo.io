@@ -280,6 +280,11 @@
 		return collection.createIndex(indexDef);
 	};
 
+	Handler.createIndices = async (database, colName, indicesDef) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.createIndexes(indicesDef);
+	};
+
 	Handler.dropIndex = async (database, colName, indexName) => {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.dropIndex(indexName);
@@ -342,6 +347,11 @@
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;
 		return collection.updateOne(query, data, options);
+	};
+
+	Handler.replaceOne = async function (database, colName, query, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.replaceOne(query, data);
 	};
 
 	Handler.count = async function (database, colName, query, options) {

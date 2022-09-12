@@ -17,7 +17,7 @@
 import { ThemeProvider } from 'styled-components';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
-import { DashboardLayout } from './dashboardViewerLayout.styles';
+import { DashboardLayout } from '../dashboardLayout/dashboardLayout.component';
 
 export const DashboardViewerLayout = ({ children }) => (
 	<DashboardLayout>

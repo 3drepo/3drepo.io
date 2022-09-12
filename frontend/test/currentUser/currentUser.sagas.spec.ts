@@ -25,7 +25,7 @@ import {
 	generateFakeApiKey,
 	generateFakeAvatarFile,
 	generateFakeAvatarUrl,
-	generatePersonlData,
+	generatePersonalData,
 } from './currentUser.fixtures';
 import { spyOnAxiosApiCallWithFile } from '../test.helpers';
 import { mockServer } from '../../internals/testing/mockServer';
@@ -65,12 +65,17 @@ describe('Current User: sagas', () => {
 	})
 
 	describe('updatePersonalData', () => {
-		const userData = generatePersonlData();
+		const userData = generatePersonalData();
 		const avatarFile = generateFakeAvatarFile();
 		const avatarUrl = generateFakeAvatarUrl();
 		const personalData: UpdatePersonalData = { ...userData };
 		const personalDataWithAvatar: UpdatePersonalData = { ...userData, avatarFile };
-		const onError = jest.fn();
+		let onSuccess, onError;
+
+		beforeEach(() => {
+			onSuccess = jest.fn();
+			onError = jest.fn();
+		});
 
 		it('should update user data (without avatar)', async () => {
 			mockServer
@@ -78,11 +83,12 @@ describe('Current User: sagas', () => {
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalData, onError))
+				.dispatch(CurrentUserActions.updatePersonalData(personalData, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
 
@@ -97,13 +103,14 @@ describe('Current User: sagas', () => {
 				.reply(200, { avatarUrl });
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, onError))
+				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }))
 				.put(CurrentUserActions.updateUserSuccess(userData))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 
 			spy.mockClear();
@@ -115,11 +122,12 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData(userData, onError))
+				.dispatch(CurrentUserActions.updatePersonalData(userData, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})
 
@@ -131,18 +139,17 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, onError))
+				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, onSuccess, onError))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
+			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})
 	})
 
 	describe('generateApiKey', () => {
-		const onError = jest.fn();
-
 		it('should generate an API key and update user data', async () => {
 			const apiKey = generateFakeApiKey();
 
@@ -151,62 +158,50 @@ describe('Current User: sagas', () => {
 				.reply(200, apiKey);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey(onError))
+				.dispatch(CurrentUserActions.generateApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess(apiKey))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call error callback when API call errors', async () => {
+		it('should not generate an API key when API call errors', async () => {
 			mockServer
 				.post('/user/key')
-				.reply(400, Error);
+				.reply(400);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.generateApiKey(onError))
+				.dispatch(CurrentUserActions.generateApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-				expect(onError).toHaveBeenCalled();
 		})
 	})
 
 	describe('deleteApiKey', () => {
-		const onError = jest.fn();
-
-		it('should delete an API key and update user data', async () => {
+		it('should delete the API key and update user data', async () => {
 			mockServer
 				.delete('/user/key')
 				.reply(200, null);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey(onError))
+				.dispatch(CurrentUserActions.deleteApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ apiKey: null }))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call error callback when API call errors', async () => {
-			const error = 'Error: Request failed with status code 400';
-
+		it('should delete the API key when API call errors', async () => {
 			mockServer
 				.delete('/user/key')
-				.reply(400, error);
+				.reply(400);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.deleteApiKey(onError))
+				.dispatch(CurrentUserActions.deleteApiKey())
 				.put(CurrentUserActions.setApiKeyIsUpdating(true))
 				.put(CurrentUserActions.setApiKeyIsUpdating(false))
 				.run();
-			
-			expect(onError).toHaveBeenCalled();
 		})
 	})
 });

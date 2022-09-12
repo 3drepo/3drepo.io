@@ -24,7 +24,6 @@ import { DialogsActions } from '../dialogs/dialogs.redux';
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
-	UpdateApiKeyAction,
 	UpdatePersonalDataAction,
 } from './currentUser.redux';
 
@@ -46,6 +45,7 @@ export function* fetchUser() {
 
 export function* updatePersonalData({
 	personalData: { avatarFile, ...restOfPersonalData },
+	onSuccess,
 	onError,
 }: UpdatePersonalDataAction) {
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
@@ -59,31 +59,28 @@ export function* updatePersonalData({
 			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }));
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
+		onSuccess();
 	} catch (error) {
 		onError(error);
 	}
 	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
 
-export function* generateApiKey({ onError }: UpdateApiKeyAction) {
+export function* generateApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		const apiKey = yield API.CurrentUser.generateApiKey();
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
-	} catch (error) {
-		onError(error);
-	}
+	} catch(error) { } // eslint-disable-line
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
-export function* deleteApiKey({ onError }: UpdateApiKeyAction) {
+export function* deleteApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(true));
 	try {
 		yield API.CurrentUser.deleteApiKey();
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
-	} catch (error) {
-		onError(error);
-	}
+	} catch(error) { } // eslint-disable-line
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 

@@ -19,21 +19,22 @@ import { forwardRef, Ref } from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import { IconButtonProps } from '@mui/material';
 import { SpinnerLoader } from '@controls/spinnerLoader';
-import { StyledIconButton } from './chevronButton.styles';
+import { ChevronStyledIconButton } from './chevronButton.styles';
 
 export type IChevronButton = IconButtonProps & {
 	isOn?: boolean;
 	isLoading?: boolean;
+	size?: 'small' | 'medium' | 'large';
 };
 
 export const ChevronButton = forwardRef(
-	({ isOn, isLoading = false, ...props }: IChevronButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
-		<StyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref}>
+	({ isOn, isLoading = false, className, size = 'medium', ...props }: IChevronButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
+		<ChevronStyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref} $size={size}>
 			{isLoading ? (
 				<SpinnerLoader />
 			) : (
 				<ChevronIcon />
 			)}
-		</StyledIconButton>
+		</ChevronStyledIconButton>
 	),
 );

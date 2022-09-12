@@ -15,56 +15,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EditProfileUpdatePasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { useFormContext } from 'react-hook-form';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
 import * as API from '@/v5/services/api';
-import { UnexpectedError } from '@controls/errorMessage/unexpectedError/unexpectedError.component';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { isNetworkError, isPasswordIncorrect } from '@/v5/validation/errors.helpers';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 
-interface IUpdatePasswordInputs {
+export interface IUpdatePasswordInputs {
 	oldPassword: string;
 	newPassword: string;
 	confirmPassword: string;
 }
 
+export const EMPTY_PASSWORDS = {
+	oldPassword: '',
+	newPassword: '',
+	confirmPassword: '',
+};
+
 type EditProfilePasswordTabProps = {
+	incorrectPassword: boolean;
+	setIncorrectPassword: (isIncorrect: boolean) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
 	setSubmitFunction: (fn: Function) => void;
+	unexpectedError: any,
 };
 
 export const EditProfilePasswordTab = ({
+	incorrectPassword,
+	setIncorrectPassword,
 	setIsSubmitting,
 	setSubmitFunction,
+	unexpectedError,
 }: EditProfilePasswordTabProps) => {
-	const EMPTY_PASSWORDS = {
-		oldPassword: '',
-		newPassword: '',
-		confirmPassword: '',
-	};
-	const [unexpectedError, setUnexpectedError] = useState(false);
-	const [expectedError, setExpectedError] = useState(null);
-	const [incorrectPassword, setIncorrectPassword] = useState(false);
-
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, dirtyFields },
+		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
 		trigger,
 		reset,
 		watch,
 		handleSubmit,
-	} = useForm<IUpdatePasswordInputs>({
-		reValidateMode: 'onChange',
-		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
-		defaultValues: EMPTY_PASSWORDS,
-	});
+	} = useFormContext();
 
 	const oldPassword = watch('oldPassword');
 	const newPassword = watch('newPassword');
@@ -72,25 +68,14 @@ export const EditProfilePasswordTab = ({
 
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
-		setUnexpectedError(false);
-		setExpectedError(null);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
-		reset(EMPTY_PASSWORDS, { keepIsSubmitted: true });
+		reset(EMPTY_PASSWORDS);
 	};
 
 	const onSubmitError = (apiError) => {
-		if (isNetworkError(apiError)) {
-			setExpectedError(formatMessage({
-				id: 'editProfile.networkError',
-				defaultMessage: 'Network Error',
-			}));
-			return;
-		}
 		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
-			return;
 		}
-		setUnexpectedError(true);
 	};
 
 	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
@@ -103,20 +88,20 @@ export const EditProfilePasswordTab = ({
 	}, [formIsValid]);
 
 	useEffect(() => {
-		if (incorrectPassword) {
+		if (incorrectPassword && touchedFields.oldPassword) {
 			setIncorrectPassword(false);
 		}
 	}, [oldPassword]);
 
 	// re-trigger validation on oldPassword when incorrect
 	useEffect(() => {
-		if (dirtyFields.oldPassword) {
+		if (oldPassword) {
 			trigger('oldPassword');
 		}
 	}, [incorrectPassword]);
 
 	useEffect(() => {
-		trigger(Object.keys(dirtyFields) as Array<keyof IUpdatePasswordInputs>);
+		trigger(Object.keys(touchedFields) as Array<keyof IUpdatePasswordInputs>);
 	}, [oldPassword, newPassword, confirmPassword]);
 
 	return (
@@ -125,7 +110,7 @@ export const EditProfilePasswordTab = ({
 				control={control}
 				name="oldPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.oldPassword',
+					id: 'editProfile.form.oldPassword',
 					defaultMessage: 'Current Password',
 				})}
 				type="password"
@@ -136,7 +121,7 @@ export const EditProfilePasswordTab = ({
 				control={control}
 				name="newPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.newPassword',
+					id: 'editProfile.form.newPassword',
 					defaultMessage: 'New Password',
 				})}
 				type="password"
@@ -147,18 +132,23 @@ export const EditProfilePasswordTab = ({
 				control={control}
 				name="confirmPassword"
 				label={formatMessage({
-					id: 'editProfile.updatePassword.confirmPassword',
+					id: 'editProfile.form.confirmPassword',
 					defaultMessage: 'Confirm Password',
 				})}
 				type="password"
 				formError={errors.confirmPassword}
 				required
 			/>
-			{unexpectedError && <UnexpectedError />}
-			{expectedError && <ErrorMessage>{expectedError}</ErrorMessage>}
+			<UnhandledError
+				error={unexpectedError}
+				expectedErrorValidators={[isPasswordIncorrect]}
+			/>
 			{isSubmitSuccessful && (
 				<SuccessMessage>
-					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
+					<FormattedMessage
+						id="editProfile.form.updatePasswordSuccess"
+						defaultMessage="Your password has been changed successfully."
+					/>
 				</SuccessMessage>
 			)}
 		</>

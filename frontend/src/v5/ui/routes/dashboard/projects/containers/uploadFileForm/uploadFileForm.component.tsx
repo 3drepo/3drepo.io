@@ -17,36 +17,79 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { useParams } from 'react-router';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Sidebar } from '@controls/sideBar';
-import { ScrollArea } from '@controls/scrollArea';
-import { UploadFieldArray } from '@/v5/store/containers/containers.types';
+import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { Display } from '@/v5/ui/themes/media';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
-import { isEmpty } from 'lodash';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
+import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
-	openState: boolean;
+	presetContainerId?: string;
+	presetFile?: File;
+	open: boolean;
 	onClickClose: () => void;
 };
 
-export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+interface AddFilesProps {
+	files: File[];
+	container?: IContainer;
+}
 
+type UploadModalLabelTypes = {
+	isUploading: boolean;
+	fileCount: number;
+};
+
+const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
+	? {
+		title: formatMessage({
+			id: 'uploads.modal.title.uploading',
+			defaultMessage: '{fileCount, plural, one {Uploading file} other {Uploading files}}',
+		}, { fileCount }),
+		subtitle: formatMessage({
+			id: 'uploads.modal.subtitle.uploading',
+			defaultMessage: '{fileCount, plural, one {Do not close this window until the upload is complete} other {Do not close this window until uploads are complete}}',
+		}, { fileCount }),
+		confirmLabel: formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
+	}
+	: {
+		title: formatMessage({
+			id: 'uploads.modal.title.preparing',
+			defaultMessage: '{fileCount, plural, =0 {Add files for upload} one {Prepare file for upload} other {Prepare files for upload}}',
+		}, { fileCount }),
+		subtitle: formatMessage({
+			id: 'uploads.modal.title.preparing',
+			defaultMessage: '{fileCount, plural, =0 {Drag and drop or browse your computer} other {Select a file to add Container/Revision details}}',
+		}, { fileCount }),
+		confirmLabel: formatMessage({
+			id: 'uploads.modal.buttonText.preparing',
+			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
+		}, { fileCount }),
+	});
+
+export const UploadFileForm = ({
+	presetContainerId,
+	presetFile,
+	open,
+	onClickClose,
+}: IUploadFileForm): JSX.Element => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
@@ -55,14 +98,11 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	});
 	const { control,
 		handleSubmit,
-		formState: { errors, isValid },
+		formState: { isValid },
 		trigger,
 		getValues,
 		setValue,
 		watch,
-		reset,
-		setError,
-		clearErrors,
 	} = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -70,16 +110,9 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		keyName: 'uploadId',
 	});
 
+	const [fileError, setFileError] = useState(false);
 	useEffect(() => {
-		if (!isUploading) reset();
-	}, [isUploading]);
-
-	useEffect(() => {
-		if (fields.some((field) => filesizeTooLarge(field.file))) {
-			setError('uploads', { type: 'custom', message: '' });
-		} else {
-			clearErrors('uploads');
-		}
+		setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
 	}, [fields.length]);
 
 	const DEFAULT_SORT_CONFIG = {
@@ -102,7 +135,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		return noExceedingMax;
 	};
 
-	const processFiles = (files: File[]): void => {
+	const addFilesToList = ({ files, container }: AddFilesProps): void => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
@@ -110,12 +143,12 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				progress: 0,
 				extension: file.name.split('.').slice(-1)[0],
 				revisionTag: parseFilename(file.name),
-				containerName: '',
-				containerId: '',
-				containerUnit: 'mm',
-				containerType: 'Uncategorised',
-				containerCode: '',
-				containerDesc: '',
+				containerName: container?.name || '',
+				containerId: container?._id || '',
+				containerUnit: container?.unit || 'mm',
+				containerType: container?.type || 'Uncategorised',
+				containerCode: container?.code || '',
+				containerDesc: container?.desc || '',
 				revisionDesc: '',
 				importAnimations: false,
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
@@ -124,13 +157,18 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		append(filesToAppend);
 	};
 
+	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
+	useEffect(() => {
+		if (presetFile) addFilesToList({ files: [presetFile], container: presetContainer });
+	}, []);
+
+	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
+
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = Number.isInteger(selectedIndex) && getOriginalIndex(selectedIndex);
+	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
 
-	const onClickEdit = (id: number) => {
-		setSelectedIndex(id);
-	};
+	const onClickEdit = (id: number) => setSelectedIndex(id);
 
 	const onClickDelete = (id: number) => {
 		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
@@ -157,83 +195,70 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	return (
 		<FormProvider {...methods}>
 			<Modal
-				open={openState}
+				open={open}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
-				confirmLabel={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' })
-						: formatMessage({ id: 'uploads.modal.buttonText.preparing', defaultMessage: 'Upload files' })
-				}
-				title={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.title.uploading', defaultMessage: 'Uploading files' })
-						: formatMessage({ id: 'uploads.modal.title.preparing', defaultMessage: 'Prepare files for upload' })
-				}
-				subtitle={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.subtitle.uploading', defaultMessage: 'Do not close this window until uploads are complete' })
-						: formatMessage({ id: 'uploads.modal.subtitle.preparing', defaultMessage: 'Select a file to add Container/Revision details' })
-				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
-				isValid={(isValid && isEmpty(errors) && !isUploading) || (isUploading && allUploadsComplete)}
+				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
-				<Container>
-					<ScrollArea>
+				<UploadsContainer>
+					<UploadsListScroll>
 						<Padding>
-							<div hidden={!fields.length}>
-								<UploadsListHeader
-									onSortingChange={setSortConfig}
-									defaultSortConfig={DEFAULT_SORT_CONFIG}
-								>
-									<DashboardListHeaderLabel key="file" name="file.name" hideWhenSmallerThan={Display.Desktop}>
-										<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="destination" width={352}>
-										<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
-										<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
-										<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-									</DashboardListHeaderLabel>
-								</UploadsListHeader>
-							</div>
 							{!!fields.length && (
-								<UploadList
-									values={sortedList}
-									selectedIndex={selectedIndex}
-									isUploading={isUploading}
-									onClickEdit={(id) => onClickEdit(id)}
-									onClickDelete={(id) => onClickDelete(id)}
-									getOriginalIndex={getOriginalIndex}
-								/>
+								<>
+									<UploadsListHeader
+										onSortingChange={setSortConfig}
+										defaultSortConfig={DEFAULT_SORT_CONFIG}
+									>
+										<DashboardListHeaderLabel key="file" name="file.name" minWidth={122}>
+											<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="destination" width={352}>
+											<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
+											<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+										</DashboardListHeaderLabel>
+										<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
+											<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+										</DashboardListHeaderLabel>
+									</UploadsListHeader>
+									<UploadList
+										values={sortedList}
+										selectedIndex={selectedIndex}
+										isUploading={isUploading}
+										onClickEdit={(id) => onClickEdit(id)}
+										onClickDelete={(id) => onClickDelete(id)}
+										getOriginalIndex={getOriginalIndex}
+									/>
+								</>
 							)}
 							<DropZone
 								message={formatMessage(
 									{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-									{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+									{ MoreLink:
+										(child: string) => (
+											<a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a>
+										),
+									},
 								)}
-								processFiles={(files) => { processFiles(files); }}
+								processFiles={(files) => addFilesToList({ files })}
 								hidden={isUploading}
 							/>
 						</Padding>
-					</ScrollArea>
+					</UploadsListScroll>
 					<Sidebar
-						open={Number.isInteger(selectedIndex) && !isUploading}
+						open={sidebarOpen}
 						onClick={() => setSelectedIndex(null)}
-						noButton={!(Number.isInteger(selectedIndex))}
 					>
 						{
-							Number.isInteger(selectedIndex)
+							sidebarOpen
 								? (
 									<span key={watch(`uploads.${origIndex}.containerName`)}>
 										<SidebarForm
-											value={
-												getValues(`uploads.${origIndex}`)
-											}
+											value={getValues(`uploads.${origIndex}`)}
 											key={sortedList[selectedIndex].uploadId}
 											isNewContainer={
 												!getValues(`uploads.${origIndex}.containerId`)
@@ -252,7 +277,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								: <></>
 						}
 					</Sidebar>
-				</Container>
+				</UploadsContainer>
 			</Modal>
 		</FormProvider>
 	);

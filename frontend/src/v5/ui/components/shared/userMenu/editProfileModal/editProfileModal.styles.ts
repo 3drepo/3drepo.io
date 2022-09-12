@@ -14,23 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import TabBase from '@mui/material/Tab';
+import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
-import { SubmitButton } from '@controls/modal/formModal/formDialog.styles';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 
-export const FormModal = styled(FormModalBase)<{ $isPasswordTab?: boolean}>`
+export const FormModal = styled(FormModalBase)`
 	.MuiDialogContent-root {
 		padding: 0;
 		margin-bottom: 0;
 		min-width: 522px;
 		width: 522px;
-	}
-
-	${SubmitButton} {
-		width: ${({ $isPasswordTab }) => ($isPasswordTab ? 132 : 112)}px;
 	}
 `;
 
@@ -51,10 +47,19 @@ export const TabList = styled(TabListBase)`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	transition: none;
 	padding-left: 17px;
+
+	box-shadow: 0 0 13px -7px;
+	position: relative;
+	z-index: 1;
 `;
 
-export const TabPanel = styled('div')<{ $zeroPadding?: boolean }>`
-	height: 554px;
+export const TabPanel = styled(TabPanelBase)<{ $personalTab?: boolean }>`
 	box-sizing: border-box;
-	${({ $zeroPadding }) => !$zeroPadding && 'padding: 30px 58px'};
+	overflow-x: hidden;
+	height: min(554px, 50vh);
+
+	padding: 30px 58px 48px;
+	${({ $personalTab }) => $personalTab && css`
+		padding: 0;
+	`};
 `;

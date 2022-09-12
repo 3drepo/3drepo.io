@@ -37,7 +37,6 @@ const options = {
 		security: [
 			{ keyAuth: [] },
 		],
-		basePath: '/api/v5',
 	},
 	apis: [`${__dirname}/../../routes/**/*.js`], // files containing annotations as above
 };
@@ -49,6 +48,7 @@ const setupDocEndpoint = (app) => {
 	const uiOptions = {
 		explorer: true,
 	};
+
 	app.use('/docs/openapi.json', (req, res) => res.json(docs));
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };

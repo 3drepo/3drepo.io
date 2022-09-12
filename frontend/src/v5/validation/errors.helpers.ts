@@ -16,6 +16,7 @@
  */
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
 export const getErrorCode = (error: any) => error.response?.data?.code;
+export const getErrorStatus = (error: any) => error.response?.data?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
 
@@ -25,10 +26,11 @@ export const isFileFormatUnsupported = (error: any): boolean => getErrorCode(err
 
 export const isNetworkError = (error: any): boolean => getErrorMessage(error) === 'Network Error';
 
-export const usernameAlreadyExists = (error: any): boolean => (
-	getErrorMessage(error).toLowerCase().includes('username already exists')
-);
+const fieldAlreadyExists = (error: any, field: string): boolean => {
+	const errorMessage = getErrorMessage(error).toLowerCase();
+	return errorMessage.includes(field) && errorMessage.includes('already exists');
+};
 
-export const emailAlreadyExists = (error: any): boolean => (
-	getErrorMessage(error).toLowerCase().includes('email already exists')
-);
+export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
+export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
+export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');

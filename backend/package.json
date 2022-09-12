@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.25.0",
+  "version": "4.27.0",
   "engines": {
     "node": "14.x.x"
   },
@@ -23,6 +23,7 @@
     "run-script": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/index"
   },
   "dependencies": {
+    "@azure/msal-node": "1.11.0",
     "@elastic/elasticsearch": "7.17.0",
     "amqplib": "0.8.0",
     "apidoc": "0.17.7",
@@ -56,6 +57,7 @@
     "mongodb": "3.6.12",
     "multer": "1.4.1",
     "nodemailer": "6.6.3",
+    "openapi-schema-validator": "12.0.0",
     "paypal-rest-sdk": "1.8.1",
     "pug": "3.0.2",
     "serialize-javascript": "4.0.0",

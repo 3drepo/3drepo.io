@@ -24,10 +24,9 @@ import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 export const Container = styled(ViewerPanelContent)`
 	font-size: 13px;
 	color: ${COLOR.BLACK_60};
-	padding: 15px;
 
-	& > * {
-		margin-bottom: 15px;
+	& > :first-child {
+		padding: 15px;
 	}
 
 	${SequenceTasksListItem} {

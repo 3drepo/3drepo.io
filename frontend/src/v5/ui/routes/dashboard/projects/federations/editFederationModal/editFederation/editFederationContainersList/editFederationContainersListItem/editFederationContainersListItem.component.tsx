@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentType } from 'react';
+import { ComponentType, memo } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { DashboardListItemButton, DashboardListItemIcon, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
@@ -23,95 +23,92 @@ import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { DashboardListItemRow } from './editFederationContainersListItem.styles';
 
+export type IconButtonProps = {
+	container: IContainer;
+	isSelected?: boolean;
+};
+
 type EditFederationContainersListItemProps = {
-	index: number;
 	isSelected: boolean;
 	container: IContainer;
 	filterQuery?: string;
-	icon: ComponentType
+	icon: ComponentType<IconButtonProps>;
 	onSelectOrToggleItem: (id: string) => void;
 };
 
-export const EditFederationContainersListItem = ({
-	index,
+export const EditFederationContainersListItem = memo(({
 	icon: Icon,
 	isSelected,
 	container,
 	filterQuery,
 	onSelectOrToggleItem,
-}: EditFederationContainersListItemProps) => {
-	if (container.hasStatsPending) {
-		return <SkeletonListItem delay={index / 10} key={container._id} />;
-	}
-	return (
-		<DashboardListItem
+}: EditFederationContainersListItemProps) => (
+	<DashboardListItem
+		selected={isSelected}
+		key={container._id}
+	>
+		<DashboardListItemRow
 			selected={isSelected}
-			key={container._id}
+			onClick={() => onSelectOrToggleItem(container._id)}
 		>
-			<DashboardListItemRow
-				selected={isSelected}
+			<DashboardListItemIcon>
+				<Icon container={container} isSelected={isSelected} />
+			</DashboardListItemIcon>
+			<DashboardListItemContainerTitle
+				minWidth={116}
+				container={container}
+				isSelected={isSelected}
+				filterQuery={filterQuery}
+				openInNewTab
+			/>
+			<DashboardListItemButton
+				width={186}
 				onClick={() => onSelectOrToggleItem(container._id)}
+				hideWhenSmallerThan={Display.Desktop}
+				tooltipTitle={
+					<FormattedMessage id="modal.editFederation.list.item.revisions.tooltip" defaultMessage="View revisions" />
+				}
 			>
-				<DashboardListItemIcon>
-					<Icon />
-				</DashboardListItemIcon>
-				<DashboardListItemContainerTitle
-					minWidth={116}
-					container={container}
-					isSelected={isSelected}
-					filterQuery={filterQuery}
-					openInNewTab
+				<FormattedMessage
+					id="modal.editFederation.list.item.revisions"
+					defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
+					values={{ count: container.revisionsCount }}
 				/>
-				<DashboardListItemButton
-					width={186}
-					onClick={() => onSelectOrToggleItem(container._id)}
-					hideWhenSmallerThan={Display.Desktop}
-					tooltipTitle={
-						<FormattedMessage id="modal.editFederation.list.item.revisions.tooltip" defaultMessage="View revisions" />
-					}
-				>
-					<FormattedMessage
-						id="modal.editFederation.list.item.revisions"
-						defaultMessage="{count} revisions"
-						values={{ count: container.revisionsCount }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemText
-					width={160}
-					selected={isSelected}
-				>
-					<Highlight search={filterQuery}>
-						{container.code}
-					</Highlight>
-				</DashboardListItemText>
-				<DashboardListItemText
-					width={160}
-					hideWhenSmallerThan={Display.Tablet}
-					selected={isSelected}
-				>
-					<Highlight search={filterQuery}>
-						{container.type}
-					</Highlight>
-				</DashboardListItemText>
-				<DashboardListItemText
-					width={188}
-					selected={isSelected}
-				>
-					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
-				</DashboardListItemText>
-			</DashboardListItemRow>
-			{isSelected && (
-				<RevisionDetails
-					containerId={container._id}
-					revisionsCount={container.revisionsCount}
-					status={container.status}
-				/>
-			)}
-		</DashboardListItem>
-	);
-};
+			</DashboardListItemButton>
+			<DashboardListItemText
+				width={160}
+				selected={isSelected}
+			>
+				<Highlight search={filterQuery}>
+					{container.code}
+				</Highlight>
+			</DashboardListItemText>
+			<DashboardListItemText
+				width={160}
+				hideWhenSmallerThan={Display.Tablet}
+				selected={isSelected}
+			>
+				<Highlight search={filterQuery}>
+					{container.type}
+				</Highlight>
+			</DashboardListItemText>
+			<DashboardListItemText
+				width={188}
+				selected={isSelected}
+			>
+				{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
+			</DashboardListItemText>
+		</DashboardListItemRow>
+		{isSelected && (
+			<RevisionDetails
+				containerId={container._id}
+				revisionsCount={container.revisionsCount}
+				status={container.status}
+			/>
+		)}
+	</DashboardListItem>
+));

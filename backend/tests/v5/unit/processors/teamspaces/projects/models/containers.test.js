@@ -42,7 +42,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
-ModelSettings.deleteModel.mockImplementation((ts, model) => {
+ModelSettings.deleteModel.mockImplementation((ts, project, model) => {
 	if (Number.isInteger(model)) {
 		return Promise.resolve(undefined);
 	}
@@ -343,7 +343,7 @@ const testDeleteContainer = () => {
 			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
 
 			const teamspace = 'teamspace';
-			await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
+			await Containers.deleteContainer(teamspace, 'project', modelId);
 
 			expect(fnList.mock.calls.length).toBe(1);
 			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
@@ -356,7 +356,7 @@ const testDeleteContainer = () => {
 		});
 
 		test('should succeed if file removal fails', async () => {
-			await Containers.deleteContainer('teamspace', 'project', 3, 'tsAdmin');
+			await Containers.deleteContainer('teamspace', 'project', 3);
 		});
 	});
 };

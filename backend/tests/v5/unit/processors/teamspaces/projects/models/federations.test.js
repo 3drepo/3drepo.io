@@ -40,7 +40,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const newFederationId = 'newFederationId';
 ModelSettings.addModel.mockImplementation(() => newFederationId);
-ModelSettings.deleteModel.mockImplementation((ts, model) => {
+ModelSettings.deleteModel.mockImplementation((ts, project, model) => {
 	if (Number.isInteger(model)) {
 		return Promise.resolve(undefined);
 	}

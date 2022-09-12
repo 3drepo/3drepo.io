@@ -22,10 +22,11 @@ import { EllipsisButton } from '@controls/ellipsisButton';
 import { MenuList, Popover } from './ellipsisMenu.styles';
 
 export interface IEllipsisMenu {
+	selected?: boolean;
 	children: JSX.Element[];
 }
 
-export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
+export const EllipsisMenu = ({ selected, children }: IEllipsisMenu): JSX.Element => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
 	const handleClickDropdown = (event: MouseEvent<HTMLButtonElement>) => {
@@ -54,9 +55,11 @@ export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
 					aria-haspopup="true"
 					onClick={(event) => {
 						event.stopPropagation();
+						event.preventDefault();
 						handleClickDropdown(event);
 					}}
 					isOn={Boolean(anchorEl)}
+					variant={selected ? 'secondary' : 'primary'}
 				/>
 			</Tooltip>
 			<Popover

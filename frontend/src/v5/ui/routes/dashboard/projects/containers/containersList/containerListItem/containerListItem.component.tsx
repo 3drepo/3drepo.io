@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Tooltip } from '@mui/material';
+import { useParams } from 'react-router-dom';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,
@@ -25,54 +25,77 @@ import {
 	DashboardListItemText,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import {
+	enableRealtimeContainerRemoved,
+	enableRealtimeContainerUpdateSettings,
+} from '@/v5/services/realtime/container.events';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import {
+	enableRealtimeContainerRevisionUpdate,
+	enableRealtimeNewRevisionUpdate,
+} from '@/v5/services/realtime/revision.events';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
-import { enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
+import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
-
-const MODALS = {
-	share: 'share',
-	containerSettings: 'containerSettings',
-	none: 'none',
-};
+import { IsMainList } from '../../containers.component';
 
 interface IContainerListItem {
-	index: number;
 	isSelected: boolean;
 	container: IContainer;
-	filterQuery: string;
-	onFavouriteChange: (id: string, value: boolean) => void;
 	onSelectOrToggleItem: (id: string) => void;
 }
 
-export const ContainerListItem = ({
-	index,
+export const ContainerListItem = memo(({
 	isSelected,
 	container,
-	filterQuery,
 	onSelectOrToggleItem,
-	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isMainList = useContext(IsMainList);
 
-	if (container.hasStatsPending) {
-		return <SkeletonListItem delay={index / 10} key={container._id} />;
-	}
+	useEffect(() => {
+		if (isMainList) {
+			return combineSubscriptions(
+				enableRealtimeContainerRemoved(teamspace, project, container._id),
+				enableRealtimeContainerUpdateSettings(teamspace, project, container._id),
+				enableRealtimeContainerRevisionUpdate(teamspace, project, container._id),
+				enableRealtimeNewRevisionUpdate(teamspace, project, container._id),
+			);
+		}
+		return null;
+	}, [container._id]);
 
-	useEffect(() => enableRealtimeContainerUpdateSettings(teamspace, project, container._id), [container._id]);
+	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
 
-	const [openModal, setOpenModal] = useState(MODALS.none);
-	const closeModal = () => setOpenModal(MODALS.none);
+	const onChangeFavourite = ({ currentTarget: { checked } }) => {
+		if (checked) {
+			ContainersActionsDispatchers.addFavourite(teamspace, project, container._id);
+		} else {
+			ContainersActionsDispatchers.removeFavourite(teamspace, project, container._id);
+		}
+	};
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
+		const subject = formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
+		const title = formatMessage({ id: 'shareModal.container.title', defaultMessage: 'Share Container' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: container.name,
+			subject,
+			title,
+			link,
+		});
+	};
 
 	return (
 		<DashboardListItem
@@ -86,7 +109,6 @@ export const ContainerListItem = ({
 				<DashboardListItemContainerTitle
 					container={container}
 					isSelected={isSelected}
-					filterQuery={filterQuery}
 				/>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(container._id)}
@@ -98,7 +120,7 @@ export const ContainerListItem = ({
 				>
 					<FormattedMessage
 						id="containers.list.item.revisions"
-						defaultMessage="{count} revisions"
+						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
@@ -106,18 +128,14 @@ export const ContainerListItem = ({
 					selected={isSelected}
 					width={160}
 				>
-					<Highlight search={filterQuery}>
-						{container.code}
-					</Highlight>
+					{container.code}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={188}
 					hideWhenSmallerThan={Display.Tablet}
 					selected={isSelected}
 				>
-					<Highlight search={filterQuery}>
-						{container.type}
-					</Highlight>
+					{container.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={78}
@@ -126,35 +144,19 @@ export const ContainerListItem = ({
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
-					<Tooltip
-						title={
-							container.isFavourite
-								? <FormattedMessage id="containers.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
-								: <FormattedMessage id="containers.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
-						}
-					>
-						<FavouriteCheckbox
-							checked={container.isFavourite}
-							selected={isSelected}
-							onClick={(event) => {
-								event.stopPropagation();
-							}}
-							onChange={(event) => {
-								onFavouriteChange(
-									container._id,
-									!!event.currentTarget.checked,
-								);
-							}}
-						/>
-					</Tooltip>
+					<FavouriteCheckbox
+						checked={container.isFavourite}
+						selected={isSelected}
+						onChange={onChangeFavourite}
+					/>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
 					<ContainerEllipsisMenu
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={() => setOpenModal(MODALS.share)}
-						openContainerSettings={() => setOpenModal(MODALS.containerSettings)}
+						openShareModal={onClickShare}
+						openContainerSettings={() => setContainerSettingsOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -165,20 +167,11 @@ export const ContainerListItem = ({
 					status={container.status}
 				/>
 			)}
-			<ShareModal
-				openState={openModal === MODALS.share}
-				onClickClose={closeModal}
-				title={formatMessage({
-					id: 'ShareModal.component.title',
-					defaultMessage: 'Share Container URL',
-				})}
-				containerOrFederation={container}
-			/>
 			<ContainerSettingsForm
-				open={openModal === MODALS.containerSettings}
+				open={containerSettingsOpen}
 				container={container}
-				onClose={closeModal}
+				onClose={() => setContainerSettingsOpen(false)}
 			/>
 		</DashboardListItem>
 	);
-};
+});

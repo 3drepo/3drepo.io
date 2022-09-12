@@ -21,18 +21,25 @@ const http = require('http');
 
 const { src, srcV4 } = require('./path');
 
-const { createApp } = require(`${srcV4}/services/api`);
+const { createApp: createServer } = require(`${srcV4}/services/api`);
+const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
+const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../../../src/v5/models/users.constants');
+
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
 const queue = {};
@@ -64,7 +71,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
-db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
+db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
 db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
@@ -73,6 +80,7 @@ db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
 			{ permissions: breaking ? undefined : permissions, ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
+		createTeamspaceSettings(teamspace),
 	]);
 };
 
@@ -129,6 +137,18 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
+db.createTemplates = (teamspace, data = []) => {
+	const toInsert = data.map((entry) => {
+		const converted = {
+			...entry,
+			_id: stringToUUID(entry._id),
+		};
+		return converted;
+	});
+
+	return DbHandler.insertMany(teamspace, 'templates', toInsert);
+};
+
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
@@ -164,11 +184,13 @@ db.createAvatar = async (username, type, avatarData) => {
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
-ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
+ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+
+ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -262,6 +284,93 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
+ServiceHelper.generateTemplate = (deprecated) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	code: ServiceHelper.generateRandomString(3),
+	name: ServiceHelper.generateRandomString(),
+	config: {},
+	properties: [
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.DATE,
+			required: true,
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.TEXT,
+			deprecated: true,
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.NUMBER,
+			default: ServiceHelper.generateRandomNumber(),
+		},
+	],
+	modules: [
+		{
+			type: presetModules.SHAPES,
+			deprecated: true,
+			properties: [],
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			properties: [
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.TEXT,
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.NUMBER,
+					default: ServiceHelper.generateRandomNumber(),
+					deprecated: true,
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.NUMBER,
+					default: ServiceHelper.generateRandomNumber(),
+				},
+			],
+		},
+	],
+	...deleteIfUndefined({ deprecated }),
+});
+
+const generateProperties = (propTemplate) => {
+	const properties = {};
+
+	propTemplate.forEach(({ name, deprecated, type }) => {
+		if (deprecated) return;
+		if (type === propTypes.TEXT) {
+			properties[name] = ServiceHelper.generateRandomString();
+		} else if (type === propTypes.DATE) {
+			properties[name] = Date.now();
+		} else if (type === propTypes.NUMBER) {
+			properties[name] = ServiceHelper.generateRandomNumber();
+		}
+	});
+
+	return properties;
+};
+
+ServiceHelper.generateTicket = (template) => {
+	const modules = {};
+	template.modules.forEach(({ name, type, deprecated, properties }) => {
+		if (deprecated) return;
+		const id = name ?? type;
+		modules[id] = generateProperties(properties);
+	});
+
+	const ticket = {
+		type: template._id,
+		title: ServiceHelper.generateRandomString(),
+		properties: generateProperties(template.properties),
+		modules,
+	};
+
+	return ticket;
+};
+
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = {
@@ -309,7 +418,9 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = () => createApp().listen(8080);
+ServiceHelper.app = () => createServer().listen(8080);
+
+ServiceHelper.frontend = () => createFrontend().listen(8080);
 
 ServiceHelper.chatApp = () => {
 	const server = http.createServer();
@@ -371,6 +482,8 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();
 	if (server) await server.close();
+	EventsManager.reset();
+	QueueHandler.close();
 };
 
 module.exports = ServiceHelper;

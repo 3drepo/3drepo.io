@@ -18,7 +18,7 @@
 import { ScrollbarProps } from 'react-custom-scrollbars';
 import { ScrollbarWrapper } from './scrollArea.styles';
 
-type IScrollArea = ScrollbarProps & {
+export type IScrollArea = ScrollbarProps & {
 	variant?: 'base' | 'secondary';
 	as?: React.ElementType;
 	hideHorizontal?: boolean;

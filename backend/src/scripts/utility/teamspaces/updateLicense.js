@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { isValidType, validateSchema } = require(`${v5Path}/middleware/dataConverter/schemas/subscriptions`);
+const { isValidType, validateSchema } = require(`${v5Path}/schemas/subscriptions`);
 const { getSubscriptions, editSubscriptions, removeSubscription } = require(`${v5Path}/models/teamspaces`);
 
 const run = async (teamspace, remove, removeAll, type, collaborators, data, expiryDate) => {

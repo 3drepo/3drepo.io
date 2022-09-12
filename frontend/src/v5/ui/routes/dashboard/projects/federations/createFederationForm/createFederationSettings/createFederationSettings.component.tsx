@@ -22,7 +22,7 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { SectionTitle } from '../../federationSettingsForm/federationSettingsForm.styles';
+import { SectionTitle } from '../../../settingsForm/settingsForm.styles';
 import { HalfWidth } from './createFederationSettings.styles';
 
 export const CreateFederationFormSettings = () => {

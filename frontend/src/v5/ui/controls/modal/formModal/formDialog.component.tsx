@@ -44,10 +44,10 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	isValid?: boolean;
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
-	zeroMargin?: boolean;
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
 	hideSubmitButton?: boolean;
+	hideHorizontalScroll?: boolean;
 }
 
 export const FormModal = (props: IFormModal) => {
@@ -65,10 +65,10 @@ export const FormModal = (props: IFormModal) => {
 		isValid = true,
 		showButtons = true,
 		maxWidth = false,
-		zeroMargin = false,
 		isSubmitting = false,
 		disableClosing = false,
 		hideSubmitButton = false,
+		hideHorizontalScroll = true,
 		...formProps
 	} = props;
 
@@ -98,8 +98,8 @@ export const FormModal = (props: IFormModal) => {
 						<CloseIcon />
 					</CloseButton>
 				</Header>
-				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
-					<FormDialogContent $zeromargin={zeroMargin}>
+				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight hideHorizontal={hideHorizontalScroll}>
+					<FormDialogContent>
 						{children}
 					</FormDialogContent>
 				</ScrollArea>

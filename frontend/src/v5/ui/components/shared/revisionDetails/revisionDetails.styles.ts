@@ -55,7 +55,7 @@ export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
 
 export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
-	padding: 13px 20px 10px 86px;
+	padding: 13px 46px 10px 86px;
 	margin-top: 17px;
 
 	${RevisionsListHeaderLabelStyles.Container} {
