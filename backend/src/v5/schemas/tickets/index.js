@@ -161,10 +161,14 @@ Tickets.processReadOnlyValues = (ticket, user, isNewTicket) => {
 		const safetiBaseProps = modules[presetModules.SAFETIBASE];
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		safetiBaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
+		const levelOfRisk = calculateLevelOfRisk(
 			safetiBaseProps[modProps.RISK_LIKELIHOOD],
 			safetiBaseProps[modProps.RISK_CONSEQUENCE],
 		);
+
+		if (levelOfRisk) {
+			safetiBaseProps[modProps.LEVEL_OF_RISK] = levelOfRisk;
+		}
 
 		const treatedLevel = calculateLevelOfRisk(
 			safetiBaseProps[modProps.TREATED_RISK_LIKELIHOOD],
