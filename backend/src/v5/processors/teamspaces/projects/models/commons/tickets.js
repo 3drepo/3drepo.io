@@ -21,6 +21,7 @@ const FilesManager = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
+const { addTicketLog } = require('../../../../../models/tickets.logs');
 
 const Tickets = {};
 
@@ -111,6 +112,15 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 	const ticketId = oldTicket._id;
 	await updateTicket(teamspace, ticketId, updateData);
 	await storeFiles(teamspace, project, model, ticketId, binaryData);
+	await addTicketLog(teamspace, {
+		teamspace,
+		project,
+		model,
+		ticket: ticketId,
+		author: "",
+		from: oldTicket,
+		to: updateData
+	});
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
