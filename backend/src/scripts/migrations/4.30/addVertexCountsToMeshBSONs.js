@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { count, find, updateOne } = require(`${v5Path}/handler/db`);
+const { bulkWrite, count, find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processModel = async (teamspace, model) => {
@@ -36,20 +36,23 @@ const processModel = async (teamspace, model) => {
 	const spanningMeshVerticesCounts = [];
 	const meshUpdates = [];
 
-	// eslint-disable-next-line camelcase
-	superMeshes.forEach(({ m_map }) => {
+	for (let i = 0; i < superMeshes.length; i++) {
+		// eslint-disable-next-line camelcase
+		const { m_map } = superMeshes[i];
 		if (m_map.length > 1) {
 			// eslint-disable-next-line camelcase
-			meshUpdates.push(...m_map.map(({ map_id, v_from, v_to }) => {
+			for (let j = 0; j < m_map.length; j++) {
+				// eslint-disable-next-line camelcase
+				const { map_id, v_from, v_to } = m_map[j];
 				// eslint-disable-next-line camelcase
 				const verticesCount = v_to - v_from;
-				return updateOne(
-					teamspace,
-					`${model}.scene`,
-					{ _id: map_id },
-					{ $set: { vertices_count: verticesCount } },
-				);
-			}));
+				meshUpdates.push({
+					updateOne: {
+						filter: { _id: map_id },
+						update: { $set: { vertices_count: verticesCount } },
+					},
+				});
+			}
 		} else if (m_map.length === 1) {
 			const idString = UUIDToString(m_map[0].map_id);
 			const verticesCount = m_map[0].v_to - m_map[0].v_from;
@@ -57,17 +60,21 @@ const processModel = async (teamspace, model) => {
 				spanningMeshVerticesCounts[idString] || 0
 			) + verticesCount;
 		}
-	});
+	}
 
 	// eslint-disable-next-line camelcase
-	const singularMeshUpdates = Object.keys(spanningMeshVerticesCounts).map((map_id) => updateOne(
-		teamspace,
-		`${model}.scene`,
-		{ _id: stringToUUID(map_id) },
-		{ $set: { vertices_count: spanningMeshVerticesCounts[map_id] } },
-	));
+	const singularMeshUpdates = Object.keys(spanningMeshVerticesCounts).map((map_id) => ({
+		updateOne: {
+			filter: { _id: stringToUUID(map_id) },
+			update: { $set: { vertices_count: spanningMeshVerticesCounts[map_id] } },
+		},
+	}));
 
-	await Promise.all([...meshUpdates, ...singularMeshUpdates]);
+	try {
+		await bulkWrite(teamspace, `${model}.scene`, [...meshUpdates, ...singularMeshUpdates]);
+	} catch (err) {
+		logger.logError(err);
+	}
 };
 
 const processTeamspace = async (teamspace) => {
