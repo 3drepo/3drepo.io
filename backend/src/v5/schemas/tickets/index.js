@@ -114,7 +114,7 @@ Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const validator = Yup.object().shape({
 		...(isNewTicket ? { title: types.strings.title.required() } : { title: types.strings.title }),
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
-		modules: Yup.object(moduleSchema).default({}),
+		modules: Yup.object(moduleSchema).default(isNewTicket ? {} : undefined),
 		...(isNewTicket ? { type: Yup.mixed().required() } : {}),
 	});
 
@@ -157,7 +157,7 @@ Tickets.processReadOnlyValues = (ticket, user, isNewTicket) => {
 
 	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
 
-	if (modules[presetModules.SAFETIBASE]) {
+	if (modules?.[presetModules.SAFETIBASE]) {
 		const safetiBaseProps = modules[presetModules.SAFETIBASE];
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
