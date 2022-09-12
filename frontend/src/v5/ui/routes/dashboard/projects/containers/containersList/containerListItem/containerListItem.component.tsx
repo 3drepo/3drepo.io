@@ -120,7 +120,7 @@ export const ContainerListItem = memo(({
 				>
 					<FormattedMessage
 						id="containers.list.item.revisions"
-						defaultMessage="{count} revisions"
+						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
