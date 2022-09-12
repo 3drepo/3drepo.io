@@ -20,6 +20,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import Scrollbars from 'react-custom-scrollbars';
 
+import { formatMessage } from '@/v5/services/intl';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -83,7 +84,12 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 			return 'Uploading BCF...';
 		}
 		if (this.props.isModelLoaded) {
-			return `${this.props.items.length} results displayed`;
+			return formatMessage({
+				id: 'reportedItems.numberOfItems',
+				defaultMessage: '{items, plural, =0 {No results displayed} one {# result displayed} other {# results displayed}}',
+			}, {
+				items: this.props.items.length,
+			})
 		}
 		return 'Model is loading';
 	}
