@@ -18,7 +18,7 @@
 const instantiateSystemRoles = require('./instantiateSystemRoles');
 
 const scripts = [
-	{ script: instantiateSystemRoles, desc: 'Adding the system and service roles' },
+	{ script: instantiateSystemRoles, desc: 'Adding the service and system roles' },
 ];
 
 module.exports = scripts;

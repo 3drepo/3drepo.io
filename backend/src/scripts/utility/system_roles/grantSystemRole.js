@@ -60,7 +60,7 @@ const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('username',
 		{
-			describe: 'username to grant the system role to',
+			describe: 'Username (or account email address) to grant the system role to',
 			type: 'string',
 			demandOption: true,
 
