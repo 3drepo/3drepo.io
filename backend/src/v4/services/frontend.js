@@ -38,9 +38,9 @@ module.exports.createApp = function () {
 	const cors = require("cors");
 
 	app.use(compression({ level: 9 }));
-	const publicDir =  __dirname + "/../../../../public";
-	app.use(favicon(`${publicDir}/assets/images/favicon.ico`));
+	app.use(favicon(`${__dirname}/../../../resources/images/favicon.ico`));
 
+	const publicDir =  __dirname + "/../../../../public";
 	app.use(express.static(publicDir));
 
 	app.use("/config", configRoute);
