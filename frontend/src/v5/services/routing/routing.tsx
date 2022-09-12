@@ -22,6 +22,8 @@ import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { LOGIN_PATH, VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
+import { selectCurrentRevision } from '@/v4/modules/model/model.selectors';
+import { useSelector } from 'react-redux';
 import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
 import { ProjectsHooksSelectors } from '../selectorsHooks/projectsSelectors.hooks';
@@ -87,6 +89,51 @@ interface RouteProps {
 	children?: any;
 }
 
+const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
+const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
+
+const truncateValue = (str, max = 12) => {
+	if (!str) return null;
+	let truncatedStr = str.substring(0, max).trim();
+	if (str.length > truncatedStr.length) truncatedStr += '...';
+	return truncatedStr;
+};
+
+export const Route = ({ title, children, computedMatch: { params }, ...props }: RouteProps) => {
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
+	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
+	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
+	const containerOrFederationName = containerName || federationName || '';
+	const revisionTag = useSelector(selectCurrentRevision)?.tag || LOADING_TEXT;
+
+	const PARAM_REGEX = /:(\S+)/g;
+	const parseTitle = (string) => string.replace(PARAM_REGEX, (_, match) => {
+		switch (match) {
+			case 'project':
+				return truncateValue(projectName) || LOADING_TEXT;
+			case 'revision':
+				return params.revision ? `(${truncateValue(revisionTag)})` : '';
+			case 'containerOrFederation':
+				return truncateValue(containerOrFederationName) || LOADING_TEXT;
+			default:
+				return truncateValue(params[match]) || '';
+		}
+	});
+
+	const titleParsed = title ? parseTitle(title) : '';
+
+	useEffect(() => {
+		if (titleParsed) {
+			document.title = titleParsed;
+		}
+		return () => {
+			document.title = DEFAULT_TITLE;
+		};
+	}, [titleParsed]);
+
+	return <BaseRoute {...props}>{children}</BaseRoute>;
+};
+
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
@@ -106,50 +153,6 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	}
 
 	return children;
-};
-
-const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
-const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
-
-const truncateValue = (str = '', max = 10) => {
-	let truncatedStr = str.substring(0, max);
-	if (str.length > truncatedStr.length) truncatedStr += '...';
-	return truncatedStr;
-};
-
-export const Route = ({ title, children, computedMatch: { params }, ...props }: RouteProps) => {
-	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
-	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
-	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
-	const containerOrFederationName = containerName || federationName || '';
-	const revisionTag = useSelector(selectCurrentRevision)?.tag || LOADING_TEXT;
-
-	const parseTitle = (string) => string.replace(/:(\S+)/g, (_, match) => {
-		if (match === 'project') {
-			return truncateValue(projectName) || LOADING_TEXT;
-		}
-		if (match === 'revision') {
-			return params.revision ? `(${truncateValue(revisionTag)})` : '';
-		}
-		if (match === 'containerOrFederation') {
-			return truncateValue(containerOrFederationName) || LOADING_TEXT;
-		}
-
-		return truncateValue(params[match]) || '';
-	});
-
-	const titleParsed = title ? parseTitle(title) : '';
-
-	useEffect(() => {
-		if (titleParsed) {
-			document.title = titleParsed;
-		}
-		return () => {
-			document.title = DEFAULT_TITLE;
-		};
-	}, [titleParsed]);
-
-	return <BaseRoute {...props}>{children}</BaseRoute>;
 };
 
 export const AuthenticatedRoute = ({ children, ...props }: RouteProps) => (
