@@ -216,11 +216,17 @@ const generateSignUpSchema = (isSSO) => {
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
-			const url = `${config.captcha.validateUrl}?secret=${config.captcha.secretKey}&response=${body.captcha}`;
-			const checkCaptcha = post(url);
-			const result = await checkCaptcha;
+			const reqConfig = {
+				params: {
+					secret: config.captcha.secretKey,
+					response: body.captcha,
+				},
+			};
 
-			return result.data.success;
+			const checkCaptcha = post(config.captcha.validateUrl, undefined, reqConfig);
+			const { data } = await checkCaptcha;
+
+			return data.success;
 		})
 		: schema;
 };
