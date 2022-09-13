@@ -329,7 +329,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns the ticket as a json object
+	 *         description: returns an array of tickets
 	 *         content:
 	 *           application/json:
 	 *             schema:

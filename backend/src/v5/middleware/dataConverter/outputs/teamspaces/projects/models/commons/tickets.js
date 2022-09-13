@@ -122,8 +122,8 @@ Tickets.serialiseTicketList = async (req, res) => {
 		const { teamspace } = req.params;
 		const { tickets } = req;
 
-		const idArr = tickets.map(({ type }) => type);
-		const templateIds = new Set(idArr);
+		const templateIdArr = tickets.map(({ type }) => type);
+		const templateIds = new Set(templateIdArr);
 
 		const templateLUT = await getTemplatesDictionary(teamspace, Array.from(templateIds));
 		const outputProms = tickets.map((ticket) => serialiseTicket(teamspace,

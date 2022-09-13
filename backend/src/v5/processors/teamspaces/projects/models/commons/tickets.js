@@ -99,7 +99,9 @@ Tickets.getTicketList = (teamspace, project, model) => {
 
 	};
 
-	return getAllTickets(teamspace, project, model, projection, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+	const sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 };
+
+	return getAllTickets(teamspace, project, model, projection, sort);
 };
 
 module.exports = Tickets;

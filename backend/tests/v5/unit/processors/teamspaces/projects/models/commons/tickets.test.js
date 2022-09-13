@@ -193,7 +193,7 @@ const testGetTicketById = () => {
 
 const testGetTicketList = () => {
 	describe('Get ticket list', () => {
-		test('should call getTicketList in model with the expected projection', async () => {
+		test('should call getAllTickets in model with the expected projection', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
