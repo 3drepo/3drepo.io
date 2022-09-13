@@ -21,7 +21,7 @@ import { getPasswordStrength } from '@/v4/services/validation';
 import { avatarFileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
 import { trimmedString } from '../shared/validators';
 
-export const username = (alreadyExistingUsernames) => trimmedString
+export const username = trimmedString
 	.required(
 		formatMessage({
 			id: 'userSignupForm.username.error.required',
@@ -48,7 +48,9 @@ export const username = (alreadyExistingUsernames) => trimmedString
 			id: 'userRegistration.username.alreadyExisting',
 			defaultMessage: 'This username is already taken',
 		}),
-		(usernameValue) => !alreadyExistingUsernames.includes(usernameValue),
+		(usernameValue, testContext) => (
+			!testContext.options.context.alreadyExistingUsernames.map((u) => u.trim()).includes(usernameValue)
+		),
 	);
 
 export const password = (passwordName = 'Password') => Yup.string()
@@ -119,7 +121,7 @@ export const countryCode = Yup.string()
 		}),
 	);
 
-export const email = (alreadyExistingEmails) => trimmedString
+export const email = trimmedString
 	.email(
 		formatMessage({
 			id: 'validation.email.error.invalid',
@@ -142,7 +144,9 @@ export const email = (alreadyExistingEmails) => trimmedString
 			id: 'validation.email.alreadyExisting',
 			defaultMessage: 'This email is already taken',
 		}),
-		(emailValue) => !alreadyExistingEmails.includes(emailValue),
+		(emailValue, testContext) => (
+			!testContext.options.context.alreadyExistingEmails.map((e) => e.trim()).includes(emailValue)
+		),
 	);
 
 export const avatarFile = Yup.mixed()

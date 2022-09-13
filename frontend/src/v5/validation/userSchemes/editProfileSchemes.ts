@@ -19,10 +19,10 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { firstName, lastName, email, company, countryCode, password, avatarFile } from './validators';
 
-export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({
+export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	firstName,
 	lastName,
-	email: email(alreadyExistingEmails),
+	email,
 	company,
 	countryCode,
 	avatarFile,
