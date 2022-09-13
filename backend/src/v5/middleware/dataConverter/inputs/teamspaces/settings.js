@@ -105,22 +105,6 @@ Settings.validateNewTicketSchema = async (req, res, next) => {
 	}
 };
 
-Settings.checkTicketExists = async (req, res, next) => {
-	const { teamspace, project, ticket } = req.params;
-	const model = req.params.container ?? req.params.federation;
-
-	try {
-		req.ticketData = await getTicketById(teamspace, project, model, ticket,
-			{ type: 1, modules: 1, properties: 1 });
-		req.templateData = await getTemplateById(teamspace, req.ticketData.type,
-			{ properties: 1, modules: 1, config: 1 });
-
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
 Settings.checkTicketTemplateExists = async (req, res, next) => {
 	const { teamspace, template } = req.params;
 	try {

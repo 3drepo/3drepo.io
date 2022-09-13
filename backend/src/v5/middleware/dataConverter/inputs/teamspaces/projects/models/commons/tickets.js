@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { checkTicketExists, checkTicketTemplateExists } = require('../../../settings');
+const { checkTicketTemplateExists } = require('../../../settings');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { processReadOnlyValues, validateTicket } = require('../../../../../../../schemas/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
+const { getTicketById } = require('../../../../../../../models/tickets');
+const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 
 const TicketsMiddleware = {};
 
@@ -62,6 +64,22 @@ const setSafetibaseModValues = (req, res, next) => {
 	}
 
 	next();
+};
+
+const checkTicketExists = async (req, res, next) => {
+	const { teamspace, project, ticket } = req.params;
+	const model = req.params.container ?? req.params.federation;
+
+	try {
+		req.ticketData = await getTicketById(teamspace, project, model, ticket,
+			{ type: 1, modules: 1, properties: 1 });
+		req.templateData = await getTemplateById(teamspace, req.ticketData.type,
+			{ properties: 1, modules: 1, config: 1 });
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
 };
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validate(true)]);
