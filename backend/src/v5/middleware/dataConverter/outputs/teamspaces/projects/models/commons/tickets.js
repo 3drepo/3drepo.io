@@ -73,12 +73,8 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 	});
 };
 
-const serialiseTicket = async (teamspace, ticket, template, stripDeprecated) => {
-	let templateData = template;
-	if (!templateData) {
-		templateData = generateFullSchema(await getTemplateById(teamspace, ticket.type));
-	}
-	const caster = generateCastObject(templateData, stripDeprecated);
+const serialiseTicket = (teamspace, ticket, fullTemplate, stripDeprecated) => {
+	const caster = generateCastObject(fullTemplate, stripDeprecated);
 	return caster.cast(ticket);
 };
 
@@ -98,8 +94,8 @@ Tickets.serialiseTicket = async (req, res) => {
 	try {
 		const { teamspace } = req.params;
 		const { ticket, showDeprecated } = req;
-
-		respond(req, res, templates.ok, await serialiseTicket(teamspace, ticket, undefined, !showDeprecated));
+		const template = generateFullSchema(await getTemplateById(teamspace, ticket.type));
+		respond(req, res, templates.ok, serialiseTicket(teamspace, ticket, template, !showDeprecated));
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}
