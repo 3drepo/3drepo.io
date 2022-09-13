@@ -24,72 +24,41 @@ const { propTypes } = require('../../../../../schemas/tickets/templates.constant
 
 const Tickets = {};
 
-const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket) => {
-	const promises = [];
+const formatResourceProperties = (template, oldTicket, updatedTicket) => {
+	const toRemove = [];
+	const toAdd = [];
 
-	const removeFiles = (templateProperties, oldProperties, updatedProperties) => {
+	const processProps = (templateProperties, oldProperties = {}, updatedProperties) => {
 		templateProperties.forEach(({ type, name }) => {
-			let oldProp;
+			let oldProp, newProp;
 			if (type === propTypes.IMAGE) {
 				oldProp = oldProperties[name];
+				newProp = updatedProperties[name];
 			} else if (type === propTypes.VIEW) {
 				oldProp = oldProperties[name]?.screenshot;
+				newProp = updatedProperties[name]?.screenshot;
 			}
 
-			if (oldProp && updatedProperties[name] !== undefined) {
-				promises.push(FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, oldProp));
+			if (oldProp && newProp !== undefined) {
+				toRemove.push(oldProp);
 			}
-		});
-	};
 
-	removeFiles(template.properties, oldTicket.properties, updatedTicket.properties);
-
-	template.modules.forEach(({ properties, name, type }) => {
-		const id = name ?? type;
-		const oldModule = oldTicket.modules?.[id];
-		const updatedModule = updatedTicket.modules?.[id];
-		if (oldModule && updatedModule) {
-			removeFiles(properties, oldModule, updatedModule);
-		}
-	});
-
-	await Promise.all(promises);
-};
-
-const extractEmbeddedBinary = (ticket, template) => {
-	const binaryData = [];
-
-	const replaceBinaryDataWithRef = (properties, propTemplate) => {
-		propTemplate.forEach(({ type, name }) => {
-			if (properties[name]) {
-				const data = properties[name];
-				if (type === propTypes.IMAGE) {
-					const ref = generateUUID();
-					// eslint-disable-next-line no-param-reassign
-					properties[name] = ref;
-					binaryData.push({ ref, data });
-				} else if (type === propTypes.VIEW && data.screenshot) {
-					const ref = generateUUID();
-					const buffer = data.screenshot;
-					data.screenshot = ref;
-					binaryData.push({ ref, data: buffer });
-				}
+			if (newProp) {
+				const ref = generateUUID();
+				updatedProperties[name] = type === propTypes.IMAGE ? ref : { screenshot: ref };
+				toAdd.push({ ref, data: newProp });
 			}
 		});
 	};
 
-	replaceBinaryDataWithRef(ticket.properties, template.properties);
+	processProps(template.properties, oldTicket?.properties, updatedTicket.properties);
 
 	template.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
-		const module = ticket.modules?.[id];
-
-		if (module) {
-			replaceBinaryDataWithRef(module, properties);
-		}
+		processProps(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
 
-	return binaryData;
+	return { toRemove, toAdd }
 };
 
 const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
@@ -99,19 +68,19 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 );
 
 Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
-	const binaryData = extractEmbeddedBinary(ticket, template);
+	const resourceData = formatResourceProperties(template, undefined, ticket);
 	const res = await addTicket(teamspace, project, model, ticket);
-	await storeFiles(teamspace, project, model, res, binaryData);
+	await storeFiles(teamspace, project, model, res, resourceData.toAdd);
 	return res;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
-	const binaryData = extractEmbeddedBinary(updateData, template);
+	const resourceData = formatResourceProperties(template, oldTicket, updateData);
 	const ticketId = oldTicket._id;
 	await updateTicket(teamspace, ticketId, updateData);
 	await Promise.all([
-		removeExistingFiles(teamspace, template, oldTicket, updateData),
-		storeFiles(teamspace, project, model, ticketId, binaryData)
+		resourceData.toRemove.map(d => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
+		storeFiles(teamspace, project, model, ticketId, resourceData.toAdd)
 	]);
 };
 
