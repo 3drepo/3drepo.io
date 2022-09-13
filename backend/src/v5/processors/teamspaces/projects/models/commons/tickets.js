@@ -106,11 +106,13 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
-	await removeExistingFiles(teamspace, template, oldTicket, updateData);
 	const binaryData = extractEmbeddedBinary(updateData, template);
 	const ticketId = oldTicket._id;
 	await updateTicket(teamspace, ticketId, updateData);
-	await storeFiles(teamspace, project, model, ticketId, binaryData);
+	await Promise.all([
+		removeExistingFiles(teamspace, template, oldTicket, updateData),
+		storeFiles(teamspace, project, model, ticketId, binaryData)
+	]);
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
