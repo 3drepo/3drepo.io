@@ -36,7 +36,8 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 };
 
 Tickets.updateTicket = async (teamspace, ticketId, data) => {
-	const updateObj = { toUpdate: {}, toUnset: {} };
+	const toUpdate = {};
+	const toUnset = {};
 
 	Object.keys(data).forEach((key) => {
 		const value = data[key];
@@ -47,9 +48,9 @@ Tickets.updateTicket = async (teamspace, ticketId, data) => {
 					Object.keys(module).forEach((moduleProp) => {
 						const modulePropValue = module[moduleProp];
 						if (modulePropValue) {
-							updateObj.toUpdate[`modules.${moduleName}.${moduleProp}`] = modulePropValue;
+							toUpdate[`modules.${moduleName}.${moduleProp}`] = modulePropValue;
 						} else {
-							updateObj.toUnset[`modules.${moduleName}.${moduleProp}`] = 1;
+							toUnset[`modules.${moduleName}.${moduleProp}`] = 1;
 						}
 					});
 				});
@@ -57,24 +58,29 @@ Tickets.updateTicket = async (teamspace, ticketId, data) => {
 				Object.keys(value).forEach((propKey) => {
 					const propValue = value[propKey];
 					if (propValue) {
-						updateObj.toUpdate[`properties.${propKey}`] = propValue;
+						toUpdate[`properties.${propKey}`] = propValue;
 					} else {
-						updateObj.toUnset[`properties.${propKey}`] = 1;
+						toUnset[`properties.${propKey}`] = 1;
 					}
 				});
 			} else {
-				updateObj.toUpdate[key] = value;
+				toUpdate[key] = value;
 			}
 		} else {
-			updateObj.toUnset[key] = 1;
+			toUnset[key] = 1;
 		}
 	});
 
-	if (Object.keys(updateObj.toUpdate).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, { $set: updateObj.toUpdate });
+	const updateJson = {};
+	if (Object.keys(toUpdate).length) {
+		updateJson.$set = toUpdate;
 	}
-	if (Object.keys(updateObj.toUnset).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, { $unset: updateObj.toUnset });
+	if (Object.keys(toUnset).length) {
+		updateJson.$unset = toUnset;
+	}
+
+	if (Object.keys(updateJson).length) {
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
 	}
 };
 
