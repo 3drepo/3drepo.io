@@ -20,10 +20,12 @@ const EventManagerConst = {};
 const eventList = [
 	// Groups
 	'NEW_GROUPS', 'UPDATE_GROUP',
-	// Model settngs
-	'NEW_MODEL', 'DELETE_MODEL', 'MODEL_SETTINGS_UPDATE',
+	// Model settings
+	'NEW_MODEL', 'DELETE_MODEL', 'MODEL_SETTINGS_UPDATE',	
 	// Model import (including federation and toy project)
 	'MODEL_IMPORT_FINISHED',
+	// Model Tickets
+	'MODEL_TICKET_UPDATE',
 	// Revisions
 	'NEW_REVISION', 'REVISION_UPDATED',
 	// Queue specific

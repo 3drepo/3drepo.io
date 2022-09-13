@@ -22,6 +22,8 @@ const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constan
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { addTicketLog } = require('../../../../../models/tickets.logs');
+const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 
 const Tickets = {};
 
@@ -109,18 +111,19 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
 	await removeExistingFiles(teamspace, template, oldTicket, updateData);
 	const binaryData = extractEmbeddedBinary(updateData, template);
-	const ticketId = oldTicket._id;
-	await updateTicket(teamspace, ticketId, updateData);
-	await storeFiles(teamspace, project, model, ticketId, binaryData);
-	await addTicketLog(teamspace, {
+	const ticket = oldTicket._id;
+	await updateTicket(teamspace, ticket, updateData);
+	await storeFiles(teamspace, project, model, ticket, binaryData);
+
+	publish(events.MODEL_TICKET_UPDATE, {
 		teamspace,
 		project,
 		model,
-		ticket: ticketId,
+		ticket,
 		author: "",
 		from: oldTicket,
 		to: updateData
-	});
+	})
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

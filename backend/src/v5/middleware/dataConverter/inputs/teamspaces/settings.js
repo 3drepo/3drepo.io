@@ -111,7 +111,7 @@ Settings.checkTicketExists = async (req, res, next) => {
 
 	try {
 		req.ticketData = await getTicketById(teamspace, project, model, ticket,
-			{ type: 1, modules: 1, properties: 1 });
+			{ type: 1, title: 1, modules: 1, properties: 1 });
 		req.templateData = await getTemplateById(teamspace, req.ticketData.type,
 			{ properties: 1, modules: 1, config: 1 });
 
