@@ -55,4 +55,12 @@ Tickets.getTicketById = async (
 	return ticket;
 };
 
+Tickets.getAllTickets = (
+	teamspace,
+	project,
+	model,
+	projection = { teamspace: 0, project: 0, model: 0 },
+	sort,
+) => DbHandler.find(teamspace, TICKETS_COL, { teamspace, project, model }, projection, sort);
+
 module.exports = Tickets;

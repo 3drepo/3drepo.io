@@ -84,7 +84,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Treatment Details', propTypes.LONG_TEXT),
 		createPropertyEntry('Stage', propTypes.TEXT),
 		createPropertyEntry('Type', propTypes.TEXT),
-		createPropertyEntry('Treatment Status', propTypes.ONE_OF, ['Unmitigated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], 'Unmitigated'),
+		createPropertyEntry('Treatment Status', propTypes.ONE_OF, ['Untreated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], 'Untreated'),
 		createPropertyEntry('Treated Risk Likelihood', propTypes.ONE_OF, riskLevelsArr, riskLevels.VERY_LOW),
 		createPropertyEntry('Treated Risk Consequence', propTypes.ONE_OF, riskLevelsArr, riskLevels.VERY_LOW),
 		createPropertyEntry('Treated Level of Risk', propTypes.TEXT, undefined, undefined, true),
