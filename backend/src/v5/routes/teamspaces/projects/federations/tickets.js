@@ -264,11 +264,11 @@ const establishRoutes = () => {
 	 *                     Description:
 	 *                       type: string
 	 *                       description: A detailed description of the ticket
-	 *                       example: "The door way is too narrow for disable access"
+	 *                       example: The door way is too narrow for disable access
 	 *                     CustomProperty1:
 	 *                       type: string
 	 *                       description: Any custom properties in the ticket should be filled in this way
-	 *                       example: "Data1"
+	 *                       example: Data1
 	 *                 modules:
 	 *                   type: object
 	 *                   description: modules within the ticket
@@ -280,7 +280,7 @@ const establishRoutes = () => {
 	 *                         Property1:
 	 *                           type: string
 	 *                           description: Any properties in the module should be filled in this way
-	 *                           example: "Data1"
+	 *                           example: Data1
 	 *
 	 *
 	 *     responses:
@@ -359,7 +359,7 @@ const establishRoutes = () => {
 	 *                 title:
 	 *                   type: string
 	 *                   description: ticket title
-	 *                   example: "Missing door"
+	 *                   example: Missing door
 	 *                 number:
 	 *                   type: number
 	 *                   description: ticket number
@@ -426,7 +426,8 @@ const establishRoutes = () => {
 	 */
 	router.get('/:ticket/resources/:resource', hasReadAccessToFederation, getTicketResource);
 
-	/* @openapi
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
 	 *   patch:
 	 *     description: Update a ticket. The Schema of the payload depends on the ticket template being used
@@ -474,11 +475,11 @@ const establishRoutes = () => {
 	 *                     Description:
 	 *                       type: string
 	 *                       description: A detailed description of the ticket
-	 *                       example: "The door way is too narrow for disable access"
+	 *                       example: The door way is too narrow for disable access
 	 *                     CustomProperty1:
 	 *                       type: string
 	 *                       description: Any custom properties in the ticket should be filled in this way
-	 *                       example: "Data1"
+	 *                       example: Data1
 	 *                 modules:
 	 *                   type: object
 	 *                   description: modules within the ticket
@@ -490,7 +491,7 @@ const establishRoutes = () => {
 	 *                         Property1:
 	 *                           type: string
 	 *                           description: Any properties in the module should be filled in this way
-	 *                           example: "Data1"
+	 *                           example: Data1
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
