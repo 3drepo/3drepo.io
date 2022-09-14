@@ -76,7 +76,8 @@ export const UserSignupFormStepAccount = ({
 	} = useForm<IAccountFormInput>({
 		mode: 'all',
 		reValidateMode: 'onChange',
-		resolver: yupResolver(UserSignupSchemaAccount(alreadyExistingUsernames, alreadyExistingEmails)),
+		resolver: yupResolver(UserSignupSchemaAccount),
+		context: { alreadyExistingUsernames, alreadyExistingEmails },
 		defaultValues: getAccountFields(),
 	});
 
