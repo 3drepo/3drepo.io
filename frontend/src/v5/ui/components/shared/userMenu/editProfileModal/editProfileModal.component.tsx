@@ -80,8 +80,8 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 
 	const personalFormData = useForm<IUpdatePersonalInputs>({
-		mode: 'all',
-		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
+		resolver: yupResolver(EditProfileUpdatePersonalSchema),
+		context: { alreadyExistingEmails },
 		defaultValues: defaultPersonalValues,
 	});
 

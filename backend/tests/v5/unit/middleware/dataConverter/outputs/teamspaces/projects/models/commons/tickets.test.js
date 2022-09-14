@@ -17,7 +17,7 @@
 
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateTemplate, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
+const { generateTemplate, generateTicket, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -56,6 +56,7 @@ const testSerialiseTicketTemplate = () => {
 			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledWith(fullTemplateData, true);
 
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, serialisedTemplateData);
 		});
 
@@ -76,12 +77,14 @@ const testSerialiseTicketTemplate = () => {
 			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledWith(fullTemplateData, false);
 
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, serialisedTemplateData);
 		});
 
 		test('should catch the error and respond gracefully on error', () => {
 			TicketOutputMiddleware.serialiseFullTicketTemplate(undefined, {});
 
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(undefined, {}, templates.unknown);
 		});
 	});
@@ -162,6 +165,7 @@ const testSerialiseTicket = () => {
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledWith(template);
 
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok,
 				{ ...ticket, _id: UUIDToString(ticket._id), properties: {}, modules: { [modName]: {} } });
 		});
@@ -231,6 +235,7 @@ const testSerialiseTicket = () => {
 			res.properties[propName] = res.properties[propName].getTime();
 			res.modules[modName][propName] = res.modules[modName][propName].getTime();
 
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);
 		});
 
@@ -325,7 +330,58 @@ const testSerialiseTicket = () => {
 			res.properties[imageProp] = UUIDToString(res.properties[imageProp]);
 			res.modules[modName][imageProp] = UUIDToString(res.modules[modName][imageProp]);
 
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);
+		});
+	});
+};
+
+const testSerialiseTicketList = () => {
+	describe('Serialise ticket list', () => {
+		const teamspace = generateRandomString();
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, async () => {
+			TemplateModel.getTemplatesByQuery.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			const tickets = times(5, () => ({ type: generateRandomString() }));
+
+			const req = { params: { teamspace }, tickets };
+
+			await expect(TicketOutputMiddleware.serialiseTicketList(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledWith(
+				teamspace, { _id: { $in: tickets.map(({ type }) => type) } },
+			);
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+		});
+
+		test('Should serialise tickets correctly', async () => {
+			const templateData = times(3, () => ({ ...generateTemplate(), _id: generateRandomString() }));
+
+			TemplateModel.getTemplatesByQuery.mockResolvedValueOnce(templateData);
+
+			TicketTemplateSchema.generateFullSchema.mockImplementation((t) => t);
+
+			const tickets = times(10, (i) => generateTicket(templateData[i % templateData.length], true));
+
+			const req = { params: { teamspace }, tickets };
+
+			await expect(TicketOutputMiddleware.serialiseTicketList(req, {})).resolves.toBeUndefined();
+
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledWith(
+				teamspace, { _id: { $in: templateData.map(({ _id }) => _id) } },
+			);
+
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(templateData.length);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+
+			// Cheating here - the serialiser is already tested by testSerialiseTicket.
+			const output = Responder.respond.mock.calls[0][3];
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output);
 		});
 	});
 };
@@ -333,4 +389,5 @@ const testSerialiseTicket = () => {
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
+	testSerialiseTicketList();
 });

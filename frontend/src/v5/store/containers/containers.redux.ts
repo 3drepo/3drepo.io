@@ -39,9 +39,9 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerViewsSuccess: ['projectId', 'containerId', 'views'],
 	fetchContainerSettings: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
-	updateContainerSettings: ['teamspace', 'projectId', 'containerId', 'settings'],
+	updateContainerSettings: ['teamspace', 'projectId', 'containerId', 'settings', 'onSuccess', 'onError'],
 	updateContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
-	createContainer: ['teamspace', 'projectId', 'newContainer'],
+	createContainer: ['teamspace', 'projectId', 'newContainer', 'onSuccess', 'onError'],
 	createContainerSuccess: ['projectId', 'container'],
 	deleteContainer: ['teamspace', 'projectId', 'containerId', 'onSuccess', 'onError'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
@@ -185,9 +185,9 @@ export type FetchContainerViewsAction = Action<'FETCH_CONTAINER_VIEWS'> & Teamsp
 export type FetchContainerViewsSuccessAction = Action<'FETCH_CONTAINER_VIEWS_SUCCESS'> & ProjectAndContainerId & { views: View[] };
 export type FetchContainerSettingsAction = Action<'FETCH_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerSettingsSuccessAction = Action<'FETCH_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
-export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId & { settings: ContainerSettings };
+export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId & { settings: ContainerSettings, onSuccess: () => void, onError: (error) => void };
 export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
-export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & { newContainer: NewContainer };
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & { newContainer: NewContainer, onSuccess: () => void, onError: (error) => void };
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
@@ -210,6 +210,8 @@ export interface IContainersActionCreators {
 		teamspace: string,
 		projectId: string,
 		newContainer: NewContainer,
+		onSuccess: () => void,
+		onError: (error) => void,
 	) => CreateContainerAction;
 	createContainerSuccess: (
 		projectId: string,
@@ -236,6 +238,8 @@ export interface IContainersActionCreators {
 		projectId: string,
 		containerId: string,
 		settings: ContainerSettings,
+		onSuccess: () => void,
+		onError: (error) => void,
 	) => UpdateContainerSettingsAction;
 	updateContainerSettingsSuccess: (
 		projectId: string,

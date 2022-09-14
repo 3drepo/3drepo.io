@@ -126,8 +126,44 @@ const testGetTicketById = () => {
 	});
 };
 
+const testGetAllTickets = () => {
+	describe('Get all tickets', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		test('Should return whatever the query returns', async () => {
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const sort = { [generateRandomString()]: generateRandomString() };
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getAllTickets(teamspace, project, model, projection, sort))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model }, projection, sort);
+		});
+
+		test('Should impose default projection if not provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getAllTickets(teamspace, project, model))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, undefined);
+		});
+	});
+};
+
 describe('models/tickets', () => {
 	testAddTicket();
 	testRemoveAllTickets();
 	testGetTicketById();
+	testGetAllTickets();
 });

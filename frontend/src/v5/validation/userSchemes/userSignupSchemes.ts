@@ -19,12 +19,9 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { firstName, lastName, email, company, countryCode, password, username } from './validators';
 
-export const UserSignupSchemaAccount = (
-	alreadyExistingUsernames: string[] = [],
-	alreadyExistingEmails: string[] = [],
-) => Yup.object().shape({
-	username: username(alreadyExistingUsernames),
-	email: email(alreadyExistingEmails),
+export const UserSignupSchemaAccount = Yup.object().shape({
+	username,
+	email,
 	password: password(),
 	confirmPassword: Yup.string()
 		.required(
