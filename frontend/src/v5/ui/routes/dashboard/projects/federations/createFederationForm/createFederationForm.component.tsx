@@ -25,6 +25,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { EditFederation } from '../editFederationModal/editFederation';
 import { CreateFederationFormSettings } from './createFederationSettings';
 
@@ -41,15 +43,20 @@ const defaultValues = {
 };
 
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
+	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
 	const methods = useForm<NewFederation>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(NewFederationSettingsSchema),
+		context: { alreadyExistingNames },
 	});
 	const {
 		handleSubmit,
 		getValues,
 		reset,
+		trigger,
 		formState: { isValid },
 	} = methods;
 
@@ -57,7 +64,24 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [includedContainers, setIncludedContainers] = useState([]);
 
-	useEffect(() => (open ? setModalPhase('settings') : reset()), [open]);
+	useEffect(() => {
+		if (open) {
+			setModalPhase('settings');
+		} else {
+			reset();
+			setIsSubmitting(false);
+		}
+		setAlreadyExistingNames([]);
+	}, [open]);
+
+	const onSubmitError = (err) => {
+		setIsSubmitting(false);
+		if (nameAlreadyExists(err)) {
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			setModalPhase('settings');
+			trigger('name');
+		}
+	};
 
 	const onClickBack = (): void => {
 		setModalPhase('settings');
@@ -66,13 +90,15 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const onClickContinue = (): void => setModalPhase('edit');
 
 	const onClickSubmit = (newFederation: NewFederation): void => {
+		setIsSubmitting(true);
 		FederationsActionsDispatchers.createFederation(
 			teamspace,
 			project,
 			newFederation,
 			includedContainers.map((container) => container._id),
+			onClickClose,
+			onSubmitError,
 		);
-		onClickClose();
 	};
 
 	const SettingsModalProps = {
@@ -94,6 +120,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 			isValid={isValid}
 			open={open}
 			onClickClose={onClickClose}
+			isSubmitting={isSubmitting}
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
 		>
 			{modalPhase === 'settings' ? (
@@ -106,6 +133,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 					onContainersChange={setIncludedContainers}
 				/>
 			)}
+			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };
