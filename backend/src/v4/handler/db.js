@@ -107,6 +107,7 @@
 
 	Handler.dropCollection = function (database, collection) {
 		return Handler.getDB(database).then(dbConn => {
+			Handler.dropAllIndicies(database, collection.name || collection);
 			return dbConn.dropCollection(collection.name || collection);
 		}).catch(err => {
 			if(err.message !== "ns not found") {
@@ -179,7 +180,6 @@
 		} else {
 			db = await connect();
 			return db.db(database);
-
 		}
 	};
 
@@ -290,6 +290,10 @@
 		return collection.dropIndex(indexName);
 	};
 
+	Handler.dropAllIndicies = async (database, colName) => {
+		return await Handler.runCommand(database,{ dropIndexes: colName, index: "*" });
+	};
+
 	Handler.getAllValues = async (database, colName, key) => {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.distinct(key);
@@ -303,7 +307,6 @@
 			Handler.disconnect();
 			throw err;
 		}
-
 	};
 
 	Handler.listCollections = async function (database) {
@@ -384,6 +387,11 @@
 		if(!["config", "admin"].includes(database)) {
 			try {
 				const dbConn = await Handler.getDB(database);
+				const collections = Handler.listCollections(database);
+				for (const coll in collections) {
+					console.log("stop me mnow");
+					await Handler.dropAllIndicies(database,coll);
+				}
 				await dbConn.dropDatabase();
 			} catch (err) {
 				if(err.message !== "ns not found") {
