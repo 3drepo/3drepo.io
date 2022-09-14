@@ -34,6 +34,8 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
@@ -90,13 +92,16 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
+
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
 		mode: 'onBlur',
 		resolver: yupResolver(UploadsSchema),
+		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name) },
 	});
-	const { control,
+	const {
+		control,
 		handleSubmit,
 		formState: { isValid },
 		trigger,
@@ -160,6 +165,7 @@ export const UploadFileForm = ({
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 	useEffect(() => {
 		if (presetFile) addFilesToList({ files: [presetFile], container: presetContainer });
+		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
 	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;

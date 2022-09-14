@@ -32,6 +32,12 @@ describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'projectId';
 	const containerId = 'containerId';
+	let onSuccess, onError;
+
+	beforeEach(() => {
+		onSuccess = jest.fn();
+		onError = jest.fn();
+	})
 
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint', async () => {
@@ -40,9 +46,9 @@ describe('Containers: sagas', () => {
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
-			.silentRun();
+				.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
+				.silentRun();
 		})
 
 		it('should call addFavourite endpoint with 404 and revert change', async () => {
@@ -51,10 +57,10 @@ describe('Containers: sagas', () => {
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
-			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
-			.silentRun();
+				.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
+				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+				.silentRun();
 		})
 	})
 
@@ -65,9 +71,9 @@ describe('Containers: sagas', () => {
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
-			.silentRun();
+				.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+				.silentRun();
 		})
 
 		it('should call removeFavourite endpoint with 404 and revert change', async () => {
@@ -76,10 +82,10 @@ describe('Containers: sagas', () => {
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
-			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
-			.silentRun();
+				.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
+				.silentRun();
 		})
 	})
 
@@ -98,9 +104,9 @@ describe('Containers: sagas', () => {
 			});
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainersWithoutStats))
-			.silentRun();
+				.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
+				.put(ContainersActions.fetchContainersSuccess(projectId, mockContainersWithoutStats))
+				.silentRun();
 		})
 
 		it('should fetch stats', async () => {
@@ -123,11 +129,11 @@ describe('Containers: sagas', () => {
 			})
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
-			.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[1]._id))
-			.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[0]._id, prepareMockStatsReply(mockContainers[0])))
-			.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[1]._id, prepareMockStatsReply(mockContainers[1])))
-			.silentRun();
+				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
+				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[1]._id))
+				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[0]._id, prepareMockStatsReply(mockContainers[0])))
+				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[1]._id, prepareMockStatsReply(mockContainers[1])))
+				.silentRun();
 		})
 
 		it('should call containers endpoint with 404', async () => {
@@ -136,8 +142,8 @@ describe('Containers: sagas', () => {
 			.reply(404);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-			.silentRun();
+				.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
+				.silentRun();
 		})
 
 		it('should fetch container views', async () => {
@@ -148,18 +154,18 @@ describe('Containers: sagas', () => {
 			});
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[0]._id))
-			.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[1]._id))
-			.put(ContainersActions.fetchContainerViewsSuccess(
-				projectId,
-				mockContainers[0]._id,
-				prepareMockViewsReply(mockContainers[0]).views)
-			).put(ContainersActions.fetchContainerViewsSuccess(
-				projectId,
-				mockContainers[1]._id,
-				prepareMockViewsReply(mockContainers[1]).views)
-			)
-			.silentRun();
+				.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[0]._id))
+				.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[1]._id))
+				.put(ContainersActions.fetchContainerViewsSuccess(
+					projectId,
+					mockContainers[0]._id,
+					prepareMockViewsReply(mockContainers[0]).views)
+				).put(ContainersActions.fetchContainerViewsSuccess(
+					projectId,
+					mockContainers[1]._id,
+					prepareMockViewsReply(mockContainers[1]).views)
+				)
+				.silentRun();
 		})
 
 		it('should fetch container settings', async () => {
@@ -170,19 +176,19 @@ describe('Containers: sagas', () => {
 			});
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[0]._id))
-			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[1]._id))
-			.put(ContainersActions.fetchContainerSettingsSuccess(
-				projectId,
-				mockContainers[0]._id,
-				prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[0])),
-			))
-			.put(ContainersActions.fetchContainerSettingsSuccess(
-				projectId,
-				mockContainers[1]._id,
-				prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[1])),
-			))
-			.silentRun();
+				.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[0]._id))
+				.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[1]._id))
+				.put(ContainersActions.fetchContainerSettingsSuccess(
+					projectId,
+					mockContainers[0]._id,
+					prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[0])),
+				))
+				.put(ContainersActions.fetchContainerSettingsSuccess(
+					projectId,
+					mockContainers[1]._id,
+					prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[1])),
+				))
+				.silentRun();
 		})
 
 		it('should call container settings endpoint with 404', async () => {
@@ -192,8 +198,8 @@ describe('Containers: sagas', () => {
 			.reply(404);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId))
-			.silentRun();
+				.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId))
+				.silentRun();
 		})
 	})
 
@@ -213,9 +219,12 @@ describe('Containers: sagas', () => {
 			const container = { ...newContainer, _id: '12345'}
 
 			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
+				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer, onSuccess, onError))
 				.put(ContainersActions.createContainerSuccess( projectId, container))
 				.silentRun();
+
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		})
 		
 		it('should call createContainer endpoint with 400', async () => {
@@ -224,8 +233,11 @@ describe('Containers: sagas', () => {
 			.reply(400);
 
 			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
+				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer, onSuccess, onError))
 				.silentRun();
+
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		})
 	})
 
@@ -233,25 +245,29 @@ describe('Containers: sagas', () => {
 		const mockContainer = containerMockFactory();
 		const mockSettings = prepareMockSettingsReply(mockContainer);
 
-
 		it('should call updateContainerSettings endpoint', async () => {
 			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 			.reply(200);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.updateContainerSettings(
-				teamspace,
-				projectId,
-				containerId,
-				mockSettings,
-			))
-			.put(ContainersActions.updateContainerSettingsSuccess(
-				projectId,
-				containerId,
-				mockSettings,
-			))
-			.silentRun();	
+				.dispatch(ContainersActions.updateContainerSettings(
+					teamspace,
+					projectId,
+					containerId,
+					mockSettings,
+					onSuccess,
+					onError,
+				))
+				.put(ContainersActions.updateContainerSettingsSuccess(
+					projectId,
+					containerId,
+					mockSettings,
+				))
+				.silentRun();
+
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		})
 
 		it('should call container settings endpoint with 404', async () => {
@@ -261,13 +277,14 @@ describe('Containers: sagas', () => {
 			.reply(404);
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.updateContainerSettings(teamspace, projectId, containerId, mockSettings))
-			.silentRun();
+				.dispatch(ContainersActions.updateContainerSettings(teamspace, projectId, containerId, mockSettings, onSuccess, onError))
+				.silentRun();
+
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		})
 	})
-	
-	const onSuccess = jest.fn();
-	const onError = jest.fn();
+
 	describe('deleteContainer', () => {
 		it('should call deleteContainer endpoint', async () => {
 			mockServer
@@ -279,7 +296,8 @@ describe('Containers: sagas', () => {
 				.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
 				.silentRun();
 				
-			expect(onSuccess).toBeCalled();
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		})
 
 		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
@@ -291,7 +309,8 @@ describe('Containers: sagas', () => {
 				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
 				.silentRun();
 
-			expect(onError).toBeCalled();
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		})
 	})
 })
