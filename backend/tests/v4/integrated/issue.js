@@ -3376,7 +3376,7 @@ describe("Issues", function () {
 			});
 
 			it("if file is from Solibri should succeed", function(done) {
-				agent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
+				agent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.solibri)
 					.expect(200, done);
 			});
