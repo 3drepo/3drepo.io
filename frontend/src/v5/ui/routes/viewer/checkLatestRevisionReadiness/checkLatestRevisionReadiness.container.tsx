@@ -30,7 +30,7 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 	const isContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
 
-	const CheckContainerReadiness = (container) => {
+	const checkContainerReadiness = (container) => {
 		if ((!canUploadToBackend(container.status))
 			&& container.revisionsCount
 		) {
@@ -55,11 +55,11 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 
 	useEffect(() => {
 		if (isContainer) {
-			CheckContainerReadiness(isContainer);
+			checkContainerReadiness(isContainer);
 		}
 		if (isFederation) {
 			isFederation.forEach(
-				(container) => CheckContainerReadiness(container),
+				(container) => checkContainerReadiness(container),
 			);
 		}
 	}, [containerOrFederation]);
