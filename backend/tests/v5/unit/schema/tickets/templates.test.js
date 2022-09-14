@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { propTypes, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
 	const nameTests = [
@@ -278,11 +278,44 @@ const testValidate = () => {
 				deprecated: true,
 			}],
 		};
-		const expectedData = { ...cloneDeep(data) };
+		const expectedData = cloneDeep(data);
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
 		expectedData.config = { defaultView: true };
+		const output = TemplateSchema.validate(data);
+
+		expect(output).toEqual(expectedData);
+	});
+
+	test('Image field will have the default field stripped if provided', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+			},
+			properties: [
+				{
+					name: generateRandomString(),
+					type: propTypes.IMAGE,
+					default: generateRandomString(),
+				},
+
+			],
+			modules: [
+				{
+					type: presetModules.SAFETIBASE,
+					properties: [
+						{
+							name: generateRandomString(),
+							type: propTypes.IMAGE,
+							default: generateRandomString(),
+						}],
+				}],
+		};
+		const expectedData = cloneDeep(data);
+		delete expectedData.properties[0].default;
+		delete expectedData.modules[0].properties[0].default;
 
 		data[generateRandomString()] = generateRandomString();
 		data.properties[0][generateRandomString()] = generateRandomString();
@@ -293,6 +326,76 @@ const testValidate = () => {
 	});
 };
 
+const testGenerateFullSchema = () => {
+	describe('Generating a full schema', () => {
+		test('should fill properties with default properties', () => {
+			const template = {
+				name: generateRandomString(),
+				config: {
+					issueProperties: true,
+				},
+				properties: [
+					{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [],
+			};
+
+			const output = TemplateSchema.generateFullSchema(template);
+
+			const expectedOutput = cloneDeep(template);
+			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
+				...expectedOutput.properties];
+			expect(output).toEqual(expectedOutput);
+		});
+		test('should fill preset modules with default properties', () => {
+			const template = {
+				name: generateRandomString(),
+				config: {},
+				properties: [
+					{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [
+					{
+						type: presetModules.SEQUENCING,
+						properties: [{
+							name: generateRandomString(),
+							type: propTypes.TEXT,
+						}],
+					},
+					{
+						name: generateRandomString(),
+						properties: [{
+							name: generateRandomString(),
+							type: propTypes.TEXT,
+						}],
+					},
+				],
+			};
+
+			const output = TemplateSchema.generateFullSchema(template);
+
+			const expectedOutput = cloneDeep(template);
+			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
+				...expectedOutput.properties];
+			expectedOutput.modules.forEach((module) => {
+				if (module.type) {
+					// eslint-disable-next-line no-param-reassign
+					module.properties = [...presetModulesProperties[module.type], ...module.properties];
+				}
+			});
+
+			expect(output).toEqual(expectedOutput);
+		});
+	});
+};
+
 describe('schema/tickets/templates', () => {
 	testValidate();
+	testGenerateFullSchema();
 });

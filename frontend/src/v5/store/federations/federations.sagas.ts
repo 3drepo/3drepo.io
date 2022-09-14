@@ -40,7 +40,14 @@ import { isEqualWith } from 'lodash';
 import { compByColum } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
 
-export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
+export function* createFederation({
+	teamspace,
+	projectId,
+	newFederation,
+	containers,
+	onSuccess,
+	onError,
+}: CreateFederationAction) {
 	try {
 		const federationId = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
 		yield put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId));
@@ -48,14 +55,9 @@ export function* createFederation({ teamspace, projectId, newFederation, contain
 			yield put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, containers));
 		}
 		yield put(FederationsActions.fetchFederationStats(teamspace, projectId, federationId));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'federation.create.error',
-				defaultMessage: 'trying to create federation',
-			}),
-			error,
-		}));
+		onError(error);
 	}
 }
 
@@ -177,7 +179,12 @@ export function* fetchFederationSettings({
 }
 
 export function* updateFederationSettings({
-	teamspace, projectId, federationId, settings,
+	teamspace,
+	projectId,
+	federationId,
+	settings,
+	onSuccess,
+	onError,
 }: UpdateFederationSettingsAction) {
 	try {
 		const rawSettings = prepareFederationSettingsForBackend(settings);
@@ -185,11 +192,9 @@ export function* updateFederationSettings({
 			teamspace, projectId, federationId, settings: rawSettings,
 		});
 		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to update federation settings',
-			error,
-		}));
+		onError(error);
 	}
 }
 

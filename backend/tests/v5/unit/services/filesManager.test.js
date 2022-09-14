@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
 const { generateRandomString } = require('../../helper/services');
@@ -33,6 +34,8 @@ const GridFSHandler = require(`${src}/handler/gridfs`);
 const FilesManager = require(`${src}/services/filesManager`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const DEFAULT_MIME_TYPE = 'application/octet-stream';
 
 const testRemoveAllFilesFromModel = () => {
 	describe('Remove all files from model', () => {
@@ -311,7 +314,7 @@ const testGetFileAsStream = () => {
 			const fileName = generateRandomString();
 
 			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
-				.resolves.toEqual({ readStream, size: fileEntry.size });
+				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
@@ -331,10 +334,64 @@ const testGetFileAsStream = () => {
 			const fileName = generateRandomString();
 
 			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
-				.resolves.toEqual({ readStream, size: fileEntry.size });
+				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+		});
+	});
+};
+
+const testGetFileWithMetaAsStream = () => {
+	describe('Get file as stream with certain metadata', () => {
+		const teamspace = generateRandomString();
+		const collection = generateRandomString();
+		const fileName = generateRandomString();
+		const meta = { [generateRandomString()]: generateRandomString() };
+
+		test('should throw error if the storage type is unrecognised', async () => {
+			const fileEntry = { type: generateRandomString() };
+			FileRefs.getRefEntryByQuery.mockResolvedValueOnce(fileEntry);
+			await expect(FilesManager.getFileWithMetaAsStream(
+				teamspace, collection, fileName, meta,
+			)).rejects.toEqual(templates.fileNotFound);
+
+			expect(FileRefs.getRefEntryByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntryByQuery).toHaveBeenCalledWith(teamspace, collection, { ...meta, _id: fileName });
+		});
+
+		test('should throw error if ref entry is not found', async () => {
+			FileRefs.getRefEntryByQuery.mockRejectedValueOnce(templates.fileNotFound);
+
+			await expect(FilesManager.getFileWithMetaAsStream(
+				teamspace, collection, fileName, meta,
+			)).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should return a stream if the reference is found', async () => {
+			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+			const readStream = { [generateRandomString()]: generateRandomString() };
+			FileRefs.getRefEntryByQuery.mockResolvedValueOnce(fileEntry);
+			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+
+			await expect(FilesManager.getFileWithMetaAsStream(teamspace, collection, fileName))
+				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
+
+			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
+		});
+
+		test('should return a stream of the reference is found (gridFs)', async () => {
+			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
+			const readStream = { [generateRandomString()]: generateRandomString() };
+			FileRefs.getRefEntryByQuery.mockResolvedValueOnce(fileEntry);
+			GridFSHandler.getFileStream.mockResolvedValueOnce(readStream);
+
+			await expect(FilesManager.getFileWithMetaAsStream(teamspace, collection, fileName))
+				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
 			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
@@ -374,7 +431,8 @@ const testStoreFile = () => {
 			expect(FSHandler.storeFile).toHaveBeenCalledTimes(1);
 			expect(FSHandler.storeFile).toHaveBeenCalledWith(data);
 			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection, { ...refInfo, _id: id });
+			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
+				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
 
 			config.defaultStorage = defaultStorage;
 		});
@@ -395,7 +453,8 @@ const testStoreFile = () => {
 			expect(GridFSHandler.storeFile).toHaveBeenCalledTimes(1);
 			expect(GridFSHandler.storeFile).toHaveBeenCalledWith(teamspace, collection, data);
 			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection, { ...refInfo, _id: id });
+			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
+				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
 
 			config.defaultStorage = defaultStorage;
 		});
@@ -432,11 +491,70 @@ const testFileExists = () => {
 	});
 };
 
+const testRemoveFilesWithMeta = () => {
+	describe('Remove files with meta', () => {
+		const meta = { [generateRandomString()]: generateRandomString() };
+		const teamspace = generateRandomString();
+		const collection = generateRandomString();
+		test('Should remove all files that satisfy the query', async () => {
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
+			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
+
+			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
+
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+
+			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FSHandler.removeFiles).toHaveBeenCalledWith(expectedRefs.map(({ link }) => link));
+
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+		});
+
+		test('Should do nothing if no files are found', async () => {
+			FileRefs.getRefsByQuery.mockResolvedValueOnce([]);
+
+			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
+
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+
+			expect(FSHandler.removeFiles).not.toHaveBeenCalled();
+			expect(FileRefs.removeRefsByQuery).not.toHaveBeenCalled();
+		});
+
+		test('Should manage non file refs properly', async () => {
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
+			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
+
+			expectedRefs.push({ _id: generateRandomString(), type: 'http', link: generateRandomString() });
+			expectedRefs.push({ _id: generateRandomString(), type: 'gridfs', link: generateRandomString() });
+
+			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
+
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+
+			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FSHandler.removeFiles).toHaveBeenCalledWith(expectedRefs.flatMap(({ type, link }) => (type === 'fs' ? link : [])));
+
+			expect(GridFSHandler.removeFiles).toHaveBeenCalledTimes(1);
+			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, collection, expectedRefs.flatMap(({ type, link }) => (type === 'gridfs' ? link : [])));
+
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
+			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
+		});
+	});
+};
+
 describe('services/filesManager', () => {
+	testRemoveFilesWithMeta();
 	testRemoveAllFilesFromModel();
 	testRemoveAllFilesFromTeamspace();
 	testGetFile();
 	testGetFileAsStream();
+	testGetFileWithMetaAsStream();
 	testStoreFile();
 	testFileExists();
 });

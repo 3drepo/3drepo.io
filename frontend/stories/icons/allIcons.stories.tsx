@@ -15,4 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ExistingContainer } from './existingContainer.component';
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from './icons.component';
+import { getIcons } from './icons.helper';
+
+export default {
+	title: 'Icons/All Icons',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
+
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/', true, /\.*(svg)/)),
+};

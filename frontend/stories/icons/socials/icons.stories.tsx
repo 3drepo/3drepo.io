@@ -15,19 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const IssuesConstants = {};
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from '../icons.component';
+import { getIcons } from '../icons.helper';
 
-IssuesConstants.topicTypes = [
-	'Clash',
-	'Diff',
-	'RFI',
-	'Risk',
-	'H&S',
-	'Design',
-	'Constructibility',
-	'GIS',
-	'For information',
-	'VR',
-];
+export default {
+	title: 'Icons/\\Socials',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
 
-module.exports = IssuesConstants;
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/socials/', false, /\.*(svg)/), 'socials'),
+};

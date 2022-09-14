@@ -15,22 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RisksConstants = {};
+import { FormattedMessage } from 'react-intl';
+import { AlreadyUsedNameContainer } from './alreadyUsedName.styles';
 
-RisksConstants.riskCategories = [
-	'Commercial Issue',
-	'Environmental Issue',
-	'Health - Material effect',
-	'Health - Mechanical effect',
-	'Safety Issue - Fall',
-	'Safety Issue - Trapped',
-	'Safety Issue - Event',
-	'Safety Issue - Handling',
-	'Safety Issue - Struck',
-	'Safety Issue - Public',
-	'Social Issue',
-	'Other Issue',
-	'Unknown',
-];
-
-module.exports = RisksConstants;
+export const AlreadyUsedName = () => (
+	<AlreadyUsedNameContainer>
+		<FormattedMessage
+			id="uploads.destination.name.error.alreadyExists"
+			defaultMessage="This name is already used within this project"
+		/>
+	</AlreadyUsedNameContainer>
+);

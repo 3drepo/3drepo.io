@@ -29,7 +29,7 @@ import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
-	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
+	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers', 'onSuccess', 'onError'],
 	createFederationSuccess: ['projectId', 'newFederation', 'federationId'],
 	addFavourite: ['teamspace', 'projectId', 'federationId'],
 	removeFavourite: ['teamspace', 'projectId', 'federationId'],
@@ -42,7 +42,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
-	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings'],
+	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings', 'onSuccess', 'onError'],
 	updateFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId', 'onSuccess', 'onError'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
@@ -165,7 +165,7 @@ export interface IFederationsState {
 	federationsByProject: Record<string, IFederation[]>;
 }
 
-export type CreateFederationAction = Action<'CREATE_FEDERATION'> & TeamspaceAndProjectId & { newFederation: NewFederation, containers?: string[] };
+export type CreateFederationAction = Action<'CREATE_FEDERATION'> & TeamspaceAndProjectId & { newFederation: NewFederation, containers?: string[], onSuccess: () => void, onError: (error) => void };
 export type CreateFederationSuccessAction = Action<'CREATE_FEDERATION_SUCCESS'> & { projectId: string, newFederation: NewFederation, federationId: string };
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & TeamspaceAndProjectId;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndFederationId;
@@ -180,7 +180,7 @@ export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & Team
 export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & ProjectAndFederationId & { views: View[] };
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings};
-export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: FederationSettings };
+export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: FederationSettings, onSuccess: () => void, onError: (error) => void };
 export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings};
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & TeamspaceProjectAndFederationId & SuccessAndErrorCallbacks;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & ProjectAndFederationId;
@@ -191,7 +191,9 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		newFederation: NewFederation,
-		containers?: string[],
+		containers: string[],
+		onSuccess: () => void,
+		onError: (error) => void,
 	) => CreateFederationAction;
 	createFederationSuccess: (
 		projectId: string,
@@ -230,6 +232,8 @@ export interface IFederationsActionCreators {
 		projectId: string,
 		federationId: string,
 		settings: FederationSettings,
+		onSuccess: () => void,
+		onError: (error) => void,
 	) => UpdateFederationSettingsAction;
 	updateFederationSettingsSuccess: (
 		projectId: string,

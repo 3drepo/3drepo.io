@@ -41,7 +41,7 @@ const config = require(`${src}/utils/config`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 WebRequests.post.mockImplementation(() => Promise.resolve({
-	success: true,
+	data: { success: true },
 }));
 
 const availableUsername = 'nonExistingUser';

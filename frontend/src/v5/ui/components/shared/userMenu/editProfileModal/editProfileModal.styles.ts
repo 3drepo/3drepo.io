@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
@@ -53,8 +53,13 @@ export const TabList = styled(TabListBase)`
 	z-index: 1;
 `;
 
-export const TabPanel = styled(TabPanelBase)<{ $zeroPadding?: boolean }>`
-	height: 554px;
+export const TabPanel = styled(TabPanelBase)<{ $personalTab?: boolean }>`
 	box-sizing: border-box;
-	${({ $zeroPadding }) => `padding: ${$zeroPadding ? 0 : '30px 58px'}`};
+	overflow-x: hidden;
+	height: min(554px, 50vh);
+
+	padding: 30px 58px 48px;
+	${({ $personalTab }) => $personalTab && css`
+		padding: 0;
+	`};
 `;
