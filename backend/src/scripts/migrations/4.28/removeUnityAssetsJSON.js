@@ -18,19 +18,12 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
 
-const { find, deleteMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
-const ExternalServices = require(`${v5Path}/handler/externalServices`);
+const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 
-const processCollection = async (teamspace, collection) => {
-	const refs = await find(teamspace, collection, { _id: /.*unityAssets.json$/i }, { type: 1, link: 1 });
-	const ids = await Promise.all(refs.map(async ({ _id, type, link }) => {
-		await ExternalServices.removeFiles(teamspace, collection.replace('.ref', ''), type, [link]);
-		return _id;
-	}));
-
-	await deleteMany(teamspace, collection, { _id: { $in: ids } });
-};
+const processCollection = (teamspace, collection) => removeFilesWithMeta(
+	teamspace, collection, { _id: /.*unityAssets.json$/i },
+);
 
 const processTeamspace = async (teamspace) => {
 	const filesCols = await getCollectionsEndsWith(teamspace, '.json_mpc.ref');
