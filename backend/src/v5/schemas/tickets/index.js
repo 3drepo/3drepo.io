@@ -62,7 +62,7 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 				}
 
 				if (prop.type === propTypes.ONE_OF) {
-					validator = validator.oneOf(isNewTicket ? values : values.concat(null));
+					validator = validator.oneOf(isNewTicket || prop.required ? values : values.concat(null));
 				} else if (prop.type === propTypes.MANY_OF) {
 					validator = Yup.array().of(types.strings.title.oneOf(values));
 				} else {
@@ -78,7 +78,7 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 					validator = validator.required();
 				}
 			} else if (!prop.required) {
-				validator = validator.nullable(true);
+				validator = validator.nullable();
 			}
 
 			obj[prop.name] = validator;
@@ -112,10 +112,10 @@ Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
 
 	const validator = Yup.object().shape({
-		...(isNewTicket ? { title: types.strings.title.required() } : { title: types.strings.title }),
+		title: isNewTicket ? types.strings.title.required() : types.strings.title,
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
 		modules: Yup.object(moduleSchema).default(isNewTicket ? {} : undefined),
-		...(isNewTicket ? { type: Yup.mixed().required() } : {}),
+		type: isNewTicket ?  Yup.mixed().required() : undefined
 	});
 
 	return validator.validate(data, { stripUnknown: true });
@@ -146,37 +146,43 @@ const calculateLevelOfRisk = (likelihood, consequence) => {
 	return levelOfRisk;
 };
 
-Tickets.processReadOnlyValues = (ticket, user, isNewTicket) => {
-	const { properties, modules } = ticket;
+Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
+	const { properties, modules } = newTicket;
 	const currTime = new Date();
 
-	if (isNewTicket) {
+	if (!oldTicket) {
 		properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
 		properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
 	}
 
 	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
 
-	if (modules?.[presetModules.SAFETIBASE]) {
-		const safetiBaseProps = modules[presetModules.SAFETIBASE];
+	const updatedSafetibaseProps = modules?.[presetModules.SAFETIBASE];
+	
+	if (updatedSafetibaseProps) {
+		const safetiBaseMod = { 
+			...oldTicket?.modules?.[presetModules.SAFETIBASE] ,
+			...updatedSafetibaseProps
+		};
+
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
 		const levelOfRisk = calculateLevelOfRisk(
-			safetiBaseProps[modProps.RISK_LIKELIHOOD],
-			safetiBaseProps[modProps.RISK_CONSEQUENCE],
+			safetiBaseMod[modProps.RISK_LIKELIHOOD],
+			safetiBaseMod[modProps.RISK_CONSEQUENCE],
 		);
 
 		if (levelOfRisk) {
-			safetiBaseProps[modProps.LEVEL_OF_RISK] = levelOfRisk;
+			updatedSafetibaseProps[modProps.LEVEL_OF_RISK] = levelOfRisk;
 		}
 
 		const treatedLevel = calculateLevelOfRisk(
-			safetiBaseProps[modProps.TREATED_RISK_LIKELIHOOD],
-			safetiBaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+			safetiBaseMod[modProps.TREATED_RISK_LIKELIHOOD],
+			safetiBaseMod[modProps.TREATED_RISK_CONSEQUENCE],
 		);
 
 		if (treatedLevel) {
-			safetiBaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
+			updatedSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
 		}
 	}
 };
