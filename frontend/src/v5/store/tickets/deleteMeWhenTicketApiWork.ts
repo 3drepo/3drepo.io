@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { EMPTY_VIEW } from '../store.helpers';
-import { ITicket } from './tickets.types';
+import { ITemplate, ITemplateDetails, ITicket } from './tickets.types';
 
-// eslint-ignore
-// TODO - delete me when endpoint is developed
+// eslint-disable
 export const fakeTickets: ITicket[] = [
 	{
 		_id: 'ticket id',
@@ -113,3 +112,111 @@ export const fakeTickets: ITicket[] = [
 		},
 	},
 ];
+
+export const fakeTemplates: ITemplate[] = [
+	{
+		_id: 'CLASH',
+		name: 'Clash',
+		code: 'CLS',
+		deprecated: false,
+	},
+	{
+		_id: 'RISK',
+		name: 'Risk',
+		code: 'RSK',
+		deprecated: false,
+	},
+	{
+		_id: 'CONSTRUCTABILITY',
+		name: 'Constructability',
+		code: 'CNS',
+		deprecated: false,
+	},
+];
+
+export const fakeTemplatesDetails: Record<string, ITemplateDetails> = {
+	CLASH: {
+		config: {
+			comments: true,
+			issueProperties: false,
+			defaultView: true,
+			defaultImage: false,
+			pin: false,
+		},
+		properties: [{
+			name: 'property name',
+			type: 'oneOf',
+			deprecated: false,
+			required: true,
+			values: ['property value'],
+		}],
+		modules: [{
+			name: 'CLASH module',
+			type: 'CLASH type',
+			deprecated: false,
+			properties: [{
+				name: 'property name',
+				type: 'oneOf',
+				deprecated: false,
+				required: true,
+				values: ['property value'],
+			}],
+		}],
+	},
+	RISK: {
+		config: {
+			comments: false,
+			issueProperties: false,
+			defaultView: false,
+			defaultImage: false,
+			pin: false,
+		},
+		properties: [{
+			name: 'property name',
+			type: 'oneOf',
+			deprecated: false,
+			required: true,
+			values: ['property value'],
+		}],
+		modules: [{
+			name: 'RISK module',
+			type: 'RISK type',
+			deprecated: false,
+			properties: [{
+				name: 'property name',
+				type: 'oneOf',
+				deprecated: false,
+				required: true,
+				values: ['property value'],
+			}],
+		}],
+	},
+	CONSTRUCTABILITY: {
+		config: {
+			comments: true,
+			issueProperties: true,
+			defaultView: true,
+			defaultImage: true,
+			pin: true,
+		},
+		properties: [{
+			name: 'property name',
+			type: 'oneOf',
+			deprecated: false,
+			required: true,
+			values: ['property value'],
+		}],
+		modules: [{
+			name: 'CONSTRUCTABILITY module',
+			type: 'CONSTRUCTABILITY type',
+			deprecated: false,
+			properties: [{
+				name: 'property name',
+				type: 'oneOf',
+				deprecated: false,
+				required: true,
+				values: ['property value'],
+			}],
+		}],
+	},
+};
