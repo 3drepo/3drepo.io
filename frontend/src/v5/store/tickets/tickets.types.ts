@@ -23,3 +23,38 @@ export interface ITicket {
 	properties: any,
 	modules: any,
 }
+
+export interface ITemplate {
+	_id: string,
+	name: string,
+	code: string,
+	deprecated: boolean,
+}
+
+export interface ITemplateDetails {
+	config: TemplateConfig,
+	properties: TemplateProperties[],
+	modules: TemplateModule[],
+}
+
+type TemplateConfig = {
+	comments: boolean,
+	issueProperties: boolean,
+	defaultView: boolean,
+	defaultImage: boolean,
+	pin: boolean,
+};
+type TemplateModule = {
+	name: string,
+	type: string,
+	deprecated: boolean,
+	properties: TemplateProperties[],
+};
+type TemplateProperties = {
+	name: string,
+	type: 'text' | 'longText' | 'boolean' | 'date' | 'number'
+	| 'oneOf' | 'manyOf' | 'image' | 'view' | 'measurements' | 'coords',
+	deprecated: boolean
+	required: boolean,
+	values: string[],
+};
