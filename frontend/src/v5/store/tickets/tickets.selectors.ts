@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { ITicketsState } from './tickets.redux';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
@@ -24,4 +25,17 @@ export const selectModelTickets = createSelector(
 	selectTicketsDomain,
 	(_, modelId) => modelId,
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
+);
+
+export const selectCurrentTeamspaceTemplates = createSelector(
+	selectTicketsDomain,
+	selectCurrentTeamspace,
+	(state, teamspace) => state.templatesByTeamspace[teamspace] || [],
+);
+
+export const selectTemplateById = createSelector(
+	selectTicketsDomain,
+	selectCurrentTeamspaceTemplates,
+	(_, id) => id,
+	(_, templates, id) => templates.find(({ _id }) => _id === id),
 );
