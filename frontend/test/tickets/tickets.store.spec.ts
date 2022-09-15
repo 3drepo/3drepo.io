@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
-import { selectModelTickets } from '@/v5/store/tickets/tickets.selectors';
+import { selectModelTickets, selectCurrentTeamspaceTemplates } from '@/v5/store/tickets/tickets.selectors';
 import { createTestStore } from '../test.helpers';
-import { ticketMockFactory } from './tickets.fixture';
+import { templateDetailsMockFactory, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 
-describe('Federations: store', () => {
+describe('Tickets: store', () => {
 	let dispatch, getState;
+	const teamspace = 'teamspace';
 	const modelId = 'modelId';
 
 	beforeEach(() => {
@@ -35,4 +37,28 @@ describe('Federations: store', () => {
 
 		expect(modelTicketsFromState[0]).toEqual(ticket);
 	});
+
+	describe('templates', () => {
+		beforeEach(() => {
+			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
+		});
+
+		it('should update teamspace templates', () => {
+			const template = templateMockFactory();
+			dispatch(TicketsActions.fetchTemplatesSuccess(teamspace, [template]));
+			const templatesFromState = selectCurrentTeamspaceTemplates(getState());
+	
+			expect(templatesFromState[0]).toEqual(template);
+		});
+	
+		it('should update template details', () => {
+			const template = templateMockFactory();
+			const details = templateDetailsMockFactory();
+			dispatch(TicketsActions.fetchTemplatesSuccess(teamspace, [template]));
+			dispatch(TicketsActions.fetchTemplateDetailsSuccess(teamspace, template._id, details));
+			const templatesFromState = selectCurrentTeamspaceTemplates(getState());
+	
+			expect(templatesFromState[0]).toEqual({ ...template, ...details });
+		});
+	})
 });

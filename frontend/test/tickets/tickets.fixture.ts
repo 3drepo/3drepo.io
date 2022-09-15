@@ -16,7 +16,7 @@
  */
 
  import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITemplateDetails, ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 
 export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
@@ -33,5 +33,43 @@ export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
 		...overrides?.properties,
 	},
 	modules: {},
+	...overrides,
+});
+
+export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
+	_id: faker.datatype.uuid(),
+	name: faker.random.word(),
+	code: faker.random.alpha({ count: 5, upcase: true }),
+	deprecated: faker.datatype.boolean(),
+	...overrides,
+});
+
+export const templateDetailsMockFactory = (overrides?: ITemplateDetails): ITemplateDetails => ({
+	config: {
+		comments: faker.datatype.boolean(),
+		issueProperties: faker.datatype.boolean(),
+		defaultView: faker.datatype.boolean(),
+		defaultImage: faker.datatype.boolean(),
+		pin: faker.datatype.boolean(),
+	},
+	properties: [{
+		name: faker.random.word(),
+		type: faker.random.word(),
+		deprecated: faker.datatype.boolean(),
+		required: faker.datatype.boolean(),
+		values: [faker.random.word()],
+	}],
+	modules: [{
+		name: faker.random.word(),
+		type: faker.random.word(),
+		deprecated: faker.datatype.boolean(),
+		properties: [{
+			name: faker.random.word(),
+			type: faker.random.word(),
+			deprecated: faker.datatype.boolean(),
+			required: faker.datatype.boolean(),
+			values: [faker.random.word()],
+		}],
+	}],
 	...overrides,
 });
