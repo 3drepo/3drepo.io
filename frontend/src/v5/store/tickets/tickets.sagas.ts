@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-// import * as API from '@/v5/services/api';
+import { put, takeLatest, takeEvery } from 'redux-saga/effects';
+import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import {
 	TicketsTypes,
 	TicketsActions,
-	FetchModelTicketsAction,
+	FetchTicketsAction,
 	FetchTemplatesAction,
 	FetchTemplateDetailsAction,
 } from './tickets.redux';
-import { fakeTemplates, fakeTemplatesDetails, fakeTickets } from './deleteMeWhenTicketApiWork';
+// import { fakeTemplates, fakeTemplatesDetails, fakeTickets } from './deleteMeWhenTicketApiWork';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
 // TODO - after endpoints are ready, uncomment comments all over
 // TODO - the file (ALSO UNCOMMENT tickets.sagas.spec.ts!!)
 // eslint-disable-next-line
-export function* fetchModelTickets({ teamspace, projectId, modelId, isFederation }: FetchModelTicketsAction) {
+export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
-		// const fetchTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
-		// const tickets = yield fetchTickets({ teamspace, projectId, modelId });
-		const tickets = fakeTickets;
-		yield put(TicketsActions.fetchModelTicketsSuccess(modelId, tickets));
+		const fetchModelTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
+		const tickets = yield fetchModelTickets({ teamspace, projectId, modelId });
+		// const tickets = fakeTickets;
+		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -48,11 +48,12 @@ export function* fetchModelTickets({ teamspace, projectId, modelId, isFederation
 	}
 }
 
-export function* fetchTemplates({ teamspace }: FetchTemplatesAction) {
+export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
 	try {
-		// const templates = yield API.Tickets.fetchTemplates(teamspace);
-		const templates = fakeTemplates;
-		yield put(TicketsActions.fetchTemplatesSuccess(teamspace, templates));
+		const fetchModelTemplates = isFederation ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
+		const templates = yield fetchModelTemplates({ teamspace, projectId, modelId });
+		// const templates = fakeTemplates;
+		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
@@ -68,11 +69,12 @@ export function* fetchTemplates({ teamspace }: FetchTemplatesAction) {
 	}
 }
 
-export function* fetchTemplateDetails({ teamspace, templateId }: FetchTemplateDetailsAction) {
+export function* fetchTemplateDetails({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateDetailsAction) {
 	try {
-		// const details = yield API.Tickets.fetchTemplateDetails(teamspace, templateId);
-		const details = fakeTemplatesDetails[templateId];
-		yield put(TicketsActions.fetchTemplateDetailsSuccess(teamspace, templateId, details));
+		const fetchModelTemplateDetails = isFederation ? API.Tickets.fetchFederationTemplateDetails : API.Tickets.fetchContainerTemplateDetails;
+		const details = yield fetchModelTemplateDetails({ teamspace, projectId, modelId, templateId });
+		// const details = fakeTemplatesDetails[templateId];
+		yield put(TicketsActions.fetchTemplateDetailsSuccess(modelId, templateId, details));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
@@ -89,7 +91,7 @@ export function* fetchTemplateDetails({ teamspace, templateId }: FetchTemplateDe
 }
 
 export default function* TicketsSagas() {
-	yield takeLatest(TicketsTypes.FETCH_MODEL_TICKETS, fetchModelTickets);
+	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
-	yield takeLatest(TicketsTypes.FETCH_TEMPLATE_DETAILS, fetchTemplateDetails);
+	yield takeEvery(TicketsTypes.FETCH_TEMPLATE_DETAILS, fetchTemplateDetails);
 }

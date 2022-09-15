@@ -27,15 +27,15 @@ export const selectModelTickets = createSelector(
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
-export const selectCurrentTeamspaceTemplates = createSelector(
+export const selectModelTemplates = createSelector(
 	selectTicketsDomain,
-	selectCurrentTeamspace,
-	(state, teamspace) => state.templatesByTeamspace[teamspace] || [],
+	(_, modelId) => modelId,
+	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
-export const selectTemplateById = createSelector(
+export const selectModelTemplateById = createSelector(
 	selectTicketsDomain,
-	selectCurrentTeamspaceTemplates,
-	(_, id) => id,
-	(_, templates, id) => templates.find(({ _id }) => _id === id),
+	selectModelTemplates,
+	(_, modelId, templateId) => templateId,
+	(_, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
 );

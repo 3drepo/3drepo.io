@@ -19,6 +19,44 @@ import { TeamspaceAndProjectId } from '@/v5/store/store.types';
 import { ITicket, ITemplate, ITemplateDetails } from '@/v5/store/tickets/tickets.types';
 import api from './default';
 
+export const fetchContainerTemplates = async ({
+	teamspace,
+	projectId,
+	modelId,
+}: FetchModelTemplatesParams): Promise<FetchModelTemplatesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`);
+	return data.templates;
+};
+
+export const fetchFederationTemplates = async ({
+	teamspace,
+	projectId,
+	modelId,
+}: FetchModelTemplatesParams): Promise<FetchModelTemplatesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`);
+	return data.templates;
+};
+
+export const fetchContainerTemplateDetails = async ({
+	teamspace,
+	projectId,
+	modelId,
+	templateId,
+}: FetchModelTemplateDetailsParams): Promise<FetchModelTemplateDetailsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${templateId}`);
+	return data;
+};
+
+export const fetchFederationTemplateDetails = async ({
+	teamspace,
+	projectId,
+	modelId,
+	templateId,
+}: FetchModelTemplateDetailsParams): Promise<FetchModelTemplateDetailsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${templateId}`);
+	return data;
+};
+
 export const fetchContainerTickets = async ({
 	teamspace,
 	projectId,
@@ -37,24 +75,13 @@ export const fetchFederationTickets = async ({
 	return data.tickets;
 };
 
-export const fetchTemplates = async (teamspace: string): Promise<FetchTemplatesResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/templates`);
-	return data.templates;
-};
-
-export const fetchTemplateDetails = async (
-	teamspace: string,
-	templateId: string,
-): Promise<FetchTemplateDetailsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/templates/${templateId}`);
-	return data;
-};
-
 /**
  * Types
  */
-type FetchTemplatesResponse = { templates: ITemplate[] };
-type FetchTemplateDetailsResponse = ITemplateDetails[];
+type FetchModelTemplatesResponse = { templates: ITemplate[] };
+type FetchModelTemplateDetailsResponse = ITemplateDetails[];
+type FetchModelTicketsResponse = { tickets: ITicket[] };
 
 type FetchModelTicketsParams = TeamspaceAndProjectId & { modelId: string };
-type FetchModelTicketsResponse = { tickets: ITicket[] };
+type FetchModelTemplatesParams = TeamspaceAndProjectId & { modelId: string };
+type FetchModelTemplateDetailsParams = TeamspaceAndProjectId & { modelId: string, templateId: string };

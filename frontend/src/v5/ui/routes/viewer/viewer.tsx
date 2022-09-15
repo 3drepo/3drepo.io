@@ -43,8 +43,6 @@ export const Viewer = () => {
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
-	useEffect(() => { TicketsActionsDispatchers.fetchTemplates(teamspace); }, []);
-
 	if (isLoading) return (<></>);
 
 	if (selectedContainer?.revisionsCount === 0) {
