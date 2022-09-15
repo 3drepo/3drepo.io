@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { flatMap, groupBy } from 'lodash';
+import { flatMap } from 'lodash';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, TemplateName, Filters } from './ticketsList.styles';
+import { ViewerParams } from '../../../routes.constants';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -27,34 +29,24 @@ type TicketsListProps = {
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
-	const [templateNamesToUseForFilter, setTemplateNamesToUseForFilter] = useState<string[]>([]);
-	const templates = TicketsHooksSelectors.selectCurrentTeamspaceTemplates();
-	const templateNamesById = templates.reduce(
-		(acc, { _id, name }) => ({ ...acc, [_id]: name }),
-		{} as Record<string, string>,
-	);
-	const ticketsByType = Object.entries(groupBy(tickets, 'type'));
-	const ticketsByTemplateName = ticketsByType.reduce(
-		(acc, [type, templateTickets]) => ({ ...acc, [templateNamesById[type]]: templateTickets }),
-		{} as Record<string, ITicket[]>,
-	);
+	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const templates = TicketsHooksSelectors.selectModelTemplates(containerOrFederation);
 
 	const ticketIsSelected = ({ _id }: ITicket) => selectedTicket?._id === _id;
 
-	const toggleFilterName = (name: string) => {
-		if (templateNamesToUseForFilter.includes(name)) {
-			setTemplateNamesToUseForFilter(
-				templateNamesToUseForFilter.filter((templateName) => templateName !== name),
-			);
+	const toggleTemplate = (templateId: string) => {
+		if (selectedTemplates.has(templateId)) {
+			selectedTemplates.delete(templateId);
 		} else {
-			setTemplateNamesToUseForFilter(templateNamesToUseForFilter.concat(name));
+			selectedTemplates.add(templateId);
 		}
+		setSelectedTemplates(new Set(selectedTemplates));
 	};
 
 	const getFilteredTickets = () => {
-		if (templateNamesToUseForFilter.length === 0) return tickets;
-		return flatMap(templateNamesToUseForFilter, (name) => ticketsByTemplateName[name])
-			.sort((a, b) => a.number - b.number);
+		if (selectedTemplates.size === 0) return tickets;
+		return flatMap([...selectedTemplates], getTicketsByTemplateId);
 	};
 
 	const onTicketClick = (ticket: ITicket) => {
@@ -65,16 +57,20 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		}
 	};
 
+	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
+
+	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
+
 	return (
 		<>
 			<Filters>
-				{Object.entries(ticketsByTemplateName).map(([name, templateTickets]) => (
+				{getTemplatesForFilter().map(({ name, _id }) => (
 					<TemplateName
-						key={name}
-						$selected={templateNamesToUseForFilter.includes(name)}
-						onClick={() => toggleFilterName(name)}
+						key={_id}
+						$selected={selectedTemplates.has(_id)}
+						onClick={() => toggleTemplate(_id)}
 					>
-						{name} ({templateTickets.length})
+						{name} ({getTicketsByTemplateId(_id).length})
 					</TemplateName>
 				))}
 			</Filters>

@@ -18,5 +18,5 @@
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 
 export const modelIsFederation = (modelId: string) => (
-	!!FederationsHooksSelectors.selectContainersByFederationId(modelId)
+	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
