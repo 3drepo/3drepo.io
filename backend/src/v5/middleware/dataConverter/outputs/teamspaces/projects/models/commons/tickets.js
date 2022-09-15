@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const Yup = require('yup');
-
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
-const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
@@ -74,8 +73,8 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 	});
 };
 
-const serialiseTicket = (ticket, template, stripDeprecated) => {
-	const caster = generateCastObject(template, stripDeprecated);
+const serialiseTicket = (teamspace, ticket, fullTemplate, stripDeprecated) => {
+	const caster = generateCastObject(fullTemplate, stripDeprecated);
 	return caster.cast(ticket);
 };
 
@@ -96,8 +95,36 @@ Tickets.serialiseTicket = async (req, res) => {
 		const { teamspace } = req.params;
 		const { ticket, showDeprecated } = req;
 		const template = generateFullSchema(await getTemplateById(teamspace, ticket.type));
+		respond(req, res, templates.ok, serialiseTicket(teamspace, ticket, template, !showDeprecated));
+	} catch (err) {
+		respond(req, res, templates.unknown);
+	}
+};
 
-		respond(req, res, templates.ok, serialiseTicket(ticket, template, !showDeprecated));
+const getTemplatesDictionary = async (teamspace, templateIds) => {
+	const res = {};
+
+	const data = await getTemplatesByQuery(teamspace, { _id: { $in: templateIds } });
+
+	data.forEach((tem) => {
+		res[UUIDToString(tem._id)] = generateFullSchema(tem);
+	});
+
+	return res;
+};
+
+Tickets.serialiseTicketList = async (req, res) => {
+	try {
+		const { teamspace } = req.params;
+		const { tickets } = req;
+
+		const templateIdArr = tickets.map(({ type }) => type);
+		const templateIds = new Set(templateIdArr);
+
+		const templateLUT = await getTemplatesDictionary(teamspace, Array.from(templateIds));
+		const outputProms = tickets.map((ticket) => serialiseTicket(teamspace,
+			ticket, templateLUT[UUIDToString(ticket.type)], true));
+		respond(req, res, templates.ok, { tickets: await Promise.all(outputProms) });
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}

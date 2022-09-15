@@ -15,4 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ExistingContainer } from './existingContainer.component';
+import { FormattedMessage } from 'react-intl';
+import { AlreadyUsedNameContainer } from './alreadyUsedName.styles';
+
+export const AlreadyUsedName = () => (
+	<AlreadyUsedNameContainer>
+		<FormattedMessage
+			id="uploads.destination.name.error.alreadyExists"
+			defaultMessage="This name is already used within this project"
+		/>
+	</AlreadyUsedNameContainer>
+);

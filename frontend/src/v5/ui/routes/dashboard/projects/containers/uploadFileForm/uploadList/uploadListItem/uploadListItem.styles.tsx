@@ -20,7 +20,7 @@ import { CircleButton } from '@controls/circleButton';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
 import { UploadListItemDestination } from './components/uploadListItemDestination';
 
-export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () => void; }>`
+export const Button = styled(CircleButton)<{ $selectedrow: boolean; }>`
 	margin: 0;
 	&&&&& {
 		:hover, &.Mui-focusVisible { 
