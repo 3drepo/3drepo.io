@@ -35,13 +35,6 @@ export interface RouteProps {
 const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
 const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
 
-const truncateValue = (str, max = 12) => {
-	if (!str) return null;
-	let truncatedStr = str.substring(0, max).trim();
-	if (str.length > truncatedStr.length) truncatedStr += '...';
-	return truncatedStr;
-};
-
 export const Route = ({ title, children, computedMatch: { params }, ...props }: RouteProps) => {
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
 	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
@@ -53,13 +46,13 @@ export const Route = ({ title, children, computedMatch: { params }, ...props }: 
 	const parseTitle = (string) => string.replace(PARAM_REGEX, (_, match) => {
 		switch (match) {
 			case 'project':
-				return truncateValue(projectName) || LOADING_TEXT;
+				return projectName || LOADING_TEXT;
 			case 'revision':
-				return params.revision ? `(${truncateValue(revisionTag)})` : '';
+				return params.revision ? `(${revisionTag})` : '';
 			case 'containerOrFederation':
-				return truncateValue(containerOrFederationName) || LOADING_TEXT;
+				return containerOrFederationName || LOADING_TEXT;
 			default:
-				return truncateValue(params[match]) || '';
+				return params[match] || '';
 		}
 	});
 
