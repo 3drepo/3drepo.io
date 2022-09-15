@@ -17,19 +17,9 @@
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { Route as BaseRoute, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { LOGIN_PATH, VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
-import { useEffect } from 'react';
-import { selectCurrentRevision } from '@/v4/modules/model/model.selectors';
-import { useSelector } from 'react-redux';
-import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
-import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
-import { ProjectsHooksSelectors } from '../selectorsHooks/projectsSelectors.hooks';
-import { ContainersHooksSelectors } from '../selectorsHooks/containersSelectors.hooks';
-import { FederationsHooksSelectors } from '../selectorsHooks/federationsSelectors.hooks';
-import { formatMessage } from '../intl';
+import { VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
@@ -80,81 +70,3 @@ export const viewerRoute = (
 
 	return generatePath(VIEWER_ROUTE, params);
 };
-
-interface RouteProps {
-	computedMatch?: any;
-	title?: string;
-	path?: string;
-	exact?: boolean;
-	children?: any;
-}
-
-const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
-const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
-
-const truncateValue = (str, max = 12) => {
-	if (!str) return null;
-	let truncatedStr = str.substring(0, max).trim();
-	if (str.length > truncatedStr.length) truncatedStr += '...';
-	return truncatedStr;
-};
-
-export const Route = ({ title, children, computedMatch: { params }, ...props }: RouteProps) => {
-	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
-	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
-	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
-	const containerOrFederationName = containerName || federationName || '';
-	const revisionTag = useSelector(selectCurrentRevision)?.tag || LOADING_TEXT;
-
-	const PARAM_REGEX = /:(\S+)/g;
-	const parseTitle = (string) => string.replace(PARAM_REGEX, (_, match) => {
-		switch (match) {
-			case 'project':
-				return truncateValue(projectName) || LOADING_TEXT;
-			case 'revision':
-				return params.revision ? `(${truncateValue(revisionTag)})` : '';
-			case 'containerOrFederation':
-				return truncateValue(containerOrFederationName) || LOADING_TEXT;
-			default:
-				return truncateValue(params[match]) || '';
-		}
-	});
-
-	const titleParsed = title ? parseTitle(title) : '';
-
-	useEffect(() => {
-		if (titleParsed) {
-			document.title = titleParsed;
-		}
-		return () => {
-			document.title = DEFAULT_TITLE;
-		};
-	}, [titleParsed]);
-
-	return <BaseRoute {...props}>{children}</BaseRoute>;
-};
-
-const WrapAuthenticationRedirect = ({ children }) => {
-	const history = useHistory();
-	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
-	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
-
-	const location = useLocation();
-
-	useEffect(() => {
-		AuthActionsDispatchers.setReturnUrl(location);
-		if (!isAuthenticated && authenticationFetched) {
-			history.replace(LOGIN_PATH);
-		}
-	}, [isAuthenticated, authenticationFetched]);
-
-	if (!isAuthenticated) {
-		return (<></>);
-	}
-
-	return children;
-};
-
-export const AuthenticatedRoute = ({ children, ...props }: RouteProps) => (
-	<Route {...props}><WrapAuthenticationRedirect>{children}</WrapAuthenticationRedirect></Route>
-);

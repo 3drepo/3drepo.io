@@ -16,9 +16,9 @@
  */
 
 import { Switch } from 'react-router-dom';
+import { Route } from '@/v5/services/routing/route.component';
 import { CookiesLegalPaper, PrivacyLegalPaper, TermsLegalPaper } from '@components/legal';
 import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
-import { Route } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 
 type ILegalRoutes = {

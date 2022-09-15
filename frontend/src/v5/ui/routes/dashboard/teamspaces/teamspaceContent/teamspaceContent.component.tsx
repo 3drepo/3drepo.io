@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash, Route } from '@/v5/services/routing/routing';
+import { discardSlash } from '@/v5/services/routing/routing';
 import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
+import { Route } from '@/v5/services/routing/route.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { ProjectsList } from '../projects/projectsList.component';
