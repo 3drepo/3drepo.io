@@ -28,7 +28,6 @@ const FS = require('fs');
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Link\n');
 	results.forEach((record) => {
 		writeStream.write(`${record}\n`);
 	});
@@ -36,19 +35,24 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	writeStream.end(resolve);
 });
 
-const run = async (dbName, outFile) => {
-	if (!dbName) {
+const run = async (dbNames, outFile) => {
+	if (!dbNames) {
 		throw new Error('Database name must be provided to execute this script');
 	}
 
-	const collections = await getCollectionsEndsWith(dbName, '.ref');
 	const results = [];
+	const dbList = dbNames.split(',');
 
-	for (let i = 0; i < collections.length; ++i) {
+	for (const dbName of dbList) {
 		// eslint-disable-next-line no-await-in-loop
-		const coll = await find(dbName, collections[i].name, {}, { link: 1 });
-		for (let j = 0; j < coll.length; ++j) {
-			results.push(coll[j].link);
+		const collections = await getCollectionsEndsWith(dbName, '.ref');
+
+		for (let i = 0; i < collections.length; ++i) {
+			// eslint-disable-next-line no-await-in-loop
+			const coll = await find(dbName, collections[i].name, {}, { link: 1 });
+			for (let j = 0; j < coll.length; ++j) {
+				results.push(coll[j].link);
+			}
 		}
 	}
 
@@ -58,7 +62,7 @@ const run = async (dbName, outFile) => {
 const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.positional('database', {
-		describe: 'Database name',
+		describe: 'Database name (comma separated)',
 		type: 'string',
 	}).option('outFile', {
 		describe: 'Name of output file',
