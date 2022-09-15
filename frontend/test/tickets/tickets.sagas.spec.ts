@@ -21,7 +21,7 @@ import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { federationMockFactory } from '../federations/federations.fixtures';
 import { containerMockFactory } from '../containers/containers.fixtures';
-import { ticketMockFactory } from './tickets.fixture';
+import { templateDetailsMockFactory, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 import { projectMockFactory } from '../projects/projects.fixtures';
 import { alertAction } from '../test.helpers';
 
@@ -33,50 +33,109 @@ describe('Tickets: sagas', () => {
 	const federation = federationMockFactory();
 	const tickets = [ticketMockFactory()];
 
-	describe('fetchTickets for container', () => {
-		// TODO - uncomment when fetch tickets endpoints are ready
-		// it('should call fetchContainerTickets endpoint', async () => {
-		// 	mockServer
-		// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/tickets`)
-		// 		.reply(200, { tickets });
+	it('needed for test file not to fail', () => expect(true).toBe(true))
 
-		// 	await expectSaga(TicketsSaga.default)
-		// 		.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, container._id, false))
-		// 		.put(TicketsActions.fetchModelTicketsSuccess(container._id, tickets))
-		// 		.silentRun();
-		// })
+	// describe('fetchTickets', () => {
+	// 	// TODO - uncomment when fetch tickets endpoints are ready
+		
+	// 	describe('tickets', () => {
+	// 		// Containers
+	// 		it('should call fetchContainerTickets endpoint', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/tickets`)
+	// 				.reply(200, { tickets });
 
-		// it('should call fetchContainerTickets endpoint with a 404', async () => {
-		// 	mockServer
-		// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/tickets`)
-		// 		.reply(400);
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, container._id, false))
+	// 				.put(TicketsActions.fetchModelTicketsSuccess(container._id, tickets))
+	// 				.silentRun();
+	// 		})
 
-		// 	await expectSaga(TicketsSaga.default)
-		// 		.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, container._id, false))
-		// 		.put.like(alertAction('trying to fetch container tickets'))
-		// 		.silentRun();
-		// })
+	// 		it('should call fetchContainerTickets endpoint with a 404', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/tickets`)
+	// 				.reply(400);
 
-		// it('should call fetchFederationsTickets endpoint', async () => {
-		// 	mockServer
-		// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/tickets`)
-		// 		.reply(200, { tickets });
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, container._id, false))
+	// 				.put.like(alertAction('trying to fetch container tickets'))
+	// 				.silentRun();
+	// 		})
 
-		// 	await expectSaga(TicketsSaga.default)
-		// 		.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, federation._id, true))
-		// 		.put(TicketsActions.fetchModelTicketsSuccess(federation._id, tickets))
-		// 		.silentRun();
-		// })
+	// 		// Federations
+	// 		it('should call fetchFederationsTickets endpoint', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/tickets`)
+	// 				.reply(200, { tickets });
 
-		// it('should call fetchFederationsTickets endpoint with a 404', async () => {
-		// 	mockServer
-		// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/tickets`)
-		// 		.reply(400);
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, federation._id, true))
+	// 				.put(TicketsActions.fetchModelTicketsSuccess(federation._id, tickets))
+	// 				.silentRun();
+	// 		})
 
-		// 	await expectSaga(TicketsSaga.default)
-		// 		.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, federation._id, true))
-		// 		.put.like(alertAction('trying to fetch federation tickets'))
-		// 		.silentRun();
-		// })
-	})
+	// 		it('should call fetchFederationsTickets endpoint with a 404', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/tickets`)
+	// 				.reply(400);
+
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchModelTickets(teamspace, projectId, federation._id, true))
+	// 				.put.like(alertAction('trying to fetch federation tickets'))
+	// 				.silentRun();
+	// 		})
+	// 	})
+
+	// 	describe('templates', () => {
+	// 		const template = templateMockFactory();
+	// 		const templates = [template];
+	// 		const details = templateDetailsMockFactory();
+
+	// 		// Basic templates
+	// 		it('should call fetchTemplates endpoint', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/settings/tickets/templates`)
+	// 				.reply(200, { templates });
+	
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchTemplates(teamspace))
+	// 				.put(TicketsActions.fetchTemplatesSuccess(teamspace, templates))
+	// 				.silentRun();
+	// 		})
+	
+	// 		it('should call fetchTemplates endpoint with a 404', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/settings/tickets/templates`)
+	// 				.reply(400);
+	
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchTemplates(teamspace))
+	// 				.put.like(alertAction('trying to fetch templates'))
+	// 				.silentRun();
+	// 		})
+	
+	// 		// Template details
+	// 		it('should call fetchTemplateDetails endpoint', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/settings/tickets/templates/${template._id}`)
+	// 				.reply(200, details);
+	
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchTemplateDetails(teamspace, template._id))
+	// 				.put(TicketsActions.fetchTemplateDetailsSuccess(teamspace, template._id, details))
+	// 				.silentRun();
+	// 		})
+	
+	// 		it('should call fetchTemplateDetails endpoint with a 404', async () => {
+	// 			mockServer
+	// 				.get(`/teamspaces/${teamspace}/settings/tickets/templates/${template._id}`)
+	// 				.reply(400);
+	
+	// 			await expectSaga(TicketsSaga.default)
+	// 				.dispatch(TicketsActions.fetchTemplateDetails(teamspace, template._id))
+	// 				.put.like(alertAction('trying to fetch template details'))
+	// 				.silentRun();
+	// 		})
+	// 	})
+	// })
 })
