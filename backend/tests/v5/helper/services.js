@@ -336,7 +336,7 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 	...deleteIfUndefined({ deprecated }),
 });
 
-const generateProperties = (propTemplate) => {
+const generateProperties = (propTemplate, internalType) => {
 	const properties = {};
 
 	propTemplate.forEach(({ name, deprecated, type }) => {
@@ -344,7 +344,7 @@ const generateProperties = (propTemplate) => {
 		if (type === propTypes.TEXT) {
 			properties[name] = ServiceHelper.generateRandomString();
 		} else if (type === propTypes.DATE) {
-			properties[name] = Date.now();
+			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
 		}
@@ -353,18 +353,18 @@ const generateProperties = (propTemplate) => {
 	return properties;
 };
 
-ServiceHelper.generateTicket = (template) => {
+ServiceHelper.generateTicket = (template, internalType = false) => {
 	const modules = {};
 	template.modules.forEach(({ name, type, deprecated, properties }) => {
 		if (deprecated) return;
 		const id = name ?? type;
-		modules[id] = generateProperties(properties);
+		modules[id] = generateProperties(properties, internalType);
 	});
 
 	const ticket = {
 		type: template._id,
 		title: ServiceHelper.generateRandomString(),
-		properties: generateProperties(template.properties),
+		properties: generateProperties(template.properties, internalType),
 		modules,
 	};
 

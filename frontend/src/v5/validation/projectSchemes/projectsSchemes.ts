@@ -18,7 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '../../services/intl';
 
-export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, string[]>) => Yup.object().shape({
+export const CreateProjectSchema = Yup.object().shape({
 	teamspace: Yup.string()
 		.required(
 			formatMessage({
@@ -29,7 +29,7 @@ export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, s
 	projectName: Yup.string()
 		.transform((value) => value.trim())
 		.max(120, formatMessage({
-			id: 'createProject.teamspace.error.max',
+			id: 'createProject.name.error.max',
 			defaultMessage: 'Project name is limited to 120 characters',
 		}))
 		.required(
@@ -41,7 +41,7 @@ export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, s
 		.matches(
 			/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
 			formatMessage({
-				id: 'createProject.teamspace.error.illegalCharacters',
+				id: 'createProject.name.error.illegalCharacters',
 				defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
 			}),
 		)
@@ -51,8 +51,9 @@ export const CreateProjectSchema = (existingProjectByTeamspace: Record<string, s
 				id: 'createProject.name.error.alreadyExisting',
 				defaultMessage: 'This name is already taken',
 			}),
-			(projectName, testContext) => (
-				!(existingProjectByTeamspace?.[testContext.parent.teamspace] || []).includes(projectName)
-			),
+			(projectName, { options, parent }) => {
+				const existingNames = options.context.alreadyExistingProjectsByTeamspace[parent.teamspace] || [];
+				return !existingNames.map((name) => name.trim()).includes(projectName);
+			},
 		),
 });

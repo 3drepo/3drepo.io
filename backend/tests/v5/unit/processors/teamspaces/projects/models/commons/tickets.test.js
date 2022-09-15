@@ -20,7 +20,7 @@ const { generateRandomString, generateTemplate, generateTicket } = require('../.
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
-const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
@@ -191,8 +191,50 @@ const testGetTicketById = () => {
 	});
 };
 
+const testGetTicketList = () => {
+	describe('Get ticket list', () => {
+		test('should call getAllTickets in model with the expected projection', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const expectedOutput = generateRandomString();
+
+			TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTicketList(teamspace, project, model))
+				.resolves.toEqual(expectedOutput);
+
+			const { SAFETIBASE } = presetModules;
+			const { [SAFETIBASE]: safetibaseProps } = modulePropertyLabels;
+			const projection = {
+				_id: 1,
+				title: 1,
+				number: 1,
+				type: 1,
+				[`properties.${basePropertyLabels.OWNER}`]: 1,
+				[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
+				[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,
+				[`properties.${basePropertyLabels.DUE_DATE}`]: 1,
+				[`properties.${basePropertyLabels.PIN}`]: 1,
+				[`properties.${basePropertyLabels.STATUS}`]: 1,
+				[`properties.${basePropertyLabels.PRIORITY}`]: 1,
+				[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
+				[`modules.${SAFETIBASE}.${safetibaseProps.LEVEL_OF_RISK}`]: 1,
+				[`modules.${SAFETIBASE}.${safetibaseProps.TREATED_LEVEL_OF_RISK}`]: 1,
+				[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
+
+			};
+
+			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model, projection, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
 	testGetTicketResourceAsStream();
 	testGetTicketById();
+	testGetTicketList();
 });
