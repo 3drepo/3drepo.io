@@ -35,7 +35,7 @@ export interface RouteProps {
 const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
 const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
 
-export const Route = ({ title, children, computedMatch: { params }, ...props }: RouteProps) => {
+export const Route = ({ title = '', children, computedMatch: { params }, ...props }: RouteProps) => {
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
 	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
 	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
@@ -43,7 +43,8 @@ export const Route = ({ title, children, computedMatch: { params }, ...props }: 
 	const revisionTag = useSelector(selectCurrentRevision)?.tag || LOADING_TEXT;
 
 	const PARAM_REGEX = /:(\S+)/g;
-	const parseTitle = (string) => string.replace(PARAM_REGEX, (_, match) => {
+
+	const titleParsed = title.replace(PARAM_REGEX, (_, match) => {
 		switch (match) {
 			case 'project':
 				return projectName || LOADING_TEXT;
@@ -55,8 +56,6 @@ export const Route = ({ title, children, computedMatch: { params }, ...props }: 
 				return params[match] || '';
 		}
 	});
-
-	const titleParsed = title ? parseTitle(title) : '';
 
 	useEffect(() => {
 		if (titleParsed) {
