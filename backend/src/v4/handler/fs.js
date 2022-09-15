@@ -97,9 +97,9 @@ class FSHandler {
 		keys.forEach((key) => {
 			fs.unlink(this.getFullPath(key), (err) => {
 				if (err) {
-					//					systemLogger.logError("File not removed:", {err, key});
+					systemLogger.logError("File not removed:", {err, key});
 				} else {
-					systemLogger.logDebug("File removed:", key);
+					systemLogger.logInfo("File removed:", key);
 				}
 			});
 		});
