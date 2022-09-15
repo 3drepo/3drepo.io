@@ -14,12 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { Ticket, Id, Title } from './ticketItem.styles';
 
-import styled from 'styled-components';
-import { CardContent as CardContentBase } from '@/v5/ui/components/viewer/cards/cardContent.component';
+type TicketItemProps = {
+	ticket: ITicket;
+	onClick: () => void;
+	selected?: boolean;
+};
 
-export const CardContent = styled(CardContentBase)`
-	// TODO - fix after new palette is released
-	background-color: #f9faff;
-	height: 100%;
-`;
+export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
+	const { code } = TicketsHooksSelectors.selectTemplateById(ticket.type);
+
+	return (
+		<Ticket
+			onClick={onClick}
+			key={ticket._id}
+			$selected={selected}
+		>
+			<Id>{code}:{ticket.number}</Id>
+			<Title>{ticket.title}</Title>
+		</Ticket>
+	);
+};

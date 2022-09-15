@@ -14,36 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-
-export const Id = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-weight: 500;
-	font-size: 10px;
-	line-height: 14px;
-`;
-
-export const Title = styled.div`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-	padding-top: 5px;
-`;
-
-// TODO - fix after new palette is released
-export const Ticket = styled.div<{ $selected?: boolean }>`
-	cursor: pointer;
-	padding: 12px 14px 16px;
-	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-
-	&:hover {
-		${({ $selected }) => !$selected && 'background-color: #f9faff;'}
-		${Title} {
-			text-decoration: underline;
-		}
-	}
-`;
+import styled, { css } from 'styled-components';
+import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
@@ -52,4 +24,30 @@ export const List = styled.div`
 	${/* sc-selector */ Ticket}:not(:last-child) {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
+`;
+
+export const Filters = styled.div`
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 15px;
+`;
+
+export const TemplateName = styled.div<{ $selected?: boolean }>`
+	cursor: pointer;
+	font-size: 8px;
+	line-height: 14px;
+	font-weight: 500;
+	border-radius: 4px;
+	padding: 1px 6px;
+	border: solid 1px #6b778c;
+	background-color: #f9faff;
+	color: #6b778c;
+
+	${({ $selected }) => $selected && css`
+		color: ${({ theme }) => theme.palette.primary.main};
+		border-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) => theme.palette.primary.lightest};
+	`}
 `;
