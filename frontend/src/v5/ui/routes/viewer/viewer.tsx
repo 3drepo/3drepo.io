@@ -17,8 +17,10 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { ViewerParams } from '../routes.constants';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
@@ -40,6 +42,8 @@ export const Viewer = () => {
 	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
+
+	useEffect(() => { TicketsActionsDispatchers.fetchTemplates(teamspace); }, []);
 
 	if (isLoading) return (<></>);
 
