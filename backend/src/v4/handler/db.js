@@ -105,16 +105,24 @@
 		}
 	};
 
-	Handler.dropCollection = function (database, collection) {
-		return Handler.getDB(database).then(dbConn => {
-			Handler.dropAllIndicies(database, collection.name || collection);
-			return dbConn.dropCollection(collection.name || collection);
-		}).catch(err => {
+	const dropAllIndicies = async (database, colName) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.dropIndexes();
+	};
+
+	Handler.dropCollection = async (database, collection) => {
+		const colName = collection.name || collection;
+		try {
+			await dropAllIndicies(database, colName);
+			const dbConn = await Handler.getDB(database);
+			await dbConn.dropCollection(colName);
+
+		} catch(err) {
 			if(err.message !== "ns not found") {
 				Handler.disconnect();
-				return Promise.reject(err);
+				throw err;
 			}
-		});
+		}
 	};
 
 	Handler.aggregate = async (database, colName, pipelines) => {
@@ -290,10 +298,6 @@
 		return collection.dropIndex(indexName);
 	};
 
-	Handler.dropAllIndicies = async (database, colName) => {
-		return await Handler.runCommand(database,{ dropIndexes: colName, index: "*" });
-	};
-
 	Handler.getAllValues = async (database, colName, key) => {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.distinct(key);
@@ -388,10 +392,7 @@
 			try {
 				const dbConn = await Handler.getDB(database);
 				const collections = Handler.listCollections(database);
-				for (const coll in collections) {
-					console.log("stop me mnow");
-					await Handler.dropAllIndicies(database,coll);
-				}
+				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
 				await dbConn.dropDatabase();
 			} catch (err) {
 				if(err.message !== "ns not found") {
