@@ -16,7 +16,7 @@
  */
 
 import { TeamspaceAndProjectId } from '@/v5/store/store.types';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate, ITemplateDetails } from '@/v5/store/tickets/tickets.types';
 import api from './default';
 
 export const fetchContainerTickets = async ({
@@ -37,9 +37,24 @@ export const fetchFederationTickets = async ({
 	return data.tickets;
 };
 
+export const fetchTemplates = async (teamspace: string): Promise<FetchTemplatesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/templates`);
+	return data.templates;
+};
+
+export const fetchTemplateDetails = async (
+	teamspace: string,
+	templateId: string,
+): Promise<FetchTemplateDetailsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/templates/${templateId}`);
+	return data;
+};
+
 /**
  * Types
-*/
-type FetchModelTicketsParams = TeamspaceAndProjectId & { modelId: string };
+ */
+type FetchTemplatesResponse = { templates: ITemplate[] };
+type FetchTemplateDetailsResponse = ITemplateDetails[];
 
-export type FetchModelTicketsResponse = { tickets: ITicket[] };
+type FetchModelTicketsParams = TeamspaceAndProjectId & { modelId: string };
+type FetchModelTicketsResponse = { tickets: ITicket[] };

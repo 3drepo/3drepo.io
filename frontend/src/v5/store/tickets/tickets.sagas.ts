@@ -18,17 +18,20 @@
 import { put, takeLatest } from 'redux-saga/effects';
 // import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsTypes, TicketsActions, FetchModelTicketsAction } from './tickets.redux';
-import { fakeTickets } from './deleteMeWhenTicketApiWork';
+import {
+	TicketsTypes,
+	TicketsActions,
+	FetchModelTicketsAction,
+	FetchTemplatesAction,
+	FetchTemplateDetailsAction,
+} from './tickets.redux';
+import { fakeTemplates, fakeTemplatesDetails, fakeTickets } from './deleteMeWhenTicketApiWork';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
-// TODO - uncomment comments after endpoints are ready (ALSO UCCOMENT tickets.sagas.spec.ts!!)
-export function* fetchModelTickets({
-	// teamspace,
-	// projectId,
-	modelId,
-	isFederation,
-}: FetchModelTicketsAction) {
+// TODO - after endpoints are ready, uncomment comments all over
+// TODO - the file (ALSO UNCOMMENT tickets.sagas.spec.ts!!)
+// eslint-disable-next-line
+export function* fetchModelTickets({ teamspace, projectId, modelId, isFederation }: FetchModelTicketsAction) {
 	try {
 		// const fetchTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
 		// const tickets = yield fetchTickets({ teamspace, projectId, modelId });
@@ -45,6 +48,48 @@ export function* fetchModelTickets({
 	}
 }
 
+export function* fetchTemplates({ teamspace }: FetchTemplatesAction) {
+	try {
+		// const templates = yield API.Tickets.fetchTemplates(teamspace);
+		const templates = fakeTemplates;
+		yield put(TicketsActions.fetchTemplatesSuccess(teamspace, templates));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchTemplates.error.action',
+				defaultMessage: 'trying to fetch templates',
+			}),
+			error,
+			details: formatMessage({
+				id: 'tickets.fetchTemplates.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
+export function* fetchTemplateDetails({ teamspace, templateId }: FetchTemplateDetailsAction) {
+	try {
+		// const details = yield API.Tickets.fetchTemplateDetails(teamspace, templateId);
+		const details = fakeTemplatesDetails[templateId];
+		yield put(TicketsActions.fetchTemplateDetailsSuccess(teamspace, templateId, details));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchTtemplateDetails.error.action',
+				defaultMessage: 'trying to fetch template details',
+			}),
+			error,
+			details: formatMessage({
+				id: 'tickets.fetchTtemplateDetails.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
 export default function* TicketsSagas() {
 	yield takeLatest(TicketsTypes.FETCH_MODEL_TICKETS, fetchModelTickets);
+	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
+	yield takeLatest(TicketsTypes.FETCH_TEMPLATE_DETAILS, fetchTemplateDetails);
 }
