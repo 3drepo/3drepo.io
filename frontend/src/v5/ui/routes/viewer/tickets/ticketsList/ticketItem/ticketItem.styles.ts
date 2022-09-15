@@ -14,12 +14,33 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
-import { CardContent as CardContentBase } from '@/v5/ui/components/viewer/cards/cardContent.component';
 
-export const CardContent = styled(CardContentBase)`
-	// TODO - fix after new palette is released
-	background-color: #f9faff;
-	height: 100%;
+export const Id = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-weight: 500;
+	font-size: 10px;
+	line-height: 14px;
+`;
+
+export const Title = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-weight: 500;
+	font-size: 12px;
+	line-height: 16px;
+	padding-top: 5px;
+`;
+
+// TODO - fix after new palette is released
+export const Ticket = styled.div<{ $selected?: boolean }>`
+	cursor: pointer;
+	padding: 12px 14px 16px;
+	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+
+	&:hover {
+		${({ $selected }) => !$selected && 'background-color: #f9faff;'}
+		${Title} {
+			text-decoration: underline;
+		}
+	}
 `;

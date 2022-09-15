@@ -16,7 +16,10 @@
  */
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useState } from 'react';
-import { List, Ticket, Id, Title } from './ticketsList.styles';
+import { flatMap, groupBy } from 'lodash';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { TicketItem } from './ticketItem/ticketItem.component';
+import { List, TemplateName, Filters } from './ticketsList.styles';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -24,30 +27,67 @@ type TicketsListProps = {
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
+	const [templateNamesToUseForFilter, setTemplateNamesToUseForFilter] = useState<string[]>([]);
+	const templates = TicketsHooksSelectors.selectCurrentTeamspaceTemplates();
+	const templateNamesById = templates.reduce(
+		(acc, { _id, name }) => ({ ...acc, [_id]: name }),
+		{} as Record<string, string>,
+	);
+	const ticketsByType = Object.entries(groupBy(tickets, 'type'));
+	const ticketsByTemplateName = ticketsByType.reduce(
+		(acc, [type, templateTickets]) => ({ ...acc, [templateNamesById[type]]: templateTickets }),
+		{} as Record<string, ITicket[]>,
+	);
 
 	const ticketIsSelected = ({ _id }: ITicket) => selectedTicket?._id === _id;
 
-	const handleTicketClick = (ticket: ITicket) => {
-		if (!ticketIsSelected(ticket)) {
-			setSelectedTicket(ticket);
+	const toggleFilterName = (name: string) => {
+		if (templateNamesToUseForFilter.includes(name)) {
+			setTemplateNamesToUseForFilter(
+				templateNamesToUseForFilter.filter((templateName) => templateName !== name),
+			);
 		} else {
-			// eslint-disable-next-line
-			console.log('navigating to ticket');
+			setTemplateNamesToUseForFilter(templateNamesToUseForFilter.concat(name));
+		}
+	};
+
+	const getFilteredTickets = () => {
+		if (templateNamesToUseForFilter.length === 0) return tickets;
+		return flatMap(templateNamesToUseForFilter, (name) => ticketsByTemplateName[name])
+			.sort((a, b) => a.number - b.number);
+	};
+
+	const onTicketClick = (ticket: ITicket) => {
+		if (ticketIsSelected(ticket)) {
+			// navigate to ticket
+		} else {
+			setSelectedTicket(ticket);
 		}
 	};
 
 	return (
-		<List>
-			{tickets.map((ticket) => (
-				<Ticket
-					onClick={() => handleTicketClick(ticket)}
-					key={ticket._id}
-					$selected={ticketIsSelected(ticket)}
-				>
-					<Id>{ticket.type}:{ticket.number}</Id>
-					<Title>{ticket.title}</Title>
-				</Ticket>
-			))}
-		</List>
+		<>
+			<Filters>
+				{Object.entries(ticketsByTemplateName).map(([name, templateTickets]) => (
+					<TemplateName
+						key={name}
+						$selected={templateNamesToUseForFilter.includes(name)}
+						onClick={() => toggleFilterName(name)}
+					>
+						{name} ({templateTickets.length})
+					</TemplateName>
+				))}
+			</Filters>
+			<List>
+				{getFilteredTickets().map((ticket) => (
+					<TicketItem
+						ticket={ticket}
+						key={ticket._id}
+						onClick={() => onTicketClick(ticket)}
+						selected={ticketIsSelected(ticket)}
+					/>
+				))}
+			</List>
+		</>
 	);
 };
