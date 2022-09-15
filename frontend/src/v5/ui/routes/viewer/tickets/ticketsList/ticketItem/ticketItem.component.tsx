@@ -16,6 +16,8 @@
  */
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
 import { Ticket, Id, Title } from './ticketItem.styles';
 
 type TicketItemProps = {
@@ -25,7 +27,8 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
-	const { code } = TicketsHooksSelectors.selectTemplateById(ticket.type);
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const template = TicketsHooksSelectors.selectModelTemplateById(containerOrFederation, ticket.type);
 
 	return (
 		<Ticket
@@ -33,7 +36,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			key={ticket._id}
 			$selected={selected}
 		>
-			<Id>{code}:{ticket.number}</Id>
+			<Id>{template?.code}:{ticket.number}</Id>
 			<Title>{ticket.title}</Title>
 		</Ticket>
 	);

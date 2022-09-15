@@ -31,10 +31,16 @@ export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectModelTickets(containerOrFederation);
-	const templates = TicketsHooksSelectors.selectCurrentTeamspaceTemplates();
+	const templates = TicketsHooksSelectors.selectModelTemplates(containerOrFederation);
 
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchModelTickets(
+		TicketsActionsDispatchers.fetchTickets(
+			teamspace,
+			project,
+			containerOrFederation,
+			isFederation,
+		);
+		TicketsActionsDispatchers.fetchTemplates(
 			teamspace,
 			project,
 			containerOrFederation,
@@ -44,9 +50,15 @@ export const Tickets = () => {
 
 	useEffect(() => {
 		templates.forEach(({ _id }) => {
-			TicketsActionsDispatchers.fetchTemplateDetails(teamspace, _id);
+			TicketsActionsDispatchers.fetchTemplateDetails(
+				teamspace,
+				project,
+				containerOrFederation,
+				_id,
+				isFederation,
+			);
 		});
-	}, []);
+	}, [templates.length]);
 
 	return (
 		<CardContainer>
