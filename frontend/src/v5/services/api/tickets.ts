@@ -59,9 +59,7 @@ export const fetchFederationTickets = async ({
  * Types
  */
 type FetchModelTemplatesResponse = { templates: ITemplate[] };
-	type FetchModelTemplateDetailsResponse = ITemplateDetails[];
 type FetchModelTicketsResponse = { tickets: ITicket[] };
 
 type FetchModelTicketsParams = TeamspaceAndProjectId & { modelId: string };
 type FetchModelTemplatesParams = TeamspaceAndProjectId & { modelId: string };
-	type FetchModelTemplateDetailsParams = TeamspaceAndProjectId & { modelId: string, templateId: string };
