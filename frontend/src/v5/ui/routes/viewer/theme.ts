@@ -193,7 +193,7 @@ export const theme = createTheme(
 						root: {
 							height: '32 !important',
 							width: '32 !important',
-							border: 'none !important',
+							border: 'none',
 							margin: '0 !important',
 							alignSelf: 'flex-start',
 						},

@@ -18,12 +18,13 @@
 import styled, { css } from 'styled-components';
 
 import { Avatar as AvatarComponent } from '@mui/material';
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../../../../../styles';
 
 const jobBorderStyles = (color) => css`
 	height: 30px;
 	width: 30px;
-	border-style: solid;
+	border-style: ${isV5() ? 'none' : 'solid'};
 	border-color: ${color};
 	border-width: 2px;
 `;
