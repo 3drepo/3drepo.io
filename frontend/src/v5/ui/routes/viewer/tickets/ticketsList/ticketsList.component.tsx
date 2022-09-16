@@ -44,10 +44,14 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		setSelectedTemplates(new Set(selectedTemplates));
 	};
 
+	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
+
 	const getFilteredTickets = () => {
 		if (selectedTemplates.size === 0) return tickets;
 		return flatMap([...selectedTemplates], getTicketsByTemplateId);
 	};
+
+	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
 
 	const onTicketClick = (ticket: ITicket) => {
 		if (ticketIsSelected(ticket)) {
@@ -55,11 +59,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		} else {
 			setSelectedTicket(ticket);
 		}
-	};
-
-	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
-
-	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
+	};	
 
 	return (
 		<>
