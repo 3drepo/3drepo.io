@@ -16,7 +16,6 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { ITicketsState } from './tickets.redux';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
