@@ -94,10 +94,6 @@ export default css`
 					font-weight: 500;
 				}
 
-				.MuiOutlinedInput-notchedOutline {
-					top: -1px;
-				}
-
 				span {
 					color: ${({ theme }) => theme.palette.base.lighter};
 					border: solid 1px ${({ theme }) => theme.palette.base.lighter};
