@@ -59,7 +59,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		} else {
 			setSelectedTicket(ticket);
 		}
-	};	
+	};
 
 	return (
 		<>
