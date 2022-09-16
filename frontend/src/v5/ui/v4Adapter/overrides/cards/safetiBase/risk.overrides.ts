@@ -18,11 +18,14 @@
 import { css } from 'styled-components';
 import { Header } from '@/v4/routes/viewerGui/components/risks/components/levelOfRisk/levelOfRisk.styles';
 import { DateFieldContainer } from '@/v4/routes/viewerGui/components/risks/components/mainRiskFormTab/mainRiskFormTab.styles';
-import { DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl, Container as Description } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 import { DescriptionStyles } from '../issues/properties.overrides';
 
 export default css`
+	${Description} {
+		overflow: unset;
+	}
 	${DescriptionStyles}
 	${DescriptionImage} img {
 		border-radius: 5px;
@@ -74,6 +77,7 @@ export default css`
 		}
 		${FieldsContainer} {
 			width: calc(50% - 5px);
+			overflow: unset;
 			${StyledFormControl} {
 				margin: 0;
 				/* Level of risk */
