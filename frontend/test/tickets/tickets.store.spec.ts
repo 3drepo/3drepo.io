@@ -17,7 +17,7 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
-import { selectModelTickets, selectCurrentTeamspaceTemplates } from '@/v5/store/tickets/tickets.selectors';
+import { selectModelTickets, selectModelTemplates } from '@/v5/store/tickets/tickets.selectors';
 import { createTestStore } from '../test.helpers';
 import { templateDetailsMockFactory, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 
@@ -32,7 +32,7 @@ describe('Tickets: store', () => {
 
 	it('should update a model tickets', () => {
 		const ticket = ticketMockFactory();
-		dispatch(TicketsActions.fetchModelTicketsSuccess(modelId, [ticket]));
+		dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
 		const modelTicketsFromState = selectModelTickets(getState(), modelId);
 
 		expect(modelTicketsFromState[0]).toEqual(ticket);
@@ -43,10 +43,10 @@ describe('Tickets: store', () => {
 			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
 		});
 
-		it('should update teamspace templates', () => {
+		it('should update model templates', () => {
 			const template = templateMockFactory();
-			dispatch(TicketsActions.fetchTemplatesSuccess(teamspace, [template]));
-			const templatesFromState = selectCurrentTeamspaceTemplates(getState());
+			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
+			const templatesFromState = selectModelTemplates(getState(), modelId);
 	
 			expect(templatesFromState[0]).toEqual(template);
 		});
@@ -54,9 +54,9 @@ describe('Tickets: store', () => {
 		it('should update template details', () => {
 			const template = templateMockFactory();
 			const details = templateDetailsMockFactory();
-			dispatch(TicketsActions.fetchTemplatesSuccess(teamspace, [template]));
-			dispatch(TicketsActions.fetchTemplateDetailsSuccess(teamspace, template._id, details));
-			const templatesFromState = selectCurrentTeamspaceTemplates(getState());
+			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
+			dispatch(TicketsActions.fetchTemplateDetailsSuccess(modelId, template._id, details));
+			const templatesFromState = selectModelTemplates(getState(), modelId);
 	
 			expect(templatesFromState[0]).toEqual({ ...template, ...details });
 		});

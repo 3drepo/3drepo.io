@@ -28,10 +28,10 @@ export interface ITemplate {
 	_id: string,
 	name: string,
 	code: string,
-	deprecated: boolean,
 }
 
 export interface ITemplateDetails {
+	deprecated: boolean,
 	config: TemplateConfig,
 	properties: TemplateProperties[],
 	modules: TemplateModule[],

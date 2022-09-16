@@ -40,11 +40,11 @@ export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.word(),
 	code: faker.random.alpha({ count: 5, upcase: true }),
-	deprecated: faker.datatype.boolean(),
 	...overrides,
 });
 
 export const templateDetailsMockFactory = (overrides?: ITemplateDetails): ITemplateDetails => ({
+	deprecated: faker.datatype.boolean(),
 	config: {
 		comments: faker.datatype.boolean(),
 		issueProperties: faker.datatype.boolean(),
