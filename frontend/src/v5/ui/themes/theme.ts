@@ -256,14 +256,21 @@ export const theme = createTheme({
 							color: COLOR.BASE_LIGHT,
 						},
 
-						'&.Mui-focused': {
+						'&.Mui-focused:not(.Mui-error)': {
 							color: COLOR.BASE_MAIN,
+						},
+
+						'&.Mui-error': {
+							color: COLOR.ERROR_MAIN,
 						},
 					},
 					'.Mui-error': {
 						'.MuiOutlinedInput-notchedOutline': {
 							borderWidth: 1,
 						},
+						'& > textarea': {
+							color: COLOR.ERROR_MAIN,
+						}
 					},
 				},
 			},
