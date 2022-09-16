@@ -66,7 +66,6 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 	}
 }
 
-
 export default function* TicketsSagas() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
