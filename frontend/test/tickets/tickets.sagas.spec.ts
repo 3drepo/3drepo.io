@@ -19,7 +19,7 @@ import { expectSaga } from 'redux-saga-test-plan';
 import * as TicketsSaga from '@/v5/store/tickets/tickets.sagas';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { templateDetailsMockFactory, templateMockFactory, ticketMockFactory } from './tickets.fixture';
+import { templateMockFactory, ticketMockFactory } from './tickets.fixture';
 import { alertAction } from '../test.helpers';
 
 describe('Tickets: sagas', () => {

@@ -16,7 +16,7 @@
  */
 
  import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { ITemplate, ITemplateDetails, ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 
 export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
