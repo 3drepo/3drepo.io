@@ -16,14 +16,29 @@
  */
 
 import { IUser } from '@/v5/store/users/users.redux';
-import { AssignedUsersList, UserCircle, WhiteOverlay } from './assignedUsers.styles';
+import { AssignedUsersList, ExtraUsersCircle, UserCircle, WhiteOverlay } from './assignedUsers.styles';
 
 type AssignedUsersType = {
 	users: IUser[];
+	max?: number
 };
-export const AssignedUsers = ({ users }: AssignedUsersType) => (
-	<AssignedUsersList>
-		<WhiteOverlay />
-		{users.map((user, index) => <UserCircle user={user} index={index} size="small" />)}
-	</AssignedUsersList>
-);
+
+export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
+	let displayedUsers = [...users];
+	let extraUsers = [];
+	if (max && users.length > max) {
+		displayedUsers = users.slice(0, max - 1);
+		extraUsers = users.slice(max - 1);
+	}
+	return (
+		<AssignedUsersList>
+			<WhiteOverlay />
+			{displayedUsers.map((user, index) => <UserCircle user={user} index={index} size="small" />)}
+			{extraUsers.length && (
+				<ExtraUsersCircle>
+					+{extraUsers.length}
+				</ExtraUsersCircle>
+			)}
+		</AssignedUsersList>
+	);
+};

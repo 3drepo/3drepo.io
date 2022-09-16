@@ -15,23 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AvatarIcon from '@mui/material/Avatar';
 import { Avatar } from '@controls/avatar';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const OVERLAP_WIDTH = '10px';
 
-export const UserCircle = styled(Avatar)<{ index: number }>`
-	margin: 0 -${OVERLAP_WIDTH} 0 0;
-	border: 2px solid ${({ theme }) => theme.palette.primary.contrast};
-	z-index: ${({ index }) => 100 - index};
-	pointer-events: auto;
+const CircleStyles = css`
+	border: 2px solid ${({ theme }) => theme.palette.primary.contrast} !important;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	height: 28px;
+	width: 28px;
 
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
+	pointer-events: auto;
+	display: inline-flex;
+	margin: 0 -${OVERLAP_WIDTH} 0 0;
 	&:hover {
 		z-index: 1000;
+	}
+`;
+
+export const UserCircle = styled(Avatar)<{ index: number }>`
+	margin: 0 -${OVERLAP_WIDTH} 0 0;
+	
+	>.MuiAvatar-root {
+		background-color: ${({ theme }) => theme.palette.secondary.main};
+		z-index: ${({ index }) => 100 - index};
+		${CircleStyles}
 	}
 `;
 
@@ -51,7 +61,6 @@ export const AssignedUsersList = styled.div`
 	pointer-events: none;
 	position: relative;
 	width: fit-content;
-    padding-right: ${OVERLAP_WIDTH};
 
 	&:hover {
 		${WhiteOverlay} {
@@ -59,4 +68,9 @@ export const AssignedUsersList = styled.div`
 			transition: opacity 0.2s;
 		}
 	}
+`;
+
+export const ExtraUsersCircle = styled(AvatarIcon)`
+	${CircleStyles}
+	background-color: ${({ theme }) => theme.palette.primary.main};
 `;
