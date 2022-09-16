@@ -79,7 +79,6 @@ describe('Tickets: sagas', () => {
 
 		describe('templates', () => {
 			const templates = [templateMockFactory()];
-			const details = templateDetailsMockFactory();
 
 			// Basic Container templates
 			it('should call fetchContainerTemplates endpoint', async () => {
