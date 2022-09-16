@@ -20,7 +20,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId } from '../store.types';
-import { ITemplate, ITicket, ITemplateDetails } from './tickets.types';
+import { ITemplate, ITicket } from './tickets.types';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
@@ -44,19 +44,9 @@ export const fetchTemplatesSuccess = (state, { modelId, templates }: FetchTempla
 	state.templatesByModelId[modelId] = templates;
 };
 
-export const fetchTemplateDetailsSuccess = (state, {
-	modelId,
-	templateId,
-	details,
-}: FetchTemplateDetailsSuccessAction) => {
-	const templates = state.templatesByModelId[modelId];
-	Object.assign(templates.find(({ _id }) => _id === templateId), details);
-};
-
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
-	[TicketsTypes.FETCH_TEMPLATE_DETAILS_SUCCESS]: fetchTemplateDetailsSuccess,
 }));
 
 export interface ITicketsState {
@@ -68,8 +58,6 @@ export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceAndProjectId
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & { modelId: string, templates: ITemplate[] };
-export type FetchTemplateDetailsAction = Action<'FETCH_TEMPLATE_DETAILS'> & TeamspaceAndProjectId & { modelId: string, templateId: string, isFederation: boolean };
-export type FetchTemplateDetailsSuccessAction = Action<'FETCH_TEMPLATE_DETAILS_SUCCESS'> & { modelId: string, templateId: string, details: ITemplateDetails };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -89,16 +77,4 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 	) => FetchTemplatesAction;
 	fetchTemplatesSuccess: (modelId: string, templates: ITemplate[]) => FetchTemplatesSuccessAction;
-	fetchTemplateDetails: (
-		teamspace: string,
-		projectId: string,
-		modelId: string,
-		templateId: string,
-		isFederation: boolean,
-	) => FetchTemplateDetailsAction;
-	fetchTemplateDetailsSuccess: (
-		modelId: string,
-		templateId: string,
-		details: ITemplateDetails,
-	) => FetchTemplateDetailsSuccessAction;
 }

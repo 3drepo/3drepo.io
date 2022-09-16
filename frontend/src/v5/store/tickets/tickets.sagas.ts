@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, takeEvery } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import {
@@ -23,7 +23,6 @@ import {
 	TicketsActions,
 	FetchTicketsAction,
 	FetchTemplatesAction,
-	FetchTemplateDetailsAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -67,36 +66,8 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 	}
 }
 
-export function* fetchTemplateDetails({
-	teamspace,
-	projectId,
-	modelId,
-	templateId,
-	isFederation,
-}: FetchTemplateDetailsAction) {
-	try {
-		const fetchModelTemplateDetails = isFederation
-			? API.Tickets.fetchFederationTemplateDetails
-			: API.Tickets.fetchContainerTemplateDetails;
-		const details = yield fetchModelTemplateDetails({ teamspace, projectId, modelId, templateId });
-		yield put(TicketsActions.fetchTemplateDetailsSuccess(modelId, templateId, details));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'tickets.fetchTtemplateDetails.error.action',
-				defaultMessage: 'trying to fetch template details',
-			}),
-			error,
-			details: formatMessage({
-				id: 'tickets.fetchTtemplateDetails.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
-		}));
-	}
-}
 
 export default function* TicketsSagas() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
-	yield takeEvery(TicketsTypes.FETCH_TEMPLATE_DETAILS, fetchTemplateDetails);
 }

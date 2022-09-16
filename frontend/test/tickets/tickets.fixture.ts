@@ -42,34 +42,3 @@ export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 	code: faker.random.alpha({ count: 5, upcase: true }),
 	...overrides,
 });
-
-export const templateDetailsMockFactory = (overrides?: ITemplateDetails): ITemplateDetails => ({
-	deprecated: faker.datatype.boolean(),
-	config: {
-		comments: faker.datatype.boolean(),
-		issueProperties: faker.datatype.boolean(),
-		defaultView: faker.datatype.boolean(),
-		defaultImage: faker.datatype.boolean(),
-		pin: faker.datatype.boolean(),
-	},
-	properties: [{
-		name: faker.random.word(),
-		type: faker.random.word(),
-		deprecated: faker.datatype.boolean(),
-		required: faker.datatype.boolean(),
-		values: [faker.random.word()],
-	}],
-	modules: [{
-		name: faker.random.word(),
-		type: faker.random.word(),
-		deprecated: faker.datatype.boolean(),
-		properties: [{
-			name: faker.random.word(),
-			type: faker.random.word(),
-			deprecated: faker.datatype.boolean(),
-			required: faker.datatype.boolean(),
-			values: [faker.random.word()],
-		}],
-	}],
-	...overrides,
-});
