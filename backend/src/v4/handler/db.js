@@ -118,7 +118,7 @@
 			await dbConn.dropCollection(colName);
 
 		} catch(err) {
-			if(err.message !== "ns not found") {
+			if(!err.message.includes("ns not found")) {
 				Handler.disconnect();
 				throw err;
 			}
