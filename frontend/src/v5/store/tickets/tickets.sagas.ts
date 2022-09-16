@@ -25,17 +25,14 @@ import {
 	FetchTemplatesAction,
 	FetchTemplateDetailsAction,
 } from './tickets.redux';
-// import { fakeTemplates, fakeTemplatesDetails, fakeTickets } from './deleteMeWhenTicketApiWork';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
-// TODO - after endpoints are ready, uncomment comments all over
-// TODO - the file (ALSO UNCOMMENT tickets.sagas.spec.ts!!)
-// eslint-disable-next-line
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
-		const fetchModelTickets = isFederation ? API.Tickets.fetchFederationTickets : API.Tickets.fetchContainerTickets;
+		const fetchModelTickets = isFederation
+			? API.Tickets.fetchFederationTickets
+			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets({ teamspace, projectId, modelId });
-		// const tickets = fakeTickets;
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -50,9 +47,10 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 
 export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
 	try {
-		const fetchModelTemplates = isFederation ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
+		const fetchModelTemplates = isFederation
+			? API.Tickets.fetchFederationTemplates
+			: API.Tickets.fetchContainerTemplates;
 		const templates = yield fetchModelTemplates({ teamspace, projectId, modelId });
-		// const templates = fakeTemplates;
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -69,11 +67,18 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 	}
 }
 
-export function* fetchTemplateDetails({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateDetailsAction) {
+export function* fetchTemplateDetails({
+	teamspace,
+	projectId,
+	modelId,
+	templateId,
+	isFederation,
+}: FetchTemplateDetailsAction) {
 	try {
-		const fetchModelTemplateDetails = isFederation ? API.Tickets.fetchFederationTemplateDetails : API.Tickets.fetchContainerTemplateDetails;
+		const fetchModelTemplateDetails = isFederation
+			? API.Tickets.fetchFederationTemplateDetails
+			: API.Tickets.fetchContainerTemplateDetails;
 		const details = yield fetchModelTemplateDetails({ teamspace, projectId, modelId, templateId });
-		// const details = fakeTemplatesDetails[templateId];
 		yield put(TicketsActions.fetchTemplateDetailsSuccess(modelId, templateId, details));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
