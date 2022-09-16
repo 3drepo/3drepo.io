@@ -16,7 +16,7 @@
  */
 
 import { TeamspaceAndProjectId } from '@/v5/store/store.types';
-import { ITicket, ITemplate, ITemplateDetails } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate } from '@/v5/store/tickets/tickets.types';
 import api from './default';
 
 export const fetchContainerTemplates = async ({
@@ -35,26 +35,6 @@ export const fetchFederationTemplates = async ({
 }: FetchModelTemplatesParams): Promise<FetchModelTemplatesResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`);
 	return data.templates;
-};
-
-export const fetchContainerTemplateDetails = async ({
-	teamspace,
-	projectId,
-	modelId,
-	templateId,
-}: FetchModelTemplateDetailsParams): Promise<FetchModelTemplateDetailsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${templateId}`);
-	return data;
-};
-
-export const fetchFederationTemplateDetails = async ({
-	teamspace,
-	projectId,
-	modelId,
-	templateId,
-}: FetchModelTemplateDetailsParams): Promise<FetchModelTemplateDetailsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${templateId}`);
-	return data;
 };
 
 export const fetchContainerTickets = async ({
@@ -79,9 +59,9 @@ export const fetchFederationTickets = async ({
  * Types
  */
 type FetchModelTemplatesResponse = { templates: ITemplate[] };
-type FetchModelTemplateDetailsResponse = ITemplateDetails[];
+	type FetchModelTemplateDetailsResponse = ITemplateDetails[];
 type FetchModelTicketsResponse = { tickets: ITicket[] };
 
 type FetchModelTicketsParams = TeamspaceAndProjectId & { modelId: string };
 type FetchModelTemplatesParams = TeamspaceAndProjectId & { modelId: string };
-type FetchModelTemplateDetailsParams = TeamspaceAndProjectId & { modelId: string, templateId: string };
+	type FetchModelTemplateDetailsParams = TeamspaceAndProjectId & { modelId: string, templateId: string };

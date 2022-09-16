@@ -126,29 +126,6 @@ describe('Tickets: sagas', () => {
 					.put.like(alertAction('trying to fetch templates'))
 					.silentRun();
 			})
-	
-			// // Template details
-			// it('should call fetchTemplateDetails endpoint', async () => {
-			// 	mockServer
-			// 		.get(`/teamspaces/${teamspace}/settings/tickets/templates/${template._id}`)
-			// 		.reply(200, details);
-	
-			// 	await expectSaga(TicketsSaga.default)
-			// 		.dispatch(TicketsActions.fetchTemplateDetails(teamspace, template._id))
-			// 		.put(TicketsActions.fetchTemplateDetailsSuccess(teamspace, template._id, details))
-			// 		.silentRun();
-			// })
-	
-			// it('should call fetchTemplateDetails endpoint with a 404', async () => {
-			// 	mockServer
-			// 		.get(`/teamspaces/${teamspace}/settings/tickets/templates/${template._id}`)
-			// 		.reply(400);
-	
-			// 	await expectSaga(TicketsSaga.default)
-			// 		.dispatch(TicketsActions.fetchTemplateDetails(teamspace, template._id))
-			// 		.put.like(alertAction('trying to fetch template details'))
-			// 		.silentRun();
-			// })
 		})
 	})
 })
