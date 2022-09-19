@@ -85,7 +85,9 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 				};
 
 				await expect(runTest(goodTest)).resolves.toBeUndefined();
-				await expect(runTest(badTest)).rejects.toBeUndefined();
+				
+				if(badTest != undefined)
+					await expect(runTest(badTest)).rejects.toBeUndefined();
 			});
 		});
 };
@@ -268,15 +270,15 @@ const testValidateTicket = () => {
 		];
 
 		const propertyTypeUnsetData = [
-			['Text (unset)', { type: propTypes.TEXT }, null, generateRandomString(121)],
-			['Long text (unset)', { type: propTypes.LONG_TEXT }, null, generateRandomString(1201)],
-			['Boolean (unset)', { type: propTypes.BOOLEAN }, null, new Date()],
-			['Date (unset)', { type: propTypes.DATE }, null, generateRandomString()],
-			['Number (unset)', { type: propTypes.NUMBER }, null, generateRandomString()],
-			['Coordinates (unset)', { type: propTypes.COORDS }, null, [2, 3]],
-			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null, generateRandomString()],
-			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null, ['b', generateRandomString()]],
-			['Image (unset)', { type: propTypes.IMAGE }, null, generateRandomString()],
+			['Text (unset)', { type: propTypes.TEXT }, null],
+			['Long text (unset)', { type: propTypes.LONG_TEXT }, null],
+			['Boolean (unset)', { type: propTypes.BOOLEAN }, null],
+			['Date (unset)', { type: propTypes.DATE }, null],
+			['Number (unset)', { type: propTypes.NUMBER }, null],
+			['Coordinates (unset)', { type: propTypes.COORDS }, null],
+			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
+			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null],
+			['Image (unset)', { type: propTypes.IMAGE }, null],
 
 		];
 
