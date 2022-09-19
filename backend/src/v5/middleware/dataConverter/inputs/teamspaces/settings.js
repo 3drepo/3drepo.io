@@ -18,7 +18,6 @@
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getTemplateByCode, getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
-const { getTicketById } = require('../../../../models/tickets');
 const { respond } = require('../../../../utils/responder');
 const { validate } = require('../../../../schemas/tickets/templates');
 const { validateMany } = require('../../../common');

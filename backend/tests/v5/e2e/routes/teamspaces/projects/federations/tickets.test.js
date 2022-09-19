@@ -84,9 +84,9 @@ const templateWithRequiredProp = {
 		{
 			name: requiredPropName,
 			type: propTypes.TEXT,
-			required: true
-		}
-	]
+			required: true,
+		},
+	],
 };
 const depracatedTemplate = ServiceHelper.generateTemplate(true);
 
@@ -98,7 +98,7 @@ const ticketTemplates = [
 	templateWithAllModulesAndPresetEnums,
 	templateWithImage,
 	templateWithRequiredProp,
-	depracatedTemplate
+	depracatedTemplate,
 ];
 
 const setupData = async () => {
@@ -393,7 +393,8 @@ const testGetTicket = () => {
 const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 
 const testUpdateTicket = () => {
-	let ticket, tickWithDeprepactedTemplate;
+	let ticket; let
+		tickWithDeprepactedTemplate;
 
 	beforeAll(async () => {
 		await updateOne(teamspace, 'templates', { _id: stringToUUID(depracatedTemplate._id) }, { $set: { deprecated: false } });
@@ -427,7 +428,8 @@ const testUpdateTicket = () => {
 			const res = await agent.patch(endpoint).send(payloadChanges).expect(expectedStatus);
 
 			if (success) {
-				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticket?._id ?? ticket._id);
+				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id,
+					ticket?._id ?? ticket._id);
 				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
 				const updatedTicket = updatedTicketRes.body;
 				expect(updatedTicket).toHaveProperty('number');
@@ -437,10 +439,10 @@ const testUpdateTicket = () => {
 				delete updatedTicket.number;
 				delete updatedTicket.properties['Updated at'];
 				delete updatedTicket.properties['Created at'];
-				delete updatedTicket.properties['Owner'];
+				delete updatedTicket.properties.Owner;
 				expect({ ...updatedTicket }).toEqual({
 					...ticket,
-					...payloadChanges
+					...payloadChanges,
 				});
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
@@ -450,12 +452,12 @@ const testUpdateTicket = () => {
 
 	test('Should succeed if the template is depracated', async () => {
 		const payloadChanges = { title: ServiceHelper.generateRandomString() };
-		const endpoint = updateTicketRoute( users.tsAdmin.apiKey, undefined, undefined, tickWithDeprepactedTemplate._id);
+		const endpoint = updateTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tickWithDeprepactedTemplate._id);
 		await agent.patch(endpoint).send(payloadChanges).expect(templates.ok.status);
 
 		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tickWithDeprepactedTemplate._id);
 		const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
-		
+
 		const updatedTicket = updatedTicketRes.body;
 		expect(updatedTicket).toHaveProperty('number');
 		expect(updatedTicket.properties).toHaveProperty('Updated at');
@@ -464,10 +466,10 @@ const testUpdateTicket = () => {
 		delete updatedTicket.number;
 		delete updatedTicket.properties['Updated at'];
 		delete updatedTicket.properties['Created at'];
-		delete updatedTicket.properties['Owner'];
+		delete updatedTicket.properties.Owner;
 		expect({ ...updatedTicket }).toEqual({
 			...tickWithDeprepactedTemplate,
-			...payloadChanges
+			...payloadChanges,
 		});
 	});
 };

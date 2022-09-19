@@ -33,7 +33,6 @@ const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../../../../../src/v5/models/tickets');
 const TicketModelSchema = require(`${src}/models/tickets`);
 
-
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const { stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
@@ -159,7 +158,7 @@ const testValidateNewTicket = () => {
 
 const testValidateUpdateTicket = () => {
 	describe('Validate update ticket', () => {
-		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn\'t exist`, async () => {
+		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
 			const res = {};
@@ -236,16 +235,16 @@ const testValidateUpdateTicket = () => {
 
 		test('Should call next if validation succeeded and the template is deprecated', async () => {
 			const fn = jest.fn();
-			const req = { 
-				params: {}, 
-				body: { [generateRandomString()] : generateRandomString()},
-				session: { user: { username: generateRandomString() } }
+			const req = {
+				params: {},
+				body: { [generateRandomString()]: generateRandomString() },
+				session: { user: { username: generateRandomString() } },
 			};
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
-			const template = { 
+			const template = {
 				deprecated: true,
-				[generateRandomString()]: generateRandomString() 
+				[generateRandomString()]: generateRandomString(),
 			};
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
@@ -256,7 +255,8 @@ const testValidateUpdateTicket = () => {
 			expect(fn).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalled();
-			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledWith(ticket, req.body, req.session.user.username);
+			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledWith(ticket, req.body,
+				req.session.user.username);
 		});
 	});
 };

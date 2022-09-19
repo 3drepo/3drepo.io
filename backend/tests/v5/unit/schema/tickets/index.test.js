@@ -243,7 +243,7 @@ const testPresetValues = () => {
 const testValidateTicket = () => {
 	describe('Validate ticket', () => {
 		const propertyTypeSetData = [
-			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],			
+			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
@@ -374,7 +374,7 @@ const testProcessReadOnlyValues = () => {
 		});
 
 		test('Should leave the properties with existing values if a ticket is not new', () => {
-			const user = generateRandomString();		
+			const user = generateRandomString();
 			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
 			const oldTicket = {
 				title: generateRandomString(),

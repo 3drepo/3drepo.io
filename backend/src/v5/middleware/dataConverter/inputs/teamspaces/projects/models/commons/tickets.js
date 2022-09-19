@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { checkTicketTemplateExists } = require('../../../settings');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { processReadOnlyValues, validateTicket } = require('../../../../../../../schemas/tickets');
+const { checkTicketTemplateExists } = require('../../../settings');
+const { getTemplateById } = require('../../../../../../../models/tickets.templates');
+const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
-const { getTicketById } = require('../../../../../../../models/tickets');
-const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 
 const TicketsMiddleware = {};
 

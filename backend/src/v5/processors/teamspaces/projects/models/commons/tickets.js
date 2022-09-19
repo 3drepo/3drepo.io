@@ -30,7 +30,8 @@ const formatResourceProperties = (template, oldTicket, updatedTicket) => {
 
 	const processProps = (templateProperties, oldProperties = {}, updatedProperties) => {
 		templateProperties.forEach(({ type, name }) => {
-			let oldProp, newProp;
+			let oldProp;
+			let newProp;
 			if (type === propTypes.IMAGE) {
 				oldProp = oldProperties[name];
 				newProp = updatedProperties[name];
@@ -45,6 +46,7 @@ const formatResourceProperties = (template, oldTicket, updatedTicket) => {
 
 			if (newProp) {
 				const ref = generateUUID();
+				// eslint-disable-next-line no-param-reassign
 				updatedProperties[name] = type === propTypes.IMAGE ? ref : { screenshot: ref };
 				toAdd.push({ ref, data: newProp });
 			}
@@ -58,7 +60,7 @@ const formatResourceProperties = (template, oldTicket, updatedTicket) => {
 		processProps(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
 
-	return { toRemove, toAdd }
+	return { toRemove, toAdd };
 };
 
 const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
@@ -79,8 +81,8 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 	const ticketId = oldTicket._id;
 	await updateTicket(teamspace, ticketId, updateData);
 	await Promise.all([
-		resourceData.toRemove.map(d => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
-		storeFiles(teamspace, project, model, ticketId, resourceData.toAdd)
+		resourceData.toRemove.map((d) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
+		storeFiles(teamspace, project, model, ticketId, resourceData.toAdd),
 	]);
 };
 

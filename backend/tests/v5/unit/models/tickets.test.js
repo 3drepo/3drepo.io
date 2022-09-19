@@ -193,7 +193,8 @@ const testUpdateTicket = () => {
 						'modules.module.propToUpdate': propToUpdate,
 						propToUpdate,
 						'properties.propToUpdate': propToUpdate,
-					}, $unset: {
+					},
+					$unset: {
 						'modules.module.propToUnset': 1,
 						propToUnset: 1,
 						'properties.propToUnset': 1,
@@ -212,13 +213,10 @@ const testUpdateTicket = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
-				{
-					$set: {	propToUpdate }
-				});
+				{ $set: { propToUpdate } });
 		});
 
-		
-		test('should not update the ticket if update data is an empty object', async () => {		
+		test('should not update the ticket if update data is an empty object', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 			await Ticket.updateTicket(generateRandomString(), generateRandomString(), {});
 
