@@ -56,6 +56,7 @@ const generateImageTestData = (isView) => {
 			},
 			{
 				type: 'safetibase',
+				properties: []
 			},
 		],
 	};

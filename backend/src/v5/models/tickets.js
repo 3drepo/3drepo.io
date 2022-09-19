@@ -39,49 +39,38 @@ Tickets.updateTicket = async (teamspace, ticketId, data) => {
 	const toUpdate = {};
 	const toUnset = {};
 
-	Object.keys(data).forEach((key) => {
-		const value = data[key];
-		if (value) {
-			if (key === 'modules') {
-				Object.keys(value).forEach((moduleName) => {
-					const module = value[moduleName];
-					Object.keys(module).forEach((moduleProp) => {
-						const modulePropValue = module[moduleProp];
-						if (modulePropValue) {
-							toUpdate[`modules.${moduleName}.${moduleProp}`] = modulePropValue;
-						} else {
-							toUnset[`modules.${moduleName}.${moduleProp}`] = 1;
-						}
-					});
-				});
-			} else if (key === 'properties') {
-				Object.keys(value).forEach((propKey) => {
-					const propValue = value[propKey];
-					if (propValue) {
-						toUpdate[`properties.${propKey}`] = propValue;
-					} else {
-						toUnset[`properties.${propKey}`] = 1;
-					}
-				});
-			} else {
-				toUpdate[key] = value;
-			}
-		} else {
-			toUnset[key] = 1;
-		}
-	});
+	const { modules, properties, ...rootProps} = data;
+
+	const determineUpdate = (obj, prefix) => {
+		Object.keys(obj).forEach((key) => {
+			const value = obj[key];
+			if (value)
+				toUpdate[`${prefix ?? ''}${key}`] = value;
+			else 
+				toUnset[`${prefix ?? ''}${key}`] = 1;
+		});
+	}
+
+	determineUpdate(rootProps);
+
+	if (properties) 
+		determineUpdate(properties, 'properties.');
+
+	if(modules) {
+		Object.keys(modules).forEach((mod) => {
+			determineUpdate(modules[mod], `modules.${[mod]}.`);
+		});
+	}
 
 	const updateJson = {};
-	if (Object.keys(toUpdate).length) {
+	if (Object.keys(toUpdate).length) 
 		updateJson.$set = toUpdate;
-	}
-	if (Object.keys(toUnset).length) {
+	
+	if (Object.keys(toUnset).length) 
 		updateJson.$unset = toUnset;
-	}
 
-	if (Object.keys(updateJson).length) {
+	if (Object.keys(updateJson).length) 
 		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
-	}
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {

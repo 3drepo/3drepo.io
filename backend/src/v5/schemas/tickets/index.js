@@ -155,7 +155,7 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 		properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
 	}
 
-	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
+	properties[basePropertyLabels.UPDATED_AT] = currTime;
 
 	const updatedSafetibaseProps = modules?.[presetModules.SAFETIBASE];
 	
@@ -167,14 +167,10 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		const levelOfRisk = calculateLevelOfRisk(
+		updatedSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
 			safetiBaseMod[modProps.RISK_LIKELIHOOD],
 			safetiBaseMod[modProps.RISK_CONSEQUENCE],
 		);
-
-		if (levelOfRisk) {
-			updatedSafetibaseProps[modProps.LEVEL_OF_RISK] = levelOfRisk;
-		}
 
 		const treatedLevel = calculateLevelOfRisk(
 			safetiBaseMod[modProps.TREATED_RISK_LIKELIHOOD],

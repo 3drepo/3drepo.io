@@ -186,23 +186,43 @@ const testUpdateTicket = () => {
 
 			await Ticket.updateTicket(teamspace, ticketId, data);
 
-			expect(fn).toHaveBeenCalledTimes(2);
+			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
 				{
 					$set: {
 						'modules.module.propToUpdate': propToUpdate,
 						propToUpdate,
 						'properties.propToUpdate': propToUpdate,
-					},
-				});
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
-				{
-					$unset: {
+					}, $unset: {
 						'modules.module.propToUnset': 1,
 						propToUnset: 1,
 						'properties.propToUnset': 1,
 					},
 				});
+		});
+
+		test('should update the ticket without updating properties', async () => {
+			const teamspace = generateRandomString();
+			const ticketId = generateRandomString();
+			const propToUpdate = generateRandomString();
+			const data = { propToUpdate };
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await Ticket.updateTicket(teamspace, ticketId, data);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
+				{
+					$set: {	propToUpdate }
+				});
+		});
+
+		
+		test('should not update the ticket if update data is an empty object', async () => {		
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			await Ticket.updateTicket(generateRandomString(), generateRandomString(), {});
+
+			expect(fn).not.toHaveBeenCalled();
 		});
 	});
 };
