@@ -161,6 +161,8 @@ export function* updateContainerSettings({
 	projectId,
 	containerId,
 	settings,
+	onSuccess,
+	onError,
 }: UpdateContainerSettingsAction) {
 	try {
 		const rawSettings = prepareContainerSettingsForBackend(settings);
@@ -168,15 +170,13 @@ export function* updateContainerSettings({
 			teamspace, projectId, containerId, settings: rawSettings,
 		});
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.updateSettings.error', defaultMessage: 'trying to update container settings' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 
-export function* createContainer({ teamspace, projectId, newContainer }: CreateContainerAction) {
+export function* createContainer({ teamspace, projectId, newContainer, onSuccess, onError }: CreateContainerAction) {
 	try {
 		const id = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
 
@@ -185,11 +185,9 @@ export function* createContainer({ teamspace, projectId, newContainer }: CreateC
 			projectId,
 			container,
 		));
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 

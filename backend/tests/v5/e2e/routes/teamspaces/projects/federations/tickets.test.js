@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep } = require('lodash');
+const { cloneDeep, times } = require('lodash');
 const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../helper/services');
@@ -45,11 +45,14 @@ const project = ServiceHelper.generateRandomProject();
 const models = [
 	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], isFederation: true }),
 	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], isFederation: true }),
+	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user], isFederation: true }),
 	ServiceHelper.generateRandomModel({ }),
 ];
 
 const modelWithTemplates = models[0];
-const con = models[2];
+const modelWithNoTickets = models[1];
+const modelForTicketList = models[2];
+const con = models[3];
 
 const templateWithAllModulesAndPresetEnums = {
 	...ServiceHelper.generateTemplate(),
@@ -474,6 +477,73 @@ const testUpdateTicket = () => {
 	});
 };
 
+const testGetTicketList = () => {
+	const route = (key, projectId = project.id, modelId = modelWithTemplates._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets${key ? `?key=${key}` : ''}`;
+	describe('Get ticket list', () => {
+		const tickets = [];
+		const sortById = (a, b) => {
+			if (a._id > b._id) return 1;
+			if (b._id > a._id) return -1;
+			return 0;
+		};
+		beforeAll(async () => {
+			const tickTems = [];
+			times(3, () => {
+				tickTems.push(ServiceHelper.generateTemplate());
+			});
+			await ServiceHelper.db.createTemplates(teamspace, tickTems);
+
+			const proms = [];
+			const endpoint = addTicketRoute(users.tsAdmin.apiKey, undefined, modelForTicketList._id);
+
+			times(10, (i) => {
+				const ticket = ServiceHelper.generateTicket(tickTems[i % tickTems.length]);
+				const prom = agent.post(endpoint).send(ticket).then(({ body }) => {
+					ticket._id = body._id;
+					tickets.push(ticket);
+				});
+
+				proms.push(prom);
+			});
+
+			await Promise.all(proms);
+			tickets.sort(sortById);
+		});
+
+		describe.each([
+			['the user does not have a valid session', templates.notLoggedIn],
+			['the user is not a member of the teamspace', templates.teamspaceNotFound, undefined, undefined, users.nobody.apiKey],
+			['the project does not exist', templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+			['the federation does not exist', templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
+			['the federation provided is a container', templates.federationNotFound, project.id, con._id, users.tsAdmin.apiKey],
+			['the user does not have access to the federation', templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
+		])('Error checks', (desc, expectedOutput, projectId, modelId, key) => {
+			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
+				const endpoint = route(key, projectId, modelId);
+				const res = await agent.get(endpoint).expect(expectedOutput.status);
+				expect(res.body.code).toEqual(expectedOutput.code);
+			});
+		});
+
+		test('Should return empty list if model has no tickets', async () => {
+			const endpoint = route(users.tsAdmin.apiKey, undefined, modelWithNoTickets._id);
+			const res = await agent.get(endpoint).expect(templates.ok.status);
+			expect(res.body).toEqual({ tickets: [] });
+		});
+
+		test('Should return all tickets within the model', async () => {
+			const endpoint = route(users.tsAdmin.apiKey, undefined, modelForTicketList._id);
+			const res = await agent.get(endpoint).expect(templates.ok.status);
+			const ticketsOut = res.body.tickets;
+			ticketsOut.sort(sortById);
+			ticketsOut.forEach((tickOut, ind) => {
+				const { _id, title, type } = tickets[ind];
+				expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
+			});
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/federations/tickets', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -487,5 +557,6 @@ describe('E2E routes/teamspaces/projects/federations/tickets', () => {
 	testAddTicket();
 	testGetTicket();
 	testGetTicketResource();
+	testGetTicketList();
 	testUpdateTicket();
 });

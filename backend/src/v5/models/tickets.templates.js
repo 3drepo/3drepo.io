@@ -48,6 +48,8 @@ Templates.updateTemplate = async (teamspace, _id, data) => {
 	await db.replaceOne(teamspace, TEMPLATES_COL, { _id }, { ...data, _id });
 };
 
+Templates.getTemplatesByQuery = find;
+
 Templates.getAllTemplates = (teamspace, includeDeprecated, projection) => {
 	const query = includeDeprecated ? { } : { deprecated: { $ne: true } };
 	return find(teamspace, query, projection);

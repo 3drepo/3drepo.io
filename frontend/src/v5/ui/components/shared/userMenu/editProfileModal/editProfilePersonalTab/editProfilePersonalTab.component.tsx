@@ -60,7 +60,6 @@ export const EditProfilePersonalTab = ({
 }: EditProfilePersonalTabProps) => {
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
-
 	const {
 		getValues,
 		trigger,
