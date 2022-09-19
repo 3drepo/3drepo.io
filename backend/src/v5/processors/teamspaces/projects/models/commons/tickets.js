@@ -15,84 +15,55 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, updateTicket } = require('../../../../../models/tickets');
+const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
+const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
 const FilesManager = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
-const { propTypes } = require('../../../../../schemas/tickets/templates.constants');
-const { addTicketLog } = require('../../../../../models/tickets.logs');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 
+
 const Tickets = {};
 
-const removeExistingFiles = async (teamspace, template, oldTicket, updatedTicket) => {
-	const promises = [];
+const formatResourceProperties = (template, oldTicket, updatedTicket) => {
+	const toRemove = [];
+	const toAdd = [];
 
-	const removeFiles = (templateProperties, oldProperties, updatedProperties) => {
+	const processProps = (templateProperties, oldProperties = {}, updatedProperties) => {
 		templateProperties.forEach(({ type, name }) => {
 			let oldProp;
+			let newProp;
 			if (type === propTypes.IMAGE) {
 				oldProp = oldProperties[name];
+				newProp = updatedProperties[name];
 			} else if (type === propTypes.VIEW) {
 				oldProp = oldProperties[name]?.screenshot;
+				newProp = updatedProperties[name]?.screenshot;
 			}
 
-			if (oldProp && updatedProperties[name] !== undefined) {
-				promises.push(FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, oldProp));
+			if (oldProp && newProp !== undefined) {
+				toRemove.push(oldProp);
 			}
-		});
-	};
 
-	removeFiles(template.properties, oldTicket.properties, updatedTicket.properties);
-
-	template.modules.forEach(({ properties, name, type }) => {
-		const id = name ?? type;
-		const oldModule = oldTicket.modules?.[id];
-		const updatedModule = updatedTicket.modules?.[id];
-		if (oldModule && updatedModule) {
-			removeFiles(properties, oldModule, updatedModule);
-		}
-	});
-
-	await Promise.all(promises);
-};
-
-const extractEmbeddedBinary = (ticket, template) => {
-	const binaryData = [];
-
-	const replaceBinaryDataWithRef = (properties, propTemplate) => {
-		propTemplate.forEach(({ type, name }) => {
-			if (properties[name]) {
-				const data = properties[name];
-				if (type === propTypes.IMAGE) {
-					const ref = generateUUID();
-					// eslint-disable-next-line no-param-reassign
-					properties[name] = ref;
-					binaryData.push({ ref, data });
-				} else if (type === propTypes.VIEW && data.screenshot) {
-					const ref = generateUUID();
-					const buffer = data.screenshot;
-					data.screenshot = ref;
-					binaryData.push({ ref, data: buffer });
-				}
+			if (newProp) {
+				const ref = generateUUID();
+				// eslint-disable-next-line no-param-reassign
+				updatedProperties[name] = type === propTypes.IMAGE ? ref : { screenshot: ref };
+				toAdd.push({ ref, data: newProp });
 			}
 		});
 	};
 
-	replaceBinaryDataWithRef(ticket.properties, template.properties);
+	processProps(template.properties, oldTicket?.properties, updatedTicket.properties);
 
 	template.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
-		const module = ticket.modules?.[id];
-
-		if (module) {
-			replaceBinaryDataWithRef(module, properties);
-		}
+		processProps(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
 
-	return binaryData;
+	return { toRemove, toAdd };
 };
 
 const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
@@ -102,18 +73,20 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 );
 
 Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
-	const binaryData = extractEmbeddedBinary(ticket, template);
+	const resourceData = formatResourceProperties(template, undefined, ticket);
 	const res = await addTicket(teamspace, project, model, ticket);
-	await storeFiles(teamspace, project, model, res, binaryData);
+	await storeFiles(teamspace, project, model, res, resourceData.toAdd);
 	return res;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
-	await removeExistingFiles(teamspace, template, oldTicket, updateData);
-	const binaryData = extractEmbeddedBinary(updateData, template);
-	const ticket = oldTicket._id;
-	await updateTicket(teamspace, ticket, updateData);
-	await storeFiles(teamspace, project, model, ticket, binaryData);
+	const resourceData = formatResourceProperties(template, oldTicket, updateData);
+	const ticketId = oldTicket._id;
+	await updateTicket(teamspace, ticketId, updateData);
+	await Promise.all([
+		resourceData.toRemove.map((d) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
+		storeFiles(teamspace, project, model, ticketId, resourceData.toAdd),
+	]);
 
 	publish(events.MODEL_TICKET_UPDATE, {
 		teamspace,
@@ -131,5 +104,32 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 );
 
 Tickets.getTicketById = getTicketById;
+
+Tickets.getTicketList = (teamspace, project, model) => {
+	const { SAFETIBASE } = presetModules;
+	const { [SAFETIBASE]: safetibaseProps } = modulePropertyLabels;
+	const projection = {
+		_id: 1,
+		title: 1,
+		number: 1,
+		type: 1,
+		[`properties.${basePropertyLabels.OWNER}`]: 1,
+		[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
+		[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,
+		[`properties.${basePropertyLabels.DUE_DATE}`]: 1,
+		[`properties.${basePropertyLabels.PIN}`]: 1,
+		[`properties.${basePropertyLabels.STATUS}`]: 1,
+		[`properties.${basePropertyLabels.PRIORITY}`]: 1,
+		[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
+		[`modules.${SAFETIBASE}.${safetibaseProps.LEVEL_OF_RISK}`]: 1,
+		[`modules.${SAFETIBASE}.${safetibaseProps.TREATED_LEVEL_OF_RISK}`]: 1,
+		[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
+
+	};
+
+	const sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 };
+
+	return getAllTickets(teamspace, project, model, projection, sort);
+};
 
 module.exports = Tickets;

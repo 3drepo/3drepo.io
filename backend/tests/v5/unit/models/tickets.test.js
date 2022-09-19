@@ -126,6 +126,41 @@ const testGetTicketById = () => {
 	});
 };
 
+const testGetAllTickets = () => {
+	describe('Get all tickets', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		test('Should return whatever the query returns', async () => {
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const sort = { [generateRandomString()]: generateRandomString() };
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getAllTickets(teamspace, project, model, projection, sort))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model }, projection, sort);
+		});
+
+		test('Should impose default projection if not provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getAllTickets(teamspace, project, model))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, undefined);
+		});
+	});
+};
+
 const testUpdateTicket = () => {
 	describe('Update ticket', () => {
 		test('should update the ticket to set properties', async () => {
@@ -186,7 +221,7 @@ const testUpdateTicket = () => {
 
 			await Ticket.updateTicket(teamspace, ticketId, data);
 
-			expect(fn).toHaveBeenCalledTimes(2);
+			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
 				{
 					$set: {
@@ -194,15 +229,33 @@ const testUpdateTicket = () => {
 						propToUpdate,
 						'properties.propToUpdate': propToUpdate,
 					},
-				});
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
-				{
 					$unset: {
 						'modules.module.propToUnset': 1,
 						propToUnset: 1,
 						'properties.propToUnset': 1,
 					},
 				});
+		});
+
+		test('should update the ticket without updating properties', async () => {
+			const teamspace = generateRandomString();
+			const ticketId = generateRandomString();
+			const propToUpdate = generateRandomString();
+			const data = { propToUpdate };
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await Ticket.updateTicket(teamspace, ticketId, data);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
+				{ $set: { propToUpdate } });
+		});
+
+		test('should not update the ticket if update data is an empty object', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			await Ticket.updateTicket(generateRandomString(), generateRandomString(), {});
+
+			expect(fn).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -212,4 +265,5 @@ describe('models/tickets', () => {
 	testRemoveAllTickets();
 	testGetTicketById();
 	testUpdateTicket();
+	testGetAllTickets();
 });

@@ -27,6 +27,12 @@ const SettingsMW = require(`${src}/middleware/dataConverter/inputs/teamspaces/se
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets');
 const TicketSchema = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
+const TemplateModelSchema = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../../../../../../src/v5/models/tickets');
+const TicketModelSchema = require(`${src}/models/tickets`);
+
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const { stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
@@ -152,14 +158,16 @@ const testValidateNewTicket = () => {
 
 const testValidateUpdateTicket = () => {
 	describe('Validate update ticket', () => {
-		test('Should not call next if ticket doesn\'t exist', async () => {
+		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
 			const res = {};
 
-			SettingsMW.checkTicketExists.mockImplementationOnce(() => {});
+			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ticketNotFound);
 			expect(fn).not.toHaveBeenCalled();
 		});
 
@@ -167,15 +175,11 @@ const testValidateUpdateTicket = () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
 			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
 
-			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
-				/* eslint-disable no-param-reassign */
-				_req.templateData = { };
-				_req.ticketData = { };
-				/* eslint-enable no-param-reassign */
-
-				await next();
-			});
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
@@ -192,14 +196,11 @@ const testValidateUpdateTicket = () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
 			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
 
-			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
-				/* eslint-disable no-param-reassign */
-				_req.templateData = { };
-				_req.ticketData = { };
-				/* eslint-enable no-param-reassign */
-				await next();
-			});
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
@@ -218,64 +219,44 @@ const testValidateUpdateTicket = () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
 			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
 
-			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
-				/* eslint-disable no-param-reassign */
-				_req.templateData = { };
-				_req.ticketData = { };
-				/* eslint-enable no-param-reassign */
-				await next();
-			});
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
 			expect(fn).toHaveBeenCalled();
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-
-		test('Should call next and after setting safetibase module props if user wants to update safetibase module', async () => {
-			const safetiBaseProp1 = generateRandomString();
-			const safetiBaseProp2 = generateRandomString();
-			const fn = jest.fn();
-			const req = { params: {}, body: { modules: { safetibase: { safetiBaseProp2 } } } };
-			const res = {};
-
-			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
-				/* eslint-disable no-param-reassign */
-				_req.templateData = { };
-				_req.ticketData = { modules: { safetibase: { safetiBaseProp1 } } };
-				/* eslint-enable no-param-reassign */
-				await next();
-			});
-
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-
-			await Tickets.validateUpdateTicket(req, res, fn);
-
-			expect(fn).toHaveBeenCalled();
-			expect(req.body.modules.safetibase).toEqual({ safetiBaseProp1, safetiBaseProp2 });
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
 		test('Should call next if validation succeeded and the template is deprecated', async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = {
+				params: {},
+				body: { [generateRandomString()]: generateRandomString() },
+				session: { user: { username: generateRandomString() } },
+			};
 			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = {
+				deprecated: true,
+				[generateRandomString()]: generateRandomString(),
+			};
 
-			SettingsMW.checkTicketExists.mockImplementationOnce(async (_req, _res, next) => {
-				/* eslint-disable no-param-reassign */
-				_req.templateData = { deprecated: true };
-				_req.ticketData = { };
-				/* eslint-enable no-param-reassign */
-				await next();
-			});
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
 			expect(fn).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalled();
+			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledWith(ticket, req.body,
+				req.session.user.username);
 		});
 	});
 };

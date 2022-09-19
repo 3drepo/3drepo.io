@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketResourceAsStream, updateTicket: update } = require('../../../../processors/teamspaces/projects/models/federations');
+const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update  } = require('../../../../processors/teamspaces/projects/models/federations');
 const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTicket } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket} = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
@@ -59,6 +59,18 @@ const getTicket = async (req, res, next) => {
 		req.ticket = await getTicketById(teamspace, project, federation, ticket);
 		req.showDeprecated = req.query.showDeprecated === 'true';
 
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketsInFederation = async (req, res, next) => {
+	const { teamspace, project, federation } = req.params;
+
+	try {
+		req.tickets = await getTicketList(teamspace, project, federation);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -170,7 +182,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the full definition of a template
 	 *     tags: [Federations]
-	 *     operationId: getTicketTemplateDetails
+	 *     operationId: getFederationTicketTemplateDetails
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -264,11 +276,11 @@ const establishRoutes = () => {
 	 *                     Description:
 	 *                       type: string
 	 *                       description: A detailed description of the ticket
-	 *                       example: "The door way is too narrow for disable access"
+	 *                       example: The door way is too narrow for disable access
 	 *                     CustomProperty1:
 	 *                       type: string
 	 *                       description: Any custom properties in the ticket should be filled in this way
-	 *                       example: "Data1"
+	 *                       example: Data1
 	 *                 modules:
 	 *                   type: object
 	 *                   description: modules within the ticket
@@ -280,7 +292,7 @@ const establishRoutes = () => {
 	 *                         Property1:
 	 *                           type: string
 	 *                           description: Any properties in the module should be filled in this way
-	 *                           example: "Data1"
+	 *                           example: Data1
 	 *
 	 *
 	 *     responses:
@@ -303,11 +315,80 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets:
+	 *   get:
+	 *     description: Get all tickets within the federation
+	 *     tags: [Federations]
+	 *     operationId: GetFederationTicketList
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns an array of tickets
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 tickets:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     description: schema is subject to the template the ticket follows
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: id of the ticket
+	 *                       type:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: template id
+	 *                       title:
+	 *                         type: string
+	 *                         description: ticket title
+	 *                         example: "Missing door"
+	 *                       number:
+	 *                         type: number
+	 *                         description: ticket number
+	 *                       properties:
+	 *                         type: object
+	 *                         description: ticket properties
+	 *                       modules:
+	 *                         type: object
+	 *                         description: ticket modules and their properties
+	 *
+	 */
+	router.get('/', hasReadAccessToFederation, getTicketsInFederation, serialiseTicketList);
+
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
 	 *   get:
 	 *     description: Get ticket by ID
 	 *     tags: [Federations]
-	 *     operationId: GetTicket
+	 *     operationId: GetFederationTicket
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -356,10 +437,14 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: id of the ticket
+	 *                 type:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: template id
 	 *                 title:
 	 *                   type: string
 	 *                   description: ticket title
-	 *                   example: "Missing door"
+	 *                   example: Missing door
 	 *                 number:
 	 *                   type: number
 	 *                   description: ticket number
@@ -379,7 +464,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the binary resource associated with the given ticket
 	 *     tags: [Federations]
-	 *     operationId: getTicketResource
+	 *     operationId: getFederationTicketResource
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -426,7 +511,8 @@ const establishRoutes = () => {
 	 */
 	router.get('/:ticket/resources/:resource', hasReadAccessToFederation, getTicketResource);
 
-	/* @openapi
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/tickets/{ticket}:
 	 *   patch:
 	 *     description: Update a ticket. The Schema of the payload depends on the ticket template being used
@@ -474,11 +560,11 @@ const establishRoutes = () => {
 	 *                     Description:
 	 *                       type: string
 	 *                       description: A detailed description of the ticket
-	 *                       example: "The door way is too narrow for disable access"
+	 *                       example: The door way is too narrow for disable access
 	 *                     CustomProperty1:
 	 *                       type: string
 	 *                       description: Any custom properties in the ticket should be filled in this way
-	 *                       example: "Data1"
+	 *                       example: Data1
 	 *                 modules:
 	 *                   type: object
 	 *                   description: modules within the ticket
@@ -490,7 +576,7 @@ const establishRoutes = () => {
 	 *                         Property1:
 	 *                           type: string
 	 *                           description: Any properties in the module should be filled in this way
-	 *                           example: "Data1"
+	 *                           example: Data1
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

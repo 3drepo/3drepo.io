@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
@@ -27,6 +27,8 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface ICreateContainer {
@@ -43,9 +45,19 @@ interface IFormInput {
 }
 
 export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
-	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
+	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
+	const {
+		handleSubmit,
+		reset,
+		getValues,
+		trigger,
+		control,
+		formState,
+		formState: { errors },
+	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
+		context: { alreadyExistingNames },
 		defaultValues: {
 			name: '',
 			unit: 'mm',
@@ -55,12 +67,22 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 		},
 	});
 	const { teamspace, project } = useParams<DashboardParams>();
-	const onSubmit: SubmitHandler<IFormInput> = (body) => {
-		ContainersActionsDispatchers.createContainer(teamspace, project, body);
-		onClickClose();
+
+	const onSubmitError = (err) => {
+		if (nameAlreadyExists(err)) {
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			trigger('name');
+		}
 	};
 
-	useEffect(reset, [open]);
+	const onSubmit: SubmitHandler<IFormInput> = (body) => {
+		ContainersActionsDispatchers.createContainer(teamspace, project, body, onClickClose, onSubmitError);
+	};
+
+	useEffect(() => {
+		reset();
+		setAlreadyExistingNames([]);
+	}, [open]);
 
 	return (
 		<FormModal
@@ -121,6 +143,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
 				formError={errors.code}
 			/>
+			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
 		</FormModal>
 	);
 };

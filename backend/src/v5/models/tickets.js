@@ -36,45 +36,36 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 };
 
 Tickets.updateTicket = async (teamspace, ticketId, data) => {
-	const updateObj = { toUpdate: {}, toUnset: {} };
+	const toUpdate = {};
+	const toUnset = {};
 
-	Object.keys(data).forEach((key) => {
-		const value = data[key];
-		if (value) {
-			if (key === 'modules') {
-				Object.keys(value).forEach((moduleName) => {
-					const module = value[moduleName];
-					Object.keys(module).forEach((moduleProp) => {
-						const modulePropValue = module[moduleProp];
-						if (modulePropValue) {
-							updateObj.toUpdate[`modules.${moduleName}.${moduleProp}`] = modulePropValue;
-						} else {
-							updateObj.toUnset[`modules.${moduleName}.${moduleProp}`] = 1;
-						}
-					});
-				});
-			} else if (key === 'properties') {
-				Object.keys(value).forEach((propKey) => {
-					const propValue = value[propKey];
-					if (propValue) {
-						updateObj.toUpdate[`properties.${propKey}`] = propValue;
-					} else {
-						updateObj.toUnset[`properties.${propKey}`] = 1;
-					}
-				});
-			} else {
-				updateObj.toUpdate[key] = value;
-			}
-		} else {
-			updateObj.toUnset[key] = 1;
-		}
-	});
+	const { modules, properties, ...rootProps } = data;
 
-	if (Object.keys(updateObj.toUpdate).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, { $set: updateObj.toUpdate });
+	const determineUpdate = (obj, prefix) => {
+		Object.keys(obj).forEach((key) => {
+			const value = obj[key];
+			if (value) toUpdate[`${prefix ?? ''}${key}`] = value;
+			else { toUnset[`${prefix ?? ''}${key}`] = 1; }
+		});
+	};
+
+	determineUpdate(rootProps);
+
+	if (properties) { determineUpdate(properties, 'properties.'); }
+
+	if (modules) {
+		Object.keys(modules).forEach((mod) => {
+			determineUpdate(modules[mod], `modules.${[mod]}.`);
+		});
 	}
-	if (Object.keys(updateObj.toUnset).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, { $unset: updateObj.toUnset });
+
+	const updateJson = {};
+	if (Object.keys(toUpdate).length) { updateJson.$set = toUpdate; }
+
+	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
+
+	if (Object.keys(updateJson).length) {
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
 	}
 };
 
@@ -97,5 +88,13 @@ Tickets.getTicketById = async (
 
 	return ticket;
 };
+
+Tickets.getAllTickets = (
+	teamspace,
+	project,
+	model,
+	projection = { teamspace: 0, project: 0, model: 0 },
+	sort,
+) => DbHandler.find(teamspace, TICKETS_COL, { teamspace, project, model }, projection, sort);
 
 module.exports = Tickets;

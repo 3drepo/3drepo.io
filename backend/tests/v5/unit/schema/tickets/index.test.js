@@ -17,7 +17,7 @@
 const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
-const { generateRandomString, generateRandomNumber, generateUUID } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateUUID, generateRandomDate } = require('../../../helper/services');
 const FS = require('fs');
 
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
@@ -40,11 +40,11 @@ const {
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
-const testPropertyTypes = (testData, moduleProperty) => {
+const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 	describe.each(
 		testData,
 	)(`${moduleProperty ? '[Modules] ' : ''}Property types`,
-		(desc, schema, goodTest, badTest, isNewTicket = true) => {
+		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const teamspace = generateRandomString();
 				const fieldName = generateRandomString();
@@ -85,7 +85,9 @@ const testPropertyTypes = (testData, moduleProperty) => {
 				};
 
 				await expect(runTest(goodTest)).resolves.toBeUndefined();
-				await expect(runTest(badTest)).rejects.toBeUndefined();
+				
+				if(badTest != undefined)
+					await expect(runTest(badTest)).rejects.toBeUndefined();
 			});
 		});
 };
@@ -242,25 +244,16 @@ const testPresetValues = () => {
 
 const testValidateTicket = () => {
 	describe('Validate ticket', () => {
-		const propertyTypeTestData = [
+		const propertyTypeSetData = [
 			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
-			['Text (unset)', { type: propTypes.TEXT }, null, generateRandomString(121), false],
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
-			['Long text (unset)', { type: propTypes.LONG_TEXT }, null, generateRandomString(1201), false],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
-			['Boolean (unset)', { type: propTypes.BOOLEAN }, null, new Date(), false],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
-			['Date (unset)', { type: propTypes.DATE }, null, generateRandomString(), false],
 			['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
-			['Number (unset)', { type: propTypes.NUMBER }, null, generateRandomString(), false],
 			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
-			['Coordinates (unset)', { type: propTypes.COORDS }, null, [2, 3], false],
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
-			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null, generateRandomString(), false],
 			['Many Of', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
-			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null, ['b', generateRandomString()], false],
 			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
-			['Image (unset)', { type: propTypes.IMAGE }, null, generateRandomString(), false],
 			['View (empty)', { type: propTypes.VIEW }, {}, 123],
 			['View (Image only)', { type: propTypes.VIEW }, { screenshot: FS.readFileSync(image, { encoding: 'base64' }) }, { screenshot: 'abc' }],
 			['View', { type: propTypes.VIEW }, { camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, { camera: {} }],
@@ -276,8 +269,23 @@ const testValidateTicket = () => {
 			], [{}]],
 		];
 
-		testPropertyTypes(propertyTypeTestData);
-		testPropertyTypes(propertyTypeTestData, true);
+		const propertyTypeUnsetData = [
+			['Text (unset)', { type: propTypes.TEXT }, null],
+			['Long text (unset)', { type: propTypes.LONG_TEXT }, null],
+			['Boolean (unset)', { type: propTypes.BOOLEAN }, null],
+			['Date (unset)', { type: propTypes.DATE }, null],
+			['Number (unset)', { type: propTypes.NUMBER }, null],
+			['Coordinates (unset)', { type: propTypes.COORDS }, null],
+			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
+			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null],
+			['Image (unset)', { type: propTypes.IMAGE }, null],
+
+		];
+
+		testPropertyTypes(propertyTypeSetData, false, true);
+		testPropertyTypes(propertyTypeSetData, true, true);
+		testPropertyTypes(propertyTypeUnsetData, false, false);
+		testPropertyTypes(propertyTypeUnsetData, true, false);
 		const randomData = generateRandomString();
 
 		const commonPropertyConditionTests = [
@@ -354,36 +362,55 @@ const testProcessReadOnlyValues = () => {
 	describe('Process read only values', () => {
 		test('Should fill in all the base properties if they are not present', () => {
 			const user = generateRandomString();
-			const ticket = {
+			const newTicket = {
 				title: generateRandomString(),
 				type: generateUUID(),
 				properties: {},
 				modules: {},
 			};
-			TicketSchema.processReadOnlyValues(ticket, user, true);
+			TicketSchema.processReadOnlyValues(undefined, newTicket, user);
 			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
-			expect(ticket.properties[OWNER]).toEqual(user);
-			expect(ticket.properties[CREATED_AT]).toBeInstanceOf(Date);
-			expect(ticket.properties[UPDATED_AT]).toBeInstanceOf(Date);
+			expect(newTicket.properties[OWNER]).toEqual(user);
+			expect(newTicket.properties[CREATED_AT]).toBeInstanceOf(Date);
+			expect(newTicket.properties[UPDATED_AT]).toBeInstanceOf(Date);
 		});
-		test('Should leave the properties with existing values if they are available', () => {
+
+		test('Should leave the properties with existing values if a ticket is not new', () => {
 			const user = generateRandomString();
-			const created = new Date(1000000);
-			const updated = new Date(2000000);
 			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
-			const ticket = {
+			const oldTicket = {
 				title: generateRandomString(),
 				type: generateUUID(),
 				properties: {
 					[OWNER]: user,
-					[CREATED_AT]: created,
-					[UPDATED_AT]: updated,
+					[CREATED_AT]: undefined,
+					[UPDATED_AT]: undefined,
 				},
 				modules: {},
 			};
-			const expectedOutput = cloneDeep(ticket);
-			TicketSchema.processReadOnlyValues(ticket, generateRandomString(), true);
-			expect(ticket).toEqual(expectedOutput);
+			const newTicket = { title: generateRandomString(), properties: {} };
+			const expectedOutput = cloneDeep(oldTicket);
+			TicketSchema.processReadOnlyValues(oldTicket, newTicket, generateRandomString());
+			expect(oldTicket).toEqual(expectedOutput);
+		});
+
+		test('Should leave the properties with existing values if they are available', () => {
+			const user = generateRandomString();
+			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
+			const newTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[OWNER]: user,
+					[CREATED_AT]: generateRandomDate(),
+					[UPDATED_AT]: generateRandomDate(),
+				},
+				modules: {},
+			};
+			const expectedOutput = cloneDeep(newTicket);
+			TicketSchema.processReadOnlyValues(undefined, newTicket, generateRandomString());
+			expectedOutput.properties[UPDATED_AT] = newTicket.properties[UPDATED_AT];
+			expect(newTicket).toEqual(expectedOutput);
 		});
 
 		describe(presetModules.SAFETIBASE, () => {
@@ -402,10 +429,12 @@ const testProcessReadOnlyValues = () => {
 				['both are missing', false, false],
 			])('Should not calculate treated level of risk if ', (desc, likelihood, consequence) => {
 				test(desc, () => {
-					const ticket = {
-						properties: {},
-						title: generateRandomString(),
-						type: generateUUID(),
+					const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
+					const newTicket = {
+						properties: {
+							[OWNER]: generateRandomString(),
+							[CREATED_AT]: generateRandomDate(),
+						},
 						modules: {
 							[presetModules.SAFETIBASE]: {
 								[RISK_LIKELIHOOD]: riskLevels.VERY_HIGH,
@@ -416,9 +445,9 @@ const testProcessReadOnlyValues = () => {
 						},
 					};
 
-					TicketSchema.processReadOnlyValues(ticket, generateRandomString());
+					TicketSchema.processReadOnlyValues(undefined, newTicket, generateRandomString());
 					const expectedOutput = {
-						...ticket,
+						...newTicket,
 						modules: {
 							[presetModules.SAFETIBASE]: {
 								[RISK_LIKELIHOOD]: riskLevels.VERY_HIGH,
@@ -429,7 +458,8 @@ const testProcessReadOnlyValues = () => {
 							},
 						},
 					};
-					expect(ticket).toEqual(expectedOutput);
+					expectedOutput.properties[UPDATED_AT] = newTicket.properties[UPDATED_AT];
+					expect(newTicket).toEqual(expectedOutput);
 				});
 			});
 
@@ -441,10 +471,12 @@ const testProcessReadOnlyValues = () => {
 				[riskLevels.VERY_LOW, riskLevels.VERY_LOW, riskLevels.VERY_LOW],
 			])('Level of risk calculation', (likelihood, consequence, expectedRes) => {
 				test(`Likelihood: ${likelihood}, Consequence: ${consequence} should result in ${expectedRes}`, () => {
-					const ticket = {
-						properties: {},
-						title: generateRandomString(),
-						type: generateUUID(),
+					const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
+					const newTicket = {
+						properties: {
+							[OWNER]: generateRandomString(),
+							[CREATED_AT]: generateRandomDate(),
+						},
 						modules: {
 							[presetModules.SAFETIBASE]: {
 								[RISK_LIKELIHOOD]: likelihood,
@@ -454,9 +486,9 @@ const testProcessReadOnlyValues = () => {
 							},
 						},
 					};
-					TicketSchema.processReadOnlyValues(ticket, generateRandomString());
+					TicketSchema.processReadOnlyValues(undefined, newTicket, generateRandomString());
 					const expectedOutput = {
-						...ticket,
+						...newTicket,
 						modules: {
 							[presetModules.SAFETIBASE]: {
 								[RISK_LIKELIHOOD]: likelihood,
@@ -468,8 +500,8 @@ const testProcessReadOnlyValues = () => {
 							},
 						},
 					};
-
-					expect(ticket).toEqual(expectedOutput);
+					expectedOutput.properties[UPDATED_AT] = newTicket.properties[UPDATED_AT];
+					expect(newTicket).toEqual(expectedOutput);
 				});
 			});
 		});
