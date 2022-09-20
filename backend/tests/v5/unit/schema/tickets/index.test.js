@@ -374,29 +374,10 @@ const testProcessReadOnlyValues = () => {
 			expect(newTicket.properties[UPDATED_AT]).toBeInstanceOf(Date);
 		});
 
-		test('Should leave the properties with existing values if a ticket is not new', () => {
+		test('Should update updated at if there an old ticket is provided', () => {
 			const user = generateRandomString();
 			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
 			const oldTicket = {
-				title: generateRandomString(),
-				type: generateUUID(),
-				properties: {
-					[OWNER]: user,
-					[CREATED_AT]: undefined,
-					[UPDATED_AT]: undefined,
-				},
-				modules: {},
-			};
-			const newTicket = { title: generateRandomString(), properties: {} };
-			const expectedOutput = cloneDeep(oldTicket);
-			TicketSchema.processReadOnlyValues(oldTicket, newTicket, generateRandomString());
-			expect(oldTicket).toEqual(expectedOutput);
-		});
-
-		test('Should leave the properties with existing values if they are available', () => {
-			const user = generateRandomString();
-			const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
-			const newTicket = {
 				title: generateRandomString(),
 				type: generateUUID(),
 				properties: {
@@ -406,8 +387,13 @@ const testProcessReadOnlyValues = () => {
 				},
 				modules: {},
 			};
+			const newTicket = { title: generateRandomString(),
+				properties: {
+					[generateRandomString()]: generateRandomString(),
+				} };
 			const expectedOutput = cloneDeep(newTicket);
-			TicketSchema.processReadOnlyValues(undefined, newTicket, generateRandomString());
+			TicketSchema.processReadOnlyValues(oldTicket, newTicket, generateRandomString());
+			expect(newTicket.properties[UPDATED_AT]).not.toEqual(oldTicket.properties[UPDATED_AT]);
 			expectedOutput.properties[UPDATED_AT] = newTicket.properties[UPDATED_AT];
 			expect(newTicket).toEqual(expectedOutput);
 		});
@@ -426,7 +412,7 @@ const testProcessReadOnlyValues = () => {
 				['likelihood is missing', true, false],
 				['consequence is missing', false, true],
 				['both are missing', false, false],
-			])('Should not calculate treated level of risk if ', (desc, likelihood, consequence) => {
+			])('(new ticket) Should not calculate treated level of risk if ', (desc, likelihood, consequence) => {
 				test(desc, () => {
 					const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
 					const newTicket = {
@@ -454,6 +440,56 @@ const testProcessReadOnlyValues = () => {
 								[LEVEL_OF_RISK]: riskLevels.VERY_HIGH,
 								[TREATED_RISK_LIKELIHOOD]: likelihood ? riskLevels.VERY_HIGH : undefined,
 								[TREATED_RISK_CONSEQUENCE]: consequence ? riskLevels.VERY_HIGH : undefined,
+							},
+						},
+					};
+					expectedOutput.properties[UPDATED_AT] = newTicket.properties[UPDATED_AT];
+					expect(newTicket).toEqual(expectedOutput);
+				});
+			});
+
+			describe.each([
+				['likelihood is missing', false, true, true],
+				['consequence is missing', true, false, true],
+				['both are missing', false, false, false],
+			])('(update ticket) ', (desc, likelihood, consequence, calculate) => {
+				test(desc, () => {
+					const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
+					const oldTicket = {
+						properties: {
+							[OWNER]: generateRandomString(),
+							[CREATED_AT]: generateRandomDate(),
+						},
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								[RISK_LIKELIHOOD]: riskLevels.VERY_HIGH,
+								[RISK_CONSEQUENCE]: riskLevels.VERY_HIGH,
+								[TREATED_RISK_LIKELIHOOD]: riskLevels.VERY_HIGH,
+								[TREATED_RISK_CONSEQUENCE]: riskLevels.VERY_HIGH,
+							},
+						},
+					};
+
+					const newTicket = {
+						properties: {},
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								[RISK_LIKELIHOOD]: likelihood ? riskLevels.VERY_HIGH : undefined,
+								[RISK_CONSEQUENCE]: consequence ? riskLevels.VERY_HIGH : undefined,
+								[TREATED_RISK_LIKELIHOOD]: likelihood ? riskLevels.VERY_HIGH : undefined,
+								[TREATED_RISK_CONSEQUENCE]: consequence ? riskLevels.VERY_HIGH : undefined,
+							},
+						},
+					};
+
+					TicketSchema.processReadOnlyValues(oldTicket, newTicket, generateRandomString());
+					const expectedOutput = {
+						properties: {},
+						modules: {
+							[presetModules.SAFETIBASE]: {
+								...newTicket.modules[presetModules.SAFETIBASE],
+								[LEVEL_OF_RISK]: calculate ? riskLevels.VERY_HIGH : undefined,
+								[TREATED_LEVEL_OF_RISK]: calculate ? riskLevels.VERY_HIGH : undefined,
 							},
 						},
 					};
