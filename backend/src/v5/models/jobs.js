@@ -25,13 +25,15 @@ const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, p
 const updateOne = (ts, query, action) => db.updateOne(ts, COL_NAME, query, action);
 const updateMany = (ts, query, action) => db.updateMany(ts, COL_NAME, query, action);
 
-Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
+Jobs.getJobNamesToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
-Jobs.getJobs = async (teamspace) => {
+Jobs.getJobNames = async (teamspace) => {
 	const jobs = await findMany(teamspace, {}, { _id: 1 });
 
 	return jobs.map(({ _id }) => _id);
 };
+
+Jobs.getJobs = (teamspace) => findMany(teamspace, {}, { _id: 1, color: 1 });
 
 Jobs.addDefaultJobs = async (teamspace) => {
 	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));

@@ -22,7 +22,9 @@ const { DEFAULT_JOBS } = require('../../../../src/v5/models/jobs.constants');
 const Jobs = require(`${src}/models/jobs`);
 const db = require(`${src}/handler/db`);
 
-const testGetJobsToUsers = () => {
+const JOB_COL = 'jobs';
+
+const testGetJobNamesToUsers = () => {
 	describe('Get Jobs to users', () => {
 		test('should get list of jobs within the teamspace with the users', async () => {
 			const expectedResult = [
@@ -30,10 +32,10 @@ const testGetJobsToUsers = () => {
 			];
 			const fn = jest.spyOn(db, 'find').mockImplementation(() => expectedResult);
 			const teamspace = 'ts';
-			const res = await Jobs.getJobsToUsers(teamspace);
+			const res = await Jobs.getJobNamesToUsers(teamspace);
 			expect(res).toEqual(expectedResult);
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][1]).toEqual('jobs');
+			expect(fn.mock.calls[0][1]).toEqual(JOB_COL);
 			expect(fn.mock.calls[0][2]).toEqual({});
 		});
 	});
@@ -46,7 +48,7 @@ const testAddDefaultJobs = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
 			await Jobs.addDefaultJobs(teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
 		});
 	});
 };
@@ -60,7 +62,7 @@ const testAssignUserToJob = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			await Jobs.assignUserToJob(teamspace, job, username);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { _id: job }, { $push: { users: username } });
+			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL, { _id: job }, { $push: { users: username } });
 		});
 	});
 };
@@ -73,32 +75,55 @@ const testRemoveUserFromJobs = () => {
 			const fn = jest.spyOn(db, 'updateMany').mockImplementation(() => {});
 			await Jobs.removeUserFromJobs(teamspace, userToRemove);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { users: userToRemove }, { $pull: { users: userToRemove } });
+			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL,
+				{ users: userToRemove }, { $pull: { users: userToRemove } });
+		});
+	});
+};
+
+const testGetJobNames = () => {
+	describe('Get job namess', () => {
+		test('return names of all available jobs', async () => {
+			const teamspace = generateRandomString();
+			const jobs = [generateRandomString(), generateRandomString(), generateRandomString()];
+			jest.spyOn(db, 'find').mockResolvedValueOnce(jobs.map((_id) => ({ _id })));
+			await expect(Jobs.getJobNames(teamspace)).resolves.toEqual(jobs);
+		});
+
+		test('return an empty array if there are no jobs', async () => {
+			const teamspace = generateRandomString();
+			jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(Jobs.getJobNames(teamspace)).resolves.toEqual([]);
 		});
 	});
 };
 
 const testGetJobs = () => {
 	describe('Get jobs', () => {
-		test('return names of all available jobs', async () => {
+		test('return all available jobs', async () => {
 			const teamspace = generateRandomString();
 			const jobs = [generateRandomString(), generateRandomString(), generateRandomString()];
-			jest.spyOn(db, 'find').mockResolvedValueOnce(jobs.map((_id) => ({ _id })));
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(jobs);
 			await expect(Jobs.getJobs(teamspace)).resolves.toEqual(jobs);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, JOB_COL, {}, { _id: 1, color: 1 }, undefined);
 		});
 
 		test('return an empty array if there are no jobs', async () => {
 			const teamspace = generateRandomString();
-			jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
 			await expect(Jobs.getJobs(teamspace)).resolves.toEqual([]);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, JOB_COL, {}, { _id: 1, color: 1 }, undefined);
 		});
 	});
 };
 
 describe('models/jobs', () => {
-	testGetJobsToUsers();
+	testGetJobNamesToUsers();
 	testAddDefaultJobs();
 	testAssignUserToJob();
 	testRemoveUserFromJobs();
+	testGetJobNames();
 	testGetJobs();
 });
