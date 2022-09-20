@@ -391,7 +391,7 @@
 		if(!["config", "admin"].includes(database)) {
 			try {
 				const dbConn = await Handler.getDB(database);
-				const collections = Handler.listCollections(database);
+				const collections = await Handler.listCollections(database);
 				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
 				await dbConn.dropDatabase();
 			} catch (err) {
