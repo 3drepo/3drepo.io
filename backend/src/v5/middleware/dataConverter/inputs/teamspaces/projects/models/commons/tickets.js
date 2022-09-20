@@ -34,7 +34,9 @@ const validate = (isNewTicket) => async (req, res, next) => {
 		const user = getUserFromSession(req.session);
 		const { teamspace } = req.params;
 
-		if (isNewTicket && template.deprecated) { throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated'); }
+		if (isNewTicket && template.deprecated) {
+			throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
+		}
 
 		req.body = await validateTicket(teamspace, template, ticket, isNewTicket);
 		processReadOnlyValues(req.ticketData, req.body, user);
@@ -61,8 +63,7 @@ const checkTicketExists = async (req, res, next) => {
 
 	try {
 		req.ticketData = await getTicketById(teamspace, project, model, ticket);
-		req.templateData = await getTemplateById(teamspace, req.ticketData.type,
-			{ properties: 1, modules: 1, config: 1 });
+		req.templateData = await getTemplateById(teamspace, req.ticketData.type);
 
 		await next();
 	} catch (err) {

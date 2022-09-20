@@ -18,9 +18,9 @@
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
-const FilesManager = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { removeFile } = require('../../../../../services/filesManager');
 
 const Tickets = {};
 
@@ -81,7 +81,7 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 	const ticketId = oldTicket._id;
 	await updateTicket(teamspace, ticketId, updateData);
 	await Promise.all([
-		resourceData.toRemove.map((d) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
+		resourceData.toRemove.map((d) => removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
 		storeFiles(teamspace, project, model, ticketId, resourceData.toAdd),
 	]);
 };
