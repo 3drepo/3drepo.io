@@ -85,9 +85,8 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 				};
 
 				await expect(runTest(goodTest)).resolves.toBeUndefined();
-				
-				if(badTest != undefined)
-					await expect(runTest(badTest)).rejects.toBeUndefined();
+
+				if (badTest !== undefined) await expect(runTest(badTest)).rejects.toBeUndefined();
 			});
 		});
 };
