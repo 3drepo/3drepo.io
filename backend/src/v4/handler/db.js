@@ -105,7 +105,7 @@
 		}
 	};
 
-  const dropAllIndicies = async (database, colName) => {
+	const dropAllIndicies = async (database, colName) => {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.dropIndexes();
 	};
