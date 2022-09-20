@@ -51,12 +51,20 @@ const testGetRequest = () => {
 
 const testPostRequest = () => {
 	describe('Post request', () => {
-		test('Should make a post request', async () => {
+		test('Should make a post request with body params', async () => {
 			const data = { someData: generateRandomString() };
 			const uri = generateRandomString();
 			await WebRequests.post(uri, data);
 			expect(axios.default.post).toHaveBeenCalledTimes(1);
-			expect(axios.default.post).toHaveBeenCalledWith(uri, data);
+			expect(axios.default.post).toHaveBeenCalledWith(uri, data, undefined);
+		});
+
+		test('Should make a post request with query params', async () => {
+			const config = { params: { someData: generateRandomString() } };
+			const uri = generateRandomString();
+			await WebRequests.post(uri, undefined, config);
+			expect(axios.default.post).toHaveBeenCalledTimes(1);
+			expect(axios.default.post).toHaveBeenCalledWith(uri, undefined, config);
 		});
 	});
 };
