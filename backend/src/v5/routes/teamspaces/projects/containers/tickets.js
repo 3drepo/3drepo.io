@@ -98,10 +98,13 @@ const getTicketResource = async (req, res) => {
 };
 
 const updateTicket = async (req, res) => {
-	const { teamspace, project, container } = req.params;
-	const template = req.templateData;
-	const oldTicket = req.ticketData;
-	const updatedTicket = req.body;
+	const {
+		templateData: template,
+		ticketData: oldTicket,
+		params,
+		body: updatedTicket,
+	} = req;
+	const { teamspace, project, container } = params;
 
 	try {
 		await update(teamspace, project, container, template, oldTicket, updatedTicket);

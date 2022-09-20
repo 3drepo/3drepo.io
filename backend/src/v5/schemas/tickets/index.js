@@ -114,8 +114,8 @@ Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const validator = Yup.object().shape({
 		title: isNewTicket ? types.strings.title.required() : types.strings.title,
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
-		modules: Yup.object(moduleSchema).default(isNewTicket ? {} : undefined),
-		type: isNewTicket ? Yup.mixed().required() : undefined,
+		modules: Yup.object(moduleSchema).default({}),
+		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	});
 
 	return validator.validate(data, { stripUnknown: true });
