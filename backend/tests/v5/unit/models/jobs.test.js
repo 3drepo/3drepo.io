@@ -24,7 +24,7 @@ const db = require(`${src}/handler/db`);
 
 const JOB_COL = 'jobs';
 
-const testGetJobNamesToUsers = () => {
+const testGetJobsToUsers = () => {
 	describe('Get Jobs to users', () => {
 		test('should get list of jobs within the teamspace with the users', async () => {
 			const expectedResult = [
@@ -32,7 +32,7 @@ const testGetJobNamesToUsers = () => {
 			];
 			const fn = jest.spyOn(db, 'find').mockImplementation(() => expectedResult);
 			const teamspace = 'ts';
-			const res = await Jobs.getJobNamesToUsers(teamspace);
+			const res = await Jobs.getJobsToUsers(teamspace);
 			expect(res).toEqual(expectedResult);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][1]).toEqual(JOB_COL);
@@ -120,7 +120,7 @@ const testGetJobs = () => {
 };
 
 describe('models/jobs', () => {
-	testGetJobNamesToUsers();
+	testGetJobsToUsers();
 	testAddDefaultJobs();
 	testAssignUserToJob();
 	testRemoveUserFromJobs();
