@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { Paper as PaperBase } from '@mui/material';
 
 export const ActionMenuSection = styled.div`
 	display: flex;
@@ -31,14 +30,6 @@ export const ActionMenuSection = styled.div`
 export const ActionMenuTriggerButton = styled.div.attrs({
 	isActionMenuTriggerButton: true,
 })``;
-
-export const Paper = styled(PaperBase)`
-	border-radius: 5px;
-	box-shadow: 
-		0 6px 10px rgb(0 0 0 / 14%),
-		0 1px 18px rgb(0 0 0 / 12%),
-		0 3px 5px rgb(0 0 0 / 20%);
-`;
 
 export const Menu = styled.div`
 	display: flex;
