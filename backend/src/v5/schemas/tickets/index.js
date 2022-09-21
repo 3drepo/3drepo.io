@@ -115,8 +115,8 @@ Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const validator = Yup.object().shape({
 		title: isNewTicket ? types.strings.title.required() : types.strings.title,
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
-		modules: Yup.object(moduleSchema).default(isNewTicket ? {} : undefined),
-		type: isNewTicket ? Yup.mixed().required() : undefined,
+		modules: Yup.object(moduleSchema).default({}),
+		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	});
 
 	return validator.validate(data, { stripUnknown: true });
@@ -158,32 +158,30 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 
 	properties[basePropertyLabels.UPDATED_AT] = currTime;
 
-	const updatedSafetibaseProps = modules?.[presetModules.SAFETIBASE];
+	const newSafetibaseProps = modules?.[presetModules.SAFETIBASE];
+	const oldSafetibaseProps = oldTicket?.modules?.[presetModules.SAFETIBASE] || {};
 
-	if (updatedSafetibaseProps) {
-		const safetiBaseMod = {
-			...oldTicket?.modules?.[presetModules.SAFETIBASE],
-			...updatedSafetibaseProps,
-		};
-
+	if (newSafetibaseProps) {
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		const level = calculateLevelOfRisk(
-			safetiBaseMod[modProps.RISK_LIKELIHOOD],
-			safetiBaseMod[modProps.RISK_CONSEQUENCE],
-		);
-
-		if (level){
-			updatedSafetibaseProps[modProps.LEVEL_OF_RISK]
+		if (newSafetibaseProps[modProps.RISK_LIKELIHOOD] || newSafetibaseProps[modProps.RISK_CONSEQUENCE]) {
+			newSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
+				newSafetibaseProps[modProps.RISK_LIKELIHOOD] ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
+				newSafetibaseProps[modProps.RISK_CONSEQUENCE] ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
+			);
 		}
 
-		const treatedLevel = calculateLevelOfRisk(
-			safetiBaseMod[modProps.TREATED_RISK_LIKELIHOOD],
-			safetiBaseMod[modProps.TREATED_RISK_CONSEQUENCE],
-		);
-
-		if (treatedLevel) {
-			updatedSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
+		if (newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
+			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
+			const treatedLevel = calculateLevelOfRisk(
+				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
+					?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
+					?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+			);
+			if (treatedLevel) {
+				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
+			}
 		}
 	}
 };

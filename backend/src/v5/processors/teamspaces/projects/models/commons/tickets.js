@@ -18,17 +18,17 @@
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
-const FilesManager = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { removeFile } = require('../../../../../services/filesManager');
 
 const Tickets = {};
 
-const formatResourceProperties = (template, oldTicket, updatedTicket) => {
+const processBinaryProperties = (template, oldTicket, updatedTicket) => {
 	const toRemove = [];
 	const toAdd = [];
 
-	const processProps = (templateProperties, oldProperties = {}, updatedProperties = {}) => {
+	const updateReferences = (templateProperties, oldProperties = {}, updatedProperties) => {
 		templateProperties.forEach(({ type, name }) => {
 			let oldProp;
 			let newProp;
@@ -53,11 +53,11 @@ const formatResourceProperties = (template, oldTicket, updatedTicket) => {
 		});
 	};
 
-	processProps(template.properties, oldTicket?.properties, updatedTicket.properties);
+	updateReferences(template.properties, oldTicket?.properties, updatedTicket.properties);
 
 	template.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
-		processProps(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
+		updateReferences(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
 
 	return { toRemove, toAdd };
@@ -70,18 +70,18 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 );
 
 Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
-	const resourceData = formatResourceProperties(template, undefined, ticket);
+	const { toAdd } = processBinaryProperties(template, undefined, ticket);
 	const res = await addTicket(teamspace, project, model, ticket);
-	await storeFiles(teamspace, project, model, res, resourceData.toAdd);
+	await storeFiles(teamspace, project, model, res, toAdd);
 	return res;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
-	const resourceData = formatResourceProperties(template, oldTicket, updateData);
+	const { toAdd, toRemove } = processBinaryProperties(template, oldTicket, updateData);
 	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
 	await Promise.all([
-		resourceData.toRemove.map((d) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
-		storeFiles(teamspace, project, model, oldTicket._id, resourceData.toAdd),
+		toRemove.map((ref) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
+		storeFiles(teamspace, project, model, oldTicket._id, toAdd),
 	]);
 };
 

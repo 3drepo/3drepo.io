@@ -55,11 +55,11 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	const { modules, properties, ...rootProps } = updateData;
 
-	const determineUpdate = (obj, prefix) => {
+	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
 			const value = obj[key];
-			if (value) toUpdate[`${prefix ?? ''}${key}`] = value;
-			else { toUnset[`${prefix ?? ''}${key}`] = 1; }
+			if (value) toUpdate[`${prefix}${key}`] = value;
+			else { toUnset[`${prefix}${key}`] = 1; }
 		});
 	};
 
@@ -69,7 +69,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	if (modules) {
 		Object.keys(modules).forEach((mod) => {
-			determineUpdate(modules[mod], `modules.${[mod]}.`);
+			determineUpdate(modules[mod], `modules.${mod}.`);
 		});
 	}
 

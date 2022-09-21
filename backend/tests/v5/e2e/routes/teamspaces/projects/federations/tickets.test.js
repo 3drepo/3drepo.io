@@ -91,17 +91,16 @@ const templateWithRequiredProp = {
 		},
 	],
 };
-const depracatedTemplate = ServiceHelper.generateTemplate(true);
+const deprecatedTemplate = ServiceHelper.generateTemplate(true);
 
 const ticketTemplates = [
 	ServiceHelper.generateTemplate(),
-	ServiceHelper.generateTemplate(true),
+	deprecatedTemplate,
 	ServiceHelper.generateTemplate(),
 	ServiceHelper.generateTemplate(true),
 	templateWithAllModulesAndPresetEnums,
 	templateWithImage,
 	templateWithRequiredProp,
-	depracatedTemplate,
 ];
 
 const setupData = async () => {
@@ -330,8 +329,8 @@ const testGetTicket = () => {
 				},
 			],
 		};
-		let ticket; let
-			ticketWithDepData;
+		let ticket;
+		let ticketWithDepData;
 		beforeAll(async () => {
 			await ServiceHelper.db.createTemplates(teamspace, [templateToUse]);
 			ticket = ServiceHelper.generateTicket(templateToUse);
@@ -397,19 +396,19 @@ const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTempl
 
 const testUpdateTicket = () => {
 	let ticket; let
-		tickWithDeprepactedTemplate;
+		tickWithDeprecatedTemplate;
 
 	beforeAll(async () => {
-		await updateOne(teamspace, 'templates', { _id: stringToUUID(depracatedTemplate._id) }, { $set: { deprecated: false } });
+		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: false } });
 		ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
-		tickWithDeprepactedTemplate = ServiceHelper.generateTicket(depracatedTemplate);
+		tickWithDeprecatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
 		const endpoint = addTicketRoute(users.tsAdmin.apiKey);
 
 		const res = await agent.post(endpoint).send(ticket);
-		const res2 = await agent.post(endpoint).send(tickWithDeprepactedTemplate);
+		const res2 = await agent.post(endpoint).send(tickWithDeprecatedTemplate);
 		ticket._id = res.body._id;
-		tickWithDeprepactedTemplate._id = res2.body._id;
-		await updateOne(teamspace, 'templates', { _id: stringToUUID(depracatedTemplate._id) }, { $set: { deprecated: true } });
+		tickWithDeprecatedTemplate._id = res2.body._id;
+		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 	});
 
 	describe.each([
@@ -453,12 +452,12 @@ const testUpdateTicket = () => {
 		});
 	});
 
-	test('Should succeed if the template is depracated', async () => {
+	test('Should succeed if the template is deprecated', async () => {
 		const payloadChanges = { title: ServiceHelper.generateRandomString() };
-		const endpoint = updateTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tickWithDeprepactedTemplate._id);
+		const endpoint = updateTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tickWithDeprecatedTemplate._id);
 		await agent.patch(endpoint).send(payloadChanges).expect(templates.ok.status);
 
-		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tickWithDeprepactedTemplate._id);
+		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined, tickWithDeprecatedTemplate._id);
 		const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
 
 		const updatedTicket = updatedTicketRes.body;
@@ -471,7 +470,7 @@ const testUpdateTicket = () => {
 		delete updatedTicket.properties['Created at'];
 		delete updatedTicket.properties.Owner;
 		expect({ ...updatedTicket }).toEqual({
-			...tickWithDeprepactedTemplate,
+			...tickWithDeprecatedTemplate,
 			...payloadChanges,
 		});
 	});
