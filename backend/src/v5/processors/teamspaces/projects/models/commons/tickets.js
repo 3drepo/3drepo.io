@@ -27,11 +27,33 @@ const { events } = require('../../../../../services/eventsManager/eventsManager.
 
 const Tickets = {};
 
+const getOldValuesToBeUpdated = (oldTicket, updateData) => {
+	return Object.assign(...Object.keys(updateData).map(updateKey => {
+		var temp;
+
+		if (!(updateKey in oldTicket)) {
+			return {};
+		}
+
+		const updateValue = updateData[updateKey];
+		if (typeof updateValue === 'object') {
+			if (Object.keys(updateValue).length) {
+
+				temp = getOldValuesToBeUpdated(oldTicket[updateKey], updateValue);
+				return Object.keys(temp).length ? { [updateKey]: temp } : {};
+
+			} else
+				return {};
+		} else
+			return { [updateKey]: oldTicket[updateKey] };
+	}));
+}
+
 const formatResourceProperties = (template, oldTicket, updatedTicket) => {
 	const toRemove = [];
 	const toAdd = [];
 
-	const processProps = (templateProperties, oldProperties = {}, updatedProperties) => {
+	const processProps = (templateProperties, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
 			let oldProp;
 			let newProp;
@@ -79,13 +101,13 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 	return res;
 };
 
-Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
+Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
 	const resourceData = formatResourceProperties(template, oldTicket, updateData);
-	const ticketId = oldTicket._id;
-	await updateTicket(teamspace, ticketId, updateData);
+	const ticket = oldTicket._id;
+	await updateTicket(teamspace, ticket, updateData);
 	await Promise.all([
 		resourceData.toRemove.map((d) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
-		storeFiles(teamspace, project, model, ticketId, resourceData.toAdd),
+		storeFiles(teamspace, project, model, ticket, resourceData.toAdd),
 	]);
 
 	publish(events.MODEL_TICKET_UPDATE, {
@@ -93,8 +115,8 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 		project,
 		model,
 		ticket,
-		author: "",
-		from: oldTicket,
+		author,
+		from: getOldValuesToBeUpdated(oldTicket, updateData),
 		to: updateData
 	})
 };

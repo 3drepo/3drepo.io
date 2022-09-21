@@ -24,6 +24,7 @@ const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
 const { templates } = require('../../../../utils/responseCodes');
+const { getUserFromSession } = require('../../../../utils/sessions');
 
 const createTicket = async (req, res) => {
 	const { teamspace, project, federation } = req.params;
@@ -99,12 +100,13 @@ const getTicketResource = async (req, res) => {
 
 const updateTicket = async (req, res) => {
 	const { teamspace, project, federation } = req.params;
+	const user = getUserFromSession(req.session);
 	const template = req.templateData;
 	const oldTicket = req.ticketData;
 	const updatedTicket = req.body;
 
 	try {
-		await update(teamspace, project, federation, template, oldTicket, updatedTicket);
+		await update(teamspace, project, federation, template, oldTicket, updatedTicket, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {

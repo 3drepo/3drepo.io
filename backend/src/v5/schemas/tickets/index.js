@@ -97,7 +97,8 @@ const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties, isNewTicket);
+			moduleToSchema[id] = (await generatePropertiesValidator(teamspace, module.properties, isNewTicket))
+				.default(isNewTicket ? {} : undefined);
 		}
 	});
 
@@ -167,10 +168,14 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		updatedSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
+		const level = calculateLevelOfRisk(
 			safetiBaseMod[modProps.RISK_LIKELIHOOD],
 			safetiBaseMod[modProps.RISK_CONSEQUENCE],
 		);
+
+		if (level){
+			updatedSafetibaseProps[modProps.LEVEL_OF_RISK]
+		}
 
 		const treatedLevel = calculateLevelOfRisk(
 			safetiBaseMod[modProps.TREATED_RISK_LIKELIHOOD],
