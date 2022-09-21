@@ -34,7 +34,7 @@ const { types } = require('../../utils/helper/yup');
 
 const Tickets = {};
 
-const generatePropertiesValidator = async (teamspace, properties) => {
+const generatePropertiesValidator = async (teamspace, properties, isNewTicket) => {
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
@@ -62,7 +62,7 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 				}
 
 				if (prop.type === propTypes.ONE_OF) {
-					validator = validator.oneOf(values);
+					validator = validator.oneOf(isNewTicket || prop.required ? values : values.concat(null));
 				} else if (prop.type === propTypes.MANY_OF) {
 					validator = Yup.array().of(types.strings.title.oneOf(values));
 				} else {
@@ -70,12 +70,15 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 				}
 			}
 
-			if (prop.required) {
-				validator = validator.required();
-			}
-
-			if (prop.default) {
-				validator = validator.default(prop.default);
+			if (isNewTicket) {
+				if (prop.default) {
+					validator = validator.default(prop.default);
+				}
+				if (prop.required) {
+					validator = validator.required();
+				}
+			} else if (!prop.required) {
+				validator = validator.nullable();
 			}
 
 			obj[prop.name] = validator;
@@ -89,12 +92,12 @@ const generatePropertiesValidator = async (teamspace, properties) => {
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, modules) => {
+const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties);
+			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties, isNewTicket);
 		}
 	});
 
@@ -103,17 +106,18 @@ const generateModuleValidator = async (teamspace, modules) => {
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, template, data) => {
+Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const fullTem = generateFullSchema(template);
 
-	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules);
+	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
 
 	const validator = Yup.object().shape({
-		title: types.strings.title.required(),
-		type: Yup.mixed().required(),
-		properties: await generatePropertiesValidator(teamspace, fullTem.properties),
+		title: isNewTicket ? types.strings.title.required() : types.strings.title,
+		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
 		modules: Yup.object(moduleSchema).default({}),
+		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	});
+
 	return validator.validate(data, { stripUnknown: true });
 };
 
@@ -142,30 +146,41 @@ const calculateLevelOfRisk = (likelihood, consequence) => {
 	return levelOfRisk;
 };
 
-Tickets.processReadOnlyValues = (ticket, user) => {
-	const { properties, modules } = ticket;
+Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
+	const { properties, modules } = newTicket;
 	const currTime = new Date();
 
-	properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
-	properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
-	properties[basePropertyLabels.UPDATED_AT] = properties[basePropertyLabels.UPDATED_AT] ?? currTime;
+	if (!oldTicket) {
+		properties[basePropertyLabels.OWNER] = properties[basePropertyLabels.OWNER] ?? user;
+		properties[basePropertyLabels.CREATED_AT] = properties[basePropertyLabels.CREATED_AT] ?? currTime;
+	}
 
-	if (modules[presetModules.SAFETIBASE]) {
-		const safetiBaseProps = modules[presetModules.SAFETIBASE];
+	properties[basePropertyLabels.UPDATED_AT] = currTime;
+
+	const newSafetibaseProps = modules?.[presetModules.SAFETIBASE];
+	const oldSafetibaseProps = oldTicket?.modules?.[presetModules.SAFETIBASE] || {};
+
+	if (newSafetibaseProps) {
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		safetiBaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
-			safetiBaseProps[modProps.RISK_LIKELIHOOD],
-			safetiBaseProps[modProps.RISK_CONSEQUENCE],
-		);
+		if (newSafetibaseProps[modProps.RISK_LIKELIHOOD] || newSafetibaseProps[modProps.RISK_CONSEQUENCE]) {
+			newSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
+				newSafetibaseProps[modProps.RISK_LIKELIHOOD] ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
+				newSafetibaseProps[modProps.RISK_CONSEQUENCE] ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
+			);
+		}
 
-		const treatedLevel = calculateLevelOfRisk(
-			safetiBaseProps[modProps.TREATED_RISK_LIKELIHOOD],
-			safetiBaseProps[modProps.TREATED_RISK_CONSEQUENCE],
-		);
-
-		if (treatedLevel) {
-			safetiBaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
+		if (newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
+			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
+			const treatedLevel = calculateLevelOfRisk(
+				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
+					?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
+					?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+			);
+			if (treatedLevel) {
+				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
+			}
 		}
 	}
 };
