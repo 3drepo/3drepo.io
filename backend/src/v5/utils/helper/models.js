@@ -26,18 +26,15 @@ const ModelHelper = {};
 
 const removeModelCollections = async (ts, model) => {
 	const collections = await db.listCollections(ts);
-	const promises = [];
-
-	collections.flatMap(({ name }) => (name.startsWith(`${model}.`) ? promises.push(db.dropCollection(ts, name)) : []));
-
-	return Promise.all(promises);
+	const promises = collections.flatMap(({ name }) => (name.startsWith(`${model}.`) ? db.dropCollection(ts, name) : []));
+	await Promise.all(promises);
 };
 
 ModelHelper.removeModelData = async (teamspace, project, model) => {
 	// This needs to be done before removeModelCollections or we risk the .ref col being deleted before we check it
 	await removeAllFilesFromModel(teamspace, model);
 
-	return Promise.all([
+	await Promise.all([
 		removeModelCollections(teamspace, model),
 		deleteModel(teamspace, project, model).catch((err) => {
 			if (err.code !== templates.modelNotFound.code) throw err;

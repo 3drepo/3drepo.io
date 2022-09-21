@@ -23,31 +23,31 @@ const { v5Path } = require('../../../interop');
 const Yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getCollectionsEndsWith } = require('../../common/utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { fs: fsConfig } = require(`${v5Path}/utils/config`);
 const { path: fsPath } = fsConfig;
-const { find } = require(`${v5Path}/handler/db`);
+const { find, listDatabases } = require(`${v5Path}/handler/db`);
 const { readdirSync } = require('fs');
 const { unlink } = require('fs/promises');
 const Path = require('path');
 
 const joinPath = (a, b) => (a && b ? Path.posix.join(a, b) : a || b);
 
-const processTeamspace = async (teamspace, files) => {
-	const cols = await getCollectionsEndsWith(teamspace, '.ref');
+const processDatabase = async (database, files) => {
+	const cols = await getCollectionsEndsWith(database, '.ref');
 	await Promise.all(cols.map(async ({ name }) => {
-		const refs = await find(teamspace, name, { type: 'fs' }, { link: 1 });
+		const refs = await find(database, name, { type: 'fs' }, { link: 1 });
 		refs.forEach(({ link }) => files.delete(link));
 	}));
 };
 
 const removeEntriesWithRef = async (files) => {
-	const teamspaces = await getTeamspaceList();
-	for (const ts of teamspaces) {
+	const databases = (await listDatabases()).map(({ name }) => name);
+	for (const db of databases) {
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(ts, files);
+		await processDatabase(db, files);
 	}
 };
 
