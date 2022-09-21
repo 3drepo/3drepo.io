@@ -21,33 +21,8 @@ const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/
 const FilesManager = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
-const { publish } = require('../../../../../services/eventsManager/eventsManager');
-const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-
 
 const Tickets = {};
-
-const getOldValuesToBeUpdated = (oldTicket, updateData) => {
-	return Object.assign(...Object.keys(updateData).map(updateKey => {
-		var temp;
-
-		if (!(updateKey in oldTicket)) {
-			return {};
-		}
-
-		const updateValue = updateData[updateKey];
-		if (typeof updateValue === 'object') {
-			if (Object.keys(updateValue).length) {
-
-				temp = getOldValuesToBeUpdated(oldTicket[updateKey], updateValue);
-				return Object.keys(temp).length ? { [updateKey]: temp } : {};
-
-			} else
-				return {};
-		} else
-			return { [updateKey]: oldTicket[updateKey] };
-	}));
-}
 
 const formatResourceProperties = (template, oldTicket, updatedTicket) => {
 	const toRemove = [];
@@ -103,22 +78,11 @@ Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
 	const resourceData = formatResourceProperties(template, oldTicket, updateData);
-	const ticket = oldTicket._id;
-	await updateTicket(teamspace, ticket, updateData);
+	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
 	await Promise.all([
 		resourceData.toRemove.map((d) => FilesManager.removeFile(teamspace, TICKETS_RESOURCES_COL, d)),
-		storeFiles(teamspace, project, model, ticket, resourceData.toAdd),
+		storeFiles(teamspace, project, model, oldTicket._id, resourceData.toAdd),
 	]);
-
-	publish(events.MODEL_TICKET_UPDATE, {
-		teamspace,
-		project,
-		model,
-		ticket,
-		author,
-		from: getOldValuesToBeUpdated(oldTicket, updateData),
-		to: updateData
-	})
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { get, set } = require('lodash');
 const DbHandler = require('../handler/db');
+const { publish } = require('../services/eventsManager/eventsManager');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
@@ -35,11 +38,22 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, ticketId, data) => {
+const getOldValuesToBeUpdated = (oldTicket, updateObj) => {
+	let oldValues = {};
+
+	Object.keys(updateObj).forEach(propKey => {
+		const propValue = get(oldTicket, propKey);
+		set(oldValues, propKey, propValue);
+	})
+
+	return oldValues;
+}
+
+Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
 	const toUpdate = {};
 	const toUnset = {};
 
-	const { modules, properties, ...rootProps } = data;
+	const { modules, properties, ...rootProps } = updateData;
 
 	const determineUpdate = (obj, prefix) => {
 		Object.keys(obj).forEach((key) => {
@@ -65,8 +79,18 @@ Tickets.updateTicket = async (teamspace, ticketId, data) => {
 	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
 
 	if (Object.keys(updateJson).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, updateJson);
 	}
+
+	publish(events.MODEL_TICKET_UPDATE, {
+		teamspace,
+		project,
+		model,
+		ticket: oldTicket._id,
+		author,
+		from: getOldValuesToBeUpdated(oldTicket, { ...toUpdate, ...toUnset }),
+		to: updateData
+	})
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
