@@ -58,6 +58,7 @@ const processCollection = async (teamspace, collection) => {
 	const ownerCol = collection.slice(0, -(filesExt.length));
 	const gridFSEntry = await find(teamspace, collection, { }, { filename: 1 });
 	for (const entry of gridFSEntry) {
+		logger.logInfo(`\t\t\t\t${entry}`);
 		// eslint-disable-next-line no-await-in-loop
 		await moveFile(teamspace, ownerCol, entry.filename);
 	}
