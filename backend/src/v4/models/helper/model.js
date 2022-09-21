@@ -38,7 +38,7 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const History = require("../history");
 const { getRefNodes } = require("../ref");
-const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
+const { findNodesByType, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const fs = require("fs");
@@ -49,7 +49,6 @@ const FileRef = require("../fileRef");
 const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
-const { StreamBuffer } = require("./stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
@@ -335,9 +334,9 @@ function importToyProject(account, username) {
 
 		return Promise.all([
 
-			importToyModel(account, username, "Lego_House_Architecture", "cac0c1c0-4eb5-11ec-934b-b1a3427c3c40", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "cac332c0-4eb5-11ec-934b-b1a3427c3c40", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "cac332c1-4eb5-11ec-934b-b1a3427c3c40", project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "9f101b80-b4c6-11ec-8b15-4f0e6dbe2114", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "9f117b10-b4c6-11ec-8b15-4f0e6dbe2114", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "9f11f040-b4c6-11ec-8b15-4f0e6dbe2114", project.name)
 
 		]).then(models => {
 
@@ -353,7 +352,7 @@ function importToyProject(account, username) {
 				};
 			});
 
-			return importToyModel(account, username, "Lego_House_Federation", "cacc8190-4eb5-11ec-934b-b1a3427c3c40", project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "9f252a20-b4c6-11ec-8b15-4f0e6dbe2114", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -768,8 +767,10 @@ async function getMeshById(account, model, meshId) {
 	}
 	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], [mesh.rev_id]);
 
-	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
+	const { fetchFileStream } = require("../fileRef");
+
+	const { readStream: vertices } =  await fetchFileStream(account, `${model}.scene` ,mesh._extRef.vertices);
+	const { readStream: faces } = await fetchFileStream(account, `${model}.scene`, mesh._extRef.faces);
 
 	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
 		mesh.primitive = 3;

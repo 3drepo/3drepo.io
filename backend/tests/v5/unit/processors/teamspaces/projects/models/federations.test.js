@@ -311,9 +311,9 @@ const testDeleteFederation = () => {
 
 			expect(fnDrop.mock.calls.length).toBe(2);
 			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
+			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0].name);
 			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
+			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1].name);
 		});
 
 		test('should succeed if file removal fails', async () => {
