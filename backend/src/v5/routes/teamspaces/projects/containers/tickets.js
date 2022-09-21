@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update  } = require('../../../../processors/teamspaces/projects/models/containers');
+const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update } = require('../../../../processors/teamspaces/projects/models/containers');
 const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update  } = require('../../../../processors/teamspaces/projects/models/federations');
+const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update } = require('../../../../processors/teamspaces/projects/models/federations');
 const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket} = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');

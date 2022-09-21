@@ -17,10 +17,8 @@
 
 "use strict";
 const db = require("../handler/db");
-const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
-const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
@@ -43,61 +41,32 @@ const FileRef = {};
 
 const getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, {_id: id}, projection);
 
-function _fetchFile(account, model, ext, fileName, metadata = false, useLegacyNameOnFallback = false) {
+async function _fetchFile(account, model, ext, fileName, metadata = false) {
 	const collection =  model ? `${model}${ext}` : ext;
-	return getRefEntry(account, collection, fileName).then((entry) => {
-		if(!entry) {
-			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
-		}
+	const entry = await getRefEntry(account, collection, fileName);
+	if(!entry) {
+		throw ResponseCodes.NO_FILE_FOUND;
+	}
 
-		return ExternalServices.getFile(account, collection, entry.type, entry.link).catch (() => {
+	const fileBuffer = await ExternalServices.getFile(account, collection, entry.type, entry.link);
 
-			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-			Mailer.sendFileMissingError({
-				account, model, collection,
-				refId: entry._id,
-				link: entry.link
-			});
+	if (metadata) {
+		const type = (((entry.name || "").match(extensionRe) || [])[0] || "").toLowerCase();
+		return {file:fileBuffer, type, name: entry.name , size: entry.size};
+	}
+	return fileBuffer;
 
-			// Temporary fall back - read from gridfs
-			const fullName = useLegacyNameOnFallback ?
-				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
-				fileName;
-			return ExternalServices.getFile(account, collection, "gridfs", fullName);
-		}).then(fileBuffer=> {
-			if (metadata) {
-				const type = (((entry.name || "").match(extensionRe) || [])[0] || "").toLowerCase();
-				return {file:fileBuffer, type, name: entry.name , size: entry.size};
-			}
-			return fileBuffer;
-		});
-	});
 }
 
-function fetchFileStream(account, model, collection, fileName, useLegacyNameOnFallback = false) {
-	return getRefEntry(account, collection, fileName).then((entry) => {
-		if(!entry) {
-			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
-		}
-		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
-			return {readStream: stream, size: entry.size };
-		}).catch (() => {
-			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-			Mailer.sendFileMissingError({
-				account, model, collection,
-				refId: entry._id,
-				link: entry.link
-			});
+async function fetchFileStream(account,collection, fileName) {
 
-			// Temporary fall back - read from gridfs
-			const fullName = useLegacyNameOnFallback ?
-				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}` :
-				fileName;
-			return ExternalServices.getFileStream(account, collection, "gridfs", fullName).then((stream) => {
-				return {readStream: stream, size: entry.size };
-			});
-		});
-	});
+	const entry = await getRefEntry(account, collection, fileName);
+	if(!entry) {
+		throw ResponseCodes.NO_FILE_FOUND;
+	}
+
+	const stream  = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
+	return {readStream: stream, size: entry.size };
 }
 
 function removeAllFiles(account, collection) {
@@ -139,9 +108,11 @@ FileRef.fileExists = async (account, collection, id) => {
 	return !!fileEntry;
 };
 
+FileRef.fetchFileStream = (account, collection, fileName) => fetchFileStream(account, `${collection}.ref`, fileName);
+
 FileRef.getOriginalFile = function(account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
-	return fetchFileStream(account, model, collection, fileName, false);
+	return fetchFileStream(account, collection, fileName, false);
 };
 
 FileRef.getSRCFile = function(account, model, fileName) {
@@ -219,7 +190,7 @@ FileRef.getResourceFile = function(account, model, fileName) {
  */
 FileRef.getJSONFileStream = function(account, model, fileName) {
 	const collection = model + JSON_FILE_REF_EXT;
-	return fetchFileStream(account, model, collection, fileName, true);
+	return fetchFileStream(account, collection, fileName, true);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
