@@ -37,3 +37,7 @@ export const selectCurrentProjectDetails = createSelector(
 	selectCurrentProject, selectCurrentProjects,
 	(project, projects) => projects.find(({ _id }) => _id === project),
 );
+export const selectCurrentProjectName = createSelector(
+	selectCurrentProjectDetails,
+	(project) => project?.name || null,
+);
