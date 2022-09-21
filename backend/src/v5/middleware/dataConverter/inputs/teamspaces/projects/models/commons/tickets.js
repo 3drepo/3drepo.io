@@ -21,6 +21,7 @@ const { checkTicketTemplateExists } = require('../../../settings');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
+const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
@@ -39,6 +40,10 @@ const validate = (isNewTicket) => async (req, res, next) => {
 		}
 
 		req.body = await validateTicket(teamspace, template, ticket, isNewTicket);
+
+		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
+			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
+		}
 		processReadOnlyValues(req.ticketData, req.body, user);
 		await next();
 	} catch (err) {

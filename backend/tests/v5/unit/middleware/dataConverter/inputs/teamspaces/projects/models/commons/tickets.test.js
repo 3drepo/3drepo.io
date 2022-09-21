@@ -192,6 +192,25 @@ const testValidateUpdateTicket = () => {
 			expect(fn).not.toHaveBeenCalled();
 		});
 
+		test(`Should respond with ${templates.invalidArguments.code} if there is nothing to update`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
+
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TicketSchema.validateTicket.mockResolvedValueOnce({ properties: {}, modules: {} });
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				expect.objectContaining({ code: templates.invalidArguments.code }));
+			expect(fn).not.toHaveBeenCalled();
+		});
+
 		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
