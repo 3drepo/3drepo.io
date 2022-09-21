@@ -74,7 +74,7 @@ const establishRoutes = () => {
 	*                       color:
 	*                         type: string
 	*                         description: Color that represents the job, in hex
-	*                         example: #AA00BB
+	*                         example: "#AA00BB"
 	*/
 	router.get('/', hasAccessToTeamspace, getJobList);
 

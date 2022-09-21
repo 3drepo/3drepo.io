@@ -25,7 +25,7 @@ const JobsModel = require(`${src}/models/jobs`);
 const Jobs = require(`${src}/processors/teamspaces/jobs`);
 
 const testGetJobList = () => {
-	describe('Get template list', () => {
+	describe('Get job list', () => {
 		test('should call getJobs with the teamspace provided', async () => {
 			const teamspace = generateRandomString();
 			const data = generateRandomString();

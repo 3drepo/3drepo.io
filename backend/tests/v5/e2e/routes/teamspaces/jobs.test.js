@@ -64,7 +64,7 @@ const testGetJobList = () => {
 			['user is a ts admin', tsAdmin.apiKey, undefined, true],
 			['user is a member', normalUser.apiKey, undefined, true],
 		])('', (desc, key, ts, success, expectedRes) => {
-			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(route(key, ts)).expect(expectedStatus);
 				if (success) {

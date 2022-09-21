@@ -82,7 +82,7 @@ const testRemoveUserFromJobs = () => {
 };
 
 const testGetJobNames = () => {
-	describe('Get job namess', () => {
+	describe('Get job names', () => {
 		test('return names of all available jobs', async () => {
 			const teamspace = generateRandomString();
 			const jobs = [generateRandomString(), generateRandomString(), generateRandomString()];
