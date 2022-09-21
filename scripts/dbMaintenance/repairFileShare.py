@@ -30,7 +30,7 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 ##### Enable dry run to not commit to the database #####
 dryRun = True
 verbose = True
-ignoreDirs = ["toy_2019-05-31"]
+ignoreDirs = ["toy_2019-05-31","toy_2020-07-22","toy_2020-08-21","toy_2021-11-26","toy_2022-04-05"]
 
 ##### Retrieve file list from local folder #####
 fileList = {}
