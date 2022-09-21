@@ -34,41 +34,29 @@ const gridFsFilename = "cd561c86-de1a-482e-8f5d-89cfc49562e8LAB-BBD-00-ZZ-M3-A-0
 const goldenColls = [
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.groups', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.chunks', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.files', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.issues', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.scene', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.scene.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.3drepo', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.chunks', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.files', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.3drepo.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.chunks', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.files', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.groups', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.files', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.issues', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.scene', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.scene.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.files', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.files', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.files', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.ref', options: {} },
 	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.history', options: {} },
 	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.issues', options: {} },
 	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.scene', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.chunks', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.files', options: {} },
 	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.ref', options: {} },
 	{ name: 'jobs', options: {} },
 	{ name: 'projects', options: {} },
@@ -85,7 +73,8 @@ const goldenJobs = [
 	{ _id: 'Project Manager', users: [] },
 	{ _id: 'Quantity Surveyor', users: [] },
 	{ _id: 'Structural Engineer', users: [] },
-	{ _id: 'Supplier', users: [] }
+	{ _id: 'Supplier', users: [] },
+	{ _id: 'Admin', color: "#f7f7b2", users: ["testuser"] },
 ];
 
 const goldenProjectNames = [{"name":"Sample_Project"}];
@@ -122,19 +111,6 @@ describe("Check DB handler", function() {
 		it("get DB should succeed", async function() {
 			const database = await db.getDB(account);
 			expect(database).to.exist;
-			const coll = await database.collection("jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.deep.equal(goldenJobs);
-		});
-
-		it("get DB with incorrect username to be empty", async function() {
-			const database = await db.getDB("nope");
-			expect(database).to.exist;
-			const coll = await database.collection("jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.be.empty;
 		});
 	});
 
@@ -280,146 +256,6 @@ describe("Check DB handler", function() {
 		it("find one with incorrect collection should be null", async function() {
 			const setting = await db.findOne(account, "wrongOne", {});
 			expect(setting).to.be.null;
-		});
-	});
-
-	describe("getFileStreamFromGridFS", function () {
-		it("get file stream should succeed", async function() {
-			const file = await db.getFileStreamFromGridFS(account, `${model}.history`, gridFsFilename);
-			expect(file).to.exist;
-			expect(file.stream).to.exist;
-		});
-
-		it("get file stream with incorrect filename should fail", async function() {
-			try {
-				await db.getFileStreamFromGridFS(account, `${model}.history`, "badFilename");
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("NO_FILE_FOUND");
-				expect(err.status).to.equal(404);
-			}
-		});
-
-		it("get file stream with incorrect collection should fail", async function() {
-			try {
-				await db.getFileStreamFromGridFS(account, "badCollection", gridFsFilename);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("NO_FILE_FOUND");
-				expect(err.status).to.equal(404);
-			}
-		});
-
-		it("get file stream with incorrect DB should fail", async function() {
-			try {
-				await db.getFileStreamFromGridFS("wrong", `${model}.history`, gridFsFilename);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("NO_FILE_FOUND");
-				expect(err.status).to.equal(404);
-			}
-		});
-	});
-
-	describe("getFileFromGridFS", function () {
-		it("get file should succeed", async function() {
-			const file = await db.getFileFromGridFS(account, `${model}.history`, gridFsFilename);
-			expect(file).to.exist;
-			expect(file).to.be.instanceof(Buffer);
-		});
-
-		it("get file with incorrect filename should fail", async function() {
-			try {
-				await db.getFileFromGridFS(account, `${model}.history`, "badFilename");
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("NO_FILE_FOUND");
-				expect(err.status).to.equal(404);
-			}
-		});
-
-		it("get file from incorrect collection should fail", async function() {
-			try {
-				await db.getFileFromGridFS(account, "badCollection", gridFsFilename);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("NO_FILE_FOUND");
-				expect(err.status).to.equal(404);
-			}
-		});
-
-		it("get file from incorrect DB should fail", async function() {
-			try {
-				await db.getFileFromGridFS("wrong", `${model}.history`, gridFsFilename);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("NO_FILE_FOUND");
-				expect(err.status).to.equal(404);
-			}
-		});
-	});
-
-	describe("storeFileInGridFS", function () {
-		it("store file buffer in Grid FS should succeed", async function() {
-			const buffer = Buffer.alloc(8);
-			const filename = "test_file";
-			const file = await db.storeFileInGridFS(account, `${model}.history`, filename, buffer);
-			expect(file).to.exist;
-			expect(file).to.equal(filename);
-		});
-
-		it("store file string in Grid FS should succeed", async function() {
-			const data = "test data";
-			const filename = "test_string";
-			const file = await db.storeFileInGridFS(account, `${model}.history`, filename, data);
-			expect(file).to.exist;
-			expect(file).to.equal(filename);
-		});
-
-		it("store file string in Grid FS should succeed", async function() {
-			const data = "test data";
-			const filename = "test_string";
-			const file = await db.storeFileInGridFS(account, `${model}.history`, filename, data);
-			expect(file).to.exist;
-			expect(file).to.equal(filename);
-		});
-
-		it("store file number in Grid FS should succeed", async function() {
-			const data = 123456789;
-			const filename = "test_number";
-			try {
-				await db.storeFileInGridFS(account, `${model}.history`, filename, data);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("ERR_INVALID_ARG_TYPE");
-			}
-		});
-
-		it("store file that is not a buffer should fail", async function() {
-			const data = { "badData": true };
-			const filename = "bad_file";
-			try {
-				await db.storeFileInGridFS(account, `${model}.history`, filename, data);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).to.equal("ERR_INVALID_ARG_TYPE");
-			}
-		});
-
-		it("store file in wrong collection should succeed", async function() {
-			const buffer = Buffer.alloc(8);
-			const filename = "bad_test_file";
-			const file = await db.storeFileInGridFS(account, "wrong.history", filename, buffer);
-			expect(file).to.exist;
-			expect(file).to.equal(filename);
-		});
-
-		it("store file in wrong DB should succeed", async function() {
-			const buffer = Buffer.alloc(8);
-			const filename = "test_file";
-			const file = await db.storeFileInGridFS("wrong", `${model}.history`, filename, buffer);
-			expect(file).to.exist;
-			expect(file).to.equal(filename);
 		});
 	});
 
@@ -740,8 +576,8 @@ describe("Check DB handler", function() {
 			const query = {};
 			const newData = { $set: { users: [] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
-			expect(result.result.n).to.equal(24);
-			expect(result.result.nModified).to.equal(8);
+			expect(result.result.n).to.equal(25);
+			expect(result.result.nModified).to.equal(9);
 			expect(result.result.ok).to.equal(1);
 		});
 	});

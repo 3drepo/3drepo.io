@@ -27,6 +27,12 @@ const SettingsMW = require(`${src}/middleware/dataConverter/inputs/teamspaces/se
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets');
 const TicketSchema = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
+const TemplateModelSchema = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../../../../../../src/v5/models/tickets');
+const TicketModelSchema = require(`${src}/models/tickets`);
+
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const { stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
@@ -141,7 +147,6 @@ const testValidateNewTicket = () => {
 			});
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.validateTicket.mockResolvedValueOnce();
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -151,6 +156,131 @@ const testValidateNewTicket = () => {
 	});
 };
 
+const testValidateUpdateTicket = () => {
+	describe('Validate update ticket', () => {
+		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+
+			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ticketNotFound);
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
+
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+
+			const errMsg = generateRandomString();
+			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, errMsg));
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if there is nothing to update`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
+
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TicketSchema.validateTicket.mockResolvedValueOnce({ properties: {}, modules: {} });
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				expect.objectContaining({ code: templates.invalidArguments.code }));
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
+
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+
+			const errMsg = generateRandomString();
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, errMsg));
+
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test('Should call next if validation succeeded', async () => {
+			const fn = jest.fn();
+			const req = { params: {}, body: { } };
+			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = { [generateRandomString()]: generateRandomString() };
+
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(fn).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('Should call next if validation succeeded and the template is deprecated', async () => {
+			const fn = jest.fn();
+			const req = {
+				params: {},
+				body: { [generateRandomString()]: generateRandomString() },
+				session: { user: { username: generateRandomString() } },
+			};
+			const res = {};
+			const ticket = { [generateRandomString()]: generateRandomString() };
+			const template = {
+				deprecated: true,
+				[generateRandomString()]: generateRandomString(),
+			};
+
+			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+
+			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(fn).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalled();
+			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledWith(ticket, req.body,
+				req.session.user.username);
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets', () => {
 	testValidateNewTicket();
+	testValidateUpdateTicket();
 });
