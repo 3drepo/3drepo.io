@@ -21,7 +21,7 @@
  * that are incomplete and older than 14 days (i.e., unlikely to be queued)
  */
 
-const { v5Path } = require('../../../interop');
+const { v4Path, v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
@@ -29,6 +29,7 @@ const FS = require('fs');
 const Path = require('path');
 
 const { bulkWrite, count, find } = require(`${v5Path}/handler/db`);
+const { removeFiles } = require(`${v4Path}/handler/externalServices`);
 
 const removeRefFile = async (teamspace, collection, filter) => {
 	// remove files from .ref
@@ -42,40 +43,43 @@ const removeGridFSFile = async (teamspace, collection, filter) => {
 	console.log(files);
 };
 
-const processFilesAndRefs = async (teamspace, collPrefix, filenames = [], processFiles = false, processRefs = false) => {
-	if (filenames.length > 0 && (processFiles || processRefs)) {
-		for (filename of filenames) {
-			if (processFiles) {
-				await removeGridFSFile(teamspace, `${collPrefix}.files`, { filename });
-			}
-
-			if (processRefs) {
-				await removeRefFile(teamspace, `${collPrefix}.ref`, { _id: filename });
+const processFilesAndRefs = async (teamspace, collPrefix, filenames = []) => {
+	console.log(`process ${teamspace}::${collPrefix}::${filenames.length}`);
+	if (filenames.length > 0) {
+		for (type of ['fs', 's3', 'gridfs', 'alluxio']) {
+			try {
+				console.log(type);
+				await removeFiles(teamspace, collPrefix, type, filenames);
+			} catch (err) {
+				logger.logError(err);
 			}
 		}
 	}
 };
 
-const processCollection = async (teamspace, collection, filter, refAttribute, processFiles, processRefs) => {
+const processCollection = async (teamspace, collection, filter, refAttribute) => {
 	const projection = {};
 	projection[refAttribute] = 1;
 
 	const results = await find(teamspace, collection, filter, projection);
+	const filenames = [];
 
 	for (const record of results) {
 		const fileRefs = record[refAttribute];
 		if (fileRefs) {
-			await processFilesAndRefs(teamspace, collection, Object.values(fileRefs), processFiles, processRefs);
+			filenames.push(fileRefs);
 		}
 	}
+
+	await processFilesAndRefs(teamspace, collection, filenames);
 
 	// await deleteMany(teamspace, collection, filter);
 };
 
 const processModelStashMpc = async (teamspace, model, revId) => {
-	await removeGridFSFile(teamspace, `${model}.stash.json_mpc.files`, {
-		filename: { $regex: `^/${teamspace}/${model}/revision/${uuidToString(revId)}/`}
-	});
+	await removeGridFSFile(teamspace, `${model}.stash.json_mpc.files`, [
+		{ $regex: `^/${teamspace}/${model}/revision/${uuidToString(revId)}/`}
+	]);
 
 	await removeRefFile(teamspace, `${model}.stash.json_mpc.ref`, {
 		_id: { $regex: `^/${uuidToString(revId)}/`}
@@ -83,12 +87,13 @@ const processModelStashMpc = async (teamspace, model, revId) => {
 };
 
 const processModelStash = async (teamspace, model, revId) => {
-	await processCollection(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef', true);
+	await processCollection(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef');
 };
 
 const processModelSequences = async (teamspace, model, revId) => {
-	// await processCollection(teamspace, `${model}.sequences`, { rev_id: revId }, 'frames', true);
+	// await processCollection(teamspace, `${model}.sequences`, { rev_id: revId }, 'frames');
 	const sequences = await find(teamspace, `${model}.sequences`, { rev_id: revId }, { frames: 1 });
+	const sequenceFilenames = [];
 
 	for (const { frames } of sequences) {
 		if (frames) {
@@ -96,20 +101,23 @@ const processModelSequences = async (teamspace, model, revId) => {
 			for (const { state } of Object.values(frames)) {
 				console.log(state);
 				// remove gridfs from sequences.files
-				await removeGridFsFile(teamspace, `${model}.sequences.files`, { filename: state });
+				sequenceFilenames.push(state);
 				// maybe remove files from sequences.ref
 				// activities?
+				// -- based on sequenceId
 				// activities.files?
 				// activities.ref?
 			}
 		}
 	}
 
+	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, sequenceFilenames);
+
 	// await deleteMany(teamspace, `${model}.sequences`, { rev_id: revId });
 };
 
 const processModelScene = async (teamspace, model, revId) => {
-	await processCollection(teamspace, `${model}.scene`, { rev_id: revId }, '_extRef', true);
+	await processCollection(teamspace, `${model}.scene`, { rev_id: revId }, '_extRef');
 };
 
 const processTeamspace = async (teamspace) => {
@@ -129,14 +137,14 @@ const processTeamspace = async (teamspace) => {
 			await processModelScene(teamspace, model, _id);
 			await processModelSequences(teamspace, model, _id);
 			await processModelStash(teamspace, model, _id);
-			await processModelStashMpc(teamspace, model, _id);
+			// await processModelStashMpc(teamspace, model, _id);
 		}
 	}
 };
 
 const run = async (outFile) => {
 	logger.logInfo('Finding all members from all teamspaces...');
-	const teamspaces = ['carmen']; // await getTeamspaceList();
+	const teamspaces = ['charence']; // await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`\t-${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop
