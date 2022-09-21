@@ -464,20 +464,20 @@ const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTempl
 
 const testUpdateTicket = () => {
 	let ticket;
-	let ticketWithDepracatedTemplate;
+	let ticketWithDeprecatedTemplate;
 
 	beforeAll(async () => {
 		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: false } });
 		ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
-		ticketWithDepracatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
+		ticketWithDeprecatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
 		const endpoint = addTicketRoute(users.tsAdmin.apiKey);
 
 		const res = await agent.post(endpoint).send(ticket);
-		const res2 = await agent.post(endpoint).send(ticketWithDepracatedTemplate);
+		const res2 = await agent.post(endpoint).send(ticketWithDeprecatedTemplate);
 		ticket._id = res.body._id;
-		ticketWithDepracatedTemplate._id = res2.body._id;
+		ticketWithDeprecatedTemplate._id = res2.body._id;
 		ticket.properties['Updated at'] = new Date();
-		ticketWithDepracatedTemplate.properties['Updated at'] = new Date();
+		ticketWithDeprecatedTemplate.properties['Updated at'] = new Date();
 		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 	});
 
@@ -527,26 +527,26 @@ const testUpdateTicket = () => {
 	test('Should succeed if the template is deprecated', async () => {
 		const payloadChanges = { title: ServiceHelper.generateRandomString() };
 		const endpoint = updateTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
-			ticketWithDepracatedTemplate._id);
+			ticketWithDeprecatedTemplate._id);
 		await agent.patch(endpoint).send(payloadChanges).expect(templates.ok.status);
 
 		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
-			ticketWithDepracatedTemplate._id);
+			ticketWithDeprecatedTemplate._id);
 		const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
 
 		const updatedTicket = updatedTicketRes.body;
 		expect(updatedTicket).toHaveProperty('number');
 		expect(updatedTicket.properties).toHaveProperty('Updated at');
-		expect(updatedTicket.properties['Updated at']).not.toEqual(ticketWithDepracatedTemplate.properties['Updated at']);
+		expect(updatedTicket.properties['Updated at']).not.toEqual(ticketWithDeprecatedTemplate.properties['Updated at']);
 		expect(updatedTicket.properties).toHaveProperty('Created at');
 		expect(updatedTicket.properties).toHaveProperty('Owner');
 		delete updatedTicket.number;
 		delete updatedTicket.properties['Updated at'];
-		delete ticketWithDepracatedTemplate.properties['Updated at'];
+		delete ticketWithDeprecatedTemplate.properties['Updated at'];
 		delete updatedTicket.properties['Created at'];
 		delete updatedTicket.properties.Owner;
 		expect({ ...updatedTicket }).toEqual({
-			...ticketWithDepracatedTemplate,
+			...ticketWithDeprecatedTemplate,
 			...payloadChanges,
 		});
 	});
