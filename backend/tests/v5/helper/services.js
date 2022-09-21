@@ -149,6 +149,18 @@ db.createTemplates = (teamspace, data = []) => {
 	return DbHandler.insertMany(teamspace, 'templates', toInsert);
 };
 
+db.createTicket = (teamspace, project, model, ticket) => {
+	const formattedTicket = {
+		...ticket,
+		_id: stringToUUID(ticket._id),
+		type: stringToUUID(ticket.type),
+		project: stringToUUID(project),
+		teamspace,
+		model,
+	};
+	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
+};
+
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
@@ -362,6 +374,7 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 	});
 
 	const ticket = {
+		_id: ServiceHelper.generateUUIDString(),
 		type: template._id,
 		title: ServiceHelper.generateRandomString(),
 		properties: generateProperties(template.properties, internalType),

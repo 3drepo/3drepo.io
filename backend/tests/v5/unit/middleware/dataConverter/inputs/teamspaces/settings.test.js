@@ -24,6 +24,7 @@ jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+
 jest.mock('../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 
@@ -397,7 +398,7 @@ const testValidateUpdateTicketSchema = () => {
 
 const testCheckTicketTemplateExists = () => {
 	describe('Check if template exists', () => {
-		test('Should call next if the ticket exists', async () => {
+		test('Should call next if the template exists', async () => {
 			const output = {
 				name: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
@@ -419,8 +420,8 @@ const testCheckTicketTemplateExists = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
-		test(`Should respond with ${templates.templatesNotFound} if template does not exist`, async () => {
-			TemplateModelSchema.getTemplateById.mockRejectedValueOnce(templates.templatesNotfound);
+		test(`Should respond with ${templates.templateNotFound.code} if template does not exist`, async () => {
+			TemplateModelSchema.getTemplateById.mockRejectedValueOnce(templates.templateNotFound);
 
 			const req = {
 				params: { teamspace: generateRandomString(), template: generateRandomString() },
@@ -433,9 +434,9 @@ const testCheckTicketTemplateExists = () => {
 
 			expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledWith(req.params.teamspace, req.params.template);
 			expect(next).not.toHaveBeenCalled();
-			expect(req.templiateData).toBeUndefined();
+			expect(req.templateData).toBeUndefined();
 			expect(Responder.respond).toHaveBeenCalledWith(
-				req, res, templates.templatesNotFound,
+				req, res, templates.templateNotFound,
 			);
 		});
 	});

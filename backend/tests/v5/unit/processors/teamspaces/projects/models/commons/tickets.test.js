@@ -29,13 +29,9 @@ const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
-const imageTest = async (isView) => {
-	const teamspace = generateRandomString();
-	const project = generateRandomString();
-	const model = generateRandomString();
+const generatePropData = (buffer, isView) => (isView ? { screenshot: buffer } : buffer);
 
-	const expectedOutput = generateRandomString();
-
+const generateImageTestData = (isView) => {
 	const propName = generateRandomString();
 	const moduleName = generateRandomString();
 
@@ -58,59 +54,126 @@ const imageTest = async (isView) => {
 					},
 				],
 			},
+			{
+				type: 'safetibase',
+				properties: [],
+			},
 		],
 	};
 
 	const propBuffer = Buffer.from(generateRandomString());
 	const modPropBuffer = Buffer.from(generateRandomString());
 
-	const generatePropData = (buffer) => (isView ? { screenshot: buffer } : buffer);
-
 	const ticket = {
+		_id: generateRandomString(),
 		title: generateRandomString(),
 		properties: {
-			[propName]: generatePropData(propBuffer),
+			[propName]: generatePropData(propBuffer, isView),
 		},
 		modules: {
 			[moduleName]: {
-				[propName]: generatePropData(modPropBuffer),
+				[propName]: generatePropData(modPropBuffer, isView),
 			},
 		},
 	};
 
+	return { template, ticket, propName, moduleName, propBuffer, modPropBuffer };
+};
+
+const addTicketImageTest = async (isView) => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const expectedOutput = generateRandomString();
+
+	const imageTestData = generateImageTestData(isView);
+
 	TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
 
-	await expect(Tickets.addTicket(teamspace, project, model, ticket, template))
+	await expect(Tickets.addTicket(teamspace, project, model, imageTestData.ticket, imageTestData.template))
 		.resolves.toEqual(expectedOutput);
 
-	expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
 	const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
+	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
+		: processedTicket.properties[imageTestData.propName];
+	const modPropRef = isView ? processedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot
+		: processedTicket.modules[imageTestData.moduleName][imageTestData.propName];
 
-	const propRef = isView ? processedTicket.properties[propName].screenshot
-		: processedTicket.properties[propName];
-	const modPropRef = isView ? processedTicket.modules[moduleName][propName].screenshot
-		: processedTicket.modules[moduleName][propName];
-
+	expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
 	expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model,
 		{
-			...ticket,
-			properties: { [propName]: generatePropData(propRef) },
+			...imageTestData.ticket,
+			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
 			modules: {
-				[moduleName]: {
-					[propName]: generatePropData(modPropRef),
+				[imageTestData.moduleName]: {
+					[imageTestData.propName]: generatePropData(modPropRef, isView),
 				},
 			},
 		});
 
-	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
-
 	const meta = { teamspace, project, model, ticket: expectedOutput };
-
+	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
-		teamspace, TICKETS_RESOURCES_COL, propRef, propBuffer, meta,
+		teamspace, TICKETS_RESOURCES_COL, propRef, imageTestData.propBuffer, meta,
 	);
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
-		teamspace, TICKETS_RESOURCES_COL, modPropRef, modPropBuffer, meta,
+		teamspace, TICKETS_RESOURCES_COL, modPropRef, imageTestData.modPropBuffer, meta,
+	);
+};
+
+const updateTicketImageTest = async (isView) => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+
+	const imageTestData = generateImageTestData(isView);
+	const updatePropBuffer = Buffer.from(generateRandomString());
+	const updateModPropBuffer = Buffer.from(generateRandomString());
+	const updateData = {
+		properties: {
+			[imageTestData.propName]: generatePropData(updatePropBuffer, isView),
+		},
+		modules: {
+			[imageTestData.moduleName]: {
+				[imageTestData.propName]: generatePropData(updateModPropBuffer, isView),
+			},
+		},
+	};
+
+	await expect(Tickets.updateTicket(teamspace, project, model, imageTestData.template,
+		imageTestData.ticket, updateData)).resolves.toBeUndefined();
+
+	const processedTicket = TicketsModel.updateTicket.mock.calls[0][2];
+	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
+		: processedTicket.properties[imageTestData.propName];
+	const modPropRef = isView ? processedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot
+		: processedTicket.modules[imageTestData.moduleName][imageTestData.propName];
+
+	expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
+	expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, imageTestData.ticket._id,
+		{
+			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
+			modules: {
+				[imageTestData.moduleName]: {
+					[imageTestData.propName]: generatePropData(modPropRef, isView),
+				},
+			},
+		});
+
+	const meta = { teamspace, project, model, ticket: imageTestData.ticket._id };
+	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
+	expect(FilesManager.storeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, propRef, updatePropBuffer, meta,
+	);
+	expect(FilesManager.storeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, modPropRef, updateModPropBuffer, meta,
+	);
+	expect(FilesManager.removeFile).toHaveBeenCalledTimes(2);
+	expect(FilesManager.removeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, imageTestData.propBuffer,
+	);
+	expect(FilesManager.removeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, imageTestData.propBuffer,
 	);
 };
 
@@ -136,8 +199,36 @@ const testAddTicket = () => {
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
 
-		test('should process image and store a ref', () => imageTest());
-		test('should process screenshot from view data and store a ref', () => imageTest(true));
+		test('should process image and store a ref', () => addTicketImageTest());
+		test('should process screenshot from view data and store a ref', () => addTicketImageTest(true));
+	});
+};
+
+const testUpdateTicket = () => {
+	describe('Update ticket', () => {
+		test('should call updateTicket in model', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const template = generateTemplate();
+			const ticket = generateTicket(template);
+			const updateData = {
+				title: generateRandomString(),
+				properties: {},
+			};
+
+			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket, updateData))
+				.resolves.toBeUndefined();
+
+			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, ticket._id, updateData);
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(FilesManager.removeFile).not.toHaveBeenCalled();
+		});
+
+		test('should process image and store a ref', () => updateTicketImageTest());
+		test('should process screenshot from view data and store a ref', () => updateTicketImageTest(true));
 	});
 };
 
@@ -171,7 +262,7 @@ const testGetTicketResourceAsStream = () => {
 };
 
 const testGetTicketById = () => {
-	describe('Add ticket', () => {
+	describe('Get ticket by Id', () => {
 		test('should call getTicketById in model and return whatever it returns', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -236,5 +327,6 @@ describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
 	testGetTicketResourceAsStream();
 	testGetTicketById();
+	testUpdateTicket();
 	testGetTicketList();
 });
