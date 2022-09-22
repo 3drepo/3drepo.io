@@ -25,6 +25,8 @@ Objects.removeFields = _.omit;
 
 Objects.isEmpty = _.isEmpty;
 
+Objects.isEqual = _.isEqual;
+
 Objects.deleteIfUndefined = (obj) => {
 	const res = { ...obj };
 	Object.keys(obj).forEach((key) => {
