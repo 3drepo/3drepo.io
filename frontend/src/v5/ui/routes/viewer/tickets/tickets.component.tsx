@@ -15,47 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TicketsIcon from '@mui/icons-material/FormatListBulleted';
-import { FormattedMessage } from 'react-intl';
-import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
-import { useEffect } from 'react';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsList } from './ticketsList/ticketsList.component';
-import { CardContent } from './tickets.styles';
+import { useState } from 'react';
+import { CardContainer } from '@components/viewer/cards/card.styles';
+import { TicketsListCard } from './ticketsList/ticketListCard.component';
+import { TicketsTabs } from './tickets.constants';
+import { TicketsDetailsCard } from './ticketsDetails/ticketDetailsCard.component';
 
 export const Tickets = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const isFederation = modelIsFederation(containerOrFederation);
-	const tickets = TicketsHooksSelectors.selectModelTickets(containerOrFederation);
+	const [tabValue, setTabValue] = useState(TicketsTabs.List);
+	const [tabProps, setTabProps] = useState<any>();
 
-	useEffect(() => {
-		TicketsActionsDispatchers.fetchTickets(
-			teamspace,
-			project,
-			containerOrFederation,
-			isFederation,
-		);
-		TicketsActionsDispatchers.fetchTemplates(
-			teamspace,
-			project,
-			containerOrFederation,
-			isFederation,
-		);
-	}, [containerOrFederation]);
-
-	return (
-		<CardContainer>
-			<CardHeader>
-				<TicketsIcon fontSize="small" />
-				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
-			</CardHeader>
-			<CardContent autoHeightMax="100%">
-				<TicketsList tickets={tickets} />
-			</CardContent>
-		</CardContainer>
-	);
+	switch (tabValue) {
+		case TicketsTabs.List:
+			return <TicketsListCard setTabValue={setTabValue} setTabProps={setTabProps} />;
+			break;
+		case TicketsTabs.New:
+			return <CardContainer>New {JSON.stringify(tabProps)} </CardContainer>;
+			break;
+		case TicketsTabs.Details:
+			return <TicketsDetailsCard setTabValue={setTabValue} {...tabProps} />;
+			break;
+		default:
+			return <></>;
+	}
 };

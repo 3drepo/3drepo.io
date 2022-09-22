@@ -22,12 +22,15 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelec
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, TemplateName, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
+import { TicketsTabs } from '../tickets.constants';
 
 type TicketsListProps = {
 	tickets: ITicket[];
+	setTabValue: (string) => void;
+	setTabProps: (any) => void;
 };
 
-export const TicketsList = ({ tickets }: TicketsListProps) => {
+export const TicketsList = ({ tickets, setTabValue, setTabProps }: TicketsListProps) => {
 	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -55,6 +58,8 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const onTicketClick = (ticket: ITicket) => {
 		if (ticketIsSelected(ticket)) {
+			setTabProps({ ticket });
+			setTabValue(TicketsTabs.Details);
 			// navigate to ticket
 		} else {
 			setSelectedTicket(ticket);
