@@ -30,6 +30,7 @@ const Path = require('path');
 
 const { bulkWrite, count, find } = require(`${v5Path}/handler/db`);
 const { removeFiles } = require(`${v4Path}/handler/externalServices`);
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
 const removeRefFile = async (teamspace, collection, filter) => {
 	// remove files from .ref
@@ -43,16 +44,35 @@ const removeGridFSFile = async (teamspace, collection, filter) => {
 	console.log(files);
 };
 
-const processFilesAndRefs = async (teamspace, collPrefix, filenames = []) => {
-	console.log(`process ${teamspace}::${collPrefix}::${filenames.length}`);
-	if (filenames.length > 0) {
-		for (type of ['fs', 's3', 'gridfs', 'alluxio']) {
-			try {
-				console.log(type);
-				await removeFiles(teamspace, collPrefix, type, filenames);
-			} catch (err) {
-				logger.logError(err);
+const processFilesAndRefs = async (teamspace, collection, filenames = [], filter) => {
+	console.log(`process ${teamspace}::${collection}::${filenames.length}`);
+	filter = filter || { _id: {$in: filenames} };
+
+	for (type of ['fs', 's3', 'gridfs', 'alluxio']) {
+		try {
+			console.log(type);
+			if ('gridfs' === type && filenames.length > 0) {
+				await removeFiles(teamspace, collection, type, filenames);
+			} else {
+				// retrieve file links
+				console.log({ ...filter, type });
+				const fileRefs = await find(
+					teamspace,
+					collection,
+					{ ...filter, type },
+					{ link: 1 },
+				);
+				console.log(fileRefs);
+				const links = fileRefs.map((ref) => ref.link);
+				console.log(links);
+				if (links.length > 0) {
+					const res = await removeFiles(teamspace, collection, type, links);
+					console.log(res);
+				}
 			}
+		} catch (err) {
+			console.log(err);
+			logger.logError(err);
 		}
 	}
 };
@@ -77,13 +97,22 @@ const processCollection = async (teamspace, collection, filter, refAttribute) =>
 };
 
 const processModelStashMpc = async (teamspace, model, revId) => {
-	await removeGridFSFile(teamspace, `${model}.stash.json_mpc.files`, [
-		{ $regex: `^/${teamspace}/${model}/revision/${uuidToString(revId)}/`}
-	]);
+	// await processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, ['58/200/9fd5285c-7a49-4b9c-8878-14101d9fedcd','bf9670e0-b735-11ec-973a-6dcd25debb2e/tree_path.json']);
 
-	await removeRefFile(teamspace, `${model}.stash.json_mpc.ref`, {
-		_id: { $regex: `^/${uuidToString(revId)}/`}
-	});
+	// get list of file links
+	await processFilesAndRefs(
+		teamspace,
+		`${model}.stash.json_mpc.ref`,
+		undefined,
+		{ filename: { $regex: `^/${teamspace}/${model}/revision/${UUIDToString(revId)}/` } },
+	);
+
+	await processFilesAndRefs(
+		teamspace,
+		`${model}.stash.json_mpc.ref`,
+		undefined,
+		{ _id: { $regex: `^${UUIDToString(revId)}/` } },
+	);
 };
 
 const processModelStash = async (teamspace, model, revId) => {
@@ -132,12 +161,12 @@ const processTeamspace = async (teamspace) => {
 		for (const { _id, rFile } of badRevisions) {
 			const model = name.slice(0, -('.history'.length));;
 
-			await processFilesAndRefs(teamspace, name, rFile, true, true);
+			await processFilesAndRefs(teamspace, name, rFile);
 
-			await processModelScene(teamspace, model, _id);
-			await processModelSequences(teamspace, model, _id);
-			await processModelStash(teamspace, model, _id);
-			// await processModelStashMpc(teamspace, model, _id);
+			// await processModelScene(teamspace, model, _id);
+			// await processModelSequences(teamspace, model, _id);
+			// await processModelStash(teamspace, model, _id);
+			await processModelStashMpc(teamspace, model, _id);
 		}
 	}
 };
