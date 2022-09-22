@@ -16,7 +16,7 @@ if [ "$1" = 'web' ]; then
     fi
 
     if [ ! "$APP_WEB_CUSTOMLOGINS" = '' ]; then
-        list=( $(python3 -c 'exec("""\nimport sys, json\no=[]\nc=json.load(open("'"$APP_WEB_CUSTOMLOGINS"'","r"))\n\nfor k in c:\n  for i in c[k]:\n    if (c[k][i].count("/") ):\n      b=c[k][i].split("/")[0]\n      if b not in o:\n        o.append(b)\n\nprint(" ".join(map(str, o)))\n""")') )
+        list=( $(python3 getCustomLogins.py $APP_WEB_CUSTOMLOGINS ) )
         for l in "${list[@]}"
         do
             mkdir -p /home/node/3drepo.io/public/"$l"
