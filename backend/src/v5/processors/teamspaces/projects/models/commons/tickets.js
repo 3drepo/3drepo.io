@@ -15,60 +15,75 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getAllTickets, getTicketById } = require('../../../../../models/tickets');
+const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { removeFile } = require('../../../../../services/filesManager');
 
 const Tickets = {};
 
-const extractEmbeddedBinary = (ticket, template) => {
-	const binaryData = [];
+const processBinaryProperties = (template, oldTicket, updatedTicket) => {
+	const toRemove = [];
+	const toAdd = [];
 
-	const replaceBinaryDataWithRef = (properties, propTemplate) => {
-		propTemplate.forEach(({ type, name }) => {
-			if (properties[name]) {
-				const data = properties[name];
-				if (type === propTypes.IMAGE) {
-					const ref = generateUUID();
-					// eslint-disable-next-line no-param-reassign
-					properties[name] = ref;
-					binaryData.push({ ref, data });
-				} else if (type === propTypes.VIEW && data.screenshot) {
-					const ref = generateUUID();
-					const buffer = data.screenshot;
-					data.screenshot = ref;
-					binaryData.push({ ref, data: buffer });
-				}
+	const updateReferences = (templateProperties, oldProperties = {}, updatedProperties) => {
+		templateProperties.forEach(({ type, name }) => {
+			let oldProp;
+			let newProp;
+			if (type === propTypes.IMAGE) {
+				oldProp = oldProperties[name];
+				newProp = updatedProperties[name];
+			} else if (type === propTypes.VIEW) {
+				oldProp = oldProperties[name]?.screenshot;
+				newProp = updatedProperties[name]?.screenshot;
+			}
+
+			if (oldProp && newProp !== undefined) {
+				toRemove.push(oldProp);
+			}
+
+			if (newProp) {
+				const ref = generateUUID();
+				// eslint-disable-next-line no-param-reassign
+				updatedProperties[name] = type === propTypes.IMAGE ? ref : { screenshot: ref };
+				toAdd.push({ ref, data: newProp });
 			}
 		});
 	};
 
-	replaceBinaryDataWithRef(ticket.properties, template.properties);
+	updateReferences(template.properties, oldTicket?.properties, updatedTicket.properties);
 
 	template.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
-		const module = ticket.modules[id];
-
-		if (module) {
-			replaceBinaryDataWithRef(module, properties);
-		}
+		updateReferences(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
 
-	return binaryData;
+	return { toRemove, toAdd };
 };
 
-Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
-	const binaryData = extractEmbeddedBinary(ticket, template);
-	const res = await addTicket(teamspace, project, model, ticket);
-	await Promise.all(
-		binaryData.map(({ ref, data }) => storeFile(
-			teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket: res },
-		)),
-	);
+const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
+	binaryData.map(({ ref, data }) => storeFile(
+		teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
+	)),
+);
 
+Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
+	const { toAdd } = processBinaryProperties(template, undefined, ticket);
+	const res = await addTicket(teamspace, project, model, ticket);
+	await storeFiles(teamspace, project, model, res, toAdd);
 	return res;
+};
+
+Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
+	const { toAdd, toRemove } = processBinaryProperties(template, oldTicket, updateData);
+	const ticketId = oldTicket._id;
+	await updateTicket(teamspace, ticketId, updateData);
+	await Promise.all([
+		toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
+		storeFiles(teamspace, project, model, ticketId, toAdd),
+	]);
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

@@ -17,13 +17,9 @@
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { Route, useHistory, useLocation } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { LOGIN_PATH, VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
-import { useEffect } from 'react';
-import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
-import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
+import { VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
@@ -74,34 +70,3 @@ export const viewerRoute = (
 
 	return generatePath(VIEWER_ROUTE, params);
 };
-
-interface RouteProps {
-	path?: string;
-	exact?: boolean;
-	children?: any;
-}
-
-const WrapAuthenticationRedirect = ({ children }) => {
-	const history = useHistory();
-	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
-	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
-
-	const location = useLocation();
-
-	useEffect(() => {
-		AuthActionsDispatchers.setReturnUrl(location);
-		if (!isAuthenticated && authenticationFetched) {
-			history.replace(LOGIN_PATH);
-		}
-	}, [isAuthenticated, authenticationFetched]);
-
-	if (!isAuthenticated) {
-		return (<></>);
-	}
-
-	return children;
-};
-
-export const AuthenticatedRoute = ({ children, ...props }: RouteProps) => (
-	<Route {...props}><WrapAuthenticationRedirect>{children}</WrapAuthenticationRedirect></Route>
-);
