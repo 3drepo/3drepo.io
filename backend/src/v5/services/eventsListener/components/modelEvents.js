@@ -76,9 +76,9 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 	await createModelMessage(event, {}, teamspace, project, model, sender);
 };
 
-const modelTicketUpdate = async ({ teamspace, project, model, ticket, author, from, to }) => {
+const modelTicketUpdate = async ({ teamspace, project, model, ticket, author, from, to, date }) => {
 	try {
-		await addTicketLog(teamspace, { project, model, ticket, author, from, to });
+		await addTicketLog(teamspace, { project, model, ticket, author, from, to, date });
 	} catch (err) {
 		logger.logError(`Failed to insert a ticket update log: ${err?.message}`);
 	}

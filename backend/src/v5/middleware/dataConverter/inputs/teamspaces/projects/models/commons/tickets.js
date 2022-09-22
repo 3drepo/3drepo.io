@@ -41,9 +41,19 @@ const validate = (isNewTicket) => async (req, res, next) => {
 
 		req.body = await validateTicket(teamspace, template, ticket, isNewTicket);
 
-		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
-			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
-		}
+		if (!isNewTicket) {
+			if (isEqual(req.body, { modules: {}, properties: {} })) {
+				throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
+			}
+			
+			const modules = req.body.modules;
+			for (const mod in modules) {
+				if(Object.keys(modules[mod]).length === 0){
+					delete modules[mod];
+				}
+			}
+		};
+
 		processReadOnlyValues(req.ticketData, req.body, user);
 		await next();
 	} catch (err) {

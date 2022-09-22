@@ -19,6 +19,7 @@ const { get, set } = require('lodash');
 const DbHandler = require('../handler/db');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { cloneDeep } = require('../utils/helper/objects');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
@@ -38,15 +39,27 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
-const getOldValuesToBeUpdated = (oldTicket, updateObj) => {
-	let oldValues = {};
+const formatRecordLogData = (oldTicket, newTicket, updateObj) => {
+	const propsLogBlacklist = [];
+	let from = {};
+	let to = cloneDeep(newTicket);
+
+	const date = to.properties["Updated at"];
+
+	delete updateObj['properties.Updated at'];
+    delete to.properties["Updated at"];    
+    if (Object.keys(to.properties).length === 0){
+      delete to.properties;
+    }	
 
 	Object.keys(updateObj).forEach(propKey => {
-		const propValue = get(oldTicket, propKey);
-		set(oldValues, propKey, propValue);
-	})
+		if (!propsLogBlacklist.includes(propKey)) {
+			const propValue = get(oldTicket, propKey);
+			set(from, propKey, propValue);
+		}
+	});
 
-	return oldValues;
+	return { from, to, date };
 }
 
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
@@ -82,15 +95,17 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, updateJson);
 	}
 
+	const { from, to, date } = formatRecordLogData(oldTicket, updateData, { ...toUpdate, ...toUnset });
 	publish(events.MODEL_TICKET_UPDATE, {
 		teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,
 		author,
-		from: getOldValuesToBeUpdated(oldTicket, { ...toUpdate, ...toUnset }),
-		to: updateData
-	})
+		from,
+		to,
+		date
+	});
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
