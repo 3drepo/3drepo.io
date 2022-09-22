@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
+import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
+import { FormContainer, FormData } from './FormInput.styles';
+import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme as dashboardTheme } from '@/v5/ui/themes/theme';
+import { theme as viewerTheme } from '@/v5/ui/routes/viewer/theme';
+import { bindWithTheme } from 'stories/theme/helper';
 
 interface IFormCheckboxInput {
 	checkbox: boolean;
@@ -31,24 +37,29 @@ export default {
 		defaultValue: {
 			type: 'boolean',
 		},
+		viewerTheme: {
+			type: 'boolean'
+		},
 	},
 	component: FormCheckbox,
 	parameters: { controls: { exclude: ['control', 'formError'] } },
 } as ComponentMeta<typeof FormCheckbox>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
-	const {
-		control,
-	} = useForm<IFormCheckboxInput>({
-		mode: 'onChange',
-	});
+const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps & { viewerTheme: boolean }) => {
+	const { control, watch } = useForm({ mode: 'onChange' });
 
 	return (
-		<FormCheckbox
-			name="checkbox"
-			control={control}
-			{...args}
-		/>
+		<FormContainer>
+			<FormCheckbox
+				name="checkbox"
+				control={control}
+				{...args}
+			/>
+			<FormData>
+				<span>Value:</span>
+				<span>{watch('checkbox')}</span>
+			</FormData>
+		</FormContainer>
 	);
 };
 
