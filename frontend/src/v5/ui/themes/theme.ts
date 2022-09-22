@@ -770,12 +770,16 @@ export const theme = createTheme({
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					borderRadius: 5,
+					width: '100%',
+
 					'& input': {
 						padding: '0px 15px',
 						height: 35,
-						color: COLOR.SECONDARY_MAIN,
-						...typography.body1,
 						lineHeight: '35px',
+					},
+					'& input, & textarea': {
+						...typography.body1,
+						color: COLOR.SECONDARY_MAIN,
 					},
 					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
 						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
@@ -789,7 +793,7 @@ export const theme = createTheme({
 						},
 					},
 					'&.Mui-disabled': {
-						'& input': {
+						'& input, & textarea': {
 							color: COLOR.BASE_LIGHT,
 						},
 						'& path': {
@@ -805,7 +809,7 @@ export const theme = createTheme({
 							borderColor: COLOR.ERROR_MAIN,
 							boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
 						},
-						'& input': {
+						'& input, & textarea': {
 							color: COLOR.ERROR_MAIN,
 						},
 						'& path': {
