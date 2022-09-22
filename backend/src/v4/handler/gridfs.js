@@ -20,28 +20,28 @@
 const DB = require("./db");
 const utils = require("../utils");
 
+const cleanColName = (col) => {
+	return col.endsWith(".ref") ? col.slice(0, -4) : col;
+};
+
 class GridFSHandler {
 	constructor() {
 
 	}
 
-	cleanColName(col) {
-		return col.endsWith(".ref") ? col.slice(0, -4) : col;
-	}
-
 	getFileStream(account, col, file) {
-		return DB.getFileStreamFromGridFS(account, this.cleanColName(col), file).then((fileInfo) => {
+		return DB.getFileStreamFromGridFS(account, cleanColName(col), file).then((fileInfo) => {
 			return fileInfo.stream;
 		});
 	}
 
 	getFile(account, col, file) {
-		return DB.getFileFromGridFS(account, this.cleanColName(col), file);
+		return DB.getFileFromGridFS(account, cleanColName(col), file);
 	}
 
 	storeFile(account, col, data, id) {
 		const _id = id || utils.generateUUID({string: true});
-		return DB.storeFileInGridFS(account, this.cleanColName(col), _id, data).then(() => (
+		return DB.storeFileInGridFS(account, cleanColName(col), _id, data).then(() => (
 			{_id, link: _id, size: data.length, type: "gridfs"}
 		));
 	}
@@ -49,7 +49,7 @@ class GridFSHandler {
 	removeFiles(teamspace, col, keys) {
 		return Promise.all(
 			keys.map(async (key) => {
-				const collection = this.cleanColName(col);
+				const collection = cleanColName(col);
 				const gridFSRef = await DB.findOneAndDelete(teamspace, `${collection}.files`,
 					{ filename: key}, { _id: 1 });
 				if (gridFSRef) {

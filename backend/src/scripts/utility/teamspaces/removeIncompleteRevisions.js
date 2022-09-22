@@ -21,65 +21,61 @@
  * that are incomplete and older than 14 days (i.e., unlikely to be queued)
  */
 
-const { v4Path, v5Path } = require('../../../interop');
+const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
 const FS = require('fs');
 const Path = require('path');
+const TypeChecker = require(`${v5Path}/utils/helper/typeCheck`);
 
 const { bulkWrite, count, find } = require(`${v5Path}/handler/db`);
-const { removeFiles } = require(`${v4Path}/handler/externalServices`);
+const { removeFiles } = require(`${v5Path}/handler/gridfs`);
+const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
-const removeRefFile = async (teamspace, collection, filter) => {
-	// remove files from .ref
-	const refs = await count(teamspace, collection, filter);
-	console.log(refs);
-};
-
-const removeGridFSFile = async (teamspace, collection, filter) => {
-	// remove gridfs from .files
-	const files = await count(teamspace, collection, filter);
-	console.log(files);
-};
-
 const processFilesAndRefs = async (teamspace, collection, filenames = [], filter) => {
-	console.log(`process ${teamspace}::${collection}::${filenames.length}`);
+	// console.log(`process ${teamspace}::${collection}::${filenames.length}`);
 	filter = filter || { _id: {$in: filenames} };
 
-	for (type of ['fs', 's3', 'gridfs', 'alluxio']) {
-		try {
-			console.log(type);
-			if ('gridfs' === type && filenames.length > 0) {
-				await removeFiles(teamspace, collection, type, filenames);
-			} else {
-				// retrieve file links
-				console.log({ ...filter, type });
-				const fileRefs = await find(
-					teamspace,
-					collection,
-					{ ...filter, type },
-					{ link: 1 },
-				);
-				console.log(fileRefs);
-				const links = fileRefs.map((ref) => ref.link);
-				console.log(links);
-				if (links.length > 0) {
-					const res = await removeFiles(teamspace, collection, type, links);
-					console.log(res);
-				}
-			}
-		} catch (err) {
-			console.log(err);
-			logger.logError(err);
+	try {
+		if (filenames.length > 0) {
+			// console.log(filenames);
+			await removeFiles(teamspace, collection, filenames);
 		}
+
+		await removeFilesWithMeta(teamspace, collection, filter);
+		/*
+		if ('gridfs' === type && filenames.length > 0) {
+			await removeFilesWithMeta(teamspace, collection, filter);
+		} else {
+			// retrieve file links
+			console.log({ ...filter, type });
+			const fileRefs = await find(
+				teamspace,
+				collection,
+				{ ...filter, type },
+				{ link: 1 },
+			);
+			console.log(fileRefs);
+			const links = fileRefs.map((ref) => ref.link);
+			console.log(links);
+			if (links.length > 0) {
+				const res = await removeFiles(teamspace, collection, type, links);
+				console.log(res);
+			}
+		}
+		*/
+	} catch (err) {
+		console.log(err);
+		logger.logError(err);
 	}
 };
 
 const processCollection = async (teamspace, collection, filter, refAttribute) => {
 	const projection = {};
 	projection[refAttribute] = 1;
+	filter[refAttribute] = { $exists: true };
 
 	const results = await find(teamspace, collection, filter, projection);
 	const filenames = [];
@@ -87,9 +83,18 @@ const processCollection = async (teamspace, collection, filter, refAttribute) =>
 	for (const record of results) {
 		const fileRefs = record[refAttribute];
 		if (fileRefs) {
-			filenames.push(fileRefs);
+			if (TypeChecker.isString(fileRefs)) {
+				filenames.push(fileRefs);
+			} else if (TypeChecker.isArray(fileRefs)) {
+				console.log("is array");
+			} else {
+				for (const entry of Object.values(fileRefs)) {
+					filenames.push(entry);
+				}
+			}
 		}
 	}
+	console.log(filenames);
 
 	await processFilesAndRefs(teamspace, collection, filenames);
 
@@ -165,7 +170,7 @@ const processTeamspace = async (teamspace) => {
 
 			// await processModelScene(teamspace, model, _id);
 			// await processModelSequences(teamspace, model, _id);
-			// await processModelStash(teamspace, model, _id);
+			await processModelStash(teamspace, model, _id);
 			await processModelStashMpc(teamspace, model, _id);
 		}
 	}
