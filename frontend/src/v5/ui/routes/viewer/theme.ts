@@ -115,6 +115,13 @@ export const theme = createTheme(
 								lineHeight: 22,
 								height: 26,
 							},
+
+							'& label:not(.Mui-error)': {
+								'&, &.Mui-focused': {
+									color: COLOR.SECONDARY_MAIN,
+								}
+							},
+
 							'& .MuiFormHelperText-root': {
 								position: 'relative',
 								height: 0,
