@@ -17,7 +17,7 @@
 import { FormTextArea } from '@controls/formTextArea/formTextArea.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer, FormData } from './FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
 	title: 'Inputs/FormTextArea',
@@ -26,18 +26,24 @@ export default {
 			type: 'string',
 		},
 		defaultValue: {
-			type: 'boolean',
+			type: 'string',
 		},
 		formError: {
 			type: 'string',
 		},
+		minRows: {
+			type: 'number',
+		},
+		disabled: {
+			type: 'boolean',
+		},
 	},
 	component: FormTextArea,
-	parameters: { controls: { exclude: ['control'] } },
+	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
 } as ComponentMeta<typeof FormTextArea>;
 
 const Controlled: ComponentStory<typeof FormTextArea> = (args) => {
-	const { control, watch } = useForm({ mode: 'onChange' });
+	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
@@ -47,10 +53,6 @@ const Controlled: ComponentStory<typeof FormTextArea> = (args) => {
 				{...args}
 				formError={args.formError ? { message: args.formError } : null}
 			/>
-			<FormData>
-				<span>Value:</span>
-				<span>{watch('textfield')}</span>
-			</FormData>
 		</FormContainer>
 	);
 };
@@ -59,4 +61,5 @@ export const ControlledFormTextArea = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormTextArea.args = {
 	label: 'Controlled Multi Line input',
+	minRows: 3,
 };

@@ -28,12 +28,9 @@ export default {
 		defaultValue: {
 			type: 'boolean',
 		},
-		viewerTheme: {
-			type: 'boolean'
-		},
 	},
 	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError'] } },
+	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
 } as ComponentMeta<typeof FormCheckbox>;
 
 const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps & { viewerTheme: boolean }) => {
@@ -47,7 +44,7 @@ const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps
 				{...args}
 			/>
 			<FormData>
-				<span>Value: {watch('checkbox')?.toString?.() || 'undefined'}</span>
+				Value: {watch('checkbox')?.toString?.() || 'undefined'}
 			</FormData>
 		</FormContainer>
 	);

@@ -17,7 +17,7 @@
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer, FormData } from './FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
 	title: 'Inputs/FormTextField',
@@ -31,19 +31,16 @@ export default {
 		formError: {
 			type: 'string',
 		},
-		hiddenLabel: {
-			type: 'boolean',
-		},
 		disabled: {
 			type: 'boolean',
 		},
 	},
 	component: FormTextField,
-	parameters: { controls: { exclude: ['control'] } },
+	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
 } as ComponentMeta<typeof FormTextField>;
 
 const Controlled: ComponentStory<typeof FormTextField> = (args) => {
-	const { control, watch } = useForm({ mode: 'onChange' });
+	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
@@ -53,10 +50,6 @@ const Controlled: ComponentStory<typeof FormTextField> = (args) => {
 				{...args}
 				formError={args.formError ? { message: args.formError } : null}
 			/>
-			<FormData>
-				<span>Values:</span>
-				<span>{watch('textfield')}</span>
-			</FormData>
 		</FormContainer>
 	);
 };
