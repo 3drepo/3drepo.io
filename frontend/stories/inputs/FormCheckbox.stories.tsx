@@ -18,15 +18,6 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
 import { FormContainer, FormData } from './FormInput.styles';
-import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { theme as dashboardTheme } from '@/v5/ui/themes/theme';
-import { theme as viewerTheme } from '@/v5/ui/routes/viewer/theme';
-import { bindWithTheme } from 'stories/theme/helper';
-
-interface IFormCheckboxInput {
-	checkbox: boolean;
-}
 
 export default {
 	title: 'Inputs/FormCheckbox',
@@ -56,8 +47,7 @@ const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps
 				{...args}
 			/>
 			<FormData>
-				<span>Value:</span>
-				<span>{watch('checkbox')}</span>
+				<span>Value: {watch('checkbox')?.toString?.() || 'undefined'}</span>
 			</FormData>
 		</FormContainer>
 	);
