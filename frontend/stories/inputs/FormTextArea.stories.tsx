@@ -17,6 +17,7 @@
 import { FormTextArea } from '@controls/formTextArea/formTextArea.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
+import { FormContainer, FormData } from './FormInput.styles';
 
 export default {
 	title: 'Inputs/FormTextArea',
@@ -36,15 +37,21 @@ export default {
 } as ComponentMeta<typeof FormTextArea>;
 
 const Controlled: ComponentStory<typeof FormTextArea> = (args) => {
-	const { control } = useForm({ mode: 'onChange' });
+	const { control, watch } = useForm({ mode: 'onChange' });
 
 	return (
+		<FormContainer>
 			<FormTextArea
 				name="textfield"
 				control={control}
 				{...args}
 				formError={args.formError ? { message: args.formError } : null}
 			/>
+			<FormData>
+				<span>Value:</span>
+				<span>{watch('textfield')}</span>
+			</FormData>
+		</FormContainer>
 	);
 };
 
