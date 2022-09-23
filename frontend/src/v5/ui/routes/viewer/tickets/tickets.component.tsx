@@ -24,8 +24,8 @@ import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsList } from './ticketsList/ticketsList.component';
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
+import { TicketsList } from './ticketsList/ticketsList.component';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
