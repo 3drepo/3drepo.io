@@ -270,7 +270,7 @@ export const theme = createTheme({
 						},
 						'& > textarea': {
 							color: COLOR.ERROR_MAIN,
-						}
+						},
 					},
 				},
 			},
@@ -853,14 +853,12 @@ export const theme = createTheme({
 					height: 35,
 					paddingTop: 0,
 					paddingBottom: 0,
-					marginTop: 38,
 					width: '100%',
 					boxSizing: 'border-box',
 					pointerEvents: 'auto',
 					'& ~ svg': {
 						position: 'absolute',
 						right: 14,
-						marginTop: 40,
 						pointerEvents: 'none',
 						'& path': {
 							fill: COLOR.BASE_MAIN,
@@ -870,23 +868,33 @@ export const theme = createTheme({
 			},
 		},
 		MuiInputLabel: {
+			defaultProps: {
+				shrink: false,
+			},
 			styleOverrides: {
 				root: {
 					position: 'absolute',
 					...typography.body1,
 					fontSize: '12px',
+					top: '-35.5px',
+					left: '-13px',
+					color: COLOR.BASE_MAIN,
 
-					'&, &.Mui-focused': {
+					'&.Mui-disabled': {
+						color: COLOR.BASE_LIGHT,
+					},
+
+					'&.Mui-focused:not(.Mui-error)': {
 						color: COLOR.BASE_MAIN,
+					},
+
+					'&.Mui-error': {
+						color: COLOR.ERROR_MAIN,
 					},
 
 					'&.Mui-disabled .MuiInputLabel-asterisk': {
 						display: 'none',
 					},
-				},
-				formControl: {
-					top: '18px',
-					left: '1px',
 				},
 				asterisk: {
 					color: COLOR.ERROR_MAIN,
@@ -896,6 +904,7 @@ export const theme = createTheme({
 		MuiFormControl: {
 			styleOverrides: {
 				root: {
+					margin: '38px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
 				},
