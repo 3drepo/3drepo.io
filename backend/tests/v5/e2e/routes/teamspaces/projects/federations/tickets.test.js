@@ -22,7 +22,7 @@ const ServiceHelper = require('../../../../../helper/services');
 const { src, image } = require('../../../../../helper/path');
 
 const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
-const { updateOne } = require(`${src}/handler/db`);
+const { findOne, updateOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -433,19 +433,19 @@ const testUpdateTicket = () => {
 				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id,
 					ticket?._id ?? ticket._id);
 				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
-				const updatedTicket = updatedTicketRes.body;
+				const updatedTicket = updatedTicketRes.body;				
 				expect(updatedTicket).toHaveProperty('number');
 				expect(updatedTicket.properties).toHaveProperty('Updated at');
 				expect(updatedTicket.properties).toHaveProperty('Created at');
 				expect(updatedTicket.properties).toHaveProperty('Owner');
 				delete updatedTicket.number;
+				const updatedDate = updatedTicket.properties['Updated at'];		
 				delete updatedTicket.properties['Updated at'];
 				delete updatedTicket.properties['Created at'];
 				delete updatedTicket.properties.Owner;
-				expect({ ...updatedTicket }).toEqual({
-					...ticket,
-					...payloadChanges,
-				});
+				expect({ ...updatedTicket }).toEqual({ ...ticket, ...payloadChanges });
+				const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+				expect(ticketLog).not.toBeUndefined();
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}
@@ -466,13 +466,13 @@ const testUpdateTicket = () => {
 		expect(updatedTicket.properties).toHaveProperty('Created at');
 		expect(updatedTicket.properties).toHaveProperty('Owner');
 		delete updatedTicket.number;
+		const updatedDate = updatedTicket.properties['Updated at'];
 		delete updatedTicket.properties['Updated at'];
 		delete updatedTicket.properties['Created at'];
 		delete updatedTicket.properties.Owner;
-		expect({ ...updatedTicket }).toEqual({
-			...tickWithDeprecatedTemplate,
-			...payloadChanges,
-		});
+		expect({ ...updatedTicket }).toEqual({ ...tickWithDeprecatedTemplate, ...payloadChanges });
+		const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+		expect(ticketLog).not.toBeUndefined();
 	});
 };
 
