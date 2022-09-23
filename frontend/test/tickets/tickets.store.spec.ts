@@ -30,7 +30,7 @@ describe('Tickets: store', () => {
 		({ dispatch, getState } = createTestStore());
 	});
 
-	it('should update a model tickets', () => {
+	it('should fetch and set model tickets', () => {
 		const ticket = ticketMockFactory();
 		dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
 		const modelTicketsFromState = selectTickets(getState(), modelId);
@@ -43,7 +43,7 @@ describe('Tickets: store', () => {
 			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
 		});
 
-		it('should update model templates', () => {
+		it('should fetch and set model templates', () => {
 			const template = templateMockFactory();
 			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
 			const templatesFromState = selectTemplates(getState(), modelId);
