@@ -65,25 +65,26 @@ export const FormMultiSelect = ({ label, values, name, control }: FormMultiSelec
 				value={Array.from(selectedValues)}
 			>
 				<SearchInput
-					placeholder={formatMessage({ id: 'form.multiSelect.search.placeholder', defaultMessage: 'Search users' })}
+					placeholder={formatMessage({ id: 'form.multiSelect.search.placeholder', defaultMessage: 'Search...' })}
 					onKeyDown={preventInputUnfocus}
 					onChange={filterValues}
 					onClear={() => setFilteredValues(values)}
 				/>
-				<ScrollArea autoHeight>
-					{filteredValues.map((value) => (
-						<MenuItem key={value}>
-							<FormCheckbox
-								control={control}
-								label={value}
-								name={`${name}.${value}`}
-								checked={selectedValues.has(value)}
-								onClick={(e) => toggleSelectedValue(e, value)}
-							/>
-						</MenuItem>
-					))}
-				</ScrollArea>
-				{filteredValues.length === 0 && (
+				{filteredValues.length > 0 ? (
+					<ScrollArea autoHeight>
+						{filteredValues.map((value) => (
+							<MenuItem key={value}>
+								<FormCheckbox
+									control={control}
+									label={value}
+									name={`${name}.${value}`}
+									checked={selectedValues.has(value)}
+									onClick={(e) => toggleSelectedValue(e, value)}
+								/>
+							</MenuItem>
+						))}
+					</ScrollArea>
+				) : (
 					<NoResults>
 						<FormattedMessage
 							id="form.multiSelect.search.emptyList"

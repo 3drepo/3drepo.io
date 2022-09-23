@@ -41,5 +41,7 @@ export const SearchInput = styled(SearchInputBase)`
 `;
 
 export const NoResults = styled.div`
-	padding: 8px 12px 0;
+	padding: 5px 12px 8px;
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.body1};
 `;

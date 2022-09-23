@@ -602,6 +602,7 @@ export const theme = createTheme({
 					margin: '0',
 					padding: '8px 14px',
 					width: '100%',
+					color: COLOR.SECONDARY_MAIN,
 
 					'&.Mui-selected, &.Mui-selected:hover': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
