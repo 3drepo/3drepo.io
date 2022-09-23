@@ -22,7 +22,7 @@ export const FormContainer = styled.form`
 	width: 300px;
 	padding: 20px;
 	border-radius: 10px;
-	box-shadow: 0px 12px 33px 0px ${({ theme }) => theme.palette.tertiary.lightest};
+	box-shadow: 0 12px 33px 0 ${({ theme }) => theme.palette.tertiary.lightest};
 	border: solid 30px ${({ theme }) => theme.palette.secondary.dark};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	display: flex;
