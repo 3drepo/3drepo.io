@@ -23,6 +23,6 @@ export type FormTextAreaProps = FormTextFieldProps & {
 	minRows?: number,
 };
 
-export const FormTextArea = ({ minRows = 3, ...props}: FormTextAreaProps) => (
+export const FormTextArea = ({ minRows = 3, ...props }: FormTextAreaProps) => (
 	<FormTextField multiline minRows={minRows} {...props} />
 );
