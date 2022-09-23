@@ -31,6 +31,7 @@ export const FormSelect = ({
 	control,
 	disabled,
 	hidden,
+	value,
 	defaultValue = '',
 	...otherProps
 }: FormSelectProps) => (
