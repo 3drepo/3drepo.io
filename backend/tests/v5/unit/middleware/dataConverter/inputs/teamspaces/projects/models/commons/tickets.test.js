@@ -234,9 +234,9 @@ const testValidateUpdateTicket = () => {
 			expect(fn).not.toHaveBeenCalled();
 		});
 
-		test('Should call next if validation succeeded', async () => {
+		test('Should call next and remove empty modules if validation succeeded', async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: { modules: { mod1: generateRandomString(), mod2: {} } } };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -250,6 +250,7 @@ const testValidateUpdateTicket = () => {
 
 			expect(fn).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(req.body.modules).not.toHaveProperty('mod2');
 		});
 
 		test('Should call next if validation succeeded and the template is deprecated', async () => {
@@ -266,6 +267,7 @@ const testValidateUpdateTicket = () => {
 				[generateRandomString()]: generateRandomString(),
 			};
 
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 

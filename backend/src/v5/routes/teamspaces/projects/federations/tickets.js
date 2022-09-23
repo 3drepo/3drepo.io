@@ -23,8 +23,8 @@ const { templateExists, validateNewTicket, validateUpdateTicket } = require('../
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
-const { templates } = require('../../../../utils/responseCodes');
 const { getUserFromSession } = require('../../../../utils/sessions');
+const { templates } = require('../../../../utils/responseCodes');
 
 const createTicket = async (req, res) => {
 	const { teamspace, project, federation } = req.params;

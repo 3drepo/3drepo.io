@@ -22,7 +22,7 @@ const ServiceHelper = require('../../../../../helper/services');
 const { src, image } = require('../../../../../helper/path');
 
 const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
-const { updateOne } = require(`${src}/handler/db`);
+const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -510,14 +510,15 @@ const testUpdateTicket = () => {
 				expect(updatedTicket.properties).toHaveProperty('Created at');
 				expect(updatedTicket.properties).toHaveProperty('Owner');
 				delete updatedTicket.number;
+				const updatedDate = updatedTicket.properties['Updated at'];
 				delete updatedTicket.properties['Updated at'];
 				delete ticket.properties['Updated at'];
 				delete updatedTicket.properties['Created at'];
 				delete updatedTicket.properties.Owner;
-				expect({ ...updatedTicket }).toEqual({
-					...ticket,
-					...payloadChanges,
-				});
+				expect({ ...updatedTicket }).toEqual({ ...ticket, ...payloadChanges });
+
+				const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+				expect(ticketLog).not.toBeUndefined();
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}
@@ -542,13 +543,13 @@ const testUpdateTicket = () => {
 		expect(updatedTicket.properties).toHaveProperty('Owner');
 		delete updatedTicket.number;
 		delete updatedTicket.properties['Updated at'];
+		const updatedDate = updatedTicket.properties['Updated at'];
 		delete ticketWithDeprecatedTemplate.properties['Updated at'];
 		delete updatedTicket.properties['Created at'];
 		delete updatedTicket.properties.Owner;
-		expect({ ...updatedTicket }).toEqual({
-			...ticketWithDeprecatedTemplate,
-			...payloadChanges,
-		});
+		expect({ ...updatedTicket }).toEqual({ ...ticketWithDeprecatedTemplate, ...payloadChanges });
+		const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+		expect(ticketLog).not.toBeUndefined();
 	});
 };
 

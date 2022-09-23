@@ -17,13 +17,13 @@
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
+const { addTicketLog } = require('../../../models/tickets.logs');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { getRevisionByIdOrTag } = require('../../../models/revisions');
 const { logger } = require('../../../utils/logger');
 const { subscribe } = require('../../eventsManager/eventsManager');
-const { addTicketLog } = require('../../../models/tickets.logs');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -76,13 +76,9 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 	await createModelMessage(event, {}, teamspace, project, model, sender);
 };
 
-const modelTicketUpdate = async ({ teamspace, project, model, ticket, author, from, to, date }) => {
-	try {
-		await addTicketLog(teamspace, { project, model, ticket, author, from, to, date });
-	} catch (err) {
-		logger.logError(`Failed to insert a ticket update log: ${err?.message}`);
-	}
-};
+const modelTicketUpdate = ({ teamspace, project, model, ticket, author, from, to, date }) => addTicketLog(
+	teamspace, { project, model, ticket, author, from, to, date },
+);
 
 const ModelEventsListener = {};
 

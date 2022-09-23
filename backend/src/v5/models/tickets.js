@@ -17,10 +17,10 @@
 
 const { get, set } = require('lodash');
 const DbHandler = require('../handler/db');
-const { publish } = require('../services/eventsManager/eventsManager');
-const { events } = require('../services/eventsManager/eventsManager.constants');
 const { cloneDeep } = require('../utils/helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const Tickets = {};
@@ -40,27 +40,25 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 };
 
 const formatRecordLogData = (oldTicket, newTicket, updateObj) => {
-	const propsLogBlacklist = [];
-	let from = {};
-	let to = cloneDeep(newTicket);
+	const from = {};
+	const to = cloneDeep(newTicket);
 
-	const date = to.properties["Updated at"];
+	const date = to.properties['Updated at'];
 
+	// eslint-disable-next-line no-param-reassign
 	delete updateObj['properties.Updated at'];
-    delete to.properties["Updated at"];    
-    if (Object.keys(to.properties).length === 0){
-      delete to.properties;
-    }	
+	delete to.properties['Updated at'];
+	if (Object.keys(to.properties).length === 0) {
+		delete to.properties;
+	};
 
-	Object.keys(updateObj).forEach(propKey => {
-		if (!propsLogBlacklist.includes(propKey)) {
-			const propValue = get(oldTicket, propKey);
-			set(from, propKey, propValue);
-		}
+	Object.keys(updateObj).forEach((propKey) => {
+		const propValue = get(oldTicket, propKey);
+		set(from, propKey, propValue);
 	});
 
 	return { from, to, date };
-}
+};
 
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
 	const toUpdate = {};
@@ -77,8 +75,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 	};
 
 	determineUpdate(rootProps);
-
-	if (properties) { determineUpdate(properties, 'properties.'); }
+	determineUpdate(properties, 'properties.');
 
 	if (modules) {
 		Object.keys(modules).forEach((mod) => {
@@ -86,14 +83,11 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		});
 	}
 
-	const updateJson = {};
-	if (Object.keys(toUpdate).length) { updateJson.$set = toUpdate; }
+	const updateJson = { $set: toUpdate };
 
 	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
 
-	if (Object.keys(updateJson).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, updateJson);
-	}
+	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, updateJson);
 
 	const { from, to, date } = formatRecordLogData(oldTicket, updateData, { ...toUpdate, ...toUnset });
 	publish(events.MODEL_TICKET_UPDATE, {
@@ -104,7 +98,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		author,
 		from,
 		to,
-		date
+		date,
 	});
 };
 

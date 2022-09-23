@@ -45,10 +45,10 @@ const validate = (isNewTicket) => async (req, res, next) => {
 			if (isEqual(req.body, { modules: {}, properties: {} })) {
 				throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
 			}
-			
-			const modules = req.body.modules;
+
+			const { modules } = req.body;
 			for (const mod in modules) {
-				if(Object.keys(modules[mod]).length === 0){
+				if (Object.keys(modules[mod]).length === 0) {
 					delete modules[mod];
 				}
 			}

@@ -17,7 +17,7 @@
 
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
-const { getFileWithMetaAsStream, removeFile ,storeFile } = require('../../../../../services/filesManager');
+const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 

@@ -32,6 +32,9 @@ const Revisions = require(`${src}/models/revisions`);
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecord = require(`${src}/models/loginRecords`);
 
+jest.mock('../../../../../src/v5/models/tickets.logs');
+const TicketLogs = require(`${src}/models/tickets.logs`);
+
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
 const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
@@ -388,6 +391,25 @@ const testModelEventsListener = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
 				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
+		});
+
+		test(`Should trigger addTicketLog if there is a ${events.MODEL_TICKET_UPDATE}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_TICKET_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: generateRandomString(),
+				author: generateRandomString(),
+				date: generateRandomDate(),
+				from: { [generateRandomString()]: generateRandomString() },
+				to: { [generateRandomString()]: generateRandomString() },
+			};
+			EventsManager.publish(events.MODEL_TICKET_UPDATE, data);
+
+			await waitOnEvent;
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, { ...data, teamspace: undefined });
 		});
 	});
 };
