@@ -98,11 +98,13 @@ const processModelStash = async (teamspace, model, revId) => {
 		// eslint-disable-next-line no-await-in-loop
 		await processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, jsonFiles.map((filename) => filename.replace(`/${teamspace}/${model}/`, '')));
 		// eslint-disable-next-line no-await-in-loop
+		await processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'json.mpc')));
+		// eslint-disable-next-line no-await-in-loop
 		await processFilesAndRefs(teamspace, `${model}.stash.src.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'src.mpc')));
 	}
 
 	await processCollection(teamspace, `${model}.stash.unity3d`, { _id: revId }, '_extRef');
-	await processCollection(teamspace, `${model}.stash.3drepo`, { rev_id: revId });
+	await processCollection(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef');
 };
 
 const processModelSequences = async (teamspace, model, revId) => {
