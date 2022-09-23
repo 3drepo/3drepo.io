@@ -38,9 +38,9 @@ export const CardHeader = styled.div`
 	gap: 4px;
 `;
 
+// TODO - fix after new palette is released
 export const CardContentContainer = styled.div`
 	padding: 15px;
-	// TODO - fix after new palette is released
 	background-color: #f9faff;
 	height: 100%;
 `;
