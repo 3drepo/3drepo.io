@@ -37,7 +37,7 @@ export const FormCheckbox = ({
 		render={({ field }) => (
 			<FormControlLabel
 				{...field}
-				control={<Checkbox checked={field.value} onClick={onClick}/>}
+				control={<Checkbox checked={field.value} onClick={onClick} />}
 				{...otherProps}
 			/>
 		)}
