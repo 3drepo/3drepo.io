@@ -32,7 +32,7 @@ export const FormSelect = ({
 	disabled,
 	hidden,
 	value,
-	defaultValue='',
+	defaultValue = '',
 	...otherProps
 }: FormSelectProps) => (
 	<FormControl>
