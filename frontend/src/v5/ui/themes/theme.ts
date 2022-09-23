@@ -270,7 +270,7 @@ export const theme = createTheme({
 						},
 						'& > textarea': {
 							color: COLOR.ERROR_MAIN,
-						}
+						},
 					},
 				},
 			},
