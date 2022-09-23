@@ -18,7 +18,7 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer, FormData } from './FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
 	title: 'Inputs/FormSelect',
@@ -40,8 +40,8 @@ export default {
 	parameters: { controls: { exclude: ['control', 'ref'] } },
 } as ComponentMeta<typeof FormSelect>;
 
-const Controlled: ComponentStory<typeof FormSelect> = (args) => {
-	const { control, watch } = useForm({ mode: 'onChange' });
+const Controlled: ComponentStory<typeof FormSelect> = ({ values, ...args }: any) => {
+	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
@@ -50,16 +50,12 @@ const Controlled: ComponentStory<typeof FormSelect> = (args) => {
 				control={control}
 				{...args}
 			>
-				{/* @ts-ignore */}
-				{args.values.map((value) => (
+				{values.map((value) => (
 					<MenuItem value={value} key={value}>
 						{value}
 					</MenuItem>
 				))}
 			</FormSelect>
-			<FormData>
-				Value: {watch('select')}
-			</FormData>
 		</FormContainer>
 	);
 };
@@ -68,5 +64,5 @@ export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Select input',
-	values: ["value 1", "value 2", "value 3", "Longer value 4"],
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };
