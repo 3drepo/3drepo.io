@@ -22,8 +22,8 @@ import { Checkbox } from '@controls/formCheckbox/formCheckbox.styles';
 
 export const FormCheckbox = styled(FormCheckboxBase)`
 	width: 100%;
-    margin: 0;
-    padding: 8px 14px;
+	margin: 0;
+	padding: 8px 14px;
 
 	${Checkbox} {
 		margin: 0 17px 0 0;
@@ -37,7 +37,7 @@ export const MenuItem = styled(MenuItemBase)`
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
-    padding: 4px 12px 12px;
+	padding: 4px 12px 12px;
 `;
 
 export const NoResults = styled.div`
