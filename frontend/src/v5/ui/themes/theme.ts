@@ -345,6 +345,59 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiSwitch: {
+			defaultProps: {
+				disableRipple: true,
+			},
+			styleOverrides: {
+				root: {
+					width: 28,
+					height: 16,
+					padding: 0,
+					borderRadius: 8,
+					'& .MuiSwitch-switchBase': {
+						width: 16,
+						height: 16,
+						margin: 0,
+						padding: 0,
+						transitionDuration: '300ms',
+						'&:hover': {
+							backgroundColor: 'transparent',
+						},
+						'&.Mui-checked': {
+							transform: 'translateX(12px)',
+						},
+						// bg active non-checked
+						'& + .MuiSwitch-track': {
+							opacity: 1,
+							backgroundColor: COLOR.BASE_MAIN,
+						},
+						// bg active checked
+						'&.Mui-checked + .MuiSwitch-track': {
+							opacity: 1,
+							backgroundColor: COLOR.PRIMARY_MAIN,
+						},
+						'&.Mui-disabled': {
+							// bg disabled non-checked
+							'& + .MuiSwitch-track': {
+								opacity: 1,
+								backgroundColor: COLOR.BASE_LIGHT,
+							},
+							// bg disabled checked
+							'&.Mui-checked + .MuiSwitch-track': {
+								opacity: 1,
+								backgroundColor: COLOR.PRIMARY_LIGHT,
+							},
+						},
+					},
+					'& .MuiSwitch-thumb': {
+						width: 12,
+						height: 12,
+						color: COLOR.PRIMARY_MAIN_CONTRAST,
+					},
+				},
+			},
+		},
 		MuiRadio: {
 			defaultProps: {
 				color: 'primary',
