@@ -31,7 +31,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const templates = TicketsHooksSelectors.selectModelTemplates(containerOrFederation);
+	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 
 	const ticketIsSelected = ({ _id }: ITicket) => selectedTicket?._id === _id;
 

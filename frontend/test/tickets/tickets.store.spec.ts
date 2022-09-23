@@ -17,7 +17,7 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
-import { selectModelTickets, selectModelTemplates } from '@/v5/store/tickets/tickets.selectors';
+import { selectTickets, selectTemplates } from '@/v5/store/tickets/tickets.selectors';
 import { createTestStore } from '../test.helpers';
 import { templateMockFactory, ticketMockFactory } from './tickets.fixture';
 
@@ -33,7 +33,7 @@ describe('Tickets: store', () => {
 	it('should update a model tickets', () => {
 		const ticket = ticketMockFactory();
 		dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
-		const modelTicketsFromState = selectModelTickets(getState(), modelId);
+		const modelTicketsFromState = selectTickets(getState(), modelId);
 
 		expect(modelTicketsFromState[0]).toEqual(ticket);
 	});
@@ -46,7 +46,7 @@ describe('Tickets: store', () => {
 		it('should update model templates', () => {
 			const template = templateMockFactory();
 			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
-			const templatesFromState = selectModelTemplates(getState(), modelId);
+			const templatesFromState = selectTemplates(getState(), modelId);
 	
 			expect(templatesFromState[0]).toEqual(template);
 		});

@@ -23,7 +23,7 @@ export const fetchContainerTemplates = async ({
 	teamspace,
 	projectId,
 	modelId,
-}: FetchModelTemplatesParams): Promise<FetchModelTemplatesResponse> => {
+}: FetchTemplatesParams): Promise<FetchTemplatesResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`);
 	return data.templates;
 };
@@ -32,7 +32,7 @@ export const fetchFederationTemplates = async ({
 	teamspace,
 	projectId,
 	modelId,
-}: FetchModelTemplatesParams): Promise<FetchModelTemplatesResponse> => {
+}: FetchTemplatesParams): Promise<FetchTemplatesResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`);
 	return data.templates;
 };
@@ -41,7 +41,7 @@ export const fetchContainerTickets = async ({
 	teamspace,
 	projectId,
 	modelId,
-}: FetchModelTicketsParams): Promise<FetchModelTicketsResponse> => {
+}: FetchTicketsParams): Promise<FetchTicketsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`);
 	return data.tickets;
 };
@@ -50,7 +50,7 @@ export const fetchFederationTickets = async ({
 	teamspace,
 	projectId,
 	modelId,
-}: FetchModelTicketsParams): Promise<FetchModelTicketsResponse> => {
+}: FetchTicketsParams): Promise<FetchTicketsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets`);
 	return data.tickets;
 };
@@ -58,8 +58,8 @@ export const fetchFederationTickets = async ({
 /**
  * Types
  */
-type FetchModelTemplatesResponse = { templates: ITemplate[] };
-type FetchModelTicketsResponse = { tickets: ITicket[] };
+type FetchTemplatesResponse = { templates: ITemplate[] };
+type FetchTicketsResponse = { tickets: ITicket[] };
 
-type FetchModelTicketsParams = TeamspaceAndProjectId & { modelId: string };
-type FetchModelTemplatesParams = TeamspaceAndProjectId & { modelId: string };
+type FetchTicketsParams = TeamspaceAndProjectId & { modelId: string };
+type FetchTemplatesParams = TeamspaceAndProjectId & { modelId: string };

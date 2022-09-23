@@ -28,7 +28,7 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const template = TicketsHooksSelectors.selectModelTemplateById(containerOrFederation, ticket.type);
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
 
 	return (
 		<Ticket

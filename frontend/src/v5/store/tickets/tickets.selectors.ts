@@ -20,21 +20,21 @@ import { ITicketsState } from './tickets.redux';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
-export const selectModelTickets = createSelector(
+export const selectTickets = createSelector(
 	selectTicketsDomain,
 	(_, modelId) => modelId,
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
-export const selectModelTemplates = createSelector(
+export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(_, modelId) => modelId,
 	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
-export const selectModelTemplateById = createSelector(
+export const selectTemplateById = createSelector(
 	selectTicketsDomain,
-	selectModelTemplates,
+	selectTemplates,
 	(_, modelId, templateId) => templateId,
 	(_, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
 );
