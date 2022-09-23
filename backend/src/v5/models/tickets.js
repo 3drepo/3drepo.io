@@ -50,7 +50,7 @@ const formatRecordLogData = (oldTicket, newTicket, updateObj) => {
 	delete to.properties['Updated at'];
 	if (Object.keys(to.properties).length === 0) {
 		delete to.properties;
-	};
+	}
 
 	Object.keys(updateObj).forEach((propKey) => {
 		const propValue = get(oldTicket, propKey);

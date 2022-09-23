@@ -52,7 +52,7 @@ const validate = (isNewTicket) => async (req, res, next) => {
 					delete modules[mod];
 				}
 			}
-		};
+		}
 
 		processReadOnlyValues(req.ticketData, req.body, user);
 		await next();
