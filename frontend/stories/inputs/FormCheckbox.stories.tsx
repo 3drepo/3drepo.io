@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
+import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from './FormInput.styles';
 
@@ -33,7 +33,7 @@ export default {
 	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
 } as ComponentMeta<typeof FormCheckbox>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps & { viewerTheme: boolean }) => {
+const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
