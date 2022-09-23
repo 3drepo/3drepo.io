@@ -42,7 +42,7 @@ export default {
 	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
 } as ComponentMeta<typeof FormTextArea>;
 
-const Controlled: ComponentStory<typeof FormTextArea> = (args) => {
+const Controlled: ComponentStory<typeof FormTextArea> = ({ formError, ...args }) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
@@ -51,7 +51,7 @@ const Controlled: ComponentStory<typeof FormTextArea> = (args) => {
 				name="textfield"
 				control={control}
 				{...args}
-				formError={args.formError ? { message: args.formError } : null}
+				formError={formError ? { message: formError } : null}
 			/>
 		</FormContainer>
 	);
