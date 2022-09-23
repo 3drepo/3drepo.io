@@ -50,10 +50,11 @@ const processCollection = async (teamspace, collection, filter, refAttribute) =>
 	if (refAttribute) {
 		const projection = {};
 		projection[refAttribute] = 1;
-		// eslint-disable-next-line no-param-reassign
-		filter[refAttribute] = { $exists: true };
 
-		const results = await find(teamspace, collection, filter, projection);
+		const filesFilter = { ...filter };
+		filesFilter[refAttribute] = { $exists: true };
+
+		const results = await find(teamspace, collection, filesFilter, projection);
 		const filenames = [];
 
 		for (const record of results) {
@@ -101,6 +102,7 @@ const processModelStash = async (teamspace, model, revId) => {
 	}
 
 	await processCollection(teamspace, `${model}.stash.unity3d`, { _id: revId }, '_extRef');
+	await processCollection(teamspace, `${model}.stash.3drepo`, { rev_id: revId });
 };
 
 const processModelSequences = async (teamspace, model, revId) => {
