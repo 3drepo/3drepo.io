@@ -36,7 +36,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'ticekts.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
+				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
