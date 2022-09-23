@@ -17,7 +17,7 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
-import { FormContainer, FormData } from './FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
 	title: 'Inputs/FormCheckbox',
@@ -34,7 +34,7 @@ export default {
 } as ComponentMeta<typeof FormCheckbox>;
 
 const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps & { viewerTheme: boolean }) => {
-	const { control, watch } = useForm({ mode: 'onChange' });
+	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
@@ -43,9 +43,6 @@ const Controlled: ComponentStory<typeof FormCheckbox> = (args: FormCheckboxProps
 				control={control}
 				{...args}
 			/>
-			<FormData>
-				Value: {watch('checkbox')?.toString?.() || 'undefined'}
-			</FormData>
 		</FormContainer>
 	);
 };

@@ -28,14 +28,3 @@ export const FormContainer = styled.form`
 	display: flex;
 	flex-direction: column;
 `;
-
-export const FormData = styled.div`
-	margin-top: 30px;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: flex-start;
-	width: 100%;
-    word-break: break-all;
-	${({ theme }) => theme.typography.body1}
-`;

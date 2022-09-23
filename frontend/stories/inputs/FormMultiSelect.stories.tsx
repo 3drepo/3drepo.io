@@ -17,7 +17,7 @@
 import { FormMultiSelect } from '@/v5/ui/routes/viewer/formElements/formMultiSelect/formMultiSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer, FormData } from './FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
 	title: 'Inputs/FormMultiSelect',
@@ -40,7 +40,7 @@ export default {
 } as ComponentMeta<typeof FormMultiSelect>;
 
 const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
-	const { control, watch } = useForm({ mode: 'onChange' });
+	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
@@ -49,9 +49,6 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 				control={control}
 				{...args}
 			/>
-			<FormData>
-				Value: {watch('multiselect')}
-			</FormData>
 		</FormContainer>
 	);
 };
@@ -60,5 +57,5 @@ export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Multi Select input',
-	values: ["value 1", "value 2", "value 3", "Longer value 4"],
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };
