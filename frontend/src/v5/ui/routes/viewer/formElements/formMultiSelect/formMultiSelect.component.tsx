@@ -87,7 +87,7 @@ export const FormMultiSelect = ({ label, values, name, control }: FormMultiSelec
 					<NoResults>
 						<FormattedMessage
 							id="form.multiSelect.search.emptyList"
-							defaultMessage="No results."
+							defaultMessage="No results"
 						/>
 					</NoResults>
 				)}
