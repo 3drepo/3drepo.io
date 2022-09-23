@@ -42,7 +42,7 @@ export const CreateProjectSchema = Yup.object().shape({
 			/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
 			formatMessage({
 				id: 'createProject.name.error.illegalCharacters',
-				defaultMessage: 'Project name cannot contains the following characters: / ? = # +',
+				defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
 			}),
 		)
 		.test(

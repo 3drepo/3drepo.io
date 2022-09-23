@@ -15,26 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@/v5/services/routing/route.component';
 import { CookiesLegalPaper, PrivacyLegalPaper, TermsLegalPaper } from '@components/legal';
 import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
+import { formatMessage } from '@/v5/services/intl';
 
 type ILegalRoutes = {
 	path: string;
 };
 
 export const LegalRoutes = ({ path }: ILegalRoutes) => (
-	<Switch>
-		<LegalLayout>
-			<Route exact path={`${path}/terms`}>
+	<LegalLayout>
+		<Switch>
+			<Route title={formatMessage({ id: 'pageTitle.terms', defaultMessage: 'Terms & Conditions' })} exact path={`${path}/terms`}>
 				<TermsLegalPaper />
 			</Route>
-			<Route exact path={`${path}/cookies`}>
+			<Route title={formatMessage({ id: 'pageTitle.cookies', defaultMessage: 'Cookies Policy' })} exact path={`${path}/cookies`}>
 				<CookiesLegalPaper />
 			</Route>
-			<Route exact path={`${path}/privacy`}>
+			<Route title={formatMessage({ id: 'pageTitle.privacy', defaultMessage: 'Privacy Policy' })} exact path={`${path}/privacy`}>
 				<PrivacyLegalPaper />
 			</Route>
-		</LegalLayout>
-	</Switch>
+		</Switch>
+	</LegalLayout>
 );
