@@ -25,12 +25,12 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelec
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsList } from './ticketsList/ticketsList.component';
-import { CardContent } from './tickets.styles';
+import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const tickets = TicketsHooksSelectors.selectModelTickets(containerOrFederation);
+	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchTickets(

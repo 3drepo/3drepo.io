@@ -40,6 +40,9 @@ export const CardHeader = styled.div`
 
 export const CardContentContainer = styled.div`
 	padding: 15px;
+	// TODO - fix after new palette is released
+	background-color: #f9faff;
+	height: 100%;
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({
