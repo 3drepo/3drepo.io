@@ -22,7 +22,7 @@ export type FormCheckboxProps = FormControlLabelProps & {
 	name: string;
 	label: string | JSX.Element;
 	control: any;
-	onClick: (event) => any
+	onClick?: (event) => any
 };
 
 export const FormCheckbox = ({
