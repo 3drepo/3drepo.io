@@ -119,7 +119,7 @@ export const theme = createTheme(
 							'& label:not(.Mui-error)': {
 								'&, &.Mui-focused': {
 									color: COLOR.SECONDARY_MAIN,
-								}
+								},
 							},
 
 							'& .MuiFormHelperText-root': {
