@@ -56,6 +56,7 @@ export const FormSelect = ({
 					label={label}
 					disabled={disabled}
 					hidden={hidden}
+					onClose={value && (() => field.onChange({ target: { value }}))}
 					{...otherProps}
 				>
 					{children}
