@@ -33,7 +33,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 
-	const ticketIsSelected = ({ _id }: ITicket) => selectedTicket?._id === _id;
+	const ticketIsSelected = (ticket: ITicket) => selectedTicket === ticket;
 
 	const toggleTemplate = (templateId: string) => {
 		if (selectedTemplates.has(templateId)) {
