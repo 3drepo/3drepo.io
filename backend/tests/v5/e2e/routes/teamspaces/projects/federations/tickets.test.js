@@ -433,13 +433,13 @@ const testUpdateTicket = () => {
 				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id,
 					ticket?._id ?? ticket._id);
 				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
-				const updatedTicket = updatedTicketRes.body;				
+				const updatedTicket = updatedTicketRes.body;
 				expect(updatedTicket).toHaveProperty('number');
 				expect(updatedTicket.properties).toHaveProperty('Updated at');
 				expect(updatedTicket.properties).toHaveProperty('Created at');
 				expect(updatedTicket.properties).toHaveProperty('Owner');
 				delete updatedTicket.number;
-				const updatedDate = updatedTicket.properties['Updated at'];		
+				const updatedDate = updatedTicket.properties['Updated at'];
 				delete updatedTicket.properties['Updated at'];
 				delete updatedTicket.properties['Created at'];
 				delete updatedTicket.properties.Owner;
