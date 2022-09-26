@@ -35,6 +35,40 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
+Tickets.updateTicket = async (teamspace, ticketId, data) => {
+	const toUpdate = {};
+	const toUnset = {};
+
+	const { modules, properties, ...rootProps } = data;
+
+	const determineUpdate = (obj, prefix = '') => {
+		Object.keys(obj).forEach((key) => {
+			const value = obj[key];
+			if (value) toUpdate[`${prefix}${key}`] = value;
+			else { toUnset[`${prefix}${key}`] = 1; }
+		});
+	};
+
+	determineUpdate(rootProps);
+
+	if (properties) { determineUpdate(properties, 'properties.'); }
+
+	if (modules) {
+		Object.keys(modules).forEach((mod) => {
+			determineUpdate(modules[mod], `modules.${mod}.`);
+		});
+	}
+
+	const updateJson = {};
+	if (Object.keys(toUpdate).length) { updateJson.$set = toUpdate; }
+
+	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
+
+	if (Object.keys(updateJson).length) {
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
+	}
+};
+
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
 	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
 };
