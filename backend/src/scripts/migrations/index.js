@@ -30,7 +30,7 @@ const runScripts = async (version, scripts, { list, ...argv }) => {
 		logger.logInfo(`Migration script v${version} will perform the followings:`);
 		for (let i = 0; i < scripts.length; ++i) {
 			const { desc } = scripts[i];
-			logger.logInfo(`\t${i}. ${desc}`);
+			logger.logInfo(`\t${i + 1}. ${desc}`);
 		}
 	} else {
 		logger.logInfo(`================= Migration scripts v${version} =====================`);
