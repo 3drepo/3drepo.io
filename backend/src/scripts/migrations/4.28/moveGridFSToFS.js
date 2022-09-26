@@ -53,16 +53,15 @@ const moveFile = async (teamspace, collection, filename) => {
 	return filename;
 };
 
-const organiseFilesToProcess = (entries) => {
+const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) => {
 	const groups = [];
 
-	const maxMem = 2048 * 1024;
-	const maxEntries = 2000;
+	const maxMem = maxParallelSizeMB * 1024 * 1024;
 
 	let currentGroup = [];
 	let currentGroupSize = 0;
 	for (const entry of entries) {
-		if ((entry.size + currentGroupSize) > maxMem || currentGroup.length >= maxEntries) {
+		if ((entry.size + currentGroupSize) > maxMem || currentGroup.length >= maxParallelFiles) {
 			groups.push(currentGroup);
 			currentGroupSize = 0;
 			currentGroup = [];
@@ -79,10 +78,10 @@ const organiseFilesToProcess = (entries) => {
 	return groups;
 };
 
-const processCollection = async (teamspace, collection) => {
+const processCollection = async (teamspace, collection, maxParallelSizeMB, maxParallelFiles) => {
 	const ownerCol = collection.slice(0, -(filesExt.length));
 	const gridFSEntries = await find(teamspace, collection, { }, { filename: 1, length: 1 });
-	const fileGroups = organiseFilesToProcess(gridFSEntries);
+	const fileGroups = organiseFilesToProcess(gridFSEntries, maxParallelSizeMB, maxParallelFiles);
 
 	for (let i = 0; i < fileGroups.length; ++i) {
 		const group = fileGroups[i];
@@ -95,22 +94,22 @@ const processCollection = async (teamspace, collection) => {
 	}
 };
 
-const processTeamspace = async (teamspace) => {
+const processTeamspace = async (teamspace, maxParallelSizeMB, maxParallelFiles) => {
 	const filesCols = await getCollectionsEndsWith(teamspace, filesExt);
 	for (let i = 0; i < filesCols.length; ++i) {
 		const collection = filesCols[i].name;
 		logger.logInfo(`\t\t\t${collection}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processCollection(teamspace, collection);
+		await processCollection(teamspace, collection, maxParallelSizeMB, maxParallelFiles);
 	}
 };
 
-const run = async () => {
+const run = async ({ maxParallelSizeMB, maxParallelFiles }) => {
 	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
 		logger.logInfo(`\t\t-${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(teamspaces[i]);
+		await processTeamspace(teamspaces[i], maxParallelSizeMB, maxParallelFiles);
 	}
 };
 

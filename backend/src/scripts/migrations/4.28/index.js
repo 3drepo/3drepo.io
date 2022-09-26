@@ -26,4 +26,16 @@ const scripts = [
 	{ script: removeGridFSBackUps, desc: 'Remove redundant GridFS files (due to last script)' },
 ];
 
-module.exports = scripts;
+const argsDef = (yargs) => yargs.option('maxParallelSizeMB',
+	{
+		describe: 'Maximum amount of file size to process in parallel',
+		type: 'number',
+		default: 2048,
+	}).option('maxParallelFiles',
+	{
+		describe: 'Maximum amount of files to process in parallel',
+		type: 'number',
+		default: 2000,
+	});
+
+module.exports = { scripts, argsDef };
