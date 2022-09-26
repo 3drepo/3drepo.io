@@ -20,7 +20,7 @@ const { constants } = require('fs');
 const Path = require('path');
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { count, dropCollection, find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);

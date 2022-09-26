@@ -16,7 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);

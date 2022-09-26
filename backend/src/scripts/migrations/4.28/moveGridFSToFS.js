@@ -16,7 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
