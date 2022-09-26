@@ -213,7 +213,7 @@ const testPresetValues = () => {
 
 			const jobs = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
-			JobsModel.getJobs.mockResolvedValue(jobs);
+			JobsModel.getJobNames.mockResolvedValue(jobs);
 			TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(users);
 
 			const testCases = [
