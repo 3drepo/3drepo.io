@@ -87,7 +87,7 @@ const processCollection = async (teamspace, collection) => {
 	for (let i = 0; i < fileGroups.length; ++i) {
 		const group = fileGroups[i];
 		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
-		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying over ${group.length} files (${parseFloat(totalSize).toFixed(2)})MiB`);
+		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying ${group.length} file(s) (${parseFloat(totalSize).toFixed(2)}MiB)`);
 		// eslint-disable-next-line no-await-in-loop
 		const filesToRemove = await Promise.all(group.map(({ filename }) => moveFile(teamspace, ownerCol, filename)));
 		// eslint-disable-next-line no-await-in-loop

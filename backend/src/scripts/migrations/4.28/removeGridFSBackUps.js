@@ -39,21 +39,29 @@ const removeGridFSBackup = async (teamspace, col, filename) => {
 	}
 };
 
+const filesInGridFS = (teamspace, collection) => count(teamspace, `${collection}.files`, { filename: { $not: { $regex: '.*unityAssets.json$' } } });
+
 const processCollection = async (teamspace, collection) => {
 	const ownerCol = collection.slice(0, -(refExt.length));
-	const refEntries = await find(teamspace, collection, { type: 'fs' }, { link: 1 });
-	await Promise.all(refEntries.map(async ({ _id, link }) => {
-		try {
-			await access(Path.join(fs.path, link), constants.R_OK);
-			await removeGridFSBackup(teamspace, ownerCol, _id);
-		} catch (err) {
-			logger.logError(`Failed to process file ${_id}: ${err.message}`);
-		}
-	}));
+	const gridfsCount = await filesInGridFS(teamspace, ownerCol);
+	if (gridfsCount) {
+		const refEntries = await find(teamspace, collection, { type: 'fs' }, { link: 1 });
+		logger.logInfo(`\t\t\t\tChecking ${refEntries.length} references...`);
+		await Promise.all(refEntries.map(async ({ _id, link }) => {
+			try {
+				await access(Path.join(fs.path, link), constants.R_OK);
+				await removeGridFSBackup(teamspace, ownerCol, _id);
+			} catch (err) {
+				logger.logError(`Failed to process file ${_id}: ${err.message}`);
+			}
+		}));
+	} else {
+		logger.logInfo('\t\t\t\tNo gridfs reference. Skipping...');
+	}
 
 	const filesCol = `${ownerCol}.files`;
 	const chunksCol = `${ownerCol}.chunks`;
-	const fileCount = await count(teamspace, filesCol, { filename: { $not: { $regex: '.*unityAssets.json$' } } });
+	const fileCount = await filesInGridFS(teamspace, ownerCol);
 	if (!fileCount) {
 		await Promise.all([
 			dropCollection(teamspace, filesCol),
