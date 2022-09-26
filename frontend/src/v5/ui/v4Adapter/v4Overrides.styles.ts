@@ -39,6 +39,7 @@ import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 import gis from './overrides/cards/gis.overrides';
+import compare from './overrides/cards/compare.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -80,6 +81,7 @@ export const V4OverridesContainer = styled.div`
 
 	${views}
 	${gis}
+	${compare}
 
 	${RevisionsSwitchContainer} {
 		display: none;
