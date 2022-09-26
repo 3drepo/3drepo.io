@@ -21,6 +21,7 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils
 const { find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const FsService = require(`${v5Path}/handler/fs`);
+const GridFS = require(`${v5Path}/handler/gridfs`);
 
 const filesExt = '.files';
 
@@ -42,25 +43,55 @@ const moveFile = async (teamspace, collection, filename) => {
 
 	if (existingRef && existingRef.type !== 'gridfs') {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
-		await updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: existingRef._id } });
 	} else {
 		const file = await getFileFromGridFS(teamspace, collection, filename);
 		const newRef = await FsService.storeFile(file);
 		newRef._id = existingRef?._id || convertLegacyFileName(filename);
-		await Promise.all([
-			updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true),
-			updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: newRef._id } }),
-		]);
+		await updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true);
 	}
+
+	return filename;
+};
+
+const organiseFilesToProcess = (entries) => {
+	const groups = [];
+
+	const maxMem = 2048 * 1024;
+	const maxEntries = 2000;
+
+	let currentGroup = [];
+	let currentGroupSize = 0;
+	for (const entry of entries) {
+		if ((entry.size + currentGroupSize) > maxMem || currentGroup.length >= maxEntries) {
+			groups.push(currentGroup);
+			currentGroupSize = 0;
+			currentGroup = [];
+		}
+
+		currentGroup.push(entry);
+		currentGroupSize += entry.size;
+	}
+
+	if (currentGroup.length) {
+		groups.push(currentGroup);
+	}
+
+	return groups;
 };
 
 const processCollection = async (teamspace, collection) => {
 	const ownerCol = collection.slice(0, -(filesExt.length));
-	const gridFSEntry = await find(teamspace, collection, { }, { filename: 1 });
-	for (const entry of gridFSEntry) {
-		logger.logInfo(`\t\t\t\t${entry.filename}`);
+	const gridFSEntries = await find(teamspace, collection, { }, { filename: 1, length: 1 });
+	const fileGroups = organiseFilesToProcess(gridFSEntries);
+
+	for (let i = 0; i < fileGroups.length; ++i) {
+		const group = fileGroups[i];
+		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
+		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying over ${group.length} files (${parseFloat(totalSize).toFixed(2)})MiB`);
 		// eslint-disable-next-line no-await-in-loop
-		await moveFile(teamspace, ownerCol, entry.filename);
+		const filesToRemove = await Promise.all(group.map(({ filename }) => moveFile(teamspace, ownerCol, filename)));
+		// eslint-disable-next-line no-await-in-loop
+		await GridFS.removeFiles(teamspace, ownerCol, filesToRemove);
 	}
 };
 
