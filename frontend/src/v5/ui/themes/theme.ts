@@ -668,9 +668,11 @@ export const theme = createTheme({
 				root: {
 					borderRadius: 5,
 					boxShadow: SHADOW.LEVEL_5,
-				},
-				padding: {
-					padding: '8px 0',
+					padding: 0,
+					// multiSelect
+					'&[aria-labelledby="selectSingle-label"]': {
+						padding: '8px 0'
+					},
 				},
 			},
 		},
@@ -824,7 +826,6 @@ export const theme = createTheme({
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					borderRadius: 5,
-					width: '100%',
 
 					'& input': {
 						padding: '0px 15px',

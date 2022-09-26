@@ -21,6 +21,8 @@ import { StyledItemText, StyledListItem, CopyText } from '@/v4/routes/components
 import { Item } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
 import _ from 'lodash';
+import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import { createElement } from 'react';
 
 export const theme = createTheme(
 	_.merge(
@@ -384,6 +386,13 @@ export const theme = createTheme(
 								margin: 0,
 							},
 						},
+					},
+				},
+				MuiAccordionSummary: {
+					defaultProps: {
+						// this messes up with existing accordion (WHY is that an accordion!???)
+						// in the viewer (issues/risks card)
+						expandIcon: createElement(ThinChevronIcon),
 					},
 				},
 			},
