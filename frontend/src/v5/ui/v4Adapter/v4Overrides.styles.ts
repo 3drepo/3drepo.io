@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
 import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
+import { StyledSelect } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
@@ -42,6 +43,12 @@ export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+
+	${StyledSelect} {
+		.MuiSelect-select {
+			margin-top: 18px;
+		}
+	}
 
 	${customTable}
 
