@@ -55,6 +55,16 @@ export default css`
 			align-items: start;
 			min-height: unset;
 
+			.MuiAccordionSummary {
+				&-content {
+					margin: 12px 0;
+				}
+				
+				&-expandIconWrapper {
+					display: none;
+				}
+			}
+
 			${Grid} {
 
 				${TitleNumber} {
