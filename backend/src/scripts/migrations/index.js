@@ -25,15 +25,23 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const Yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-const runScripts = async (version, scripts, argv) => {
-	logger.logInfo(`================= Migration scripts v${version} =====================`);
-	for (let i = 0; i < scripts.length; ++i) {
-		const { script, desc } = scripts[i];
-		logger.logInfo(`\t${i}/${scripts.length} ${desc}...`);
-		// eslint-disable-next-line no-await-in-loop
-		await script(argv);
+const runScripts = async (version, scripts, { list, ...argv }) => {
+	if (list) {
+		logger.logInfo(`Migration script v${version} will perform the followings:`);
+		for (let i = 0; i < scripts.length; ++i) {
+			const { desc } = scripts[i];
+			logger.logInfo(`\t${i}. ${desc}`);
+		}
+	} else {
+		logger.logInfo(`================= Migration scripts v${version} =====================`);
+		for (let i = 0; i < scripts.length; ++i) {
+			const { script, desc } = scripts[i];
+			logger.logInfo(`\t${i}/${scripts.length} ${desc}...`);
+			// eslint-disable-next-line no-await-in-loop
+			await script(argv);
+		}
+		logger.logInfo('============================= Done ============================');
 	}
-	logger.logInfo('============================= Done ============================');
 };
 
 const genYargs = (version, yargs) => {
@@ -43,11 +51,19 @@ const genYargs = (version, yargs) => {
 
 	// Older scripts do not return an object, they just return the scripts
 	const scripts = migrationPack?.scripts ?? migrationPack;
-	const argsDef = migrationPack?.argsDef ?? {};
+
+	const fullArgsDef = (subYargs) => {
+		const retVal = migrationPack?.argsDef ? migrationPack.argsDef(subYargs) : subYargs;
+		return retVal.option('list', {
+			describe: 'List the actions that will be performed for this migration',
+			type: 'boolean',
+			default: false,
+		});
+	};
 
 	return yargs.command(version,
 		`Run migration script for v${version}`,
-		argsDef,
+		fullArgsDef,
 		(argv) => runScripts(version, scripts, argv));
 };
 
