@@ -41,9 +41,9 @@ export const TemplateName = styled.div<{ $selected?: boolean }>`
 	font-weight: 500;
 	border-radius: 4px;
 	padding: 1px 6px;
-	border: solid 1px #6b778c;
+	border: solid 1px ${({ theme }) => theme.palette.base.main};
 	background-color: #f9faff;
-	color: #6b778c;
+	color: ${({ theme }) => theme.palette.base.main};
 
 	${({ $selected }) => $selected && css`
 		color: ${({ theme }) => theme.palette.primary.main};
