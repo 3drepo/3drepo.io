@@ -69,17 +69,17 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 	)),
 );
 
-Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
+Tickets.addTicket = async (teamspace, project, model, ticket, template, isFederation = false) => {
 	const { toAdd } = processBinaryProperties(template, undefined, ticket);
-	const res = await addTicket(teamspace, project, model, ticket);
+	const res = await addTicket(teamspace, project, model, ticket, isFederation);
 	await storeFiles(teamspace, project, model, res, toAdd);
 	return res;
 };
 
-Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData) => {
+Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, isFederation = false) => {
 	const { toAdd, toRemove } = processBinaryProperties(template, oldTicket, updateData);
 	const ticketId = oldTicket._id;
-	await updateTicket(teamspace, ticketId, updateData);
+	await updateTicket(teamspace, project, model, ticketId, updateData, isFederation);
 	await Promise.all([
 		toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
 		storeFiles(teamspace, project, model, ticketId, toAdd),

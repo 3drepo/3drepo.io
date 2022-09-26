@@ -16,7 +16,9 @@
  */
 
 const DbHandler = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const Tickets = {};
@@ -28,14 +30,16 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 	return (lastTicket?.number ?? 0) + 1;
 };
 
-Tickets.addTicket = async (teamspace, project, model, ticket) => {
+Tickets.addTicket = async (teamspace, project, model, ticketData, isFederation = false) => {
 	const _id = generateUUID();
-	const number = await determineTicketNumber(teamspace, project, model, ticket.type);
-	await DbHandler.insertOne(teamspace, TICKETS_COL, { ...ticket, teamspace, project, model, _id, number });
+	const number = await determineTicketNumber(teamspace, project, model, ticketData.type);
+	const ticket = { ...ticketData, teamspace, project, model, _id, number };
+	await DbHandler.insertOne(teamspace, TICKETS_COL, ticket);
+	publish(isFederation ? events.FEDERATION_NEW_TICKET : events.CONTAINER_NEW_TICKET, ticket);
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, ticketId, data) => {
+Tickets.updateTicket = async (teamspace, project, model, ticketId, data, isFederation = false) => {
 	const toUpdate = {};
 	const toUnset = {};
 
@@ -67,6 +71,9 @@ Tickets.updateTicket = async (teamspace, ticketId, data) => {
 	if (Object.keys(updateJson).length) {
 		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
 	}
+
+	publish(isFederation ? events.FEDERATION_UPDATE_TICKET : events.CONTAINER_UPDATE_TICKET, 
+		{ teamspace, project, model, _id: ticketId, ...data });
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {

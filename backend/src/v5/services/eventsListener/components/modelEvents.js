@@ -75,6 +75,16 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 	await createModelMessage(event, {}, teamspace, project, model, sender);
 };
 
+const modelTicketAdded = (isFederation) => async ({ teamspace, project, model, _id, number, type, properties, modules }) => {
+	const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+	await createModelMessage(event, { _id, type, number, properties, modules }, teamspace, project, model);
+};
+
+const modelTicketUpdated= (isFederation) => async ({ teamspace, project, model, ...propsUpdated }) => {
+	const event = isFederation ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
+	await createModelMessage(event, { ...propsUpdated }, teamspace, project, model);
+};
+
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
@@ -86,6 +96,10 @@ ModelEventsListener.init = () => {
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
+	subscribe(events.CONTAINER_NEW_TICKET, modelTicketAdded(false));
+	subscribe(events.FEDERATION_NEW_TICKET, modelTicketAdded(true));
+	subscribe(events.CONTAINER_UPDATE_TICKET, modelTicketUpdated(false));
+	subscribe(events.FEDERATION_UPDATE_TICKET, modelTicketUpdated(true));
 };
 
 module.exports = ModelEventsListener;

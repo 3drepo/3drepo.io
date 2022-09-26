@@ -32,12 +32,16 @@ const events = [
 	'containerRevisionUpdate',
 	'newContainer',
 	'containerRemoved',
+	'containerNewTicket',
+	'containerUpdateTicket',
 
 	// Federation events
 	'federationSettingsUpdate',
 	'federationNewRevision',
 	'newFederation',
 	'federationRemoved',
+	'federationNewTicket',
+	'federationUpdateTicket',
 ];
 
 const errors = [
