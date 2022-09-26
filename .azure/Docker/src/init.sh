@@ -16,7 +16,7 @@ if [ "$1" = 'web' ]; then
     fi
 
     if [ ! "$APP_WEB_CUSTOMLOGINS" = '' ]; then
-        list=( $(python3 getCustomLogins.py $APP_WEB_CUSTOMLOGINS ) )
+        list=( $( python3 /usr/local/bin/getCustomLogins.py $APP_WEB_CUSTOMLOGINS ) )
         for l in "${list[@]}"
         do
             mkdir -p /home/node/3drepo.io/public/"$l"
