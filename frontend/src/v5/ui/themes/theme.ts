@@ -1161,10 +1161,56 @@ export const theme = createTheme({
 				},
 			},
 		},
-		MuiAccordionSummary: {
+		MuiAccordion: {
+			defaultProps: {
+				disableGutters: true,
+			},
 			styleOverrides: {
+				root: {
+					borderRadius: 0,
+					border: `solid 1px ${COLOR.SECONDARY_LIGHTEST}`,
+					boxShadow: 'none',
+					'&::before': {
+						height: 0,
+					},
+					'&:last-of-type': {
+						borderRadius: 0,
+					},
+				},
+			},
+		},
+		MuiAccordionSummary: {
+			defaultProps: {
+				// this messes up with existing accordion (WHY is that an accordion!???)
+				// in the viewer (issues/risks card)
+				expandIcon: createElement(ChevronIcon),
+			},
+			styleOverrides: {
+				root: {
+					margin: 0,
+					padding: '10px 13px 10px 10px',
+					color: COLOR.SECONDARY_MAIN,
+					minHeight: 'unset',
+
+					'& > .MuiAccordionSummary-expandIconWrapper': {	
+						color: 'currentColor',
+					},
+					'&.Mui-expanded': {
+						color: COLOR.PRIMARY_MAIN,
+					},
+				},
 				content: {
-					marginBottom: 5,
+					// marginBottom: 5,
+					margin: 0,
+				},
+			},
+		},
+		MuiAccordionDetails: {
+			styleOverrides: {
+				root: {
+					borderTop: `solid 1px ${COLOR.SECONDARY_LIGHTEST}`,
+					margin: 0,
+					padding: '11px 20px 24px',
 				},
 			},
 		},
