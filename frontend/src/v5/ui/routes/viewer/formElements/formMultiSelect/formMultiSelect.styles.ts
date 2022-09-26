@@ -37,7 +37,7 @@ export const MenuItem = styled(MenuItemBase)`
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
-	padding: 4px 12px 12px;
+	padding: 12px;
 `;
 
 export const NoResults = styled.div`
