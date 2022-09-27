@@ -19,7 +19,7 @@ import { Popover } from '@/v4/routes/components/messagesList/components/message/
 import { IUser } from '@/v5/store/users/users.redux';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { useState } from 'react';
-import { AssignedUsersList, ExtraUsersCircle, UserCircle, WhiteOverlay } from './assignedUsers.styles';
+import { AssignedUsersList, ExtraUsersCircle, UserCircle } from './assignedUsers.styles';
 import { ExtraUsersPopover } from './extraUsersPopover/extraUsersPopover.component';
 
 type AssignedUsersType = {
@@ -48,7 +48,6 @@ export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
 	}
 	return (
 		<AssignedUsersList>
-			<WhiteOverlay />
 			{displayedUsers.map((user, index) => (
 				<UserCircle
 					key={user.user}

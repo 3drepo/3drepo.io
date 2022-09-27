@@ -30,7 +30,7 @@ const CircleStyles = css`
 	pointer-events: auto;
 	display: inline-flex;
 	margin: 0 -${OVERLAP_WIDTH} 0 0;
-	&:hover {
+	&:hover { /* avatar appears on top when hovered */
 		z-index: 1000;
 	}
 `;
@@ -42,19 +42,21 @@ export const UserCircle = styled(Avatar)<{ index: number }>`
 		background-color: ${({ theme }) => theme.palette.secondary.main};
 		z-index: ${({ index }) => 100 - index};
 		${CircleStyles}
+		
+		&:before { /* a white layer which fades avatars on hover */
+			content: "";
+			${CircleStyles}
+			margin: 0;
+			background-color: white;
+			position: absolute;
+			opacity: 0;
+		}
 	}
-`;
-
-export const WhiteOverlay = styled.div`
-	width: 100%;
-	height: 100%;
-	position: absolute;
-
-	opacity: 0;
-	transition: opacity 0.2s;
-	background-color: white;
-	pointer-events: none;
-	z-index: 500;
+	&:hover {
+		>.MuiAvatar-root:before {/* prevent focused avatar from fading */
+			opacity: 0 !important;
+		}
+	}
 `;
 
 export const AssignedUsersList = styled.div`
@@ -62,11 +64,8 @@ export const AssignedUsersList = styled.div`
 	position: relative;
 	width: fit-content;
 
-	&:hover {
-		${WhiteOverlay} {
-			opacity: 0.3;
-			transition: opacity 0.2s;
-		}
+	&:hover .MuiAvatar-root:before { /* fade avatars on hover */
+		opacity: 0.3;
 	}
 `;
 
