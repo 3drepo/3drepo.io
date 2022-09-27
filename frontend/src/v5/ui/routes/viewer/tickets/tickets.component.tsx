@@ -14,48 +14,73 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { FormattedMessage } from 'react-intl';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
-import { useEffect } from 'react';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
-import { TicketsList } from './ticketsList/ticketsList.component';
+import { CardContext, CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
+import { useContext } from 'react';
+import { Button } from '@controls/button';
+import { TicketsCardViews } from './tickets.constants';
+import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 
-export const Tickets = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const isFederation = modelIsFederation(containerOrFederation);
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+export const TicketDetailCard = () => {
+	const contextValue = useContext(CardContext);
 
-	useEffect(() => {
-		TicketsActionsDispatchers.fetchTickets(
-			teamspace,
-			project,
-			containerOrFederation,
-			isFederation,
-		);
-		TicketsActionsDispatchers.fetchTemplates(
-			teamspace,
-			project,
-			containerOrFederation,
-			isFederation,
-		);
-	}, [containerOrFederation]);
+	const goBack = () => {
+		contextValue.setCardView(TicketsCardViews.List);
+	};
 
 	return (
 		<CardContainer>
 			<CardHeader>
 				<TicketsIcon fontSize="small" />
-				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
+				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
+				<Button onClick={goBack}>back</Button>
 			</CardHeader>
-			<CardContent autoHeightMax="100%">
-				<TicketsList tickets={tickets} />
+			<CardContent>
+				Showing the details of the ticket {JSON.stringify(contextValue.props.ticket)}
 			</CardContent>
 		</CardContainer>
 	);
 };
+
+export const TicketNewCard = () => {
+	const contextValue = useContext(CardContext);
+
+	const goBack = () => {
+		contextValue.setCardView(TicketsCardViews.List);
+	};
+
+	return (
+		<CardContainer>
+			<CardHeader>
+				<TicketsIcon fontSize="small" />
+				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
+				<Button onClick={goBack}>back</Button>
+			</CardHeader>
+			<CardContent>
+				Showing the form for a new ticket for the template {JSON.stringify(contextValue.props.template)}
+			</CardContent>
+		</CardContainer>
+	);
+};
+
+export const Tickets = () => (
+	<CardContextComponent defaultView={TicketsCardViews.List}>
+		<CardContextView cardView={TicketsCardViews.List}>
+			<TicketsListCard />
+		</CardContextView>
+		<CardContextView cardView={TicketsCardViews.Details}>
+			<TicketDetailCard />
+		</CardContextView>
+		<CardContextView cardView={TicketsCardViews.New}>
+			<TicketNewCard />
+		</CardContextView>
+	</CardContextComponent>
+);
