@@ -18,6 +18,11 @@
 const { src } = require('../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
+jest.mock('../../../../src/v5/utils/helper/tickets');
+const TicketsHelper = require(`${src}/utils/helper/tickets`);
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Ticket = require(`${src}/models/tickets`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -26,18 +31,21 @@ const ticketCol = 'tickets';
 
 const testAddTicket = () => {
 	describe('Add ticket', () => {
-		test('should add the ticket', async () => {
+		test('should add the ticket (Container)', async () => {
 			const templateType = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
 			const number = generateRandomNumber();
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(data);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
+			const serialiseTicketMock = TicketsHelper.serialiseTicket.mockImplementationOnce(() => data);
 			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
+			const template = { [generateRandomString()]: generateRandomString() };
 
-			const _id = await Ticket.addTicket(teamspace, project, model, data);
+			const _id = await Ticket.addTicket(teamspace, project, model, template, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...data, teamspace, project, model, _id, number });
@@ -45,6 +53,46 @@ const testAddTicket = () => {
 			expect(getLastNumber).toHaveBeenCalledTimes(1);
 			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CONTAINER_NEW_TICKET, 
+				{ teamspace, project, model, ...data });
+
+			expect(serialiseTicketMock).toHaveBeenCalledTimes(1);
+			expect(serialiseTicketMock).toHaveBeenCalledWith(
+				{ teamspace, project, model, number, _id, ...data }, template);
+		});
+
+		test('should add the ticket (Federation)', async () => {
+			const templateType = generateRandomString();
+			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
+			const number = generateRandomNumber();
+
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(data);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
+			const serialiseTicketMock = TicketsHelper.serialiseTicket.mockImplementationOnce(() => data);
+			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const template = { [generateRandomString()]: generateRandomString() };
+
+			const _id = await Ticket.addTicket(teamspace, project, model, template, data, true);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...data, teamspace, project, model, _id, number });
+
+			expect(getLastNumber).toHaveBeenCalledTimes(1);
+			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.FEDERATION_NEW_TICKET, 
+				{ teamspace, project, model, ...data });
+
+			expect(serialiseTicketMock).toHaveBeenCalledTimes(1);
+			expect(serialiseTicketMock).toHaveBeenCalledWith(
+				{ teamspace, project, model, number, _id, ...data }, template);
 		});
 
 		test('should add the ticket with number set to 1 if this is the first ticket', async () => {
@@ -56,8 +104,9 @@ const testAddTicket = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
+			const template = { [generateRandomString()]: generateRandomString() };
 
-			const _id = await Ticket.addTicket(teamspace, project, model, data);
+			const _id = await Ticket.addTicket(teamspace, project, model, template, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
