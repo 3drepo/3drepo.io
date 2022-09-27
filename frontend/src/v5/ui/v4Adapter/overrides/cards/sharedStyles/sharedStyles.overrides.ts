@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import shapes from '../sharedStyles/shapes.overrides';
 import sequences from './sequences.overrides';
 import selectMenus from './selectMenus.overrides';
+import shapes from './shapes.overrides';
 
 export default css`
 	${sequences}
