@@ -18,32 +18,32 @@
 import { createContext, useContext, useState } from 'react';
 
 export interface CardContextType {
-	view: any;
+	cardView: string;
 	props?: any;
-	setView: (view: any, extraProps?: any) => void
+	setCardView: (view: string, extraProps?: any) => void
 }
 
-const defaultValue: CardContextType = { props: {}, view: {}, setView: () => {} };
+const defaultValue: CardContextType = { props: {}, cardView: '', setCardView: () => {} };
 export const CardContext = createContext(defaultValue);
 CardContext.displayName = 'CardContext';
 
 export const CardContextComponent = ({ defaultView, children }) => {
-	const [viewProps, setViewProps] = useState({ view: defaultView, props: {} });
+	const [viewProps, setViewProps] = useState({ cardView: defaultView, props: {} });
 
 	const setView = (newView, newExtraProps) => {
-		setViewProps({ view: newView, props: newExtraProps });
+		setViewProps({ cardView: newView, props: newExtraProps });
 	};
 
 	return (
-		<CardContext.Provider value={{ ...viewProps, setView }}>
+		<CardContext.Provider value={{ ...viewProps, setCardView: setView }}>
 			{children}
 		</CardContext.Provider>
 	);
 };
 
-export const CardContextView = ({ view, children }) => {
+export const CardContextView = ({ cardView, children }) => {
 	const contextValue = useContext(CardContext);
 	return (
-		<>{view === contextValue.view && children}</>
+		<>{cardView === contextValue.cardView && children}</>
 	);
 };

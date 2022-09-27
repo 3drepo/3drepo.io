@@ -33,7 +33,7 @@ export const TicketDetailCard = () => {
 	const contextValue = useContext(CardContext);
 
 	const goBack = () => {
-		contextValue.setView(TicketsCardViews.List);
+		contextValue.setCardView(TicketsCardViews.List);
 	};
 
 	return (
@@ -54,7 +54,7 @@ export const TicketNewCard = () => {
 	const contextValue = useContext(CardContext);
 
 	const goBack = () => {
-		contextValue.setView(TicketsCardViews.List);
+		contextValue.setCardView(TicketsCardViews.List);
 	};
 
 	return (
@@ -73,13 +73,13 @@ export const TicketNewCard = () => {
 
 export const Tickets = () => (
 	<CardContextComponent defaultView={TicketsCardViews.List}>
-		<CardContextView view={TicketsCardViews.List}>
+		<CardContextView cardView={TicketsCardViews.List}>
 			<TicketsListCard />
 		</CardContextView>
-		<CardContextView view={TicketsCardViews.Details}>
+		<CardContextView cardView={TicketsCardViews.Details}>
 			<TicketDetailCard />
 		</CardContextView>
-		<CardContextView view={TicketsCardViews.New}>
+		<CardContextView cardView={TicketsCardViews.New}>
 			<TicketNewCard />
 		</CardContextView>
 	</CardContextComponent>
