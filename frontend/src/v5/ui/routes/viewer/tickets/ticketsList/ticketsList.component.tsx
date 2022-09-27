@@ -30,7 +30,7 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const constextValue = useContext(CardContext);
+	const contextValue = useContext(CardContext);
 	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -58,7 +58,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const onTicketClick = (ticket: ITicket) => {
 		if (ticketIsSelected(ticket)) {
-			constextValue.setView(TicketsCardViews.Details, { ticket });
+			contextValue.setView(TicketsCardViews.Details, { ticket });
 		} else {
 			setSelectedTicket(ticket);
 		}
