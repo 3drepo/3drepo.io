@@ -13,8 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Assign to One Project
     steps:
-    - name: Assign NEW issues to sprint project
+    - name: Assign NEW issues/pull requests to sprint project
       uses: srggrs/assign-one-project-github-action@1.2.1
-      if: github.event.action == 'opened'
       with:
         project: 'https://github.com/orgs/3drepo/projects/22'
