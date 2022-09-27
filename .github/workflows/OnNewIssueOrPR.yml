@@ -1,7 +1,9 @@
-name: Auto Assign to Sprint Project
+name: On New Issue or PR
 
 on:
   issues:
+    types: [opened]
+  pull_request:
     types: [opened]
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
