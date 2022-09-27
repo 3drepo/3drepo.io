@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SequenceDateActions } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
-import { Content as RiskDetails } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
+import issueProperties from './properties.overrides';
+import issueAttachments from './attachments.overrides';
 
 export default css`
-	${RiskDetails} {
-		${SequenceDateActions} {
-			bottom: -4px;
-		}
+	#issues-card-details {
+		${issueProperties}
+		${issueAttachments}
 	}
 `;

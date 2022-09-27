@@ -14,15 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { SequenceDateActions } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
-import { Content as RiskDetails } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
+import shapes from '../sharedStyles/shapes.overrides';
+import sequences from './sequences.overrides';
+import selectMenus from './selectMenus.overrides';
 
 export default css`
-	${RiskDetails} {
-		${SequenceDateActions} {
-			bottom: -4px;
-		}
-	}
+	${sequences}
+	${shapes}
+	${selectMenus}
 `;
