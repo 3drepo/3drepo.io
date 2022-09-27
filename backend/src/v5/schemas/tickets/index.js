@@ -26,7 +26,7 @@ const {
 const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
-const { getJobs } = require('../../models/jobs');
+const { getJobNames } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaces');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
@@ -47,7 +47,7 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 				case presetEnumValues.JOBS_AND_USERS:
 					{
 						const [jobs, users] = await Promise.all([
-							getJobs(teamspace),
+							getJobNames(teamspace),
 							getAllUsersInTeamspace(teamspace),
 						]);
 
