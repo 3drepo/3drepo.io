@@ -16,18 +16,21 @@
  */
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { flatMap } from 'lodash';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, TemplateName, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
+import { TicketsCardViews } from '../tickets.constants';
 
 type TicketsListProps = {
 	tickets: ITicket[];
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
+	const contextValue = useContext(CardContext);
 	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -55,7 +58,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const onTicketClick = (ticket: ITicket) => {
 		if (ticketIsSelected(ticket)) {
-			// navigate to ticket
+			contextValue.setCardView(TicketsCardViews.Details, { ticket });
 		} else {
 			setSelectedTicket(ticket);
 		}
