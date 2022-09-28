@@ -15,31 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
+import { FormToggle } from '@controls/formToggle/formToggle.component';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormCheckbox',
+	title: 'Inputs/Control/FormToggle',
 	argTypes: {
-		label: {
-			type: 'string',
+		defaultChecked: {
+			type: 'boolean',
 		},
-		defaultValue: {
+		checked: {
 			type: 'boolean',
 		},
 	},
-	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
-} as ComponentMeta<typeof FormCheckbox>;
+	component: FormToggle,
+	parameters: { controls: { exclude: [
+		'control',
+		'ref',
+		'action',
+		'touchRippleRef',
+		'TouchRippleProps',
+		'onFocusVisible',
+		'LinkComponent',
+		'focusVisibleClassName',
+		'focusRipple',
+		'disableTouchRipple',
+		'centerRipple',
+	] } },
+} as ComponentMeta<typeof FormToggle>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
+const Controlled: ComponentStory<typeof FormToggle> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormCheckbox
-				name="checkbox"
+			<FormToggle
+				name="toggle"
 				control={control}
 				{...args}
 			/>
@@ -47,8 +59,8 @@ const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
 	);
 };
 
-export const ControlledFormCheckbox = Controlled.bind({});
+export const ControlledFormToggle = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormCheckbox.args = {
-	label: 'Controlled Checkbox input',
+ControlledFormToggle.args = {
+	label: 'Controlled Toggle input',
 };

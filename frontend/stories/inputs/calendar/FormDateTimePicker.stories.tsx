@@ -19,10 +19,10 @@ import { useForm } from 'react-hook-form';
 import { FormDateTimePicker } from '@controls/formDatePicker/formDateTimePicker.component';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormDateTimePicker',
+	title: 'Inputs/Calendar/FormDateTimePicker',
 	argTypes: {
 		disablePast: {
 			type: 'boolean',

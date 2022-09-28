@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
+import { FormTextArea } from '@controls/formTextArea/formTextArea.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormMultiSelect',
+	title: 'Inputs/TextField/FormTextArea',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -28,34 +28,38 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
-		values: {
-			control: 'array',
+		formError: {
+			type: 'string',
+		},
+		minRows: {
+			type: 'number',
 		},
 		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormMultiSelect,
-	parameters: { controls: { exclude: ['control'] } },
-} as ComponentMeta<typeof FormMultiSelect>;
+	component: FormTextArea,
+	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
+} as ComponentMeta<typeof FormTextArea>;
 
-const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
+const Controlled: ComponentStory<typeof FormTextArea> = ({ formError, ...args }) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormMultiSelect
-				name="multiselect"
+			<FormTextArea
+				name="textfield"
 				control={control}
 				{...args}
+				formError={formError ? { message: formError } : null}
 			/>
 		</FormContainer>
 	);
 };
 
-export const ControlledFormSelect = Controlled.bind({});
+export const ControlledFormTextArea = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormSelect.args = {
-	label: 'Controlled Multi Select input',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+ControlledFormTextArea.args = {
+	label: 'Controlled Multi Line input',
+	minRows: 3,
 };

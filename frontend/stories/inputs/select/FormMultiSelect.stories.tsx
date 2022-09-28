@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormTextField',
+	title: 'Inputs/Select/FormMultiSelect',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -28,34 +28,34 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
-		formError: {
-			type: 'string',
+		values: {
+			control: 'array',
 		},
 		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormTextField,
-	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof FormTextField>;
+	component: FormMultiSelect,
+	parameters: { controls: { exclude: ['control'] } },
+} as ComponentMeta<typeof FormMultiSelect>;
 
-const Controlled: ComponentStory<typeof FormTextField> = ({ formError, ...args }) => {
+const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormTextField
-				name="textfield"
+			<FormMultiSelect
+				name="multiselect"
 				control={control}
 				{...args}
-				formError={formError ? { message: formError } : null}
 			/>
 		</FormContainer>
 	);
 };
 
-export const ControlledFormTextField = Controlled.bind({});
+export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormTextField.args = {
-	label: 'Controlled Single Line input',
+ControlledFormSelect.args = {
+	label: 'Controlled Multi Select input',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

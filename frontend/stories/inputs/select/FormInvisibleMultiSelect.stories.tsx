@@ -14,53 +14,50 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Button } from '@controls/button';
+import { FormInvisibleMultiSelect } from '@controls/formInvisibleMultiSelect/formInvisibleMultiSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormToggle } from '@controls/formToggle/formToggle.component';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormToggle',
+	title: 'Inputs/Select/FormInvisibleMultiSelect',
 	argTypes: {
-		defaultChecked: {
-			type: 'boolean',
+		label: {
+			type: 'string',
 		},
-		checked: {
+		defaultValue: {
+			type: 'string',
+		},
+		values: {
+			control: 'array',
+		},
+		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormToggle,
-	parameters: { controls: { exclude: [
-		'control',
-		'ref',
-		'action',
-		'touchRippleRef',
-		'TouchRippleProps',
-		'onFocusVisible',
-		'LinkComponent',
-		'focusVisibleClassName',
-		'focusRipple',
-		'disableTouchRipple',
-		'centerRipple',
-	] } },
-} as ComponentMeta<typeof FormToggle>;
+	component: FormInvisibleMultiSelect,
+	parameters: { controls: { exclude: ['control'] } },
+} as ComponentMeta<typeof FormInvisibleMultiSelect>;
 
-const Controlled: ComponentStory<typeof FormToggle> = (args) => {
+const Controlled: ComponentStory<typeof FormInvisibleMultiSelect> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormToggle
-				name="toggle"
+			<FormInvisibleMultiSelect
+				name="invisible-multiselect"
 				control={control}
+				TriggerComponent={<Button variant="contained">This is a button that will trigger the select</Button>}
 				{...args}
 			/>
 		</FormContainer>
 	);
 };
 
-export const ControlledFormToggle = Controlled.bind({});
+export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormToggle.args = {
-	label: 'Controlled Toggle input',
+ControlledFormSelect.args = {
+	label: 'Controlled Invisible Multi Select input',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

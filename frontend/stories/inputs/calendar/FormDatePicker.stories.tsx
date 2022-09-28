@@ -14,50 +14,49 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button } from '@controls/button';
-import { FormInvisibleMultiSelect } from '@controls/formInvisibleMultiSelect/formInvisibleMultiSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormDatePicker } from '@controls/formDatePicker/formDatePicker.component';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormInvisibleMultiSelect',
+	title: 'Inputs/Calendar/FormDatePicker',
 	argTypes: {
-		label: {
-			type: 'string',
-		},
-		defaultValue: {
-			type: 'string',
-		},
-		values: {
-			control: 'array',
+		disablePast: {
+			type: 'boolean',
 		},
 		disabled: {
 			type: 'boolean',
 		},
+		formError: {
+			type: 'string',
+		},
 	},
-	component: FormInvisibleMultiSelect,
-	parameters: { controls: { exclude: ['control'] } },
-} as ComponentMeta<typeof FormInvisibleMultiSelect>;
+	component: FormDatePicker,
+	parameters: { controls: { exclude: ['control', 'name'] } },
+} as ComponentMeta<typeof FormDatePicker>;
 
-const Controlled: ComponentStory<typeof FormInvisibleMultiSelect> = (args) => {
+const Controlled: ComponentStory<typeof FormDatePicker> = ({ formError, ...args }: any) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
-		<FormContainer>
-			<FormInvisibleMultiSelect
-				name="invisible-multiselect"
-				control={control}
-				TriggerComponent={<Button variant="contained">This is a button that will trigger the select</Button>}
-				{...args}
-			/>
-		</FormContainer>
+		<LocalizationProvider dateAdapter={AdapterDayjs}>
+			<FormContainer>
+				<FormDatePicker
+					name="date-picker"
+					control={control}
+					{...args}
+					formError={formError ? { message: formError } : null}
+				/>
+			</FormContainer>
+		</LocalizationProvider>
 	);
 };
 
-export const ControlledFormSelect = Controlled.bind({});
+export const ControlledFormDatePicker = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormSelect.args = {
-	label: 'Controlled Invisible Multi Select input',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+ControlledFormDatePicker.args = {
+	label: 'Controlled Date Picker input',
 };

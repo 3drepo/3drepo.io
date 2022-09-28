@@ -14,49 +14,48 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormDatePicker } from '@controls/formDatePicker/formDatePicker.component';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormDatePicker',
+	title: 'Inputs/TextField/FormTextField',
 	argTypes: {
-		disablePast: {
-			type: 'boolean',
+		label: {
+			type: 'string',
 		},
-		disabled: {
-			type: 'boolean',
+		defaultValue: {
+			type: 'string',
 		},
 		formError: {
 			type: 'string',
 		},
+		disabled: {
+			type: 'boolean',
+		},
 	},
-	component: FormDatePicker,
-	parameters: { controls: { exclude: ['control', 'name'] } },
-} as ComponentMeta<typeof FormDatePicker>;
+	component: FormTextField,
+	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
+} as ComponentMeta<typeof FormTextField>;
 
-const Controlled: ComponentStory<typeof FormDatePicker> = ({ formError, ...args }: any) => {
+const Controlled: ComponentStory<typeof FormTextField> = ({ formError, ...args }) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			<FormContainer>
-				<FormDatePicker
-					name="date-picker"
-					control={control}
-					{...args}
-					formError={formError ? { message: formError } : null}
-				/>
-			</FormContainer>
-		</LocalizationProvider>
+		<FormContainer>
+			<FormTextField
+				name="textfield"
+				control={control}
+				{...args}
+				formError={formError ? { message: formError } : null}
+			/>
+		</FormContainer>
 	);
 };
 
-export const ControlledFormDatePicker = Controlled.bind({});
+export const ControlledFormTextField = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormDatePicker.args = {
-	label: 'Controlled Date Picker input',
+ControlledFormTextField.args = {
+	label: 'Controlled Single Line input',
 };

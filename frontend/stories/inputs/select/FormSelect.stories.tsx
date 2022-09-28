@@ -18,10 +18,10 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormSelect',
+	title: 'Inputs/Select/FormSelect',
 	argTypes: {
 		label: {
 			type: 'string',
