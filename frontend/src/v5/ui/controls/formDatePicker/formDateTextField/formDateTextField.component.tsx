@@ -14,9 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { TextFieldProps } from '@mui/material';
 import { TextField } from './formDateTextField.styles';
 
-export const FormDateTextField = ({ inputRef, ...params }) => {
+type FormDateTextFieldProps = TextFieldProps & {
+	formError?: any,
+	inputRef?: any,
+};
+
+export const FormDateTextField = ({ inputRef, formError, ...params }: FormDateTextFieldProps) => {
 	const preventManualInsertion = (e) => {
 		e.preventDefault();
 	};
@@ -25,6 +31,8 @@ export const FormDateTextField = ({ inputRef, ...params }) => {
 		<TextField
 			{...params}
 			ref={inputRef}
+			error={!!formError}
+			helperText={formError?.message}
 			onClick={preventManualInsertion}
 		/>
 	);

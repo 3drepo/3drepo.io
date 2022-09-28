@@ -23,11 +23,13 @@ export type FormDateTimePickerProps = Partial<DateTimePickerProps<any, any>> & {
 	name: string;
 	label: string | JSX.Element;
 	control: any;
+	formError?: any;
 };
 
 export const FormDateTimePicker = ({
 	name,
 	control,
+	formError,
 	...otherProps
 }: FormDateTimePickerProps) => {
 	const formatTime = (time) => time.replace('@', formatMessage({
@@ -47,7 +49,7 @@ export const FormDateTimePicker = ({
 					disableHighlightToday
 					inputFormat="DD/MM/YYYY @ hh:mma"
 					rifmFormatter={formatTime}
-					renderInput={FormDateTextField}
+					renderInput={(textFieldProps) => (<FormDateTextField {...textFieldProps} formError={formError} />)}
 				/>
 			)}
 		/>

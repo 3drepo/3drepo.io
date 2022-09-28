@@ -22,11 +22,13 @@ export type FormDatePickerProps = Partial<DatePickerProps<any, any>> & {
 	name: string;
 	label: string | JSX.Element;
 	control: any;
+	formError?: any;
 };
 
 export const FormDatePicker = ({
 	name,
 	control,
+	formError,
 	...otherProps
 }: FormDatePickerProps) => (
 	<Controller
@@ -38,7 +40,7 @@ export const FormDatePicker = ({
 				{...otherProps}
 				dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
 				disableHighlightToday
-				renderInput={FormDateTextField}
+				renderInput={(textFieldProps) => (<FormDateTextField {...textFieldProps} formError={formError} />)}
 			/>
 		)}
 	/>
