@@ -44,10 +44,13 @@ describe('Tickets: store', () => {
 		dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
 
 		const oldTicket = cloneDeep(ticket)
-		const modified = {...oldTicket,  name:'modified ticket', properties: {...oldTicket.properties, priority: 'Top'} };
-		dispatch(TicketsActions.upsertTicketSuccess(modelId, modified));
+		const modifications = { _id: ticket._id, title:'modified ticket', properties:{priority:'Top'}}
+			
+		dispatch(TicketsActions.upsertTicketSuccess(modelId, modifications));
+		
+		const modified = {...oldTicket,  ...modifications, properties:{...oldTicket.properties, priority:'Top' } };
+		const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
 
-		const ticketFromStore = selectTicketById(getState(), modelId,ticket._id);
 		expect(ticketFromStore).toEqual(modified);
 	});
 

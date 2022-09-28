@@ -64,6 +64,20 @@ describe('Tickets: sagas', () => {
 					.put(TicketsActions.upsertTicketSuccess(modelId, ticket))
 					.silentRun();
 			})
+			
+			it('should call container`s update ticket endpoint', async () => {
+				const ticket = tickets[0];
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
+					.reply(200);
+
+				const updateProp = {title:'updatedName'};
+
+				await expectSaga(TicketsSaga.default)
+					.dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false))
+					.put(TicketsActions.upsertTicketSuccess(modelId, updateProp))
+					.silentRun();
+			})
 
 			// Federations
 			it('should call fetchFederationsTickets endpoint', async () => {
@@ -97,6 +111,20 @@ describe('Tickets: sagas', () => {
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true))
 					.put(TicketsActions.upsertTicketSuccess(modelId, ticket))
+					.silentRun();
+			})
+
+			it('should call federation update ticket endpoint', async () => {
+				const ticket = tickets[0];
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
+					.reply(200, ticket);
+
+				const updateProp = {title:'updatedName'};
+
+				await expectSaga(TicketsSaga.default)
+					.dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true))
+					.put(TicketsActions.upsertTicketSuccess(modelId, updateProp))
 					.silentRun();
 			})
 		})

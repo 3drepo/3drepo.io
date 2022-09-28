@@ -75,6 +75,46 @@ export const fetchFederationTicket = async ({
 	return data;
 };
 
+export const createContainerTicket = async ({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	ticket,
+}: CreateTicketParams) => (
+	api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}`, ticket)
+);
+
+export const createFederationTicket = async ({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	ticket,
+}: CreateTicketParams) => (
+	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`, ticket)
+);
+
+export const updateContainerTicket = async ({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	ticket,
+}: UpdateTicketParams) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}`, ticket)
+);
+
+export const updateFederationTicket = async ({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	ticket,
+}: UpdateTicketParams) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`, ticket)
+);
+
 /**
  * Types
  */
@@ -85,3 +125,7 @@ type FetchTicketsParams = TeamspaceAndProjectId & { modelId: string };
 type FetchTemplatesParams = TeamspaceAndProjectId & { modelId: string };
 
 type FetchTicketParams = FetchTicketsParams & { ticketId: string };
+
+type CreateTicketParams = FetchTicketsParams & { ticketId: string, ticket: ITicket };
+
+type UpdateTicketParams = FetchTicketsParams & { ticketId: string, ticket: Partial<ITicket> };
