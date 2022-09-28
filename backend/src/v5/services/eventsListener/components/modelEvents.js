@@ -76,9 +76,8 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 	await createModelMessage(event, {}, teamspace, project, model, sender);
 };
 
-const modelTicketUpdate = ({ teamspace, project, model, ticket, author, from, to, date }) => addTicketLog(
-	teamspace, { project, model, ticket, author, from, to, date },
-);
+const modelTicketUpdate = ({ teamspace, project, model, ticket, author, changes, date }) => addTicketLog(teamspace,
+	project, model, ticket, { author, changes, date });
 
 const ModelEventsListener = {};
 

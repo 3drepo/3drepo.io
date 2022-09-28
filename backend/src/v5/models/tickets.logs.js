@@ -17,11 +17,11 @@
 
 const TicketLogs = {};
 
-const TICKETLOGS_COL = 'tickets.logs';
+const TICKET_LOGS_COL = 'tickets.logs';
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 
-TicketLogs.addTicketLog = (teamspace, ticketLog) => db.insertOne(teamspace,
-	TICKETLOGS_COL, { ...ticketLog, _id: generateUUID() });
+TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => db.insertOne(teamspace,
+	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 
 module.exports = TicketLogs;

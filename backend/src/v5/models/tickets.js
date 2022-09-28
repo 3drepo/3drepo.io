@@ -17,7 +17,7 @@
 
 const { get, set } = require('lodash');
 const DbHandler = require('../handler/db');
-const { cloneDeep } = require('../utils/helper/objects');
+const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -39,67 +39,49 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
-const formatRecordLogData = (oldTicket, newTicket, updateObj) => {
-	const from = {};
-	const to = cloneDeep(newTicket);
-
-	const date = to.properties['Updated at'];
-
-	// eslint-disable-next-line no-param-reassign
-	delete updateObj['properties.Updated at'];
-	delete to.properties['Updated at'];
-	if (Object.keys(to.properties).length === 0) {
-		delete to.properties;
-	}
-
-	Object.keys(updateObj).forEach((propKey) => {
-		const propValue = get(oldTicket, propKey);
-		set(from, propKey, propValue);
-	});
-
-	return { from, to, date };
-};
-
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
-	const toUpdate = {};
-	const toUnset = {};
-
+	const toUpdate = {}; const
+		toUnset = {};
+	const propNamesChanged = [];
+	const from = {}; const
+		to = {};
 	const { modules, properties, ...rootProps } = updateData;
 
 	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
+			const updateObjProp = `${prefix}${key}`;
 			const value = obj[key];
-			if (value) toUpdate[`${prefix}${key}`] = value;
-			else { toUnset[`${prefix}${key}`] = 1; }
+			if (value) { toUpdate[updateObjProp] = value; } else toUnset[updateObjProp] = 1;
+
+			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
+				propNamesChanged.push(updateObjProp);
+				set(from, updateObjProp, get(oldTicket, updateObjProp));
+				set(to, updateObjProp, get(updateData, updateObjProp));
+			}
 		});
 	};
 
 	determineUpdate(rootProps);
 	determineUpdate(properties, 'properties.');
+	Object.keys(modules).forEach((mod) => {
+		determineUpdate(modules[mod], `modules.${mod}.`);
+	});
 
-	if (modules) {
-		Object.keys(modules).forEach((mod) => {
-			determineUpdate(modules[mod], `modules.${mod}.`);
-		});
-	}
+	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, { $set: toUpdate, $unset: toUnset });
 
-	const updateJson = { $set: toUpdate };
+	const changes = {};
+	propNamesChanged.forEach((p) => {
+		set(changes, `${p}.from`, get(from, p));
+		set(changes, `${p}.to`, get(to, p));
+	});
 
-	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
-
-	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, updateJson);
-
-	const { from, to, date } = formatRecordLogData(oldTicket, updateData, { ...toUpdate, ...toUnset });
-	publish(events.MODEL_TICKET_UPDATE, {
-		teamspace,
+	publish(events.MODEL_TICKET_UPDATE, { teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,
 		author,
-		from,
-		to,
-		date,
-	});
+		changes,
+		date: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {

@@ -25,13 +25,18 @@ const testAddTicketLog = () => {
 	describe('Add ticket log', () => {
 		test('Should add a new ticket log', async () => {
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
 			const ticketLog = { from: generateRandomString(), to: generateRandomString() };
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await TicketLogs.addTicketLog(teamspace, ticketLog);
+			await TicketLogs.addTicketLog(teamspace, project, model, ticket, ticketLog);
 			ticketLog._id = fn.mock.calls[0][2]._id;
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs', ticketLog);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+				{ teamspace, project, model, ticket, ...ticketLog });
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 		});
 	});
 };

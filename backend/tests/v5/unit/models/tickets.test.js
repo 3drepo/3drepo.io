@@ -178,7 +178,7 @@ const testUpdateTicket = () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = { _id: generateRandomString(), properties: { propToUpdate: oldPropvalue } };
-			const data = { properties: { propToUpdate: newPropValue, 'Updated at': date } };
+			const data = { properties: { propToUpdate: newPropValue, 'Updated at': date }, modules: {} };
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
 			await Ticket.updateTicket(teamspace, project, model, oldTicket, data, author);
@@ -190,6 +190,7 @@ const testUpdateTicket = () => {
 						'properties.propToUpdate': newPropValue,
 						'properties.Updated at': date,
 					},
+					$unset: {},
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_TICKET_UPDATE, {
@@ -199,8 +200,7 @@ const testUpdateTicket = () => {
 				ticket: oldTicket._id,
 				author,
 				date,
-				from: { properties: { propToUpdate: oldPropvalue } },
-				to: { properties: { propToUpdate: newPropValue } },
+				changes: { properties: { propToUpdate: { from: oldPropvalue, to: newPropValue } } },
 			});
 		});
 
@@ -223,6 +223,7 @@ const testUpdateTicket = () => {
 						'modules.module.propToUpdate': newPropValue,
 						'properties.Updated at': date,
 					},
+					$unset: {},
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_TICKET_UPDATE, {
@@ -232,8 +233,9 @@ const testUpdateTicket = () => {
 				ticket: oldTicket._id,
 				author,
 				date,
-				from: { modules: { module: { propToUpdate: oldPropvalue } } },
-				to: { modules: { module: { propToUpdate: newPropValue } } },
+				changes: {
+					modules: { module: { propToUpdate: { from: oldPropvalue, to: newPropValue } } },
+				},
 			});
 		});
 
@@ -268,12 +270,11 @@ const testUpdateTicket = () => {
 				ticket: oldTicket._id,
 				author,
 				date,
-				from: { propToUpdate: undefined,
-					properties: { propToUnset: oldPropvalue },
-					modules: { module: { propToUnset: oldPropvalue } } },
-				to: { propToUpdate: newPropValue,
-					properties: { propToUnset: null },
-					modules: { module: { propToUnset: null } } },
+				changes: {
+					propToUpdate: { from: undefined, to: newPropValue },
+					properties: { propToUnset: { from: oldPropvalue, to: null } },
+					modules: { module: { propToUnset: { from: oldPropvalue, to: null } } },
+				},
 			});
 		});
 	});
