@@ -24,6 +24,9 @@ import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterm
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
+import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
+import type {} from '@mui/x-date-pickers/themeAugmentation';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#FFFFFF',
@@ -271,6 +274,15 @@ export const theme = createTheme({
 						'& > textarea': {
 							color: COLOR.ERROR_MAIN,
 						},
+					},
+				},
+			},
+		},
+		MuiInputAdornment: {
+			styleOverrides: {
+				root: {
+					'&, *' : {
+						color: 'currentColor',
 					},
 				},
 			},
@@ -1211,6 +1223,171 @@ export const theme = createTheme({
 					borderTop: `solid 1px ${COLOR.SECONDARY_LIGHTEST}`,
 					margin: 0,
 					padding: '11px 20px 24px',
+				},
+			},
+		},
+		MuiDateTimePicker: {
+			defaultProps: {
+				components: {
+					OpenPickerIcon: CalendarIcon,
+					LeftArrowIcon: ThinChevronIcon,
+					RightArrowIcon: ThinChevronIcon,
+				},
+			},
+		},
+		MuiDatePicker: {
+			defaultProps: {
+				components: {
+					OpenPickerIcon: CalendarIcon,
+					LeftArrowIcon: ThinChevronIcon,
+					RightArrowIcon: ThinChevronIcon,
+				},
+			},
+		},
+		MuiCalendarPicker: {
+			styleOverrides: {
+				root: {
+					// header section
+					'.MuiPickersCalendarHeader-root': {
+						padding: 0,
+						justifyContent: 'center',
+						color: COLOR.SECONDARY_MAIN,
+
+						// month and year
+						'& > :first-child': {
+							position: 'absolute',
+							justifyContent: 'center',
+							width: '100%',
+							'& > *': {
+								position: 'relative',
+								zIndex: 1,
+							},
+							'& button': {
+								display: 'none',
+								margin: 0,
+							},
+						},
+
+						// arrows-container
+						'& > .MuiPickersArrowSwitcher-root': {
+							position: 'absolute',
+							justifyContent: 'space-between',
+							width: '100%',
+							// actual arrows
+							'button': {
+								transform: 'rotate(90deg)',
+								'&:not(:first-child)': {
+									transform: 'rotate(-90deg)',
+								},
+							}
+						},
+					},
+					// year selection
+					'.MuiYearPicker-root': {
+						'button': {
+							'&:not(.Mui-disabled)':{
+								color: COLOR.SECONDARY_MAIN,
+								'&:hover': {
+									backgroundColor: COLOR.TERTIARY_LIGHTEST,
+								},
+							},
+							'&.Mui-disabled': {
+								color: COLOR.BASE_MAIN,
+								cursor: 'unset',
+							},
+							'&.Mui-selected': {
+								color: COLOR.PRIMARY_MAIN_CONTRAST,
+								'&:hover': {
+									backgroundColor: COLOR.PRIMARY_DARK,
+								},
+							},
+						},
+					},
+					'.MuiPickersCalendarHeader-root, .MuiYearPicker-root': {						
+						'button': {
+							'&:hover': {
+								background: 'transparent',
+							},
+							'.Mui-disabled': {
+								color: COLOR.BASE_MAIN,
+							},
+						},
+					},
+					// calendar body
+					'.MuiCalendarPicker-viewTransitionContainer': {
+						// week days (sun-sat)
+						'.MuiTypography-caption': {
+							color: COLOR.BASE_MAIN,
+						},
+						// day number (1-31)
+						'.MuiPickersDay-root': {
+							color: COLOR.SECONDARY_MAIN,
+							'&:hover': {
+								backgroundColor: COLOR.TERTIARY_LIGHTEST,
+							},
+							'&.Mui-selected': {
+								color: COLOR.PRIMARY_MAIN_CONTRAST,
+								'&:hover': {
+									backgroundColor: COLOR.PRIMARY_DARK,
+								},
+							},
+							'&.Mui-disabled': {
+								color: COLOR.BASE_MAIN,
+							}
+						},
+					},
+				},
+			},
+		},
+		MuiClockPicker: {
+			styleOverrides: {
+				root: {
+					// arrows at the top
+					'.MuiClockPicker-arrowSwitcher': {
+						margin: 0,
+						'.MuiPickersArrowSwitcher-spacer': {
+							display: 'none',
+						},
+						'button': {
+							margin: 0,
+							padding: 10,
+							color: COLOR.SECONDARY_MAIN,
+							transform: 'rotate(90deg)',
+							'&:not(:first-child)': {
+								transform: 'rotate(-90deg)',
+							},
+							'&:hover': {
+								backgroundColor: 'transparent',
+							},
+							'&.Mui-disabled': {
+								color: COLOR.BASE_MAIN,
+							},
+						},
+					},
+					// actual clock
+					'.MuiClock-root': {
+						'.MuiClock-clock': {
+							backgroundColor: COLOR.TERTIARY_LIGHTEST,
+							'.MuiClock-wrapper': {
+								height: '100%',
+								position: 'relative',
+								// the circle with the numbers
+								'.MuiClockNumber-root': {
+									'&:hover': {
+										backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
+									},
+									'&.Mui-selected': {
+										color: COLOR.PRIMARY_MAIN_CONTRAST,
+									},
+								},
+							},
+						},
+						// bottom buttons (AM - PM)
+						'.MuiClock-pmButton, .MuiClock-amButton': {
+							color: COLOR.BASE_MAIN,
+							bottom: 0,
+						},
+					},
 				},
 			},
 		},
