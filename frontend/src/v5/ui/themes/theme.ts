@@ -1364,8 +1364,8 @@ export const theme = createTheme({
 							},
 						},
 					},
-					// actual clock
 					'.MuiClock-root': {
+						// actual clock
 						'.MuiClock-clock': {
 							backgroundColor: COLOR.TERTIARY_LIGHTEST,
 							'.MuiClock-wrapper': {
@@ -1384,7 +1384,6 @@ export const theme = createTheme({
 						},
 						// bottom buttons (AM - PM)
 						'.MuiClock-pmButton, .MuiClock-amButton': {
-							color: COLOR.BASE_MAIN,
 							bottom: 0,
 						},
 					},
