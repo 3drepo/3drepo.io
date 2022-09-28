@@ -46,9 +46,17 @@ class GridFSHandler {
 		));
 	}
 
-	removeFiles() {
-		// No need to remove anything - we will be dropping the collection
-		return Promise.resolve();
+	removeFiles(teamspace, col, keys) {
+		return Promise.all(
+			keys.map(async (key) => {
+				const collection = this.cleanColName(col);
+				const gridFSRef = await DB.findOneAndDelete(teamspace, `${collection}.files`,
+					{ filename: key}, { _id: 1 });
+				if (gridFSRef) {
+					await DB.deleteMany(teamspace, `${collection}.chunks`, { files_id: gridFSRef._id });
+				}
+			})
+		);
 	}
 
 }

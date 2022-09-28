@@ -40,7 +40,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
-import { UploadFileForm } from '../uploadFileForm';
+import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { SkeletonListItem } from './skeletonListItem';
 
 interface IContainersList {

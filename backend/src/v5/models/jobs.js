@@ -27,6 +27,14 @@ const updateMany = (ts, query, action) => db.updateMany(ts, COL_NAME, query, act
 
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
+Jobs.getJobNames = async (teamspace) => {
+	const jobs = await findMany(teamspace, {}, { _id: 1 });
+
+	return jobs.map(({ _id }) => _id);
+};
+
+Jobs.getJobs = (teamspace) => findMany(teamspace, {}, { _id: 1, color: 1 });
+
 Jobs.addDefaultJobs = async (teamspace) => {
 	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
 };

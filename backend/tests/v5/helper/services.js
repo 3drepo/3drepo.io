@@ -31,11 +31,15 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
+const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require('../../../src/v5/models/users.constants');
+
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
 const queue = {};
@@ -67,7 +71,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
-db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
+db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
 db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
@@ -76,6 +80,7 @@ db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
 			{ permissions: breaking ? undefined : permissions, ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
+		createTeamspaceSettings(teamspace),
 	]);
 };
 
@@ -130,6 +135,30 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	});
 
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
+};
+
+db.createTemplates = (teamspace, data = []) => {
+	const toInsert = data.map((entry) => {
+		const converted = {
+			...entry,
+			_id: stringToUUID(entry._id),
+		};
+		return converted;
+	});
+
+	return DbHandler.insertMany(teamspace, 'templates', toInsert);
+};
+
+db.createTicket = (teamspace, project, model, ticket) => {
+	const formattedTicket = {
+		...ticket,
+		_id: stringToUUID(ticket._id),
+		type: stringToUUID(ticket.type),
+		project: stringToUUID(project),
+		teamspace,
+		model,
+	};
+	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
 };
 
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
@@ -266,6 +295,94 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	defaultView: ServiceHelper.generateUUIDString(),
 	defaultLegend: ServiceHelper.generateUUIDString(),
 });
+
+ServiceHelper.generateTemplate = (deprecated) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	code: ServiceHelper.generateRandomString(3),
+	name: ServiceHelper.generateRandomString(),
+	config: {},
+	properties: [
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.DATE,
+			required: true,
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.TEXT,
+			deprecated: true,
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.NUMBER,
+			default: ServiceHelper.generateRandomNumber(),
+		},
+	],
+	modules: [
+		{
+			type: presetModules.SHAPES,
+			deprecated: true,
+			properties: [],
+		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			properties: [
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.TEXT,
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.NUMBER,
+					default: ServiceHelper.generateRandomNumber(),
+					deprecated: true,
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.NUMBER,
+					default: ServiceHelper.generateRandomNumber(),
+				},
+			],
+		},
+	],
+	...deleteIfUndefined({ deprecated }),
+});
+
+const generateProperties = (propTemplate, internalType) => {
+	const properties = {};
+
+	propTemplate.forEach(({ name, deprecated, type }) => {
+		if (deprecated) return;
+		if (type === propTypes.TEXT) {
+			properties[name] = ServiceHelper.generateRandomString();
+		} else if (type === propTypes.DATE) {
+			properties[name] = internalType ? new Date() : Date.now();
+		} else if (type === propTypes.NUMBER) {
+			properties[name] = ServiceHelper.generateRandomNumber();
+		}
+	});
+
+	return properties;
+};
+
+ServiceHelper.generateTicket = (template, internalType = false) => {
+	const modules = {};
+	template.modules.forEach(({ name, type, deprecated, properties }) => {
+		if (deprecated) return;
+		const id = name ?? type;
+		modules[id] = generateProperties(properties, internalType);
+	});
+
+	const ticket = {
+		_id: ServiceHelper.generateUUIDString(),
+		type: template._id,
+		title: ServiceHelper.generateRandomString(),
+		properties: generateProperties(template.properties, internalType),
+		modules,
+	};
+
+	return ticket;
+};
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
