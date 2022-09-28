@@ -23,11 +23,11 @@ import { MouseEvent, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { SearchInput, NoResults, FormCheckbox, MenuItem } from './formMultiSelect.styles';
 
-type FormMultiSelectProps = FormSelectProps & {
+export type FormMultiSelectProps = FormSelectProps & {
 	values: string[],
 };
 
-export const FormMultiSelect = ({ label, values, name, control }: FormMultiSelectProps) => {
+export const FormMultiSelect = ({ label, values, name, control, ...props }: FormMultiSelectProps) => {
 	const [filteredValues, setFilteredValues] = useState(values);
 	const [selectedValues, setSelectedValues] = useState(new Set());
 
@@ -63,6 +63,7 @@ export const FormMultiSelect = ({ label, values, name, control }: FormMultiSelec
 				control={control}
 				renderValue={() => Array.from(selectedValues).join(', ')}
 				value={Array.from(selectedValues)}
+				{...props}
 			>
 				<SearchInput
 					placeholder={formatMessage({ id: 'form.multiSelect.search.placeholder', defaultMessage: 'Search...' })}
