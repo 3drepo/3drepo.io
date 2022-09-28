@@ -20,7 +20,7 @@ import { Container } from './formInvisibleMultiSelect.styles';
 import { FormMultiSelect, FormMultiSelectProps } from '../formMultiSelect/formMultiSelect.component';
 
 type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
-	TriggerComponent?: JSX.Element,
+	TriggerComponent: JSX.Element,
 };
 
 export const FormInvisibleMultiSelect = ({ TriggerComponent, ...props }: FormInvisibleMultiSelectProps) => {
