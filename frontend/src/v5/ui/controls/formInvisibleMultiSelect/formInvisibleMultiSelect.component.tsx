@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import { Container } from './formInvisibleMultiSelect.styles';
+import { InvisibleContainer } from '../formInvisibleSelect/formInvisibleSelect.styles';
 import { FormMultiSelect, FormMultiSelectProps } from '../formMultiSelect/formMultiSelect.component';
 
 type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
@@ -27,9 +27,9 @@ export const FormInvisibleMultiSelect = ({ TriggerComponent, ...props }: FormInv
 	const [open, setOpen] = useState(false);
 
 	return (
-		<Container onClick={() => setOpen(!open)}>
+		<InvisibleContainer onClick={() => setOpen(!open)}>
 			{TriggerComponent}
 			<FormMultiSelect {...props} open={open} />
-		</Container>
+		</InvisibleContainer>
 	);
 };

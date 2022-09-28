@@ -16,8 +16,11 @@
  */
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	width: min-content;
+export const InvisibleContainer = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
 
 	.MuiFormControl-root {
 		width: 100%;

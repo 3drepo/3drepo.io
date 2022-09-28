@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import { Container } from './formInvisibleSelect.styles';
+import { InvisibleContainer } from './formInvisibleSelect.styles';
 import { FormSelect, FormSelectProps } from '../formSelect/formSelect.component';
 
 type FormInvisibleSelectProps = FormSelectProps & {
@@ -27,9 +27,9 @@ export const FormInvisibleSelect = ({ TriggerComponent, ...props }: FormInvisibl
 	const [open, setOpen] = useState(false);
 
 	return (
-		<Container onClick={() => setOpen(!open)}>
+		<InvisibleContainer onClick={() => setOpen(!open)}>
 			{TriggerComponent}
 			<FormSelect {...props} open={open} />
-		</Container>
+		</InvisibleContainer>
 	);
 };
