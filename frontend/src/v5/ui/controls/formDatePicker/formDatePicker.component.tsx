@@ -40,7 +40,9 @@ export const FormDatePicker = ({
 				{...otherProps}
 				dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
 				disableHighlightToday
-				renderInput={(textFieldProps) => (<FormDateTextField {...textFieldProps} formError={formError} />)}
+				renderInput={({ ref, ...textFieldProps }) => (
+					<FormDateTextField {...textFieldProps} formError={formError} />
+				)}
 			/>
 		)}
 	/>

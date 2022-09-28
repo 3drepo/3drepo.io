@@ -49,7 +49,9 @@ export const FormDateTimePicker = ({
 					disableHighlightToday
 					inputFormat="DD/MM/YYYY @ hh:mma"
 					rifmFormatter={formatTime}
-					renderInput={(textFieldProps) => (<FormDateTextField {...textFieldProps} formError={formError} />)}
+					renderInput={({ ref, ...textFieldProps }) => (
+						<FormDateTextField {...textFieldProps} formError={formError} />
+					)}
 				/>
 			)}
 		/>
