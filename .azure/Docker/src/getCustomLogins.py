@@ -6,7 +6,7 @@
 #       "topLogo": "login/sb.png",
 #       "topLogoLink": "safetibase.www.3drepo.io",
 #       "backgroundImage": "login/sb_bg.png"
-#     },
+#     }
 # }
 
 import sys, json
