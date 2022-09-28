@@ -29,6 +29,10 @@ export const FormCheckbox = styled(FormCheckboxBase)`
 		margin: 0 17px 0 0;
 		padding: 0;
 	}
+
+	.MuiFormControlLabel-label {
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 `;
 
 export const MenuItem = styled(MenuItemBase)`
