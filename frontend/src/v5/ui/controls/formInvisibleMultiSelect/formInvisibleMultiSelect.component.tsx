@@ -20,7 +20,7 @@ import { Container } from './formInvisibleMultiSelect.styles';
 import { FormMultiSelect, FormMultiSelectProps } from '../formMultiSelect/formMultiSelect.component';
 
 type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
-	TriggerComponent?: any,
+	TriggerComponent?: JSX.Element,
 };
 
 export const FormInvisibleMultiSelect = ({ TriggerComponent, ...props }: FormInvisibleMultiSelectProps) => {
@@ -28,7 +28,7 @@ export const FormInvisibleMultiSelect = ({ TriggerComponent, ...props }: FormInv
 
 	return (
 		<Container onClick={() => setOpen(!open)}>
-			<TriggerComponent />
+			{TriggerComponent}
 			<FormMultiSelect {...props} open={open} />
 		</Container>
 	);
