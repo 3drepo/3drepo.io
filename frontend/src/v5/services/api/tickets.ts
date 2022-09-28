@@ -55,6 +55,26 @@ export const fetchFederationTickets = async ({
 	return data.tickets;
 };
 
+export const fetchContainerTicket = async ({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+}: FetchTicketParams): Promise<ITicket> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}`);
+	return data;
+};
+
+export const fetchFederationTicket = async ({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+}: FetchTicketParams): Promise<ITicket> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`);
+	return data;
+};
+
 /**
  * Types
  */
@@ -63,3 +83,5 @@ type FetchTicketsResponse = { tickets: ITicket[] };
 
 type FetchTicketsParams = TeamspaceAndProjectId & { modelId: string };
 type FetchTemplatesParams = TeamspaceAndProjectId & { modelId: string };
+
+type FetchTicketParams = FetchTicketsParams & { ticketId: string };

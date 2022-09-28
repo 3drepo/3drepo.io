@@ -23,6 +23,7 @@ import {
 	TicketsActions,
 	FetchTicketsAction,
 	FetchTemplatesAction,
+	FetchTicketAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -37,6 +38,24 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+		}));
+	}
+}
+
+export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketAction) {
+	try {
+		const fetchModelTicket = isFederation
+			? API.Tickets.fetchFederationTicket
+			: API.Tickets.fetchContainerTicket;
+		const ticket = yield fetchModelTicket({ teamspace, projectId, modelId, ticketId });
+		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model} ' },
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
@@ -68,5 +87,6 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 
 export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
+	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 }
