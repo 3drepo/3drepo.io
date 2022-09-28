@@ -32,10 +32,9 @@ const testAddTicketLog = () => {
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
 			await TicketLogs.addTicketLog(teamspace, project, model, ticket, ticketLog);
-			ticketLog._id = fn.mock.calls[0][2]._id;
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
-				{ teamspace, project, model, ticket, ...ticketLog });
+				{ ...ticketLog, _id: fn.mock.calls[0][2]._id, teamspace, project, model, ticket });
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 		});
 	});

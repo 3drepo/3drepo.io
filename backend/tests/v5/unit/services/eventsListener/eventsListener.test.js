@@ -403,17 +403,17 @@ const testModelEventsListener = () => {
 				author: generateRandomString(),
 				date: generateRandomDate(),
 				changes: {
-					prop: { 
-						from: generateRandomString(), 
-						to: generateRandomString() 
-					}
-				}
+					prop: {
+						from: generateRandomString(),
+						to: generateRandomString(),
+					},
+				},
 			};
 			EventsManager.publish(events.MODEL_TICKET_UPDATE, data);
 
 			await waitOnEvent;
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
-			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model, 
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket, { author: data.author, changes: data.changes, date: data.date });
 		});
 	});

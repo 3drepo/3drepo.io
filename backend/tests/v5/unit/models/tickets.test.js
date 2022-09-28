@@ -277,6 +277,27 @@ const testUpdateTicket = () => {
 				},
 			});
 		});
+
+		test('should not throw MODEL_TICKET_UPDATE event if update fails', async () => {
+			const oldPropvalue = generateRandomString();
+			const newPropValue = generateRandomString();
+			const oldTicket = {
+				_id: generateRandomString(),
+				properties: { propToUnset: oldPropvalue },
+				modules: { module: { propToUnset: oldPropvalue } },
+			};
+			const data = {
+				propToUpdate: newPropValue,
+				properties: { propToUnset: null, 'Updated at': date },
+				modules: { module: { propToUnset: null } },
+			};
+
+			const errMsg = new Error(generateRandomString());
+			jest.spyOn(db, 'updateOne').mockRejectedValueOnce(errMsg);
+			await expect(Ticket.updateTicket(teamspace, project, model, oldTicket, data, author))
+				.rejects.toEqual(errMsg);
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
 	});
 };
 
