@@ -53,6 +53,18 @@ describe('Tickets: sagas', () => {
 					.silentRun();
 			})
 
+			it('should call fetch containers Ticket endpoint', async () => {
+				const ticket = tickets[0];
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
+					.reply(200, ticket);
+
+				await expectSaga(TicketsSaga.default)
+					.dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false))
+					.put(TicketsActions.upsertTicketSuccess(modelId, ticket))
+					.silentRun();
+			})
+
 			// Federations
 			it('should call fetchFederationsTickets endpoint', async () => {
 				mockServer
@@ -73,6 +85,18 @@ describe('Tickets: sagas', () => {
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.fetchTickets(teamspace, projectId, modelId, true))
 					.put.like(alertAction('trying to fetch federation tickets'))
+					.silentRun();
+			})
+
+			it('should call fetchFederationsTicket endpoint', async () => {
+				const ticket = tickets[0];
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
+					.reply(200, ticket);
+
+				await expectSaga(TicketsSaga.default)
+					.dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true))
+					.put(TicketsActions.upsertTicketSuccess(modelId, ticket))
 					.silentRun();
 			})
 		})

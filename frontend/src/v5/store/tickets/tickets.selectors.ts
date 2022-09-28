@@ -22,19 +22,25 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
 export const selectTickets = createSelector(
 	selectTicketsDomain,
-	(_, modelId) => modelId,
+	(state, modelId) => modelId,
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
-	(_, modelId) => modelId,
+	(state, modelId) => modelId,
 	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
 export const selectTemplateById = createSelector(
 	selectTicketsDomain,
 	selectTemplates,
-	(_, modelId, templateId) => templateId,
-	(_, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
+	(state, modelId, templateId) => templateId,
+	(state, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
+);
+
+export const selectTicketById = createSelector(
+	selectTickets,
+	(_, modelId, ticketId) => ticketId,
+	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
 );
