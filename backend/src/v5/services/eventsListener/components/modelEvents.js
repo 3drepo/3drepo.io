@@ -17,6 +17,7 @@
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
+const { addTicketLog } = require('../../../models/tickets.logs');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
@@ -80,11 +81,12 @@ const modelTicketAdded = (isFederation) => async ({ teamspace, project, model, .
 	await createModelMessage(event, ticketProps, teamspace, project, model);
 };
 
-const modelTicketUpdated= (isFederation) => async ({ teamspace, project, model, ...propsUpdated }) => {
+
+const modelTicketUpdated = (isFederation) => async ({ teamspace, project, model, ticket, author, changes, date }) => {
 	const event = isFederation ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
+	await addTicketLog(teamspace, project, model, ticket, { author, changes, date });
 	await createModelMessage(event, propsUpdated, teamspace, project, model);
 };
-
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
@@ -96,10 +98,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
-	subscribe(events.CONTAINER_NEW_TICKET, modelTicketAdded(false));
-	subscribe(events.FEDERATION_NEW_TICKET, modelTicketAdded(true));
-	subscribe(events.CONTAINER_UPDATE_TICKET, modelTicketUpdated(false));
-	subscribe(events.FEDERATION_UPDATE_TICKET, modelTicketUpdated(true));
+	subscribe(events.MODEL_TICKET_UPDATE, modelTicketUpdate);
 };
 
 module.exports = ModelEventsListener;

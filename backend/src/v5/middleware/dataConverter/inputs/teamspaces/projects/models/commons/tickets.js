@@ -44,6 +44,7 @@ const validate = (isNewTicket) => async (req, res, next) => {
 		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
 			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
 		}
+
 		processReadOnlyValues(req.ticketData, req.body, user);
 		await next();
 	} catch (err) {

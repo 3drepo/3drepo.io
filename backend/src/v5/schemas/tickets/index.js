@@ -97,7 +97,8 @@ const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties, isNewTicket);
+			moduleToSchema[id] = (await generatePropertiesValidator(teamspace, module.properties, isNewTicket))
+				.default({});
 		}
 	});
 
@@ -108,13 +109,12 @@ const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 
 Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
 	const fullTem = generateFullSchema(template);
-
-	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
+	const modSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
 
 	const validator = Yup.object().shape({
 		title: isNewTicket ? types.strings.title.required() : types.strings.title,
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
-		modules: Yup.object(moduleSchema).default({}),
+		modules: Yup.object(modSchema).default({}),
 		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	});
 

@@ -22,7 +22,7 @@ const ServiceHelper = require('../../../../../helper/services');
 const { src, image } = require('../../../../../helper/path');
 
 const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
-const { updateOne } = require(`${src}/handler/db`);
+const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -481,6 +481,19 @@ const testUpdateTicket = () => {
 		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 	});
 
+	const formatTicket = (tick) => {
+		const formattedTicket = tick;
+		expect(formattedTicket).toHaveProperty('number');
+		expect(formattedTicket.properties).toHaveProperty('Updated at');
+		expect(formattedTicket.properties).toHaveProperty('Created at');
+		expect(formattedTicket.properties).toHaveProperty('Owner');
+		delete formattedTicket.number;
+		delete formattedTicket.properties['Updated at'];
+		delete formattedTicket.properties['Created at'];
+		delete formattedTicket.properties.Owner;
+		return formattedTicket;
+	};
+
 	describe.each([
 		['the user does not have a valid session', false, templates.notLoggedIn],
 		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
@@ -504,20 +517,15 @@ const testUpdateTicket = () => {
 					ticketId ?? ticket._id);
 				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
 				const updatedTicket = updatedTicketRes.body;
-				expect(updatedTicket).toHaveProperty('number');
-				expect(updatedTicket.properties).toHaveProperty('Updated at');
-				expect(updatedTicket.properties['Updated at']).not.toEqual(ticket.properties['Updated at']);
-				expect(updatedTicket.properties).toHaveProperty('Created at');
-				expect(updatedTicket.properties).toHaveProperty('Owner');
-				delete updatedTicket.number;
-				delete updatedTicket.properties['Updated at'];
+				const updatedDate = updatedTicket.properties['Updated at'];
+				expect(updatedDate).not.toEqual(ticket.properties['Updated at']);
 				delete ticket.properties['Updated at'];
-				delete updatedTicket.properties['Created at'];
-				delete updatedTicket.properties.Owner;
-				expect({ ...updatedTicket }).toEqual({
-					...ticket,
-					...payloadChanges,
-				});
+
+				const formattedTicket = formatTicket(updatedTicket);
+				expect({ ...formattedTicket }).toEqual({ ...ticket, ...payloadChanges });
+
+				const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+				expect(ticketLog).not.toBeUndefined();
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}
@@ -530,25 +538,20 @@ const testUpdateTicket = () => {
 			ticketWithDeprecatedTemplate._id);
 		await agent.patch(endpoint).send(payloadChanges).expect(templates.ok.status);
 
-		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
+		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id,
 			ticketWithDeprecatedTemplate._id);
 		const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
-
 		const updatedTicket = updatedTicketRes.body;
-		expect(updatedTicket).toHaveProperty('number');
-		expect(updatedTicket.properties).toHaveProperty('Updated at');
-		expect(updatedTicket.properties['Updated at']).not.toEqual(ticketWithDeprecatedTemplate.properties['Updated at']);
-		expect(updatedTicket.properties).toHaveProperty('Created at');
-		expect(updatedTicket.properties).toHaveProperty('Owner');
-		delete updatedTicket.number;
-		delete updatedTicket.properties['Updated at'];
+		const updatedDate = updatedTicket.properties['Updated at'];
 		delete ticketWithDeprecatedTemplate.properties['Updated at'];
-		delete updatedTicket.properties['Created at'];
-		delete updatedTicket.properties.Owner;
-		expect({ ...updatedTicket }).toEqual({
-			...ticketWithDeprecatedTemplate,
-			...payloadChanges,
-		});
+
+		expect(updatedDate).not.toEqual(ticketWithDeprecatedTemplate.properties['Updated at']);
+		const formattedTicket = formatTicket(updatedTicket);
+
+		expect({ ...formattedTicket }).toEqual({ ...ticketWithDeprecatedTemplate, ...payloadChanges });
+
+		const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+		expect(ticketLog).not.toBeUndefined();
 	});
 };
 
