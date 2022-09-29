@@ -46,12 +46,15 @@ const moveFile = async (teamspace, collection, filename, timers) => {
 	} else {
 		const startTimer = Date.now();
 		const file = await getFileFromGridFS(teamspace, collection, filename);
+		const getFileFromGridFSTimer = Date.now();
 		const newRef = await FsService.storeFile(file);
 		const copiedTimer = Date.now();
 		newRef._id = existingRef?._id || convertLegacyFileName(filename);
 		await updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true);
 		const dbUpdateTimer = Date.now();
 		timers.copy.push(copiedTimer - startTimer);
+		timers.copyDetails.gridfs.push(getFileFromGridFSTimer - startTimer);
+		timers.copyDetails.fs.push(copiedTimer - getFileFromGridFSTimer);
 		timers.update.push(dbUpdateTimer - copiedTimer);
 	}
 
@@ -96,7 +99,7 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
 		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying ${group.length} file(s) (${formatNumber(totalSize)}MiB)`);
 		const processFilesStart = Date.now();
-		const stats = { copy: [], update: [] };
+		const stats = { copy: [], update: [], copyDetails: { gridfs: [], fs: [] } };
 		// eslint-disable-next-line no-await-in-loop
 		const filesToRemove = await Promise.all(
 			group.map(({ filename }) => moveFile(teamspace, ownerCol, filename, stats)),
@@ -111,7 +114,10 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 		const fileIOTime = sumArray(stats.copy);
 		const dbOpTime = sumArray(stats.update);
 		const totalTime = fileIOTime + dbOpTime;
+		const gridfsIOTime = sumArray(stats.copyDetails.gridfs);
+		const fsIOTime = sumArray(stats.copyDetails.fs);
 		logger.logInfo(`\t\t\t\t\t\tCopy Files breakdown: file IO [${formatNumber((fileIOTime / totalTime) * 100)}%], db Ops [${formatNumber((dbOpTime / totalTime) * 100)}%]`);
+		logger.logInfo(`\t\t\t\t\t\tFile IO breakdown: gridfs read [${formatNumber((gridfsIOTime / fileIOTime) * 100)}%], fs write [${formatNumber((fsIOTime / fileIOTime) * 100)}%]`);
 	}
 };
 
