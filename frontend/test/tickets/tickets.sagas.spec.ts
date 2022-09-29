@@ -71,7 +71,7 @@ describe('Tickets: sagas', () => {
 					.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
 					.reply(200);
 
-				const updateProp = {title:'updatedName'};
+				const updateProp = {title:'updatedContainerTicketName'};
 
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false))
@@ -120,7 +120,7 @@ describe('Tickets: sagas', () => {
 					.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 					.reply(200, ticket);
 
-				const updateProp = {title:'updatedName'};
+				const updateProp = {title:'updatedFederationTicketName'};
 
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true))

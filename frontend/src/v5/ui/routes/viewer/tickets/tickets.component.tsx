@@ -23,7 +23,7 @@ import { FormattedMessage } from 'react-intl';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 import { CardContext, CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button } from '@controls/button';
 import { useParams } from 'react-router-dom';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -31,6 +31,7 @@ import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/tick
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { omit } from 'lodash';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
+import { TextField } from '@mui/material';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 
@@ -39,6 +40,7 @@ export const TicketDetailCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, contextValue.props.ticket._id);
+	const [title, setTitle] = useState(ticket.title);
 
 	const goBack = () => {
 		contextValue.setCardView(TicketsCardViews.List);
@@ -50,7 +52,7 @@ export const TicketDetailCard = () => {
 			project,
 			containerOrFederation,
 			contextValue.props.ticket._id,
-			{ properties: { Description: 'yet a new description' } },
+			{ title },
 			isFederation,
 		);
 	};
@@ -85,6 +87,10 @@ export const TicketDetailCard = () => {
 		);
 	}, [contextValue.props.ticket._id]);
 
+	const onChange = (evt) => {
+		setTitle(evt.target.value);
+	};
+
 	return (
 		<CardContainer>
 			<CardHeader>
@@ -94,6 +100,7 @@ export const TicketDetailCard = () => {
 			</CardHeader>
 			<CardContent>
 				Showing the details of the ticket {JSON.stringify(ticket)}
+				<TextField name="title" value={title} onChange={onChange} />
 				<Button onClick={updateTicket}> Update Ticket! </Button>
 				<Button onClick={cloneTicket}> Clone Ticket!</Button>
 

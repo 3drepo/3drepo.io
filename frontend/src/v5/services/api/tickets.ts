@@ -96,21 +96,21 @@ export const createFederationTicket = async (
 export const updateContainerTicket = async (
 	teamspace: string,
 	projectId: string,
-	modelId: string,
+	containerId: string,
 	ticketId: string,
 	ticket: Partial<ITicket>,
 ) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`, ticket)
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}`, ticket)
 );
 
 export const updateFederationTicket = async (
 	teamspace: string,
 	projectId: string,
-	modelId: string,
+	federationId: string,
 	ticketId: string,
 	ticket: Partial<ITicket>,
 ) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`, ticket)
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}`, ticket)
 );
 
 /**
