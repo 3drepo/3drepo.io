@@ -21,19 +21,34 @@
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { FormattedMessage } from 'react-intl';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
-
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 import { CardContext, CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
 import { useContext } from 'react';
 import { Button } from '@controls/button';
+import { useParams } from 'react-router-dom';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 
 export const TicketDetailCard = () => {
 	const contextValue = useContext(CardContext);
+	const { teamspace, project, containerOrFederation } = useParams();
+	const isFederation = modelIsFederation(containerOrFederation);
 
 	const goBack = () => {
 		contextValue.setCardView(TicketsCardViews.List);
+	};
+
+	const updateTicket = () => {
+		TicketsActionsDispatchers.updateTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			contextValue.props.ticket._id,
+			{ properties: { Description: 'yet a new description' } },
+			isFederation,
+		);
 	};
 
 	return (
@@ -45,6 +60,7 @@ export const TicketDetailCard = () => {
 			</CardHeader>
 			<CardContent>
 				Showing the details of the ticket {JSON.stringify(contextValue.props.ticket)}
+				<Button onClick={updateTicket}> Update Ticket! </Button>
 			</CardContent>
 		</CardContainer>
 	);
