@@ -25,6 +25,7 @@ import {
 	FetchTemplatesAction,
 	FetchTicketAction,
 	UpdateTicketAction,
+	CreateTicketAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -104,9 +105,28 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 	}
 }
 
+export function* createTicket({ teamspace, projectId, modelId, ticket, isFederation }: CreateTicketAction) {
+	try {
+		const updateModelTicket = isFederation
+			? API.Tickets.createFederationTicket
+			: API.Tickets.createContainerTicket;
+		const { _id: ticketId } = yield updateModelTicket(teamspace, projectId, modelId, ticket);
+		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+		}));
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
+	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 }

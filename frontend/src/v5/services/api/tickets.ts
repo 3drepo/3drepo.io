@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket, ITemplate } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate, NewTicket } from '@/v5/store/tickets/tickets.types';
 import api from './default';
 
 export const fetchContainerTemplates = async (
@@ -77,19 +77,21 @@ export const createContainerTicket = async (
 	teamspace: string,
 	projectId: string,
 	containterId: string,
-	ticket: Omit<ITicket, '_id'>,
-) => (
-	api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containterId}/tickets`, ticket)
-);
+	ticket: NewTicket,
+): Promise<CreateTicketResponse> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containterId}/tickets`, ticket);
+	return data;
+};
 
 export const createFederationTicket = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
-	ticket: Omit<ITicket, '_id'>,
-) => (
-	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`, ticket)
-);
+	ticket: NewTicket,
+): Promise<CreateTicketResponse> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`, ticket);
+	return data;
+};
 
 export const updateContainerTicket = async (
 	teamspace: string,
@@ -116,3 +118,4 @@ export const updateFederationTicket = async (
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
 type FetchTicketsResponse = { tickets: ITicket[] };
+type CreateTicketResponse = { _id: string };

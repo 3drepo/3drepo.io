@@ -21,7 +21,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId } from '../store.types';
-import { ITemplate, ITicket } from './tickets.types';
+import { ITemplate, ITicket, NewTicket } from './tickets.types';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
@@ -32,6 +32,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTemplateDetails: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
 	fetchTemplateDetailsSuccess: ['modelId', 'templateId', 'details'],
 	updateTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'ticket', 'isFederation'],
+	createTicket: ['teamspace', 'projectId', 'modelId', 'ticket', 'isFederation'],
 	upsertTicketSuccess: ['modelId', 'ticket'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
@@ -80,6 +81,7 @@ export interface ITicketsState {
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
 export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
 export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, ticket: Partial<ITicket>, isFederation: boolean };
+export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticket: NewTicket, isFederation: boolean };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & { modelId: string, ticket: ITicket };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
@@ -107,6 +109,13 @@ export interface ITicketsActionCreators {
 		ticket: Partial<ITicket>,
 		isFederation: boolean,
 	) => UpdateTicketAction;
+	createTicket: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticket: NewTicket,
+		isFederation: boolean,
+	) => CreateTicketAction;
 	fetchTicketsSuccess: (
 		modelId: string,
 		tickets: ITicket[],
