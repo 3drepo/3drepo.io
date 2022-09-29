@@ -80,8 +80,8 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 
 	const personalFormData = useForm<IUpdatePersonalInputs>({
-		mode: 'all',
-		resolver: yupResolver(EditProfileUpdatePersonalSchema(alreadyExistingEmails)),
+		resolver: yupResolver(EditProfileUpdatePersonalSchema),
+		context: { alreadyExistingEmails },
 		defaultValues: defaultPersonalValues,
 	});
 
@@ -117,7 +117,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
 				<FormProvider {...personalFormData}>
-					<TabPanel value={PERSONAL_TAB} $zeroPadding>
+					<TabPanel value={PERSONAL_TAB} $personalTab>
 						<EditProfilePersonalTab
 							alreadyExistingEmails={alreadyExistingEmails}
 							setAlreadyExistingEmails={setAlreadyExistingEmails}

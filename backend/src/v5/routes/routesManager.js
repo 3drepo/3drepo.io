@@ -20,13 +20,16 @@ const AadRoutes = require('./sso/aad');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
+const ContainerTicketsRoutes = require('./teamspaces/projects/containers/tickets');
 const ContainerViewsRoutes = require('./teamspaces/projects/containers/views');
 const FederationGroupsRoutes = require('./teamspaces/projects/federations/groups');
 const FederationRevisionRoutes = require('./teamspaces/projects/federations/revisions');
 const FederationRoutes = require('./teamspaces/projects/federations/federations');
+const FederationTicketsRoutes = require('./teamspaces/projects/federations/tickets');
 const FederationViewsRoutes = require('./teamspaces/projects/federations/views');
 const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
+const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
 const UserRoutes = require('./users');
@@ -40,10 +43,12 @@ RoutesManager.init = (app) => {
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
+	app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/tickets', ContainerTicketsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/groups', ContainerGroupsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/views', ContainerViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/revisions', ContainerRevisionRoutes);
@@ -51,6 +56,7 @@ RoutesManager.init = (app) => {
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', FederationRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/tickets', FederationTicketsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/groups', FederationGroupsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/views', FederationViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);

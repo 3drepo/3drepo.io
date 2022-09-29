@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { useForm } from 'react-hook-form';
@@ -25,6 +25,7 @@ import filesize from 'filesize';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { ListItemSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -53,10 +54,21 @@ export const UploadListItem = ({
 	isUploading,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const { control, formState: { errors }, setValue, trigger, watch, setError } = useForm<UploadItemFields>({
+	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
+	const [containersNamesInUse, setContainersNamesInUse] = useState([]);
+	const {
+		control,
+		formState: { errors },
+		getValues,
+		setValue,
+		trigger,
+		watch,
+		setError,
+	} = useForm<UploadItemFields>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
+		context: { alreadyExistingNames: containersNamesInUse.concat(federationsNames) },
 	});
 
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
@@ -75,8 +87,11 @@ export const UploadListItem = ({
 			setValue(key, conversion[key]);
 			updateValue(key);
 		});
-		trigger('containerName');
 	};
+
+	useEffect(() => {
+		if (getValues('containerName')) trigger('containerName');
+	}, [watch('containerName')]);
 
 	useEffect(() => {
 		trigger('revisionTag');
@@ -101,9 +116,12 @@ export const UploadListItem = ({
 			/>
 			<Destination
 				disabled={isUploading}
-				errorMessage={errors.containerName?.message}
+				errors={errors}
+				control={control}
 				defaultValue={defaultValues.containerName}
-				onChange={onDestinationChange}
+				onValueChange={onDestinationChange}
+				containersNamesInUse={containersNamesInUse}
+				setContainersNamesInUse={setContainersNamesInUse}
 			/>
 			<RevisionTag
 				control={control}
@@ -111,7 +129,7 @@ export const UploadListItem = ({
 				isSelected={isSelected}
 				errorMessage={errors.revisionTag?.message}
 			/>
-			{ isUploading
+			{isUploading
 				? <UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />
 				: (
 					<>

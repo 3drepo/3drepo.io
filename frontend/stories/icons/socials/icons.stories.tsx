@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,26 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	Backup read from GridFS triggered:
-	<br>
-	account: ${data.account}
-	<br>
-	model: ${data.model}
-	<br>
-	collection: ${data.collection}
-	<br>
-	ref: ${data.refId}
-	<br>
-	link: ${data.link}
-	<br>
-	domain: ${data.domain}
-`;
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from '../icons.component';
+import { getIcons } from '../icons.helper';
 
-const subject = data => `[System][${data.domain}] Missing file from Fileshare detected`;
+export default {
+	title: 'Icons/\\Socials',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
 
-module.exports =  {
-	html: html,
-	subject: subject
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/socials/', false, /\.*(svg)/), 'socials'),
 };

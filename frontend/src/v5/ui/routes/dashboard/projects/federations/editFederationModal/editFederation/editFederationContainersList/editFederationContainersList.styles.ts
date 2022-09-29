@@ -16,12 +16,17 @@
  */
 
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
+import { ButtonContainer, Title } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 import { DashboardListHeaderContainer } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
+import { TextField } from '@controls/search/searchInput/searchInput.styles';
 import styled from 'styled-components';
+import { CollapseSideElementGroup } from '../../../../containers/containersList/containersList.styles';
 
 export const Container = styled.div`
 	margin: 16px 0;
 	width: 100%;
+	min-width: 720px;
+	padding-right: 24px;
 
 	${DashboardListEmptyContainer} {
 		background-color: transparent;
@@ -31,9 +36,30 @@ export const Container = styled.div`
 		margin-left: 46px;
 		padding-right: 10px;
 	}
+
+	${ButtonContainer} {
+		min-width: 0;
+		width: 100%;
+		${Title} {
+			min-width: 300px;
+			display: inline-flex;
+		}
+	}
+	${CollapseSideElementGroup} {
+		width: 100%;
+		${TextField} { /* Search box */
+			padding: 0;
+			width: 100%;
+			min-width: 200px;
+		}
+	}
 `;
 
-export const IconButtonContainer = styled.div`
-	padding: 0 8px;
-	cursor: pointer;
+export const ContainerListMainTitle = styled.span`
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const ContainerCount = styled.span`
+	padding-left: 0.3rem;
 `;

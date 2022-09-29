@@ -105,15 +105,24 @@
 		}
 	};
 
-	Handler.dropCollection = function (database, collection) {
-		return Handler.getDB(database).then(dbConn => {
-			return dbConn.dropCollection(collection.name || collection);
-		}).catch(err => {
-			if(err.message !== "ns not found") {
+	const dropAllIndicies = async (database, colName) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.dropIndexes();
+	};
+
+	Handler.dropCollection = async (database, collection) => {
+		const colName = collection.name || collection;
+		try {
+			await dropAllIndicies(database, colName);
+			const dbConn = await Handler.getDB(database);
+			await dbConn.dropCollection(colName);
+
+		} catch(err) {
+			if(!err.message.includes("ns not found")) {
 				Handler.disconnect();
-				return Promise.reject(err);
+				throw err;
 			}
-		});
+		}
 	};
 
 	Handler.aggregate = async (database, colName, pipelines) => {
@@ -179,7 +188,6 @@
 		} else {
 			db = await connect();
 			return db.db(database);
-
 		}
 	};
 
@@ -219,6 +227,11 @@
 				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
 			});
 		});
+	};
+
+	Handler.bulkWrite = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.bulkWrite(data);
 	};
 
 	Handler.insertMany = async function (database, colName, data) {
@@ -303,7 +316,6 @@
 			Handler.disconnect();
 			throw err;
 		}
-
 	};
 
 	Handler.listCollections = async function (database) {
@@ -384,6 +396,8 @@
 		if(!["config", "admin"].includes(database)) {
 			try {
 				const dbConn = await Handler.getDB(database);
+				const collections = await Handler.listCollections(database);
+				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
 				await dbConn.dropDatabase();
 			} catch (err) {
 				if(err.message !== "ns not found") {

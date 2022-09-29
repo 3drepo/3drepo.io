@@ -17,6 +17,7 @@
 
 import { css } from 'styled-components';
 import { StyledTextField } from '@/v4/routes/viewerGui/components/gis/components/settingsForm/settingsForm.styles';
+import { StyledSelect } from '@/v4/routes/viewerGui/components/gis/gis.styles';
 
 export default css`
 	#gis-card {
@@ -25,6 +26,15 @@ export default css`
 
 			.MuiFormHelperText-root {
 				top: 22px;
+			}
+		}
+		${StyledSelect} {
+			[role="button"] {
+				margin: 0;
+				padding: 0 10px;
+			}
+			svg {
+				margin: 0;
 			}
 		}
 	}

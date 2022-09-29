@@ -16,7 +16,9 @@
  */
 
 import { discardSlash } from '@/v5/services/routing/routing';
-import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
+import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
+import { formatMessage } from '@/v5/services/intl';
+import { Route } from '@/v5/services/routing/route.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { ProjectsList } from '../projects/projectsList.component';
@@ -28,16 +30,16 @@ export const TeamspaceContent = () => {
 	return (
 		<ScrollArea variant="base" autoHide>
 			<Switch>
-				<Route exact path={`${path}/t/projects`}>
+				<Route title={formatMessage({ id: 'pageTitle.teamspace.projects', defaultMessage: ':teamspace - Projects' })} exact path={`${path}/t/projects`}>
 					<ProjectsList />
 				</Route>
-				<Route exact path={`${path}/t/settings`}>
+				<Route title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })} exact path={`${path}/t/settings`}>
 					Settings
 				</Route>
-				<Route exact path={`${path}/t/users`}>
+				<Route title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })} exact path={`${path}/t/users`}>
 					Users
 				</Route>
-				<Route exact path={`${path}/t/jobs`}>
+				<Route title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })} exact path={`${path}/t/jobs`}>
 					Jobs
 				</Route>
 				<Route path="*">
