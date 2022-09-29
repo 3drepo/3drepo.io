@@ -15,15 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
+import MenuItemBase from '@mui/material/MenuItem';
+// import { FormCheckbox as FormCheckboxBase } from '@controls/formCheckbox/formCheckbox.component';
+// import { Checkbox } from '@controls/formCheckbox/formCheckbox.styles';
 
-export const SearchInput = styled(SearchInputBase)`
+// export const FormCheckbox = styled(FormCheckboxBase)`
+export const CheckboxContainer = styled.div`
+	width: 100%;
 	margin: 0;
-	padding: 12px;
+	padding: 8px 14px;
+	height: 48px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+
+	.MuiCheckbox-root {
+		margin: 0 17px 0 0;
+		padding: 0;
+	}
+
+	.MuiFormControlLabel-label {
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 `;
 
-export const NoResults = styled.div`
-	padding: 5px 12px 8px;
-	color: ${({ theme }) => theme.palette.base.main};
-	${({ theme }) => theme.typography.body1};
+export const MenuItem = styled(MenuItemBase)`
+	padding: 0;
 `;

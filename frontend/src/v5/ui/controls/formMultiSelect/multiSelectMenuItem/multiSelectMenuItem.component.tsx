@@ -14,16 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
+import { CheckboxContainer, MenuItem } from './multiSelectMenuItem.styles';
+import { Checkbox } from '@mui/material';
 
-export const SearchInput = styled(SearchInputBase)`
-	margin: 0;
-	padding: 12px;
-`;
+type MultiSelectMenuItem = {
+	label: string,
+	value: any,
+	name: string,
+	itemIsSelected?: (name) => boolean,
+	toggleItemSelection?: (item) => void,
+};
 
-export const NoResults = styled.div`
-	padding: 5px 12px 8px;
-	color: ${({ theme }) => theme.palette.base.main};
-	${({ theme }) => theme.typography.body1};
-`;
+export const MultiSelectMenuItem = ({
+	label,
+	value,
+	name,
+	itemIsSelected,
+	toggleItemSelection,
+}: MultiSelectMenuItem) => (
+	<MenuItem
+		key={value.toString()}
+		onClick={() => toggleItemSelection({ value, label, name })}
+	>
+		<CheckboxContainer>
+			<Checkbox checked={itemIsSelected(name)} />
+			{label}
+		</CheckboxContainer>
+	</MenuItem>
+);

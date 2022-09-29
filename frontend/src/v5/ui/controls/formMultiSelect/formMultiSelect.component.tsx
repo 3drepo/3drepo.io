@@ -18,81 +18,93 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormSelect, FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { ScrollArea } from '@controls/scrollArea';
-import { SearchContextComponent } from '@controls/search/searchContext';
-import { MouseEvent, useState } from 'react';
+import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
+import { isEqual, xorWith } from 'lodash';
+import { Children, cloneElement, ReactElement, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { SearchInput, NoResults, FormCheckbox, MenuItem } from './formMultiSelect.styles';
+import { SearchInput, NoResults } from './formMultiSelect.styles';
+import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
-export type FormMultiSelectProps = FormSelectProps & {
-	values: string[],
+const MenuContent = () => {
+	const { filteredItems } = useContext(SearchContext);
+	
+	if (filteredItems.length > 0) {
+		return (
+			<ScrollArea autoHeight>
+				{filteredItems}
+			</ScrollArea>
+		);
+	}
+
+	return (
+		<NoResults>
+			<FormattedMessage
+				id="form.multiSelect.search.emptyList"
+				defaultMessage="No results"
+			/>
+		</NoResults>
+	);
 };
 
-export const FormMultiSelect = ({ label, values, name, control, ...props }: FormMultiSelectProps) => {
-	const [filteredValues, setFilteredValues] = useState(values);
-	const [selectedValues, setSelectedValues] = useState(new Set());
+export type FormMultiSelectProps = FormSelectProps & { children: JSX.Element | JSX.Element[] }
 
-	const toggleSelectedValue = (e: MouseEvent, value) => {
-		if (selectedValues.has(value)) {
-			selectedValues.delete(value);
-		} else {
-			selectedValues.add(value);
-		}
-		setSelectedValues(new Set(selectedValues));
+export const FormMultiSelect = ({ children: rawChildren, control, label, name, ...props }: FormMultiSelectProps) => {
+	const [selectedItems, setSelectedItems] = useState([]);
+	const [items, setItems] = useState([]);
+
+	const toggleItemSelection = (item) => {
+		setSelectedItems((items) => xorWith(items, [item], isEqual));
 	};
 
-	const filterValues = ({ target }) => {
-		const input = target.value;
-		if (!input) setFilteredValues(values);
-
-		const lowerCaseInput = input.toLowerCase();
-		const newFilteredValues = values.filter((value) => value.includes(lowerCaseInput));
-		setFilteredValues(newFilteredValues);
-	};
+	const itemIsSelected = (itemName) => !!selectedItems.find(({ name }) => name === itemName);
 
 	const preventInputUnfocus = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
 	};
 
+	const verifyChildrenAreValid = () => {
+		Children.forEach(rawChildren, (child) => {
+			if (child.type !== MultiSelectMenuItem) {
+				throw new Error('FormMultiSelect only accepts an array of MultiSelectMenuItem as direct children');
+			}
+		});
+	};
+
+	const populateChildren = () => {
+		setItems(
+			Children.toArray(rawChildren)
+				.map((child: ReactElement) => (
+					cloneElement(child, { toggleItemSelection, itemIsSelected })
+				))
+		);
+	};
+
+	useEffect(() => {
+		verifyChildrenAreValid();
+		populateChildren();
+	}, [rawChildren]);
+
+	// necessary because cloneElement does not keep track of
+	// changes in the props passed to the children which do not have
+	// the latest values for selectedItems
+	useEffect(() => { populateChildren(); }, [selectedItems]);
+
 	return (
-		<SearchContextComponent items={values}>
+		<SearchContextComponent fieldsToFilter={['props.label']} items={items}>
 			<FormSelect
 				multiple
 				defaultValue={[]}
-				label={label}
-				name={name}
 				control={control}
-				renderValue={() => Array.from(selectedValues).join(', ')}
-				value={Array.from(selectedValues)}
+				name={name}
+				renderValue={() => selectedItems.map(({ label }) => label).join(', ')}
+				value={selectedItems.map(({ value }) => value)}
 				{...props}
 			>
 				<SearchInput
 					placeholder={formatMessage({ id: 'form.multiSelect.search.placeholder', defaultMessage: 'Search...' })}
 					onKeyDown={preventInputUnfocus}
-					onChange={filterValues}
-					onClear={() => setFilteredValues(values)}
 				/>
-				{filteredValues.length > 0 ? (
-					<ScrollArea autoHeight>
-						{filteredValues.map((value) => (
-							<MenuItem key={value}>
-								<FormCheckbox
-									control={control}
-									label={value}
-									name={`${name}.${value}`}
-									checked={selectedValues.has(value)}
-									onClick={(e) => toggleSelectedValue(e, value)}
-								/>
-							</MenuItem>
-						))}
-					</ScrollArea>
-				) : (
-					<NoResults>
-						<FormattedMessage
-							id="form.multiSelect.search.emptyList"
-							defaultMessage="No results"
-						/>
-					</NoResults>
-				)}
+				<MenuContent />
 			</FormSelect>
 		</SearchContextComponent>
 	);
