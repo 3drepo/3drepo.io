@@ -26,6 +26,7 @@ import {
 	FetchTicketAction,
 	UpdateTicketAction,
 	CreateTicketAction,
+	FetchTemplateAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -87,6 +88,28 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 	}
 }
 
+export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateAction) {
+	try {
+		const fetchTicketsTemplate = isFederation
+			? API.Tickets.fetchFederationTemplate
+			: API.Tickets.fetchContainerTemplate;
+		const templates = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(TicketsActions.upsertTemplateSuccess(modelId, templates));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchTemplate.error.action',
+				defaultMessage: 'trying to fetch a template',
+			}),
+			error,
+			details: formatMessage({
+				id: 'tickets.fetchTemplates.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
 export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket, isFederation }: UpdateTicketAction) {
 	try {
 		const updateModelTicket = isFederation
@@ -127,6 +150,7 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
+	yield takeLatest(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 }
