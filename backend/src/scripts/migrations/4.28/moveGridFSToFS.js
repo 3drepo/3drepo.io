@@ -45,7 +45,7 @@ const moveFile = async (teamspace, collection, filename, timers) => {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
 	} else {
 		const startTimer = Date.now();
-		const file = await getFileFromGridFS(teamspace, collection, filename);
+		const file = await getFileFromGridFS(teamspace, collection, filename).catch((err) => { throw new Error(`Failed to fetch file from gridfs (${teamspace}.${collection}): ${filename}: ${err?.message ?? err}`); });
 		const getFileFromGridFSTimer = Date.now();
 		const newRef = await FsService.storeFile(file);
 		const copiedTimer = Date.now();
