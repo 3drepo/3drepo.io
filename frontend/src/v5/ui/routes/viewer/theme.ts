@@ -100,13 +100,25 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiFormControl: {
+					styleOverrides: {
+						root: {
+							margin: 0,
+						},
+					},
+				},
 				MuiTextField: {
 					styleOverrides: {
 						root: {
 							margin: 0,
 							'& .MuiInputBase-root input': {
 								lineHeight: 22,
-								height: 24,
+								height: 26,
+							},
+							'& .MuiFormHelperText-root': {
+								position: 'relative',
+								height: 0,
+								top: -2,
 							},
 						},
 					},
@@ -118,7 +130,7 @@ export const theme = createTheme(
 							lineHeight: '22px',
 							height: '24px',
 							padding: '0 10px',
-							marginTop: '18px',
+							marginTop: 0,
 							left: '-14px',
 							color: `${COLOR.SECONDARY_MAIN} !important`,
 
