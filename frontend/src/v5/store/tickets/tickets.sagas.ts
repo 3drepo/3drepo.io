@@ -33,7 +33,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets({ teamspace, projectId, modelId });
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -51,7 +51,7 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 		const fetchModelTicket = isFederation
 			? API.Tickets.fetchFederationTicket
 			: API.Tickets.fetchContainerTicket;
-		const ticket = yield fetchModelTicket({ teamspace, projectId, modelId, ticketId });
+		const ticket = yield fetchModelTicket(teamspace, projectId, modelId, ticketId);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -69,7 +69,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 		const fetchModelTemplates = isFederation
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates({ teamspace, projectId, modelId });
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -91,7 +91,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 		const updateModelTicket = isFederation
 			? API.Tickets.updateFederationTicket
 			: API.Tickets.updateContainerTicket;
-		yield updateModelTicket({ teamspace, projectId, modelId, ticketId, ticket });
+		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

@@ -14,104 +14,100 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { TeamspaceAndProjectId } from '@/v5/store/store.types';
 import { ITicket, ITemplate } from '@/v5/store/tickets/tickets.types';
 import api from './default';
 
-export const fetchContainerTemplates = async ({
-	teamspace,
-	projectId,
-	modelId,
-}: FetchTemplatesParams): Promise<FetchTemplatesResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`);
+export const fetchContainerTemplates = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+): Promise<FetchTemplatesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates`);
 	return data.templates;
 };
 
-export const fetchFederationTemplates = async ({
-	teamspace,
-	projectId,
-	modelId,
-}: FetchTemplatesParams): Promise<FetchTemplatesResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`);
+export const fetchFederationTemplates = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+): Promise<FetchTemplatesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates`);
 	return data.templates;
 };
 
-export const fetchContainerTickets = async ({
-	teamspace,
-	projectId,
-	modelId,
-}: FetchTicketsParams): Promise<FetchTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`);
+export const fetchContainerTickets = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+): Promise<FetchTicketsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`);
 	return data.tickets;
 };
 
-export const fetchFederationTickets = async ({
-	teamspace,
-	projectId,
-	modelId,
-}: FetchTicketsParams): Promise<FetchTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets`);
+export const fetchFederationTickets = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+): Promise<FetchTicketsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${containerId}/tickets`);
 	return data.tickets;
 };
 
-export const fetchContainerTicket = async ({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-}: FetchTicketParams): Promise<ITicket> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}`);
+export const fetchContainerTicket = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	ticketId: string,
+): Promise<ITicket> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}`);
 	return data;
 };
 
-export const fetchFederationTicket = async ({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-}: FetchTicketParams): Promise<ITicket> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`);
+export const fetchFederationTicket = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	ticketId: string,
+): Promise<ITicket> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}`);
 	return data;
 };
 
-export const createContainerTicket = async ({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-	ticket,
-}: CreateTicketParams) => (
-	api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}`, ticket)
+export const createContainerTicket = async (
+	teamspace: string,
+	projectId: string,
+	containterId: string,
+	ticket: Omit<ITicket, '_id'>,
+) => (
+	api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containterId}/tickets`, ticket)
 );
 
-export const createFederationTicket = async ({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-	ticket,
-}: CreateTicketParams) => (
-	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`, ticket)
+export const createFederationTicket = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	ticket: Omit<ITicket, '_id'>,
+) => (
+	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`, ticket)
 );
 
-export const updateContainerTicket = async ({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-	ticket,
-}: UpdateTicketParams) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}`, ticket)
+export const updateContainerTicket = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	ticketId: string,
+	ticket: Partial<ITicket>,
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`, ticket)
 );
 
-export const updateFederationTicket = async ({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-	ticket,
-}: UpdateTicketParams) => (
+export const updateFederationTicket = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	ticketId: string,
+	ticket: Partial<ITicket>,
+) => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}`, ticket)
 );
 
@@ -120,12 +116,3 @@ export const updateFederationTicket = async ({
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
 type FetchTicketsResponse = { tickets: ITicket[] };
-
-type FetchTicketsParams = TeamspaceAndProjectId & { modelId: string };
-type FetchTemplatesParams = TeamspaceAndProjectId & { modelId: string };
-
-type FetchTicketParams = FetchTicketsParams & { ticketId: string };
-
-type CreateTicketParams = FetchTicketsParams & { ticketId: string, ticket: ITicket };
-
-type UpdateTicketParams = FetchTicketsParams & { ticketId: string, ticket: Partial<ITicket> };
