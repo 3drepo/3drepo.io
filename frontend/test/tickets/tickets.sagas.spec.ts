@@ -185,6 +185,18 @@ describe('Tickets: sagas', () => {
 					.silentRun();
 			})
 
+			it('should call fetchContainerTemplate  detail endpoint', async () => {
+				const template = templateMockFactory();
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
+					.reply(200, template);
+	
+				await expectSaga(TicketsSaga.default)
+					.dispatch(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, false))
+					.put(TicketsActions.replaceTemplateSuccess(modelId, template))
+					.silentRun();
+			})
+
 			// Basic Federation templates
 			it('should call fetchTemplates endpoint', async () => {
 				mockServer
@@ -205,6 +217,18 @@ describe('Tickets: sagas', () => {
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, true))
 					.put.like(alertAction('trying to fetch templates'))
+					.silentRun();
+			})
+
+			it('should call fetchContainerTemplate  detail endpoint', async () => {
+				const template = templateMockFactory();
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
+					.reply(200, template);
+	
+				await expectSaga(TicketsSaga.default)
+					.dispatch(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, true))
+					.put(TicketsActions.replaceTemplateSuccess(modelId, template))
 					.silentRun();
 			})
 		})

@@ -93,8 +93,8 @@ export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFe
 		const fetchTicketsTemplate = isFederation
 			? API.Tickets.fetchFederationTemplate
 			: API.Tickets.fetchContainerTemplate;
-		const templates = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
-		yield put(TicketsActions.upsertTemplateSuccess(modelId, templates));
+		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(TicketsActions.replaceTemplateSuccess(modelId, template));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({

@@ -17,7 +17,7 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
-import { selectTickets, selectTemplates, selectTicketById } from '@/v5/store/tickets/tickets.selectors';
+import { selectTickets, selectTemplates, selectTicketById, selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
 import { cloneDeep } from 'lodash';
 import { createTestStore } from '../test.helpers';
 import { templateMockFactory, ticketMockFactory } from './tickets.fixture';
@@ -66,5 +66,21 @@ describe('Tickets: store', () => {
 	
 			expect(templatesFromState[0]).toEqual(template);
 		});
+
+
+		it('should replace the template', () => {
+			const template = templateMockFactory();
+			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
+	
+			const newTemplate = templateMockFactory();
+			newTemplate._id = template._id;
+
+			dispatch(TicketsActions.replaceTemplateSuccess(modelId, newTemplate));
+			
+			const ticketFromStore = selectTemplateById(getState(), modelId, template._id);
+
+			expect(ticketFromStore).toEqual(newTemplate);
+		});
+	
 	})
 });

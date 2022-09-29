@@ -29,9 +29,8 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
+	replaceTemplateSuccess: ['modelId', 'template'],
 	fetchTemplatesSuccess: ['modelId', 'templates'],
-	fetchTemplateDetails: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
-	fetchTemplateDetailsSuccess: ['modelId', 'templateId', 'details'],
 	updateTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'ticket', 'isFederation'],
 	createTicket: ['teamspace', 'projectId', 'modelId', 'ticket', 'isFederation'],
 	upsertTicketSuccess: ['modelId', 'ticket'],
@@ -49,35 +48,29 @@ export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: 
 export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
-	let oldTicket = {};
+	let found = false;
 
 	state.ticketsByModelId[modelId] = state.ticketsByModelId[modelId]
-		.filter((loadedTicket) => {
-			const foundTicket = loadedTicket._id === ticket._id;
-			if (foundTicket) {
-				oldTicket = loadedTicket;
+		.map((loadedTicket) => {
+			if (loadedTicket._id === ticket._id) {
+				found = true;
+				return merge(loadedTicket, ticket);
 			}
-			return !foundTicket;
+			return loadedTicket;
 		});
 
-	state.ticketsByModelId[modelId].push(merge(oldTicket, ticket) as ITicket);
+	if (!found) {
+		state.ticketsByModelId[modelId].push(ticket as ITicket);
+	}
 };
 
-export const upsertTemplateSuccess = (state: ITicketsState, { modelId, template }: UpsertTemplateSuccessAction) => {
-	if (!state.ticketsByModelId[modelId]) state.templatesByModelId[modelId] = [];
-
-	let oldTemplate = {};
+export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template }: ReplaceTemplateSuccessAction) => {
+	if (!state.templatesByModelId[modelId]) state.templatesByModelId[modelId] = [];
 
 	state.templatesByModelId[modelId] = state.templatesByModelId[modelId]
-		.filter((loadedTemplate) => {
-			const foundTicket = loadedTemplate._id === template._id;
-			if (foundTicket) {
-				oldTemplate = loadedTemplate;
-			}
-			return !foundTicket;
-		});
+		.filter((loadedTemplate) => loadedTemplate._id !== template._id);
 
-	state.templatesByModelId[modelId].push(merge(oldTemplate, template) as ITemplate);
+	state.templatesByModelId[modelId].push(template);
 };
 
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {
@@ -88,7 +81,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
-	[TicketsTypes.UPSERT_TEMPLATE_SUCCESS]: upsertTemplateSuccess,
+	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
 }));
 
 export interface ITicketsState {
@@ -102,7 +95,7 @@ export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceAndProjectId
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticket: NewTicket, isFederation: boolean };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & { modelId: string, ticket: Partial<ITicket> };
-export type UpsertTemplateSuccessAction = Action<'UPSERT_TEMPLATE_SUCCESS'> & { modelId: string, template: Partial<ITemplate> };
+export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & { modelId: string, template: ITemplate };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
 export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, templateId: string, isFederation: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & { modelId: string, templates: ITemplate[] };
@@ -155,6 +148,5 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 	) => FetchTemplateAction;
 	upsertTicketSuccess: (modelId: string, ticket: Partial<ITicket>) => UpsertTicketSuccessAction;
-	upsertTemplateSuccess: (modelId: string, ticket: Partial<ITemplate>) => UpsertTemplateSuccessAction;
-
+	replaceTemplateSuccess: (modelId: string, ticket: ITemplate) => ReplaceTemplateSuccessAction;
 }
