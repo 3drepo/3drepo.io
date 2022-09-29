@@ -74,3 +74,9 @@ declare module '@mui/material/styles/createTypography' {
 		kicker?: CSSProperties;
 	}
 }
+
+declare module '@mui/material/Chip' {
+	interface ChipPropsVariantOverrides {
+		noBorder: true;
+	}
+}
