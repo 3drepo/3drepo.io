@@ -85,6 +85,14 @@ export const TicketDetailCard = () => {
 			contextValue.props.ticket._id,
 			isFederation,
 		);
+
+		TicketsActionsDispatchers.fetchTemplate(
+			teamspace,
+			project,
+			containerOrFederation,
+			contextValue.props.ticket.type,
+			isFederation,
+		);
 	}, [contextValue.props.ticket._id]);
 
 	const onChange = (evt) => {
