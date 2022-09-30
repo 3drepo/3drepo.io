@@ -96,12 +96,6 @@ export const TicketDetailCard = () => {
 		);
 	}, [ticket?.type]);
 
-
-
-	// const onChange = (evt) => {
-	// 	setTitle(evt.target.value);
-	// };
-
 	return (
 		<CardContainer>
 			<CardHeader>
@@ -110,9 +104,6 @@ export const TicketDetailCard = () => {
 				<Button onClick={goBack}>back</Button>
 			</CardHeader>
 			<CardContent>
-				Showing the details of the ticket {JSON.stringify(ticket)}
-				{/* <TextField name="title" value={title} onChange={onChange} /> */}
-
 				<TicketForm template={template} ticket={ticket} />
 				<Button onClick={updateTicket}> Update Ticket! </Button>
 				<Button onClick={cloneTicket}> Clone Ticket!</Button>

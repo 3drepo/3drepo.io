@@ -16,15 +16,53 @@
  */
 /* eslint-disable max-len */
 
-import { TextField } from '@mui/material';
+import { DateTimePicker } from '@mui/lab';
+import { InputLabel, MenuItem, Select, TextField } from '@mui/material';
 
 const TicketProperty = ({ property, value }) => {
+	const maskValue = (val) => (!val ? '' : new Date(val));
+
 	switch (property.type) {
 		case 'text':
-			return <TextField label={property.name} value={value} />;
+			return (
+				<div>
+				&nbsp;
+					<TextField label={property.name} value={value} disabled={property.readOnly} />
+				</div>
+			);
+			break;
+		case 'date':
+			return (
+				<div>
+				&nbsp;
+					<DateTimePicker
+						label={property.name}
+						inputFormat="MM/DD/YYYY"
+						value={maskValue(value)}
+						onChange={() => { }}
+						renderInput={(params) => <TextField {...params} value={maskValue(value)} disabled={property.readOnly} />}
+					/>
+				</div>
+			);
+			break;
+		case 'oneOf':
+			return (
+				<div>
+				&nbsp;
+					{property.name}
+					<br />
+					<Select value={value}>
+						{property.values.map((propValue) => (
+							<MenuItem key={propValue} value={propValue}>
+								{propValue}
+							</MenuItem>
+						))}
+					</Select>
+				</div>
+			);
 			break;
 		default:
-			return <div>Unsupported property {property.nameproperty.type} (for now) {(`${JSON.stringify(value)}`).substring(0, 80)}</div>;
+			return <div>Unsupported property {`${property.name}:${property.type}`} (for now) {(`${JSON.stringify(value)}`).substring(0, 80)}</div>;
 			break;
 	}
 };
