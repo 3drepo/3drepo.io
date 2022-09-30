@@ -138,7 +138,7 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
+				{ id: 'tickets.createTicket.error', defaultMessage: 'trying to create the ticket for {model} ' },
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
