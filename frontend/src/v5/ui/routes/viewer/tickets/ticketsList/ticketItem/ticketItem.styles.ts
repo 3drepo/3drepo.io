@@ -29,6 +29,11 @@ export const Title = styled.div`
 	font-size: 12px;
 	line-height: 16px;
 	padding-top: 5px;
+	width: fit-content;
+
+	&:hover {
+		text-decoration: underline;
+	}
 `;
 
 // TODO - fix after new palette is released
@@ -39,8 +44,5 @@ export const Ticket = styled.div<{ $selected?: boolean }>`
 
 	&:hover {
 		${({ $selected }) => !$selected && 'background-color: #f9faff;'}
-		${Title} {
-			text-decoration: underline;
-		}
 	}
 `;

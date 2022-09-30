@@ -36,7 +36,7 @@ export default css`
 		}
 
 		${TabContainer} {
-			margin-top: 0;
+			margin: 0;
 			padding-top: 15px;
 		}
 
@@ -70,6 +70,9 @@ export default css`
 		// comments header section
 		${FilterWrapper} {
 			padding: 0 0 13px 0;
+			& > .MuiFormControl-root {
+				padding-top: 0
+			}
 
 			${ShowLabel} {
 				font-size: 10px;
