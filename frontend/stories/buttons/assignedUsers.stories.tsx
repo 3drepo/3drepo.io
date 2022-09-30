@@ -58,6 +58,11 @@ SingleAssignedUser.args = {
 	userCount: 1,
 } as Props;
 
+export const Unassigned = Template.bind({});
+Unassigned.args = {
+	userCount: 0,
+} as Props;
+
 export const OverflowingAssignedUsers = Template.bind({});
 OverflowingAssignedUsers.args = {
 	max: 6,

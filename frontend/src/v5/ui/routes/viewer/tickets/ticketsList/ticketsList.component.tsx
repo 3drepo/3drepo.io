@@ -20,7 +20,7 @@ import { useContext, useState } from 'react';
 import { flatMap } from 'lodash';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { FilterChip } from '@controls/chip/chip.styles';
+import { FilterChip } from '@controls/chip';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
