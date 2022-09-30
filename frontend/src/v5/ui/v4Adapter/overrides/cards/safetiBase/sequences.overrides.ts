@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SequenceDateActions, SequenceDateField } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
+import { SequenceDateActions } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
 import { Content as RiskDetails } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
 
 export default css`
 	${RiskDetails} {
-		${SequenceDateField} .MuiInputBase-root {
-			margin: 0;
-		}
 		${SequenceDateActions} {
 			bottom: -4px;
 		}

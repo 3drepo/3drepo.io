@@ -14,17 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { css } from 'styled-components';
+import sequences from './sequences.overrides';
+import selectMenus from './selectMenus.overrides';
+import shapes from './shapes.overrides';
 
-const addAdminJob = require('./addAdminJob');
-const addAndAssignDefaultRole = require('./addAndAssignDefaultRole');
-const addSharedIdToMeshMap = require('./addSharedIdToMeshMap');
-const storeUserAvatarInFileshare = require('./storeUserAvatarInFileshare');
-
-const scripts = [
-	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
-	{ script: addAndAssignDefaultRole, desc: 'Add Default role and assign it to all users' },
-	{ script: addSharedIdToMeshMap, desc: 'Add shared Id to super mesh mappings' },
-	{ script: storeUserAvatarInFileshare, desc: 'Store user avatar in fileshare' },
-];
-
-module.exports = scripts;
+export default css`
+	${sequences}
+	${shapes}
+	${selectMenus}
+`;

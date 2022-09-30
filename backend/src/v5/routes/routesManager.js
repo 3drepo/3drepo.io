@@ -31,6 +31,7 @@ const FederationTicketsRoutes = require('./teamspaces/projects/federations/ticke
 const FederationViewsRoutes = require('./teamspaces/projects/federations/views');
 const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
+const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
 const UserRoutes = require('./users');
@@ -45,6 +46,7 @@ RoutesManager.init = (app) => {
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
+	app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
 
 	// Containers
