@@ -36,10 +36,10 @@ const convertLegacyFileName = (filename) => {
 };
 
 const moveFile = async (teamspace, collection, filename, timers) => {
-	const existingRef = await findOne(teamspace, `${collection}.ref`, { $or: [
-		{ link: filename },
-		{ link: convertLegacyFileName(filename) },
-	] }, { type: 1 });
+	const legacyFileName = convertLegacyFileName(filename);
+	const query = legacyFileName === filename ? { link: filename }
+		: { link: { $in: [filename, legacyFileName] } };
+	const existingRef = await findOne(teamspace, `${collection}.ref`, query, { type: 1 });
 
 	if (existingRef && existingRef.type !== 'gridfs') {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
