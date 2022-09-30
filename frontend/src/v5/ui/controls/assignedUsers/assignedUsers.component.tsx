@@ -19,6 +19,7 @@ import { Popover } from '@/v4/routes/components/messagesList/components/message/
 import { IUser } from '@/v5/store/users/users.redux';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { AssignedUsersList, ExtraUsersCircle, UserCircle } from './assignedUsers.styles';
 import { ExtraUsersPopover } from './extraUsersPopover/extraUsersPopover.component';
 
@@ -48,7 +49,7 @@ export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
 	}
 	return (
 		<AssignedUsersList>
-			{displayedUsers.map((user, index) => (
+			{displayedUsers.length ? (displayedUsers.map((user, index) => (
 				<UserCircle
 					key={user.user}
 					user={user}
@@ -57,15 +58,17 @@ export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
 					onMouseEnter={(e) => handlePopoverOpen(e, user)}
 					onMouseLeave={handlePopoverClose}
 				/>
-			))}
-			{extraUsers.length && (
+			))) : (
+				<FormattedMessage id="assignedUsers.unassigned" defaultMessage="Unassigned" />
+			)}
+			{extraUsers.length ? (
 				<ExtraUsersCircle
 					onMouseEnter={(e) => handlePopoverOpen(e, null)}
 					onMouseLeave={handlePopoverClose}
 				>
 					+{extraUsers.length}
 				</ExtraUsersCircle>
-			)}
+			) : <></>}
 			<Popover
 				id="mouse-over-popover"
 				open={!!anchorEl}

@@ -63,6 +63,8 @@ export const AssignedUsersList = styled.div`
 	pointer-events: none;
 	position: relative;
 	width: fit-content;
+	color: #D0D9EB;
+	user-select: none;
 
 	&:hover .MuiAvatar-root:before { /* fade avatars on hover */
 		opacity: 0.3;
