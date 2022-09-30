@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
+const { createIndex, find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const FsService = require(`${v5Path}/handler/fs`);
 const GridFS = require(`${v5Path}/handler/gridfs`);
@@ -93,6 +93,8 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 	const ownerCol = collection.slice(0, -(filesExt.length));
 	const gridFSEntries = await find(teamspace, collection, { }, { filename: 1, length: 1 });
 	const fileGroups = organiseFilesToProcess(gridFSEntries, maxParallelSizeMB, maxParallelFiles);
+
+	await createIndex(teamspace, `${ownerCol}.ref`, { link: 1, type: 1 });
 
 	for (let i = 0; i < fileGroups.length; ++i) {
 		const group = fileGroups[i];
