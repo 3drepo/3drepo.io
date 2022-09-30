@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { count, find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
+const { find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const FsService = require(`${v5Path}/handler/fs`);
 const GridFS = require(`${v5Path}/handler/gridfs`);
@@ -35,11 +35,11 @@ const convertLegacyFileName = (filename) => {
 	return filename;
 };
 
-const moveFile = async (teamspace, collection, filename, timers, checkRefs) => {
+const moveFile = async (teamspace, collection, filename, timers) => {
 	const legacyFileName = convertLegacyFileName(filename);
 	const query = legacyFileName === filename ? { link: filename }
 		: { link: { $in: [filename, legacyFileName] } };
-	const existingRef = checkRefs ? await findOne(teamspace, `${collection}.ref`, query, { type: 1 }) : undefined;
+	const existingRef = await findOne(teamspace, `${collection}.ref`, query, { type: 1 });
 
 	if (existingRef && existingRef.type !== 'gridfs') {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
@@ -94,8 +94,6 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 	const gridFSEntries = await find(teamspace, collection, { }, { filename: 1, length: 1 });
 	const fileGroups = organiseFilesToProcess(gridFSEntries, maxParallelSizeMB, maxParallelFiles);
 
-	const checkRefs = (await count(teamspace, `${ownerCol}.ref`, {})) > 0;
-
 	for (let i = 0; i < fileGroups.length; ++i) {
 		const group = fileGroups[i];
 		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
@@ -104,7 +102,7 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 		const stats = { copy: [], update: [], copyDetails: { gridfs: [], fs: [] } };
 		// eslint-disable-next-line no-await-in-loop
 		const filesToRemove = await Promise.all(
-			group.map(({ filename }) => moveFile(teamspace, ownerCol, filename, stats, checkRefs)),
+			group.map(({ filename }) => moveFile(teamspace, ownerCol, filename, stats)),
 		);
 		const processFilesEnd = Date.now();
 		// eslint-disable-next-line no-await-in-loop
