@@ -19,9 +19,9 @@ const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../m
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { respond } = require('../../../../../../../utils/responder');
+const { serialiseTicket } = require('../../../../../../../utils/helper/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
 const { templates } = require('../../../../../../../utils/responseCodes');
-const { serialiseTicket } = require('../../../../../../../utils/helper/tickets');
 
 const Tickets = {};
 
@@ -69,8 +69,9 @@ Tickets.serialiseTicketList = async (req, res) => {
 		const templateIds = new Set(templateIdArr);
 
 		const templateLUT = await getTemplatesDictionary(teamspace, Array.from(templateIds));
-		const outputProms = tickets.map((ticket) => serialiseTicket(teamspace,
-			ticket, templateLUT[UUIDToString(ticket.type)], true));
+		const outputProms = tickets.map((ticket) => serialiseTicket(
+			ticket, templateLUT[UUIDToString(ticket.type)], true,
+		));
 		respond(req, res, templates.ok, { tickets: await Promise.all(outputProms) });
 	} catch (err) {
 		respond(req, res, templates.unknown);

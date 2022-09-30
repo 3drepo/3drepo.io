@@ -393,28 +393,86 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 
-		test(`Should trigger addTicketLog if there is a ${events.MODEL_TICKET_UPDATE}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_TICKET_UPDATE);
+		const updateTicketTest = async (isFederation) => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_UPDATE_TICKET);
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
 				model: generateRandomString(),
 				ticket: generateRandomString(),
 				author: generateRandomString(),
-				date: generateRandomDate(),
+				timestamp: generateRandomDate(),
 				changes: {
 					prop: {
 						from: generateRandomString(),
 						to: generateRandomString(),
 					},
 				},
+				updateData: { [generateRandomString()]: generateRandomString() },
+				isFederation,
 			};
-			EventsManager.publish(events.MODEL_TICKET_UPDATE, data);
+
+			const event = isFederation ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
+			EventsManager.publish(events.MODEL_UPDATE_TICKET, data);
 
 			await waitOnEvent;
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
-				data.ticket, { author: data.author, changes: data.changes, date: data.date });
+				data.ticket, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				event,
+				{ _id: data.ticket, ...data.updateData },
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		};
+
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+				is a ${events.MODEL_UPDATE_TICKET} (Container)`, async () => {
+			await updateTicketTest(false);
+		});
+
+		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there 
+				is a ${events.MODEL_UPDATE_TICKET} (Federation)`, async () => {
+			await updateTicketTest(true);
+		});
+
+		const addTicketTest = async (isFederation) => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_NEW_TICKET);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				isFederation,
+				ticketData: {
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+			EventsManager.publish(events.MODEL_NEW_TICKET, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				event,
+				data.ticketData,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		};
+
+		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there 
+				is a ${events.MODEL_NEW_TICKET} (Container)`, async () => {
+			await addTicketTest(false);
+		});
+
+		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there 
+				is a ${events.MODEL_NEW_TICKET} (Federation)`, async () => {
+			await addTicketTest(true);
 		});
 	});
 };

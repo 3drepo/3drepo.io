@@ -21,8 +21,8 @@ const { basePropertyLabels } = require('../schemas/tickets/templates.constants')
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { templates } = require('../utils/responseCodes');
 const { serialiseTicket } = require('../utils/helper/tickets');
+const { templates } = require('../utils/responseCodes');
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
@@ -33,22 +33,20 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 	return (lastTicket?.number ?? 0) + 1;
 };
 
-Tickets.addTicket = async (teamspace, project, model, template, ticketData, isFederation = false) => {
+Tickets.addTicket = async (teamspace, project, model, template, ticketData, isFederation) => {
 	const _id = generateUUID();
 	const number = await determineTicketNumber(teamspace, project, model, ticketData.type);
 	const ticket = { ...ticketData, teamspace, project, model, _id, number };
 	await DbHandler.insertOne(teamspace, TICKETS_COL, ticket);
-	publish(isFederation ? events.FEDERATION_NEW_TICKET : events.CONTAINER_NEW_TICKET,
-		{ teamspace, project, model, ...serialiseTicket(ticket, template) });
+	publish(events.MODEL_NEW_TICKET,
+		{ teamspace, project, model, ticketData: serialiseTicket(ticket, template), isFederation });
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
-	const toUpdate = {}; const
-		toUnset = {};
+Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author, isFederation) => {
+	const toUpdate = {}; const toUnset = {};
 	const propNamesChanged = [];
-	const from = {}; const
-		to = {};
+	const from = {}; const to = {};
 	const { modules, properties, ...rootProps } = updateData;
 
 	const determineUpdate = (obj, prefix = '') => {
@@ -79,13 +77,15 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		set(changes, `${p}.to`, get(to, p));
 	});
 
-	publish(events.MODEL_TICKET_UPDATE, { teamspace,
+	publish(events.MODEL_UPDATE_TICKET, { teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,
 		author,
+		isFederation,
 		changes,
-		date: updateData.properties[basePropertyLabels.UPDATED_AT] });
+		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT],
+		updateData });
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
