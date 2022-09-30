@@ -30,27 +30,27 @@ export enum RiskLevels {
 
 const RISK_LEVELS_MAP = {
 	[RiskLevels.UNSET]: {
-		label: formatMessage({ id: 'chip.riskLevel.unset', defaultMessage: 'Unset' }),
+		label: formatMessage({ id: 'chip.riskLevel.unset', defaultMessage: 'Unset Risk' }),
 		colour: COLOR.BASE_LIGHT,
 	},
 	[RiskLevels.VERY_LOW]: {
-		label: formatMessage({ id: 'chip.riskLevel.veryLow', defaultMessage: 'Very Low' }),
+		label: formatMessage({ id: 'chip.riskLevel.veryLow', defaultMessage: 'Very Low Risk' }),
 		colour: COLOR.FAVOURITE_MAIN,
 	},
 	[RiskLevels.LOW]: {
-		label: formatMessage({ id: 'chip.riskLevel.low', defaultMessage: 'Low' }),
+		label: formatMessage({ id: 'chip.riskLevel.low', defaultMessage: 'Low Risk' }),
 		colour: '#FF9800',
 	},
 	[RiskLevels.MODERATE]: {
-		label: formatMessage({ id: 'chip.riskLevel.moderate', defaultMessage: 'Moderate' }),
+		label: formatMessage({ id: 'chip.riskLevel.moderate', defaultMessage: 'Moderate Risk' }),
 		colour: '#ED6C02',
 	},
 	[RiskLevels.HIGH]: {
-		label: formatMessage({ id: 'chip.riskLevel.high', defaultMessage: 'High' }),
+		label: formatMessage({ id: 'chip.riskLevel.high', defaultMessage: 'High Risk' }),
 		colour: COLOR.ERROR_MAIN,
 	},
 	[RiskLevels.VERY_HIGH]: {
-		label: formatMessage({ id: 'chip.riskLevel.veryHigh', defaultMessage: 'Very High' }),
+		label: formatMessage({ id: 'chip.riskLevel.veryHigh', defaultMessage: 'Very High Risk' }),
 		colour: '#000000',
 	},
 };
