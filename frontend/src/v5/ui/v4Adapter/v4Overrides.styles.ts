@@ -27,18 +27,16 @@ import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
 import bim from './overrides/bim.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
-
-import issueSequences from './overrides/cards/issues/sequences.overrides';
-import issueProperties from './overrides/cards/issues/properties.overrides';
-import issueShapes from './overrides/cards/issues/shapes.overrides';
+import issues from './overrides/cards/issues/issues.overrides';
 import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
+import sharedStyles from './overrides/cards/sharedStyles/sharedStyles.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
 import groups from './overrides/cards/groups.overrides';
-import issueAttachments from './overrides/cards/issues/attachments.overrides';
 import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 import gis from './overrides/cards/gis.overrides';
+import compare from './overrides/cards/compare.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -61,7 +59,7 @@ export const V4OverridesContainer = styled.div`
 	${previewItem}
 	${previewDetails}
 	${previewComments}
-
+	${sharedStyles}
 	${colorPicker}
 
 	${bim}
@@ -70,16 +68,12 @@ export const V4OverridesContainer = styled.div`
 	${tree}
 	${views}
 	${measurements}
-	
-	${issueProperties}
-	${issueSequences}
-	${issueShapes}
-	${issueAttachments}
-
+	${issues}
 	${safetiBase}
 
 	${views}
 	${gis}
+	${compare}
 
 	${RevisionsSwitchContainer} {
 		display: none;

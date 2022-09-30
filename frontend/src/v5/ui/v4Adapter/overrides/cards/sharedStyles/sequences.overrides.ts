@@ -23,6 +23,10 @@ import { css } from 'styled-components';
 export default css`
 	${SequenceContent} {
 		margin-top: 5px;
+
+		${StyledFormControl} {
+			padding-top: 22px;
+		}
 	}
 
 	${StyledFormControl} {
@@ -37,7 +41,7 @@ export default css`
 			width: 190px;
 			${SequenceDateField} {
 				.MuiInputBase-root {
-					margin-top: 18px;
+					margin: 0px;
 
 					input {
 						color: ${({ theme }) => theme.palette.secondary.main};
