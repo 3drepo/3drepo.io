@@ -47,6 +47,7 @@ const noBorderStyles = (colour: string) => css`
 	color: ${colour};
 	&:hover {
 		text-decoration: underline;
+		filter: brightness(75%);
 	};
 `;
 
