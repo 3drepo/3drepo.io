@@ -23,6 +23,7 @@ const { createIndex } = require(`${v5Path}/handler/db`);
 
 const processTeamspace = async (teamspace) => {
 	const filesCols = await getCollectionsEndsWith(teamspace, '.ref');
+	logger.logInfo(`\t\t\tCreating indices in ${filesCols.length} collections...`);
 	await Promise.all(filesCols.map(({ name }) => createIndex(teamspace, name, { link: 1, type: 1 })));
 };
 
