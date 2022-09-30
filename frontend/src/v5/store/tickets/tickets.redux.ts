@@ -48,18 +48,10 @@ export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: 
 export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
-	let found = false;
+	const modelTicket = state.ticketsByModelId[modelId].find(({ _id }) => _id === ticket._id);
+	merge(modelTicket, ticket);
 
-	state.ticketsByModelId[modelId] = state.ticketsByModelId[modelId]
-		.map((loadedTicket) => {
-			if (loadedTicket._id === ticket._id) {
-				found = true;
-				return merge(loadedTicket, ticket);
-			}
-			return loadedTicket;
-		});
-
-	if (!found) {
+	if (!modelTicket) {
 		state.ticketsByModelId[modelId].push(ticket as ITicket);
 	}
 };

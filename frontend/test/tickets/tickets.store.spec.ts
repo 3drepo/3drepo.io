@@ -54,6 +54,14 @@ describe('Tickets: store', () => {
 		expect(ticketFromStore).toEqual(modified);
 	});
 
+	it('should insert a ticket', () => {
+		const ticket = ticketMockFactory();
+		dispatch(TicketsActions.upsertTicketSuccess(modelId, ticket));
+		const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
+		expect(ticketFromStore).toEqual(ticket);
+	});
+
+
 	describe('templates', () => {
 		beforeEach(() => {
 			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));

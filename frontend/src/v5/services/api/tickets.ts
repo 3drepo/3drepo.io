@@ -67,9 +67,9 @@ export const fetchContainerTickets = async (
 export const fetchFederationTickets = async (
 	teamspace: string,
 	projectId: string,
-	containerId: string,
+	federationId: string,
 ): Promise<FetchTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${containerId}/tickets`);
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`);
 	return data.tickets;
 };
 
