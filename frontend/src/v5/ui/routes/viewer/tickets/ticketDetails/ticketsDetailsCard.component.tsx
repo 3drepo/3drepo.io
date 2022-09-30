@@ -28,27 +28,28 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { omit } from 'lodash';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsCardViews } from '../tickets.constants';
+import { TicketForm } from '../ticketsForm/ticketsForm.component';
 
 export const TicketDetailCard = () => {
-	const contextValue = useContext(CardContext);
+	const { props: { ticketId }, setCardView } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, contextValue.props.ticket._id);
-	const [title, setTitle] = useState(ticket.title);
+	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 
 	const goBack = () => {
-		contextValue.setCardView(TicketsCardViews.List);
+		setCardView(TicketsCardViews.List);
 	};
 
 	const updateTicket = () => {
-		TicketsActionsDispatchers.updateTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			contextValue.props.ticket._id,
-			{ title },
-			isFederation,
-		);
+		// TicketsActionsDispatchers.updateTicket(
+		// 	teamspace,
+		// 	project,
+		// 	containerOrFederation,
+		// 	ticketId,
+		// 	{ title },
+		// 	isFederation,
+		// );
 	};
 
 	const cloneTicket = () => {
@@ -76,22 +77,30 @@ export const TicketDetailCard = () => {
 			teamspace,
 			project,
 			containerOrFederation,
-			contextValue.props.ticket._id,
+			ticketId,
 			isFederation,
 		);
+	}, [ticketId]);
+
+	useEffect(() => {
+		if (!ticket) {
+			return;
+		}
 
 		TicketsActionsDispatchers.fetchTemplate(
 			teamspace,
 			project,
 			containerOrFederation,
-			contextValue.props.ticket.type,
+			ticket.type,
 			isFederation,
 		);
-	}, [contextValue.props.ticket._id]);
+	}, [ticket?.type]);
 
-	const onChange = (evt) => {
-		setTitle(evt.target.value);
-	};
+
+
+	// const onChange = (evt) => {
+	// 	setTitle(evt.target.value);
+	// };
 
 	return (
 		<CardContainer>
@@ -102,7 +111,9 @@ export const TicketDetailCard = () => {
 			</CardHeader>
 			<CardContent>
 				Showing the details of the ticket {JSON.stringify(ticket)}
-				<TextField name="title" value={title} onChange={onChange} />
+				{/* <TextField name="title" value={title} onChange={onChange} /> */}
+
+				<TicketForm template={template} ticket={ticket} />
 				<Button onClick={updateTicket}> Update Ticket! </Button>
 				<Button onClick={cloneTicket}> Clone Ticket!</Button>
 

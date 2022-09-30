@@ -24,13 +24,13 @@ const TicketProperty = ({ property, value }) => {
 			return <TextField label={property.name} value={value} />;
 			break;
 		default:
-			return <>Unsupported property(for now) {JSON.stringify(value).substring(0, 80)}</>;
+			return <div>Unsupported property {property.nameproperty.type} (for now) {(`${JSON.stringify(value)}`).substring(0, 80)}</div>;
 			break;
 	}
 };
 
 export const TicketForm = ({ template, ticket }) => (
 	<>
-		{template.properties.map((property) => <TicketProperty property={property} value={ticket.properties[property.name]} />)}
+		{(template?.properties || []).map((property) => <TicketProperty property={property} value={ticket.properties[property.name]} />)}
 	</>
 );
