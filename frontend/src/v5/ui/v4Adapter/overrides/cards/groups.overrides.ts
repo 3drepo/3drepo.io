@@ -184,6 +184,7 @@ const expandedGroupItem = css`
 						top: -16px;
 						transform: none;
 						font-size: 10px;
+						left: 1px;
 					}
 				}
 				${DetailsDescription} {
@@ -231,6 +232,8 @@ const expandedGroupItem = css`
 
 				${InputLabel} {
 					padding: 0 15px;
+					top: 23PX;
+					left: 0;
 				}
 				${SelectedCriteria} {
 					padding: 5px 15px 12px;
@@ -278,6 +281,7 @@ const expandedGroupItem = css`
 							transform: none;
 							font-size: 10px;
 							top: -2px;
+							left: 1px;
 						}
 
 						.MuiInputBase-input {
