@@ -10,6 +10,12 @@
 # }
 
 import sys, json
+from os.path import exists
+
+if not exists(sys.argv[1]):
+  print("")
+  sys.exit(0)
+
 output=[]
 customLogins=json.load(open(sys.argv[1],"r"))
 
