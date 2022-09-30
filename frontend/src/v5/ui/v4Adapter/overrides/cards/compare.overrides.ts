@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SequenceDateActions } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
-import { Content as RiskDetails } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { Revisions } from '@/v4/routes/viewerGui/components/compare/components/compareDiffItem/compareDiffItem.styles';
+import { SelectField } from '@/v4/routes/viewerGui/components/compare/components/revisionsSelect/revisionsSelect.styles';
 import { css } from 'styled-components';
 
 export default css`
-	${RiskDetails} {
-		${SequenceDateActions} {
-			bottom: -4px;
-		}
+	${Revisions} {
+		height: 26px;
+		display: flex;
+		align-items: center;
+	}
+
+	${SelectField} {
+		margin: 2px;
+		height: 24px;
 	}
 `;

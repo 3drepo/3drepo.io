@@ -16,90 +16,21 @@
  */
 
 import { css } from 'styled-components';
-import { ActionsLine, StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
+import { ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 import { DescriptionImage, Content as PropertiesTabContent } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
-import { DateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
+import { DateFieldContainer as IssuesDateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
 import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 
-export const DescriptionStyles = css`
-	.description {
-		margin: 14px 0;
-
-		${StyledTextField} {
-			margin: 0;
-		}
-
-		label {
-			font-size: 10px;
-			transform: scale(1);
-			left: 1px;
-			top: -18px;
-		}
-
-		.MuiFormControl-root {
-			margin-top: 0;
-			.MuiInputBase-root {
-				padding: 0;
-				& > textarea {
-					min-height: 2rem;
-					padding: 5px 10px;
-				}
-				.MuiOutlinedInput-notchedOutline {
-					height: calc(100%);
-					min-height: 42px;
-				}
-			}
-		}
-
-		button {
-			margin: 0 10px 0 0;
-			height: 15px;
-			width: 15px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-
-			&:hover {
-				background-color: transparent;
-			}
-
-			svg {
-				font-size: 1rem;
-			}
-		}
-
-		${ActionsLine} {
-			top: 4px;
-			right: 0;
-		}
-		${StyledMarkdownField} {
-			border: 1px solid ${({ theme }) => theme.palette.base.lighter};
-			border-radius: 5px;
-			min-height: 32px;
-			padding: 4px 10px;
-			margin-top: 0px;
-			margin-bottom: 0px;
-			font-size: 0.75rem;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			p {
-				margin: 0;
-			}
-		}
-	}
-`;
-
 export default css`
-	${DescriptionStyles}
-
 	${PropertiesTabContent} {
 		// Drop-down inputs
 		${StyledFormControl} {
 			input {
 				padding: 0px 11px;
 			}
-
-			.MuiInput-root svg { margin-top: 15px; }
 
 			// Drop down icon for date selector
 			.MuiInputAdornment-root {
@@ -112,6 +43,11 @@ export default css`
 					height: 20px;
 				}
 			}
+
+			&:last-of-type:first-child {
+				margin-left: 0;
+				margin-right: 10px;
+			}
 		}
 
 		${ActionsLine} {
@@ -123,8 +59,7 @@ export default css`
 			border-radius: 5px;
 		}
 
-		${DateFieldContainer} {
-			margin-top: 17px;
+		${IssuesDateFieldContainer} {
 			.MuiInputBase-root {
 				padding: 0;
 				input {
