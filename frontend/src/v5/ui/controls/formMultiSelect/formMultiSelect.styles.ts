@@ -16,6 +16,7 @@
  */
 import styled from 'styled-components';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
+import { MenuItem } from '@mui/material';
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
@@ -26,4 +27,9 @@ export const NoResults = styled.div`
 	padding: 5px 12px 8px;
 	color: ${({ theme }) => theme.palette.base.main};
 	${({ theme }) => theme.typography.body1};
+`;
+
+export const RenderValueTriggerer = styled(MenuItem)`
+	display: none;
+	padding: 0;
 `;

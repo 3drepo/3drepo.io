@@ -19,10 +19,10 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormSelect, FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { isEqual, xorWith } from 'lodash';
-import { Children, cloneElement, ReactElement, useContext, useEffect, useState } from 'react';
+import { isArray, isEqual, xorWith } from 'lodash';
+import { Children, cloneElement, ReactElement, useContext, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { SearchInput, NoResults } from './formMultiSelect.styles';
+import { SearchInput, NoResults, RenderValueTriggerer } from './formMultiSelect.styles';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
 const MenuContent = () => {
@@ -51,9 +51,15 @@ export type FormMultiSelectProps = FormSelectProps & { children: JSX.Element | J
 export const FormMultiSelect = ({ children: rawChildren, control, label, name, ...props }: FormMultiSelectProps) => {
 	const [selectedItems, setSelectedItems] = useState([]);
 	const [items, setItems] = useState([]);
+	const renderValueRef = useRef<HTMLLIElement>();
 
 	const toggleItemSelection = (item) => {
-		setSelectedItems((items) => xorWith(items, [item], isEqual));
+		setSelectedItems((items) => {
+			if (!items.length) {
+				renderValueRef?.current?.click();
+			}
+			return xorWith(items, [item], isEqual);
+		})
 	};
 
 	const itemIsSelected = (itemName) => !!selectedItems.find(({ name }) => name === itemName);
@@ -104,6 +110,7 @@ export const FormMultiSelect = ({ children: rawChildren, control, label, name, .
 					placeholder={formatMessage({ id: 'form.multiSelect.search.placeholder', defaultMessage: 'Search...' })}
 					onKeyDown={preventInputUnfocus}
 				/>
+				<RenderValueTriggerer ref={renderValueRef} />
 				<MenuContent />
 			</FormSelect>
 		</SearchContextComponent>
