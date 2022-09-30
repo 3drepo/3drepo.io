@@ -701,6 +701,9 @@ export const theme = createTheme({
 					borderRadius: 6,
 					height: 20,
 					gap: 4,
+					userSelect: 'none',
+					margin: 0,
+					letterSpacing: 0.7,
 					svg: {
 						height: 11,
 						width: 11,

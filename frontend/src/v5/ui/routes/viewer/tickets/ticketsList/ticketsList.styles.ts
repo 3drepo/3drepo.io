@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
@@ -31,23 +31,6 @@ export const Filters = styled.div`
 	flex-direction: row;
 	flex-wrap: wrap;
 	gap: 6px;
-	margin-bottom: 15px;
-`;
-
-export const TemplateName = styled.div<{ $selected?: boolean }>`
-	cursor: pointer;
-	font-size: 8px;
-	line-height: 14px;
-	font-weight: 500;
-	border-radius: 4px;
-	padding: 1px 6px;
-	border: solid 1px ${({ theme }) => theme.palette.base.main};
-	background-color: #f9faff;
-	color: ${({ theme }) => theme.palette.base.main};
-
-	${({ $selected }) => $selected && css`
-		color: ${({ theme }) => theme.palette.primary.main};
-		border-color: ${({ theme }) => theme.palette.primary.main};
-		background-color: ${({ theme }) => theme.palette.primary.lightest};
-	`}
+	margin-top: -2px;
+	margin-bottom: 13px;
 `;

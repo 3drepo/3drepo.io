@@ -22,16 +22,17 @@ import styled, { css } from 'styled-components';
 type ChipVariants = ChipProps['variant'] | 'label' | 'label-outlined';
 
 export type ChipType<T extends ElementType = ChipTypeMap['defaultComponent']> = Omit<ChipProps<T>, 'variant'> & {
-	variant: ChipVariants,
-	colour: string,
+	variant?: ChipVariants,
+	colour?: string,
 };
 
-const filledStyles = (colour) => css`
+const filledStyles = (colour: string) => css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	background-color: ${colour};
+	border-color: ${colour};
 `;
 
-const outlinedStyles = (colour) => css`
+const outlinedStyles = (colour: string) => css`
 	color: ${colour};
 	border-color: ${colour};
 	background: 'transparent';
@@ -40,7 +41,7 @@ const outlinedStyles = (colour) => css`
 	};
 `;
 
-const noBorderStyles = (colour) => css`
+const noBorderStyles = (colour: string) => css`
 	border-color: transparent;
 	background-color: transparent;
 	color: ${colour};
@@ -50,7 +51,7 @@ const noBorderStyles = (colour) => css`
 `;
 
 export const Chip = styled(ChipMui)<ChipType>`
-	${({ variant, colour }) => {
+	${({ variant, colour = '#000' }) => {
 		switch (variant) {
 			case 'noBorder':
 				return noBorderStyles(colour);
@@ -61,4 +62,26 @@ export const Chip = styled(ChipMui)<ChipType>`
 		}
 	}
 };
+`;
+
+export const FilterChip = styled(Chip).attrs({
+	clickable: false,
+})<{ selected?: boolean }>`
+	cursor: pointer;
+	height: 18px;
+	border-color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.base.main};
+	:hover {
+		background-color: inherit;
+		border-color: ${({ theme }) => theme.palette.primary.main};
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
+	${({ selected }) => selected && css`
+		background-color: ${({ theme }) => theme.palette.primary.lightest};
+		border-color: ${({ theme }) => theme.palette.primary.main};
+		color: ${({ theme }) => theme.palette.primary.main};
+		:hover {
+			background-color: ${({ theme }) => theme.palette.primary.lightest};
+		}
+	`}
 `;
