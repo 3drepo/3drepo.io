@@ -23,6 +23,10 @@ import {
 	TicketsActions,
 	FetchTicketsAction,
 	FetchTemplatesAction,
+	FetchTicketAction,
+	UpdateTicketAction,
+	CreateTicketAction,
+	FetchTemplateAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -31,7 +35,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets({ teamspace, projectId, modelId });
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -44,12 +48,30 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 	}
 }
 
+export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketAction) {
+	try {
+		const fetchModelTicket = isFederation
+			? API.Tickets.fetchFederationTicket
+			: API.Tickets.fetchContainerTicket;
+		const ticket = yield fetchModelTicket(teamspace, projectId, modelId, ticketId);
+		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model} ' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+		}));
+	}
+}
+
 export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
 	try {
 		const fetchModelTemplates = isFederation
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates({ teamspace, projectId, modelId });
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -66,7 +88,69 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 	}
 }
 
+export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateAction) {
+	try {
+		const fetchTicketsTemplate = isFederation
+			? API.Tickets.fetchFederationTemplate
+			: API.Tickets.fetchContainerTemplate;
+		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(TicketsActions.replaceTemplateSuccess(modelId, template));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchTemplate.error.action',
+				defaultMessage: 'trying to fetch a template',
+			}),
+			error,
+			details: formatMessage({
+				id: 'tickets.fetchTemplates.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
+export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket, isFederation }: UpdateTicketAction) {
+	try {
+		const updateModelTicket = isFederation
+			? API.Tickets.updateFederationTicket
+			: API.Tickets.updateContainerTicket;
+		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
+		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+		}));
+	}
+}
+
+export function* createTicket({ teamspace, projectId, modelId, ticket, isFederation }: CreateTicketAction) {
+	try {
+		const updateModelTicket = isFederation
+			? API.Tickets.createFederationTicket
+			: API.Tickets.createContainerTicket;
+		const { _id: ticketId } = yield updateModelTicket(teamspace, projectId, modelId, ticket);
+		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.createTicket.error', defaultMessage: 'trying to create the ticket for {model} ' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+		}));
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
+	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
+	yield takeLatest(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
+	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
+	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 }

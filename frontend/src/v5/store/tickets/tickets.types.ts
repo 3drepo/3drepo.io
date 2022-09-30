@@ -29,3 +29,5 @@ export interface ITemplate {
 	name: string,
 	code: string,
 }
+
+export type NewTicket = Omit<ITicket, '_id'>;
