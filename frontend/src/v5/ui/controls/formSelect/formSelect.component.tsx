@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormControl, SelectProps, InputLabel } from '@mui/material';
+import { SelectProps, InputLabel, FormControl } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { Select } from './formSelect.styles';
 
@@ -35,15 +35,17 @@ export const FormSelect = ({
 	defaultValue = '',
 	...otherProps
 }: FormSelectProps) => (
-	<FormControl>
-		<InputLabel
-			id={`${name}-label`}
-			required={required}
-			disabled={disabled}
-			hidden={hidden}
-		>
-			{label}
-		</InputLabel>
+	<FormControl hiddenLabel={!!label}>
+		{label && (
+			<InputLabel
+				id={`${name}-label`}
+				required={required}
+				disabled={disabled}
+				hidden={hidden}
+			>
+				{label}
+			</InputLabel>
+		)}
 		<Controller
 			control={control}
 			name={name}

@@ -247,12 +247,12 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				root: {
-					margin: '38px 0 0',
+					margin: '18px 0 0',
 					width: '100%',
 					'& label': {
 						...typography.body1,
-						top: '-35.5px',
-						left: '-13px',
+						position: 'unset',
+						transform: 'none',
 						color: COLOR.BASE_MAIN,
 
 						'&.Mui-disabled': {
@@ -970,9 +970,14 @@ export const theme = createTheme({
 		MuiFormControl: {
 			styleOverrides: {
 				root: {
-					margin: '38px 0 0',
+					margin: '18px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
+					
+					'label': {	
+						transform: 'none',
+						position: 'unset',
+					},
 				},
 			},
 		},
