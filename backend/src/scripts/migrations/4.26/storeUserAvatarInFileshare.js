@@ -29,7 +29,7 @@ const storeUserAvatarInFileshare = async (username) => {
 		{ $unset: { 'customData.avatar': 1 } },
 		{ 'customData.avatar': 1, user: 1 });
 
-	if (user) {
+	if (user && user.customData.avatar?.data?.buffer) {
 		logger.logInfo(`\t\t-${username}`);
 		await uploadAvatar(user.user, user.customData.avatar.data.buffer);
 	}
