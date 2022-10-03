@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
+import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { FormDateTextField } from './formDateTextField/formDateTextField.component';
 
@@ -30,20 +31,26 @@ export const FormDatePicker = ({
 	control,
 	formError,
 	...otherProps
-}: FormDatePickerProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<DatePicker
-				{...field}
-				{...otherProps}
-				dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
-				disableHighlightToday
-				renderInput={({ ref, ...textFieldProps }) => (
-					<FormDateTextField {...textFieldProps} formError={formError} />
-				)}
-			/>
-		)}
-	/>
-);
+}: FormDatePickerProps) => {
+	const [open, setOpen] = useState(false);
+	return (
+		<Controller
+			control={control}
+			name={name}
+			render={({ field }) => (
+				<DatePicker
+					{...field}
+					{...otherProps}
+					onOpen={() => setOpen(true)}
+					onClose={() => setOpen(false)}
+					open={open}
+					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
+					disableHighlightToday
+					renderInput={({ ref, ...textFieldProps }) => (
+						<FormDateTextField {...textFieldProps} formError={formError} onClick={() => setOpen(true)} />
+					)}
+				/>
+			)}
+		/>
+	);
+};

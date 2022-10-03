@@ -18,6 +18,7 @@ import { DateTimePicker, DateTimePickerProps } from '@mui/x-date-pickers';
 import { Controller } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import { FormDateTextField } from './formDateTextField/formDateTextField.component';
+import { useState } from 'react';
 
 export type FormDateTimePickerProps = Partial<DateTimePickerProps<any, any>> & {
 	name: string;
@@ -32,11 +33,13 @@ export const FormDateTimePicker = ({
 	formError,
 	...otherProps
 }: FormDateTimePickerProps) => {
+	const [open, setOpen] = useState(false);
+
 	const formatTime = (time) => time.replace('@', formatMessage({
 		id: 'form.dateTime.at',
 		defaultMessage: 'at',
 	}));
-	 
+
 	return (
 		<Controller
 			control={control}
@@ -45,12 +48,15 @@ export const FormDateTimePicker = ({
 				<DateTimePicker
 					{...field}
 					{...otherProps}
+					onOpen={() => setOpen(true)}
+					onClose={() => setOpen(false)}
+					open={open}
 					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
 					disableHighlightToday
 					inputFormat="DD/MM/YYYY @ hh:mma"
 					rifmFormatter={formatTime}
 					renderInput={({ ref, ...textFieldProps }) => (
-						<FormDateTextField {...textFieldProps} formError={formError} />
+						<FormDateTextField {...textFieldProps} formError={formError} onClick={() => setOpen(true)} />
 					)}
 				/>
 			)}

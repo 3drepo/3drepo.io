@@ -28,6 +28,10 @@ export const TextField = styled(TextFieldBase)`
 		padding: 0;
 	}
 
+	input {
+		cursor: pointer;
+	}
+
 	.MuiIconButton-edgeEnd {
 		margin: 0;
 		padding: 5px 12px;

@@ -20,11 +20,13 @@ import { TextField } from './formDateTextField.styles';
 type FormDateTextFieldProps = TextFieldProps & {
 	formError?: any,
 	inputRef?: any,
+	onClick: () => void;
 };
 
-export const FormDateTextField = ({ inputRef, formError, ...params }: FormDateTextFieldProps) => {
+export const FormDateTextField = ({ inputRef, formError, onClick, ...params }: FormDateTextFieldProps) => {
 	const preventManualInsertion = (e) => {
 		e.preventDefault();
+		onClick();
 	};
 
 	return (
