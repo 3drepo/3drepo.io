@@ -15,30 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Switch, SwitchProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
-import { Container } from './formToggle.styles';
+import styled from 'styled-components';
 
-export type FormToggleProps = SwitchProps & {
-	control: any;
-	name: string;
-	children: any;
-}
-
-export const FormToggle = ({ control, name, children, ...props }: FormToggleProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<Container>
-				{children}
-				<Switch
-					{...field}
-					inputRef={field.ref}
-					id={name}
-					{...props}
-				/>
-			</Container>
-		)}
-	/>
-);
+export const Container = styled.div`
+	display: flex;
+	flex-direction: row;
+	color: ${({ theme }) => theme.palette.base.main};
+	margin-top: 20px;
+	
+	.MuiSwitch-root {
+		margin-left: 7px;
+	}
+`;
