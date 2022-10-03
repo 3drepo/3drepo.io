@@ -1,0 +1,17 @@
+name: On New Issue or PR
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  add-to-project:
+    name: Add issue/PR to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: 'https://github.com/orgs/3drepo/projects/22'
+          github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
