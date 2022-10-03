@@ -33,6 +33,7 @@ export const FormDatePicker = ({
 	...otherProps
 }: FormDatePickerProps) => {
 	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState(null);
 	return (
 		<Controller
 			control={control}
@@ -44,8 +45,11 @@ export const FormDatePicker = ({
 					onOpen={() => setOpen(true)}
 					onClose={() => setOpen(false)}
 					open={open}
+					onChange={setValue}
+					value={value}
 					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
 					disableHighlightToday
+					inputFormat="DD/MM/YYYY"
 					renderInput={({ ref, ...textFieldProps }) => (
 						<FormDateTextField {...textFieldProps} formError={formError} onClick={() => setOpen(true)} />
 					)}

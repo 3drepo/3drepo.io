@@ -34,6 +34,7 @@ export const FormDateTimePicker = ({
 	...otherProps
 }: FormDateTimePickerProps) => {
 	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState(null);
 
 	const formatTime = (time) => time.replace('@', formatMessage({
 		id: 'form.dateTime.at',
@@ -51,6 +52,8 @@ export const FormDateTimePicker = ({
 					onOpen={() => setOpen(true)}
 					onClose={() => setOpen(false)}
 					open={open}
+					onChange={setValue}
+					value={value}
 					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
 					disableHighlightToday
 					inputFormat="DD/MM/YYYY @ hh:mma"
