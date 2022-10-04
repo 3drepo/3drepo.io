@@ -669,7 +669,7 @@ export const theme = createTheme({
 					width: '100%',
 					color: COLOR.SECONDARY_MAIN,
 
-					'&.Mui-selected, &.Mui-selected:hover': {
+					'&.Mui-selected, &.Mui-selected:hover, &:hover': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 					},
 				},
@@ -682,8 +682,10 @@ export const theme = createTheme({
 					boxShadow: SHADOW.LEVEL_5,
 					padding: 0,
 					// multiSelect
-					'&[aria-labelledby="selectSingle-label"]': {
-						padding: '8px 0'
+					'&[aria-labelledby="multiselect-label"]': {
+						'.Mui-selected': {
+							background: 'transparent',
+						},
 					},
 				},
 			},
