@@ -18,27 +18,26 @@ import { CheckboxContainer, MenuItem } from './multiSelectMenuItem.styles';
 import { Checkbox } from '@mui/material';
 
 type MultiSelectMenuItem = {
-	label: string,
 	value: any,
-	name: string,
+	children: any,
 	itemIsSelected?: (name) => boolean,
 	toggleItemSelection?: (item) => void,
 };
 
 export const MultiSelectMenuItem = ({
-	label,
 	value,
-	name,
+	children,
 	itemIsSelected,
 	toggleItemSelection,
 }: MultiSelectMenuItem) => (
 	<MenuItem
 		key={value.toString()}
-		onClick={() => toggleItemSelection({ value, label, name })}
+		onClick={() => toggleItemSelection({ value, children })}
+		selected={itemIsSelected(value)}
 	>
 		<CheckboxContainer>
-			<Checkbox checked={itemIsSelected(name)} />
-			{label}
+			<Checkbox checked={itemIsSelected(value)} />
+			{children}
 		</CheckboxContainer>
 	</MenuItem>
 );

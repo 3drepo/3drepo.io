@@ -23,8 +23,8 @@ import MenuItemBase from '@mui/material/MenuItem';
 export const CheckboxContainer = styled.div`
 	width: 100%;
 	margin: 0;
-	padding: 8px 14px;
-	height: 48px;
+	padding: 0 14px;
+	height: 34px;
 	box-sizing: border-box;
 	display: flex;
 	align-items: center;
