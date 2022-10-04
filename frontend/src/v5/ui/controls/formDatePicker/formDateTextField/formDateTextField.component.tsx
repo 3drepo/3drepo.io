@@ -23,7 +23,7 @@ type FormDateTextFieldProps = TextFieldProps & {
 	onClick: () => void;
 };
 
-export const FormDateTextField = ({ inputRef, formError, onClick, ...params }: FormDateTextFieldProps) => {
+export const FormDateTextField = ({ inputRef, formError, onClick, ...props }: FormDateTextFieldProps) => {
 	const preventManualInsertion = (e) => {
 		e.preventDefault();
 		onClick();
@@ -31,11 +31,16 @@ export const FormDateTextField = ({ inputRef, formError, onClick, ...params }: F
 
 	return (
 		<TextField
-			{...params}
+			{...props}
+			inputProps={{
+				...props.inputProps,
+				placeholder: ' ',
+			}}
 			ref={inputRef}
 			error={!!formError}
 			helperText={formError?.message}
 			onClick={preventManualInsertion}
+			onKeyDown={(e) => e.preventDefault()}
 		/>
 	);
 };
