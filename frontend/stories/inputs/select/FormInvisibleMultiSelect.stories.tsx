@@ -16,6 +16,7 @@
  */
 import { Button } from '@controls/button';
 import { FormInvisibleMultiSelect } from '@controls/formInvisibleMultiSelect/formInvisibleMultiSelect.component';
+import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
@@ -28,9 +29,6 @@ export default {
 		},
 		defaultValue: {
 			type: 'string',
-		},
-		values: {
-			control: 'array',
 		},
 		disabled: {
 			type: 'boolean',
@@ -50,7 +48,11 @@ const Controlled: ComponentStory<typeof FormInvisibleMultiSelect> = (args) => {
 				control={control}
 				TriggerComponent={<Button variant="contained">This is a button that will trigger the select</Button>}
 				{...args}
-			/>
+			>
+				{["1", "2", "3", "4"].map((option) => (
+					<MultiSelectMenuItem value={option} key={option}>Option #{option}</MultiSelectMenuItem>
+				))}
+			</FormInvisibleMultiSelect>
 		</FormContainer>
 	);
 };
@@ -59,5 +61,4 @@ export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Invisible Multi Select input',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

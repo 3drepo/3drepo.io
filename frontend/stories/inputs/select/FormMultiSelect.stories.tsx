@@ -15,9 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
+import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
+import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
+import PrintIcon from '@assets/icons/print.svg';
+import styled from 'styled-components';
 
 export default {
 	title: 'Inputs/Select/FormMultiSelect',
@@ -28,9 +34,6 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
-		values: {
-			control: 'array',
-		},
 		disabled: {
 			type: 'boolean',
 		},
@@ -38,6 +41,13 @@ export default {
 	component: FormMultiSelect,
 	parameters: { controls: { exclude: ['control'] } },
 } as ComponentMeta<typeof FormMultiSelect>;
+
+const IconContainer = styled.div`
+	margin-right: 5px;
+	svg {
+		width: 15px;
+	}
+`;
 
 const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
@@ -47,8 +57,44 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 			<FormMultiSelect
 				name="multiselect"
 				control={control}
+				renderValue={(selectedItem: any[]) => (
+					selectedItem.map((item, index) => (
+						<>
+							{index > 0 ? ", ": ""}
+							<div style={{ display: 'inline-flex' }}>
+								{item.children[0]}
+							</div>
+							{item.children[1]}	
+						</>
+					))
+				)}
 				{...args}
-			/>
+			>
+				<MultiSelectMenuItem value={1} key={1}>
+					<IconContainer>
+						<CalendarIcon />
+					</IconContainer>
+					calendar icon
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value={2} key={2}>
+					<IconContainer>
+						<ClearIcon />
+					</IconContainer>
+					clear icon
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value={3} key={3}>
+					<IconContainer>
+						<ChevronIcon />
+					</IconContainer>
+					chevron icon
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value={4} key={4}>
+					<IconContainer>
+						<PrintIcon />
+					</IconContainer>
+					print icon
+				</MultiSelectMenuItem>
+			</FormMultiSelect>
 		</FormContainer>
 	);
 };
@@ -57,5 +103,4 @@ export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Multi Select input',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

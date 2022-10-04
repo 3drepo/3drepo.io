@@ -28,6 +28,12 @@ export default {
 		checked: {
 			type: 'boolean',
 		},
+		disabled: {
+			type: 'boolean',
+		},
+		children: {
+			type: 'string',
+		},
 	},
 	component: FormToggle,
 	parameters: { controls: { exclude: [
@@ -62,5 +68,5 @@ const Controlled: ComponentStory<typeof FormToggle> = (args) => {
 export const ControlledFormToggle = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormToggle.args = {
-	label: 'Controlled Toggle input',
+	children: 'Controlled Toggle input',
 };
