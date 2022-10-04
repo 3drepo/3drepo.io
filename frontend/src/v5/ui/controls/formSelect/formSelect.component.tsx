@@ -33,38 +33,48 @@ export const FormSelect = ({
 	hidden,
 	value,
 	defaultValue = '',
+	onClose,
 	...otherProps
-}: FormSelectProps) => (
-	<FormControl hiddenLabel={!!label}>
-		{label && (
-			<InputLabel
-				id={`${name}-label`}
-				required={required}
-				disabled={disabled}
-				hidden={hidden}
-			>
-				{label}
-			</InputLabel>
-		)}
-		<Controller
-			control={control}
-			name={name}
-			defaultValue={defaultValue}
-			render={({ field }) => (
-				<Select
-					{...field}
-					inputRef={field.ref}
-					labelId={`${name}-label`}
-					id={name}
-					label={label}
+}: FormSelectProps) => {
+	const handleClose = (e, field) => {
+		if (value) {
+			field.onChange({ target: { value } })
+		}
+		onClose?.(e);
+	};
+
+	return (
+		<FormControl hiddenLabel={!!label}>
+			{label && (
+				<InputLabel
+					id={`${name}-label`}
+					required={required}
 					disabled={disabled}
 					hidden={hidden}
-					onClose={value && (() => field.onChange({ target: { value } }))}
-					{...otherProps}
 				>
-					{children}
-				</Select>
+					{label}
+				</InputLabel>
 			)}
-		/>
-	</FormControl>
-);
+			<Controller
+				control={control}
+				name={name}
+				defaultValue={defaultValue}
+				render={({ field }) => (
+					<Select
+						{...field}
+						inputRef={field.ref}
+						labelId={`${name}-label`}
+						id={name}
+						label={label}
+						disabled={disabled}
+						hidden={hidden}
+						onClose={(e) => handleClose(e, field)}
+						{...otherProps}
+					>
+						{children}
+					</Select>
+				)}
+			/>
+		</FormControl>
+	);
+};
