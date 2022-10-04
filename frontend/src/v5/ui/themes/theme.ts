@@ -1329,6 +1329,9 @@ export const theme = createTheme({
 						// day number (1-31)
 						'.MuiPickersDay-root': {
 							color: COLOR.SECONDARY_MAIN,
+							'&:focus': {
+								backgroundColor: 'transparent',
+							},
 							'&:hover': {
 								backgroundColor: COLOR.TERTIARY_LIGHTEST,
 							},
