@@ -1331,6 +1331,9 @@ export const theme = createTheme({
 							color: COLOR.SECONDARY_MAIN,
 							'&:focus': {
 								backgroundColor: 'transparent',
+								'&.Mui-selected': {
+									backgroundColor: COLOR.PRIMARY_MAIN,
+								},
 							},
 							'&:hover': {
 								backgroundColor: COLOR.TERTIARY_LIGHTEST,
