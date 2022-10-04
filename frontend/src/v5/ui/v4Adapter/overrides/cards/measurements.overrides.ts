@@ -18,7 +18,7 @@
 import { css } from 'styled-components';
 import { Container as MeasurementsContainer } from '@/v4/routes/viewerGui/components/measurements/measurements.styles';
 import { StyledTextField } from '@/v4/routes/components/textField/textField.styles';
-import { measurementsStying, colorPickerStyling } from './issues/shapes.overrides';
+import { measurementsStying, colorPickerStyling } from './sharedStyles/shapes.overrides';
 
 export default css`
 	${colorPickerStyling}
