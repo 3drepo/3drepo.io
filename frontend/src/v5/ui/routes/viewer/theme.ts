@@ -88,7 +88,6 @@ export const theme = createTheme(
 								padding: '0px 12px !important',
 							},
 							'& svg': {
-								color: COLOR.SECONDARY_MAIN,
 								'& path': {
 									fill: 'currentColor !important',
 								},
@@ -127,7 +126,7 @@ export const theme = createTheme(
 							'& .MuiFormHelperText-root': {
 								position: 'relative',
 								height: 0,
-								top: -2,
+								top: 0,
 							},
 						},
 					},

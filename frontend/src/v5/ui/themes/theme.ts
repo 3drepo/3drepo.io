@@ -846,7 +846,7 @@ export const theme = createTheme({
 						height: 35,
 						lineHeight: '35px',
 					},
-					'& input, & textarea': {
+					'& input, & textarea, & .MuiInputAdornment-root': {
 						...typography.body1,
 						color: COLOR.SECONDARY_MAIN,
 					},
@@ -862,7 +862,7 @@ export const theme = createTheme({
 						},
 					},
 					'&.Mui-disabled': {
-						'& input, & textarea': {
+						'& input, & textarea, & .MuiInputAdornment-root': {
 							color: COLOR.BASE_LIGHT,
 						},
 						'& path': {
@@ -878,7 +878,7 @@ export const theme = createTheme({
 							borderColor: COLOR.ERROR_MAIN,
 							boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
 						},
-						'& input, & textarea': {
+						'& input, & textarea, & .MuiInputAdornment-root': {
 							color: COLOR.ERROR_MAIN,
 						},
 						'& path': {
