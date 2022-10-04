@@ -42,6 +42,10 @@ export default css`
 			}
 		}
 
+		.MuiTextField-root {
+			margin-top: -18px;
+		}
+
 		${Image},
 		${ThumbnailPlaceholder} {
 			width: 70px;

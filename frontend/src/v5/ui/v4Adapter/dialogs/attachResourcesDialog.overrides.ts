@@ -190,8 +190,8 @@ const AttachResourcesLink = css`
 					position: unset;
 				}
 
-				&:first-of-type {
-					margin-bottom: 20px;
+				&:last-of-type {
+					margin-top: 20px;
 				}
 
 				button {

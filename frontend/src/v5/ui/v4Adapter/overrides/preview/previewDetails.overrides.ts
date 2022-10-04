@@ -57,7 +57,7 @@ export default css`
 
 			.MuiAccordionSummary {
 				&-content {
-					margin: 12px 0;
+					margin: 12px 0 5px;
 				}
 				
 				&-expandIconWrapper {

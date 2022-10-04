@@ -34,6 +34,7 @@ export const DescriptionStyles = css`
 			transform: scale(1);
 			left: 1px;
 			top: -18px;
+			position: absolute;
 		}
 
 		.MuiFormControl-root {
@@ -137,7 +138,6 @@ export const FieldsRowStyles = css`
 				margin: 0;
 				/* Level of risk */
 				${Header} {
-					margin-top: -13px;
 					font-size: 10px;
 					color: ${({ theme }) => theme.palette.base.main};
 				}
