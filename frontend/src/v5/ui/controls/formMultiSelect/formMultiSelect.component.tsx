@@ -19,15 +19,16 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormSelect, FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { isArray, isEqual, xorWith } from 'lodash';
+import { isEqual, xorWith } from 'lodash';
 import { Children, cloneElement, ReactElement, useContext, useEffect, useRef, useState } from 'react';
+import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
 import { SearchInput, NoResults, RenderValueTriggerer } from './formMultiSelect.styles';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
 const MenuContent = () => {
 	const { filteredItems } = useContext(SearchContext);
-	
+
 	if (filteredItems.length > 0) {
 		return (
 			<ScrollArea autoHeight>
@@ -46,9 +47,12 @@ const MenuContent = () => {
 	);
 };
 
-export type FormMultiSelectProps = FormSelectProps & { children: JSX.Element | JSX.Element[] }
+export type FormMultiSelectProps = FormSelectProps & {
+	children: JSX.Element | JSX.Element[],
+	renderValue?: (selectedItems: any[]) => any;
+};
 
-export const FormMultiSelect = ({ children: rawChildren, control, label, name, ...props }: FormMultiSelectProps) => {
+export const FormMultiSelect = ({ children: rawChildren, control, name, renderValue, ...props }: FormMultiSelectProps) => {
 	const [selectedItems, setSelectedItems] = useState([]);
 	const [items, setItems] = useState([]);
 	const renderValueRef = useRef<HTMLLIElement>();
@@ -62,7 +66,7 @@ export const FormMultiSelect = ({ children: rawChildren, control, label, name, .
 		})
 	};
 
-	const itemIsSelected = (itemName) => !!selectedItems.find(({ name }) => name === itemName);
+	const itemIsSelected = (itemValue) => !!selectedItems.find(({ value }) => isEqual(value, itemValue));
 
 	const preventInputUnfocus = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
@@ -80,10 +84,18 @@ export const FormMultiSelect = ({ children: rawChildren, control, label, name, .
 		setItems(
 			Children.toArray(rawChildren)
 				.map((child: ReactElement) => (
-					cloneElement(child, { toggleItemSelection, itemIsSelected })
+					cloneElement(child, {
+						toggleItemSelection,
+						itemIsSelected,
+						searchValue: onlyText(child.props.children),
+					})
 				))
 		);
 	};
+
+	const formatRenderValue = () => (
+		renderValue?.(selectedItems) || selectedItems.map(({ children }) => children).join(", ")
+	);
 
 	useEffect(() => {
 		verifyChildrenAreValid();
@@ -91,18 +103,18 @@ export const FormMultiSelect = ({ children: rawChildren, control, label, name, .
 	}, [rawChildren]);
 
 	// necessary because cloneElement does not keep track of
-	// changes in the props passed to the children which do not have
-	// the latest values for selectedItems
+	// changes in the props passed to children (so the latter
+	// do not have the updated value for selectedItems)
 	useEffect(() => { populateChildren(); }, [selectedItems]);
 
 	return (
-		<SearchContextComponent fieldsToFilter={['props.label']} items={items}>
+		<SearchContextComponent fieldsToFilter={['props.searchValue']} items={items}>
 			<FormSelect
 				multiple
 				defaultValue={[]}
 				control={control}
 				name={name}
-				renderValue={() => selectedItems.map(({ label }) => label).join(', ')}
+				renderValue={formatRenderValue}
 				value={selectedItems.map(({ value }) => value)}
 				{...props}
 			>
