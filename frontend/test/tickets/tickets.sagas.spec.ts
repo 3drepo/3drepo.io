@@ -135,7 +135,7 @@ describe('Tickets: sagas', () => {
 					.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 					.reply(200, ticket);
 
-				const updateProp = {title:'updatedFederationTicketName'};
+				const updateProp = {_id: ticket._id,title:'updatedFederationTicketName'};
 
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true))

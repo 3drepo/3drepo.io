@@ -15,19 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'coords' | 'measurements';
+
+export interface PropertyDefinition {
+	name: string;
+	type: PropertyTypeDefinition;
+	values?: string[] | 'jobsAndUsers';
+	default?: string;
+	readOnly?: boolean;
+	required?: boolean;
+	deprecated?: boolean;
+}
+
 export interface ITicket {
 	_id: string,
 	title: string,
 	number: number,
 	type: string,
-	properties: any,
-	modules: any,
+	properties: Record<string, any>,
+	modules?: Record<string, Record<string, any>>,
 }
 
 export interface ITemplate {
-	_id: string,
-	name: string,
-	code: string,
+	_id: string;
+	name: string;
+	code: string;
+	properties: PropertyDefinition[];
+	modules?: {
+		name: string;
+		deprecated?: boolean;
+		properties: PropertyDefinition[];
+	}
+	config: any;
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;
