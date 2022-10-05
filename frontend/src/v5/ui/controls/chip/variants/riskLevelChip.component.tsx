@@ -20,12 +20,12 @@ import { COLOR } from '@/v5/ui/themes/theme';
 import { Chip } from '../chip.styles';
 
 export enum RiskLevels {
-	UNSET = 'unset',
-	VERY_LOW = 'very low',
-	LOW = 'low',
-	MODERATE = 'moderate',
-	HIGH = 'high',
-	VERY_HIGH = 'very high',
+	UNSET = 'Unset',
+	VERY_LOW = 'Very Low',
+	LOW = 'Low',
+	MODERATE = 'Moderate',
+	HIGH = 'High',
+	VERY_HIGH = 'Very High',
 }
 
 const RISK_LEVELS_MAP = {
@@ -58,6 +58,6 @@ const RISK_LEVELS_MAP = {
 type IRiskLevelChip = {
 	state: RiskLevels,
 };
-export const RiskLevelChip = ({ state }: IRiskLevelChip) => (
+export const RiskLevelChip = ({ state = RiskLevels.UNSET }: IRiskLevelChip) => (
 	<Chip variant="filled" {...RISK_LEVELS_MAP[state]} />
 );

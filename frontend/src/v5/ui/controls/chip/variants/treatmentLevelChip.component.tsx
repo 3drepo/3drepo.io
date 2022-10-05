@@ -20,12 +20,12 @@ import { COLOR } from '@/v5/ui/themes/theme';
 import { Chip } from '../chip.styles';
 
 export enum TreatmentLevels {
-	UNTREATED = 'untreated',
-	PROPOSED = 'proposed',
-	AGREED_PARTIAL = 'agreed_partial',
-	AGREED_FULLY = 'agreed_fully',
-	REJECTED = 'rejected',
-	VOID = 'void',
+	UNTREATED = 'Untreated',
+	PROPOSED = 'Proposed',
+	AGREED_PARTIAL = 'Agreed (Partial)',
+	AGREED_FULLY = 'Agreed (Fully)',
+	REJECTED = 'Rejected',
+	VOID = 'Void',
 }
 
 const TREATMENT_LEVELS_MAP = {
@@ -59,6 +59,6 @@ type ITreatmentLevelChip = {
 	state: TreatmentLevels,
 };
 
-export const TreatmentLevelChip = ({ state }: ITreatmentLevelChip) => (
+export const TreatmentLevelChip = ({ state = TreatmentLevels.UNTREATED }: ITreatmentLevelChip) => (
 	<Chip variant="filled" {...TREATMENT_LEVELS_MAP[state]} />
 );

@@ -23,10 +23,10 @@ import { COLOR } from '@/v5/ui/themes/theme';
 import { Chip } from '../chip.styles';
 
 export enum PriorityLevels {
-	NONE = 'none',
-	LOW = 'low',
-	MEDIUM = 'medium',
-	HIGH = 'high',
+	NONE = 'None',
+	LOW = 'Low',
+	MEDIUM = 'Medium',
+	HIGH = 'High',
 }
 
 const PRIORITY_LEVELS_MAP = {
@@ -57,7 +57,7 @@ type IPriorityLevelChip = {
 	state: PriorityLevels,
 };
 
-export const PriorityLevelChip = ({ state, noLabel = false }: IPriorityLevelChip) => {
+export const PriorityLevelChip = ({ state = PriorityLevels.NONE, noLabel = false }: IPriorityLevelChip) => {
 	const props = PRIORITY_LEVELS_MAP[state];
 	const refinedProps = omit(props, noLabel ? 'label' : 'title');
 	const Icon = state === PriorityLevels.NONE ? FlagOutlineIcon : FlagFillIcon;

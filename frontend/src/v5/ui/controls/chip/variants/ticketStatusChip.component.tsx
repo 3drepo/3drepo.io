@@ -25,11 +25,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { Chip } from '../chip.styles';
 
 export enum TicketStatuses {
-	OPEN = 'open',
-	IN_PROGRESS = 'in-progress',
-	FOR_APPROVAL = 'for approval',
-	CLOSED = 'closed',
-	VOID = 'void',
+	OPEN = 'Open',
+	IN_PROGRESS = 'In Progress',
+	FOR_APPROVAL = 'For Approval',
+	CLOSED = 'Closed',
+	VOID = 'Void',
 }
 
 const STATUS_MAP = {
@@ -61,9 +61,9 @@ const STATUS_MAP = {
 };
 
 type ITicketStatusChip = {
-	variant: 'outlined' | 'noBorder' | 'filled',
+	variant?: 'outlined' | 'noBorder',
 	state: TicketStatuses,
 };
-export const TicketStatusChip = ({ variant, state }: ITicketStatusChip) => (
+export const TicketStatusChip = ({ variant = 'outlined', state = TicketStatuses.OPEN }: ITicketStatusChip) => (
 	<Chip variant={variant} {...STATUS_MAP[state]} />
 );
