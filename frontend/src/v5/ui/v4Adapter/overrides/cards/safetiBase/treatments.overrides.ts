@@ -91,7 +91,7 @@ export default css`
 
 			${StyledSelect} svg {
 				/* TODO: fix after new palette is released */
-				color: #C1C8D5;
+				color: ${({ theme }) => theme.palette.base.lighter};
 				top: -13px;
 			}
 
