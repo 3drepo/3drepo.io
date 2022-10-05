@@ -18,9 +18,9 @@ import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Button, TextField } from '@mui/material';
+import { Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
@@ -43,12 +43,12 @@ export const TicketDetailCard = () => {
 
 	const updateTicket = () => {
 		// TicketsActionsDispatchers.updateTicket(
-		// 	teamspace,
-		// 	project,
-		// 	containerOrFederation,
-		// 	ticketId,
-		// 	{ title },
-		// 	isFederation,
+		// teamspace,
+		// project,
+		// containerOrFederation,
+		// ticketId,
+		// { title },
+		// isFederation,
 		// );
 	};
 

@@ -14,61 +14,69 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable max-len */
+import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
+import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { CoordsProperty } from './properties/coordsProperty.component';
+import { DateProperty } from './properties/dateProperty.component';
+import { ImageProperty } from './properties/imageProperty.component';
+import { LongTextProperty } from './properties/longTextProperty.component';
+import { ManyOfProperty } from './properties/manyOfProperty.component';
+import { NumberProperty } from './properties/numberProperty.component';
+import { OneOfProperty } from './properties/oneOfProperty.component';
+import { TextProperty } from './properties/textProperty.component';
+import { UnsupportedProperty } from './properties/unsupportedProperty.componet';
 
-import { DateTimePicker } from '@mui/lab';
-import { InputLabel, MenuItem, Select, TextField } from '@mui/material';
-
-const TicketProperty = ({ property, value }) => {
-	const maskValue = (val) => (!val ? '' : new Date(val));
-
-	switch (property.type) {
-		case 'text':
-			return (
-				<div>
-				&nbsp;
-					<TextField label={property.name} value={value} disabled={property.readOnly} />
-				</div>
-			);
-			break;
-		case 'date':
-			return (
-				<div>
-				&nbsp;
-					<DateTimePicker
-						label={property.name}
-						inputFormat="MM/DD/YYYY"
-						value={maskValue(value)}
-						onChange={() => { }}
-						renderInput={(params) => <TextField {...params} value={maskValue(value)} disabled={property.readOnly} />}
-					/>
-				</div>
-			);
-			break;
-		case 'oneOf':
-			return (
-				<div>
-				&nbsp;
-					{property.name}
-					<br />
-					<Select value={value}>
-						{property.values.map((propValue) => (
-							<MenuItem key={propValue} value={propValue}>
-								{propValue}
-							</MenuItem>
-						))}
-					</Select>
-				</div>
-			);
-			break;
-		default:
-			return <div>Unsupported property {`${property.name}:${property.type}`} (for now) {(`${JSON.stringify(value)}`).substring(0, 80)}</div>;
-			break;
-	}
+const TicketProperty = {
+	text: TextProperty,
+	longText: LongTextProperty,
+	date: DateProperty,
+	oneOf: OneOfProperty,
+	manyOf: ManyOfProperty,
+	coords: CoordsProperty,
+	number: NumberProperty,
+	image: ImageProperty,
 };
 
-export const TicketForm = ({ template, ticket }) => (
+interface PropertiesPanelProps {
+	properties: PropertyDefinition[] ;
+	propertiesValues: Record<string, any>;
+}
+
+const PropertiesPanel = ({ properties, propertiesValues }: PropertiesPanelProps) => (
 	<>
-		{(template?.properties || []).map((property) => <TicketProperty property={property} value={ticket.properties[property.name]} />)}
+		{properties.map((property) => {
+			const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
+			return (<><hr /><PropertyComponent property={property} value={propertiesValues[property.name]} /></>);
+		})}
+	</>
+);
+
+interface ModulePanelProps {
+	module: TemplateModule ;
+	moduleValues: Record<string, any>;
+}
+
+const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
+	<DashboardListCollapse
+		title={<>Module: {module.name}</>}
+	>
+		<PropertiesPanel properties={module.properties || []} propertiesValues={moduleValues} />
+	</DashboardListCollapse>
+);
+
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => (
+	<>
+		<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
+		{
+			(template.modules || []).map((module) => (
+				<>
+					<br />
+					<ModulePanel
+						module={module}
+						moduleValues={ticket.modules[module.name]}
+					/>
+				</>
+			))
+		}
 	</>
 );

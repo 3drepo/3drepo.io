@@ -36,16 +36,18 @@ export interface ITicket {
 	modules?: Record<string, Record<string, any>>,
 }
 
+export interface TemplateModule {
+	name: string;
+	deprecated?: boolean;
+	properties: PropertyDefinition[];
+}
+
 export interface ITemplate {
 	_id: string;
 	name: string;
 	code: string;
 	properties: PropertyDefinition[];
-	modules?: {
-		name: string;
-		deprecated?: boolean;
-		properties: PropertyDefinition[];
-	}
+	modules?: TemplateModule[];
 	config: any;
 }
 
