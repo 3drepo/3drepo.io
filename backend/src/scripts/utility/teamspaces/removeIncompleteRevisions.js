@@ -24,7 +24,7 @@
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const Path = require('path');
 
 const TypeChecker = require(`${v5Path}/utils/helper/typeCheck`);
@@ -46,13 +46,10 @@ const processFilesAndRefs = async (teamspace, collection, filenames = [], filter
 	}
 };
 
-const processCollection = async (teamspace, collection, filter, refAttribute) => {
+const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 	if (refAttribute) {
-		const projection = {};
-		projection[refAttribute] = 1;
-
-		const filesFilter = { ...filter };
-		filesFilter[refAttribute] = { $exists: true };
+		const projection = { [refAttribute]: 1 };
+		const filesFilter = { ...filter, [refAttribute]: { $exists: true } };
 
 		const results = await find(teamspace, collection, filesFilter, projection);
 		const filenames = [];
@@ -77,34 +74,34 @@ const processCollection = async (teamspace, collection, filter, refAttribute) =>
 };
 
 const processModelStash = async (teamspace, model, revId) => {
-	await processFilesAndRefs(
+	const modelStashPromises = [];
+
+	modelStashPromises.push(processFilesAndRefs(
 		teamspace,
 		`${model}.stash.json_mpc`,
 		undefined,
 		{ filename: { $regex: `^/${teamspace}/${model}/revision/${UUIDToString(revId)}/` } },
-	);
+	));
 
-	await processFilesAndRefs(
+	modelStashPromises.push(processFilesAndRefs(
 		teamspace,
 		`${model}.stash.json_mpc.ref`,
 		undefined,
 		{ _id: { $regex: `^${UUIDToString(revId)}/` } },
-	);
+	));
 
 	const unity3d = await find(teamspace, `${model}.stash.unity3d`, { _id: revId }, { assets: 1, jsonFiles: 1 });
 	for (const { assets, jsonFiles } of unity3d) {
-		// eslint-disable-next-line no-await-in-loop
-		await processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '')));
-		// eslint-disable-next-line no-await-in-loop
-		await processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, jsonFiles.map((filename) => filename.replace(`/${teamspace}/${model}/`, '')));
-		// eslint-disable-next-line no-await-in-loop
-		await processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'json.mpc')));
-		// eslint-disable-next-line no-await-in-loop
-		await processFilesAndRefs(teamspace, `${model}.stash.src.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'src.mpc')));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, ''))));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, jsonFiles.map((filename) => filename.replace(`/${teamspace}/${model}/`, ''))));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'json.mpc'))));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.src.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'src.mpc'))));
 	}
 
-	await processCollection(teamspace, `${model}.stash.unity3d`, { _id: revId }, '_extRef');
-	await processCollection(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef');
+	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.unity3d`, { _id: revId }, '_extRef'));
+	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef'));
+
+	await Promise.all(modelStashPromises);
 };
 
 const processModelSequences = async (teamspace, model, revId) => {
@@ -115,12 +112,14 @@ const processModelSequences = async (teamspace, model, revId) => {
 		if (frames) {
 			for (const { state } of Object.values(frames)) {
 				sequenceFilenames.push(state);
-				// eslint-disable-next-line no-await-in-loop
-				await processCollection(teamspace, `${model}.activities`, { sequenceId: _id }, '_extRef');
-				// eslint-disable-next-line no-await-in-loop
-				await processFilesAndRefs(teamspace, `${model}.activities.ref`, undefined, { _id: UUIDToString(_id) });
 			}
 		}
+
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all([
+			removeRecords(teamspace, `${model}.activities`, { sequenceId: _id }, '_extRef'),
+			processFilesAndRefs(teamspace, `${model}.activities.ref`, undefined, { _id: UUIDToString(_id) }),
+		]);
 	}
 
 	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, sequenceFilenames);
@@ -129,55 +128,64 @@ const processModelSequences = async (teamspace, model, revId) => {
 };
 
 const processModelScene = async (teamspace, model, revId) => {
-	await processCollection(teamspace, `${model}.scene`, { rev_id: revId }, '_extRef');
+	await removeRecords(teamspace, `${model}.scene`, { rev_id: revId }, '_extRef');
 };
 
-const processTeamspace = async (teamspace) => {
+const removeRevision = async (teamspace, model, revId) => {
+	logger.logInfo(`\t\t-${model}::${UUIDToString(revId)}`);
+
+	await Promise.all([
+		processModelScene(teamspace, model, revId),
+		processModelSequences(teamspace, model, revId),
+		processModelStash(teamspace, model, revId),
+	]);
+};
+
+const processTeamspace = async (teamspace, revisionAge) => {
 	const cols = await getCollectionsEndsWith(teamspace, '.history');
 
 	for (const { name } of cols) {
 		const incompleteRevisionFilter = {
 			incomplete: { $exists: true },
-			timestamp: { $lt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14) },
+			timestamp: { $lt: new Date(new Date().setDate(new Date().getDate() - revisionAge)) },
 		};
 		// eslint-disable-next-line no-await-in-loop
 		const badRevisions = await find(teamspace, name, incompleteRevisionFilter, { rFile: 1 });
 
 		for (const { _id, rFile } of badRevisions) {
 			const model = name.slice(0, -('.history'.length));
-			logger.logInfo(`\t\t-${model}::${UUIDToString(_id)}`);
-
 			// eslint-disable-next-line no-await-in-loop
-			await processModelScene(teamspace, model, _id);
-			// eslint-disable-next-line no-await-in-loop
-			await processModelSequences(teamspace, model, _id);
-			// eslint-disable-next-line no-await-in-loop
-			await processModelStash(teamspace, model, _id);
+			await removeRevision(teamspace, model, _id);
 
 			// eslint-disable-next-line no-await-in-loop
 			await processFilesAndRefs(teamspace, name, rFile);
 			// eslint-disable-next-line no-await-in-loop
-			await processCollection(teamspace, name, incompleteRevisionFilter);
+			await removeRecords(teamspace, name, incompleteRevisionFilter);
 		}
 	}
 };
 
-const run = async () => {
+const run = async (revisionAge) => {
 	logger.logInfo('Finding all members from all teamspaces...');
-	const teamspaces = await getTeamspaceList();
+	const teamspaces = ['charence']; // await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`\t-${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(teamspace);
+		await processTeamspace(teamspace, revisionAge);
 	}
 };
 
 const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
+	const argsSpec = (subYargs) => subYargs.option('revisionAge', {
+		describe: 'Days threshold for failed revisions',
+		type: 'number',
+		default: 14,
+	});
 	return yargs.command(commandName,
-		'Create a CSV dump of all members from all teamspaces',
-		{},
-		() => run());
+		'Remove any incomplete (failed, not processing) revisions',
+		argsSpec,
+		(argv) => run(argv.revisionAge));
 };
 
 module.exports = {
