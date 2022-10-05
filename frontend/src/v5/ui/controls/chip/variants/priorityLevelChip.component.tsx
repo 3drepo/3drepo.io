@@ -18,8 +18,8 @@
 import FlagOutlineIcon from '@assets/icons/outlined/flag-outlined.svg';
 import FlagFillIcon from '@assets/icons/filled/flag-filled.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { omit } from 'lodash';
 import { COLOR } from '@/v5/ui/themes/theme';
+import { Tooltip } from '@mui/material';
 import { Chip } from '../chip.styles';
 
 export enum PriorityLevels {
@@ -32,22 +32,22 @@ export enum PriorityLevels {
 const PRIORITY_LEVELS_MAP = {
 	[PriorityLevels.NONE]: {
 		label: formatMessage({ id: 'chip.priorityLevel.none.label', defaultMessage: 'None' }),
-		title: formatMessage({ id: 'chip.priorityLevel.none.tooltip', defaultMessage: 'No priority' }),
+		tooltip: formatMessage({ id: 'chip.priorityLevel.none.tooltip', defaultMessage: 'No priority' }),
 		colour: COLOR.BASE_LIGHT,
 	},
 	[PriorityLevels.LOW]: {
 		label: formatMessage({ id: 'chip.priorityLevel.low.label', defaultMessage: 'Low' }),
-		title: formatMessage({ id: 'chip.priorityLevel.low.tooltip', defaultMessage: 'Low priority' }),
+		tooltip: formatMessage({ id: 'chip.priorityLevel.low.tooltip', defaultMessage: 'Low priority' }),
 		colour: '#0288D1',
 	},
 	[PriorityLevels.MEDIUM]: {
 		label: formatMessage({ id: 'chip.priorityLevel.medium.label', defaultMessage: 'Medium' }),
-		title: formatMessage({ id: 'chip.priorityLevel.medium.tooltip', defaultMessage: 'Medium priority' }),
+		tooltip: formatMessage({ id: 'chip.priorityLevel.medium.tooltip', defaultMessage: 'Medium priority' }),
 		colour: '#ED6C02',
 	},
 	[PriorityLevels.HIGH]: {
 		label: formatMessage({ id: 'chip.priorityLevel.high.label', defaultMessage: 'High' }),
-		title: formatMessage({ id: 'chip.priorityLevel.high.tooltip', defaultMessage: 'High priority' }),
+		tooltip: formatMessage({ id: 'chip.priorityLevel.high.tooltip', defaultMessage: 'High priority' }),
 		colour: COLOR.ERROR_MAIN,
 	},
 };
@@ -58,8 +58,11 @@ type IPriorityLevelChip = {
 };
 
 export const PriorityLevelChip = ({ state = PriorityLevels.NONE, noLabel = false }: IPriorityLevelChip) => {
-	const props = PRIORITY_LEVELS_MAP[state];
-	const refinedProps = omit(props, noLabel ? 'label' : 'title');
+	const { tooltip, ...chipProps } = PRIORITY_LEVELS_MAP[state];
 	const Icon = state === PriorityLevels.NONE ? FlagOutlineIcon : FlagFillIcon;
-	return <Chip variant="noBorder" icon={<Icon />} {...refinedProps} />;
+	return (
+		<Tooltip title={tooltip} arrow placement="bottom" disableHoverListener={!noLabel}>
+			<Chip variant="noBorder" icon={(<Icon />)} {...chipProps} {...(noLabel && { label: '' })} />
+		</Tooltip>
+	);
 };
