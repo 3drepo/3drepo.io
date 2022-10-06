@@ -52,7 +52,7 @@ const Controlled: ComponentStory<typeof FormInvisibleSelect> = (args) => {
 				TriggerComponent={<Button variant="contained">This is a button that will trigger the select</Button>}
 				{...args}
 			>
-				{["1", "2", "3", "4"].map((option) => (
+				{['1', '2', '3', '4'].map((option) => (
 					<MenuItem value={option} key={option}>Option #{option}</MenuItem>
 				))}
 			</FormInvisibleSelect>
