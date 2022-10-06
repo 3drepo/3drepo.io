@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormSearchSingleSelect } from '@controls/formSearchSelect/formSearchSingleSelect.component';
+import { FormSearchSingleSelect } from '@controls/formSingleSearchSelect/formSearchSingleSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
@@ -22,7 +22,7 @@ import ChevronIcon from '@assets/icons/chevron.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import PrintIcon from '@assets/icons/print.svg';
 import styled from 'styled-components';
-import { MenuItem } from '@mui/material';
+import { SearchSelectMenuItem } from '@controls/formSingleSearchSelect/searchSelectMenuItem.component';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
@@ -67,30 +67,30 @@ const Controlled: ComponentStory<typeof FormSearchSingleSelect> = (args) => {
 				)}
 				{...args}
 			>
-				<MenuItem value={1} key={1}>
+				<SearchSelectMenuItem value={1} key={1}>
 					<IconContainer>
 						<CalendarIcon />
 					</IconContainer>
 					calendar icon
-				</MenuItem>
-				<MenuItem value={2} key={2}>
+				</SearchSelectMenuItem>
+				<SearchSelectMenuItem value={2} key={2}>
 					<IconContainer>
 						<ClearIcon />
 					</IconContainer>
 					clear icon
-				</MenuItem>
-				<MenuItem value={3} key={3}>
+				</SearchSelectMenuItem>
+				<SearchSelectMenuItem value={3} key={3}>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					chevron icon
-				</MenuItem>
-				<MenuItem value={4} key={4}>
+				</SearchSelectMenuItem>
+				<SearchSelectMenuItem value={4} key={4}>
 					<IconContainer>
 						<PrintIcon />
 					</IconContainer>
 					print icon
-				</MenuItem>
+				</SearchSelectMenuItem>
 			</FormSearchSingleSelect>
 		</FormContainer>
 	);

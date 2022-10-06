@@ -32,7 +32,7 @@ export default {
 			type: 'string',
 		},
 		defaultValue: {
-			type: 'string',
+			control: 'array',
 		},
 		disabled: {
 			type: 'boolean',
@@ -57,14 +57,14 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 			<FormMultiSelect
 				name="multiselect"
 				control={control}
-				renderValue={(selectedItem: any[]) => (
-					selectedItem.map((item, index) => (
+				renderValue={(selectedItemsChildren: any[]) => (
+					selectedItemsChildren.map(([icon, label], index) => (
 						<>
 							<span>{index > 0 ? ', ' : ''}</span>
 							<div style={{ display: 'inline-flex' }}>
-								{item.children[0]}
+								{icon}
 							</div>
-							<span>{item.children[1]}</span>
+							<span>{label}</span>
 						</>
 					))
 				)}
