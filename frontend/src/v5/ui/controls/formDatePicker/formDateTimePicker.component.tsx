@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useState } from 'react';
 import { DateTimePicker, DateTimePickerProps } from '@mui/x-date-pickers';
 import { Controller } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import { FormDateTextField } from './formDateTextField/formDateTextField.component';
-import { useState } from 'react';
 
 export type FormDateTimePickerProps = Partial<DateTimePickerProps<any, any>> & {
 	name: string;

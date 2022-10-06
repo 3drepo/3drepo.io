@@ -18,12 +18,12 @@ import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.compo
 import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from '../FormInput.styles';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import PrintIcon from '@assets/icons/print.svg';
 import styled from 'styled-components';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
 	title: 'Inputs/Select/FormMultiSelect',
@@ -60,11 +60,11 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 				renderValue={(selectedItem: any[]) => (
 					selectedItem.map((item, index) => (
 						<>
-							{index > 0 ? ", ": ""}
+							<span>{index > 0 ? ', ' : ''}</span>
 							<div style={{ display: 'inline-flex' }}>
 								{item.children[0]}
 							</div>
-							{item.children[1]}	
+							<span>{item.children[1]}</span>
 						</>
 					))
 				)}
