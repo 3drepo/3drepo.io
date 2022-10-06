@@ -15,116 +15,56 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
-import { FormSelect, FormSelectProps } from '@controls/formSelect/formSelect.component';
-import { ScrollArea } from '@controls/scrollArea';
-import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
+import { FormSearchSelect, SearchItem } from '@controls/formSearchSelect/formSearchSelectMenu';
+import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { isEqual, xorWith } from 'lodash';
-import { Children, cloneElement, ReactElement, useContext, useEffect, useRef, useState } from 'react';
-import { onlyText } from 'react-children-utilities';
-import { FormattedMessage } from 'react-intl';
-import { SearchInput, NoResults, RenderValueTriggerer } from './formMultiSelect.styles';
+import { Children, useEffect, useState } from 'react';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
-
-const MenuContent = () => {
-	const { filteredItems } = useContext(SearchContext);
-
-	if (filteredItems.length > 0) {
-		return (
-			<ScrollArea autoHeight>
-				{filteredItems}
-			</ScrollArea>
-		);
-	}
-
-	return (
-		<NoResults>
-			<FormattedMessage
-				id="form.multiSelect.search.emptyList"
-				defaultMessage="No results"
-			/>
-		</NoResults>
-	);
-};
 
 export type FormMultiSelectProps = FormSelectProps & {
 	children: JSX.Element | JSX.Element[],
 	renderValue?: (selectedItems: any[]) => any;
 };
 
-export const FormMultiSelect = ({ children: rawChildren, control, name, renderValue, ...props }: FormMultiSelectProps) => {
-	const [selectedItems, setSelectedItems] = useState([]);
-	const [items, setItems] = useState([]);
-	const renderValueRef = useRef<HTMLLIElement>();
+export const FormMultiSelect = ({
+	children,
+	defaultValue = [],
+	renderValue,
+	...props
+}: FormMultiSelectProps) => {
+	const [selectedItems, setSelectedItems] = useState<SearchItem[]>([]);
 
-	const toggleItemSelection = (item) => {
-		setSelectedItems((items) => {
-			if (!items.length) {
-				renderValueRef?.current?.click();
-			}
-			return xorWith(items, [item], isEqual);
-		})
-	};
+	const formatRenderValue = () => (
+		renderValue?.(selectedItems) || selectedItems.map((item) => item.children).join(', ')
+	);
 
-	const itemIsSelected = (itemValue) => !!selectedItems.find(({ value }) => isEqual(value, itemValue));
+	const itemIsSelected = ({ value: inputValue }) => !!selectedItems.find(({ value }) => isEqual(value, inputValue));
 
-	const preventInputUnfocus = (e) => {
-		if (e.key !== 'Escape') e.stopPropagation();
+	const toggleItemSelection = (item: SearchItem) => {
+		setSelectedItems((items) => xorWith(items, [item], isEqual));
 	};
 
 	const verifyChildrenAreValid = () => {
-		Children.forEach(rawChildren, (child) => {
+		Children.forEach(children, (child) => {
 			if (child.type !== MultiSelectMenuItem) {
 				throw new Error('FormMultiSelect only accepts an array of MultiSelectMenuItem as direct children');
 			}
 		});
 	};
 
-	const populateChildren = () => {
-		setItems(
-			Children.toArray(rawChildren)
-				.map((child: ReactElement) => (
-					cloneElement(child, {
-						toggleItemSelection,
-						itemIsSelected,
-						searchValue: onlyText(child.props.children),
-					})
-				))
-		);
-	};
-
-	const formatRenderValue = () => (
-		renderValue?.(selectedItems) || selectedItems.map(({ children }) => children).join(", ")
-	);
-
-	useEffect(() => {
-		verifyChildrenAreValid();
-		populateChildren();
-	}, [rawChildren]);
-
-	// necessary because cloneElement does not keep track of
-	// changes in the props passed to children (so the latter
-	// do not have the updated value for selectedItems)
-	useEffect(() => { populateChildren(); }, [selectedItems]);
+	useEffect(() => { verifyChildrenAreValid(); }, [children]);
 
 	return (
-		<SearchContextComponent fieldsToFilter={['props.searchValue']} items={items}>
-			<FormSelect
-				multiple
-				defaultValue={[]}
-				control={control}
-				name={name}
-				renderValue={formatRenderValue}
-				value={selectedItems.map(({ value }) => value)}
-				{...props}
-			>
-				<SearchInput
-					placeholder={formatMessage({ id: 'form.multiSelect.search.placeholder', defaultMessage: 'Search...' })}
-					onKeyDown={preventInputUnfocus}
-				/>
-				<RenderValueTriggerer ref={renderValueRef} />
-				<MenuContent />
-			</FormSelect>
-		</SearchContextComponent>
+		<FormSearchSelect
+			defaultValue={defaultValue}
+			value={selectedItems.map(({ value }) => value)}
+			renderValue={formatRenderValue}
+			onItemClick={toggleItemSelection}
+			itemIsSelected={itemIsSelected}
+			multiple
+			{...props}
+		>
+			{children}
+		</FormSearchSelect>
 	);
 };

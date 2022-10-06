@@ -16,10 +16,7 @@
  */
 import styled from 'styled-components';
 import MenuItemBase from '@mui/material/MenuItem';
-// import { FormCheckbox as FormCheckboxBase } from '@controls/formCheckbox/formCheckbox.component';
-// import { Checkbox } from '@controls/formCheckbox/formCheckbox.styles';
 
-// export const FormCheckbox = styled(FormCheckboxBase)`
 export const CheckboxContainer = styled.div`
 	width: 100%;
 	margin: 0;
@@ -41,4 +38,5 @@ export const CheckboxContainer = styled.div`
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 0;
+	height: 30px;
 `;

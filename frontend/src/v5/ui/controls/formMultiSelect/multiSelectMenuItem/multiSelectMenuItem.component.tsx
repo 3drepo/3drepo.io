@@ -14,29 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Checkbox, MenuItemProps } from '@mui/material';
+import { SearchItem } from '@controls/formSearchSelect/formSearchSelectMenu';
 import { CheckboxContainer, MenuItem } from './multiSelectMenuItem.styles';
-import { Checkbox } from '@mui/material';
 
-type MultiSelectMenuItem = {
-	value: any,
-	children: any,
-	itemIsSelected?: (name) => boolean,
-	toggleItemSelection?: (item) => void,
+type MultiSelectMenuItemProps = MenuItemProps & {
+	onClick?: (item: SearchItem) => void,
 };
 
 export const MultiSelectMenuItem = ({
 	value,
 	children,
-	itemIsSelected,
-	toggleItemSelection,
-}: MultiSelectMenuItem) => (
+	selected,
+	onClick,
+}: MultiSelectMenuItemProps) => (
 	<MenuItem
 		key={value.toString()}
-		onClick={() => toggleItemSelection({ value, children })}
-		selected={itemIsSelected(value)}
+		onClick={() => onClick({ value, children } as SearchItem)}
+		selected={selected}
 	>
 		<CheckboxContainer>
-			<Checkbox checked={itemIsSelected(value)} />
+			<Checkbox checked={selected} />
 			{children}
 		</CheckboxContainer>
 	</MenuItem>
