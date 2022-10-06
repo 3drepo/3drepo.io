@@ -38,7 +38,7 @@ export const FormSelect = ({
 }: FormSelectProps) => {
 	const handleClose = (e, field) => {
 		if (value) {
-			field.onChange({ target: { value } })
+			field.onChange({ target: { value } });
 		}
 		onClose?.(e);
 	};

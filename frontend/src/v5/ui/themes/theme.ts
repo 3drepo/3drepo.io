@@ -281,7 +281,7 @@ export const theme = createTheme({
 		MuiInputAdornment: {
 			styleOverrides: {
 				root: {
-					'&, *' : {
+					'&, *': {
 						color: 'currentColor',
 					},
 				},
@@ -975,7 +975,6 @@ export const theme = createTheme({
 					margin: '18px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
-					
 					'label': {	
 						transform: 'none',
 						position: 'unset',
@@ -1219,7 +1218,6 @@ export const theme = createTheme({
 					},
 				},
 				content: {
-					// marginBottom: 5,
 					margin: 0,
 				},
 			},
@@ -1286,13 +1284,13 @@ export const theme = createTheme({
 								'&:not(:first-child)': {
 									transform: 'rotate(-90deg)',
 								},
-							}
+							},
 						},
 					},
 					// year selection
 					'.MuiYearPicker-root': {
 						'button': {
-							'&:not(.Mui-disabled)':{
+							'&:not(.Mui-disabled)': {
 								color: COLOR.SECONDARY_MAIN,
 								'&:hover': {
 									backgroundColor: COLOR.TERTIARY_LIGHTEST,
@@ -1346,7 +1344,7 @@ export const theme = createTheme({
 							},
 							'&.Mui-disabled': {
 								color: COLOR.BASE_MAIN,
-							}
+							},
 						},
 					},
 				},

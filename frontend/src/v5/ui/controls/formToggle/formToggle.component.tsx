@@ -23,7 +23,7 @@ export type FormToggleProps = SwitchProps & {
 	control: any;
 	name: string;
 	children: any;
-}
+};
 
 export const FormToggle = ({ control, name, children, ...props }: FormToggleProps) => (
 	<Controller
