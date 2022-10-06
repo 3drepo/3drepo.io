@@ -14,32 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { SearchSelectMenuItem } from '@controls/formSingleSearchSelect/searchSelectMenuItem.component';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
-import { MenuItem } from '@mui/material';
 import { isEqual } from 'lodash';
 import { Children, useEffect, useState } from 'react';
-import { FormSearchSelect, SearchItem } from './formSearchSelectMenu';
+import { FormSearchSelect } from '../formSearchSelect/formSearchSelectMenu';
 
 export type FormSearchSingleSelectProps = FormSelectProps & {
 	children: JSX.Element | JSX.Element[],
-	renderValue?: (selectedItem: SearchItem) => any;
+	renderValue?: (selectedValue: any) => any;
 };
 
 export const FormSearchSingleSelect = ({
 	children,
 	renderValue,
+	defaultValue,
 	...props
 }: FormSearchSingleSelectProps) => {
-	const [selectedItem, setSelectedItem] = useState<SearchItem>(null);
+	const [selectedValue, setSelectedValue] = useState<any>(defaultValue ?? '');
 
-	const formatRenderValue = () => renderValue?.(selectedItem) || selectedItem.children;
+	const formatRenderValue = (childrenByValue) => {
+		const childrenToRender = childrenByValue[JSON.stringify(selectedValue)];
+		return renderValue?.(childrenToRender) || childrenToRender;
+	};
 
-	const itemIsSelected = ({ value }) => selectedItem && isEqual(selectedItem.value, value);
+	const valueIsSelected = (value) => selectedValue && isEqual(selectedValue, value);
 
 	const verifyChildrenAreValid = () => {
 		Children.forEach(children, (child) => {
-			if (child.type !== MenuItem) {
-				throw new Error('FormSearchSingleSelect only accepts an array of MenuItem as direct children');
+			if (child.type !== SearchSelectMenuItem) {
+				throw new Error('FormSearchSingleSelect only accepts an array of SearchSelectMenuItem as direct children');
 			}
 		});
 	};
@@ -48,10 +52,11 @@ export const FormSearchSingleSelect = ({
 
 	return (
 		<FormSearchSelect
-			value={selectedItem?.value || ''}
-			renderValue={formatRenderValue}
-			onItemClick={setSelectedItem}
-			itemIsSelected={itemIsSelected}
+			value={selectedValue}
+			formatRenderValue={formatRenderValue}
+			onItemClick={setSelectedValue}
+			valueIsSelected={valueIsSelected}
+			defaultValue={defaultValue}
 			{...props}
 		>
 			{children}

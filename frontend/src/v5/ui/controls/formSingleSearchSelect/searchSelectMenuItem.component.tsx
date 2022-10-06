@@ -14,20 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Checkbox, MenuItemProps } from '@mui/material';
-import { CheckboxContainer, MenuItem } from './multiSelectMenuItem.styles';
+import { MenuItemProps, MenuItem } from '@mui/material';
 
-type MultiSelectMenuItemProps = Omit<MenuItemProps, 'value'> & { value: any };
+type SearchSelectMenuItemProps = Omit<MenuItemProps, 'value'> & { value: any };
 
-export const MultiSelectMenuItem = ({
-	children,
-	selected,
-	...props
-}: MultiSelectMenuItemProps) => (
-	<MenuItem selected={selected} {...props} >
-		<CheckboxContainer>
-			<Checkbox checked={selected} />
-			{children}
-		</CheckboxContainer>
-	</MenuItem>
-);
+export const SearchSelectMenuItem = (props: SearchSelectMenuItemProps) => (<MenuItem {...props} />);

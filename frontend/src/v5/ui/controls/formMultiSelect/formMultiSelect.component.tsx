@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormSearchSelect, SearchItem } from '@controls/formSearchSelect/formSearchSelectMenu';
+import { FormSearchSelect } from '@controls/formSearchSelect/formSearchSelectMenu';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { isEqual, xorWith } from 'lodash';
 import { Children, useEffect, useState } from 'react';
@@ -23,7 +23,8 @@ import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.c
 
 export type FormMultiSelectProps = FormSelectProps & {
 	children: JSX.Element | JSX.Element[],
-	renderValue?: (selectedItems: any[]) => any;
+	renderValue?: (selectedValues: any[]) => any;
+	defaultValue?: any[];
 };
 
 export const FormMultiSelect = ({
@@ -32,16 +33,17 @@ export const FormMultiSelect = ({
 	renderValue,
 	...props
 }: FormMultiSelectProps) => {
-	const [selectedItems, setSelectedItems] = useState<SearchItem[]>([]);
+	const [selectedValues, setSelectedValues] = useState<any[]>(defaultValue);
 
-	const formatRenderValue = () => (
-		renderValue?.(selectedItems) || selectedItems.map((item) => item.children).join(', ')
-	);
+	const formatRenderValue = (childrenByValue) => {
+		const childrenToRender = selectedValues.map((v) => childrenByValue[JSON.stringify(v)]);
+		return renderValue?.(childrenToRender) || childrenToRender.join(', ');
+	};
 
-	const itemIsSelected = ({ value: inputValue }) => !!selectedItems.find(({ value }) => isEqual(value, inputValue));
+	const valueIsSelected = (inputValue) => !!selectedValues.find((value) => isEqual(value, inputValue));
 
-	const toggleItemSelection = (item: SearchItem) => {
-		setSelectedItems((items) => xorWith(items, [item], isEqual));
+	const toggleValueSelection = (value) => {
+		setSelectedValues((values) => xorWith(values, [value], isEqual));
 	};
 
 	const verifyChildrenAreValid = () => {
@@ -57,10 +59,10 @@ export const FormMultiSelect = ({
 	return (
 		<FormSearchSelect
 			defaultValue={defaultValue}
-			value={selectedItems.map(({ value }) => value)}
-			renderValue={formatRenderValue}
-			onItemClick={toggleItemSelection}
-			itemIsSelected={itemIsSelected}
+			value={selectedValues}
+			formatRenderValue={formatRenderValue}
+			onItemClick={toggleValueSelection}
+			valueIsSelected={valueIsSelected}
 			multiple
 			{...props}
 		>

@@ -32,7 +32,7 @@ export const FormSelect = ({
 	disabled,
 	hidden,
 	value,
-	defaultValue = '',
+	defaultValue,
 	onClose,
 	...otherProps
 }: FormSelectProps) => {
@@ -58,7 +58,7 @@ export const FormSelect = ({
 			<Controller
 				control={control}
 				name={name}
-				defaultValue={defaultValue}
+				defaultValue={defaultValue ?? ''}
 				render={({ field }) => (
 					<Select
 						{...field}
