@@ -77,7 +77,6 @@ export const theme = createTheme(
 									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
 									boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 									boxSizing: 'border-box',
-									overflow: 'visible',
 								},
 								fieldset: {
 									borderWidth: '1px !important',
@@ -329,6 +328,13 @@ export const theme = createTheme(
 								height: 40,
 								color: COLOR.SECONDARY_MAIN,
 								fontSize: '0.75rem',
+							},
+							// multiSelect
+							'&[aria-labelledby="multiselect-label"]': {
+								'.MuiMenuItem-root': {
+									padding: 0,
+									minHeight: 34,
+								},
 							},
 						},
 					},
