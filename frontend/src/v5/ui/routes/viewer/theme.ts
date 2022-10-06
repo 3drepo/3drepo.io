@@ -74,7 +74,6 @@ export const theme = createTheme(
 							},
 							'&.Mui-focused': {
 								'.MuiSelect-select': {
-									height: '100%',
 									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
 									boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 									boxSizing: 'border-box',
