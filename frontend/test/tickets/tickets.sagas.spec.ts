@@ -75,7 +75,7 @@ describe('Tickets: sagas', () => {
 
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false))
-					.put(TicketsActions.upsertTicketSuccess(modelId, updateProp))
+					.put(TicketsActions.upsertTicketSuccess(modelId, {_id: ticket._id, ...updateProp}))
 					.silentRun();
 			})
 
