@@ -447,7 +447,12 @@ export const theme = createTheme({
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {
-					margin: '5px 0 !important',
+					top: -9,
+				},
+				tooltipArrow: {
+					'span::before': {
+						backgroundColor: COLOR.SECONDARY_DARK,
+					},
 				},
 			},
 		},
