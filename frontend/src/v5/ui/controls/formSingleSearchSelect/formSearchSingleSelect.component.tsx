@@ -63,7 +63,7 @@ export const FormSearchSingleSelect = ({
 
 	return (
 		<FormSearchSelect
-			value={selectedItem}
+			value={selectedItem?.value}
 			renderValue={formatRenderValue}
 			onItemClick={setSelectedItem}
 			itemIsSelected={itemIsSelected}

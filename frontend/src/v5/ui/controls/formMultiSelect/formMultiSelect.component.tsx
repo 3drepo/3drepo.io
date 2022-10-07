@@ -64,13 +64,13 @@ export const FormMultiSelect = ({
 
 	useEffect(() => {
 		verifyChildrenAreValid();
-		if (defaultValue.length) initialiseDefaultItems();
+		if (defaultValue?.length) initialiseDefaultItems();
 	}, [children]);
 
 	return (
 		<FormSearchSelect
 			defaultValue={defaultValue ?? []}
-			value={selectedItems}
+			value={selectedItems.map(({ value }) => value)}
 			renderValue={formatRenderValue}
 			onItemClick={toggleValueSelection}
 			itemIsSelected={itemIsSelected}

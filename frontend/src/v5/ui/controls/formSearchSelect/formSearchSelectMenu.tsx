@@ -50,12 +50,14 @@ type ChildrenType = JSX.Element | JSX.Element[];
 export type FormSearchSelectProps = FormSelectProps & {
 	onItemClick: (item: any) => void;
 	itemIsSelected: (item: any) => void;
+	value: any;
 };
 
 export const FormSearchSelect = ({
 	children: rawChildren,
 	onItemClick,
 	itemIsSelected,
+	value,
 	...props
 }: FormSearchSelectProps) => {
 	const renderValueRef = useRef<HTMLLIElement & { selected }>();
@@ -68,9 +70,10 @@ export const FormSearchSelect = ({
 		}
 	};
 
-	const handleItemClick = (item) => {
-		onItemClick(item);
-		refreshRenderValue();
+	const refreshRenderValue = () => {
+		if (!renderValueRef.current?.selected) {
+			renderValueRef.current?.click();
+		}
 	};
 
 	const populateChildren = () => {
@@ -81,31 +84,27 @@ export const FormSearchSelect = ({
 					return cloneElement(child, {
 						[SEARCH_VALUE_PROP]: onlyText(children),
 						selected: itemIsSelected({ value: childValue, children }),
-						onClick: () => handleItemClick({ value: childValue, children }),
+						onClick: () => onItemClick({ value: childValue, children }),
 					});
 				}),
 		);
 	};
 
-	const refreshRenderValue = () => {
-		if (!renderValueRef.current?.selected) {
-			renderValueRef.current?.click();
-		}
-	};
+	useEffect(() => { populateChildren(); }, [rawChildren, value]);
 
-	useEffect(() => { populateChildren(); }, [rawChildren, itemIsSelected]);
+	useEffect(() => { refreshRenderValue(); }, [value])
 
 	return (
 		<SearchContextComponent fieldsToFilter={[`props.${SEARCH_VALUE_PROP}`]} items={items}>
-			<FormSelect {...props}>
+			<FormSelect value={value} {...props}>
 				<SearchInputContainer>
 					<SearchInput
 						placeholder={formatMessage({ id: 'form.searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
 						onClick={preventInputUnfocus}
 					/>
 				</SearchInputContainer>
-				<RenderValueTrigger ref={renderValueRef} key={RenderValueTrigger} />
 				<MenuContent />
+				<RenderValueTrigger ref={renderValueRef} key={RenderValueTrigger} />
 			</FormSelect>
 		</SearchContextComponent>
 	);
