@@ -71,7 +71,7 @@ export const FormSelect = ({
 				</InputLabel>
 			)}
 			<Tooltip
-				title={multiple ? renderValue() : ''}
+				title={(multiple && renderValue().length) ? renderValue() : ''}
 				open={showTooltip}
 			>
 				<TooltipAdapter
