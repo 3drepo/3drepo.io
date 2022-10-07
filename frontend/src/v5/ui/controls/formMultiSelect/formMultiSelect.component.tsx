@@ -17,33 +17,33 @@
 
 import { FormSearchSelect } from '@controls/formSearchSelect/formSearchSelectMenu';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
-import { isEqual, xorWith } from 'lodash';
+import { isEqual, some, xorWith } from 'lodash';
 import { Children, useEffect, useState } from 'react';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
 export type FormMultiSelectProps = FormSelectProps & {
 	children: JSX.Element | JSX.Element[],
-	renderValue?: (selectedValues: any[]) => any;
+	renderValue?: (selectedItems: any[]) => any;
 	defaultValue?: any[];
 };
 
 export const FormMultiSelect = ({
 	children,
-	defaultValue = [],
+	defaultValue,
 	renderValue,
 	...props
 }: FormMultiSelectProps) => {
-	const [selectedValues, setSelectedValues] = useState<any[]>(defaultValue);
+	const [selectedItems, setSelectedItems] = useState<any[]>([]);
 
-	const formatRenderValue = (childrenByValue) => {
-		const childrenToRender = selectedValues.map((v) => childrenByValue[JSON.stringify(v)]);
+	const formatRenderValue = () => {
+		const childrenToRender = selectedItems.map(({ children }) => children);
 		return renderValue?.(childrenToRender) || childrenToRender.join(', ');
 	};
 
-	const valueIsSelected = (inputValue) => !!selectedValues.find((value) => isEqual(value, inputValue));
+	const itemIsSelected = (inputItem) => !!selectedItems.find((item) => isEqual(item, inputItem));
 
-	const toggleValueSelection = (value) => {
-		setSelectedValues((values) => xorWith(values, [value], isEqual));
+	const toggleValueSelection = (item) => {
+		setSelectedItems((items) => xorWith(items, [item], isEqual));
 	};
 
 	const verifyChildrenAreValid = () => {
@@ -52,21 +52,31 @@ export const FormMultiSelect = ({
 				throw new Error('FormMultiSelect only accepts an array of MultiSelectMenuItem as direct children');
 			}
 		});
+		
+	const initialiseDefaultItems = () => {	
+		setSelectedItems(
+			Children.toArray(children)
+				.map(({ props }: any) => props)
+				.filter(({ value }) => some(defaultValue, (v) => isEqual(v, value)))
+		);
 	};
 
-	useEffect(() => { verifyChildrenAreValid(); }, [children]);
+	useEffect(() => {
+		verifyChildrenAreValid();
+		if (defaultValue.length) initialiseDefaultItems();
+	}, [children]);
 
 	return (
-		<FormSearchSelect
-			defaultValue={defaultValue}
-			value={selectedValues}
-			formatRenderValue={formatRenderValue}
-			onItemClick={toggleValueSelection}
-			valueIsSelected={valueIsSelected}
-			multiple
-			{...props}
-		>
-			{children}
-		</FormSearchSelect>
+			<FormSearchSelect
+				defaultValue={defaultValue ?? []}
+				value={selectedItems}
+				renderValue={formatRenderValue}
+				onItemClick={toggleValueSelection}
+				itemIsSelected={itemIsSelected}
+				multiple
+				{...props}
+			>
+				{children}
+			</FormSearchSelect>
 	);
 };

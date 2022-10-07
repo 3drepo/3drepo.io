@@ -49,21 +49,17 @@ type ChildrenType = JSX.Element | JSX.Element[];
 
 export type FormSearchSelectProps = FormSelectProps & {
 	onItemClick: (item: any) => void;
-	valueIsSelected: (item: any) => void;
-	formatRenderValue: (childrenByValue: Record<string, ChildrenType>) => any;
+	itemIsSelected: (item: any) => void;
 };
 
 export const FormSearchSelect = ({
 	children: rawChildren,
 	onItemClick,
-	valueIsSelected,
-	value,
-	formatRenderValue,
+	itemIsSelected,
 	...props
 }: FormSearchSelectProps) => {
 	const renderValueRef = useRef<HTMLLIElement & { selected }>();
 	const [items, setItems] = useState<ChildrenType[]>([]);
-	const [childrenByValue, setChildrenByValue] = useState<Record<string, ChildrenType>>();
 	const SEARCH_VALUE_PROP = 'searchvalue';
 
 	const preventInputUnfocus = (e) => {
@@ -72,48 +68,36 @@ export const FormSearchSelect = ({
 		}
 	};
 
+	const handleItemClick = (item) => {
+		onItemClick(item);
+		refreshRenderValue();
+	};
+
+	const populateChildren = () => {
+		setItems(
+			Children.toArray(rawChildren)
+				.map((child: ReactElement) => {
+					const { children, value: childValue } = child.props;
+					return cloneElement(child, {
+						[SEARCH_VALUE_PROP]: onlyText(children),
+						selected: itemIsSelected({ value: childValue, children }),
+						onClick: () => handleItemClick({ value: childValue, children }),
+					});
+				}),
+		);
+	};
+
 	const refreshRenderValue = () => {
 		if (!renderValueRef.current?.selected) {
 			renderValueRef.current?.click();
 		}
 	};
 
-	const populateChildren = () => {
-		const childrenByValue = {};
-		setItems(
-			Children.toArray(rawChildren)
-				.map((child: ReactElement) => {
-					const { children, value: childValue } = child.props;
-					childrenByValue[JSON.stringify(childValue)] = children;
-					return cloneElement(child, {
-						[SEARCH_VALUE_PROP]: onlyText(children),
-						selected: valueIsSelected(childValue),
-						onClick: () => {
-							onItemClick(childValue);
-							refreshRenderValue();
-						},
-					});
-				}),
-		);
-		setChildrenByValue(childrenByValue);
-	};
-
-	const renderValue = () => {
-		if (!childrenByValue) return null;
-		return formatRenderValue(childrenByValue);
-	};
-
-	useEffect(() => { renderValue(); }, [childrenByValue]);
-
-	useEffect(() => { populateChildren(); }, [rawChildren, valueIsSelected]);
+	useEffect(() => { populateChildren(); }, [rawChildren, itemIsSelected]);
 
 	return (
 		<SearchContextComponent fieldsToFilter={[`props.${SEARCH_VALUE_PROP}`]} items={items}>
-			<FormSelect
-				value={value}
-				renderValue={renderValue}
-				{...props}
-			>
+			<FormSelect {...props}>
 				<SearchInputContainer>
 					<SearchInput
 						placeholder={formatMessage({ id: 'form.searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}

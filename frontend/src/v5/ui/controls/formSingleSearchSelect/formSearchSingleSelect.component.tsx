@@ -16,29 +16,29 @@
  */
 import { SearchSelectMenuItem } from '@controls/formSingleSearchSelect/searchSelectMenuItem.component';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined } from 'lodash';
 import { Children, useEffect, useState } from 'react';
 import { FormSearchSelect } from '../formSearchSelect/formSearchSelectMenu';
 
 export type FormSearchSingleSelectProps = FormSelectProps & {
 	children: JSX.Element | JSX.Element[],
-	renderValue?: (selectedValue: any) => any;
+	renderValue?: (selectedItem: any) => any;
 };
 
 export const FormSearchSingleSelect = ({
 	children,
-	renderValue,
 	defaultValue,
+	renderValue,
 	...props
 }: FormSearchSingleSelectProps) => {
-	const [selectedValue, setSelectedValue] = useState<any>(defaultValue ?? '');
+	const [selectedItem, setSelectedItem] = useState<any>();
 
-	const formatRenderValue = (childrenByValue) => {
-		const childrenToRender = childrenByValue[JSON.stringify(selectedValue)];
+	const formatRenderValue = () => {
+		const childrenToRender = selectedItem?.children;
 		return renderValue?.(childrenToRender) || childrenToRender;
 	};
 
-	const valueIsSelected = (value) => selectedValue && isEqual(selectedValue, value);
+	const itemIsSelected = (item) => selectedItem && isEqual(selectedItem, item);
 
 	const verifyChildrenAreValid = () => {
 		Children.forEach(children, (child) => {
@@ -48,15 +48,26 @@ export const FormSearchSingleSelect = ({
 		});
 	};
 
-	useEffect(() => { verifyChildrenAreValid(); }, [children]);
+	const initialiseDefaultItem = () => {
+		setSelectedItem(
+			Children.toArray(children)
+				.map(({ props }: any) => props)
+				.find(({ value }) => isEqual(defaultValue, value))
+		);
+	};
+
+	useEffect(() => {
+		verifyChildrenAreValid();
+		if (!isUndefined(defaultValue)) initialiseDefaultItem();
+	}, [children]);
 
 	return (
 		<FormSearchSelect
-			value={selectedValue}
-			formatRenderValue={formatRenderValue}
-			onItemClick={setSelectedValue}
-			valueIsSelected={valueIsSelected}
-			defaultValue={defaultValue}
+			value={selectedItem}
+			renderValue={formatRenderValue}
+			onItemClick={setSelectedItem}
+			itemIsSelected={itemIsSelected}
+			defaultValue={defaultValue ?? ''}
 			{...props}
 		>
 			{children}
