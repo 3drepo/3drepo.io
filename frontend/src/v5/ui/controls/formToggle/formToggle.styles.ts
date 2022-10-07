@@ -16,12 +16,14 @@
  */
 
 import styled from 'styled-components';
+import FormControlLabelBase from '@mui/material/FormControlLabel';
 
-export const Container = styled.div`
+export const FormControlLabel = styled(FormControlLabelBase)`
 	display: flex;
-	flex-direction: row;
-	color: ${({ theme }) => theme.palette.base.main};
-	margin-top: 20px;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+	align-items: center;
+	margin: 0;
 	
 	.MuiSwitch-root {
 		margin-left: 7px;

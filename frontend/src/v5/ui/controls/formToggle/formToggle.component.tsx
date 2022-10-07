@@ -17,7 +17,7 @@
 
 import { Switch, SwitchProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { Container } from './formToggle.styles';
+import { FormControlLabel } from './formToggle.styles';
 
 export type FormToggleProps = SwitchProps & {
 	control: any;
@@ -25,20 +25,31 @@ export type FormToggleProps = SwitchProps & {
 	children: any;
 };
 
-export const FormToggle = ({ control, name, children, ...props }: FormToggleProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<Container>
-				{children}
-				<Switch
-					{...field}
-					inputRef={field.ref}
-					id={name}
-					{...props}
-				/>
-			</Container>
+export const FormToggle = ({
+	control,
+	name,
+	children,
+	required,
+	disabled,
+	...props
+}: FormToggleProps) => (
+	<FormControlLabel
+		disabled={disabled}
+		label={children}
+		control={(
+			<Controller
+				control={control}
+				name={name}
+				render={({ field }) => (
+					<Switch
+						{...field}
+						inputRef={field.ref}
+						id={name}
+						disabled={disabled}
+						{...props}
+					/>
+				)}
+			/>
 		)}
 	/>
 );
