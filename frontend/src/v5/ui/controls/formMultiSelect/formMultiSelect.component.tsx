@@ -52,6 +52,7 @@ export const FormMultiSelect = ({
 				throw new Error('FormMultiSelect only accepts an array of MultiSelectMenuItem as direct children');
 			}
 		});
+	};
 		
 	const initialiseDefaultItems = () => {	
 		setSelectedItems(
@@ -67,16 +68,16 @@ export const FormMultiSelect = ({
 	}, [children]);
 
 	return (
-			<FormSearchSelect
-				defaultValue={defaultValue ?? []}
-				value={selectedItems}
-				renderValue={formatRenderValue}
-				onItemClick={toggleValueSelection}
-				itemIsSelected={itemIsSelected}
-				multiple
-				{...props}
-			>
-				{children}
-			</FormSearchSelect>
+		<FormSearchSelect
+			defaultValue={defaultValue ?? []}
+			value={selectedItems}
+			renderValue={formatRenderValue}
+			onItemClick={toggleValueSelection}
+			itemIsSelected={itemIsSelected}
+			multiple
+			{...props}
+		>
+			{children}
+		</FormSearchSelect>
 	);
 };
