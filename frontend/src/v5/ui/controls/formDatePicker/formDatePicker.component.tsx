@@ -30,10 +30,16 @@ export const FormDatePicker = ({
 	name,
 	control,
 	formError,
-	...otherProps
+	disabled,
+	...props
 }: FormDatePickerProps) => {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(null);
+
+	const handleClick = () => {
+		if (!disabled) setOpen(true);
+	};
+
 	return (
 		<Controller
 			control={control}
@@ -41,9 +47,9 @@ export const FormDatePicker = ({
 			render={({ field }) => (
 				<DatePicker
 					{...field}
-					{...otherProps}
 					onOpen={() => setOpen(true)}
 					onClose={() => setOpen(false)}
+					disabled={disabled}
 					open={open}
 					onChange={setValue}
 					value={value}
@@ -51,8 +57,14 @@ export const FormDatePicker = ({
 					disableHighlightToday
 					inputFormat="DD/MM/YYYY"
 					renderInput={({ ref, ...textFieldProps }) => (
-						<FormDateTextField {...textFieldProps} formError={formError} onClick={() => setOpen(true)} />
+						<FormDateTextField
+							{...textFieldProps}
+							disabled={disabled}
+							formError={formError}
+							onClick={handleClick}
+						/>
 					)}
+					{...props}
 				/>
 			)}
 		/>

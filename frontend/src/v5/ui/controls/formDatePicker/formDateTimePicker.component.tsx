@@ -31,10 +31,15 @@ export const FormDateTimePicker = ({
 	name,
 	control,
 	formError,
-	...otherProps
+	disabled,
+	...props
 }: FormDateTimePickerProps) => {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(null);
+
+	const handleClick = () => {
+		if (!disabled) setOpen(true);
+	};
 
 	const formatTime = (time) => time.replace('@', formatMessage({
 		id: 'form.dateTime.at',
@@ -48,9 +53,9 @@ export const FormDateTimePicker = ({
 			render={({ field }) => (
 				<DateTimePicker
 					{...field}
-					{...otherProps}
 					onOpen={() => setOpen(true)}
 					onClose={() => setOpen(false)}
+					disabled={disabled}
 					open={open}
 					onChange={setValue}
 					value={value}
@@ -59,8 +64,14 @@ export const FormDateTimePicker = ({
 					inputFormat="DD/MM/YYYY @ hh:mma"
 					rifmFormatter={formatTime}
 					renderInput={({ ref, ...textFieldProps }) => (
-						<FormDateTextField {...textFieldProps} formError={formError} onClick={() => setOpen(true)} />
+						<FormDateTextField
+							{...textFieldProps}
+							disabled={disabled}
+							formError={formError}
+							onClick={handleClick}
+						/>
 					)}
+					{...props}
 				/>
 			)}
 		/>

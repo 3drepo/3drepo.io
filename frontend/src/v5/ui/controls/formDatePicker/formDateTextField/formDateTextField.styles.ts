@@ -30,6 +30,9 @@ export const TextField = styled(TextFieldBase)`
 
 	input {
 		cursor: pointer;
+		&.Mui-disabled {
+			cursor: context-menu;
+		}
 	}
 
 	.MuiIconButton-edgeEnd {
