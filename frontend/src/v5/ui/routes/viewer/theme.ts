@@ -60,7 +60,7 @@ export const theme = createTheme(
 							':first-letter': {
 								textTransform: 'uppercase',
 							},
-							'&.Mui-focused': {
+							'&.Mui-focused:not(.Mui-error)': {
 								color: COLOR.BASE_MAIN,
 							},
 						},
