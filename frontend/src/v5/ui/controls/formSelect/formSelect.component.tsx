@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { SelectProps, InputLabel, FormControl } from '@mui/material';
+import { useState } from 'react';
 import { Controller } from 'react-hook-form';
-import { Select } from './formSelect.styles';
+import { Select, TooltipAdapter, Tooltip } from './formSelect.styles';
 
 export type FormSelectProps = SelectProps & {
 	control: any;
 	name: string;
+	renderValue: () => any;
 };
 
 export const FormSelect = ({
@@ -33,9 +35,19 @@ export const FormSelect = ({
 	hidden,
 	value,
 	defaultValue,
+	multiple,
+	renderValue,
+	onOpen,
 	onClose,
-	...otherProps
+	...props
 }: FormSelectProps) => {
+	const [showTooltip, setShowTooltip] = useState(false);
+
+	const handleOpen = (e) => {
+		setShowTooltip(false)
+		onOpen?.(e);
+	};
+
 	const handleClose = (e, field) => {
 		if (value) {
 			field.onChange({ target: { value } });
@@ -55,26 +67,40 @@ export const FormSelect = ({
 					{label}
 				</InputLabel>
 			)}
-			<Controller
-				control={control}
-				name={name}
-				defaultValue={defaultValue ?? ''}
-				render={({ field }) => (
-					<Select
-						{...field}
-						inputRef={field.ref}
-						labelId={`${name}-label`}
-						id={name}
-						label={label}
-						disabled={disabled}
-						hidden={hidden}
-						onClose={(e) => handleClose(e, field)}
-						{...otherProps}
-					>
-						{children}
-					</Select>
-				)}
-			/>
+			
+			<Tooltip
+				title={multiple ? renderValue() : ''}
+				open={showTooltip}
+			>
+				<TooltipAdapter
+					onMouseEnter={() => setShowTooltip(true)}
+					onMouseLeave={() => setShowTooltip(false)}
+				>
+					<Controller
+						control={control}
+						name={name}
+						defaultValue={defaultValue ?? ''}
+						render={({ field }) => (
+							<Select
+								{...field}
+								inputRef={field.ref}
+								labelId={`${name}-label`}
+								id={name}
+								label={label}
+								disabled={disabled}
+								hidden={hidden}
+								onOpen={handleOpen}
+								onClose={(e) => handleClose(e, field)}
+								multiple={multiple}
+								renderValue={renderValue}
+								{...props}
+							>
+								{children}
+							</Select>
+						)}
+					/>
+				</TooltipAdapter>
+			</Tooltip>
 		</FormControl>
 	);
 };

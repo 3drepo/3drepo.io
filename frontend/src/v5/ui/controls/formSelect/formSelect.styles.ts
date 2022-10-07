@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Select as SelectBase } from '@mui/material';
+import { Select as SelectBase, Tooltip as TooltipBase } from '@mui/material';
 import styled from 'styled-components';
 
 export const Select = styled(SelectBase)`
@@ -25,3 +25,18 @@ export const Select = styled(SelectBase)`
 		pointer-events: none;
 	}
 `;
+
+export const Tooltip = styled(TooltipBase).attrs({
+	arrow: true,
+	followCursor: true,
+	componentsProps: {
+		tooltip: {
+			sx: {
+				maxWidth: 230,
+				top: 10,
+			},
+		},
+	},
+})``;
+
+export const TooltipAdapter = styled.div``;
