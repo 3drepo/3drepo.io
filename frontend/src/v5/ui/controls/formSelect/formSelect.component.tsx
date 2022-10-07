@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SelectProps, InputLabel, FormControl } from '@mui/material';
+import { SelectProps, InputLabel, FormControl, FormHelperText } from '@mui/material';
 import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { Select, TooltipAdapter, Tooltip } from './formSelect.styles';
@@ -22,6 +22,7 @@ import { Select, TooltipAdapter, Tooltip } from './formSelect.styles';
 export type FormSelectProps = SelectProps & {
 	control: any;
 	name: string;
+	formError?: any;
 	renderValue: () => any;
 };
 
@@ -31,6 +32,7 @@ export const FormSelect = ({
 	label,
 	children,
 	control,
+	formError,
 	disabled,
 	hidden,
 	value,
@@ -63,11 +65,11 @@ export const FormSelect = ({
 					required={required}
 					disabled={disabled}
 					hidden={hidden}
+					error={!!formError}
 				>
 					{label}
 				</InputLabel>
 			)}
-			
 			<Tooltip
 				title={multiple ? renderValue() : ''}
 				open={showTooltip}
@@ -93,6 +95,7 @@ export const FormSelect = ({
 								onClose={(e) => handleClose(e, field)}
 								multiple={multiple}
 								renderValue={renderValue}
+								error={!!formError}
 								{...props}
 							>
 								{children}
@@ -101,6 +104,7 @@ export const FormSelect = ({
 					/>
 				</TooltipAdapter>
 			</Tooltip>
+			<FormHelperText error={!!formError}>{formError?.message}</FormHelperText>
 		</FormControl>
 	);
 };
