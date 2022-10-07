@@ -14,11 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { formatDate } from '@/v5/services/intl';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { PriorityLevelChip, RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { useParams } from 'react-router-dom';
-import { Ticket, Id, Title } from './ticketItem.styles';
+import { Ticket, Id, Title, ChipList, Assignees, DateTest } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -29,15 +32,35 @@ type TicketItemProps = {
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-
+	const {
+		number,
+		properties: {
+			Status: status = null,
+			Priority: priority = null,
+			Risk: risk = null,
+			Treatment: treatment = null,
+			Assignees: assignees = [],
+			'Due Date': dueDate = null,
+		},
+	} = ticket;
 	return (
 		<Ticket
 			onClick={onClick}
 			key={ticket._id}
 			$selected={selected}
 		>
-			<Id>{template?.code}:{ticket.number}</Id>
+			<Id>{template?.code}:{number}</Id>
 			<Title>{ticket.title}</Title>
+			<ChipList>
+				{status && <TicketStatusChip state={status} />}
+				{risk && <RiskLevelChip state={risk} />}
+				{treatment && <TreatmentLevelChip state={treatment} />}
+			</ChipList>
+			<DateTest>
+				Due {formatDate(dueDate)}
+				<PriorityLevelChip noLabel state={priority} />
+			</DateTest>
+			<Assignees assignees={assignees} max={7} />
 		</Ticket>
 	);
 };
