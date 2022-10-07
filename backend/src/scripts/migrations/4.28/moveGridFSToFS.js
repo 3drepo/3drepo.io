@@ -69,14 +69,14 @@ const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) =>
 	let currentGroup = [];
 	let currentGroupSize = 0;
 	for (const entry of entries) {
-		if ((entry.size + currentGroupSize) > maxMem || currentGroup.length >= maxParallelFiles) {
+		if ((entry.length + currentGroupSize) > maxMem || currentGroup.length >= maxParallelFiles) {
 			groups.push(currentGroup);
 			currentGroupSize = 0;
 			currentGroup = [];
 		}
 
 		currentGroup.push(entry);
-		currentGroupSize += entry.size;
+		currentGroupSize += entry.length;
 	}
 
 	if (currentGroup.length) {
