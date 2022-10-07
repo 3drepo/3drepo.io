@@ -32,6 +32,9 @@ export default {
 		values: {
 			control: 'array',
 		},
+		formError: {
+			type: 'string',
+		},
 		disabled: {
 			type: 'boolean',
 		},
@@ -40,7 +43,7 @@ export default {
 	parameters: { controls: { exclude: ['control', 'ref'] } },
 } as ComponentMeta<typeof FormSelect>;
 
-const Controlled: ComponentStory<typeof FormSelect> = ({ values, ...args }: any) => {
+const Controlled: ComponentStory<typeof FormSelect> = ({ formError, values, ...args }: any) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
@@ -49,6 +52,7 @@ const Controlled: ComponentStory<typeof FormSelect> = ({ values, ...args }: any)
 				name="select"
 				control={control}
 				{...args}
+				formError={formError ? { message: formError } : null}
 			>
 				{values.map((value) => (
 					<MenuItem value={value} key={value}>
