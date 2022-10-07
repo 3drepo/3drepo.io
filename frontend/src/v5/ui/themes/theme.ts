@@ -257,6 +257,7 @@ export const theme = createTheme({
 
 						'&.Mui-disabled': {
 							color: COLOR.BASE_LIGHT,
+							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
 						},
 
 						'&.Mui-focused:not(.Mui-error)': {
@@ -319,9 +320,6 @@ export const theme = createTheme({
 						marginTop: 40,
 						position: 'absolute',
 						pointerEvents: 'none',
-						'& path': {
-							fill: COLOR.BASE_MAIN,
-						},
 					},
 				},
 			},
@@ -846,12 +844,12 @@ export const theme = createTheme({
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					borderRadius: 5,
 
-					'& input': {
+					'input': {
 						padding: '0px 15px',
 						height: 35,
 						lineHeight: '35px',
 					},
-					'& input, & textarea, & .MuiInputAdornment-root': {
+					'input, textarea, .MuiInputAdornment-root': {
 						...typography.body1,
 						color: COLOR.SECONDARY_MAIN,
 					},
@@ -865,29 +863,33 @@ export const theme = createTheme({
 							borderRadius: 5,
 							border: `1px solid ${COLOR.BASE_LIGHTER}`,
 						},
+						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.BASE_LIGHT,
+						},
+						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.ERROR_MAIN,
+						},
 					},
 					'&.Mui-disabled': {
-						'& input, & textarea, & .MuiInputAdornment-root': {
+						borderColor: COLOR.BASE_LIGHT,
+						'input, textarea, .MuiInputAdornment-root, .MuiSelect-select': {
 							color: COLOR.BASE_LIGHT,
-						},
-						'& path': {
-							fill: COLOR.BASE_LIGHT,
+							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
 						},
 					},
 					'&.Mui-error': {
 						backgroundColor: COLOR.ERROR_LIGHTEST,
-						'.MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.ERROR_MAIN,
+						color: COLOR.ERROR_MAIN,
+						'.MuiSelect-select': {
+							backgroundColor: COLOR.ERROR_LIGHTEST,
+							color: COLOR.ERROR_MAIN,
 						},
 						'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline': {
 							borderColor: COLOR.ERROR_MAIN,
 							boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
 						},
-						'& input, & textarea, & .MuiInputAdornment-root': {
+						'input, textarea, .MuiInputAdornment-root': {
 							color: COLOR.ERROR_MAIN,
-						},
-						'& path': {
-							fill: COLOR.ERROR_MAIN,
 						},
 					},
 				},
@@ -933,9 +935,6 @@ export const theme = createTheme({
 						position: 'absolute',
 						right: 14,
 						pointerEvents: 'none',
-						'& path': {
-							fill: COLOR.BASE_MAIN,
-						},
 					},
 				},
 			},
@@ -991,6 +990,9 @@ export const theme = createTheme({
 			styleOverrides: {
 				label: {
 					color: COLOR.BASE_MAIN,
+					'&.Mui-disabled': {
+						color: COLOR.BASE_LIGHT,
+					},
 				},
 			},
 		},
@@ -1103,9 +1105,6 @@ export const theme = createTheme({
 					},
 					'&.Mui-disabled': {
 						color: COLOR.BASE_LIGHTEST,
-						'& path': {
-							fill: COLOR.BASE_LIGHTEST,
-						},
 					},
 					[`&:hover path,
 					  &:active path`]: {
