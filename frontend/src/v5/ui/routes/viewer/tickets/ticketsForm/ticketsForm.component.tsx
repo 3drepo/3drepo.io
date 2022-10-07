@@ -24,7 +24,7 @@ import { ManyOfProperty } from './properties/manyOfProperty.component';
 import { NumberProperty } from './properties/numberProperty.component';
 import { OneOfProperty } from './properties/oneOfProperty.component';
 import { TextProperty } from './properties/textProperty.component';
-import { UnsupportedProperty } from './properties/unsupportedProperty.componet';
+import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 
 const TicketProperty = {
 	text: TextProperty,
@@ -66,6 +66,8 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 
 export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => (
 	<>
+		<TextProperty property={{ name: 'title' }} value={ticket.title} />
+
 		<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
 		{
 			(template.modules || []).map((module) => (

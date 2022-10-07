@@ -18,7 +18,7 @@
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { TextField } from '@mui/material';
 
-export const TextProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
+export const TextProperty = ({ property, value }: {property: Partial<PropertyDefinition>, value:any}) => (
 	<div>
         &nbsp;
 		<TextField label={property.name} value={value} disabled={property.readOnly} />
