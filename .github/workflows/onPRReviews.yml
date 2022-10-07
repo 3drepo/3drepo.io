@@ -5,6 +5,20 @@ on:
   pull_request_review:
     types: [edited, dismissed, submitted]
 jobs:
+  extractIssueNumber:
+    name: Extract Issue Number
+    runs-on: ubuntu-latest
+    outputs: 
+      issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
+    steps:
+      - name: Extract Issue Number from PR
+        uses: carmenfan/extract-issue-number-from-PR-merge@v1.1
+        with:
+          pr: ${{ github.event.number }}
+          base: staging
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        id: commitMsgParser
+
   checkMergeReady:
     name: Ensure all reviewers have approved the PR
     runs-on: ubuntu-latest
@@ -20,4 +34,25 @@ jobs:
         with:
           pr: ${{ steps.condval.outputs.value }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+#  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
+
+  awaitingApproval:
+    name: If someone has been assigned a reviewer -> change issue status to "awaiting approval"
+    runs-on: ubuntu-latest
+    needs: extractIssueNumber
+    steps:
+      - name: Output status
+        run: |
+          echo "Current status value: ${{ github.event }}"
+      - name: Update status
+        id: update_status
+        uses: github/update-project-action@v2
+        with:
+          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          organization: keif-gwinn
+          project_number: 1
+          content_id: ${{ github.event.client_payload.command.resource.id }}
+          field: Status
+          value: 'awaiting approval' #${{ github.event.client_payload.data.status }}
 
