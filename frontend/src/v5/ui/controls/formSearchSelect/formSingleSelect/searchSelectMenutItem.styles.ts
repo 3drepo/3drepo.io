@@ -14,8 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { MenuItemProps, MenuItem } from '@mui/material';
+import styled from 'styled-components';
 
 type SearchSelectMenuItemProps = Omit<MenuItemProps, 'value'> & { value: any };
 
-export const SearchSelectMenuItem = (props: SearchSelectMenuItemProps) => (<MenuItem {...props} />);
+export const SearchSelectMenuItem = styled(MenuItem)<SearchSelectMenuItemProps>`
+	&&& {
+		padding: 0 14px;
+		height: 34px;
+	}
+`;
