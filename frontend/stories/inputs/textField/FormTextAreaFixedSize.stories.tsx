@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormTextArea } from '@controls/formTextArea/formTextArea.component';
+import { FormTextArea } from '@controls/formTextAreaFixedSize/formTextArea.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormTextArea',
+	title: 'Inputs/TextField/FormTextAreaFixedSize',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -31,11 +31,11 @@ export default {
 		formError: {
 			type: 'string',
 		},
-		minRows: {
-			type: 'number',
-		},
 		disabled: {
 			type: 'boolean',
+		},
+		height: {
+			type: 'number',
 		},
 	},
 	component: FormTextArea,
@@ -48,7 +48,7 @@ const Controlled: ComponentStory<typeof FormTextArea> = ({ formError, ...args })
 	return (
 		<FormContainer>
 			<FormTextArea
-				name="textfield"
+				name="textarea"
 				control={control}
 				{...args}
 				formError={formError ? { message: formError } : null}
@@ -60,6 +60,5 @@ const Controlled: ComponentStory<typeof FormTextArea> = ({ formError, ...args })
 export const ControlledFormTextArea = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormTextArea.args = {
-	label: 'Controlled Multi Line input',
-	minRows: 3,
+	label: 'Controlled Fixed Multi Line input',
 };
