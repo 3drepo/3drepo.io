@@ -14,23 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SearchSelectMenuItem } from '@controls/formSingleSearchSelect/searchSelectMenuItem.component';
-import { FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSearchSelect/formSearchSelect.component';
+import { MenuItem } from '@mui/material';
 import { isEqual, isUndefined } from 'lodash';
 import { Children, useEffect, useState } from 'react';
-import { FormSearchSelect } from '../formSearchSelect/formSearchSelectMenu';
 
-export type FormSearchSingleSelectProps = FormSelectProps & {
-	children: JSX.Element | JSX.Element[],
-	renderValue?: (selectedItem: any) => any;
+export type FormSingleSelectProps = FormSearchSelectProps & {
+	children: any,
 };
 
-export const FormSearchSingleSelect = ({
+export const FormSingleSelect = ({
 	children,
 	defaultValue,
 	renderValue,
 	...props
-}: FormSearchSingleSelectProps) => {
+}: FormSingleSelectProps) => {
 	const [selectedItem, setSelectedItem] = useState<any>();
 
 	const formatRenderValue = () => {
@@ -42,8 +40,8 @@ export const FormSearchSingleSelect = ({
 
 	const verifyChildrenAreValid = () => {
 		Children.forEach(children, (child) => {
-			if (child.type !== SearchSelectMenuItem) {
-				throw new Error('FormSearchSingleSelect only accepts an array of SearchSelectMenuItem as direct children');
+			if (child.type !== MenuItem) {
+				throw new Error('FormSingleSelect only accepts an array of MenuItem as direct children');
 			}
 		});
 	};
@@ -68,6 +66,7 @@ export const FormSearchSingleSelect = ({
 			onItemClick={setSelectedItem}
 			itemIsSelected={itemIsSelected}
 			defaultValue={defaultValue ?? ''}
+			search
 			{...props}
 		>
 			{children}

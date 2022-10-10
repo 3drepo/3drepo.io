@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FormSingleSelect, FormSingleSelectProps } from '@controls/formSearchSelect/formSingleSelect/formSingleSelect.component';
 import { useState } from 'react';
 import { InvisibleContainer } from './formInvisibleSelect.styles';
-import { FormSelect, FormSelectProps } from '../formSelect/formSelect.component';
 
-type FormInvisibleSelectProps = FormSelectProps & {
+type FormInvisibleSelectProps = FormSingleSelectProps & {
 	TriggerComponent: JSX.Element,
 };
 
@@ -29,7 +29,7 @@ export const FormInvisibleSelect = ({ TriggerComponent, ...props }: FormInvisibl
 	return (
 		<InvisibleContainer onClick={() => setOpen(!open)}>
 			{TriggerComponent}
-			<FormSelect {...props} open={open} />
+			<FormSingleSelect {...props} open={open} />
 		</InvisibleContainer>
 	);
 };

@@ -45,12 +45,12 @@ const MenuContent = () => {
 	);
 };
 
-type ChildrenType = JSX.Element | JSX.Element[];
 
 export type FormSearchSelectProps = FormSelectProps & {
-	onItemClick: (item: any) => void;
-	itemIsSelected: (item: any) => void;
-	value: any;
+	onItemClick?: (item: any) => void;
+	itemIsSelected?: (item: any) => void;
+	value?: any;
+	search?: boolean;
 };
 
 export const FormSearchSelect = ({
@@ -58,10 +58,11 @@ export const FormSearchSelect = ({
 	onItemClick,
 	itemIsSelected,
 	value,
+	search = false,
 	...props
 }: FormSearchSelectProps) => {
 	const renderValueRef = useRef<HTMLLIElement & { selected }>();
-	const [items, setItems] = useState<ChildrenType[]>([]);
+	const [items, setItems] = useState([]);
 	const SEARCH_VALUE_PROP = 'searchvalue';
 
 	const preventInputUnfocus = (e) => {
@@ -97,12 +98,14 @@ export const FormSearchSelect = ({
 	return (
 		<SearchContextComponent fieldsToFilter={[`props.${SEARCH_VALUE_PROP}`]} items={items}>
 			<FormSelect value={value} {...props}>
-				<SearchInputContainer>
-					<SearchInput
-						placeholder={formatMessage({ id: 'form.searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
-						onClick={preventInputUnfocus}
-					/>
-				</SearchInputContainer>
+				{search && (
+					<SearchInputContainer>
+						<SearchInput
+							placeholder={formatMessage({ id: 'form.searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
+							onClick={preventInputUnfocus}
+						/>
+					</SearchInputContainer>
+				)}
 				<MenuContent />
 				<RenderValueTrigger ref={renderValueRef} key={RenderValueTrigger} />
 			</FormSelect>

@@ -16,14 +16,14 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FormSelect, FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { FormSingleSelect, FormSingleSelectProps } from '@controls/formSearchSelect/formSingleSelect/formSingleSelect.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { MouseEvent, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { SearchInput, NoResults, FormCheckbox, MenuItem } from './formMultiSelect.styles';
 
-type FormMultiSelectProps = FormSelectProps & {
+type FormMultiSelectProps = FormSingleSelectProps & {
 	values: string[],
 };
 
@@ -55,7 +55,7 @@ export const FormMultiSelect = ({ label, values, name, control }: FormMultiSelec
 
 	return (
 		<SearchContextComponent items={values}>
-			<FormSelect
+			<FormSingleSelect
 				multiple
 				defaultValue={[]}
 				label={label}
@@ -91,7 +91,7 @@ export const FormMultiSelect = ({ label, values, name, control }: FormMultiSelec
 						/>
 					</NoResults>
 				)}
-			</FormSelect>
+			</FormSingleSelect>
 		</SearchContextComponent>
 	);
 };

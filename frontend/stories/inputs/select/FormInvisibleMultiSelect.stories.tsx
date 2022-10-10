@@ -16,7 +16,7 @@
  */
 import { Button } from '@controls/button';
 import { FormInvisibleMultiSelect } from '@controls/formInvisibleMultiSelect/formInvisibleMultiSelect.component';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelectMenuItem } from '@controls/formSearchSelect/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';

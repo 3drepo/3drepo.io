@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormSearchSelect } from '@controls/formSearchSelect/formSearchSelectMenu';
-import { FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSearchSelect/formSearchSelect.component';
 import { isEqual, some, xorWith } from 'lodash';
 import { Children, useEffect, useState } from 'react';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
-export type FormMultiSelectProps = FormSelectProps & {
+export type FormMultiSelectProps = FormSearchSelectProps & {
 	children: JSX.Element | JSX.Element[],
 	renderValue?: (selectedItems: any[]) => any;
 	defaultValue?: any[];
@@ -75,6 +74,7 @@ export const FormMultiSelect = ({
 			renderValue={formatRenderValue}
 			onItemClick={toggleValueSelection}
 			itemIsSelected={itemIsSelected}
+			search
 			multiple
 			selectedOptionsTooltip={selectedOptionsTooltip}
 			{...props}
