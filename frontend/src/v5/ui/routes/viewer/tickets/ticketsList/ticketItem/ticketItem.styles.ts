@@ -58,12 +58,10 @@ export const ChipList = styled.div`
 export const Assignees = styled(AssigneesBase)`
 	position: absolute;
 	right: 15px;
-	bottom: 9px;
+	bottom: 16px;
 `;
 
-// TODO - fix after new palette is released
-export const DateTest = styled.div`
-	color: #6B778C;
-	font-size: 10px;
-	margin: 10px 0 -4px;
+export const DateAndPriority = styled.div`
+	margin: 7px 0 0;
+
 `;

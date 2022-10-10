@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate } from '@/v5/services/intl';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { PriorityLevelChip, RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
+import { DueDate } from '@controls/dueDate/dueDate.component';
 import { useParams } from 'react-router-dom';
-import { Ticket, Id, Title, ChipList, Assignees, DateTest } from './ticketItem.styles';
+import { Ticket, Id, Title, ChipList, Assignees, DateAndPriority } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -56,10 +56,10 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				{risk && <RiskLevelChip state={risk} />}
 				{treatment && <TreatmentLevelChip state={treatment} />}
 			</ChipList>
-			<DateTest>
-				Due {formatDate(dueDate)}
+			<DateAndPriority>
+				<DueDate epochTime={dueDate} onClick={() => { /* Edit Due Date */ }} />
 				<PriorityLevelChip noLabel state={priority} />
-			</DateTest>
+			</DateAndPriority>
 			<Assignees assignees={assignees} max={7} />
 		</Ticket>
 	);
