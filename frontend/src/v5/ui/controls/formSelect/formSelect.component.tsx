@@ -24,7 +24,7 @@ export type FormSelectProps = SelectProps & {
 	name: string;
 	formError?: any;
 	selectedOptionsTooltip?: boolean;
-	renderValue?: () => any;
+	renderValue?: (value) => any;
 };
 
 export const FormSelect = ({
@@ -73,7 +73,7 @@ export const FormSelect = ({
 				</InputLabel>
 			)}
 			<Tooltip
-				title={(selectedOptionsTooltip && renderValue && renderValue().length) ? renderValue() : ''}
+				title={selectedOptionsTooltip ? renderValue(value) : ''}
 				open={showTooltip}
 			>
 				<TooltipAdapter
