@@ -24,7 +24,7 @@ export const MultiSelectMenuItem = ({
 	selected,
 	...props
 }: MultiSelectMenuItemProps) => (
-	<MenuItem selected={selected} {...props} >
+	<MenuItem selected={selected} {...props}>
 		<CheckboxContainer>
 			<Checkbox checked={selected} />
 			{children}
