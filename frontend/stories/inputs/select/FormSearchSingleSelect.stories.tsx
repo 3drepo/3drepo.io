@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormSearchSingleSelect } from '@controls/formSingleSearchSelect/formSearchSingleSelect.component';
+import { FormSingleSelect } from '@controls/formSearchSelect/formSingleSelect/formSingleSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
@@ -22,11 +22,11 @@ import ChevronIcon from '@assets/icons/chevron.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import PrintIcon from '@assets/icons/print.svg';
 import styled from 'styled-components';
-import { SearchSelectMenuItem } from '@controls/formSingleSearchSelect/searchSelectMenuItem.component';
 import { FormContainer } from '../FormInput.styles';
+import { SearchSelectMenuItem } from '@controls/formSearchSelect/formSingleSelect/searchSelectMenutItem.styles';
 
 export default {
-	title: 'Inputs/Select/FormSearchSingleSelect',
+	title: 'Inputs/Select/FormSingleSelect',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -37,10 +37,13 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		search: {
+			type: 'boolean',
+		},
 	},
-	component: FormSearchSingleSelect,
-	parameters: { controls: { exclude: ['control'] } },
-} as ComponentMeta<typeof FormSearchSingleSelect>;
+	component: FormSingleSelect,
+	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip'] } },
+} as ComponentMeta<typeof FormSingleSelect>;
 
 const IconContainer = styled.div`
 	margin-right: 5px;
@@ -49,12 +52,12 @@ const IconContainer = styled.div`
 	}
 `;
 
-const Controlled: ComponentStory<typeof FormSearchSingleSelect> = (args) => {
+const Controlled: ComponentStory<typeof FormSingleSelect> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormSearchSingleSelect
+			<FormSingleSelect
 				name="multiselect"
 				control={control}
 				renderValue={({ children }) => (
@@ -91,7 +94,7 @@ const Controlled: ComponentStory<typeof FormSearchSingleSelect> = (args) => {
 					</IconContainer>
 					print icon
 				</SearchSelectMenuItem>
-			</FormSearchSingleSelect>
+			</FormSingleSelect>
 		</FormContainer>
 	);
 };

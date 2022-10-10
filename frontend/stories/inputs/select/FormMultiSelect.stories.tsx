@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { FormMultiSelect } from '@controls/formSearchSelect/formMultiSelect/formMultiSelect.component';
+import { MultiSelectMenuItem } from '@controls/formSearchSelect/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
@@ -57,16 +57,20 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 			<FormMultiSelect
 				name="multiselect"
 				control={control}
-				renderValue={(selectedItemsChildren: any[]) => (
-					selectedItemsChildren.map(([icon, label], index) => (
-						<>
-							<span>{index > 0 ? ', ' : ''}</span>
-							<div style={{ display: 'inline-flex' }}>
-								{icon}
-							</div>
-							<span>{label}</span>
-						</>
-					))
+				renderValue={(selectedItems: any[]) => (
+					selectedItems.map((item, index) => {
+						if (!item?.[0]?.props) return item;
+						const [icon, label] = selectedItems;
+						return (
+							<>
+								<span>{index > 0 ? ', ' : ''}</span>
+								<div style={{ display: 'inline-flex' }}>
+									{icon}
+								</div>
+								<span>{label}</span>
+							</>
+						)
+					})
 				)}
 				{...args}
 			>
@@ -93,6 +97,15 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 						<PrintIcon />
 					</IconContainer>
 					print icon
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value={5} key={5}>
+					text
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value={6} key={6}>
+					{3}
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value={7} key={7}>
+					{`mixed text and number ${2}`}
 				</MultiSelectMenuItem>
 			</FormMultiSelect>
 		</FormContainer>
