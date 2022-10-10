@@ -31,6 +31,7 @@ export const FormMultiSelect = ({
 	children,
 	defaultValue,
 	renderValue,
+	selectedOptionsTooltip = true,
 	...props
 }: FormMultiSelectProps) => {
 	const [selectedItems, setSelectedItems] = useState<any[]>([]);
@@ -75,6 +76,7 @@ export const FormMultiSelect = ({
 			onItemClick={toggleValueSelection}
 			itemIsSelected={itemIsSelected}
 			multiple
+			selectedOptionsTooltip={selectedOptionsTooltip}
 			{...props}
 		>
 			{children}

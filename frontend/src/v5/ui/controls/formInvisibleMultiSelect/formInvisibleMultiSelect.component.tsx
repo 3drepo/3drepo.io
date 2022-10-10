@@ -24,8 +24,18 @@ type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
 	TriggerComponent: JSX.Element,
 };
 
-export const FormInvisibleMultiSelect = ({ TriggerComponent, ...props }: FormInvisibleMultiSelectProps) => {
+export const FormInvisibleMultiSelect = ({
+	TriggerComponent,
+	selectedOptionsTooltip = false,
+	onClose,
+	...props
+}: FormInvisibleMultiSelectProps) => {
 	const [open, setOpen] = useState(false);
+
+	const handleClose = (e) => {
+		setOpen(false);
+		onClose?.(e)
+	};
 
 	return (
 		<>
@@ -33,7 +43,12 @@ export const FormInvisibleMultiSelect = ({ TriggerComponent, ...props }: FormInv
 				{TriggerComponent}
 			</ButtonContainer>
 			<SelectContainer>
-				<FormMultiSelect {...props} open={open} onClose={() => setOpen(false)} />
+				<FormMultiSelect
+					selectedOptionsTooltip={selectedOptionsTooltip}
+					open={open}
+					onClose={handleClose}
+					{...props}
+				/>
 			</SelectContainer>
 		</>
 	);
