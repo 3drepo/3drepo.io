@@ -92,7 +92,7 @@ export const FormSearchSelect = ({
 
 	useEffect(() => { populateChildren(); }, [rawChildren, value]);
 
-	useEffect(() => { refreshRenderValue(); }, [value])
+	useEffect(() => { refreshRenderValue(); }, [value]);
 
 	return (
 		<SearchContextComponent fieldsToFilter={[`props.${SEARCH_VALUE_PROP}`]} items={items}>

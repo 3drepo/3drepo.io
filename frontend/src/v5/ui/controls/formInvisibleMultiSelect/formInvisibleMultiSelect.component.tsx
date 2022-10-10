@@ -34,7 +34,7 @@ export const FormInvisibleMultiSelect = ({
 
 	const handleClose = (e) => {
 		setOpen(false);
-		onClose?.(e)
+		onClose?.(e);
 	};
 
 	return (
