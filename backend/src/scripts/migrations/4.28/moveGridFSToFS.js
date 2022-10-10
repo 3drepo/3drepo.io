@@ -78,6 +78,13 @@ const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) =>
 	return groups;
 };
 
+const processFileGroup = async (teamspace, collection, group) => {
+	const filesToRemove = await Promise.all(
+		group.map(({ filename }) => moveFile(teamspace, collection, filename)),
+	);
+	await GridFS.removeFiles(teamspace, collection, filesToRemove);
+};
+
 const formatNumber = (n) => parseFloat(n).toFixed(2);
 
 const processCollection = async (teamspace, collection, maxParallelSizeMB, maxParallelFiles) => {
@@ -92,11 +99,7 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
 		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying ${group.length} file(s) (${formatNumber(totalSize)}MiB)`);
 		// eslint-disable-next-line no-await-in-loop
-		const filesToRemove = await Promise.all(
-			group.map(({ filename }) => moveFile(teamspace, ownerCol, filename)),
-		);
-		// eslint-disable-next-line no-await-in-loop
-		await GridFS.removeFiles(teamspace, ownerCol, filesToRemove);
+		await processFileGroup(teamspace, ownerCol, group);
 	}
 };
 
