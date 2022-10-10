@@ -35,7 +35,7 @@ const convertLegacyFileName = (filename) => {
 	return filename;
 };
 
-const moveFile = async (teamspace, collection, filename, timers) => {
+const moveFile = async (teamspace, collection, filename) => {
 	const legacyFileName = convertLegacyFileName(filename);
 	const query = legacyFileName === filename ? { link: filename }
 		: { link: { $in: [filename, legacyFileName] } };
@@ -44,18 +44,10 @@ const moveFile = async (teamspace, collection, filename, timers) => {
 	if (existingRef && existingRef.type !== 'gridfs') {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
 	} else {
-		const startTimer = Date.now();
 		const file = await getFileFromGridFS(teamspace, collection, filename).catch((err) => { throw new Error(`Failed to fetch file from gridfs (${teamspace}.${collection}): ${filename}: ${err?.message ?? err}`); });
-		const getFileFromGridFSTimer = Date.now();
 		const newRef = await FsService.storeFile(file);
-		const copiedTimer = Date.now();
 		newRef._id = existingRef?._id || convertLegacyFileName(filename);
 		await updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true);
-		const dbUpdateTimer = Date.now();
-		timers.copy.push(copiedTimer - startTimer);
-		timers.copyDetails.gridfs.push(getFileFromGridFSTimer - startTimer);
-		timers.copyDetails.fs.push(copiedTimer - getFileFromGridFSTimer);
-		timers.update.push(dbUpdateTimer - copiedTimer);
 	}
 
 	return filename;
@@ -86,7 +78,6 @@ const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) =>
 	return groups;
 };
 
-const sumArray = (arr) => arr.reduce((partialSum, value) => partialSum + value, 0);
 const formatNumber = (n) => parseFloat(n).toFixed(2);
 
 const processCollection = async (teamspace, collection, maxParallelSizeMB, maxParallelFiles) => {
@@ -100,26 +91,12 @@ const processCollection = async (teamspace, collection, maxParallelSizeMB, maxPa
 		const group = fileGroups[i];
 		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
 		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying ${group.length} file(s) (${formatNumber(totalSize)}MiB)`);
-		const processFilesStart = Date.now();
-		const stats = { copy: [], update: [], copyDetails: { gridfs: [], fs: [] } };
 		// eslint-disable-next-line no-await-in-loop
 		const filesToRemove = await Promise.all(
-			group.map(({ filename }) => moveFile(teamspace, ownerCol, filename, stats)),
+			group.map(({ filename }) => moveFile(teamspace, ownerCol, filename)),
 		);
-		const processFilesEnd = Date.now();
 		// eslint-disable-next-line no-await-in-loop
 		await GridFS.removeFiles(teamspace, ownerCol, filesToRemove);
-		const removeFilesEnd = Date.now();
-		const processFilesTime = processFilesEnd - processFilesStart;
-		const removeFilesTime = removeFilesEnd - processFilesEnd;
-		logger.logInfo(`\t\t\t\t\tTime taken to: copy files[${formatNumber(processFilesTime / 1000)}s] remove GridFS[${formatNumber(removeFilesTime / 1000)}s]`);
-		const fileIOTime = sumArray(stats.copy);
-		const dbOpTime = sumArray(stats.update);
-		const totalTime = fileIOTime + dbOpTime;
-		const gridfsIOTime = sumArray(stats.copyDetails.gridfs);
-		const fsIOTime = sumArray(stats.copyDetails.fs);
-		logger.logInfo(`\t\t\t\t\t\tCopy Files breakdown: file IO [${formatNumber((fileIOTime / totalTime) * 100)}%], db Ops [${formatNumber((dbOpTime / totalTime) * 100)}%]`);
-		logger.logInfo(`\t\t\t\t\t\tFile IO breakdown: gridfs read [${formatNumber((gridfsIOTime / fileIOTime) * 100)}%], fs write [${formatNumber((fsIOTime / fileIOTime) * 100)}%]`);
 	}
 };
 
