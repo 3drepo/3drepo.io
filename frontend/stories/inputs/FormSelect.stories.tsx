@@ -14,41 +14,55 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { MenuItem } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from '../FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
-	title: 'Inputs/Control/FormCheckbox',
+	title: 'Inputs/FormSelect',
 	argTypes: {
 		label: {
 			type: 'string',
 		},
 		defaultValue: {
+			type: 'string',
+		},
+		values: {
+			control: 'array',
+		},
+		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
-} as ComponentMeta<typeof FormCheckbox>;
+	component: FormSelect,
+	parameters: { controls: { exclude: ['control', 'ref'] } },
+} as ComponentMeta<typeof FormSelect>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
+const Controlled: ComponentStory<typeof FormSelect> = ({ values, ...args }: any) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormCheckbox
-				name="checkbox"
+			<FormSelect
+				name="select"
 				control={control}
 				{...args}
-			/>
+			>
+				{values.map((value) => (
+					<MenuItem value={value} key={value}>
+						{value}
+					</MenuItem>
+				))}
+			</FormSelect>
 		</FormContainer>
 	);
 };
 
-export const ControlledFormCheckbox = Controlled.bind({});
+export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormCheckbox.args = {
-	label: 'Controlled Checkbox input',
+ControlledFormSelect.args = {
+	label: 'Controlled Select input',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

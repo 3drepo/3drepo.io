@@ -14,32 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FormMultiSelect } from '@/v5/ui/routes/viewer/formElements/formMultiSelect/formMultiSelect.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from '../FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
-	title: 'Inputs/Control/FormCheckbox',
+	title: 'Inputs/FormMultiSelect',
 	argTypes: {
 		label: {
 			type: 'string',
 		},
 		defaultValue: {
+			type: 'string',
+		},
+		values: {
+			control: 'array',
+		},
+		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
-} as ComponentMeta<typeof FormCheckbox>;
+	component: FormMultiSelect,
+	parameters: { controls: { exclude: ['control'] } },
+} as ComponentMeta<typeof FormMultiSelect>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
+const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormCheckbox
-				name="checkbox"
+			<FormMultiSelect
+				name="multiselect"
 				control={control}
 				{...args}
 			/>
@@ -47,8 +53,9 @@ const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
 	);
 };
 
-export const ControlledFormCheckbox = Controlled.bind({});
+export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormCheckbox.args = {
-	label: 'Controlled Checkbox input',
+ControlledFormSelect.args = {
+	label: 'Controlled Multi Select input',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

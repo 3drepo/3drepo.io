@@ -14,41 +14,48 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox, FormCheckboxProps } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
-import { FormContainer } from '../FormInput.styles';
+import { FormContainer } from './FormInput.styles';
 
 export default {
-	title: 'Inputs/Control/FormCheckbox',
+	title: 'Inputs/FormTextField',
 	argTypes: {
 		label: {
 			type: 'string',
 		},
 		defaultValue: {
+			type: 'string',
+		},
+		formError: {
+			type: 'string',
+		},
+		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
-} as ComponentMeta<typeof FormCheckbox>;
+	component: FormTextField,
+	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
+} as ComponentMeta<typeof FormTextField>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
+const Controlled: ComponentStory<typeof FormTextField> = ({ formError, ...args }) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormCheckbox
-				name="checkbox"
+			<FormTextField
+				name="textfield"
 				control={control}
 				{...args}
+				formError={formError ? { message: formError } : null}
 			/>
 		</FormContainer>
 	);
 };
 
-export const ControlledFormCheckbox = Controlled.bind({});
+export const ControlledFormTextField = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormCheckbox.args = {
-	label: 'Controlled Checkbox input',
+ControlledFormTextField.args = {
+	label: 'Controlled Single Line input',
 };
