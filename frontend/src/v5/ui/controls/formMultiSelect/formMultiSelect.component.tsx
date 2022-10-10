@@ -37,7 +37,7 @@ export const FormMultiSelect = ({
 	const [selectedItems, setSelectedItems] = useState<any[]>([]);
 
 	const formatRenderValue = () => {
-		const childrenToRender = selectedItems.map(({ children }) => children);
+		const childrenToRender = selectedItems.map((item) => item.children);
 		return renderValue?.(childrenToRender) || childrenToRender.join(', ');
 	};
 
@@ -54,12 +54,12 @@ export const FormMultiSelect = ({
 			}
 		});
 	};
-		
-	const initialiseDefaultItems = () => {	
+
+	const initialiseDefaultItems = () => {
 		setSelectedItems(
 			Children.toArray(children)
-				.map(({ props }: any) => props)
-				.filter(({ value }) => some(defaultValue, (v) => isEqual(v, value)))
+				.map((child: any) => child.props)
+				.filter(({ value }) => some(defaultValue, (v) => isEqual(v, value))),
 		);
 	};
 

@@ -51,8 +51,8 @@ export const FormSearchSingleSelect = ({
 	const initialiseDefaultItem = () => {
 		setSelectedItem(
 			Children.toArray(children)
-				.map(({ props }: any) => props)
-				.find(({ value }) => isEqual(defaultValue, value))
+				.map((child: any) => child.props)
+				.find(({ value }) => isEqual(defaultValue, value)),
 		);
 	};
 
