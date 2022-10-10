@@ -39,4 +39,6 @@ export const Tooltip = styled(TooltipBase).attrs({
 	},
 })``;
 
-export const TooltipAdapter = styled.div``;
+export const TooltipAdapter = styled.div`
+	display: contents;
+`;
