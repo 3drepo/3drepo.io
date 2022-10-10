@@ -40,7 +40,7 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 };
 
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
-	const toUpdate = {}; 
+	const toUpdate = {};
 	const toUnset = {};
 	const { modules, properties, ...rootProps } = updateData;
 	const changes = {};
@@ -49,10 +49,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		Object.keys(obj).forEach((key) => {
 			const updateObjProp = `${prefix}${key}`;
 			const value = obj[key];
-			if (value) 
-				toUpdate[updateObjProp] = value; 
-			else 
-				toUnset[updateObjProp] = 1;
+			if (value) { toUpdate[updateObjProp] = value; } else { toUnset[updateObjProp] = 1; }
 
 			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
 				set(changes, `${updateObjProp}.from`, get(oldTicket, updateObjProp));
