@@ -979,7 +979,7 @@ export const theme = createTheme({
 					margin: '18px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
-					'label': {	
+					'label': {
 						transform: 'none',
 						position: 'unset',
 					},
@@ -1213,8 +1213,7 @@ export const theme = createTheme({
 					padding: '10px 13px 10px 10px',
 					color: COLOR.SECONDARY_MAIN,
 					minHeight: 'unset',
-
-					'& > .MuiAccordionSummary-expandIconWrapper': {	
+					'& > .MuiAccordionSummary-expandIconWrapper': {
 						color: 'currentColor',
 					},
 					'&.Mui-expanded': {
@@ -1312,7 +1311,7 @@ export const theme = createTheme({
 							},
 						},
 					},
-					'.MuiPickersCalendarHeader-root, .MuiYearPicker-root': {						
+					'.MuiPickersCalendarHeader-root, .MuiYearPicker-root': {
 						'button': {
 							'&:hover': {
 								background: 'transparent',
