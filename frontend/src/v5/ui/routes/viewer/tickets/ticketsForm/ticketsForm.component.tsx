@@ -42,7 +42,7 @@ interface PropertiesPanelProps {
 	propertiesValues: Record<string, any>;
 }
 
-const PropertiesPanel = ({ properties, propertiesValues }: PropertiesPanelProps) => (
+const PropertiesPanel = ({ properties, propertiesValues = {} }: PropertiesPanelProps) => (
 	<>
 		{properties.map((property) => {
 			const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
