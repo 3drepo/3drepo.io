@@ -97,8 +97,7 @@ const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = (await generatePropertiesValidator(teamspace, module.properties, isNewTicket))
-				.default({});
+			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties, isNewTicket);
 		}
 	});
 

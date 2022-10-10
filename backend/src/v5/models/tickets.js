@@ -40,23 +40,23 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 };
 
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
-	const toUpdate = {}; const
-		toUnset = {};
-	const propNamesChanged = [];
-	const from = {}; const
-		to = {};
+	const toUpdate = {}; 
+	const toUnset = {};
 	const { modules, properties, ...rootProps } = updateData;
+	const changes = {};
 
 	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
 			const updateObjProp = `${prefix}${key}`;
 			const value = obj[key];
-			if (value) { toUpdate[updateObjProp] = value; } else toUnset[updateObjProp] = 1;
+			if (value) 
+				toUpdate[updateObjProp] = value; 
+			else 
+				toUnset[updateObjProp] = 1;
 
 			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
-				propNamesChanged.push(updateObjProp);
-				set(from, updateObjProp, get(oldTicket, updateObjProp));
-				set(to, updateObjProp, get(updateData, updateObjProp));
+				set(changes, `${updateObjProp}.from`, get(oldTicket, updateObjProp));
+				set(changes, `${updateObjProp}.to`, get(updateData, updateObjProp));
 			}
 		});
 	};
@@ -69,19 +69,13 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, { $set: toUpdate, $unset: toUnset });
 
-	const changes = {};
-	propNamesChanged.forEach((p) => {
-		set(changes, `${p}.from`, get(from, p));
-		set(changes, `${p}.to`, get(to, p));
-	});
-
 	publish(events.MODEL_TICKET_UPDATE, { teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,
 		author,
 		changes,
-		date: updateData.properties[basePropertyLabels.UPDATED_AT] });
+		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
