@@ -26,21 +26,26 @@ const Yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
 const runScripts = async (version, scripts, { list, ...argv }) => {
-	if (list) {
-		logger.logInfo(`Migration script v${version} will perform the followings:`);
-		for (let i = 0; i < scripts.length; ++i) {
-			const { desc } = scripts[i];
-			logger.logInfo(`\t${i + 1}. ${desc}`);
+	try {
+		if (list) {
+			logger.logInfo(`Migration script v${version} will perform the followings:`);
+			for (let i = 0; i < scripts.length; ++i) {
+				const { desc } = scripts[i];
+				logger.logInfo(`\t${i + 1}. ${desc}`);
+			}
+		} else {
+			logger.logInfo(`================= Migration scripts v${version} =====================`);
+			for (let i = 0; i < scripts.length; ++i) {
+				const { script, desc } = scripts[i];
+				logger.logInfo(`\t${i}/${scripts.length} ${desc}...`);
+				// eslint-disable-next-line no-await-in-loop
+				await script(argv);
+			}
+			logger.logInfo('============================= Done ============================');
 		}
-	} else {
-		logger.logInfo(`================= Migration scripts v${version} =====================`);
-		for (let i = 0; i < scripts.length; ++i) {
-			const { script, desc } = scripts[i];
-			logger.logInfo(`\t${i}/${scripts.length} ${desc}...`);
-			// eslint-disable-next-line no-await-in-loop
-			await script(argv);
-		}
-		logger.logInfo('============================= Done ============================');
+	} catch (err) {
+		logger.logError(`Failed to run the script: ${err?.message || err}`);
+		throw err;
 	}
 };
 
@@ -87,5 +92,10 @@ const parser = populateCommands(Yargs(hideBin(process.argv)))
 	.demandCommand()
 	.parse();
 
-// eslint-disable-next-line no-console
-Promise.resolve(parser).catch(console.error).finally(process.exit);
+const processError = (err) => {
+	logger.logError(`Command failed with: ${err?.message || err}`);
+	// eslint-disable-next-line no-console
+	console.error(err);
+};
+
+Promise.resolve(parser).catch(processError).finally(process.exit);
