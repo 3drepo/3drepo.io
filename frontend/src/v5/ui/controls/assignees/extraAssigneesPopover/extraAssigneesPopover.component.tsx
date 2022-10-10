@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const ExtraUsersPopover = ({ users }) => (
+export const ExtraAssigneesPopover = ({ assignees }) => (
 	<ul>
-		{users.map((user) => (<li key={user.user}>{user.user} - {user.job}</li>))}
+		{assignees.map((assignee) => (<li key={assignee}>{assignee}</li>))}
 	</ul>
 );

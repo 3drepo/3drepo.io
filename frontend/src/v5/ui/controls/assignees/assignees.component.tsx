@@ -14,21 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
+import { useParams } from 'react-router-dom';
 import { IUser } from '@/v5/store/users/users.redux';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { AssignedUsersList, ExtraUsersCircle, UserCircle } from './assignedUsers.styles';
-import { ExtraUsersPopover } from './extraUsersPopover/extraUsersPopover.component';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
+import Popover from '@mui/material/Popover';
+import { AssigneesList, ExtraAssigneesCircle } from './assignees.styles';
+import { ExtraAssigneesPopover } from './extraAssigneesPopover/extraAssigneesPopover.component';
+import { AssigneeCircle } from './assigneeCircle/assigneeCircle.component';
+import { DashboardParams } from '../../routes/routes.constants';
 
-type AssignedUsersType = {
-	users: IUser[];
-	max?: number
+type AssigneesType = {
+	assignees: string[];
+	max?: number;
+	className?: string;
 };
 
-export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
+export const Assignees = ({ assignees = [], max, className }: AssigneesType) => {
+	const { teamspace } = useParams<DashboardParams>();
 	const [anchorEl, setAnchorEl] = useState<Element | null>(null);
 	const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
@@ -41,33 +46,36 @@ export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
 		setAnchorEl(null);
 	};
 
-	let displayedUsers = [...users];
-	let extraUsers = [];
-	if (max && users.length > max) {
-		displayedUsers = users.slice(0, max - 1);
-		extraUsers = users.slice(max - 1);
+	UsersActionsDispatchers.fetchUsers(teamspace);
+
+	let displayedAssignees = assignees ?? [];
+	let extraAssignees = [];
+	if (max && assignees.length > max) {
+		displayedAssignees = assignees.slice(0, max - 1);
+		extraAssignees = assignees.slice(max - 1);
 	}
+
 	return (
-		<AssignedUsersList>
-			{displayedUsers.length ? (displayedUsers.map((user, index) => (
-				<UserCircle
-					key={user.user}
-					user={user}
-					index={index}
-					size="small"
-					onMouseEnter={(e) => handlePopoverOpen(e, user)}
-					onMouseLeave={handlePopoverClose}
-				/>
-			))) : (
-				<FormattedMessage id="assignedUsers.unassigned" defaultMessage="Unassigned" />
+		<AssigneesList className={className}>
+			{assignees.length && displayedAssignees.length ? (
+				displayedAssignees.map((assignee) => (
+					<AssigneeCircle
+						key={assignee}
+						assignee={assignee}
+						onMouseEnter={(e) => handlePopoverOpen(e, null)}
+						onMouseLeave={handlePopoverClose}
+					/>
+				))
+			) : (
+				<FormattedMessage id="assignedAssignees.unassigned" defaultMessage="Unassigned" />
 			)}
-			{extraUsers.length ? (
-				<ExtraUsersCircle
+			{extraAssignees.length ? (
+				<ExtraAssigneesCircle
 					onMouseEnter={(e) => handlePopoverOpen(e, null)}
 					onMouseLeave={handlePopoverClose}
 				>
-					+{extraUsers.length}
-				</ExtraUsersCircle>
+					+{extraAssignees.length}
+				</ExtraAssigneesCircle>
 			) : <></>}
 			<Popover
 				id="mouse-over-popover"
@@ -85,8 +93,8 @@ export const AssignedUsers = ({ users, max }: AssignedUsersType) => {
 				disableRestoreFocus
 			>
 				{selectedUser
-					? <UserPopover user={selectedUser} /> : <ExtraUsersPopover users={extraUsers} />}
+					? <UserPopover user={selectedUser} /> : <ExtraAssigneesPopover assignees={extraAssignees} />}
 			</Popover>
-		</AssignedUsersList>
+		</AssigneesList>
 	);
 };

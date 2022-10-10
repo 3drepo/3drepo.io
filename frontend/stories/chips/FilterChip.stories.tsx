@@ -17,7 +17,6 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FilterChip } from '@controls/chip';
-import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
