@@ -116,7 +116,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 			? API.Tickets.updateFederationTicket
 			: API.Tickets.updateContainerTicket;
 		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
