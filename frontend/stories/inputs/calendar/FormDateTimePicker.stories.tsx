@@ -56,7 +56,12 @@ const Controlled: ComponentStory<typeof FormDateTimePicker> = ({ formError, ...a
 };
 
 export const ControlledFormDateTimePicker = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormDateTimePicker.args = {
-	label: 'Controlled DateTime Picker input',
+	label: 'Controlled DateTime',
+};
+
+export const ControlledFormDateTimePickerDefaultDate = Controlled.bind({});
+ControlledFormDateTimePickerDefaultDate.args = {
+	label: 'Controlled DateTime with now as default date',
+	defaultValue: new Date(),
 };

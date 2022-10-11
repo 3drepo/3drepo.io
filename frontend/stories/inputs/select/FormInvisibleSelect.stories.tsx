@@ -16,7 +16,7 @@
  */
 import { Button } from '@controls/button';
 import { FormInvisibleSelect } from '@controls/formInvisibleSelect/formInvisibleSelect.component';
-import { MenuItem } from '@mui/material';
+import { SingleSelectMenuItem } from '@controls/formSearchSelect/formSingleSelect/singleSelectMenutItem.styles';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
@@ -38,7 +38,7 @@ export default {
 		},
 	},
 	component: FormInvisibleSelect,
-	parameters: { controls: { exclude: ['control'] } },
+	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip', 'onItemClick', 'itemIsSelected', 'TriggerComponent', 'formError'] } },
 } as ComponentMeta<typeof FormInvisibleSelect>;
 
 const Controlled: ComponentStory<typeof FormInvisibleSelect> = (args) => {
@@ -53,7 +53,7 @@ const Controlled: ComponentStory<typeof FormInvisibleSelect> = (args) => {
 				{...args}
 			>
 				{['1', '2', '3', '4'].map((option) => (
-					<MenuItem value={option} key={option}>Option #{option}</MenuItem>
+					<SingleSelectMenuItem value={option} key={option}>Option #{option}</SingleSelectMenuItem>
 				))}
 			</FormInvisibleSelect>
 		</FormContainer>
