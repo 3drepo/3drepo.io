@@ -18,6 +18,7 @@
 import { Avatar } from '@controls/avatar';
 import styled, { css } from 'styled-components';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
+import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 
 const OVERLAP_WIDTH = '10px';
 
@@ -71,7 +72,8 @@ export const JobCircle = styled(JobAvatar)`
 	}
 `;
 
-export const ExtraAssigneesCircle = styled(JobCircle)`
+export const ExtraAssignees = styled(ExtraAssigneesCircle)`
+	${BaseCircle}
 	.MuiAvatar-root {
 		background-color: ${({ theme }) => theme.palette.primary.main};
 		border-color: ${({ theme }) => theme.palette.primary.main};

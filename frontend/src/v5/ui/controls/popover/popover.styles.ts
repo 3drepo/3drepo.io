@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,26 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { IUser } from '@/v5/store/users/users.redux';
-import { Avatar } from '@controls/avatar';
-import { AvatarWrapper, PopoverContainer, Company, Job, Name, UserData } from './userPopover.styles';
 
-interface IUserPopover {
-	user: IUser;
-}
+import { Popover } from '@mui/material';
+import styled from 'styled-components';
 
-export const UserPopover = ({ user }: IUserPopover) => {
-	const { firstName, lastName, company, job } = user;
-	return (
-		<PopoverContainer>
-			<AvatarWrapper>
-				<Avatar user={user} />
-			</AvatarWrapper>
-			<UserData>
-				<Name>{firstName} {lastName}</Name>
-				<Company>{company}</Company>
-				<Job>{job}</Job>
-			</UserData>
-		</PopoverContainer>
-	);
-};
+export const PopoverContainer = styled(Popover).attrs({
+	disableRestoreFocus: true,
+	anchorOrigin: {
+		vertical: 'bottom',
+		horizontal: 'center',
+	},
+	transformOrigin: {
+		vertical: 'top',
+		horizontal: 'left',
+	},
+})`
+	pointer-events: none;
+`;

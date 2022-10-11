@@ -63,5 +63,4 @@ export const Assignees = styled(AssigneesBase)`
 
 export const DateAndPriority = styled.div`
 	margin: 7px 0 0;
-
 `;

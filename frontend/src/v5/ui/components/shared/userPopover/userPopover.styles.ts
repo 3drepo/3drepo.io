@@ -23,7 +23,7 @@ export const AvatarWrapper = styled.div`
 	align-items: flex-start;
 `;
 
-export const Container = styled.div`
+export const PopoverContainer = styled.div`
 	padding: 6px 11px 6px 7px;
 	display: flex;
 `;

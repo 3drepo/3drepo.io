@@ -19,6 +19,9 @@ import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { UserPopover } from '@components/shared/userPopover/userPopover.component';
+import { JobPopover } from '@components/shared/jobPopover/jobPopover.component';
+import { Popover } from '@controls/popover/popover.component';
 import { JobCircle, UserCircle } from '../assignees.styles';
 
 export const JOBS_LIST = [
@@ -34,13 +37,28 @@ export const JOBS_LIST = [
 	{ titleLong: 'Supplier', titleShort: 'Su' },
 ];
 
-export const AssigneeCircle = ({ assignee }) => {
+type IAssigneeListItem = {
+	assignee: string;
+};
+
+export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 	const { teamspace } = useParams<DashboardParams>();
 	const job = JOBS_LIST.find((j) => j.titleLong === assignee);
 	let user = UsersHooksSelectors.selectUser(teamspace, assignee);
 	if (user) {
 		user = { ...user, avatarUrl: getTeamspaceImgSrc(assignee), hasAvatar: true };
 	}
-	if (job) return <JobCircle job={assignee} />;
-	return user?.hasAvatar ? <UserCircle user={user} /> : <></>;
+
+	if (!job && !user) return <></>;
+	return job ? (
+		<Popover
+			anchor={(props) => <JobCircle job={assignee} {...props} />}
+			popoverContent={() => <JobPopover job={assignee} />}
+		/>
+	) : (
+		<Popover
+			anchor={(props) => <UserCircle user={user} {...props} />}
+			popoverContent={() => <UserPopover user={user} />}
+		/>
+	);
 };

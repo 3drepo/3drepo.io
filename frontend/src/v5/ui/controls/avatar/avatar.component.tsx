@@ -30,8 +30,6 @@ const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser | IUser) => 
 
 type AvatarProps = {
 	onClick?: (event: MouseEvent) => void;
-	onMouseEnter?: (event: MouseEvent) => void;
-	onMouseLeave?: () => void;
 	user: ICurrentUser | IUser;
 	size?: 'small' | 'medium' | 'large';
 	isButton?: boolean;
