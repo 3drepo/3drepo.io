@@ -33,7 +33,7 @@ export const Tooltip = styled(TooltipBase).attrs({
 		tooltip: {
 			sx: {
 				maxWidth: 230,
-				top: 10,
+				top: 20,
 			},
 		},
 	},
