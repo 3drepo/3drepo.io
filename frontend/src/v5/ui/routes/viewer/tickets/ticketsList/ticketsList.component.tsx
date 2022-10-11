@@ -59,7 +59,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const onTicketClick = (ticket: ITicket) => {
 		if (ticketIsSelected(ticket)) {
-			contextValue.setCardView(TicketsCardViews.Details, { ticket });
+			contextValue.setCardView(TicketsCardViews.Details, { ticketId: ticket._id });
 		} else {
 			setSelectedTicket(ticket);
 		}
