@@ -15,21 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledIconButton } from '@controls/avatar/avatar.styles';
-import { Avatar } from '@mui/material';
+import styled from 'styled-components';
 
-export type IExtraAssignees = {
-	assignees: string[];
-};
+export const ExtraAssigneesList = styled.ul`
+	padding: 0 20px;
+`;
 
-export const ExtraAssigneesCircle = ({ assignees, ...props }: IExtraAssignees) => (
-	<>
-		<StyledIconButton
-			{...props}
-		>
-			<Avatar>
-				+{assignees.length}
-			</Avatar>
-		</StyledIconButton>
-	</>
-);
+export const ExtraAssigneesListItem = styled.li`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	list-style-type: none;
+`;

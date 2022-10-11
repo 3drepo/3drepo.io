@@ -15,8 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const ExtraAssigneesPopover = ({ assignees }) => (
-	<ul>
-		{assignees.map((assignee) => (<li key={assignee}>{assignee}</li>))}
-	</ul>
+import { IExtraAssignees } from './extraAssigneesCircle.component';
+import { ExtraAssigneesList, ExtraAssigneesListItem } from './extraAssigneesPopover.styles';
+
+export const ExtraAssigneesPopover = ({ assignees }: IExtraAssignees) => (
+	<ExtraAssigneesList>
+		{assignees.map((assignee) => (
+			<ExtraAssigneesListItem key={assignee}>{assignee}</ExtraAssigneesListItem>
+		))}
+	</ExtraAssigneesList>
 );
