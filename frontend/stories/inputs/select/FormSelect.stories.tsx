@@ -68,5 +68,5 @@ export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Select input',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4','value r1', 'value r2', 'value r3', 'Longer value r4','value rr1', 'value rr2', 'value rr3', 'Longer value rr4'],
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };
