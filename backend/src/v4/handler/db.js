@@ -229,6 +229,11 @@
 		});
 	};
 
+	Handler.bulkWrite = async function (database, colName, instructions) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.bulkWrite(instructions);
+	};
+
 	Handler.insertMany = async function (database, colName, data) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.insertMany(data);

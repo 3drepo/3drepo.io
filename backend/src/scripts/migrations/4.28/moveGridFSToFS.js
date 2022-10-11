@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { createIndex, find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
+const { createIndex, find, findOne, bulkWrite, getFileStreamFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const FsService = require(`${v5Path}/handler/fs`);
 const GridFS = require(`${v5Path}/handler/gridfs`);
@@ -35,7 +35,12 @@ const convertLegacyFileName = (filename) => {
 	return filename;
 };
 
-const moveFile = async (teamspace, collection, filename) => {
+const moveFromGridFSToFs = async (teamspace, collection, filename, fileSize) => {
+	const { stream: gridfsStream } = await getFileStreamFromGridFS(teamspace, collection, filename);
+	return FsService.storeFileStream(gridfsStream, fileSize);
+};
+
+const moveFile = async (teamspace, collection, filename, fileSize) => {
 	const legacyFileName = convertLegacyFileName(filename);
 	const query = legacyFileName === filename ? { link: filename }
 		: { link: { $in: [filename, legacyFileName] } };
@@ -43,14 +48,16 @@ const moveFile = async (teamspace, collection, filename) => {
 
 	if (existingRef && existingRef.type !== 'gridfs') {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
-	} else {
-		const file = await getFileFromGridFS(teamspace, collection, filename).catch((err) => { throw new Error(`Failed to fetch file from gridfs (${teamspace}.${collection}): ${filename}: ${err?.message ?? err}`); });
-		const newRef = await FsService.storeFile(file);
-		newRef._id = existingRef?._id || convertLegacyFileName(filename);
-		await updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true);
+		return [];
 	}
-
-	return filename;
+	const newRef = await moveFromGridFSToFs(teamspace, collection, filename, fileSize);
+	newRef._id = existingRef?._id || convertLegacyFileName(filename);
+	return {
+		updateOne: {
+			filter: { _id: newRef._id },
+			update: { $set: newRef },
+		},
+	};
 };
 
 const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) => {
@@ -79,9 +86,14 @@ const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) =>
 };
 
 const processFileGroup = async (teamspace, collection, group) => {
-	const filesToRemove = await Promise.all(
-		group.map(({ filename }) => moveFile(teamspace, collection, filename)),
+	const filesToRemove = [];
+	const refUpdates = await Promise.all(
+		group.flatMap(({ filename, length }) => {
+			filesToRemove.push(filename);
+			return moveFile(teamspace, collection, filename, length);
+		}),
 	);
+	await bulkWrite(teamspace, `${collection}.ref`, refUpdates);
 	await GridFS.removeFiles(teamspace, collection, filesToRemove);
 };
 
