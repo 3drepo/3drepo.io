@@ -14,7 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { Assignees as AssigneesBase } from '@controls/assignees/assignees.component';
+import { CentredContainer } from '@controls/centredContainer';
 import styled from 'styled-components';
 
 export const Id = styled.div`
@@ -56,11 +58,12 @@ export const ChipList = styled.div`
 `;
 
 export const Assignees = styled(AssigneesBase)`
-	position: absolute;
-	right: 15px;
-	bottom: 16px;
+	margin-left: auto;
 `;
 
-export const DateAndPriority = styled.div`
+export const ExtraInfo = styled.div`
 	margin: 7px 0 0;
+    display: inline-flex;
+    width: 100%;
+	align-items: center;
 `;
