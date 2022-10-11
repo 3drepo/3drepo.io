@@ -668,7 +668,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					margin: '0',
-					padding: '8px 14px',
+					padding: '0px 14px',
 					width: '100%',
 					color: COLOR.SECONDARY_MAIN,
 
@@ -844,7 +844,7 @@ export const theme = createTheme({
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					borderRadius: 5,
 
-					'input': {
+					input: {
 						padding: '0px 15px',
 						height: 35,
 						lineHeight: '35px',
@@ -979,7 +979,7 @@ export const theme = createTheme({
 					margin: '18px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
-					'label': {
+					label: {
 						transform: 'none',
 						position: 'unset',
 					},
@@ -1282,7 +1282,7 @@ export const theme = createTheme({
 							justifyContent: 'space-between',
 							width: '100%',
 							// actual arrows
-							'button': {
+							button: {
 								transform: 'rotate(90deg)',
 								'&:not(:first-child)': {
 									transform: 'rotate(-90deg)',
@@ -1292,7 +1292,7 @@ export const theme = createTheme({
 					},
 					// year selection
 					'.MuiYearPicker-root': {
-						'button': {
+						button: {
 							'&:not(.Mui-disabled)': {
 								color: COLOR.SECONDARY_MAIN,
 								'&:hover': {
@@ -1312,7 +1312,7 @@ export const theme = createTheme({
 						},
 					},
 					'.MuiPickersCalendarHeader-root, .MuiYearPicker-root': {
-						'button': {
+						button: {
 							'&:hover': {
 								background: 'transparent',
 							},
@@ -1362,7 +1362,7 @@ export const theme = createTheme({
 						'.MuiPickersArrowSwitcher-spacer': {
 							display: 'none',
 						},
-						'button': {
+						button: {
 							margin: 0,
 							padding: 10,
 							color: COLOR.SECONDARY_MAIN,
