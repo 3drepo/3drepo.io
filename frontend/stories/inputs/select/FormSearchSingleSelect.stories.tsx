@@ -103,7 +103,6 @@ ControlledFormSelect.args = {
 	label: 'Controlled Search Single Select input',
 };
 
-
 export const ControlledFormSelectWithDefault = Controlled.bind({});
 ControlledFormSelectWithDefault.args = {
 	label: 'Controlled Search Single Select input',

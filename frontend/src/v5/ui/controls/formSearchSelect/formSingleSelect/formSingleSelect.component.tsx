@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSearchSelect/formSearchSelect.component';
-import { MenuItem } from '@mui/material';
 import { isEqual, isUndefined } from 'lodash';
 import { Children, useEffect, useState } from 'react';
 import { SingleSelectMenuItem } from './singleSelectMenutItem.styles';
