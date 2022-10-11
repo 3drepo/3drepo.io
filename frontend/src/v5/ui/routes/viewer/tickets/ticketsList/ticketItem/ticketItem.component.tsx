@@ -35,12 +35,12 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const {
 		number,
 		properties: {
-			Status: status = null,
-			Priority: priority = null,
-			Risk: risk = null,
-			Treatment: treatment = null,
-			Assignees: assignees = [],
-			'Due Date': dueDate = null,
+			Status: status = undefined,
+			Priority: priority = undefined,
+			Risk: risk = undefined,
+			Treatment: treatment = undefined,
+			Assignees: assignees = undefined,
+			'Due Date': dueDate = undefined,
 		},
 	} = ticket;
 	return (
@@ -57,10 +57,10 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				{treatment && <TreatmentLevelChip state={treatment} />}
 			</ChipList>
 			<DateAndPriority>
-				<DueDate epochTime={dueDate} onClick={() => { /* Edit Due Date */ }} />
-				<PriorityLevelChip noLabel state={priority} />
+				{dueDate && <DueDate epochTime={dueDate} onClick={() => { /* Edit Due Date */ }} />}
+				{priority && <PriorityLevelChip noLabel state={priority} />}
 			</DateAndPriority>
-			<Assignees assignees={assignees} max={7} />
+			{assignees && <Assignees assignees={assignees} max={7} />}
 		</Ticket>
 	);
 };
