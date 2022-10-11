@@ -30,17 +30,12 @@ const Path = require('path');
 const TypeChecker = require(`${v5Path}/utils/helper/typeCheck`);
 
 const { deleteMany, find } = require(`${v5Path}/handler/db`);
-const { removeFiles } = require(`${v5Path}/handler/gridfs`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
-const processFilesAndRefs = async (teamspace, collection, filenames = [], filter) => {
+const processFilesAndRefs = async (teamspace, collection, filter) => {
 	try {
-		if (filenames.length > 0) {
-			await removeFiles(teamspace, collection, filenames);
-		}
-
-		await removeFilesWithMeta(teamspace, collection, filter || { _id: { $in: filenames } });
+		await removeFilesWithMeta(teamspace, collection, filter);
 	} catch (err) {
 		logger.logError(err);
 	}
@@ -54,20 +49,34 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 		const results = await find(teamspace, collection, filesFilter, projection);
 		const filenames = [];
 
-		for (const record of results) {
+		results.flatMap((record) => {
 			const fileRefs = record[refAttribute];
 			if (fileRefs) {
+				// handle different ref formats
+				// record refs currently stored in the following formats:
+				// 1) { ref: 'refString' }
+				// 2) { ref: {
+				//        key1: 'key1RefString',
+				//        key2: 'key2RefString',
+				//    }
 				if (TypeChecker.isString(fileRefs)) {
 					filenames.push(fileRefs);
-				} else {
+				} else if (TypeChecker.isObject(fileRefs)) {
+					// for record removal, we want to remove all refs,
+					// i.e. 'key1RefString' and 'key2RefString',
+					// do not need to discern between keys
 					for (const entry of Object.values(fileRefs)) {
 						filenames.push(entry);
 					}
+				} else {
+					logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
 				}
 			}
-		}
 
-		await processFilesAndRefs(teamspace, collection, filenames);
+			return fileRefs;
+		});
+
+		await processFilesAndRefs(teamspace, collection, { _id: { $in: filenames } });
 	}
 
 	await deleteMany(teamspace, collection, filter);
@@ -79,26 +88,37 @@ const processModelStash = async (teamspace, model, revId) => {
 	modelStashPromises.push(processFilesAndRefs(
 		teamspace,
 		`${model}.stash.json_mpc`,
-		undefined,
 		{ filename: { $regex: `^/${teamspace}/${model}/revision/${UUIDToString(revId)}/` } },
 	));
 
 	modelStashPromises.push(processFilesAndRefs(
 		teamspace,
 		`${model}.stash.json_mpc.ref`,
-		undefined,
 		{ _id: { $regex: `^${UUIDToString(revId)}/` } },
 	));
 
-	const unity3d = await find(teamspace, `${model}.stash.unity3d`, { _id: revId }, { assets: 1, jsonFiles: 1 });
-	for (const { assets, jsonFiles } of unity3d) {
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, ''))));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, jsonFiles.map((filename) => filename.replace(`/${teamspace}/${model}/`, ''))));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'json.mpc'))));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.src.ref`, assets.map((filename) => filename.replace(`/${teamspace}/${model}/`, '').replace('unity3d', 'src.mpc'))));
-	}
+	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: revId, type: 'mesh' }, { _id: 1 })).map((r) => UUIDToString(r._id));
+	supermeshIds.map((supermeshId) => {
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.3drepo.ref`, { _id: { $in: [
+			`${supermeshId}_faces`,
+			`${supermeshId}_normals`,
+			`${supermeshId}_vertices`,
+		] } }));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: { $in: [
+			`${supermeshId}.json.mpc`,
+			`${supermeshId}_unity.json.mpc`,
+		] } }));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: { $in: [
+			`${supermeshId}.src.mpc`,
+		] } }));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: { $in: [
+			`${supermeshId}.unity3d`,
+		] } }));
 
-	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.unity3d`, { _id: revId }, '_extRef'));
+		return supermeshId;
+	});
+
+	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.unity3d`, { _id: revId }));
 	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef'));
 
 	await Promise.all(modelStashPromises);
@@ -110,7 +130,7 @@ const processModelSequences = async (teamspace, model, revId) => {
 
 	for (const { _id, frames } of sequences) {
 		if (frames) {
-			for (const { state } of Object.values(frames)) {
+			for (const { state } of frames) {
 				sequenceFilenames.push(state);
 			}
 		}
@@ -118,11 +138,11 @@ const processModelSequences = async (teamspace, model, revId) => {
 		// eslint-disable-next-line no-await-in-loop
 		await Promise.all([
 			removeRecords(teamspace, `${model}.activities`, { sequenceId: _id }, '_extRef'),
-			processFilesAndRefs(teamspace, `${model}.activities.ref`, undefined, { _id: UUIDToString(_id) }),
+			processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: UUIDToString(_id) }),
 		]);
 	}
 
-	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, sequenceFilenames);
+	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: sequenceFilenames } });
 
 	await deleteMany(teamspace, `${model}.sequences`, { rev_id: revId });
 };
@@ -158,7 +178,7 @@ const processTeamspace = async (teamspace, revisionAge) => {
 			await removeRevision(teamspace, model, _id);
 
 			// eslint-disable-next-line no-await-in-loop
-			await processFilesAndRefs(teamspace, name, rFile);
+			await processFilesAndRefs(teamspace, name, { _id: { $in: rFile } });
 			// eslint-disable-next-line no-await-in-loop
 			await removeRecords(teamspace, name, incompleteRevisionFilter);
 		}
