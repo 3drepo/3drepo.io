@@ -76,7 +76,7 @@ export const FormMultiSelect = ({
 			itemIsSelected={itemIsSelected}
 			search
 			multiple
-			selectedOptionsTooltip={selectedOptionsTooltip}
+			selectedOptionsTooltip={selectedItems.length && selectedOptionsTooltip}
 			{...props}
 		>
 			{children}
