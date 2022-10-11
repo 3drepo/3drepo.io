@@ -16,14 +16,15 @@
  */
 import { IUser } from '@/v5/store/users/users.redux';
 import { Avatar } from '@controls/avatar';
-import { AvatarWrapper, PopoverContainer, Company, Job, Name, UserData } from './userPopover.styles';
+import { compact } from 'lodash';
+import { AvatarWrapper, PopoverContainer, Caption as Employment, Body as Username, Heading as Name, Data as UserData } from './userPopover.styles';
 
 interface IUserPopover {
 	user: IUser;
 }
 
 export const UserPopover = ({ user }: IUserPopover) => {
-	const { firstName, lastName, company, job } = user;
+	const { firstName, lastName, company, job, user: username } = user;
 	return (
 		<PopoverContainer>
 			<AvatarWrapper>
@@ -31,8 +32,8 @@ export const UserPopover = ({ user }: IUserPopover) => {
 			</AvatarWrapper>
 			<UserData>
 				<Name>{firstName} {lastName}</Name>
-				<Company>{company}</Company>
-				<Job>{job}</Job>
+				<Username>{username}</Username>
+				<Employment>{compact([job, company]).join(', ')}</Employment>
 			</UserData>
 		</PopoverContainer>
 	);
