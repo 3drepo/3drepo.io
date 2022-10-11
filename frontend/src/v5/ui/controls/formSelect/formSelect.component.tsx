@@ -48,7 +48,7 @@ export const FormSelect = ({
 	const [showTooltip, setShowTooltip] = useState(false);
 
 	const handleOpen = (e) => {
-		setShowTooltip(false)
+		setShowTooltip(false);
 		onOpen?.(e);
 	};
 
