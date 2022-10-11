@@ -21,9 +21,9 @@ import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import PrintIcon from '@assets/icons/print.svg';
-import styled from 'styled-components';
+import { SingleSelectMenuItem } from '@controls/formSearchSelect/formSingleSelect/singleSelectMenutItem.styles';
 import { FormContainer } from '../FormInput.styles';
-import { SearchSelectMenuItem } from '@controls/formSearchSelect/formSingleSelect/searchSelectMenutItem.styles';
+import { IconContainer, ItemContainer } from './FormSearchSelect.styles';
 
 export default {
 	title: 'Inputs/Select/FormSingleSelect',
@@ -40,19 +40,15 @@ export default {
 		search: {
 			type: 'boolean',
 		},
+		formError: {
+			type: 'string',
+		},
 	},
 	component: FormSingleSelect,
-	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip'] } },
+	parameters: { controls: { exclude: ['control', 'ref', 'onItemClick', 'itemIsSelected', 'selectedOptionsTooltip'] } },
 } as ComponentMeta<typeof FormSingleSelect>;
 
-const IconContainer = styled.div`
-	margin-right: 5px;
-	svg {
-		width: 15px;
-	}
-`;
-
-const Controlled: ComponentStory<typeof FormSingleSelect> = (args) => {
+const Controlled: ComponentStory<typeof FormSingleSelect> = ({ formError, ...args }: any) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
@@ -60,47 +56,56 @@ const Controlled: ComponentStory<typeof FormSingleSelect> = (args) => {
 			<FormSingleSelect
 				name="multiselect"
 				control={control}
-				renderValue={({ children }) => (
-					<>
-						<div style={{ display: 'inline-flex' }}>
-							{children[0]}
-						</div>
-						<span>{children[1]}</span>
-					</>
+				renderValue={(children) => (
+					children?.length > 1 ? (
+						<ItemContainer>
+							<IconContainer>
+								{children[0]}
+							</IconContainer>
+							{children[1]}
+						</ItemContainer>
+					) : (children)
 				)}
+				formError={formError ? { message: formError } : null}
 				{...args}
 			>
-				<SearchSelectMenuItem value={1} key={1}>
+				<SingleSelectMenuItem value={1} key={1}>
 					<IconContainer>
 						<CalendarIcon />
 					</IconContainer>
 					calendar icon
-				</SearchSelectMenuItem>
-				<SearchSelectMenuItem value={2} key={2}>
+				</SingleSelectMenuItem>
+				<SingleSelectMenuItem value={2} key={2}>
 					<IconContainer>
 						<ClearIcon />
 					</IconContainer>
 					clear icon
-				</SearchSelectMenuItem>
-				<SearchSelectMenuItem value={3} key={3}>
+				</SingleSelectMenuItem>
+				<SingleSelectMenuItem value={3} key={3} disabled>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					chevron icon
-				</SearchSelectMenuItem>
-				<SearchSelectMenuItem value={4} key={4}>
+				</SingleSelectMenuItem>
+				<SingleSelectMenuItem value={4} key={4}>
 					<IconContainer>
 						<PrintIcon />
 					</IconContainer>
 					print icon
-				</SearchSelectMenuItem>
+				</SingleSelectMenuItem>
 			</FormSingleSelect>
 		</FormContainer>
 	);
 };
 
 export const ControlledFormSelect = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Search Single Select input',
+};
+
+
+export const ControlledFormSelectWithDefault = Controlled.bind({});
+ControlledFormSelectWithDefault.args = {
+	label: 'Controlled Search Single Select input',
+	defaultValue: 3,
 };

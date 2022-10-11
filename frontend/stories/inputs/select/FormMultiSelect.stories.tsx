@@ -22,8 +22,8 @@ import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import PrintIcon from '@assets/icons/print.svg';
-import styled from 'styled-components';
 import { FormContainer } from '../FormInput.styles';
+import { IconContainer, ItemContainer, ItemRenderer } from './FormSearchSelect.styles';
 
 export default {
 	title: 'Inputs/Select/FormMultiSelect',
@@ -37,19 +37,15 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		formError: {
+			type: 'string',
+		},
 	},
 	component: FormMultiSelect,
-	parameters: { controls: { exclude: ['control'] } },
+	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip', 'onItemClick', 'itemIsSelected'] } },
 } as ComponentMeta<typeof FormMultiSelect>;
 
-const IconContainer = styled.div`
-	margin-right: 5px;
-	svg {
-		width: 15px;
-	}
-`;
-
-const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
+const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args }) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
@@ -57,30 +53,28 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 			<FormMultiSelect
 				name="multiselect"
 				control={control}
-				renderValue={(selectedItems: any[]) => (
-					selectedItems.map((item, index) => {
-						if (!item?.[0]?.props) return item;
-						const [icon, label] = selectedItems;
-						return (
-							<>
-								<span>{index > 0 ? ', ' : ''}</span>
-								<div style={{ display: 'inline-flex' }}>
-									{icon}
-								</div>
-								<span>{label}</span>
-							</>
-						)
-					})
+				renderValue={(children: any[]) => (
+					children.map((child, index) => (
+						<ItemRenderer key={child}>
+							<ItemContainer>
+								{child?.length > 1 ? (
+									<>{child[0]}{child[1]}</>
+								) : (child)}
+							</ItemContainer>
+							<span>{index < children.length ? ', ' : ''}</span>
+						</ItemRenderer>
+					))
 				)}
+				formError={formError ? { message: formError } : null}
 				{...args}
 			>
-				<MultiSelectMenuItem value={1} key={1}>
+				<MultiSelectMenuItem value={{ id: 1 }} key={1}>
 					<IconContainer>
 						<CalendarIcon />
 					</IconContainer>
 					calendar icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={2} key={2}>
+				<MultiSelectMenuItem value={{ r: 3 }} key={2}>
 					<IconContainer>
 						<ClearIcon />
 					</IconContainer>
@@ -88,24 +82,39 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 				</MultiSelectMenuItem>
 				<MultiSelectMenuItem value={3} key={3}>
 					<IconContainer>
-						<ChevronIcon />
-					</IconContainer>
-					chevron icon
-				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={4} key={4}>
-					<IconContainer>
 						<PrintIcon />
 					</IconContainer>
 					print icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={5} key={5}>
-					text
+				<MultiSelectMenuItem value={4} key={4}>
+					<IconContainer>
+						<ChevronIcon />
+					</IconContainer>
+					chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={6} key={6}>
-					{3}
+				<MultiSelectMenuItem value={10} key={10} disabled>
+					<IconContainer>
+						<ChevronIcon />
+					</IconContainer>
+					(disabled) chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={7} key={7}>
-					{`mixed text and number ${2}`}
+				<MultiSelectMenuItem value={11} key={11} disabled>
+					<IconContainer>
+						<ChevronIcon />
+					</IconContainer>
+					(disabled) chevron icon
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="number" key={5}>
+					5
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="number" key={6}>
+					6
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="number" key={7}>
+					7
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="number" key={8}>
+					8
 				</MultiSelectMenuItem>
 			</FormMultiSelect>
 		</FormContainer>
@@ -113,7 +122,18 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = (args) => {
 };
 
 export const ControlledFormSelect = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormSelect.args = {
 	label: 'Controlled Multi Select input',
+};
+
+export const ControlledFormSelectWithDefault = Controlled.bind({});
+ControlledFormSelectWithDefault.args = {
+	label: 'Controlled Multi Select input',
+	defaultValue: [4, 5],
+};
+
+export const ControlledFormSelectWithDefaultDisabled = Controlled.bind({});
+ControlledFormSelectWithDefaultDisabled.args = {
+	label: 'Controlled Multi Select input',
+	defaultValue: [4, 5, 10],
 };
