@@ -15,58 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
-import { useState } from 'react';
-import { Controller } from 'react-hook-form';
-import { FormDateTextField } from './formDateTextField/formDateTextField.component';
+import { FormBaseCalendarPicker, FormBaseCalendarPickerProps } from './formBaseCalendarPicker/formBaseCalendarPicker.component';
 
-export type FormDatePickerProps = Partial<DatePickerProps<any, any>> & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
-	formError?: any;
-};
-
-export const FormDatePicker = ({
-	name,
-	control,
-	formError,
-	disabled,
-	...props
-}: FormDatePickerProps) => {
-	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(null);
-
-	const handleClick = () => {
-		if (!disabled) setOpen(true);
-	};
-
-	return (
-		<Controller
-			control={control}
-			name={name}
-			render={({ field }) => (
-				<DatePicker
-					{...field}
-					onOpen={() => setOpen(true)}
-					onClose={() => setOpen(false)}
-					disabled={disabled}
-					open={open}
-					onChange={setValue}
-					value={value}
-					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
-					disableHighlightToday
-					inputFormat="DD/MM/YYYY"
-					renderInput={({ ref, ...textFieldProps }) => (
-						<FormDateTextField
-							{...textFieldProps}
-							disabled={disabled}
-							formError={formError}
-							onClick={handleClick}
-						/>
-					)}
-					{...props}
-				/>
-			)}
-		/>
-	);
-};
+type FormDatePickerProps = FormBaseCalendarPickerProps & Partial<DatePickerProps<any, any>>;
+export const FormDatePicker = (props: FormDatePickerProps) => (
+	<FormBaseCalendarPicker
+		PickerComponent={DatePicker}
+		inputFormat="DD/MM/YYYY"
+		{...props}
+	/>
+);

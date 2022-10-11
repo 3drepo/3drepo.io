@@ -14,66 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
 import { DateTimePicker, DateTimePickerProps } from '@mui/x-date-pickers';
-import { Controller } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
-import { FormDateTextField } from './formDateTextField/formDateTextField.component';
+import { FormBaseCalendarPicker, FormBaseCalendarPickerProps } from './formBaseCalendarPicker/formBaseCalendarPicker.component';
 
-export type FormDateTimePickerProps = Partial<DateTimePickerProps<any, any>> & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
-	formError?: any;
-};
-
-export const FormDateTimePicker = ({
-	name,
-	control,
-	formError,
-	disabled,
-	...props
-}: FormDateTimePickerProps) => {
-	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(null);
-
-	const handleClick = () => {
-		if (!disabled) setOpen(true);
-	};
-
+type FormDateTimePickerProps = FormBaseCalendarPickerProps & Partial<DateTimePickerProps<any, any>>;
+export const FormDateTimePicker = (props: FormDateTimePickerProps) => {
 	const formatTime = (time) => time.replace('@', formatMessage({
 		id: 'form.dateTime.at',
 		defaultMessage: 'at',
 	}));
 
 	return (
-		<Controller
-			control={control}
-			name={name}
-			render={({ field }) => (
-				<DateTimePicker
-					{...field}
-					onOpen={() => setOpen(true)}
-					onClose={() => setOpen(false)}
-					disabled={disabled}
-					open={open}
-					onChange={setValue}
-					value={value}
-					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
-					disableHighlightToday
-					inputFormat="DD/MM/YYYY @ hh:mma"
-					rifmFormatter={formatTime}
-					renderInput={({ ref, ...textFieldProps }) => (
-						<FormDateTextField
-							{...textFieldProps}
-							disabled={disabled}
-							formError={formError}
-							onClick={handleClick}
-						/>
-					)}
-					{...props}
-				/>
-			)}
+		<FormBaseCalendarPicker
+			PickerComponent={DateTimePicker}
+			inputFormat="DD/MM/YYYY @ hh:mma"
+			rifmFormatter={formatTime}
+			{...props}
 		/>
 	);
 };

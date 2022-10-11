@@ -14,33 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TextFieldProps } from '@mui/material';
-import { TextField } from './formDateTextField.styles';
+import styled from 'styled-components';
+import TextFieldBase from '@mui/material/TextField';
 
-type FormDateTextFieldProps = TextFieldProps & {
-	formError?: any,
-	inputRef?: any,
-	onClick: () => void;
-};
+export const TextField = styled(TextFieldBase)`
+	caret-color: transparent;
 
-export const FormDateTextField = ({ inputRef, formError, onClick, ...props }: FormDateTextFieldProps) => {
-	const preventManualInsertion = (e) => {
-		e.preventDefault();
-		onClick();
-	};
+	button, .MuiInputAdornment {
+		color: currentColor;
+	}
 
-	return (
-		<TextField
-			{...props}
-			inputProps={{
-				...props.inputProps,
-				placeholder: ' ',
-			}}
-			ref={inputRef}
-			error={!!formError}
-			helperText={formError?.message}
-			onClick={preventManualInsertion}
-			onKeyDown={(e) => e.preventDefault()}
-		/>
-	);
-};
+	.MuiInputBase-root {
+		padding: 0;
+		&, & * {
+			cursor: pointer;
+		}
+		&.Mui-disabled {
+			&, & * {
+				cursor: context-menu;
+			}
+		}
+	}
+
+	.MuiIconButton-edgeEnd {
+		margin: 0;
+		padding: 5px 12px;
+
+		&:hover {
+			background-color: transparent;
+		}
+	}
+`;
