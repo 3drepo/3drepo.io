@@ -181,7 +181,6 @@ const expandedGroupItem = css`
 				${StyledFormControl} {
 					.MuiSelect-select {
 						margin-top: 0;
-						height: 26px;
 						color: ${({ theme }) => theme.palette.secondary.main};
 						~ svg {
 							margin-top: 0;

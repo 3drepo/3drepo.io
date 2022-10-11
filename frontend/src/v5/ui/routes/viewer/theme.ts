@@ -133,8 +133,8 @@ export const theme = createTheme(
 					styleOverrides: {
 						select: {
 							border: `1px solid ${COLOR.BASE_LIGHTER}`,
-							lineHeight: '22px',
-							height: '24px',
+							lineHeight: 24,
+							height: 26,
 							padding: '0 10px',
 							marginTop: 0,
 							left: '-14px',
