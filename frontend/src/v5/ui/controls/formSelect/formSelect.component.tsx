@@ -42,7 +42,7 @@ export const FormSelect = ({
 	multiple,
 	renderValue,
 	onOpen,
-	onClose,
+	onChange,
 	...props
 }: FormSelectProps) => {
 	const [showTooltip, setShowTooltip] = useState(false);
@@ -52,11 +52,10 @@ export const FormSelect = ({
 		onOpen?.(e);
 	};
 
-	const handleClose = (e, field) => {
-		if (value) {
-			field.onChange({ target: { value } });
-		}
-		onClose?.(e);
+	const handleChange = (eventArgs, field) => {
+		field.onChange({ target: { value } });
+		const [event, child] = eventArgs;
+		onChange?.(event, child);
 	};
 
 	return (
@@ -94,7 +93,7 @@ export const FormSelect = ({
 								disabled={disabled}
 								hidden={hidden}
 								onOpen={handleOpen}
-								onClose={(e) => handleClose(e, field)}
+								onChange={(...args) => handleChange(args, field)}
 								multiple={multiple}
 								renderValue={renderValue}
 								error={!!formError}
