@@ -18,9 +18,9 @@
 import { MenuItemProps, MenuItem } from '@mui/material';
 import styled from 'styled-components';
 
-type SearchSelectMenuItemProps = Omit<MenuItemProps, 'value'> & { value: any };
+type SingleSelectMenuItemProps = Omit<MenuItemProps, 'value'> & { value: any };
 
-export const SearchSelectMenuItem = styled(MenuItem)<SearchSelectMenuItemProps>`
+export const SingleSelectMenuItem = styled(MenuItem)<SingleSelectMenuItemProps>`
 	&&& {
 		padding: 0 14px;
 		height: 34px;

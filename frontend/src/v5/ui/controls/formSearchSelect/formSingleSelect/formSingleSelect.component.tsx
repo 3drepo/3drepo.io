@@ -18,6 +18,7 @@ import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSearchSel
 import { MenuItem } from '@mui/material';
 import { isEqual, isUndefined } from 'lodash';
 import { Children, useEffect, useState } from 'react';
+import { SingleSelectMenuItem } from './singleSelectMenutItem.styles';
 
 export type FormSingleSelectProps = FormSearchSelectProps & {
 	children: any,
@@ -40,8 +41,8 @@ export const FormSingleSelect = ({
 
 	const verifyChildrenAreValid = () => {
 		Children.forEach(children, (child) => {
-			if (child.type !== MenuItem) {
-				throw new Error('FormSingleSelect only accepts an array of MenuItem as direct children');
+			if (child.type !== SingleSelectMenuItem) {
+				throw new Error('FormSingleSelect only accepts an array of SingleSelectMenuItem as direct children');
 			}
 		});
 	};
