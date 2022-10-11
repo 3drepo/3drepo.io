@@ -18,25 +18,13 @@
 import { MouseEvent } from 'react';
 import AvatarIcon from '@mui/material/Avatar';
 import { StyledIconButton } from '@controls/avatar/avatar.styles';
-
-export const JOBS_LIST = [
-	{ titleLong: 'Admin', titleShort: 'Ad' },
-	{ titleLong: 'Client', titleShort: 'Cl' },
-	{ titleLong: 'Architect', titleShort: 'Ar' },
-	{ titleLong: 'Structural Engineer', titleShort: 'SE' },
-	{ titleLong: 'MEP Engineer', titleShort: 'ME' },
-	{ titleLong: 'Project Manager', titleShort: 'PM' },
-	{ titleLong: 'Quantity Surveyor', titleShort: 'QS' },
-	{ titleLong: 'Asset Manager', titleShort: 'AM' },
-	{ titleLong: 'Main Contractor', titleShort: 'MC' },
-	{ titleLong: 'Supplier', titleShort: 'Su' },
-];
+import { Job, JOBS_LIST } from '@/v5/store/users/user.types';
 
 type JobAvatarProps = {
 	onClick?: (event: MouseEvent) => void;
 	onMouseEnter?: (event: MouseEvent) => void;
 	onMouseLeave?: () => void;
-	job: string;
+	job: Job;
 	size?: 'small' | 'medium' | 'large';
 	isButton?: boolean;
 	className?: string;

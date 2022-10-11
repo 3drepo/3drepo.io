@@ -22,20 +22,8 @@ import { getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { JobPopover } from '@components/shared/jobPopover/jobPopover.component';
 import { Popover } from '@controls/popover/popover.component';
+import { JOBS_LIST } from '@/v5/store/users/user.types';
 import { JobCircle, UserCircle } from '../assignees.styles';
-
-export const JOBS_LIST = [
-	{ titleLong: 'Admin', titleShort: 'Ad' },
-	{ titleLong: 'Client', titleShort: 'Cl' },
-	{ titleLong: 'Architect', titleShort: 'Ar' },
-	{ titleLong: 'Structural Engineer', titleShort: 'SE' },
-	{ titleLong: 'MEP Engineer', titleShort: 'ME' },
-	{ titleLong: 'Project Manager', titleShort: 'PM' },
-	{ titleLong: 'Quantity Surveyor', titleShort: 'QS' },
-	{ titleLong: 'Asset Manager', titleShort: 'AM' },
-	{ titleLong: 'Main Contractor', titleShort: 'MC' },
-	{ titleLong: 'Supplier', titleShort: 'Su' },
-];
 
 type IAssigneeListItem = {
 	assignee: string;
@@ -53,7 +41,7 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 	return job ? (
 		<Popover
 			anchor={(props) => <JobCircle job={assignee} {...props} />}
-			popoverContent={() => <JobPopover job={assignee} />}
+			popoverContent={() => <JobPopover job={job.titleLong} />}
 		/>
 	) : (
 		<Popover

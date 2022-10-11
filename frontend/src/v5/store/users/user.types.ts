@@ -15,21 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Job } from '@/v5/store/users/user.types';
-import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
-import { AvatarWrapper, PopoverContainer, Name as JobTitle, UserData as JobData } from '../userPopover/userPopover.styles';
+export const JOBS_LIST = [
+	{ titleLong: 'Admin', titleShort: 'Ad' },
+	{ titleLong: 'Client', titleShort: 'Cl' },
+	{ titleLong: 'Architect', titleShort: 'Ar' },
+	{ titleLong: 'Structural Engineer', titleShort: 'SE' },
+	{ titleLong: 'MEP Engineer', titleShort: 'ME' },
+	{ titleLong: 'Project Manager', titleShort: 'PM' },
+	{ titleLong: 'Quantity Surveyor', titleShort: 'QS' },
+	{ titleLong: 'Asset Manager', titleShort: 'AM' },
+	{ titleLong: 'Main Contractor', titleShort: 'MC' },
+	{ titleLong: 'Supplier', titleShort: 'Su' },
+] as const;
 
-interface IJobPopover {
-	job: Job;
-}
-
-export const JobPopover = ({ job }: IJobPopover) => (
-	<PopoverContainer>
-		<AvatarWrapper>
-			<JobAvatar job={job} />
-		</AvatarWrapper>
-		<JobData>
-			<JobTitle>{job}</JobTitle>
-		</JobData>
-	</PopoverContainer>
-);
+export type Job = typeof JOBS_LIST[number]['titleLong'];
