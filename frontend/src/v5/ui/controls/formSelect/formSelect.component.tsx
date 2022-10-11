@@ -17,7 +17,7 @@
 import { SelectProps, InputLabel, FormControl, FormHelperText } from '@mui/material';
 import { useState } from 'react';
 import { Controller } from 'react-hook-form';
-import { Select, TooltipAdapter, Tooltip } from './formSelect.styles';
+import { Select, TooltipAdapter, Tooltip, TooltipTitle } from './formSelect.styles';
 
 export type FormSelectProps = SelectProps & {
 	control: any;
@@ -72,7 +72,7 @@ export const FormSelect = ({
 				</InputLabel>
 			)}
 			<Tooltip
-				title={selectedOptionsTooltip ? renderValue(value) : ''}
+				title={selectedOptionsTooltip ? (<TooltipTitle>renderValue(value)</TooltipTitle>) : ''}
 				open={showTooltip}
 			>
 				<TooltipAdapter
