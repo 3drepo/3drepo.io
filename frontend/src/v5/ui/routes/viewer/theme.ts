@@ -133,12 +133,13 @@ export const theme = createTheme(
 					styleOverrides: {
 						select: {
 							border: `1px solid ${COLOR.BASE_LIGHTER}`,
-							lineHeight: 24,
+							lineHeight: '24px',
 							height: 26,
 							padding: '0 10px',
 							marginTop: 0,
 							left: '-14px',
 							color: `${COLOR.SECONDARY_MAIN} !important`,
+							display: 'flex',
 
 							'& ~ svg': {
 								right: 10,
