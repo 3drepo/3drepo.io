@@ -45,7 +45,6 @@ const MenuContent = () => {
 	);
 };
 
-
 export type FormSearchSelectProps = FormSelectProps & {
 	onItemClick?: (item: any) => void;
 	itemIsSelected?: (item: any) => void;
