@@ -17,7 +17,7 @@
 
 import { FormSingleSelect, FormSingleSelectProps } from '@controls/formSearchSelect/formSingleSelect/formSingleSelect.component';
 import { useState } from 'react';
-import { InvisibleContainer } from './formInvisibleSelect.styles';
+import { InvisibleContainer, ButtonContainer } from './formInvisibleSelect.styles';
 
 type FormInvisibleSelectProps = FormSingleSelectProps & {
 	TriggerComponent: JSX.Element,
@@ -27,9 +27,9 @@ export const FormInvisibleSelect = ({ TriggerComponent, ...props }: FormInvisibl
 	const [open, setOpen] = useState(false);
 
 	return (
-		<InvisibleContainer onClick={() => setOpen(!open)}>
-			{TriggerComponent}
-			<FormSingleSelect {...props} open={open} />
+		<InvisibleContainer>
+			<ButtonContainer onClick={() => setOpen(true)}>{TriggerComponent}</ButtonContainer>
+			<FormSingleSelect {...props} open={open} onClose={() => setOpen(false)} />
 		</InvisibleContainer>
 	);
 };

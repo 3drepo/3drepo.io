@@ -34,3 +34,7 @@ export const InvisibleContainer = styled.div`
 		}
 	}
 `;
+
+export const ButtonContainer = styled.div`
+	display: contents;
+`;
