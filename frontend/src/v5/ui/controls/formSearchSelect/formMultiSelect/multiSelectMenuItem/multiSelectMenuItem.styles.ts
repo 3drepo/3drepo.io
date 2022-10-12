@@ -37,6 +37,7 @@ export const CheckboxContainer = styled.div`
 `;
 
 export const MenuItem = styled(MenuItemBase)`
-	padding: 0;
-	height: 30px;
+	&& {
+		padding: 0;
+	}
 `;

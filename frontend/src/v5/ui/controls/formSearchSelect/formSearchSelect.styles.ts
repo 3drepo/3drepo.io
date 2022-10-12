@@ -26,11 +26,14 @@ export const SearchInputContainer = styled.div`
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
-	padding: 12px;
+	padding: 2px 12px 12px;
 `;
 
 export const NoResults = styled.div`
-	padding: 5px 12px 8px;
+	height: 34px;
+	display: flex;
+	align-items: center;
+	padding-left: 12px;
 	color: ${({ theme }) => theme.palette.base.main};
 	${({ theme }) => theme.typography.body1};
 `;

@@ -137,9 +137,7 @@ export const theme = createTheme(
 							height: 26,
 							padding: '0 10px',
 							marginTop: 0,
-							left: '-14px',
 							color: `${COLOR.SECONDARY_MAIN} !important`,
-							display: 'flex',
 
 							'& ~ svg': {
 								right: 10,
@@ -272,7 +270,6 @@ export const theme = createTheme(
 							boxShadow: `0px 9px 28px 8px rgb(0 0 0 / 5%),
 										0px 6px 16px 0px rgb(0 0 0 / 8%),
 										0px 3px 6px -4px rgb(0 0 0 / 12%) !important`,
-							padding: '4px 0',
 							'.MuiList-root': {
 								paddingTop: 0,
 								paddingBottom: 0,
