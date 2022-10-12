@@ -187,7 +187,7 @@ const processTeamspace = async (teamspace, revisionAge) => {
 
 const run = async (revisionAge) => {
 	logger.logInfo('Finding all members from all teamspaces...');
-	const teamspaces = ['charence']; // await getTeamspaceList();
+	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`\t-${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop

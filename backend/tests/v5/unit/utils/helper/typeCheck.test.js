@@ -52,6 +52,24 @@ const testIsString = () => {
 	});
 };
 
+const testIsObject = () => {
+	describe.each(
+		[
+			[Buffer.from('abc'), true],
+			['', false],
+			['some random string', false],
+			[3, false],
+			[undefined, false],
+			[{}, true],
+			[{ a: 1, b: 'xyz' }, true],
+		],
+	)('Is Object', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isObject(item)).toBe(isTrue);
+		});
+	});
+};
+
 const testIsUUIDString = () => {
 	describe.each(
 		[
@@ -106,6 +124,7 @@ const testFileExtensionFromBuffer = () => {
 describe('utils/helpers/typeCheck', () => {
 	testIsBuffer();
 	testIsString();
+	testIsObject();
 	testIsUUIDString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
