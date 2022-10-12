@@ -33,7 +33,7 @@ export const Accordion = ({ defaultExpanded = false, children, title, Icon, ...p
 
 	return (
 		<MuiAccordion expanded={expanded} onClick={toggleExpanded} {...props}>
-			<AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+			<AccordionSummary>
 				{Icon && (
 					<IconContainer>
 						<Icon />
