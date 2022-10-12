@@ -21,7 +21,7 @@ import { DateContainer, EmptyDateContainer } from './dueDate.style';
 
 type IDueDate = {
 	date: number;
-	onClick: () => void;
+	onClick?: () => void;
 };
 
 export const DueDate = ({ date, onClick }: IDueDate) => {
