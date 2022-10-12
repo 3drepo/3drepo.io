@@ -727,6 +727,12 @@ export const theme = createTheme({
 					color: 'inherit',
 					margin: 0,
 				},
+				deleteIcon: {
+					color: 'inherit',
+					height: 15,
+					width: 15,
+					margin: 0,
+				},
 			},
 		},
 		MuiFab: {
