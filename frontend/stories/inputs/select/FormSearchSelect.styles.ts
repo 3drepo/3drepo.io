@@ -27,11 +27,10 @@ export const ItemContainer = styled.div`
 
 export const IconContainer = styled.div`
 	margin-right: 5px;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
+	display: inline-block;
 
 	svg {
 		width: 15px;
+		height: 15px;
 	}
 `;
