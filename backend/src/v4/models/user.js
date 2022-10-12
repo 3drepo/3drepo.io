@@ -50,6 +50,7 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { assignUserToJob } = require("../../v5/models/jobs.js");
 const { fileExists } = require("./fileRef");
+const { getSpaceUsed } = require("../../v5/utils/quota.js");
 
 const COLL_NAME = "system.users";
 
@@ -690,7 +691,7 @@ async function _findModelDetails(dbUserCache, username, model) {
 
 async function _calSpace(user) {
 	const quota = UserBilling.getSubscriptionLimits(user.customData.billing);
-	const sizeInBytes = await User.getTeamspaceSpaceUsed(user.user);
+	const sizeInBytes = await getSpaceUsed(user.user);
 
 	if (quota.spaceLimit > 0) {
 		quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB

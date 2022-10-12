@@ -59,7 +59,7 @@ Quota.getQuotaInfo = async (teamspace) => {
 };
 
 Quota.getSpaceUsed = async (teamspace) => {
-	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
+	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref', 'tickets.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
 	collections.forEach(({ name }) => {
