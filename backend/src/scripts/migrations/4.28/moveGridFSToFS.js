@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { createIndex, find, findOne, bulkWrite, getFileStreamFromGridFS } = require(`${v5Path}/handler/db`);
+const { createIndex, count, find, findOne, bulkWrite, getFileStreamFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const FsService = require(`${v5Path}/handler/fs`);
 const GridFS = require(`${v5Path}/handler/gridfs`);
@@ -56,6 +56,7 @@ const copyFile = async (teamspace, collection, filename, fileSize) => {
 		updateOne: {
 			filter: { _id: newRef._id },
 			update: { $set: newRef },
+			upsert: true,
 		},
 	};
 };
@@ -87,34 +88,51 @@ const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) =>
 
 const processFileGroup = async (teamspace, collection, group) => {
 	const filesToRemove = [];
-	logger.logInfo('\t\t\t\t\tCopying file to fs...');
 	const refUpdates = await Promise.all(
 		group.flatMap(({ filename, length }) => {
 			filesToRemove.push(filename);
 			return copyFile(teamspace, collection, filename, length);
 		}),
 	);
-	logger.logInfo('\t\t\t\t\tUpdating references...');
 	await bulkWrite(teamspace, `${collection}.ref`, refUpdates);
-	logger.logInfo('\t\t\t\t\tRemoving gridfs files...');
 	await GridFS.removeFiles(teamspace, collection, filesToRemove);
 };
 
 const formatNumber = (n) => parseFloat(n).toFixed(2);
 
-const processCollection = async (teamspace, collection, maxParallelSizeMB, maxParallelFiles) => {
-	const ownerCol = collection.slice(0, -(filesExt.length));
-	const gridFSEntries = await find(teamspace, collection, { }, { filename: 1, length: 1 });
-	const fileGroups = organiseFilesToProcess(gridFSEntries, maxParallelSizeMB, maxParallelFiles);
-
-	await createIndex(teamspace, `${ownerCol}.ref`, { link: 1, type: 1 });
+const processBatch = async (teamspace, collection, entries, maxParallelSizeMB, maxParallelFiles) => {
+	const fileGroups = organiseFilesToProcess(entries, maxParallelSizeMB, maxParallelFiles);
 
 	for (let i = 0; i < fileGroups.length; ++i) {
 		const group = fileGroups[i];
 		const totalSize = group.reduce((partialSum, { length }) => partialSum + length, 0) / (1024 * 1024);
-		logger.logInfo(`\t\t\t\t[${i}/${fileGroups.length}] Copying ${group.length} file(s) (${formatNumber(totalSize)}MiB)`);
+		logger.logInfo(`\t\t\t\t\t[${i}/${fileGroups.length}] Copying ${group.length} file(s) (${formatNumber(totalSize)}MiB)`);
 		// eslint-disable-next-line no-await-in-loop
-		await processFileGroup(teamspace, ownerCol, group);
+		await processFileGroup(teamspace, collection, group);
+	}
+};
+
+const processCollection = async (teamspace, collection, maxParallelSizeMB, maxParallelFiles) => {
+	const ownerCol = collection.slice(0, -(filesExt.length));
+
+	const nEntries = await count(teamspace, collection, { });
+
+	const batchSize = Math.min(maxParallelFiles, nEntries);
+	const nIterations = Math.ceil(nEntries / batchSize);
+
+	await createIndex(teamspace, `${ownerCol}.ref`, { link: 1, type: 1 });
+
+	for (let i = 0; i < nIterations; ++i) {
+		// eslint-disable-next-line no-await-in-loop
+		const gridFSEntries = await find(teamspace, collection, { }, { filename: 1, length: 1 }, undefined, batchSize);
+		logger.logInfo(`\t\t\t\t[${i}/${nIterations}] Fetching ${gridFSEntries.length} files...`);
+		// eslint-disable-next-line no-await-in-loop
+		await processBatch(teamspace, ownerCol, gridFSEntries, maxParallelSizeMB, maxParallelFiles);
+	}
+
+	const recount = await count(teamspace, collection, { });
+	if (recount > 0) {
+		throw new Error(`Unexpected error: Gridfs still have ${recount} files after the moving process`);
 	}
 };
 
