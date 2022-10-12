@@ -87,13 +87,16 @@ const organiseFilesToProcess = (entries, maxParallelSizeMB, maxParallelFiles) =>
 
 const processFileGroup = async (teamspace, collection, group) => {
 	const filesToRemove = [];
+	logger.logInfo('\t\t\t\t\tCopying file to fs...');
 	const refUpdates = await Promise.all(
 		group.flatMap(({ filename, length }) => {
 			filesToRemove.push(filename);
 			return copyFile(teamspace, collection, filename, length);
 		}),
 	);
+	logger.logInfo('\t\t\t\t\tUpdating references...');
 	await bulkWrite(teamspace, `${collection}.ref`, refUpdates);
+	logger.logInfo('\t\t\t\t\tRemoving gridfs files...');
 	await GridFS.removeFiles(teamspace, collection, filesToRemove);
 };
 
