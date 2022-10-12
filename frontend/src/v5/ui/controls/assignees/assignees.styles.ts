@@ -33,26 +33,10 @@ const BaseCircle = css`
 	
 	.MuiAvatar-root {
 		border: 1px solid;
+		box-sizing: border-box;
 		height: 100%;
 		width: 100%;
 	}
-	.MuiAvatar-root::before {
-		content: "";
-		margin: 0;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		position: absolute;
-		opacity: 0;
-		width: 28px;
-		height: 28px;
-	}
-
-	&:hover { /* avatar appears on top when hovered */
-		z-index: 1000;
-		.MuiAvatar-root::before {
-			opacity: 0 !important;
-		}
-	}
-
 `;
 
 export const UserCircle = styled(Avatar)`
@@ -62,13 +46,14 @@ export const UserCircle = styled(Avatar)`
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		border-color: currentColor;
 	}
-`;
+	`;
 
 export const JobCircle = styled(JobAvatar)`
 	${BaseCircle}
 	.MuiAvatar-root {
-		border-color: ${({ theme }) => theme.palette.secondary.main};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) => theme.palette.secondary.main};
+		border-color: currentColor;
 	}
 `;
 
@@ -89,9 +74,33 @@ export const AssigneesList = styled.div`
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	color: ${({ theme }) => theme.palette.base.main};
 
-	&:hover .MuiAvatar-root::before {
+	.MuiButtonBase-root {
+		z-index: 100;
+		&:hover {
+			z-index: 1000; /* avatar appears on top when hovered */
+			::before {
+				opacity: 0 !important;
+			}
+		}
+
+		::before {
+			content: "";
+			margin: 0;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			position: absolute;
+			opacity: 0;
+			width: 28px;
+			height: 28px;
+			box-sizing: border-box;
+			border-radius: 50%;
+			z-index: 10;
+		}
+	}
+
+	&:hover .MuiButtonBase-root::before {
 		opacity: 0.3;
 	}
+
 	>:last-child {
 		margin: 0;
 	}
