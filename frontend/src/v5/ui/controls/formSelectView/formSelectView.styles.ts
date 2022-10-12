@@ -17,6 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { MenuItem } from '@mui/material';
+import { FormSelect as FormSelectBase } from '@controls/formSelect/formSelect.component';
 
 const ThumbnailStyles = css`
 	width: 43px;
@@ -38,6 +39,31 @@ export const ThumbnailPlaceholder = styled.div`
 export const ViewLabel = styled.div`
 	display: flex;
 	flex-direction: column;
+`;
+
+export const FormSelect = styled(FormSelectBase)`
+	.MuiSelect-selectMenu {
+		display: flex;
+		padding-left: 0;
+	}
+	img {
+		margin-right: 0;
+	}
+	${ThumbnailPlaceholder} {
+		display: none;
+	}
+	
+	${Thumbnail} {
+		height: 35px;
+		border-radius: 4px 0 0 3px;
+		left: 0;
+		bottom: 0;
+		position: absolute;
+		
+		& + ${ViewLabel} {
+			margin-left: 44px;
+		}
+	}
 `;
 
 export const MenuItemView = styled(MenuItem)`
