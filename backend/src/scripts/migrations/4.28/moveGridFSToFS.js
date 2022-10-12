@@ -35,12 +35,12 @@ const convertLegacyFileName = (filename) => {
 	return filename;
 };
 
-const moveFromGridFSToFs = async (teamspace, collection, filename, fileSize) => {
+const copyFromGridFSToFs = async (teamspace, collection, filename, fileSize) => {
 	const { stream: gridfsStream } = await getFileStreamFromGridFS(teamspace, collection, filename);
 	return FsService.storeFileStream(gridfsStream, fileSize);
 };
 
-const moveFile = async (teamspace, collection, filename, fileSize) => {
+const copyFile = async (teamspace, collection, filename, fileSize) => {
 	const legacyFileName = convertLegacyFileName(filename);
 	const query = legacyFileName === filename ? { link: filename }
 		: { link: { $in: [filename, legacyFileName] } };
@@ -50,7 +50,7 @@ const moveFile = async (teamspace, collection, filename, fileSize) => {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
 		return [];
 	}
-	const newRef = await moveFromGridFSToFs(teamspace, collection, filename, fileSize);
+	const newRef = await copyFromGridFSToFs(teamspace, collection, filename, fileSize);
 	newRef._id = existingRef?._id || convertLegacyFileName(filename);
 	return {
 		updateOne: {
@@ -90,7 +90,7 @@ const processFileGroup = async (teamspace, collection, group) => {
 	const refUpdates = await Promise.all(
 		group.flatMap(({ filename, length }) => {
 			filesToRemove.push(filename);
-			return moveFile(teamspace, collection, filename, length);
+			return copyFile(teamspace, collection, filename, length);
 		}),
 	);
 	await bulkWrite(teamspace, `${collection}.ref`, refUpdates);
