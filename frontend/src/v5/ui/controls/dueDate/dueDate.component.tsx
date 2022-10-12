@@ -19,22 +19,28 @@ import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DateContainer, EmptyDateContainer } from './dueDate.style';
 
-export const DueDate = ({ epochTime, onClick }) => {
-	if (!epochTime) {
+type IDueDate = {
+	date: number;
+	onClick: () => void;
+};
+
+export const DueDate = ({ date, onClick }: IDueDate) => {
+	if (!date) {
 		return (
 			<EmptyDateContainer onClick={onClick}>
 				<FormattedMessage id="dueDate.emptyText" defaultMessage="Set Due Date" />
 			</EmptyDateContainer>
 		);
 	}
-	const isOverdue = epochTime < Date.now();
+	const isOverdue = date < Date.now();
+	const formattedDate = formatDate(date);
 	return (
 		<DateContainer isOverdue={isOverdue}>
 			{isOverdue ? (
-				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue" />
+				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
 			) : (
-				<FormattedMessage id="dueDate.due" defaultMessage="Due" />
-			)} {formatDate(epochTime)}
+				<FormattedMessage id="dueDate.due" defaultMessage="Due {date}" values={{ date: formattedDate }} />
+			)}
 		</DateContainer>
 	);
 };

@@ -57,7 +57,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				{treatment && <TreatmentLevelChip state={treatment} />}
 			</ChipList>
 			<ExtraInfo>
-				{dueDate && <DueDate epochTime={dueDate} onClick={() => { /* Edit Due Date */ }} />}
+				{dueDate !== undefined && <DueDate date={dueDate} onClick={() => { /* Edit Due Date */ }} />}
 				{priority && <PriorityLevelChip noLabel state={priority} />}
 				{assignees && <Assignees assignees={assignees} max={7} />}
 			</ExtraInfo>
