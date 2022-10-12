@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormTextArea } from '@controls/formTextAreaFixedSize/formTextArea.component';
+import { FormTextAreaFixedSize } from '@controls/formTextArea/formTextAreaFixedSize.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
@@ -38,16 +38,16 @@ export default {
 			type: 'number',
 		},
 	},
-	component: FormTextArea,
+	component: FormTextAreaFixedSize,
 	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof FormTextArea>;
+} as ComponentMeta<typeof FormTextAreaFixedSize>;
 
-const Controlled: ComponentStory<typeof FormTextArea> = ({ formError, ...args }) => {
+const Controlled: ComponentStory<typeof FormTextAreaFixedSize> = ({ formError, ...args }) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormTextArea
+			<FormTextAreaFixedSize
 				name="textarea"
 				control={control}
 				{...args}

@@ -18,16 +18,16 @@
 import { FormControl, FormHelperText, InputLabel, InputProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { ScrollArea } from '@controls/scrollArea';
-import { Container, Input } from './formTextArea.styles';
+import { Container, Input } from './formTextAreaFixedSize.styles';
 
-export type FormTextAreaProps = InputProps & {
+export type FormTextAreaFixedSizeProps = InputProps & {
 	control: any,
 	formError?: any,
 	label?: any,
 	height?: number,
 };
 
-export const FormTextArea = ({
+export const FormTextAreaFixedSize = ({
 	defaultValue,
 	formError,
 	control,
@@ -37,20 +37,17 @@ export const FormTextArea = ({
 	label,
 	height = 80,
 	...props
-}: FormTextAreaProps) => (
+}: FormTextAreaFixedSizeProps) => (
 	<Controller
 		control={control}
 		name={name}
 		defaultValue={defaultValue}
 		render={({ field }) => (
-			<FormControl>
+			<FormControl required={required} disabled={disabled} error={!!formError}>
 				{label && (
 					<InputLabel
 						{...field}
 						id={`${name}-label`}
-						required={required}
-						disabled={disabled}
-						error={!!formError}
 					>
 						{label}
 					</InputLabel>
@@ -62,16 +59,14 @@ export const FormTextArea = ({
 							inputRef={field.ref}
 							id={name}
 							name={name}
-							disabled={disabled}
 							multiline
 							minRows={4}
-							error={!!formError}
 							$height={height}
 							{...props}
 						/>
 					</ScrollArea>
 				</Container>
-				<FormHelperText error={!!formError}>{formError?.message}</FormHelperText>
+				<FormHelperText>{formError?.message}</FormHelperText>
 			</FormControl>
 		)}
 	/>
