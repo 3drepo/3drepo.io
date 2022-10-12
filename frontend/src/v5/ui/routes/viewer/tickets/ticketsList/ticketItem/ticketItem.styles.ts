@@ -16,7 +16,6 @@
  */
 
 import { Assignees as AssigneesBase } from '@controls/assignees/assignees.component';
-import { CentredContainer } from '@controls/centredContainer';
 import styled from 'styled-components';
 
 export const Id = styled.div`
