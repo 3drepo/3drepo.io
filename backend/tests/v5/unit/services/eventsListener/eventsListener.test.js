@@ -401,7 +401,7 @@ const testModelEventsListener = () => {
 				model: generateRandomString(),
 				ticket: generateRandomString(),
 				author: generateRandomString(),
-				date: generateRandomDate(),
+				timestamp: generateRandomDate(),
 				changes: {
 					prop: {
 						from: generateRandomString(),
@@ -414,7 +414,7 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
-				data.ticket, { author: data.author, changes: data.changes, date: data.date });
+				data.ticket, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 		});
 	});
 };

@@ -199,7 +199,7 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				date,
+				timestamp: date,
 				changes: { properties: { propToUpdate: { from: oldPropvalue, to: newPropValue } } },
 			});
 		});
@@ -232,7 +232,7 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				date,
+				timestamp: date,
 				changes: {
 					modules: { module: { propToUpdate: { from: oldPropvalue, to: newPropValue } } },
 				},
@@ -269,7 +269,7 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				date,
+				timestamp: date,
 				changes: {
 					propToUpdate: { from: undefined, to: newPropValue },
 					properties: { propToUnset: { from: oldPropvalue, to: null } },

@@ -41,9 +41,7 @@ const {
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
 const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
-	describe.each(
-		testData,
-	)(`${moduleProperty ? '[Modules] ' : ''}Property types`,
+	describe.each(testData)(`${moduleProperty ? '[Modules] ' : ''}Property types`,
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const teamspace = generateRandomString();
@@ -68,6 +66,14 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 					const propObj = {
 						[fieldName]: data,
 					};
+
+					const oldTicket = isNewTicket ? undefined : {
+						title: generateRandomString(),
+						type: generateUUID(),
+						properties: {},
+						modules: {},
+					};
+
 					const fullData = ({
 						title: generateRandomString(),
 						type: generateUUID(),
@@ -78,7 +84,7 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 					});
 
 					try {
-						await TicketSchema.validateTicket(teamspace, template, fullData, isNewTicket);
+						await TicketSchema.validateTicket(teamspace, template, oldTicket, fullData, isNewTicket);
 					} catch (err) {
 						throw undefined;
 					}
@@ -115,34 +121,34 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 				] : [],
 			};
 
-			const propObjIn = input === undefined ? {} : {
-				[fieldName]: input,
-			};
-			const fullData = ({
+			const propObjIn = input === undefined ? {} : { [fieldName]: input };
+
+			const oldTicket = isNewTicket ? undefined : {
 				title: generateRandomString(),
-				type: isNewTicket ? generateUUID() : undefined,
+				type: generateRandomString(),
+				properties: {},
+				modules: {},
+			};
+
+			const fullData = ({
+				title: isNewTicket ? generateRandomString() : undefined,
+				type: isNewTicket ? generateRandomString() : undefined,
 				properties: moduleProperty ? {} : propObjIn,
-				modules: moduleProperty ? {
-					[modName]: propObjIn,
-				} : {},
+				modules: moduleProperty ? { [modName]: propObjIn } : {},
 			});
 
 			if (succeed) {
-				const propObjOut = output === undefined ? {} : {
-					[fieldName]: output,
-				};
+				const propObjOut = output === undefined ? {} : { [fieldName]: output };
 				const outData = ({
 					...fullData,
 					properties: moduleProperty ? {} : propObjOut,
-					modules: moduleProperty ? {
-						[modName]: propObjOut,
-					} : {},
+					modules: moduleProperty && output ? { [modName]: propObjOut } : {},
 				});
 
-				await expect(TicketSchema.validateTicket(teamspace, template, fullData, isNewTicket))
+				await expect(TicketSchema.validateTicket(teamspace, template, oldTicket, fullData, isNewTicket))
 					.resolves.toEqual(outData);
 			} else {
-				await expect(TicketSchema.validateTicket(teamspace, template, fullData, isNewTicket)
+				await expect(TicketSchema.validateTicket(teamspace, template, oldTicket, fullData, isNewTicket)
 					.catch(() => Promise.reject())).rejects.toBeUndefined();
 			}
 		});
@@ -191,7 +197,7 @@ const testPresetValues = () => {
 		const runTestCases = (template, testCases) => {
 			const runTest = async (data) => {
 				try {
-					await TicketSchema.validateTicket(teamspace, template, data, true);
+					await TicketSchema.validateTicket(teamspace, template, undefined, data, true);
 				} catch (err) {
 					throw undefined;
 				}
@@ -326,13 +332,13 @@ const testValidateTicket = () => {
 			};
 
 			const input = {
-
 				title: generateRandomString(),
 				type: generateUUID(),
 				properties: {},
 				modules: {},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, template, input, true)).resolves.toEqual(input);
+			await expect(TicketSchema.validateTicket(teamspace, template, undefined,
+				input, true)).resolves.toEqual(input);
 		});
 
 		test('Should created default properties/modules object if it is not present', async () => {
@@ -349,7 +355,7 @@ const testValidateTicket = () => {
 				title: generateRandomString(),
 				type: generateUUID(),
 			};
-			await expect(TicketSchema.validateTicket(teamspace, template, input, true))
+			await expect(TicketSchema.validateTicket(teamspace, template, undefined, input, true))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -387,10 +393,12 @@ const testProcessReadOnlyValues = () => {
 				},
 				modules: {},
 			};
-			const newTicket = { title: generateRandomString(),
+			const newTicket = {
+				title: generateRandomString(),
 				properties: {
 					[generateRandomString()]: generateRandomString(),
-				} };
+				},
+			};
 			const expectedOutput = cloneDeep(newTicket);
 			TicketSchema.processReadOnlyValues(oldTicket, newTicket, generateRandomString());
 			expect(newTicket.properties[UPDATED_AT]).not.toEqual(oldTicket.properties[UPDATED_AT]);

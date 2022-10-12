@@ -463,18 +463,16 @@ const testGetTicketList = () => {
 const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 
 const testUpdateTicket = () => {
-	let ticket;
-	let ticketWithDeprecatedTemplate;
+	const ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
+	const ticketWithDeprecatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
 
 	const checkTicketLogByDate = async (updatedDate) => {
-		const ticketLog = await findOne(teamspace, 'tickets.logs', { date: new Date(updatedDate) });
+		const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
 		expect(ticketLog).not.toBeUndefined();
-	 };
+	};
 
 	beforeAll(async () => {
 		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: false } });
-		ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
-		ticketWithDeprecatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
 		const endpoint = addTicketRoute(users.tsAdmin.apiKey);
 
 		const res = await agent.post(endpoint).send(ticket);
@@ -495,6 +493,7 @@ const testUpdateTicket = () => {
 		['the user does not have access to the container', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
 		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, { _id: ServiceHelper.generateRandomString() }, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
 		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [requiredPropName]: null } }],
+		['the update data are the same as the existing', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: ticket.properties }],
 		['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
 		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey, { title: ServiceHelper.generateRandomString() }],
 	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, ticketId, key, payloadChanges = {}) => {
