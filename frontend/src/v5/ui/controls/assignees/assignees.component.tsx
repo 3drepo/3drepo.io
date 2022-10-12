@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { Popover } from '@controls/popover/popover.component';
+import { memo } from 'react';
 import { AssigneesList, ExtraAssignees } from './assignees.styles';
 import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
 import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
@@ -29,7 +30,7 @@ type AssigneesType = {
 	className?: string;
 };
 
-export const Assignees = ({ assignees = [], max, className }: AssigneesType) => {
+export const Assignees = memo(({ assignees = [], max, className }: AssigneesType) => {
 	const { teamspace } = useParams<DashboardParams>();
 
 	UsersActionsDispatchers.fetchUsers(teamspace);
@@ -58,4 +59,4 @@ export const Assignees = ({ assignees = [], max, className }: AssigneesType) => 
 			) : <></>}
 		</AssigneesList>
 	);
-};
+});
