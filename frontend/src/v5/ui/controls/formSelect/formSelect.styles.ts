@@ -42,9 +42,3 @@ export const Tooltip = styled(TooltipBase).attrs({
 export const TooltipAdapter = styled.div`
 	display: contents;
 `;
-
-export const TooltipTitle = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-`;
