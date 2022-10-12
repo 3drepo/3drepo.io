@@ -43,15 +43,15 @@ export const FormSelect = ({
 	...props
 }: FormSelectProps) => {
 	const [showTooltip, setShowTooltip] = useState(false);
-	
+
 	const handleOpen = (e) => {
 		setShowTooltip(false);
 		onOpen?.(e);
 	};
-	
+
 	const handleChange = (eventArgs, onFieldChange) => {
 		const [event, child] = eventArgs;
-		onFieldChange(value || { target: { value: event.target.value }});
+		onFieldChange(value || { target: { value: event.target.value } });
 		onChange?.(event, child);
 	};
 
