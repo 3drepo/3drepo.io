@@ -16,7 +16,7 @@
  */
 
 import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSearchSelect/formSearchSelect.component';
-import { isEqual, some, xorWith } from 'lodash';
+import { isEqual, isUndefined, some, xorWith } from 'lodash';
 import { Children, useEffect, useState } from 'react';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
@@ -30,6 +30,7 @@ export const FormMultiSelect = ({
 	children,
 	defaultValue,
 	renderValue,
+	renderValueTooltip,
 	...props
 }: FormMultiSelectProps) => {
 	const [selectedItems, setSelectedItems] = useState<any[]>([]);
@@ -76,7 +77,7 @@ export const FormMultiSelect = ({
 			itemIsSelected={itemIsSelected}
 			search
 			multiple
-			renderValueTooltip={formatRenderValue()}
+			renderValueTooltip={!isUndefined(renderValueTooltip) ? renderValueTooltip : formatRenderValue()}
 			{...props}
 		>
 			{children}

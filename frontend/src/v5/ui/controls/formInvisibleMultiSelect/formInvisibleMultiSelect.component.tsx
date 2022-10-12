@@ -26,7 +26,6 @@ type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
 
 export const FormInvisibleMultiSelect = ({
 	TriggerComponent,
-	selectedOptionsTooltip = false,
 	onClose,
 	...props
 }: FormInvisibleMultiSelectProps) => {
@@ -44,9 +43,9 @@ export const FormInvisibleMultiSelect = ({
 			</ButtonContainer>
 			<SelectContainer>
 				<FormMultiSelect
-					selectedOptionsTooltip={selectedOptionsTooltip}
 					open={open}
 					onClose={handleClose}
+					renderValueTooltip=""
 					{...props}
 				/>
 			</SelectContainer>
