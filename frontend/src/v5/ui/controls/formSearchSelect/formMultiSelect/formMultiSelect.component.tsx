@@ -30,12 +30,12 @@ export const FormMultiSelect = ({
 	children,
 	defaultValue,
 	renderValue,
-	selectedOptionsTooltip = true,
 	...props
 }: FormMultiSelectProps) => {
 	const [selectedItems, setSelectedItems] = useState<any[]>([]);
 
 	const formatRenderValue = () => {
+		if (!selectedItems.length) return '';
 		const childrenToRender = selectedItems.map((item) => item.children);
 		return renderValue?.(childrenToRender) || childrenToRender.join(', ');
 	};
@@ -76,7 +76,7 @@ export const FormMultiSelect = ({
 			itemIsSelected={itemIsSelected}
 			search
 			multiple
-			selectedOptionsTooltip={selectedItems.length && selectedOptionsTooltip}
+			renderValueTooltip={formatRenderValue()}
 			{...props}
 		>
 			{children}

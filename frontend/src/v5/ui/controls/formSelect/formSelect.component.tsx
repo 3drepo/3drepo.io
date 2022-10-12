@@ -14,98 +14,81 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SelectProps, InputLabel, FormControl, FormHelperText } from '@mui/material';
-import { useState } from 'react';
 import { Controller } from 'react-hook-form';
+import { FormControl, FormHelperText, InputLabel, SelectProps } from '@mui/material';
+import { useState } from 'react';
 import { Select, TooltipAdapter, Tooltip } from './formSelect.styles';
 
 export type FormSelectProps = SelectProps & {
 	control: any;
 	name: string;
 	formError?: any;
-	selectedOptionsTooltip?: boolean;
+	renderValueTooltip?: any;
 	renderValue?: (value) => any;
 };
 
 export const FormSelect = ({
 	name,
-	required,
-	label,
-	children,
 	control,
-	formError,
-	selectedOptionsTooltip,
-	disabled,
-	hidden,
 	value,
+	required,
+	formError,
+	label,
+	disabled,
 	defaultValue,
-	multiple,
-	renderValue,
+	children,
+	renderValueTooltip,
 	onOpen,
 	onChange,
 	...props
 }: FormSelectProps) => {
 	const [showTooltip, setShowTooltip] = useState(false);
-
+	
 	const handleOpen = (e) => {
 		setShowTooltip(false);
 		onOpen?.(e);
 	};
-
-	const handleChange = (eventArgs, field) => {
-		field.onChange({ target: { value } });
+	
+	const handleChange = (eventArgs, onFieldChange) => {
 		const [event, child] = eventArgs;
+		onFieldChange(value || { target: { value: event.target.value }});
 		onChange?.(event, child);
 	};
 
 	return (
-		<FormControl hiddenLabel={!!label}>
-			{label && (
-				<InputLabel
-					id={`${name}-label`}
-					required={required}
-					disabled={disabled}
-					hidden={hidden}
-					error={!!formError}
-				>
-					{label}
-				</InputLabel>
-			)}
-			<Tooltip
-				title={selectedOptionsTooltip ? renderValue(value) : ''}
-				open={showTooltip}
-			>
-				<TooltipAdapter
-					onMouseEnter={() => setShowTooltip(true)}
-					onMouseLeave={() => setShowTooltip(false)}
-				>
-					<Controller
-						control={control}
-						name={name}
-						defaultValue={defaultValue ?? ''}
-						render={({ field }) => (
+		<Controller
+			control={control}
+			name={name}
+			defaultValue={defaultValue}
+			render={({ field: { ref, onChange: onFieldChange, ...field } }) => (
+				<FormControl required={required} disabled={disabled} error={!!formError}>
+					<InputLabel id={`${name}-label`}>{label}</InputLabel>
+					<Tooltip
+						title={renderValueTooltip ?? ''}
+						open={showTooltip}
+					>
+						<TooltipAdapter
+							onMouseEnter={() => setShowTooltip(true)}
+							onMouseLeave={() => setShowTooltip(false)}
+						>
 							<Select
 								{...field}
-								inputRef={field.ref}
+								inputRef={ref}
 								labelId={`${name}-label`}
 								id={name}
 								label={label}
-								disabled={disabled}
-								hidden={hidden}
 								onOpen={handleOpen}
-								onChange={(...args) => handleChange(args, field)}
-								multiple={multiple}
-								renderValue={renderValue}
+								onChange={(...args) => handleChange(args, onFieldChange)}
 								error={!!formError}
 								{...props}
 							>
 								{children}
 							</Select>
-						)}
-					/>
-				</TooltipAdapter>
-			</Tooltip>
-			<FormHelperText error={!!formError}>{formError?.message}</FormHelperText>
-		</FormControl>
+						</TooltipAdapter>
+					</Tooltip>
+					<FormHelperText>{formError?.message}</FormHelperText>
+				</FormControl>
+			)}
+		/>
 	);
 };
