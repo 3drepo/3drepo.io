@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { FormTextField as FormTextFieldBase } from '@controls/formTextField/formTextField.component';
 
-export const FormTextField = styled(FormTextFieldBase).attrs({ type: 'number' })`
+export const FormNumberField = styled(FormTextFieldBase).attrs({ type: 'number' })`
 	width: 50%;
 `;
- 
