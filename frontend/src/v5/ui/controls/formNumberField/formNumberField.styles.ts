@@ -18,18 +18,7 @@
 import styled from 'styled-components';
 import { FormTextField as FormTextFieldBase } from '@controls/formTextField/formTextField.component';
 
-export const FormTextField = styled(FormTextFieldBase)`
+export const FormTextField = styled(FormTextFieldBase).attrs({ type: 'number' })`
 	width: 50%;
-
-	// hide arrows in Chrome, Safari, Edge, Opera
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
-
-	// hide arrows in Firefox
-	input[type=number] {
-		-moz-appearance: textfield;
-	}
 `;
+ 

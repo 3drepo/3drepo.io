@@ -249,7 +249,7 @@ export const theme = createTheme({
 				root: {
 					margin: '18px 0 0',
 					width: '100%',
-					'& label': {
+					label: {
 						...typography.body1,
 						position: 'unset',
 						transform: 'none',
@@ -266,6 +266,18 @@ export const theme = createTheme({
 
 						'&.Mui-error': {
 							color: COLOR.ERROR_MAIN,
+						},
+					},
+					input: {
+						// hide arrows in Chrome, Safari, Edge, Opera
+						'&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+							'-webkit-appearance': 'none',
+							margin: 0,
+						},
+
+						// hide arrows in Firefox
+						'&[type=number]': {
+							'-moz-appearance': 'textfield',
 						},
 					},
 					'.Mui-error': {
