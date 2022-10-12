@@ -423,6 +423,7 @@ const testUpdateTicket = () => {
 		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
 		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, { _id: ServiceHelper.generateRandomString() }, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
 		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [requiredPropName]: null } }],
+		['the update data is an empty object', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { }],
 		['the update data are the same as the existing', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: ticket.properties }],
 		['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
 		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey, { title: ServiceHelper.generateRandomString() }],
