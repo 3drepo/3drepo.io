@@ -118,8 +118,8 @@ Tickets.validateTicket = async (teamspace, template, oldTicket, newTicket, isNew
 	const modSchema = await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket);
 
 	const validator = Yup.object().shape({
-		title: stripWhen(isNewTicket ? types.strings.title.required() : types.strings.title,
-			(t) => isEqual(t, oldTicket?.title)),
+		title: isNewTicket ? types.strings.title.required()
+			: stripWhen(types.strings.title, (t) => isEqual(t, oldTicket?.title)),
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties,
 			oldTicket?.properties, isNewTicket),
 		modules: Yup.object(modSchema).default({}),
@@ -128,7 +128,7 @@ Tickets.validateTicket = async (teamspace, template, oldTicket, newTicket, isNew
 
 	const formattedTicket = await validator.validate(newTicket, { stripUnknown: true });
 	for (const mod in formattedTicket.modules) {
-		if (Object.keys(formattedTicket.modules[mod]).length === 0) delete formattedTicket.modules[mod];
+		if (isEqual(formattedTicket.modules[mod], {})) delete formattedTicket.modules[mod];
 	}
 	return formattedTicket;
 };
