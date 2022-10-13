@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { get, set } = require('lodash');
+const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -48,13 +48,13 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
 			const updateObjProp = `${prefix}${key}`;
-			const oldValue = get(oldTicket, updateObjProp);
+			const oldValue = getNestedProperty(oldTicket, updateObjProp);
 			const newValue = obj[key];
 			if (newValue) { toUpdate[updateObjProp] = newValue; } else { toUnset[updateObjProp] = 1; }
 
 			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
-				set(changes, `${updateObjProp}.from`, oldValue);
-				set(changes, `${updateObjProp}.to`, newValue);
+				setNestedProperty(changes, `${updateObjProp}.from`, oldValue);
+				setNestedProperty(changes, `${updateObjProp}.to`, newValue);
 			}
 		});
 	};

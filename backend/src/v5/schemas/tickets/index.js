@@ -29,7 +29,7 @@ const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
 const { getJobNames } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaces');
-const { isEqual } = require('lodash');
+const { isEqual } = require('../../utils/helper/objects');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 
