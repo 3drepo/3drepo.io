@@ -21,7 +21,7 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../helper/services');
 const { src, image } = require('../../../../../helper/path');
 
-const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
@@ -479,8 +479,8 @@ const testUpdateTicket = () => {
 		const res2 = await agent.post(endpoint).send(ticketWithDeprecatedTemplate);
 		ticket._id = res.body._id;
 		ticketWithDeprecatedTemplate._id = res2.body._id;
-		ticket.properties['Updated at'] = new Date();
-		ticketWithDeprecatedTemplate.properties['Updated at'] = new Date();
+		ticket.properties[basePropertyLabels.UPDATED_AT] = new Date();
+		ticketWithDeprecatedTemplate.properties[basePropertyLabels.UPDATED_AT] = new Date();
 		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 	});
 
@@ -510,17 +510,18 @@ const testUpdateTicket = () => {
 				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
 				const updatedTicket = updatedTicketRes.body;
 				expect(updatedTicket).toHaveProperty('number');
-				expect(updatedTicket.properties).toHaveProperty('Updated at');
-				expect(updatedTicket.properties['Updated at']).not.toEqual(ticket.properties['Updated at']);
-				expect(updatedTicket.properties).toHaveProperty('Created at');
-				expect(updatedTicket.properties).toHaveProperty('Owner');
+				expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.UPDATED_AT);
+				expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
+					.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
+				expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.CREATED_AT);
+				expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
 				delete updatedTicket.number;
-				const updatedDate = updatedTicket.properties['Updated at'];
-				delete updatedTicket.properties['Updated at'];
-				delete ticket.properties['Updated at'];
-				delete updatedTicket.properties['Created at'];
+				const updatedDate = updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+				delete updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+				delete ticket.properties[basePropertyLabels.UPDATED_AT];
+				delete updatedTicket.properties[basePropertyLabels.CREATED_AT];
 				delete updatedTicket.properties.Owner;
-				expect({ ...updatedTicket }).toEqual({ ...ticket, ...payloadChanges });
+				expect(updatedTicket).toEqual({ ...ticket, ...payloadChanges });
 				await checkTicketLogByDate(updatedDate);
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
@@ -540,17 +541,18 @@ const testUpdateTicket = () => {
 
 		const updatedTicket = updatedTicketRes.body;
 		expect(updatedTicket).toHaveProperty('number');
-		expect(updatedTicket.properties).toHaveProperty('Updated at');
-		expect(updatedTicket.properties['Updated at']).not.toEqual(ticketWithDeprecatedTemplate.properties['Updated at']);
-		expect(updatedTicket.properties).toHaveProperty('Created at');
-		expect(updatedTicket.properties).toHaveProperty('Owner');
+		expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.UPDATED_AT);
+		expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
+			.not.toEqual(ticketWithDeprecatedTemplate.properties[basePropertyLabels.UPDATED_AT]);
+		expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.CREATED_AT);
+		expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
 		delete updatedTicket.number;
-		delete updatedTicket.properties['Updated at'];
-		const updatedDate = updatedTicket.properties['Updated at'];
-		delete ticketWithDeprecatedTemplate.properties['Updated at'];
-		delete updatedTicket.properties['Created at'];
+		delete updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+		const updatedDate = updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+		delete ticketWithDeprecatedTemplate.properties[basePropertyLabels.UPDATED_AT];
+		delete updatedTicket.properties[basePropertyLabels.CREATED_AT];
 		delete updatedTicket.properties.Owner;
-		expect({ ...updatedTicket }).toEqual({ ...ticketWithDeprecatedTemplate, ...payloadChanges });
+		expect(updatedTicket).toEqual({ ...ticketWithDeprecatedTemplate, ...payloadChanges });
 		await checkTicketLogByDate(updatedDate);
 	});
 };

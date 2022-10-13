@@ -21,8 +21,8 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../helper/services');
 const { src, image } = require('../../../../../helper/path');
 
-const { propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
-const { findOne, updateOne } = require(`${src}/handler/db`);
+const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -130,8 +130,10 @@ const testGetAllTemplates = () => {
 		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, users.tsAdmin.apiKey],
 		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
 		['should provide the list of templates that are not deprecated', true,
-			{ templates: ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated ? []
-				: { _id, name, code })) },
+			{
+				templates: ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated ? []
+					: { _id, name, code })),
+			},
 			undefined, undefined, users.tsAdmin.apiKey],
 		['should provide the list of templates including deprecated if the flag is set', true,
 			{ templates: ticketTemplates.map(({ _id, name, code, deprecated }) => ({ _id, name, code, deprecated })) },
@@ -329,8 +331,7 @@ const testGetTicket = () => {
 				},
 			],
 		};
-		let ticket;
-		let ticketWithDepData;
+		let ticket; let ticketWithDepData;
 		beforeAll(async () => {
 			await ServiceHelper.db.createTemplates(teamspace, [templateToUse]);
 			ticket = ServiceHelper.generateTicket(templateToUse);
@@ -389,95 +390,6 @@ const testGetTicket = () => {
 			expectedTicket.properties = { ...ticketOut.properties, ...expectedTicket.properties };
 			expect(ticketOut).toEqual(expectedTicket);
 		});
-	});
-};
-
-const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
-
-const testUpdateTicket = () => {
-	const ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
-	const ticketWithDeprecatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
-
-	const checkTicketLogByDate = async (updatedDate) => {
-		const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
-		expect(ticketLog).not.toBeUndefined();
-	};
-
-	beforeAll(async () => {
-		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: false } });
-		const endpoint = addTicketRoute(users.tsAdmin.apiKey);
-
-		const res = await agent.post(endpoint).send(ticket);
-		const res2 = await agent.post(endpoint).send(ticketWithDeprecatedTemplate);
-		ticket._id = res.body._id;
-		ticketWithDeprecatedTemplate._id = res2.body._id;
-		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
-	});
-
-	describe.each([
-		['the user does not have a valid session', false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
-		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
-		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, undefined, users.tsAdmin.apiKey],
-		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
-		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, { _id: ServiceHelper.generateRandomString() }, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
-		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [requiredPropName]: null } }],
-		['the update data is an empty object', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { }],
-		['the update data are the same as the existing', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: ticket.properties }],
-		['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
-		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey, { title: ServiceHelper.generateRandomString() }],
-	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, ticketId, key, payloadChanges = {}) => {
-		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
-			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-			const endpoint = updateTicketRoute(key, projectId, modelId, ticketId ?? ticket._id);
-
-			const res = await agent.patch(endpoint).send(payloadChanges).expect(expectedStatus);
-
-			if (success) {
-				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id,
-					ticket?._id ?? ticket._id);
-				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
-				const updatedTicket = updatedTicketRes.body;
-				expect(updatedTicket).toHaveProperty('number');
-				expect(updatedTicket.properties).toHaveProperty('Updated at');
-				expect(updatedTicket.properties).toHaveProperty('Created at');
-				expect(updatedTicket.properties).toHaveProperty('Owner');
-				delete updatedTicket.number;
-				const updatedDate = updatedTicket.properties['Updated at'];
-				delete updatedTicket.properties['Updated at'];
-				delete updatedTicket.properties['Created at'];
-				delete updatedTicket.properties.Owner;
-				expect({ ...updatedTicket }).toEqual({ ...ticket, ...payloadChanges });
-				await checkTicketLogByDate(updatedDate);
-			} else {
-				expect(res.body.code).toEqual(expectedOutput.code);
-			}
-		});
-	});
-
-	test('Should succeed if the template is deprecated', async () => {
-		const payloadChanges = { title: ServiceHelper.generateRandomString() };
-		const endpoint = updateTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
-			ticketWithDeprecatedTemplate._id);
-		await agent.patch(endpoint).send(payloadChanges).expect(templates.ok.status);
-
-		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
-			ticketWithDeprecatedTemplate._id);
-		const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
-
-		const updatedTicket = updatedTicketRes.body;
-		expect(updatedTicket).toHaveProperty('number');
-		expect(updatedTicket.properties).toHaveProperty('Updated at');
-		expect(updatedTicket.properties).toHaveProperty('Created at');
-		expect(updatedTicket.properties).toHaveProperty('Owner');
-		delete updatedTicket.number;
-		const updatedDate = updatedTicket.properties['Updated at'];
-		delete updatedTicket.properties['Updated at'];
-		delete updatedTicket.properties['Created at'];
-		delete updatedTicket.properties.Owner;
-		expect({ ...updatedTicket }).toEqual({ ...ticketWithDeprecatedTemplate, ...payloadChanges });
-		await checkTicketLogByDate(updatedDate);
 	});
 };
 
@@ -545,6 +457,103 @@ const testGetTicketList = () => {
 				expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
 			});
 		});
+	});
+};
+
+const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
+
+const testUpdateTicket = () => {
+	const ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
+	const ticketWithDeprecatedTemplate = ServiceHelper.generateTicket(deprecatedTemplate);
+
+	const checkTicketLogByDate = async (updatedDate) => {
+		const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
+		expect(ticketLog).not.toBeUndefined();
+	};
+
+	beforeAll(async () => {
+		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: false } });
+		const endpoint = addTicketRoute(users.tsAdmin.apiKey);
+
+		const res = await agent.post(endpoint).send(ticket);
+		const res2 = await agent.post(endpoint).send(ticketWithDeprecatedTemplate);
+		ticket._id = res.body._id;
+		ticketWithDeprecatedTemplate._id = res2.body._id;
+		ticket.properties[basePropertyLabels.UPDATED_AT] = new Date();
+		ticketWithDeprecatedTemplate.properties[basePropertyLabels.UPDATED_AT] = new Date();
+		await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
+	});
+
+	describe.each([
+		['the user does not have a valid session', false, templates.notLoggedIn],
+		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, undefined, users.nobody.apiKey],
+		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
+		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
+		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, undefined, users.tsAdmin.apiKey],
+		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, undefined, users.noProjectAccess.apiKey],
+		['the ticketId provided does not exist', false, templates.ticketNotFound, undefined, undefined, { _id: ServiceHelper.generateRandomString() }, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		['the update data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: { [requiredPropName]: null } }],
+		['the update data is an empty object', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { }],
+		['the update data are the same as the existing', false, templates.invalidArguments, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: ticket.properties }],
+		['the update data conforms to the template', true, undefined, undefined, undefined, undefined, users.tsAdmin.apiKey, { title: ServiceHelper.generateRandomString() }],
+		['the update data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, undefined, users.viewer.apiKey, { title: ServiceHelper.generateRandomString() }],
+	])('Update Ticket', (desc, success, expectedOutput, projectId, modelId, ticketId, key, payloadChanges = {}) => {
+		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+			const endpoint = updateTicketRoute(key, projectId, modelId, ticketId ?? ticket._id);
+
+			const res = await agent.patch(endpoint).send(payloadChanges).expect(expectedStatus);
+
+			if (success) {
+				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id,
+					ticketId ?? ticket._id);
+				const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
+				const updatedTicket = updatedTicketRes.body;
+				expect(updatedTicket).toHaveProperty('number');
+				expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.UPDATED_AT);
+				expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
+					.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
+				expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.CREATED_AT);
+				expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
+				delete updatedTicket.number;
+				const updatedDate = updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+				delete updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+				delete ticket.properties[basePropertyLabels.UPDATED_AT];
+				delete updatedTicket.properties[basePropertyLabels.CREATED_AT];
+				delete updatedTicket.properties.Owner;
+				expect(updatedTicket).toEqual({ ...ticket, ...payloadChanges });
+				await checkTicketLogByDate(updatedDate);
+			} else {
+				expect(res.body.code).toEqual(expectedOutput.code);
+			}
+		});
+	});
+
+	test('Should succeed if the template is deprecated', async () => {
+		const payloadChanges = { title: ServiceHelper.generateRandomString() };
+		const endpoint = updateTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
+			ticketWithDeprecatedTemplate._id);
+		await agent.patch(endpoint).send(payloadChanges).expect(templates.ok.status);
+
+		const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, undefined, undefined,
+			ticketWithDeprecatedTemplate._id);
+		const updatedTicketRes = await agent.get(getEndpoint).expect(templates.ok.status);
+
+		const updatedTicket = updatedTicketRes.body;
+		expect(updatedTicket).toHaveProperty('number');
+		expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.UPDATED_AT);
+		expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
+			.not.toEqual(ticketWithDeprecatedTemplate.properties[basePropertyLabels.UPDATED_AT]);
+		expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.CREATED_AT);
+		expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
+		delete updatedTicket.number;
+		delete updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+		const updatedDate = updatedTicket.properties[basePropertyLabels.UPDATED_AT];
+		delete ticketWithDeprecatedTemplate.properties[basePropertyLabels.UPDATED_AT];
+		delete updatedTicket.properties[basePropertyLabels.CREATED_AT];
+		delete updatedTicket.properties.Owner;
+		expect(updatedTicket).toEqual({ ...ticketWithDeprecatedTemplate, ...payloadChanges });
+		await checkTicketLogByDate(updatedDate);
 	});
 };
 
