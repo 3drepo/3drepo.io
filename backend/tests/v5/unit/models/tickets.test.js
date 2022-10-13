@@ -18,7 +18,13 @@
 const { src } = require('../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const Ticket = require(`${src}/models/tickets`);
+const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
+
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -163,99 +169,146 @@ const testGetAllTickets = () => {
 
 const testUpdateTicket = () => {
 	describe('Update ticket', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const date = new Date();
+		const author = generateRandomString();
+		const propToUpdate = generateRandomString();
+
 		test('should update the ticket to set properties', async () => {
-			const teamspace = generateRandomString();
-			const ticketId = generateRandomString();
-			const propToUpdate = generateRandomString();
-			const data = { propToUpdate, properties: { propToUpdate }, modules: { module: { propToUpdate } } };
+			const oldPropvalue = generateRandomString();
+			const newPropValue = generateRandomString();
+			const oldTicket = { _id: generateRandomString(), properties: { [propToUpdate]: oldPropvalue } };
+			const data = {
+				properties: {
+					[propToUpdate]: newPropValue,
+					[basePropertyLabels.UPDATED_AT]: date,
+				},
+				modules: {},
+			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
-			await Ticket.updateTicket(teamspace, ticketId, data);
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, data, author);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
 					$set: {
-						'modules.module.propToUpdate': propToUpdate,
-						propToUpdate,
-						'properties.propToUpdate': propToUpdate,
+						[`properties.${propToUpdate}`]: newPropValue,
+						'properties.Updated at': date,
 					},
+					$unset: {},
 				});
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_TICKET_UPDATE, {
+				teamspace,
+				project,
+				model,
+				ticket: oldTicket._id,
+				author,
+				timestamp: date,
+				changes: { properties: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
+			});
 		});
 
-		test('should update the ticket to unset properties', async () => {
-			const teamspace = generateRandomString();
-			const ticketId = generateRandomString();
+		test('should update the ticket to set modules', async () => {
+			const oldPropvalue = generateRandomString();
+			const newPropValue = generateRandomString();
+			const moduleName = generateRandomString();
 			const data = {
-				propToUnset: null,
-				properties: { propToUnset: null },
+				properties: { [basePropertyLabels.UPDATED_AT]: date },
+				modules: { [moduleName]: { [propToUpdate]: newPropValue } },
+			};
+			const oldTicket = {
+				_id: generateRandomString(),
+				modules: { [moduleName]: { [propToUpdate]: oldPropvalue } },
+			};
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, data, author);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
+				{
+					$set: {
+						[`modules.${moduleName}.${propToUpdate}`]: newPropValue,
+						'properties.Updated at': date,
+					},
+					$unset: {},
+				});
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_TICKET_UPDATE, {
+				teamspace,
+				project,
+				model,
+				ticket: oldTicket._id,
+				author,
+				timestamp: date,
+				changes: {
+					modules: { [moduleName]: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
+				},
+			});
+		});
+
+		test('should update the ticket to set and unset data', async () => {
+			const oldPropvalue = generateRandomString();
+			const newPropValue = generateRandomString();
+			const oldTicket = {
+				_id: generateRandomString(),
+				properties: { propToUnset: oldPropvalue },
+				modules: { module: { propToUnset: oldPropvalue } },
+			};
+			const data = {
+				[propToUpdate]: newPropValue,
+				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },
 			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
-			await Ticket.updateTicket(teamspace, ticketId, data);
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, data, author);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
-					$unset: {
-						'modules.module.propToUnset': 1,
-						propToUnset: 1,
-						'properties.propToUnset': 1,
-					},
+					$set: { 'properties.Updated at': date, [propToUpdate]: newPropValue },
+					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
 				});
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_TICKET_UPDATE, {
+				teamspace,
+				project,
+				model,
+				ticket: oldTicket._id,
+				author,
+				timestamp: date,
+				changes: {
+					[propToUpdate]: { from: undefined, to: newPropValue },
+					properties: { propToUnset: { from: oldPropvalue, to: null } },
+					modules: { module: { propToUnset: { from: oldPropvalue, to: null } } },
+				},
+			});
 		});
 
-		test('should update the ticket to both set and unset properties', async () => {
-			const teamspace = generateRandomString();
-			const ticketId = generateRandomString();
-			const propToUpdate = generateRandomString();
-			const data = {
-				propToUpdate,
-				propToUnset: null,
-				properties: { propToUpdate, propToUnset: null },
-				modules: { module: { propToUpdate, propToUnset: null } },
+		test(`should not throw ${events.MODEL_TICKET_UPDATE} event if update fails`, async () => {
+			const oldPropvalue = generateRandomString();
+			const newPropValue = generateRandomString();
+			const oldTicket = {
+				_id: generateRandomString(),
+				properties: { propToUnset: oldPropvalue },
+				modules: { module: { propToUnset: oldPropvalue } },
 			};
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const data = {
+				[propToUpdate]: newPropValue,
+				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
+				modules: { module: { propToUnset: null } },
+			};
 
-			await Ticket.updateTicket(teamspace, ticketId, data);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
-				{
-					$set: {
-						'modules.module.propToUpdate': propToUpdate,
-						propToUpdate,
-						'properties.propToUpdate': propToUpdate,
-					},
-					$unset: {
-						'modules.module.propToUnset': 1,
-						propToUnset: 1,
-						'properties.propToUnset': 1,
-					},
-				});
-		});
-
-		test('should update the ticket without updating properties', async () => {
-			const teamspace = generateRandomString();
-			const ticketId = generateRandomString();
-			const propToUpdate = generateRandomString();
-			const data = { propToUpdate };
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-
-			await Ticket.updateTicket(teamspace, ticketId, data);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: ticketId },
-				{ $set: { propToUpdate } });
-		});
-
-		test('should not update the ticket if update data is an empty object', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			await Ticket.updateTicket(generateRandomString(), generateRandomString(), {});
-
-			expect(fn).not.toHaveBeenCalled();
+			const errMsg = new Error(generateRandomString());
+			jest.spyOn(db, 'updateOne').mockRejectedValueOnce(errMsg);
+			await expect(Ticket.updateTicket(teamspace, project, model, oldTicket, data, author))
+				.rejects.toEqual(errMsg);
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 	});
 };
