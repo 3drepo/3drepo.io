@@ -207,7 +207,7 @@ const testUpdateTicket = () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = { _id: generateRandomString(), properties: { [propToUpdate]: oldPropvalue } };
-			const data = {
+			const updateData = {
 				properties: {
 					[propToUpdate]: newPropValue,
 					[basePropertyLabels.UPDATED_AT]: date,
@@ -246,7 +246,7 @@ const testUpdateTicket = () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const moduleName = generateRandomString();
-			const data = {
+			const updateData = {
 				properties: { [basePropertyLabels.UPDATED_AT]: date },
 				modules: { [moduleName]: { [propToUpdate]: newPropValue } },
 			};
@@ -292,7 +292,7 @@ const testUpdateTicket = () => {
 				properties: { propToUnset: oldPropvalue },
 				modules: { module: { propToUnset: oldPropvalue } },
 			};
-			const data = {
+			const updateData = {
 				[propToUpdate]: newPropValue,
 				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },
@@ -305,7 +305,7 @@ const testUpdateTicket = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
-					$set: { 'properties.Updated at': timestamp, propToUpdate: newPropValue },
+					$set: { 'properties.Updated at': date, [propToUpdate]: newPropValue },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
@@ -334,7 +334,7 @@ const testUpdateTicket = () => {
 				properties: { propToUnset: oldPropvalue },
 				modules: { module: { propToUnset: oldPropvalue } },
 			};
-			const data = {
+			const updateData = {
 				[propToUpdate]: newPropValue,
 				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },

@@ -78,6 +78,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		author,
 		isFederation,
 		changes,
+		updateData,
 		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };
 
