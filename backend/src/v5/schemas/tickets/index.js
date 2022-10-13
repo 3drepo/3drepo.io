@@ -113,8 +113,10 @@ const generateModuleValidator = async (teamspace, modules, oldModules, isNewTick
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, template, oldTicket, newTicket, isNewTicket) => {
+Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 	const fullTem = generateFullSchema(template);
+	const isNewTicket = !oldTicket;
+
 	const modSchema = await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket);
 
 	const validator = Yup.object().shape({

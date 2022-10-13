@@ -40,7 +40,7 @@ const validate = (isNewTicket) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
 		}
 
-		req.body = await validateTicket(teamspace, template, oldTicket, newTicket, isNewTicket);
+		req.body = await validateTicket(teamspace, template, newTicket, oldTicket);
 
 		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
 			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
