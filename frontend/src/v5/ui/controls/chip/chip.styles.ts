@@ -48,7 +48,7 @@ const noBorderStyles = (colour: string) => css`
 	&:hover {
 		text-decoration: underline;
 		filter: brightness(75%);
-	};
+	}
 `;
 
 export const Chip = styled(ChipMui)<ChipType>`
@@ -61,8 +61,7 @@ export const Chip = styled(ChipMui)<ChipType>`
 			default: // outlined
 				return outlinedStyles(colour);
 		}
-	}
-};
+	}}
 `;
 
 export const FilterChip = styled(Chip).attrs({

@@ -46,7 +46,7 @@ export const UserCircle = styled(Avatar)`
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		border-color: currentColor;
 	}
-	`;
+`;
 
 export const JobCircle = styled(JobAvatar)`
 	${BaseCircle}
