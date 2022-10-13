@@ -23,18 +23,19 @@ const {
 	propTypes,
 	riskLevels,
 	riskLevelsToNum } = require('./templates.constants');
+const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
 const { getJobNames } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaces');
+const { isEqual } = require('../../utils/helper/objects');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
-const { types } = require('../../utils/helper/yup');
 
 const Tickets = {};
 
-const generatePropertiesValidator = async (teamspace, properties, isNewTicket) => {
+const generatePropertiesValidator = async (teamspace, properties, oldProperties, isNewTicket) => {
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
@@ -77,8 +78,13 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 				if (prop.required) {
 					validator = validator.required();
 				}
-			} else if (!prop.required) {
-				validator = validator.nullable();
+			} else {
+				if (!prop.required) {
+					validator = validator.nullable();
+				}
+
+				const oldValue = oldProperties?.[prop.name];
+				validator = stripWhen(validator, (p) => isEqual(p, oldValue));
 			}
 
 			obj[prop.name] = validator;
@@ -92,13 +98,13 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
+const generateModuleValidator = async (teamspace, modules, oldModules, isNewTicket) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = (await generatePropertiesValidator(teamspace, module.properties, isNewTicket))
-				.default({});
+			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties,
+				oldModules?.[id], isNewTicket);
 		}
 	});
 
@@ -107,18 +113,26 @@ const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
+Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 	const fullTem = generateFullSchema(template);
-	const modSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
+	const isNewTicket = !oldTicket;
+
+	const modSchema = await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket);
 
 	const validator = Yup.object().shape({
-		title: isNewTicket ? types.strings.title.required() : types.strings.title,
-		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
+		title: isNewTicket ? types.strings.title.required()
+			: stripWhen(types.strings.title, (t) => isEqual(t, oldTicket?.title)),
+		properties: await generatePropertiesValidator(teamspace, fullTem.properties,
+			oldTicket?.properties, isNewTicket),
 		modules: Yup.object(modSchema).default({}),
 		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	});
 
-	return validator.validate(data, { stripUnknown: true });
+	const formattedTicket = await validator.validate(newTicket, { stripUnknown: true });
+	for (const mod in formattedTicket.modules) {
+		if (isEqual(formattedTicket.modules[mod], {})) delete formattedTicket.modules[mod];
+	}
+	return formattedTicket;
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
@@ -174,9 +188,9 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
 			const treatedLevel = calculateLevelOfRisk(
 				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-					?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
 				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
-					?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+				?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
 			);
 			if (treatedLevel) {
 				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;

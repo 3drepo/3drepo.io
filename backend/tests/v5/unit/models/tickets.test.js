@@ -24,6 +24,7 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Ticket = require(`${src}/models/tickets`);
+const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -198,14 +199,21 @@ const testUpdateTicket = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
-		const timestamp = new Date();
+		const date = new Date();
 		const author = generateRandomString();
+		const propToUpdate = generateRandomString();
 
 		test('should update the ticket to set properties (Container)', async () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
-			const oldTicket = { _id: generateRandomString(), properties: { propToUpdate: oldPropvalue } };
-			const updateData = { properties: { propToUpdate: newPropValue, 'Updated at': timestamp }, modules: {} };
+			const oldTicket = { _id: generateRandomString(), properties: { [propToUpdate]: oldPropvalue } };
+			const data = {
+				properties: {
+					[propToUpdate]: newPropValue,
+					[basePropertyLabels.UPDATED_AT]: date,
+				},
+				modules: {},
+			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 			const isFederation = false;
 
@@ -215,8 +223,8 @@ const testUpdateTicket = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
 					$set: {
-						'properties.propToUpdate': newPropValue,
-						'properties.Updated at': timestamp,
+						[`properties.${propToUpdate}`]: newPropValue,
+						'properties.Updated at': date,
 					},
 					$unset: {},
 				});
@@ -227,21 +235,25 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				timestamp,
 				isFederation,
 				updateData,
-				changes: { properties: { propToUpdate: { from: oldPropvalue, to: newPropValue } } },
+				timestamp: date,
+				changes: { properties: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
 			});
 		});
 
 		test('should update the ticket to set modules', async () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
-			const updateData = {
-				properties: { 'Updated at': timestamp },
-				modules: { module: { propToUpdate: newPropValue } },
+			const moduleName = generateRandomString();
+			const data = {
+				properties: { [basePropertyLabels.UPDATED_AT]: date },
+				modules: { [moduleName]: { [propToUpdate]: newPropValue } },
 			};
-			const oldTicket = { _id: generateRandomString(), modules: { module: { propToUpdate: oldPropvalue } } };
+			const oldTicket = {
+				_id: generateRandomString(),
+				modules: { [moduleName]: { [propToUpdate]: oldPropvalue } },
+			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 			const isFederation = true;
 
@@ -251,8 +263,8 @@ const testUpdateTicket = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
 					$set: {
-						'modules.module.propToUpdate': newPropValue,
-						'properties.Updated at': timestamp,
+						[`modules.${moduleName}.${propToUpdate}`]: newPropValue,
+						'properties.Updated at': date,
 					},
 					$unset: {},
 				});
@@ -263,11 +275,11 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				timestamp,
 				isFederation,
 				updateData,
+				timestamp: date,
 				changes: {
-					modules: { module: { propToUpdate: { from: oldPropvalue, to: newPropValue } } },
+					modules: { [moduleName]: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
 				},
 			});
 		});
@@ -280,9 +292,9 @@ const testUpdateTicket = () => {
 				properties: { propToUnset: oldPropvalue },
 				modules: { module: { propToUnset: oldPropvalue } },
 			};
-			const updateData = {
-				propToUpdate: newPropValue,
-				properties: { propToUnset: null, 'Updated at': timestamp },
+			const data = {
+				[propToUpdate]: newPropValue,
+				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },
 			};
 			const isFederation = false;
@@ -303,11 +315,11 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				timestamp,
+				timestamp: date,
 				isFederation,
 				updateData,
 				changes: {
-					propToUpdate: { from: undefined, to: newPropValue },
+					[propToUpdate]: { from: undefined, to: newPropValue },
 					properties: { propToUnset: { from: oldPropvalue, to: null } },
 					modules: { module: { propToUnset: { from: oldPropvalue, to: null } } },
 				},
@@ -322,9 +334,9 @@ const testUpdateTicket = () => {
 				properties: { propToUnset: oldPropvalue },
 				modules: { module: { propToUnset: oldPropvalue } },
 			};
-			const updateData = {
-				propToUpdate: newPropValue,
-				properties: { propToUnset: null, 'Updated at': timestamp },
+			const data = {
+				[propToUpdate]: newPropValue,
+				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },
 			};
 

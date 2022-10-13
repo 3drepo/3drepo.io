@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { get, set } = require('lodash');
+const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -44,21 +44,21 @@ Tickets.addTicket = async (teamspace, project, model, template, ticketData, isFe
 };
 
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author, isFederation) => {
-	const toUpdate = {}; const toUnset = {};
-	const propNamesChanged = [];
-	const from = {}; const to = {};
+	const toUpdate = {};
+	const toUnset = {};
 	const { modules, properties, ...rootProps } = updateData;
+	const changes = {};
 
 	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
 			const updateObjProp = `${prefix}${key}`;
-			const value = obj[key];
-			if (value) { toUpdate[updateObjProp] = value; } else toUnset[updateObjProp] = 1;
+			const oldValue = getNestedProperty(oldTicket, updateObjProp);
+			const newValue = obj[key];
+			if (newValue) { toUpdate[updateObjProp] = newValue; } else { toUnset[updateObjProp] = 1; }
 
 			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
-				propNamesChanged.push(updateObjProp);
-				set(from, updateObjProp, get(oldTicket, updateObjProp));
-				set(to, updateObjProp, get(updateData, updateObjProp));
+				setNestedProperty(changes, `${updateObjProp}.from`, oldValue);
+				setNestedProperty(changes, `${updateObjProp}.to`, newValue);
 			}
 		});
 	};
@@ -71,21 +71,14 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, { $set: toUpdate, $unset: toUnset });
 
-	const changes = {};
-	propNamesChanged.forEach((p) => {
-		set(changes, `${p}.from`, get(from, p));
-		set(changes, `${p}.to`, get(to, p));
-	});
-
-	publish(events.MODEL_UPDATE_TICKET, { teamspace,
+	publish(events.MODEL_TICKET_UPDATE, { teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,
 		author,
 		isFederation,
 		changes,
-		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT],
-		updateData });
+		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {

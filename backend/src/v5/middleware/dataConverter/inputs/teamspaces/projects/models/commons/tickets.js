@@ -30,7 +30,8 @@ const TicketsMiddleware = {};
 
 const validate = (isNewTicket) => async (req, res, next) => {
 	try {
-		const ticket = req.body;
+		const oldTicket = req.ticketData;
+		const newTicket = req.body;
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
 		const { teamspace } = req.params;
@@ -39,7 +40,7 @@ const validate = (isNewTicket) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
 		}
 
-		req.body = await validateTicket(teamspace, template, ticket, isNewTicket);
+		req.body = await validateTicket(teamspace, template, newTicket, oldTicket);
 
 		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
 			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
