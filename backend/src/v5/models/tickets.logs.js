@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const TicketLogs = {};
-
-const TICKET_LOGS_COL = 'tickets.logs';
-const db = require('../handler/db');
+const DB = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 
-TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => db.insertOne(teamspace,
+const TicketLogs = {};
+const TICKET_LOGS_COL = 'tickets.logs';
+
+TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
 	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 
 module.exports = TicketLogs;
