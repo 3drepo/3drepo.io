@@ -139,15 +139,7 @@ const handleAuthenticateFail = async function (user, username) {
 
 const User = {};
 
-User.getTeamspaceSpaceUsed = async function (dbName) {
-	const settings = await db.find(dbName, "settings", {}, {_id: 1});
-
-	const spacePerModel = await Promise.all(settings.map(async (setting) =>
-		await FileRef.getTotalModelFileSize(dbName, setting._id))
-	);
-
-	return spacePerModel.reduce((total, value) => total + value, 0);
-};
+User.getTeamspaceSpaceUsed = (dbName) => getSpaceUsed(dbName);
 
 User.authenticate =  async function (username, password) {
 	if (!username || !password) {
@@ -691,7 +683,7 @@ async function _findModelDetails(dbUserCache, username, model) {
 
 async function _calSpace(user) {
 	const quota = UserBilling.getSubscriptionLimits(user.customData.billing);
-	const sizeInBytes = await getSpaceUsed(user.user);
+	const sizeInBytes = await User.getTeamspaceSpaceUsed(user.user);
 
 	if (quota.spaceLimit > 0) {
 		quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
