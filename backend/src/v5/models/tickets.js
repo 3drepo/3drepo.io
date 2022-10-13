@@ -71,7 +71,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, { $set: toUpdate, $unset: toUnset });
 
-	publish(events.MODEL_TICKET_UPDATE, { teamspace,
+	publish(events.MODEL_UPDATE_TICKET, { teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,
