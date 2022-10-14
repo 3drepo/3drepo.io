@@ -47,11 +47,9 @@ export const FormSingleSelect = ({
 	};
 
 	const initialiseDefaultItem = () => {
-		setSelectedItem(
-			Children.toArray(children)
-				.map((child: any) => child.props)
-				.find(({ value }) => isEqual(defaultValue, value)),
-		);
+		const { props: item }: any = Children.toArray(children)
+			.find(({ props: { value } }: any) => isEqual(defaultValue, value));
+		setSelectedItem(item);
 	};
 
 	useEffect(() => {

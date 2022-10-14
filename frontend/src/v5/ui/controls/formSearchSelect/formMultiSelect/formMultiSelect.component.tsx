@@ -58,8 +58,8 @@ export const FormMultiSelect = ({
 	const initialiseDefaultItems = () => {
 		setSelectedItems(
 			Children.toArray(children)
-				.map((child: any) => ({ children: child.props.children, value: child.props.value }))
-				.filter(({ value }) => some(defaultValue, (v) => isEqual(v, value))),
+				.filter(({ props: { value } }: any) => some(defaultValue, (v) => isEqual(v, value)))
+				.map((child: any) => ({ children: child.props.children, value: child.props.value })),
 		);
 	};
 
