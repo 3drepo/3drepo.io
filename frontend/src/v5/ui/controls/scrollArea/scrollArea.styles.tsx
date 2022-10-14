@@ -51,6 +51,10 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs(
 		autoHideTimeout: 1000,
 		autoHideDuration: 300,
 		renderThumbVertical: ({ style }) => <ThumbVertical style={style} variant={variant} />,
-		renderThumbHorizontal: ({ style }) => $hidehorizontal ? (<ThumbHorizontal style={style} variant={variant} />) : (<span></span>),
+		renderThumbHorizontal: ({ style }) => (
+			$hidehorizontal ? (
+				<ThumbHorizontal style={style} variant={variant} />
+			) : (<span></span>)
+		),
 	}),
 )``;
