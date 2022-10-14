@@ -102,10 +102,6 @@ const expandedGroupItem = css`
 		margin: 1px 0;
 	}
 
-	/* ${TitleTextField} {
-		margin: 7px 0 -8px;
-	} */
-
 	.MuiChip-root {
 		&:hover, 
 		&:active {

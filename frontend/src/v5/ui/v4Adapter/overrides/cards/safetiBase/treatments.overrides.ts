@@ -90,7 +90,6 @@ export default css`
 			padding-top: 0;
 
 			${StyledSelect} svg {
-				/* TODO: fix after new palette is released */
 				color: ${({ theme }) => theme.palette.base.lighter};
 				top: -13px;
 			}
