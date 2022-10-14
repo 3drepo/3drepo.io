@@ -30,6 +30,7 @@ export default {
 			type: 'boolean',
 		},
 	},
+	parameters: { controls: { exclude: ['ref', 'elevation', 'square', 'variant', 'Icon'] } },
 } as ComponentMeta<typeof Accordion>;
 
 const Controlled: ComponentStory<typeof Accordion> = (args) => (<Accordion {...args} />);
