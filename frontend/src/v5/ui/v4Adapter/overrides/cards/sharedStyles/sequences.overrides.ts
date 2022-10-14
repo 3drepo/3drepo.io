@@ -51,7 +51,7 @@ export default css`
 			}
 			
 			${SequenceDateActions} {
-				bottom: -22px;
+				bottom: -3px;
 				left: -9px;
 				top: unset;
 				right: unset;
