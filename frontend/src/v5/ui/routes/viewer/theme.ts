@@ -85,11 +85,6 @@ export const theme = createTheme(
 							'& input': {
 								padding: '0px 12px !important',
 							},
-							'& svg': {
-								'& path': {
-									fill: 'currentColor !important',
-								},
-							},
 						},
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
