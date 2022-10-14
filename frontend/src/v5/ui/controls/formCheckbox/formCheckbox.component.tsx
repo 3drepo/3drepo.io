@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormControlLabel, FormControlLabelProps } from '@mui/material';
+import { FormControlLabel, FormControlLabelProps, Checkbox } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { Checkbox } from './formCheckbox.styles';
 
 export type FormCheckboxProps = FormControlLabelProps & {
 	name: string;
