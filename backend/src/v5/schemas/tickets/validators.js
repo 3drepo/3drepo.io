@@ -53,14 +53,14 @@ Validators.propTypesToValidator = {
 			forward: types.position.required(),
 			up: types.position.required(),
 			size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
-			clippingPlanes: Yup.array().of(
-				Yup.object().shape({
-					normal: types.position.required(),
-					distance: Yup.number().required(),
-					clipDirection: Yup.number().oneOf([-1, 1]).required(),
-				}),
-			),
 		}).default(undefined),
+		clippingPlanes: Yup.array().of(
+			Yup.object().shape({
+				normal: types.position.required(),
+				distance: Yup.number().required(),
+				clipDirection: Yup.number().oneOf([-1, 1]).required(),
+			}),
+		).default(undefined),
 	}).default(undefined),
 	[propTypes.MEASUREMENTS]: Yup.array().of(
 		Yup.object().shape({
