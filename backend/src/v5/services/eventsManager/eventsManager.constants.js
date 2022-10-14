@@ -25,7 +25,7 @@ const eventList = [
 	// Model import (including federation and toy project)
 	'MODEL_IMPORT_FINISHED',
 	// Model Tickets
-	'MODEL_NEW_TICKET', 'MODEL_UPDATE_TICKET',
+	'NEW_TICKET', 'UPDATE_TICKET',
 	// Revisions
 	'NEW_REVISION', 'REVISION_UPDATED',
 	// Queue specific

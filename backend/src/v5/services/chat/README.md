@@ -166,12 +166,12 @@ The following events will be emitted if the user has subscribed to [Container/Fe
 
 #### Container New Ticket
   - Event name: `containerNewTicket`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "ticketId", title: "New ticket", type: "Ticket type", properties: {}, modules: {} }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { /* ticket data */ }}`
   - Description: Used to notify the user of a ticket addition to a container.
 
 #### Container Update Ticket
   - Event name: `containerUpdateTicket`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "ticketId",  title: "New title" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "ticketId", /* fields that has been updated */ }}`
   - Description: Used to notify the user of a ticket update in a container.
 
 #### Federation Settings Update
@@ -191,12 +191,12 @@ The following events will be emitted if the user has subscribed to [Container/Fe
 
 #### Federation New Ticket
   - Event name: `federationNewTicket`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { _id: "ticketId", title: "New ticket", type: "Ticket type", properties: {}, modules: {} }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { /* ticket data */ }}`
   - Description: Used to notify the user of a ticket addition to a federation.
 
 #### Federation Update Ticket
   - Event name: `federationUpdateTicket`
-  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { _id: "ticketId",  title: "New title" }}`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { _id: "ticketId", /* fields that has been updated */ }}`
   - Description: Used to notify the user of a ticket update in a federation.
 
 ### Project events

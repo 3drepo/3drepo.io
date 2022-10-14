@@ -99,8 +99,8 @@ ModelEventsListener.init = () => {
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
-	subscribe(events.MODEL_NEW_TICKET, modelTicketAdded);
-	subscribe(events.MODEL_UPDATE_TICKET, modelTicketUpdated);
+	subscribe(events.NEW_TICKET, modelTicketAdded);
+	subscribe(events.UPDATE_TICKET, modelTicketUpdated);
 };
 
 module.exports = ModelEventsListener;

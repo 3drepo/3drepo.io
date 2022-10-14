@@ -21,8 +21,8 @@ const { basePropertyLabels } = require('../schemas/tickets/templates.constants')
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { serialiseTicket } = require('../utils/helper/tickets');
 const { templates } = require('../utils/responseCodes');
+const { serialiseTicket } = require('../schemas/tickets');
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
@@ -38,7 +38,7 @@ Tickets.addTicket = async (teamspace, project, model, template, ticketData, isFe
 	const number = await determineTicketNumber(teamspace, project, model, ticketData.type);
 	const ticket = { ...ticketData, teamspace, project, model, _id, number };
 	await DbHandler.insertOne(teamspace, TICKETS_COL, ticket);
-	publish(events.MODEL_NEW_TICKET,
+	publish(events.NEW_TICKET,
 		{ teamspace, project, model, ticketData: serialiseTicket(ticket, template), isFederation });
 	return _id;
 };
@@ -71,7 +71,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, { $set: toUpdate, $unset: toUnset });
 
-	publish(events.MODEL_UPDATE_TICKET, { teamspace,
+	publish(events.UPDATE_TICKET, { teamspace,
 		project,
 		model,
 		ticket: oldTicket._id,

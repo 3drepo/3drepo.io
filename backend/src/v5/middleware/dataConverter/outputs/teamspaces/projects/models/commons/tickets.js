@@ -19,7 +19,7 @@ const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../m
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { respond } = require('../../../../../../../utils/responder');
-const { serialiseTicket } = require('../../../../../../../utils/helper/tickets');
+const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
 const { templates } = require('../../../../../../../utils/responseCodes');
 

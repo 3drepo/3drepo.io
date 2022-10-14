@@ -18,8 +18,8 @@
 const { src } = require('../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
-jest.mock('../../../../src/v5/utils/helper/tickets');
-const TicketsHelper = require(`${src}/utils/helper/tickets`);
+jest.mock('../../../../src/v5/schemas/tickets');
+const TicketsSchema = require(`${src}/schemas/tickets`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -40,7 +40,7 @@ const testAddTicket = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(ticketData);
 			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
-			const serialiseTicketMock = TicketsHelper.serialiseTicket.mockImplementationOnce(() => ticketData);
+			const serialiseTicketMock = TicketsSchema.serialiseTicket.mockImplementationOnce(() => ticketData);
 			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -62,7 +62,7 @@ const testAddTicket = () => {
 				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.MODEL_NEW_TICKET,
+			expect(publishFn).toHaveBeenCalledWith(events.NEW_TICKET,
 				{ teamspace, project, model, isFederation, ticketData });
 
 			expect(serialiseTicketMock).toHaveBeenCalledTimes(1);
@@ -229,7 +229,7 @@ const testUpdateTicket = () => {
 					$unset: {},
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_UPDATE_TICKET, {
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
 				teamspace,
 				project,
 				model,
@@ -269,7 +269,7 @@ const testUpdateTicket = () => {
 					$unset: {},
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_UPDATE_TICKET, {
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
 				teamspace,
 				project,
 				model,
@@ -309,7 +309,7 @@ const testUpdateTicket = () => {
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_UPDATE_TICKET, {
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
 				teamspace,
 				project,
 				model,
@@ -326,7 +326,7 @@ const testUpdateTicket = () => {
 			});
 		});
 
-		test('should not throw MODEL_UPDATE_TICKET event if update fails', async () => {
+		test('should not throw UPDATE_TICKET event if update fails', async () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = {
