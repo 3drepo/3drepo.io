@@ -44,7 +44,6 @@ const {
 	getProjectsForAccountsList,
 	removeUserFromProjects
 } = require("./project");
-const FileRef = require("./fileRef");
 const UserProcessorV5 = require("../../v5/processors/users");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
