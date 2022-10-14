@@ -17,7 +17,7 @@
 
 import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { DateContainer, EmptyDateContainer } from './dueDate.style';
+import { DateContainer, EmptyDateContainer } from './dueDate.styles';
 
 type IDueDate = {
 	date: number;

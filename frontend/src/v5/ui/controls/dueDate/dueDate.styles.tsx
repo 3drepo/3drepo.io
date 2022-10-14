@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 
 export const DateContainer = styled.span<{ isOverdue?: boolean; }>`
-	font-family: ${({ theme }) => theme.typography.fontFamily};
 	font-size: 10px;
 	padding: 3px 0;
 	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
