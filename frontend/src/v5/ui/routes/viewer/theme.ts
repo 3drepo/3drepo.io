@@ -78,6 +78,9 @@ export const theme = createTheme(
 									boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 									boxSizing: 'border-box',
 								},
+								'&.Mui-error .MuiSelect-select': {
+									boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
+								},
 								fieldset: {
 									borderWidth: '1px !important',
 								},
@@ -132,7 +135,7 @@ export const theme = createTheme(
 							height: 26,
 							padding: '0 10px',
 							marginTop: 0,
-							color: `${COLOR.SECONDARY_MAIN} !important`,
+							color: COLOR.SECONDARY_MAIN,
 
 							'& ~ svg': {
 								right: 10,
