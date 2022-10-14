@@ -119,7 +119,6 @@ export const ClauseNo = styled.span`
 `;
 
 export const PaperTitle = styled.div`
-	font-family: ${({ theme }) => theme.typography.fontFamily};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-size: 32px;
 	font-weight: ${FONT_WEIGHT.MEDIUM};

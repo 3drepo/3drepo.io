@@ -71,7 +71,6 @@ export const AssigneesList = styled.div`
 	position: relative;
 	width: fit-content;
 	user-select: none;
-	font-family: ${({ theme }) => theme.typography.fontFamily};
 	color: ${({ theme }) => theme.palette.base.main};
 
 	.MuiButtonBase-root {
