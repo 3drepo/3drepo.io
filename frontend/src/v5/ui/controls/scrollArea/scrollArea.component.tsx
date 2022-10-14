@@ -27,13 +27,11 @@ export type IScrollArea = ScrollbarProps & {
 export const ScrollArea = ({
 	variant = 'base',
 	hideHorizontal = true,
-	hideTracksWhenNotNeeded = true,
 	children,
 	...props
 }: IScrollArea) => (
 	<ScrollbarWrapper
 		$hidehorizontal={hideHorizontal}
-		hideTracksWhenNotNeeded={hideTracksWhenNotNeeded}
 		variant={variant}
 		{...props}
 	>
