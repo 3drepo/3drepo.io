@@ -45,7 +45,7 @@ export default {
 		'formError',
 		'disabled',
 		'label',
-		'renderValueTooltip'
+		'renderValueTooltip',
 	] } },
 } as ComponentMeta<typeof FormInvisibleMultiSelect>;
 
