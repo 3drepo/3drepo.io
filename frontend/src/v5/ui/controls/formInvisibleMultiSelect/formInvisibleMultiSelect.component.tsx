@@ -16,8 +16,7 @@
  */
 
 import { useState } from 'react';
-import { ButtonContainer } from './formInvisibleSelect.styles';
-import { InvisibleContainer as SelectContainer } from '../formInvisibleSelect/formInvisibleSelect.styles';
+import { InvisibleContainer as SelectContainer, ButtonContainer } from '../formInvisibleSelect/formInvisibleSelect.styles';
 import { FormMultiSelect, FormMultiSelectProps } from '../formSearchSelect/formMultiSelect/formMultiSelect.component';
 
 type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
