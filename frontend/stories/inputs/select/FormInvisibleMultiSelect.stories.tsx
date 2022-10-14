@@ -35,7 +35,18 @@ export default {
 		},
 	},
 	component: FormInvisibleMultiSelect,
-	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip', 'onItemClick', 'itemIsSelected', 'TriggerComponent', 'formError'] } },
+	parameters: { controls: { exclude: [
+		'control',
+		'ref',
+		'selectedOptionsTooltip',
+		'onItemClick',
+		'itemIsSelected',
+		'TriggerComponent',
+		'formError',
+		'disabled',
+		'label',
+		'renderValueTooltip'
+	] } },
 } as ComponentMeta<typeof FormInvisibleMultiSelect>;
 
 const Controlled: ComponentStory<typeof FormInvisibleMultiSelect> = (args) => {

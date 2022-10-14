@@ -30,15 +30,23 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
-		values: {
-			control: 'array',
-		},
 		disabled: {
 			type: 'boolean',
 		},
 	},
 	component: FormInvisibleSelect,
-	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip', 'onItemClick', 'itemIsSelected', 'TriggerComponent', 'formError'] } },
+	parameters: { controls: { exclude: [
+		'control',
+		'ref',
+		'selectedOptionsTooltip',
+		'onItemClick',
+		'itemIsSelected',
+		'TriggerComponent',
+		'formError',
+		'disabled',
+		'label',
+		'renderValueTooltip',
+	] } },
 } as ComponentMeta<typeof FormInvisibleSelect>;
 
 const Controlled: ComponentStory<typeof FormInvisibleSelect> = (args) => {

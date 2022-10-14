@@ -45,7 +45,7 @@ export default {
 		},
 	},
 	component: FormSingleSelect,
-	parameters: { controls: { exclude: ['control', 'ref', 'onItemClick', 'itemIsSelected', 'selectedOptionsTooltip'] } },
+	parameters: { controls: { exclude: ['control', 'ref', 'onItemClick', 'itemIsSelected', 'selectedOptionsTooltip', 'renderValueTooltip'] } },
 } as ComponentMeta<typeof FormSingleSelect>;
 
 const Controlled: ComponentStory<typeof FormSingleSelect> = ({ formError, ...args }: any) => {

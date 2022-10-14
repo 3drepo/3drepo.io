@@ -42,7 +42,7 @@ export default {
 		},
 	},
 	component: FormMultiSelect,
-	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip', 'onItemClick', 'itemIsSelected'] } },
+	parameters: { controls: { exclude: ['control', 'ref', 'selectedOptionsTooltip', 'onItemClick', 'itemIsSelected', 'renderValueTooltip'] } },
 } as ComponentMeta<typeof FormMultiSelect>;
 
 const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args }) => {
