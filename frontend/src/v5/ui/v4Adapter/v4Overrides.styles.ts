@@ -44,12 +44,6 @@ export const V4OverridesContainer = styled.div`
 	flex-direction: column;
 	height: 100%;
 
-	${StyledSelect} {
-		.MuiSelect-select {
-			margin-top: 18px;
-		}
-	}
-
 	${customTable}
 
 	${avatarPopover}

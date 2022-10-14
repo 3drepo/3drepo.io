@@ -23,10 +23,6 @@ import { css } from 'styled-components';
 export default css`
 	${SequenceContent} {
 		margin-top: 5px;
-
-		${StyledFormControl} {
-			padding-top: 22px;
-		}
 	}
 
 	${StyledFormControl} {

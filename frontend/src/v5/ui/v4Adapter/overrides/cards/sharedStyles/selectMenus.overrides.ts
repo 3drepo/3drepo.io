@@ -90,7 +90,7 @@ export const DescriptionStyles = css`
 export const FieldsRowStyles = css`
 	${FieldsRow} {
 		.MuiFormControl-root {
-			padding-top: 5px;
+			padding-top: 7px;
 			.MuiFormControl-root {
 				padding: 0;
 			}
