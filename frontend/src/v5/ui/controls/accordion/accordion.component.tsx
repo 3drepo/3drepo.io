@@ -16,8 +16,12 @@
  */
 
 import { useState } from 'react';
-import MuiAccordion, { AccordionProps as MuiAccordionProps } from '@mui/material/Accordion';
-import { AccordionSummary, AccordionDetails } from '@mui/material';
+import {
+	AccordionSummary,
+	AccordionDetails,
+	Accordion as MuiAccordion,
+	AccordionProps as MuiAccordionProps,
+} from '@mui/material';
 import { IconContainer, TitleContainer } from './accordion.styles';
 
 export type AccordionProps = MuiAccordionProps & {
