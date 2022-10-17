@@ -14,18 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { FormTextAreaFixedSize } from '@controls/formTextArea/formTextAreaFixedSize.component';
+import styled from 'styled-components';
 
-export const LongTextProperty = ({
-	property: { name, readOnly, required },
-	value,
-}: { property: PropertyDefinition, value: any }) => (
-	<FormTextAreaFixedSize
-		label={name}
-		name={name}
-		defaultValue={value}
-		disabled={readOnly}
-		required={required}
-	/>
-);
+export const FlexContainer = styled.div`
+	display: inline-flex;
+	gap: 10px;
+`;

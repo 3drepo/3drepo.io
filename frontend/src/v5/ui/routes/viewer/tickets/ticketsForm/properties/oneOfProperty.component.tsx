@@ -16,19 +16,18 @@
  */
 
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { MenuItem, Select } from '@mui/material';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { MenuItem } from '@mui/material';
 
-export const OneOfProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
-	<div>
-	&nbsp;
-		{property.name}
-		<br />
-		<Select value={value}>
-			{(property.values as string[]).map((propValue) => (
-				<MenuItem key={propValue} value={propValue}>
-					{propValue}
-				</MenuItem>
-			))}
-		</Select>
-	</div>
+export const OneOfProperty = ({
+	property: { name, readOnly, required, values },
+	value,
+}: { property: PropertyDefinition, value: any }) => (
+	<FormSelect defaultValue={value} label={name} name={name} disabled={readOnly} required={required}>
+		{(values as string[]).map((propValue) => (
+			<MenuItem key={propValue} value={propValue}>
+				{propValue}
+			</MenuItem>
+		))}
+	</FormSelect>
 );

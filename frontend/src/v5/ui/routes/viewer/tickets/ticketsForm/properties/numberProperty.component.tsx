@@ -16,11 +16,11 @@
  */
 
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { TextField } from '@mui/material';
+import { FormNumberField } from '@controls/formNumberField/formNumberField.component';
 
-export const NumberProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
-	<div>
-	&nbsp;
-		<TextField label={property.name} value={value} disabled={property.readOnly} />
-	</div>
+export const NumberProperty = ({
+	property: { name, readOnly, required },
+	value,
+}: { property: PropertyDefinition, value: any }) => (
+	<FormNumberField label={name} name={name} defaultValue={value} disabled={readOnly} reuiqred={required} />
 );
