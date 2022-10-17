@@ -32,4 +32,5 @@ export const IconContainer = styled.div`
 
 export const TitleContainer = styled(Typography)`
 	height: 16px;
+	font-weight: 500;
 `;
