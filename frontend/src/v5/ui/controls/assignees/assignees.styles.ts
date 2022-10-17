@@ -20,10 +20,8 @@ import styled, { css } from 'styled-components';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
 import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 
-const OVERLAP_WIDTH = '10px';
-
 const BaseCircle = css`
-	margin: 0 -${OVERLAP_WIDTH} 0 0;
+	margin: 0 -10px 0 0;
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 28px;
@@ -74,12 +72,9 @@ export const AssigneesList = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 
 	.MuiButtonBase-root {
-		z-index: 100;
+		z-index: 11;
 		&:hover {
-			z-index: 1000; /* avatar appears on top when hovered */
-			::before {
-				opacity: 0 !important;
-			}
+			z-index: 12; /* avatar appears on top when hovered */
 		}
 
 		::before {
@@ -88,16 +83,21 @@ export const AssigneesList = styled.div`
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 			position: absolute;
 			opacity: 0;
-			width: 28px;
-			height: 28px;
+			width: 100%;
+			height: 100%;
 			box-sizing: border-box;
 			border-radius: 50%;
 			z-index: 10;
 		}
 	}
 
-	&:hover .MuiButtonBase-root::before {
-		opacity: 0.3;
+	&:hover .MuiButtonBase-root {
+		&::before {
+			opacity: 0.3;
+		}
+		&:hover::before {
+			opacity: 0;
+		}
 	}
 
 	>:last-child {

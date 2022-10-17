@@ -35,10 +35,10 @@ const filledStyles = (colour: string) => css`
 const outlinedStyles = (colour: string) => css`
 	color: ${colour};
 	border-color: ${colour};
-	background: 'transparent';
-	svg: {
+	background: transparent;
+	svg {
 		color: ${colour};
-	};
+	}
 `;
 
 const noBorderStyles = (colour: string) => css`
