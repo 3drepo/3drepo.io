@@ -15,9 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const FormNumberField = styled(FormTextField).attrs({ type: 'number' })`
-	width: 50%;
-`;
+export const FormNumberField = (props) => (<FormTextField type="number" {...props} />);
