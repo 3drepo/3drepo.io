@@ -19,7 +19,7 @@ import { TextField, TextFieldProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
 export type FormTextFieldProps = TextFieldProps & {
-	control: any,
+	control?: any,
 	formError?: any,
 	name: string,
 };

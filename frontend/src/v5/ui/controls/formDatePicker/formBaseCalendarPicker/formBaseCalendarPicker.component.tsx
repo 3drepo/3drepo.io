@@ -22,7 +22,7 @@ import { TextField } from './formBaseCalendarPicker.styles';
 export type FormBaseCalendarPickerProps = any & {
 	name: string;
 	label: string | JSX.Element;
-	control: any;
+	control?: any;
 	formError?: any;
 	defaultValue?: Date;
 	disabled?: boolean;
