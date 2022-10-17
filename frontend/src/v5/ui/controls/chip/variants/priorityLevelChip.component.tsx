@@ -62,7 +62,7 @@ export const PriorityLevelChip = ({ state = PriorityLevels.NONE, noLabel = false
 	const Icon = state === PriorityLevels.NONE ? FlagOutlineIcon : FlagFillIcon;
 	return (
 		<Tooltip title={tooltip} arrow placement="bottom" disableHoverListener={!noLabel}>
-			<Chip variant="noBorder" icon={(<Icon />)} {...chipProps} {...(noLabel && { label: '' })} />
+			<Chip variant="text" icon={(<Icon />)} {...chipProps} {...(noLabel && { label: '' })} />
 		</Tooltip>
 	);
 };

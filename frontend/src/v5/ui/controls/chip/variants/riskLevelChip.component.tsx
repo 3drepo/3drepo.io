@@ -58,6 +58,7 @@ const RISK_LEVELS_MAP = {
 type IRiskLevelChip = {
 	state: RiskLevels,
 };
+
 export const RiskLevelChip = ({ state = RiskLevels.UNSET }: IRiskLevelChip) => (
 	<Chip variant="filled" {...RISK_LEVELS_MAP[state]} />
 );

@@ -77,6 +77,6 @@ declare module '@mui/material/styles/createTypography' {
 
 declare module '@mui/material/Chip' {
 	interface ChipPropsVariantOverrides {
-		noBorder: true;
+		text: true;
 	}
 }

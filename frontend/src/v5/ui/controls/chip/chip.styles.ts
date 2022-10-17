@@ -41,7 +41,7 @@ const outlinedStyles = (colour: string) => css`
 	}
 `;
 
-const noBorderStyles = (colour: string) => css`
+const textStyles = (color: string) => css`
 	border-color: transparent;
 	background-color: transparent;
 	color: ${colour};
@@ -54,8 +54,8 @@ const noBorderStyles = (colour: string) => css`
 export const Chip = styled(ChipMui)<ChipType>`
 	${({ variant, colour = '#000' }) => {
 		switch (variant) {
-			case 'noBorder':
-				return noBorderStyles(colour);
+			case 'text':
+				return textStyles(colour);
 			case 'filled':
 				return filledStyles(colour);
 			default: // outlined

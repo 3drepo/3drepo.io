@@ -61,7 +61,7 @@ const STATUS_MAP = {
 };
 
 type ITicketStatusChip = {
-	variant?: 'outlined' | 'noBorder',
+	variant?: 'outlined' | 'text',
 	state: TicketStatuses,
 };
 export const TicketStatusChip = ({ variant = 'outlined', state = TicketStatuses.OPEN }: ITicketStatusChip) => (
