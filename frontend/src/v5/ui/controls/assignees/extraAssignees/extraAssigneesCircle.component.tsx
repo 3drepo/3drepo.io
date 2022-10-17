@@ -23,13 +23,11 @@ export type IExtraAssignees = {
 };
 
 export const ExtraAssigneesCircle = ({ assignees, ...props }: IExtraAssignees) => (
-	<>
-		<StyledIconButton
-			{...props}
-		>
-			<Avatar>
-				+{assignees.length}
-			</Avatar>
-		</StyledIconButton>
-	</>
+	<StyledIconButton
+		{...props}
+	>
+		<Avatar>
+			+{assignees.length}
+		</Avatar>
+	</StyledIconButton>
 );
