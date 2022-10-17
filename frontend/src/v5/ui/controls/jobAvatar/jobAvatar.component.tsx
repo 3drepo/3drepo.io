@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MouseEvent } from 'react';
 import AvatarIcon from '@mui/material/Avatar';
 import { StyledIconButton } from '@controls/avatar/avatar.styles';
 import { Job, JOBS_LIST } from '@/v5/store/users/user.types';
 
 type JobAvatarProps = {
-	onClick?: (event: MouseEvent) => void;
-	onMouseEnter?: (event: MouseEvent) => void;
-	onMouseLeave?: () => void;
 	job: Job;
 	size?: 'small' | 'medium' | 'large';
 	isButton?: boolean;
