@@ -45,8 +45,8 @@ export const FormTitle = styled(FormTextArea).attrs({
 	inputProps: { maxLength: 120 },
 })`
 	box-shadow: 0px 6px 10px rgb(0 0 0 / 4%);
-    position: relative;
-    z-index: 1;
+	position: relative;
+	z-index: 1;
 
 	& > .MuiInputBase-root {
 		padding: 15px 18px;
