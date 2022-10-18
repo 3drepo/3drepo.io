@@ -16,7 +16,6 @@
  */
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
-import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -103,12 +102,9 @@ export const TicketDetailCard = () => {
 				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
 				<Button onClick={goBack}>back</Button>
 			</CardHeader>
-			<CardContent>
-				<TicketForm template={template} ticket={ticket} />
-				<Button onClick={updateTicket}> Update Ticket! </Button>
-				<Button onClick={cloneTicket}> Clone Ticket!</Button>
-
-			</CardContent>
+			<TicketForm template={template} ticket={ticket} />
+			<Button onClick={updateTicket}> Update Ticket! </Button>
+			<Button onClick={cloneTicket}> Clone Ticket!</Button>
 		</CardContainer>
 	);
 };

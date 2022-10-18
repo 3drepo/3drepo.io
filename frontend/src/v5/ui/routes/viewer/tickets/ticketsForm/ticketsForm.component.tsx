@@ -15,7 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { FormProvider, useForm } from 'react-hook-form';
+import { formatMessage } from '@/v5/services/intl';
+import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
+import { Accordion } from '@controls/accordion/accordion.component';
+import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { CoordsProperty } from './properties/coordsProperty.component';
 import { DateProperty } from './properties/dateProperty.component';
 import { ImageProperty } from './properties/imageProperty.component';
@@ -25,6 +29,7 @@ import { NumberProperty } from './properties/numberProperty.component';
 import { OneOfProperty } from './properties/oneOfProperty.component';
 import { TextProperty } from './properties/textProperty.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
+import { FormTitle, PanelsContainer } from './ticketsForm.styles';
 
 const TicketProperty = {
 	text: TextProperty,
@@ -37,18 +42,33 @@ const TicketProperty = {
 	image: ImageProperty,
 };
 
-interface PropertiesPanelProps {
+interface PropertiesListProps {
 	properties: PropertyDefinition[] ;
 	propertiesValues: Record<string, any>;
 }
 
-const PropertiesPanel = ({ properties, propertiesValues = {} }: PropertiesPanelProps) => (
+const PropertiesList = ({ properties, propertiesValues = {} }: PropertiesListProps) => (
 	<>
 		{properties.map((property) => {
 			const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
-			return (<><hr /><PropertyComponent property={property} value={propertiesValues[property.name]} /></>);
+			return (
+				<PropertyComponent
+					property={property}
+					value={propertiesValues[property.name]}
+					key={property.name}
+				/>
+			);
 		})}
 	</>
+);
+
+const PropertiesPanel = (props: PropertiesListProps) => (
+	<Accordion
+		Icon={PropetiesIcon}
+		title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
+	>
+		<PropertiesList {...props} />
+	</Accordion>
 );
 
 interface ModulePanelProps {
@@ -57,28 +77,26 @@ interface ModulePanelProps {
 }
 
 const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
-	<DashboardListCollapse
-		title={<>Module: {module.name}</>}
-	>
-		<PropertiesPanel properties={module.properties || []} propertiesValues={moduleValues} />
-	</DashboardListCollapse>
+	<Accordion title={module.name} Icon={PropetiesIcon}>
+		<PropertiesList properties={module.properties || []} propertiesValues={moduleValues} />
+	</Accordion>
 );
 
 export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => (
-	<>
-		<TextProperty property={{ name: 'title' }} value={ticket.title} />
-
-		<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
-		{
-			(template.modules || []).map((module) => (
-				<>
-					<br />
-					<ModulePanel
-						module={module}
-						moduleValues={ticket.modules[module.name]}
-					/>
-				</>
-			))
-		}
-	</>
+	<FormProvider {...useForm()}>
+		<FormTitle name="title" defaultValue={ticket.title} />
+		<CardContent>
+			<PanelsContainer>
+				<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
+				{
+					(template.modules || []).map((module) => (
+						<ModulePanel
+							module={module}
+							moduleValues={ticket.modules[module.name]}
+						/>
+					))
+				}
+			</PanelsContainer>
+		</CardContent>
+	</FormProvider>
 );
