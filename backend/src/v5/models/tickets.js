@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
 const DbHandler = require('../handler/db');
+const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const Tickets = {};
@@ -35,38 +39,41 @@ Tickets.addTicket = async (teamspace, project, model, ticket) => {
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, ticketId, data) => {
+Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
 	const toUpdate = {};
 	const toUnset = {};
-
-	const { modules, properties, ...rootProps } = data;
+	const { modules, properties, ...rootProps } = updateData;
+	const changes = {};
 
 	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
-			const value = obj[key];
-			if (value) toUpdate[`${prefix}${key}`] = value;
-			else { toUnset[`${prefix}${key}`] = 1; }
+			const updateObjProp = `${prefix}${key}`;
+			const oldValue = getNestedProperty(oldTicket, updateObjProp);
+			const newValue = obj[key];
+			if (newValue) { toUpdate[updateObjProp] = newValue; } else { toUnset[updateObjProp] = 1; }
+
+			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
+				setNestedProperty(changes, `${updateObjProp}.from`, oldValue);
+				setNestedProperty(changes, `${updateObjProp}.to`, newValue);
+			}
 		});
 	};
 
 	determineUpdate(rootProps);
+	determineUpdate(properties, 'properties.');
+	Object.keys(modules).forEach((mod) => {
+		determineUpdate(modules[mod], `modules.${mod}.`);
+	});
 
-	if (properties) { determineUpdate(properties, 'properties.'); }
+	await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, { $set: toUpdate, $unset: toUnset });
 
-	if (modules) {
-		Object.keys(modules).forEach((mod) => {
-			determineUpdate(modules[mod], `modules.${mod}.`);
-		});
-	}
-
-	const updateJson = {};
-	if (Object.keys(toUpdate).length) { updateJson.$set = toUpdate; }
-
-	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
-
-	if (Object.keys(updateJson).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
-	}
+	publish(events.MODEL_TICKET_UPDATE, { teamspace,
+		project,
+		model,
+		ticket: oldTicket._id,
+		author,
+		changes,
+		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };
 
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
