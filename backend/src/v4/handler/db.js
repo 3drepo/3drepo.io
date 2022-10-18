@@ -283,9 +283,10 @@
 		return collection.indexExists(index);
 	};
 
-	Handler.createIndex = async (database, colName, indexDef) => {
+	Handler.createIndex = async (database, colName, indexDef, { runInBackground } = {}) => {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.createIndex(indexDef);
+		const options = runInBackground ? { background: true } : undefined;
+		return collection.createIndex(indexDef, options);
 	};
 
 	Handler.createIndices = async (database, colName, indicesDef) => {
