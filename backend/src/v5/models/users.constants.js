@@ -44,6 +44,7 @@ UserConstants.USERNAME_BLACKLIST = [
 	'notifications',
 	'loginRecords',
 	'sessions',
+	'internal',
 ];
 
 module.exports = UserConstants;

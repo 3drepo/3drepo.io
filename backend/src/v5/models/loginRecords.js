@@ -23,11 +23,11 @@ const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const LoginRecord = {};
-const LOGIN_RECORDS_DB = 'loginRecords';
+const LOGIN_RECORDS_COL = 'loginRecords';
 
-LoginRecord.removeAllUserRecords = (user) => db.dropCollection(LOGIN_RECORDS_DB, user);
+LoginRecord.removeAllUserRecords = (user) => db.deleteMany(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user });
 
-LoginRecord.saveLoginRecord = async (username, sessionId, ipAddress, userAgent, referer) => {
+LoginRecord.saveLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
 	const uaInfo = getUserAgentInfo(userAgent);
 
 	const loginRecord = {
@@ -47,9 +47,9 @@ LoginRecord.saveLoginRecord = async (username, sessionId, ipAddress, userAgent, 
 		loginRecord.referrer = referer;
 	}
 
-	await db.insertOne(LOGIN_RECORDS_DB, username, loginRecord);
+	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
 
-	publish(events.LOGIN_RECORD_CREATED, { username, loginRecord });
+	publish(events.LOGIN_RECORD_CREATED, { username: user, loginRecord });
 };
 
 module.exports = LoginRecord;

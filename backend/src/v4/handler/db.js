@@ -417,6 +417,8 @@
 		await Handler.deleteOne("admin", "system.users", { user });
 	};
 
+	Handler.INTERNAL_DB = "internal";
+
 	module.exports = Handler;
 }());
 
