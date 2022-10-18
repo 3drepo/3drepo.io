@@ -18,8 +18,8 @@
 const { src } = require('../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
-jest.mock('../../../../src/v5/schemas/tickets');
-const TicketsSchema = require(`${src}/schemas/tickets`);
+jest.mock('../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -34,23 +34,22 @@ const ticketCol = 'tickets';
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const addTicketTest = async (isFederation) => {
-			const templateType = generateRandomString();
-			const ticketData = { [generateRandomString()]: generateRandomString(), type: templateType };
-			const number = generateRandomNumber();
-
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(ticketData);
-			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
-			const serialiseTicketMock = TicketsSchema.serialiseTicket.mockImplementationOnce(() => ticketData);
-			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const template = { [generateRandomString()]: generateRandomString() };
+			const templateType = generateRandomString();
+			const ticket = { [generateRandomString()]: generateRandomString(), type: templateType };
+			const number = generateRandomNumber();
 
-			const _id = await Ticket.addTicket(teamspace, project, model, template, ticketData, isFederation);
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(ticket);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
+			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
+
+			const _id = await Ticket.addTicket(teamspace, project, model, ticket);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...ticketData,
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { ...ticket,
 				teamspace,
 				project,
 				model,
@@ -63,12 +62,14 @@ const testAddTicket = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.NEW_TICKET,
-				{ teamspace, project, model, isFederation, ticketData });
+				{ teamspace,
+					project,
+					model,
+					isFederation,
+					ticket: { ...ticket, _id, number } });
 
-			expect(serialiseTicketMock).toHaveBeenCalledTimes(1);
-			expect(serialiseTicketMock).toHaveBeenCalledWith(
-				{ teamspace, project, model, number, _id, ...ticketData }, template,
-			);
+			expect(isFederationMock).toHaveBeenCalledTimes(1);
+			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 		};
 
 		test('Should add the ticket (Container)', async () => {
@@ -83,14 +84,14 @@ const testAddTicket = () => {
 			const templateType = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
 
+			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(false);
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(data);
 			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const template = { [generateRandomString()]: generateRandomString() };
 
-			const _id = await Ticket.addTicket(teamspace, project, model, template, data);
+			const _id = await Ticket.addTicket(teamspace, project, model, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
@@ -99,6 +100,9 @@ const testAddTicket = () => {
 			expect(getLastNumber).toHaveBeenCalledTimes(1);
 			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
+
+			expect(isFederationMock).toHaveBeenCalledTimes(1);
+			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 		});
 	});
 };
@@ -203,7 +207,7 @@ const testUpdateTicket = () => {
 		const author = generateRandomString();
 		const propToUpdate = generateRandomString();
 
-		test('should update the ticket to set properties (Container)', async () => {
+		test('should update the ticket to set properties', async () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = { _id: generateRandomString(), properties: { [propToUpdate]: oldPropvalue } };
@@ -215,10 +219,12 @@ const testUpdateTicket = () => {
 				modules: {},
 			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const isFederation = false;
+			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(false);
 
-			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author, isFederation);
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
+			expect(isFederationMock).toHaveBeenCalledTimes(1);
+			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
@@ -235,8 +241,7 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				isFederation,
-				updateData,
+				isFederation: false,
 				timestamp: date,
 				changes: { properties: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
 			});
@@ -255,10 +260,12 @@ const testUpdateTicket = () => {
 				modules: { [moduleName]: { [propToUpdate]: oldPropvalue } },
 			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const isFederation = true;
+			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(true);
 
-			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author, isFederation);
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
+			expect(isFederationMock).toHaveBeenCalledTimes(1);
+			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
@@ -275,8 +282,7 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				isFederation,
-				updateData,
+				isFederation: true,
 				timestamp: date,
 				changes: {
 					modules: { [moduleName]: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
@@ -297,11 +303,13 @@ const testUpdateTicket = () => {
 				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },
 			};
-			const isFederation = false;
+			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(false);
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
-			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author, isFederation);
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
+			expect(isFederationMock).toHaveBeenCalledTimes(1);
+			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
@@ -316,8 +324,7 @@ const testUpdateTicket = () => {
 				ticket: oldTicket._id,
 				author,
 				timestamp: date,
-				isFederation,
-				updateData,
+				isFederation: false,
 				changes: {
 					[propToUpdate]: { from: undefined, to: newPropValue },
 					properties: { propToUnset: { from: oldPropvalue, to: null } },

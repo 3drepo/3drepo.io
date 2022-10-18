@@ -24,6 +24,7 @@ const {
 	riskLevels,
 	riskLevelsToNum } = require('./templates.constants');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
+const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
@@ -32,7 +33,6 @@ const { getRiskCategories } = require('../../models/teamspaces');
 const { isEqual } = require('../../utils/helper/objects');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
-const { UUIDToString } = require('../../utils/helper/uuids');
 
 const Tickets = {};
 

@@ -85,22 +85,21 @@ const addTicketImageTest = async (isView) => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const expectedOutput = generateRandomString();
-	const isFederation = false;
 	const imageTestData = generateImageTestData(isView);
 
 	TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
 
 	await expect(Tickets.addTicket(teamspace, project, model, imageTestData.template,
-		imageTestData.ticket, isFederation)).resolves.toEqual(expectedOutput);
+		imageTestData.ticket)).resolves.toEqual(expectedOutput);
 
-	const processedTicket = TicketsModel.addTicket.mock.calls[0][4];
+	const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
 	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
 		: processedTicket.properties[imageTestData.propName];
 	const modPropRef = isView ? processedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot
 		: processedTicket.modules[imageTestData.moduleName][imageTestData.propName];
 
 	expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
-	expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, imageTestData.template,
+	expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model,
 		{
 			...imageTestData.ticket,
 			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
@@ -109,8 +108,7 @@ const addTicketImageTest = async (isView) => {
 					[imageTestData.propName]: generatePropData(modPropRef, isView),
 				},
 			},
-		},
-		isFederation);
+		});
 
 	const meta = { teamspace, project, model, ticket: expectedOutput };
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
@@ -127,7 +125,6 @@ const updateTicketImageTest = async (isView) => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const author = generateRandomString();
-	const isFederation = true;
 
 	const imageTestData = generateImageTestData(isView);
 	const updatePropBuffer = Buffer.from(generateRandomString());
@@ -144,7 +141,7 @@ const updateTicketImageTest = async (isView) => {
 	};
 
 	await expect(Tickets.updateTicket(teamspace, project, model, imageTestData.template,
-		imageTestData.ticket, updateData, author, isFederation)).resolves.toBeUndefined();
+		imageTestData.ticket, updateData, author)).resolves.toBeUndefined();
 
 	const processedTicket = TicketsModel.updateTicket.mock.calls[0][4];
 	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
@@ -162,7 +159,7 @@ const updateTicketImageTest = async (isView) => {
 				},
 			},
 		},
-		author, isFederation);
+		author);
 
 	const meta = { teamspace, project, model, ticket: imageTestData.ticket._id };
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
@@ -189,18 +186,16 @@ const testAddTicket = () => {
 			const model = generateRandomString();
 			const template = generateTemplate();
 			const ticket = generateTicket(template);
-			const isFederation = true;
 
 			const expectedOutput = generateRandomString();
 
 			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Tickets.addTicket(teamspace, project, model, template, ticket, isFederation))
+			await expect(Tickets.addTicket(teamspace, project, model, template, ticket))
 				.resolves.toEqual(expectedOutput);
 
 			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, template,
-				ticket, isFederation);
+			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, ticket);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
@@ -223,15 +218,14 @@ const testUpdateTicket = () => {
 				properties: {},
 			};
 			const author = generateRandomString();
-			const isFederation = true;
 
 			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket,
-				updateData, author, isFederation))
+				updateData, author))
 				.resolves.toBeUndefined();
 
 			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model, ticket,
-				updateData, author, isFederation);
+				updateData, author);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 			expect(FilesManager.removeFile).not.toHaveBeenCalled();

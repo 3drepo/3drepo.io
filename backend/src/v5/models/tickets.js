@@ -20,9 +20,9 @@ const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
+const { isFederation } = require('./modelSettings');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
-const { serialiseTicket } = require('../schemas/tickets');
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
@@ -33,17 +33,21 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 	return (lastTicket?.number ?? 0) + 1;
 };
 
-Tickets.addTicket = async (teamspace, project, model, template, ticketData, isFederation) => {
+Tickets.addTicket = async (teamspace, project, model, ticketData) => {
 	const _id = generateUUID();
 	const number = await determineTicketNumber(teamspace, project, model, ticketData.type);
 	const ticket = { ...ticketData, teamspace, project, model, _id, number };
 	await DbHandler.insertOne(teamspace, TICKETS_COL, ticket);
 	publish(events.NEW_TICKET,
-		{ teamspace, project, model, ticketData: serialiseTicket(ticket, template), isFederation });
+		{ teamspace,
+			project,
+			model,
+			ticket: { ...ticketData, _id, number },
+			isFederation: await isFederation(teamspace, model) });
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author, isFederation) => {
+Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
 	const toUpdate = {};
 	const toUnset = {};
 	const { modules, properties, ...rootProps } = updateData;
@@ -76,9 +80,8 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		model,
 		ticket: oldTicket._id,
 		author,
-		isFederation,
+		isFederation: await isFederation(teamspace, model),
 		changes,
-		updateData,
 		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };
 
