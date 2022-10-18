@@ -17,7 +17,7 @@
 import { Controller } from 'react-hook-form';
 import { FormControl, FormHelperText, InputLabel, SelectProps } from '@mui/material';
 import { useState } from 'react';
-import { Select, TooltipAdapter, Tooltip } from './formSelect.styles';
+import { Select, Tooltip } from './formSelect.styles';
 
 export type FormSelectProps = SelectProps & {
 	control?: any;
@@ -39,20 +39,33 @@ export const FormSelect = ({
 	children,
 	renderValueTooltip,
 	onOpen,
+	onClose,
 	onChange,
 	...props
 }: FormSelectProps) => {
-	const [showTooltip, setShowTooltip] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(false);
+	const [tooltipHovered, setTooltipHovered] = useState(false);
 
 	const handleOpen = (e) => {
-		setShowTooltip(false);
+		setMenuOpen(true);
+		setTooltipHovered(false);
 		onOpen?.(e);
+	};
+
+	const handleClose = (e) => {
+		setMenuOpen(false);
+		onClose?.(e);
 	};
 
 	const handleChange = (eventArgs, onFieldChange) => {
 		const [event, child] = eventArgs;
 		onFieldChange(value || { target: { value: event.target.value } });
 		onChange?.(event, child);
+	};
+
+	const getTooltipTitle = () => {
+		if (menuOpen || !tooltipHovered) return '';
+		return renderValueTooltip ?? '';
 	};
 
 	return (
@@ -64,27 +77,24 @@ export const FormSelect = ({
 				<FormControl required={required} disabled={disabled} error={!!formError}>
 					<InputLabel id={`${name}-label`}>{label}</InputLabel>
 					<Tooltip
-						title={renderValueTooltip ?? ''}
-						open={showTooltip}
+						title={getTooltipTitle()}
+						onMouseEnter={() => setTooltipHovered(true)}
+						onMouseLeave={() => setTooltipHovered(false)}
 					>
-						<TooltipAdapter
-							onMouseEnter={() => setShowTooltip(true)}
-							onMouseLeave={() => setShowTooltip(false)}
+						<Select
+							{...field}
+							inputRef={ref}
+							labelId={`${name}-label`}
+							id={name}
+							label={label}
+							onOpen={handleOpen}
+							onClose={handleClose}
+							onChange={(...args) => handleChange(args, onFieldChange)}
+							error={!!formError}
+							{...props}
 						>
-							<Select
-								{...field}
-								inputRef={ref}
-								labelId={`${name}-label`}
-								id={name}
-								label={label}
-								onOpen={handleOpen}
-								onChange={(...args) => handleChange(args, onFieldChange)}
-								error={!!formError}
-								{...props}
-							>
-								{children}
-							</Select>
-						</TooltipAdapter>
+							{children}
+						</Select>
 					</Tooltip>
 					<FormHelperText>{formError?.message}</FormHelperText>
 				</FormControl>
