@@ -125,6 +125,7 @@ const updateTicketImageTest = async (isView) => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
+	const author = generateRandomString();
 
 	const imageTestData = generateImageTestData(isView);
 	const updatePropBuffer = Buffer.from(generateRandomString());
@@ -141,16 +142,16 @@ const updateTicketImageTest = async (isView) => {
 	};
 
 	await expect(Tickets.updateTicket(teamspace, project, model, imageTestData.template,
-		imageTestData.ticket, updateData)).resolves.toBeUndefined();
+		imageTestData.ticket, updateData, author)).resolves.toBeUndefined();
 
-	const processedTicket = TicketsModel.updateTicket.mock.calls[0][2];
+	const processedTicket = TicketsModel.updateTicket.mock.calls[0][4];
 	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
 		: processedTicket.properties[imageTestData.propName];
 	const modPropRef = isView ? processedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot
 		: processedTicket.modules[imageTestData.moduleName][imageTestData.propName];
 
 	expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
-	expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, imageTestData.ticket._id,
+	expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model, imageTestData.ticket,
 		{
 			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
 			modules: {
@@ -158,7 +159,8 @@ const updateTicketImageTest = async (isView) => {
 					[imageTestData.propName]: generatePropData(modPropRef, isView),
 				},
 			},
-		});
+		},
+		author);
 
 	const meta = { teamspace, project, model, ticket: imageTestData.ticket._id };
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
@@ -216,12 +218,14 @@ const testUpdateTicket = () => {
 				title: generateRandomString(),
 				properties: {},
 			};
+			const author = generateRandomString();
 
-			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket, updateData))
+			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket, updateData, author))
 				.resolves.toBeUndefined();
 
 			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, ticket._id, updateData);
+			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model, ticket,
+				updateData, author);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 			expect(FilesManager.removeFile).not.toHaveBeenCalled();
