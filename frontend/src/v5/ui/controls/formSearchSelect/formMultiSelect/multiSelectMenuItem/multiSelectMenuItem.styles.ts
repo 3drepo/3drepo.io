@@ -27,7 +27,7 @@ export const CheckboxContainer = styled.div`
 	align-items: center;
 
 	.MuiCheckbox-root {
-		margin: 0 10px 0 0;
+		margin: 0 8px 0 0;
 		padding: 0;
 	}
 
