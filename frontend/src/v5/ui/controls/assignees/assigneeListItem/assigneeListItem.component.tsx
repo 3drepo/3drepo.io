@@ -41,10 +41,12 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 
 	if (!isJob && !user) return <></>;
 	return isJob ? (
+		<Popover anchor={(props) => <JobCircle job={assignee} {...props} />}>
+			<JobPopover job={assignee} />
+		</Popover>
 	) : (
-		<Popover
-			anchor={(props) => <UserCircle user={user} {...props} />}
-			popoverContent={() => <UserPopover user={user} />}
-		/>
+		<Popover anchor={(props) => <UserCircle user={user} {...props} />}>
+			<UserPopover user={user} />
+		</Popover>
 	);
 };

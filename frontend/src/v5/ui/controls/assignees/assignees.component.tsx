@@ -28,7 +28,7 @@ type AssigneesType = {
 };
 
 export const Assignees = memo(({ assignees = [], max, className }: AssigneesType) => {
-	let displayedAssignees = assignees ?? [];
+	let displayedAssignees = assignees;
 	let extraAssignees = [];
 	if (max && assignees.length > max) {
 		displayedAssignees = assignees.slice(0, max - 1);
@@ -47,8 +47,9 @@ export const Assignees = memo(({ assignees = [], max, className }: AssigneesType
 			{extraAssignees.length ? (
 				<Popover
 					anchor={(props) => <ExtraAssignees assignees={extraAssignees} {...props} />}
-					popoverContent={() => <ExtraAssigneesPopover assignees={extraAssignees} />}
-				/>
+				>
+					<ExtraAssigneesPopover assignees={extraAssignees} />
+				</Popover>
 			) : <></>}
 		</AssigneesList>
 	);

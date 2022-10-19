@@ -20,23 +20,23 @@ import { PopoverContainer } from './popover.styles';
 
 type IPopover = {
 	anchor: (props) => ReactElement;
-	popoverContent: () => ReactElement;
+	children: ReactElement;
 };
 
-export const Popover = ({ anchor: AnchorEl, popoverContent: PopoverContent }: IPopover) => {
+export const Popover = ({ anchor: AnchorEl, children }: IPopover) => {
 	const [anchorEl, setAnchorEl] = useState<Element | null>(null);
 	const onMouseEnter = (event) => setAnchorEl(event.currentTarget);
 	const onMouseLeave = () => setAnchorEl(null);
 
 	return (
-		<>
-			<AnchorEl onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />
+		<span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+			<AnchorEl />
 			<PopoverContainer
 				open={!!anchorEl}
 				anchorEl={anchorEl}
 			>
-				<PopoverContent />
+				{children}
 			</PopoverContainer>
-		</>
+		</span>
 	);
 };
