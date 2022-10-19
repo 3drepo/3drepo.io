@@ -16,7 +16,7 @@
  */
 import { Button } from '@controls/button';
 import { FormInvisibleSelect } from '@controls/formInvisibleSelect/formInvisibleSelect.component';
-import { SingleSelectMenuItem } from '@controls/formSearchSelect/formSingleSelect/singleSelectMenutItem.styles';
+import { SelectMenuItem } from '@controls/formSelect/formSelectMenutItem.styles';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
@@ -61,7 +61,7 @@ const Controlled: ComponentStory<typeof FormInvisibleSelect> = (args) => {
 				{...args}
 			>
 				{['1', '2', '3', '4'].map((option) => (
-					<SingleSelectMenuItem value={option} key={option}>Option #{option}</SingleSelectMenuItem>
+					<SelectMenuItem value={option} key={option}>Option #{option}</SelectMenuItem>
 				))}
 			</FormInvisibleSelect>
 		</FormContainer>

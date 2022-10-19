@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSearchSelect/formSearchSelect.component';
-import { isEqual, isUndefined, some, xorWith } from 'lodash';
-import { Children, useEffect, useState } from 'react';
+import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
+import { isEqual, isUndefined, pick, some, xorWith } from 'lodash';
+import { Children, ReactElement, useEffect, useState } from 'react';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
 export type FormMultiSelectProps = FormSearchSelectProps & {
 	children: JSX.Element | JSX.Element[],
 	renderValue?: (selectedItems: any[]) => any;
-	defaultValue?: any[];
 };
 
 export const FormMultiSelect = ({
 	children,
-	defaultValue,
+	defaultValue: inputDefaultValue,
 	renderValue,
 	renderValueTooltip,
 	...props
@@ -55,26 +54,25 @@ export const FormMultiSelect = ({
 		});
 	};
 
-	const initialiseDefaultItems = () => {
+	const initialiseSelectedItems = (deafultItemValue, items) => {
+		if (!deafultItemValue?.length) return;
 		setSelectedItems(
-			Children.toArray(children)
-				.filter(({ props: { value } }: any) => some(defaultValue, (v) => isEqual(v, value)))
-				.map((child: any) => ({ children: child.props.children, value: child.props.value })),
+			(Children.toArray(items) as ReactElement[])
+				.filter(({ props: { value } }) => some(deafultItemValue, (v) => isEqual(v, value)))
+				.map((child) => pick(child.props, ['children', 'value'])),
 		);
 	};
 
-	useEffect(() => {
-		verifyChildrenAreValid();
-		if (defaultValue?.length) initialiseDefaultItems();
-	}, [children]);
+	useEffect(() => { verifyChildrenAreValid(); }, [children]);
 
 	return (
 		<FormSearchSelect
-			defaultValue={defaultValue ?? []}
+			defaultValue={inputDefaultValue ?? []}
 			value={selectedItems.map(({ value }) => value)}
 			renderValue={formatRenderValue}
 			onItemClick={toggleValueSelection}
 			itemIsSelected={itemIsSelected}
+			intialiseSelectedItem={initialiseSelectedItems}
 			search
 			multiple
 			renderValueTooltip={!isUndefined(renderValueTooltip) ? renderValueTooltip : formatRenderValue()}

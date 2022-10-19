@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormMultiSelect } from '@controls/formSearchSelect/formMultiSelect/formMultiSelect.component';
-import { MultiSelectMenuItem } from '@controls/formSearchSelect/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
+import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
@@ -23,7 +23,7 @@ import ChevronIcon from '@assets/icons/chevron.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import PrintIcon from '@assets/icons/print.svg';
 import { FormContainer } from '../FormInput.styles';
-import { IconContainer, ItemContainer, ItemRenderer } from './FormSearchSelect.styles';
+import { IconContainer, ItemContainer, ItemRenderer } from './FormSelect.styles';
 
 export default {
 	title: 'Inputs/Select/FormMultiSelect',
@@ -68,53 +68,53 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args
 				formError={formError ? { message: formError } : null}
 				{...args}
 			>
-				<MultiSelectMenuItem value={'1'} key={1}>
+				<MultiSelectMenuItem value="1" key={1}>
 					<IconContainer>
 						<CalendarIcon />
 					</IconContainer>
 					calendar icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={'2'} key={2}>
+				<MultiSelectMenuItem value="2" key={2}>
 					<IconContainer>
 						<ClearIcon />
 					</IconContainer>
 					clear icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={'3'} key={3}>
+				<MultiSelectMenuItem value="3" key={3}>
 					<IconContainer>
 						<PrintIcon />
 					</IconContainer>
 					print icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={'4'} key={4}>
+				<MultiSelectMenuItem value="4" key={4}>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={'10'} key={10} disabled>
+				<MultiSelectMenuItem value="5" key={5} disabled>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					(disabled) chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={'11'} key={11} disabled>
+				<MultiSelectMenuItem value="6" key={6} disabled>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					(disabled) chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="number" key={5}>
-					5
-				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="number" key={6}>
-					6
-				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="number" key={7}>
+				<MultiSelectMenuItem value="7" key={7}>
 					7
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="number" key={8}>
+				<MultiSelectMenuItem value="8" key={8}>
 					8
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="9" key={5}>
+					some text
+				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="10" key={6}>
+					some other text
 				</MultiSelectMenuItem>
 			</FormMultiSelect>
 		</FormContainer>

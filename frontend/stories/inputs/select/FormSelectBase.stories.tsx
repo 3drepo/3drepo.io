@@ -14,15 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button } from '@controls/button';
-import { FormInvisibleMultiSelect } from '@controls/formInvisibleMultiSelect/formInvisibleMultiSelect.component';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { FormSelectBase } from '@controls/formSelect/formSelectBase/formSelectBase.component';
+import { MenuItem } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/Select/FormInvisibleMultiSelect',
+	title: 'Inputs/Select/FormSelectBase',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -30,46 +29,44 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
+		values: {
+			control: 'array',
+		},
+		formError: {
+			type: 'string',
+		},
 		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormInvisibleMultiSelect,
-	parameters: { controls: { exclude: [
-		'control',
-		'ref',
-		'selectedOptionsTooltip',
-		'onItemClick',
-		'itemIsSelected',
-		'TriggerComponent',
-		'formError',
-		'disabled',
-		'label',
-		'renderValueTooltip',
-	] } },
-} as ComponentMeta<typeof FormInvisibleMultiSelect>;
+	component: FormSelectBase,
+	parameters: { controls: { exclude: ['control', 'ref'] } },
+} as ComponentMeta<typeof FormSelectBase>;
 
-const Controlled: ComponentStory<typeof FormInvisibleMultiSelect> = (args) => {
+const Controlled: ComponentStory<typeof FormSelectBase> = ({ formError, values, ...args }: any) => {
 	const { control } = useForm({ mode: 'onChange' });
 
 	return (
 		<FormContainer>
-			<FormInvisibleMultiSelect
-				name="invisible-multiselect"
+			<FormSelectBase
+				name="select"
 				control={control}
-				TriggerComponent={<Button variant="contained">This is a button that will trigger the select</Button>}
 				{...args}
+				formError={formError ? { message: formError } : null}
 			>
-				{['1', '2', '3', '4'].map((option) => (
-					<MultiSelectMenuItem value={option} key={option}>Option #{option}</MultiSelectMenuItem>
+				{values.map((value) => (
+					<MenuItem value={value} key={value} style={{ padding: '8px 14px' }}>
+						{value}
+					</MenuItem>
 				))}
-			</FormInvisibleMultiSelect>
+			</FormSelectBase>
 		</FormContainer>
 	);
 };
 
-export const ControlledFormSelect = Controlled.bind({});
+export const ControlledFormSelectBase = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormSelect.args = {
-	label: 'Controlled Invisible Multi Select input',
+ControlledFormSelectBase.args = {
+	label: 'Controlled Select input',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };
