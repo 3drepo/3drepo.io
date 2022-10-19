@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
-import { isEqual, isEqualWith } from 'lodash';
+import { isEqual } from 'lodash';
 import { Children, useState } from 'react';
 
 export type FormSelectProps = FormSearchSelectProps & {
