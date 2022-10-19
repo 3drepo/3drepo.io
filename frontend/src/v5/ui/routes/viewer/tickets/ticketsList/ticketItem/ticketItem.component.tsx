@@ -35,14 +35,14 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const {
 		number,
 		properties: {
-			Status: status = undefined,
-			Priority: priority = undefined,
-			Risk: risk = undefined,
-			Treatment: treatment = undefined,
-			Assignees: assignees = undefined,
-			'Due Date': dueDate = undefined,
+			Status: status,
+			Priority: priority,
+			Assignees: assignees,
+			'Due Date': dueDate,
 		},
 	} = ticket;
+	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
+	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
 	return (
 		<Ticket
 			onClick={onClick}
@@ -53,8 +53,8 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			<Title>{ticket.title}</Title>
 			<ChipList>
 				{status && <TicketStatusChip state={status} />}
-				{risk && <RiskLevelChip state={risk} />}
-				{treatment && <TreatmentLevelChip state={treatment} />}
+				{riskLevel && <RiskLevelChip state={riskLevel} />}
+				{treatmentStatus && <TreatmentLevelChip state={treatmentStatus} />}
 			</ChipList>
 			<ExtraInfo>
 				{dueDate !== undefined && <DueDate date={dueDate} onClick={() => { /* Edit Due Date */ }} />}
