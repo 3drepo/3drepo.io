@@ -34,7 +34,7 @@ export const FormSelect = ({
 		return renderValue?.(childrenToRender) || childrenToRender;
 	};
 
-	const itemIsSelected = (item) => selectedItem && isEqual(selectedItem, item);
+	const itemIsSelected = (value) => selectedItem && isEqual(selectedItem.value, value);
 
 	const initialiseSelectedItem = (defaultValue, children) => {
 		if (defaultValue === '') return;

@@ -16,7 +16,6 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { Button } from '@controls/button';
 import { FormSelectBase, FormSelectBaseProps } from '@controls/formSelect/formSelectBase/formSelectBase.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
@@ -48,7 +47,7 @@ const MenuContent = () => {
 
 type FormSearchSelectItemsProps = {
 	onItemClick?: (item: any) => void;
-	itemIsSelected?: (item: any) => void;
+	itemIsSelected?: (value: any) => boolean;
 	intialiseSelectedItem?: (children, defaultValue) => void;
 };
 
@@ -69,7 +68,7 @@ export const FormSearchSelect = ({
 	name,
 	...props
 }: FormSearchSelectProps) => {
-	const renderValueRef = useRef<HTMLLIElement & { selected }>();
+	const renderValueRef = useRef<HTMLLIElement>();
 	const [items, setItems] = useState([]);
 	const SEARCH_VALUE_PROP = 'searchvalue';
 
@@ -79,13 +78,6 @@ export const FormSearchSelect = ({
 		}
 	};
 
-	const refreshRenderValue = () => {
-		// if (!renderValueRef.current?.selected) {
-		// 	console.log("click here")
-			renderValueRef.current?.click();
-		// }
-	};
-
 	const populateChildren = () => {
 		setItems(
 			Children.toArray(rawChildren)
@@ -93,7 +85,7 @@ export const FormSearchSelect = ({
 					const { children, value: childValue } = child.props;
 					return cloneElement(child, {
 						[SEARCH_VALUE_PROP]: onlyText(children),
-						selected: itemIsSelected({ value: childValue, children }),
+						selected: itemIsSelected(childValue),
 						onClick: () => onItemClick({ value: childValue, children }),
 					});
 				}),
@@ -102,19 +94,12 @@ export const FormSearchSelect = ({
 
 	const defaultValue = control?.defaultValuesRef?.current?.[name] ?? inputDefaultValue;
 
-	useEffect(() => {
-		populateChildren();
-		console.log("[value] ->", value)
-	}, [value, rawChildren]);
+	useEffect(() => { populateChildren();}, [value, rawChildren]);
 	
-	useEffect(() => {
-		refreshRenderValue();
-		console.log("[itemIsSelected]")
-	}, [itemIsSelected]);
+	// refresh renderValue
+	useEffect(() => { renderValueRef.current?.click(); }, [itemIsSelected]);
 
-	useEffect(() => {
-		intialiseSelectedItem(defaultValue, rawChildren);
-	}, [inputDefaultValue]);
+	useEffect(() => { intialiseSelectedItem(defaultValue, rawChildren); }, [inputDefaultValue]);
 
 	return (
 		<SearchContextComponent fieldsToFilter={[`props.${SEARCH_VALUE_PROP}`]} items={items}>

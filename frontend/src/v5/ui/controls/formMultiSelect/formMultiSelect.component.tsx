@@ -40,7 +40,7 @@ export const FormMultiSelect = ({
 		return renderValue?.(childrenToRender) || childrenToRender.join(', ');
 	};
 
-	const itemIsSelected = (inputItem) => !!selectedItems.find((item) => isEqual(item, inputItem));
+	const itemIsSelected = (value) => !!selectedItems.find((item) => isEqual(item.value, value));
 
 	const toggleValueSelection = (item) => {
 		setSelectedItems((items) => xorWith(items, [item], isEqual));
