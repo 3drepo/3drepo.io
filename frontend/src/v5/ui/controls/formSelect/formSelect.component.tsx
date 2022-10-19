@@ -16,7 +16,7 @@
  */
 import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
 import { isEqual } from 'lodash';
-import { Children, useState } from 'react';
+import { Children, ReactElement, useState } from 'react';
 
 export type FormSelectProps = FormSearchSelectProps & {
 	children: any,
@@ -38,8 +38,8 @@ export const FormSelect = ({
 
 	const initialiseSelectedItem = (defaultValue, children) => {
 		if (defaultValue === '') return;
-		const itemContainer: any = Children.toArray(children)
-			.find(({ props: { value } }: any) => isEqual(defaultValue, value));
+		const itemContainer = (Children.toArray(children) as ReactElement[])
+			.find(({ props: { value } }) => isEqual(defaultValue, value));
 		setSelectedItem(itemContainer?.props);
 	};
 
