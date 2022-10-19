@@ -32,7 +32,7 @@ export default {
 			type: 'string',
 		},
 		defaultValue: {
-			type: 'string',
+			type: 'number',
 		},
 		disabled: {
 			type: 'boolean',

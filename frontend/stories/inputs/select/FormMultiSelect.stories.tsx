@@ -32,7 +32,7 @@ export default {
 			type: 'string',
 		},
 		defaultValue: {
-			control: 'array',
+			type: 'string',
 		},
 		disabled: {
 			type: 'boolean',
@@ -68,37 +68,37 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args
 				formError={formError ? { message: formError } : null}
 				{...args}
 			>
-				<MultiSelectMenuItem value={{ id: 1 }} key={1}>
+				<MultiSelectMenuItem value={'1'} key={1}>
 					<IconContainer>
 						<CalendarIcon />
 					</IconContainer>
 					calendar icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={{ r: 3 }} key={2}>
+				<MultiSelectMenuItem value={'2'} key={2}>
 					<IconContainer>
 						<ClearIcon />
 					</IconContainer>
 					clear icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={3} key={3}>
+				<MultiSelectMenuItem value={'3'} key={3}>
 					<IconContainer>
 						<PrintIcon />
 					</IconContainer>
 					print icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={4} key={4}>
+				<MultiSelectMenuItem value={'4'} key={4}>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={10} key={10} disabled>
+				<MultiSelectMenuItem value={'10'} key={10} disabled>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					(disabled) chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value={11} key={11} disabled>
+				<MultiSelectMenuItem value={'11'} key={11} disabled>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
@@ -129,11 +129,11 @@ ControlledFormSelect.args = {
 export const ControlledFormSelectWithDefault = Controlled.bind({});
 ControlledFormSelectWithDefault.args = {
 	label: 'Controlled Multi Select input',
-	defaultValue: [4, 5],
+	defaultValue: ['4', '5'],
 };
 
 export const ControlledFormSelectWithDefaultDisabled = Controlled.bind({});
 ControlledFormSelectWithDefaultDisabled.args = {
 	label: 'Controlled Multi Select input',
-	defaultValue: [4, 5, 10],
+	defaultValue: ['4', '5', '10'],
 };
