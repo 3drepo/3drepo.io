@@ -16,6 +16,7 @@
  */
 
 import { Assignees as AssigneesBase } from '@controls/assignees/assignees.component';
+import { PriorityLevelChip as PriorityLevelChipBase } from '@controls/chip';
 import styled from 'styled-components';
 
 export const Id = styled.div`
@@ -65,4 +66,10 @@ export const ExtraInfo = styled.div`
 	display: inline-flex;
 	width: 100%;
 	align-items: center;
+`;
+
+export const PriorityLevelChip = styled(PriorityLevelChipBase)`
+	.MuiChip-label {
+		display: none;
+	}
 `;

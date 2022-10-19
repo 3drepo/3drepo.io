@@ -53,16 +53,15 @@ const PRIORITY_LEVELS_MAP = {
 };
 
 type IPriorityLevelChip = {
-	noLabel?: boolean,
 	state: PriorityLevels,
 };
 
-export const PriorityLevelChip = ({ state = PriorityLevels.NONE, noLabel = false }: IPriorityLevelChip) => {
+export const PriorityLevelChip = ({ state = PriorityLevels.NONE }: IPriorityLevelChip) => {
 	const { tooltip, ...chipProps } = PRIORITY_LEVELS_MAP[state];
 	const Icon = state === PriorityLevels.NONE ? FlagOutlineIcon : FlagFillIcon;
 	return (
-		<Tooltip title={tooltip} arrow placement="bottom" disableHoverListener={!noLabel}>
-			<Chip variant="text" icon={(<Icon />)} {...chipProps} {...(noLabel && { label: '' })} />
+		<Tooltip title={tooltip} arrow placement="bottom">
+			<Chip variant="text" icon={(<Icon />)} {...chipProps} />
 		</Tooltip>
 	);
 };

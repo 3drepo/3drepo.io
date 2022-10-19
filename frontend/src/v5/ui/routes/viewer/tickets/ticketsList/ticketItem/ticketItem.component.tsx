@@ -18,10 +18,10 @@
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { PriorityLevelChip, RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
+import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { useParams } from 'react-router-dom';
-import { Ticket, Id, Title, ChipList, Assignees, ExtraInfo } from './ticketItem.styles';
+import { Ticket, Id, Title, ChipList, Assignees, ExtraInfo, PriorityLevelChip } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -58,7 +58,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			<ExtraInfo>
 				{dueDate !== undefined && <DueDate date={dueDate} onClick={() => { /* Edit Due Date */ }} />}
-				{priority && <PriorityLevelChip noLabel state={priority} />}
+				{priority && <PriorityLevelChip state={priority} />}
 				{assignees && <Assignees assignees={assignees} max={7} />}
 			</ExtraInfo>
 		</Ticket>
