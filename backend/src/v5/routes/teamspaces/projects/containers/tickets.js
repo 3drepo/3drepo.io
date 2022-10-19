@@ -23,6 +23,7 @@ const { templateExists, validateNewTicket, validateUpdateTicket } = require('../
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
+const { getUserFromSession } = require('../../../../utils/sessions');
 const { templates } = require('../../../../utils/responseCodes');
 
 const createTicket = async (req, res) => {
@@ -105,9 +106,10 @@ const updateTicket = async (req, res) => {
 		body: updatedTicket,
 	} = req;
 	const { teamspace, project, container } = params;
+	const user = getUserFromSession(req.session);
 
 	try {
-		await update(teamspace, project, container, template, oldTicket, updatedTicket);
+		await update(teamspace, project, container, template, oldTicket, updatedTicket, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
