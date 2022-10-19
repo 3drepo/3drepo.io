@@ -94,8 +94,8 @@ export const FormSearchSelect = ({
 
 	const defaultValue = control?.defaultValuesRef?.current?.[name] ?? inputDefaultValue;
 
-	useEffect(() => { populateChildren();}, [value, rawChildren]);
-	
+	useEffect(() => { populateChildren(); }, [value, rawChildren]);
+
 	// refresh renderValue
 	useEffect(() => { renderValueRef.current?.click(); }, [itemIsSelected]);
 
