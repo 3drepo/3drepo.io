@@ -31,27 +31,27 @@ export enum TreatmentLevels {
 const TREATMENT_LEVELS_MAP = {
 	[TreatmentLevels.UNTREATED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.untreated', defaultMessage: 'Untreated' }),
-		colour: COLOR.BASE_LIGHT,
+		$coloroverride: COLOR.BASE_LIGHT,
 	},
 	[TreatmentLevels.PROPOSED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.proposed', defaultMessage: 'Proposed' }),
-		colour: '#0288D1',
+		$coloroverride: '#0288D1',
 	},
 	[TreatmentLevels.AGREED_PARTIAL]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.agreedPartial', defaultMessage: 'Agreed (Partial)' }),
-		colour: '#4CAF50',
+		$coloroverride: '#4CAF50',
 	},
 	[TreatmentLevels.AGREED_FULLY]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.agreedFully', defaultMessage: 'Agreed (Fully)' }),
-		colour: '#2E7D32',
+		$coloroverride: '#2E7D32',
 	},
 	[TreatmentLevels.REJECTED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.rejected', defaultMessage: 'Rejected' }),
-		colour: COLOR.ERROR_MAIN,
+		$coloroverride: COLOR.ERROR_MAIN,
 	},
 	[TreatmentLevels.VOID]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.void', defaultMessage: 'Void' }),
-		colour: '#000000',
+		$coloroverride: '#000000',
 	},
 };
 

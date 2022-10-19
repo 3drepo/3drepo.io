@@ -33,34 +33,35 @@ const PRIORITY_LEVELS_MAP = {
 	[PriorityLevels.NONE]: {
 		label: formatMessage({ id: 'chip.priorityLevel.none.label', defaultMessage: 'None' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.none.tooltip', defaultMessage: 'No priority' }),
-		colour: COLOR.BASE_LIGHT,
+		$coloroverride: COLOR.BASE_LIGHT,
 	},
 	[PriorityLevels.LOW]: {
 		label: formatMessage({ id: 'chip.priorityLevel.low.label', defaultMessage: 'Low' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.low.tooltip', defaultMessage: 'Low priority' }),
-		colour: '#0288D1',
+		$coloroverride: '#0288D1',
 	},
 	[PriorityLevels.MEDIUM]: {
 		label: formatMessage({ id: 'chip.priorityLevel.medium.label', defaultMessage: 'Medium' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.medium.tooltip', defaultMessage: 'Medium priority' }),
-		colour: '#ED6C02',
+		$coloroverride: '#ED6C02',
 	},
 	[PriorityLevels.HIGH]: {
 		label: formatMessage({ id: 'chip.priorityLevel.high.label', defaultMessage: 'High' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.high.tooltip', defaultMessage: 'High priority' }),
-		colour: COLOR.ERROR_MAIN,
+		$coloroverride: COLOR.ERROR_MAIN,
 	},
 };
 
 type IPriorityLevelChip = {
-	state: PriorityLevels,
+	state: PriorityLevels;
+	className?: string;
 };
 
-export const PriorityLevelChip = ({ state = PriorityLevels.NONE }: IPriorityLevelChip) => {
+export const PriorityLevelChip = ({ state = PriorityLevels.NONE, className }: IPriorityLevelChip) => {
 	const { tooltip, ...chipProps } = PRIORITY_LEVELS_MAP[state];
 	const Icon = state === PriorityLevels.NONE ? FlagOutlineIcon : FlagFillIcon;
 	return (
-		<Tooltip title={tooltip} arrow placement="bottom">
+		<Tooltip title={tooltip} arrow placement="bottom" className={className}>
 			<Chip variant="text" icon={(<Icon />)} {...chipProps} />
 		</Tooltip>
 	);

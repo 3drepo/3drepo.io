@@ -15,36 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Chip as ChipMui, ChipProps, ChipTypeMap } from '@mui/material';
-import { ElementType } from 'react';
+import { Chip as ChipMui, ChipProps } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-type ChipVariants = ChipProps['variant'] | 'label' | 'label-outlined';
-
-export type ChipType<T extends ElementType = ChipTypeMap['defaultComponent']> = Omit<ChipProps<T>, 'variant'> & {
-	variant?: ChipVariants,
-	colour?: string,
+export type ChipType = Omit<ChipProps, 'color'> & {
+	$coloroverride?: string,
 };
 
-const filledStyles = (colour: string) => css`
+const filledStyles = (color: string) => css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
-	background-color: ${colour};
-	border-color: ${colour};
+	background-color: ${color};
+	border-color: ${color};
 `;
 
-const outlinedStyles = (colour: string) => css`
-	color: ${colour};
-	border-color: ${colour};
+const outlinedStyles = (color: string) => css`
+	color: ${color};
+	border-color: ${color};
 	background: transparent;
 	svg {
-		color: ${colour};
+		color: ${color};
 	}
 `;
 
 const textStyles = (color: string) => css`
 	border-color: transparent;
 	background-color: transparent;
-	color: ${colour};
+	color: ${color};
 	&:hover {
 		text-decoration: underline;
 		filter: brightness(75%);
@@ -52,14 +48,14 @@ const textStyles = (color: string) => css`
 `;
 
 export const Chip = styled(ChipMui)<ChipType>`
-	${({ variant, colour = '#000' }) => {
+	${({ variant, $coloroverride = '#000' }) => {
 		switch (variant) {
 			case 'text':
-				return textStyles(colour);
+				return textStyles($coloroverride);
 			case 'filled':
-				return filledStyles(colour);
+				return filledStyles($coloroverride);
 			default: // outlined
-				return outlinedStyles(colour);
+				return outlinedStyles($coloroverride);
 		}
 	}}
 `;
