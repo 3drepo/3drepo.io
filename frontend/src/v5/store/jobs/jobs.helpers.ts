@@ -15,17 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const JOBS_LIST = [
-	{ titleLong: 'Admin', titleShort: 'Ad' },
-	{ titleLong: 'Client', titleShort: 'Cl' },
-	{ titleLong: 'Architect', titleShort: 'Ar' },
-	{ titleLong: 'Structural Engineer', titleShort: 'SE' },
-	{ titleLong: 'MEP Engineer', titleShort: 'ME' },
-	{ titleLong: 'Project Manager', titleShort: 'PM' },
-	{ titleLong: 'Quantity Surveyor', titleShort: 'QS' },
-	{ titleLong: 'Asset Manager', titleShort: 'AM' },
-	{ titleLong: 'Main Contractor', titleShort: 'MC' },
-	{ titleLong: 'Supplier', titleShort: 'Su' },
-] as const;
-
-export type Job = typeof JOBS_LIST[number]['titleLong'];
+export const getAbbreviation = (string: string) => {
+	const words = string.split(' ');
+	return words.length > 1 ? words.map((word) => word[0]).join('').substring(0, 2) : string.substring(0, 2);
+};

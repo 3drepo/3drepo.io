@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Job } from '@/v5/store/users/user.types';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
 import { AvatarWrapper, PopoverContainer, Heading as JobTitle, Data as JobData } from '../userPopover/userPopover.styles';
 
 interface IJobPopover {
-	job: Job;
+	job: string;
 }
 
 export const JobPopover = ({ job }: IJobPopover) => (

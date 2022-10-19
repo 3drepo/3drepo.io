@@ -17,10 +17,10 @@
 
 import AvatarIcon from '@mui/material/Avatar';
 import { StyledIconButton } from '@controls/avatar/avatar.styles';
-import { Job, JOBS_LIST } from '@/v5/store/users/user.types';
+import { getAbbreviation } from '@/v5/store/jobs/jobs.helpers';
 
 type JobAvatarProps = {
-	job: Job;
+	job: string;
 	size?: 'small' | 'medium' | 'large';
 	isButton?: boolean;
 	className?: string;
@@ -32,7 +32,7 @@ export const JobAvatar = ({ job, isButton, ...props }: JobAvatarProps) => (
 		{...props}
 	>
 		<AvatarIcon>
-			{JOBS_LIST.find(({ titleLong }) => titleLong === job)?.titleShort}
+			{getAbbreviation(job)}
 		</AvatarIcon>
 	</StyledIconButton>
 );
