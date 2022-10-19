@@ -142,7 +142,7 @@
 
 		// remove all models as well
 		if (project.models) {
-			await Promise.all(project.models.map(m => ModelHelper.removeModel(teamspace, m, true)));
+			await Promise.all(project.models.map(m => ModelHelper.removeModel(teamspace, m, true, project._id)));
 		}
 
 		return project;

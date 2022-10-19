@@ -23,11 +23,12 @@ import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboard
 import { Button } from '@controls/button';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useContainersData } from '../../../containers/containers.hooks';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederation.styles';
-import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
+import { ActionButtonProps, EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
+import { IconButtonProps } from './editFederationContainersList/editFederationContainersListItem/editFederationContainersListItem.component';
 
 type EditFederationProps = {
 	federation: IFederation;
@@ -50,11 +51,11 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 	}, [includedContainers]);
 
 	const includeContainer = (container: IContainer) => {
-		setIncludedContainers([...includedContainers, container]);
+		setIncludedContainers((existingState) => [...existingState, container]);
 	};
 
 	const removeContainer = (containerToRemove: IContainer) => {
-		setIncludedContainers(includedContainers.filter((container) => container !== containerToRemove));
+		setIncludedContainers((existingState) => existingState.filter((container) => container !== containerToRemove));
 	};
 
 	const includeContainers = (containersToInclude: IContainer[]) => {
@@ -100,7 +101,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 						allResults: <FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.included.removeShown" defaultMessage="Remove shown" />,
 					}}
-					iconButton={({ container }: IconButtonProps) => (
+					iconButton={useCallback(({ container }: IconButtonProps) => (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.remove.tooltip',
 							defaultMessage: 'Remove container',
@@ -115,7 +116,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 								<RemoveIcon />
 							</IconContainer>
 						</Tooltip>
-					)}
+					), [])}
 				/>
 			</SearchContextComponent>
 			<Divider />
@@ -153,7 +154,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 						allResults: <FormattedMessage id="modal.editFederation.available.includeAll" defaultMessage="Include all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.available.includeShown" defaultMessage="Include shown" />,
 					}}
-					iconButton={({ container, isSelected }: IconButtonProps) => (
+					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.include.tooltip',
 							defaultMessage: 'Include container',
@@ -168,10 +169,9 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 								<IncludeIcon isSelected={isSelected} />
 							</IconContainer>
 						</Tooltip>
-					)}
+					), [])}
 				/>
 			</SearchContextComponent>
-
 		</>
 	);
 };

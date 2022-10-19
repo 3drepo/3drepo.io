@@ -34,6 +34,8 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
@@ -50,6 +52,38 @@ interface AddFilesProps {
 	container?: IContainer;
 }
 
+type UploadModalLabelTypes = {
+	isUploading: boolean;
+	fileCount: number;
+};
+
+const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
+	? {
+		title: formatMessage({
+			id: 'uploads.modal.title.uploading',
+			defaultMessage: '{fileCount, plural, one {Uploading file} other {Uploading files}}',
+		}, { fileCount }),
+		subtitle: formatMessage({
+			id: 'uploads.modal.subtitle.uploading',
+			defaultMessage: '{fileCount, plural, one {Do not close this window until the upload is complete} other {Do not close this window until uploads are complete}}',
+		}, { fileCount }),
+		confirmLabel: formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
+	}
+	: {
+		title: formatMessage({
+			id: 'uploads.modal.title.preparing',
+			defaultMessage: '{fileCount, plural, =0 {Add files for upload} one {Prepare file for upload} other {Prepare files for upload}}',
+		}, { fileCount }),
+		subtitle: formatMessage({
+			id: 'uploads.modal.title.preparing',
+			defaultMessage: '{fileCount, plural, =0 {Drag and drop or browse your computer} other {Select a file to add Container/Revision details}}',
+		}, { fileCount }),
+		confirmLabel: formatMessage({
+			id: 'uploads.modal.buttonText.preparing',
+			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
+		}, { fileCount }),
+	});
+
 export const UploadFileForm = ({
 	presetContainerId,
 	presetFile,
@@ -58,13 +92,16 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
+
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
 		mode: 'onBlur',
 		resolver: yupResolver(UploadsSchema),
+		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name) },
 	});
-	const { control,
+	const {
+		control,
 		handleSubmit,
 		formState: { isValid },
 		trigger,
@@ -128,6 +165,7 @@ export const UploadFileForm = ({
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 	useEffect(() => {
 		if (presetFile) addFilesToList({ files: [presetFile], container: presetContainer });
+		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
 	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
@@ -166,24 +204,10 @@ export const UploadFileForm = ({
 				open={open}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
-				confirmLabel={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' })
-						: formatMessage({ id: 'uploads.modal.buttonText.preparing', defaultMessage: 'Upload files' })
-				}
-				title={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.title.uploading', defaultMessage: 'Uploading files' })
-						: formatMessage({ id: 'uploads.modal.title.preparing', defaultMessage: 'Prepare files for upload' })
-				}
-				subtitle={
-					isUploading
-						? formatMessage({ id: 'uploads.modal.subtitle.uploading', defaultMessage: 'Do not close this window until uploads are complete' })
-						: formatMessage({ id: 'uploads.modal.subtitle.preparing', defaultMessage: 'Select a file to add Container/Revision details' })
-				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
 				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadsContainer>
 					<UploadsListScroll>

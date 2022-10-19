@@ -105,15 +105,24 @@
 		}
 	};
 
-	Handler.dropCollection = function (database, collection) {
-		return Handler.getDB(database).then(dbConn => {
-			return dbConn.dropCollection(collection.name || collection);
-		}).catch(err => {
-			if(err.message !== "ns not found") {
+	const dropAllIndicies = async (database, colName) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.dropIndexes();
+	};
+
+	Handler.dropCollection = async (database, collection) => {
+		const colName = collection.name || collection;
+		try {
+			await dropAllIndicies(database, colName);
+			const dbConn = await Handler.getDB(database);
+			await dbConn.dropCollection(colName);
+
+		} catch(err) {
+			if(!err.message.includes("ns not found")) {
 				Handler.disconnect();
-				return Promise.reject(err);
+				throw err;
 			}
-		});
+		}
 	};
 
 	Handler.aggregate = async (database, colName, pipelines) => {
@@ -179,7 +188,6 @@
 		} else {
 			db = await connect();
 			return db.db(database);
-
 		}
 	};
 
@@ -303,7 +311,6 @@
 			Handler.disconnect();
 			throw err;
 		}
-
 	};
 
 	Handler.listCollections = async function (database) {
@@ -349,6 +356,11 @@
 		return collection.updateOne(query, data, options);
 	};
 
+	Handler.replaceOne = async function (database, colName, query, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.replaceOne(query, data);
+	};
+
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);
@@ -379,6 +391,8 @@
 		if(!["config", "admin"].includes(database)) {
 			try {
 				const dbConn = await Handler.getDB(database);
+				const collections = await Handler.listCollections(database);
+				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
 				await dbConn.dropDatabase();
 			} catch (err) {
 				if(err.message !== "ns not found") {

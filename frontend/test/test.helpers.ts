@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { createStore, combineReducers } from 'redux';
 import reducers from '@/v5/store/reducers';
-import { combineReducers, createStore } from 'redux';
 
 export const alertAction = (currentAction: string) => ({
 	action: {
@@ -41,3 +41,7 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 };
 
 export const createTestStore = () => createStore(combineReducers(reducers));
+
+export const listContainsElementWithId = (list, element) => (	
+	list.map(({ _id }) => _id).includes(element._id)
+);

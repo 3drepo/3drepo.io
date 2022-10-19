@@ -23,7 +23,13 @@ import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
-export const EditProfileIntegrationsTab = () => {
+type EditProfileIntegrationsTabProps = {
+	unexpectedError: any,
+};
+
+export const EditProfileIntegrationsTab = ({
+	unexpectedError,
+}: EditProfileIntegrationsTabProps) => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
 
 	const { generateApiKey, deleteApiKey } = CurrentUserActionsDispatchers;
@@ -34,7 +40,7 @@ export const EditProfileIntegrationsTab = () => {
 				label={(
 					<ShareTextFieldLabel>
 						<FormattedMessage
-							id="editProfile.apiKey"
+							id="editProfile.form.apiKey"
 							defaultMessage="API KEY"
 						/>
 					</ShareTextFieldLabel>
@@ -46,18 +52,18 @@ export const EditProfileIntegrationsTab = () => {
 			<ButtonsContainer>
 				<Button variant="outlined" color="primary" onClick={generateApiKey}>
 					<FormattedMessage
-						id="editProfile.generateApiKey"
+						id="editProfile.form.generateApiKey"
 						defaultMessage="Generate"
 					/>
 				</Button>
 				<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!apiKey}>
 					<FormattedMessage
-						id="editProfile.deleteApiKey"
+						id="editProfile.form.deleteApiKey"
 						defaultMessage="Delete"
 					/>
 				</Button>
 			</ButtonsContainer>
-			<UnhandledError />
+			<UnhandledError error={unexpectedError} />
 		</>
 	);
 };

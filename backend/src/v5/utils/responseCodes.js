@@ -59,6 +59,10 @@ ResponseCodes.templates = {
 	groupNotFound: { message: 'Group not found.', status: 404 },
 	metadataNotFound: { message: 'Metadata not found.', status: 404 },
 
+	// Custom ticket related error
+	templateNotFound: { message: 'Template not found', status: 404 },
+	ticketNotFound: { message: 'Ticket not found', status: 404 },
+
 	// File upload related error
 	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },
 	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed', status: 400 },

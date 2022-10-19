@@ -25,6 +25,12 @@ Objects.removeFields = _.omit;
 
 Objects.isEmpty = _.isEmpty;
 
+Objects.isEqual = _.isEqual;
+
+Objects.getNestedProperty = _.get;
+
+Objects.setNestedProperty = _.set;
+
 Objects.deleteIfUndefined = (obj) => {
 	const res = { ...obj };
 	Object.keys(obj).forEach((key) => {

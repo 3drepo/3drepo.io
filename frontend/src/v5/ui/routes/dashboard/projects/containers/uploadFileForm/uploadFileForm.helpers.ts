@@ -18,7 +18,7 @@
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { UploadFileForm } from './uploadFileForm.component';
 
-export const uploadToContainer = ({ presetContainerId }) => {
+export const uploadToContainer = (presetContainerId: string) => {
 	const f = document.createElement('input');
 	f.type = 'file';
 	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();

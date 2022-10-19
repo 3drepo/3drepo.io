@@ -24,7 +24,8 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { TERMS_ROUTE, PRIVACY_ROUTE, COOKIES_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import {
 	CreateAccountButton,
@@ -143,9 +144,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 										<cookiesLink>Cookies Policy</cookiesLink>.
 									`}
 									values={{
-										termsLink: (label) => <Link to="/terms" target="_blank">{label}</Link>,
-										privacyLink: (label) => <Link to="/privacy" target="_blank">{label}</Link>,
-										cookiesLink: (label) => <Link to="/cookies" target="_blank">{label}</Link>,
+										termsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
+										privacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank">{label}</Link>,
+										cookiesLink: (label) => <Link to={COOKIES_ROUTE} target="_blank">{label}</Link>,
 									}}
 								/>
 							</CheckboxMessage>
@@ -175,7 +176,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				)}
 			</TermsContainer>
-			<UnhandledError expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
+			<UnhandledErrorInterceptor expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
 			<CreateAccountButton
 				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}

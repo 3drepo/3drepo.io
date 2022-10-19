@@ -14,15 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Select as SelectBase, InputLabel as InputLabelBase } from '@mui/material';
+import { Select as SelectBase } from '@mui/material';
 import styled from 'styled-components';
-
-export const InputLabel = styled(InputLabelBase)`
-	&& {
-		transform: translate(0, 1.5px) !important;
-		transform-origin: top left;
-	}
-`;
 
 export const Select = styled(SelectBase)`
 	&& {
