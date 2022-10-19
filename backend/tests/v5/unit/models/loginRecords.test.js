@@ -26,6 +26,8 @@ UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua da
 
 const LoginRecord = require(`${src}/models/loginRecords`);
 
+const loginRecordsCol = 'loginRecords';
+
 const testSaveLoginRecord = () => {
 	const sessionId = generateRandomString();
 	const username = generateRandomString();
@@ -49,10 +51,9 @@ const testSaveLoginRecord = () => {
 	};
 
 	const checkResults = (fn, user, expectedResult) => {
-		expect(fn.mock.calls.length).toBe(1);
-		expect(fn.mock.calls[0][1]).toEqual(user);
-		const result = fn.mock.calls[0][2];
-		expect(result).toEqual({ ...expectedResult, loginTime: result.loginTime });
+		expect(fn).toHaveBeenCalledTimes(1);
+		const { loginTime } = fn.mock.calls[0][2];
+		expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { ...expectedResult, user, loginTime });
 	};
 
 	describe('Save new login record', () => {
@@ -97,13 +98,38 @@ const testSaveLoginRecord = () => {
 const testRemoveAllUserRecords = () => {
 	describe('Remove all user login records', () => {
 		test('Should just drop the user collection within loginRecords', async () => {
-			const fn = jest.spyOn(db, 'dropCollection').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
 
-			const username = generateRandomString();
-			await expect(LoginRecord.removeAllUserRecords(username)).resolves.toBeUndefined();
+			const user = generateRandomString();
+			await expect(LoginRecord.removeAllUserRecords(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('loginRecords', username);
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user });
+		});
+	});
+};
+
+const testGetLastLoginDate = () => {
+	describe('Get last login date', () => {
+		test('should return the last login date in record', async () => {
+			const expectedDate = new Date();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ loginTime: expectedDate });
+
+			const user = generateRandomString();
+			await expect(LoginRecord.getLastLoginDate(user)).resolves.toEqual(expectedDate);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user }, { loginTime: 1 }, { loginTime: -1 });
+		});
+
+		test('should return undefined if the user has no login record', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			const user = generateRandomString();
+			await expect(LoginRecord.getLastLoginDate(user)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user }, { loginTime: 1 }, { loginTime: -1 });
 		});
 	});
 };
@@ -111,4 +137,5 @@ const testRemoveAllUserRecords = () => {
 describe('models/loginRecords', () => {
 	testSaveLoginRecord();
 	testRemoveAllUserRecords();
+	testGetLastLoginDate();
 });

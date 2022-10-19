@@ -20,13 +20,20 @@ const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const geoip = require('geoip-lite');
 const { getUserAgentInfo } = require('../utils/helper/userAgent');
-const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const LoginRecord = {};
 const LOGIN_RECORDS_COL = 'loginRecords';
 
-LoginRecord.removeAllUserRecords = (user) => db.deleteMany(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user });
+LoginRecord.getLastLoginDate = async (user) => {
+	const lastRecord = await db.findOne(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+		{ user }, { loginTime: 1 }, { loginTime: -1 });
+	return lastRecord?.loginTime;
+};
+
+LoginRecord.removeAllUserRecords = async (user) => {
+	await db.deleteMany(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user });
+};
 
 LoginRecord.saveLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
 	const uaInfo = getUserAgentInfo(userAgent);
@@ -52,10 +59,5 @@ LoginRecord.saveLoginRecord = async (user, sessionId, ipAddress, userAgent, refe
 
 	publish(events.LOGIN_RECORD_CREATED, { username: user, loginRecord });
 };
-
-// Ensure the index exists at init
-db.createIndex(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user: 1, loginTime: 1 }, { background: true }).catch((err) => {
-	logger.logError(`Failed to create index for ${db.INTERNAL_DB}.${LOGIN_RECORDS_COL}`, err.message);
-});
 
 module.exports = LoginRecord;
