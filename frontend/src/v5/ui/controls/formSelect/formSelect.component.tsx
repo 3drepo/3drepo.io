@@ -39,7 +39,7 @@ export const FormSelect = ({
 	const initialiseSelectedItem = (defaultValue, children) => {
 		if (defaultValue === '') return;
 		const itemContainer: any = Children.toArray(children)
-			.find(({ props: { value } }: any) => isEqualWith(defaultValue, value, (a, b) => a == b || undefined));
+			.find(({ props: { value } }: any) => isEqual(defaultValue, value));
 		setSelectedItem(itemContainer?.props);
 	};
 
