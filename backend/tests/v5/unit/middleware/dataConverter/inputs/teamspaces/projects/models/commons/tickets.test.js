@@ -236,7 +236,7 @@ const testValidateUpdateTicket = () => {
 
 		test('Should call next if validation succeeded', async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: { modules: { mod1: generateRandomString(), mod2: {} } } };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -266,6 +266,7 @@ const testValidateUpdateTicket = () => {
 				[generateRandomString()]: generateRandomString(),
 			};
 
+			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 
