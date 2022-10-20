@@ -32,8 +32,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const ticketCol = 'tickets';
 
 const testAddTicket = () => {
-	describe('Add ticket', () => {
-		const addTicketTest = async (isFederation) => {
+	describe('Add ticket', () => {		
+		test('Should add the ticket (Container)', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -43,7 +43,6 @@ const testAddTicket = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(ticket);
 			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
-			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
 			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
 
 			const _id = await Ticket.addTicket(teamspace, project, model, ticket);
@@ -65,26 +64,13 @@ const testAddTicket = () => {
 				{ teamspace,
 					project,
 					model,
-					isFederation,
 					ticket: { ...ticket, _id, number } });
-
-			expect(isFederationMock).toHaveBeenCalledTimes(1);
-			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
-		};
-
-		test('Should add the ticket (Container)', async () => {
-			await addTicketTest(false);
-		});
-
-		test('Should add the ticket (Federation)', async () => {
-			await addTicketTest(true);
 		});
 
 		test('should add the ticket with number set to 1 if this is the first ticket', async () => {
 			const templateType = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
 
-			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(false);
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(data);
 			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			const teamspace = generateRandomString();
@@ -100,9 +86,6 @@ const testAddTicket = () => {
 			expect(getLastNumber).toHaveBeenCalledTimes(1);
 			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
-
-			expect(isFederationMock).toHaveBeenCalledTimes(1);
-			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 		});
 	});
 };
@@ -218,13 +201,10 @@ const testUpdateTicket = () => {
 				},
 				modules: {},
 			};
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(false);
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);			
 
 			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
-			expect(isFederationMock).toHaveBeenCalledTimes(1);
-			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
@@ -241,7 +221,6 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				isFederation: false,
 				timestamp: date,
 				changes: { properties: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
 			});
@@ -260,12 +239,9 @@ const testUpdateTicket = () => {
 				modules: { [moduleName]: { [propToUpdate]: oldPropvalue } },
 			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(true);
 
 			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
-			expect(isFederationMock).toHaveBeenCalledTimes(1);
-			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
@@ -282,7 +258,6 @@ const testUpdateTicket = () => {
 				model,
 				ticket: oldTicket._id,
 				author,
-				isFederation: true,
 				timestamp: date,
 				changes: {
 					modules: { [moduleName]: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
@@ -303,13 +278,10 @@ const testUpdateTicket = () => {
 				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
 				modules: { module: { propToUnset: null } },
 			};
-			const isFederationMock = ModelSettings.isFederation.mockResolvedValueOnce(false);
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
 			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
-			expect(isFederationMock).toHaveBeenCalledTimes(1);
-			expect(isFederationMock).toHaveBeenCalledWith(teamspace, model);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
@@ -324,7 +296,6 @@ const testUpdateTicket = () => {
 				ticket: oldTicket._id,
 				author,
 				timestamp: date,
-				isFederation: false,
 				changes: {
 					[propToUpdate]: { from: undefined, to: newPropValue },
 					properties: { propToUnset: { from: oldPropvalue, to: null } },

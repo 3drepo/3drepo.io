@@ -42,8 +42,7 @@ Tickets.addTicket = async (teamspace, project, model, ticketData) => {
 		{ teamspace,
 			project,
 			model,
-			ticket: { ...ticketData, _id, number },
-			isFederation: await isFederation(teamspace, model) });
+			ticket: { ...ticketData, _id, number }});
 	return _id;
 };
 
@@ -80,7 +79,6 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 		model,
 		ticket: oldTicket._id,
 		author,
-		isFederation: await isFederation(teamspace, model),
 		changes,
 		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 };

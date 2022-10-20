@@ -409,13 +409,15 @@ const testModelEventsListener = () => {
 				author: generateRandomString(),
 				timestamp: generateRandomDate(),
 				changes,
-				isFederation,
 			};
 
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
 			const event = isFederation ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
 			EventsManager.publish(events.UPDATE_TICKET, data);
 
 			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket, { author: data.author, changes: data.changes, timestamp: data.timestamp });
@@ -473,15 +475,17 @@ const testModelEventsListener = () => {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
 				model: generateRandomString(),
-				isFederation,
 				ticket: {
 					type: generateRandomString(),
 					[generateRandomString()]: generateRandomString(),
 				},
 			};
 
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 			TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
 			TicketSchemas.serialiseTicket.mockImplementationOnce(() => data.ticket);
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
 			const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 			EventsManager.publish(events.NEW_TICKET, data);
 
