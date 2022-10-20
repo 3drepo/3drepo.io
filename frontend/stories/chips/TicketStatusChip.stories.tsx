@@ -32,7 +32,7 @@ export default {
 			defaultValue: TicketStatuses.OPEN,
 		},
 		variant: {
-			options: ['outlined', 'noBorder'],
+			options: ['outlined', 'text'],
 			description: 'The chip variant',
 			control: { type: 'select' },
 		},
@@ -59,7 +59,7 @@ export const SingleOutlined = SingleTemplate.bind({});
 SingleOutlined.args = {
 	variant: 'outlined',
 };
-export const SingleNoBorder = SingleTemplate.bind({});
-SingleNoBorder.args = {
-	variant: 'noBorder',
+export const SingleText = SingleTemplate.bind({});
+SingleText.args = {
+	variant: 'text',
 };

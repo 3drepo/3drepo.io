@@ -39,11 +39,11 @@ export default {
 } as ComponentMeta<typeof PriorityLevelChip>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const AllTemplate: ComponentStory<typeof PriorityLevelChip> = ({ noLabel }) => (
+const AllTemplate: ComponentStory<typeof PriorityLevelChip> = () => (
 	<ChipList>
 		{
 			Object.keys(PriorityLevels).map(
-				(key) => <PriorityLevelChip state={PriorityLevels[key]} noLabel={noLabel} />,
+				(key) => <PriorityLevelChip state={PriorityLevels[key]} />,
 			)
 		}
 	</ChipList>
@@ -54,11 +54,4 @@ const SingleTemplate: ComponentStory<typeof PriorityLevelChip> = (args) => (
 
 export const All = AllTemplate.bind({});
 
-export const SingleLabelled = SingleTemplate.bind({});
-SingleLabelled.args = {
-	noLabel: false,
-};
-export const SingleUnlabelled = SingleTemplate.bind({});
-SingleUnlabelled.args = {
-	noLabel: true,
-};
+export const Single = SingleTemplate.bind({});

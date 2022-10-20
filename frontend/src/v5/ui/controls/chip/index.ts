@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { Chip, FilterChip } from './chip.styles';
+export { Chip } from './chip.component';
+export { FilterChip } from './chip.styles';
 export { PriorityLevelChip, PriorityLevels } from './variants/priorityLevelChip.component';
 export { RiskLevelChip, RiskLevels } from './variants/riskLevelChip.component';
 export { TicketStatusChip, TicketStatuses } from './variants/ticketStatusChip.component';

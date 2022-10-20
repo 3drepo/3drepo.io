@@ -26,10 +26,10 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the chip',
-			options: ['filled', 'outlined', 'noBorder'],
+			options: ['filled', 'outlined', 'text'],
 			control: { type: 'select' },
 		},
-		colour: {
+		color: {
 			description: 'The primary colour of the chip',
 			control: { type: 'color' },
 		},
@@ -39,26 +39,26 @@ export default {
 			defaultValue: 'Treatment',
 		},
 	},
-	parameters: { controls: { exclude: ['color'] } },
+	// parameters: { controls: { exclude: ['color'] } },
 } as ComponentMeta<typeof Chip>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Chip> = (args) => <Chip {...args}>Material ui chip</Chip>;
+const Template: ComponentStory<typeof Chip> = (args) => <Chip {...args} />;
 
 export const Filled = Template.bind({});
 Filled.args = {
 	variant: 'filled',
-	colour: '#00C1D4',
+	color: '#00C1D4',
 };
 
-export const NoBorder = Template.bind({});
-NoBorder.args = {
-	variant: 'noBorder',
-	colour: '#172B4D',
+export const Text = Template.bind({});
+Text.args = {
+	variant: 'text',
+	color: '#172B4D',
 };
 
 export const Outlined = Template.bind({});
 Outlined.args = {
 	variant: 'outlined',
-	colour: 'hotpink',
+	color: 'hotpink',
 };
