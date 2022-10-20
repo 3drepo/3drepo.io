@@ -20,7 +20,7 @@ import { useState } from 'react';
 import { Select, Tooltip } from './formSelectBase.styles';
 
 export type FormSelectBaseProps = SelectProps & {
-	control: any;
+	control?: any;
 	name: string;
 	formError?: any;
 	renderValueTooltip?: any;
