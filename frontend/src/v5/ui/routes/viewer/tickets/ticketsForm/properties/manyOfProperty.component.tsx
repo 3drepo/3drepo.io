@@ -18,8 +18,8 @@
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { FormMultiSelect } from '@controls/formSearchSelect/formMultiSelect/formMultiSelect.component';
-import { MultiSelectMenuItem } from '@controls/formSearchSelect/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
+import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { store } from '@/v4/modules/store';
 import _ from 'lodash';
 
