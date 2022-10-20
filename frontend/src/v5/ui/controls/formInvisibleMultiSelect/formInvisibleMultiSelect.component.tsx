@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import { InvisibleContainer as SelectContainer, ButtonContainer } from '../formInvisibleSelect/formInvisibleSelect.styles';
-import { FormMultiSelect, FormMultiSelectProps } from '../formSearchSelect/formMultiSelect/formMultiSelect.component';
+import { FormMultiSelect, FormMultiSelectProps } from '../formMultiSelect/formMultiSelect.component';
 
 type FormInvisibleMultiSelectProps = FormMultiSelectProps & {
 	TriggerComponent: JSX.Element,

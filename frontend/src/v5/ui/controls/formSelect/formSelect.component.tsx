@@ -14,91 +14,49 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Controller } from 'react-hook-form';
-import { FormControl, FormHelperText, InputLabel, SelectProps } from '@mui/material';
-import { useState } from 'react';
-import { Select, Tooltip } from './formSelect.styles';
+import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
+import { isEqual } from 'lodash';
+import { Children, ReactElement, useState } from 'react';
 
-export type FormSelectProps = SelectProps & {
+export type FormSelectProps = FormSearchSelectProps & {
 	control?: any;
 	name: string;
 	formError?: any;
 	renderValueTooltip?: any;
 	renderValue?: (value) => any;
+	children: any,
 };
 
 export const FormSelect = ({
-	name,
-	control,
-	value,
-	required,
-	formError,
-	label,
-	disabled,
-	defaultValue,
-	children,
-	renderValueTooltip,
-	onOpen,
-	onClose,
-	onChange,
+	defaultValue: inputDefaultValue,
+	renderValue,
 	...props
-}: FormSelectProps) => {
-	const [menuOpen, setMenuOpen] = useState(false);
-	const [tooltipHovered, setTooltipHovered] = useState(false);
+}: FormSearchSelectProps) => {
+	const [selectedItem, setSelectedItem] = useState<any>();
 
-	const handleOpen = (e) => {
-		setMenuOpen(true);
-		setTooltipHovered(false);
-		onOpen?.(e);
+	const formatRenderValue = () => {
+		const childrenToRender = selectedItem?.children;
+		return renderValue?.(childrenToRender) || childrenToRender;
 	};
 
-	const handleClose = (e) => {
-		setMenuOpen(false);
-		onClose?.(e);
-	};
+	const itemIsSelected = (value) => selectedItem && isEqual(selectedItem.value, value);
 
-	const handleChange = (eventArgs, onFieldChange) => {
-		const [event, child] = eventArgs;
-		onFieldChange(value || { target: { value: event.target.value } });
-		onChange?.(event, child);
-	};
-
-	const getTooltipTitle = () => {
-		if (menuOpen || !tooltipHovered) return '';
-		return renderValueTooltip ?? '';
+	const initialiseSelectedItem = (defaultValue, children) => {
+		if (defaultValue === '') return;
+		const itemContainer = (Children.toArray(children) as ReactElement[])
+			.find(({ props: { value } }) => isEqual(defaultValue, value));
+		setSelectedItem(itemContainer?.props);
 	};
 
 	return (
-		<Controller
-			control={control}
-			name={name}
-			defaultValue={defaultValue}
-			render={({ field: { ref, onChange: onFieldChange, ...field } }) => (
-				<FormControl required={required} disabled={disabled} error={!!formError}>
-					<InputLabel id={`${name}-label`}>{label}</InputLabel>
-					<Tooltip
-						title={getTooltipTitle()}
-						onMouseEnter={() => setTooltipHovered(true)}
-						onMouseLeave={() => setTooltipHovered(false)}
-					>
-						<Select
-							{...field}
-							inputRef={ref}
-							labelId={`${name}-label`}
-							id={name}
-							label={label}
-							onOpen={handleOpen}
-							onClose={handleClose}
-							onChange={(...args) => handleChange(args, onFieldChange)}
-							error={!!formError}
-							{...props}
-						>
-							{children}
-						</Select>
-					</Tooltip>
-					<FormHelperText>{formError?.message}</FormHelperText>
-				</FormControl>
-			)}
+		<FormSearchSelect
+			defaultValue={inputDefaultValue ?? ''}
+			value={selectedItem?.value}
+			renderValue={formatRenderValue}
+			onItemClick={setSelectedItem}
+			itemIsSelected={itemIsSelected}
+			intialiseSelectedItem={initialiseSelectedItem}
+			{...props}
 		/>
 	);
 };
