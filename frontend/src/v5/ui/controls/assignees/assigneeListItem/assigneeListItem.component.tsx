@@ -21,7 +21,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { JobPopover } from '@components/shared/jobPopover/jobPopover.component';
-import { Popover } from '@controls/popover/popover.component';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { useSelector } from 'react-redux';
 import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
 import { JobCircle, UserCircle } from '../assignees.styles';
@@ -41,12 +41,12 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 
 	if (!isJob && !user) return <></>;
 	return isJob ? (
-		<Popover anchor={(props) => <JobCircle job={assignee} {...props} />}>
+		<HoverPopover anchor={(props) => <JobCircle job={assignee} {...props} />}>
 			<JobPopover job={assignee} />
-		</Popover>
+		</HoverPopover>
 	) : (
-		<Popover anchor={(props) => <UserCircle user={user} {...props} />}>
+		<HoverPopover anchor={(props) => <UserCircle user={user} {...props} />}>
 			<UserPopover user={user} />
-		</Popover>
+		</HoverPopover>
 	);
 };

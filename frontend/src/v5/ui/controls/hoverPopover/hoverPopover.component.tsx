@@ -16,14 +16,14 @@
  */
 
 import { ReactElement, useState } from 'react';
-import { PopoverContainer } from './popover.styles';
+import { PopoverContainer } from './hoverPopover.styles';
 
-type IPopover = {
+type IHoverPopover = {
 	anchor: (props) => ReactElement;
 	children: ReactElement;
 };
 
-export const Popover = ({ anchor: AnchorEl, children }: IPopover) => {
+export const HoverPopover = ({ anchor: AnchorEl, children }: IHoverPopover) => {
 	const [anchorEl, setAnchorEl] = useState<Element | null>(null);
 	const onMouseEnter = (event) => setAnchorEl(event.currentTarget);
 	const onMouseLeave = () => setAnchorEl(null);

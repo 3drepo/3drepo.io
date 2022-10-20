@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormattedMessage } from 'react-intl';
-import { Popover } from '@controls/popover/popover.component';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { memo } from 'react';
 import { AssigneesList, ExtraAssignees } from './assignees.styles';
 import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
@@ -45,11 +45,11 @@ export const Assignees = memo(({ assignees = [], max, className }: AssigneesType
 				<FormattedMessage id="assignedAssignees.unassigned" defaultMessage="Unassigned" />
 			)}
 			{extraAssignees.length ? (
-				<Popover
+				<HoverPopover
 					anchor={(props) => <ExtraAssignees assignees={extraAssignees} {...props} />}
 				>
 					<ExtraAssigneesPopover assignees={extraAssignees} />
-				</Popover>
+				</HoverPopover>
 			) : <></>}
 		</AssigneesList>
 	);
