@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Chip as ChipMui, ChipProps } from '@mui/material';
+import { Chip, ChipProps } from '@mui/material';
 import styled, { css } from 'styled-components';
 
 export type ChipType = Omit<ChipProps, 'color'> & {
-	$coloroverride?: string,
+	color?: string;
+	$coloroverride: string;
 };
 
 const filledStyles = (color: string) => css`
@@ -47,8 +48,8 @@ const textStyles = (color: string) => css`
 	}
 `;
 
-export const Chip = styled(ChipMui)<ChipType>`
-	${({ variant, $coloroverride = '#000' }) => {
+export const ChipBase = styled(Chip)<ChipType>`
+	${({ variant, $coloroverride }) => {
 		switch (variant) {
 			case 'text':
 				return textStyles($coloroverride);

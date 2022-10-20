@@ -20,7 +20,7 @@ import FlagFillIcon from '@assets/icons/filled/flag-filled.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { Tooltip } from '@mui/material';
-import { Chip } from '../chip.styles';
+import { Chip } from '../chip.component';
 
 export enum PriorityLevels {
 	NONE = 'None',

@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { COLOR } from '@/v5/ui/themes/theme';
-import { Chip } from '../chip.styles';
+import { Chip } from '../chip.component';
 
 export enum TreatmentLevels {
 	UNTREATED = 'Untreated',

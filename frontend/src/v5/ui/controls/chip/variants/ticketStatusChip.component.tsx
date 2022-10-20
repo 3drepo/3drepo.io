@@ -22,7 +22,7 @@ import BellIcon from '@assets/icons/notifications.svg';
 import TickIcon from '@assets/icons/tick.svg';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { formatMessage } from '@/v5/services/intl';
-import { Chip } from '../chip.styles';
+import { Chip } from '../chip.component';
 
 export enum TicketStatuses {
 	OPEN = 'Open',
