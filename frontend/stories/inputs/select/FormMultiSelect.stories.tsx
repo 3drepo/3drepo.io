@@ -131,9 +131,3 @@ ControlledFormSelectWithDefault.args = {
 	label: 'Controlled Multi Select input',
 	defaultValue: ['4', '5'],
 };
-
-export const ControlledFormSelectWithDefaultDisabled = Controlled.bind({});
-ControlledFormSelectWithDefaultDisabled.args = {
-	label: 'Controlled Multi Select input',
-	defaultValue: ['4', '5', '10'],
-};
