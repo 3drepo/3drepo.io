@@ -19,13 +19,19 @@ const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
-const { getUserByEmail } = require('../../models/users');
+const { getUserByEmail, recordSuccessfulAuthAttempt } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { signupRedirectUri, authenticateRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { validateMany } = require('../common');
 
 const Aad = {};
+
+const redirectWithError = async (res, url, errorCode) => {
+	const urlRedirect = new URL(url);
+	urlRedirect.searchParams.set('error', errorCode);
+	await res.redirect(urlRedirect.href);
+}
 
 const authenticate = (redirectUri) => async (req, res) => {
 	try {
@@ -60,9 +66,7 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 		const user = await getUserByEmail(mail, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
 			const errorCode = user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
-			const urlRedirect = new URL(state.redirectUri);
-			urlRedirect.searchParams.set('error', errorCode);
-			res.redirect(urlRedirect.href);
+			redirectWithError(res, state.redirectUri, errorCode);
 		} else {
 			req.body = {
 				...state,
@@ -93,27 +97,28 @@ Aad.redirectToStateURL = (req, res) => {
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
 Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
-	const state = JSON.parse(req.query.state);
-	
-	const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
-		req.session.pkceCodes?.verifier);
-
 	try {
-		const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
+		const state = JSON.parse(req.query.state);
 
-		if (user.customData.sso?.id != id) {
-			const urlRedirect = new URL(state.redirectUri);
-			urlRedirect.searchParams.set('error', errorCodes.nonSsoUser);
-			res.redirect(urlRedirect.href);
+		const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
+			req.session.pkceCodes?.verifier);
+
+		try {
+			const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
+
+			if (user.customData.sso?.id != id) {
+				redirectWithError(res, state.redirectUri, errorCodes.nonSsoUser);
+			} else {
+				req.loginData = await recordSuccessfulAuthAttempt(user.user);
+				await next();
+			}
+		} catch {
+			redirectWithError(res, state.redirectUri, errorCodes.userNotFound);
 		}
-
-		req.loginData = await recordSuccessfulAuthAttempt(user.user);
-		await next();
-	} catch {
-		const urlRedirect = new URL(state.redirectUri);
-		urlRedirect.searchParams.set('error', errorCodes.userNotFound);
-		res.redirect(urlRedirect.href);
-	}	
+	} catch (err) {
+		logger.logError(`Failed to fetch user details from Microsoft API: ${err.message}`);
+		respond(req, res, templates.unknown);
+	}
 
 };
 

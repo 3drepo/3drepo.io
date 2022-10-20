@@ -56,7 +56,7 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, checkIfMsAccountIsLinkedTo3DRepo, notLoggedInSso, createSessionSso, redirectToStateURL);
+	router.get(authenticateRedirectEndpoint, notLoggedInSso, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, redirectToStateURL);
 
 	/**
 	 * @openapi
