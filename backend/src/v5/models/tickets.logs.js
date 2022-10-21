@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const DB = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 
-const Objects = {};
+const TicketLogs = {};
+const TICKET_LOGS_COL = 'tickets.logs';
 
-Objects.cloneDeep = _.cloneDeep;
+TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
+	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 
-Objects.removeFields = _.omit;
-
-Objects.isEmpty = _.isEmpty;
-
-Objects.isEqual = _.isEqual;
-
-Objects.getNestedProperty = _.get;
-
-Objects.setNestedProperty = _.set;
-
-Objects.deleteIfUndefined = (obj) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		if (obj[key] === undefined) delete res[key];
-	});
-
-	return res;
-};
-
-module.exports = Objects;
+module.exports = TicketLogs;
