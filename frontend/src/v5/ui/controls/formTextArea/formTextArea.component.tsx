@@ -18,7 +18,6 @@
 import { FormTextField, FormTextFieldProps } from '@controls/formTextField/formTextField.component';
 
 export type FormTextAreaProps = Omit<FormTextFieldProps, 'variant'> & {
-	formError?: any,
 	minRows?: number,
 };
 

@@ -19,12 +19,8 @@ import { isEqual } from 'lodash';
 import { Children, ReactElement, useState } from 'react';
 
 export type FormSelectProps = FormSearchSelectProps & {
-	control?: any;
-	name: string;
-	formError?: any;
 	renderValueTooltip?: any;
 	renderValue?: (value) => any;
-	children: any,
 };
 
 export const FormSelect = ({
