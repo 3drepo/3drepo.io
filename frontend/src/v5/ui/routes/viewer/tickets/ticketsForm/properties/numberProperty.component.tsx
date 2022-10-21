@@ -22,5 +22,5 @@ export const NumberProperty = ({
 	property: { name, readOnly, required },
 	value,
 }: { property: PropertyDefinition, value: any }) => (
-	<FormNumberField label={name} name={name} defaultValue={value} disabled={readOnly} reuiqred={required} />
+	<FormNumberField label={name} name={name} defaultValue={value} disabled={readOnly} required={required} />
 );

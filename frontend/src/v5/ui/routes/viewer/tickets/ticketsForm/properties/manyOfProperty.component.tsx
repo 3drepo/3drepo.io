@@ -25,13 +25,13 @@ import _ from 'lodash';
 
 export const ManyOfProperty = ({
 	property: { name, readOnly, required, values },
-	value: deafultValues,
+	value: defaultValues,
 }: { property: PropertyDefinition, value: any }) => {
-	const selectedValues = (deafultValues || []) as string[];
+	const selectedValues = (defaultValues || []) as string[];
 
 	if (values === 'jobsAndUsers') {
-		const teampspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-		const users = _.sortBy(UsersHooksSelectors.selectUsersByTeamspace(teampspace), 'firstName');
+		const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+		const users = _.sortBy(UsersHooksSelectors.selectUsersByTeamspace(teamspace), 'firstName');
 		// TODO fix after "jobs" is accessible in v5
 		// @ts-ignore
 		const { jobs } = store.getState();

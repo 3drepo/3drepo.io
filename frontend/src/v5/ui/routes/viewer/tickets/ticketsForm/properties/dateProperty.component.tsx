@@ -27,6 +27,6 @@ export const DateProperty = ({
 		name={name}
 		disabled={readOnly}
 		defaultValue={value}
-		reuiqred={required}
+		required={required}
 	/>
 );
