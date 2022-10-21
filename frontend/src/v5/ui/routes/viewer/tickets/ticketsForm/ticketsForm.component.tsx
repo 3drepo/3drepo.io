@@ -64,6 +64,7 @@ const PropertiesList = ({ properties, propertiesValues = {} }: PropertiesListPro
 
 const PropertiesPanel = (props: PropertiesListProps) => (
 	<Accordion
+		defaultExpanded
 		Icon={PropetiesIcon}
 		title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
 	>
