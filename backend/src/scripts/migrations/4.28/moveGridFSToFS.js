@@ -37,7 +37,11 @@ const convertLegacyFileName = (filename) => {
 
 const copyFromGridFSToFs = async (teamspace, collection, filename, fileSize) => {
 	const { stream: gridfsStream } = await getFileStreamFromGridFS(teamspace, collection, filename);
-	return FsService.storeFileStream(gridfsStream, fileSize);
+	try {
+		return FsService.storeFileStream(gridfsStream, fileSize);
+	} catch (err) {
+		throw new Error(`Failed to move file ${teamspace}.${collection}.${filename} to FS: ${err?.message}`);
+	}
 };
 
 const copyFile = async (teamspace, collection, filename, fileSize) => {
@@ -95,7 +99,11 @@ const processFileGroup = async (teamspace, collection, group) => {
 		}),
 	);
 	await bulkWrite(teamspace, `${collection}.ref`, refUpdates);
-	await GridFS.removeFiles(teamspace, collection, filesToRemove);
+	try {
+		await GridFS.removeFiles(teamspace, collection, filesToRemove);
+	} catch (err) {
+		throw new Error(`Failed to remove ${filesToRemove.length} files from ${teamspace}.${collection}: ${err?.message}`);
+	}
 };
 
 const formatNumber = (n) => parseFloat(n).toFixed(2);
