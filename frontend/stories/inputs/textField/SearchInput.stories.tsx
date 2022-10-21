@@ -17,14 +17,19 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { SearchInput } from '@controls/search/searchInput';
 import { useState } from 'react';
+import { SearchContextComponent } from '@controls/search/searchContext';
 
 export default {
 	title: 'Inputs/Textfield/SearchInput',
 	component: SearchInput,
-	parameters: { controls: { exclude: ['ref', 'hiddenLabel'] } },
+	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear', 'value'] } },
 } as ComponentMeta<typeof SearchInput>;
 
-const Template: ComponentStory<typeof SearchInput> = (args) => <SearchInput {...args} />;
+const Template: ComponentStory<typeof SearchInput> = (args) => (
+	<SearchContextComponent fieldsToFilter={[]} items={[]}>
+		<SearchInput {...args} />
+	</SearchContextComponent>
+);
 
 export const Default = Template.bind({});
 Default.args = {

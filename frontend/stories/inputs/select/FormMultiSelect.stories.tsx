@@ -86,13 +86,16 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args
 					</IconContainer>
 					print icon
 				</MultiSelectMenuItem>
+				<MultiSelectMenuItem value="33" key={33}>
+					33
+				</MultiSelectMenuItem>
 				<MultiSelectMenuItem value="4" key={4}>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
 					chevron icon
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="5" key={5} disabled>
+				<MultiSelectMenuItem value="5" key={5}>
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
@@ -102,7 +105,7 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args
 					<IconContainer>
 						<ChevronIcon />
 					</IconContainer>
-					(disabled) chevron icon
+					chevrone icon
 				</MultiSelectMenuItem>
 				<MultiSelectMenuItem value="7" key={7}>
 					7
@@ -110,10 +113,10 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args
 				<MultiSelectMenuItem value="8" key={8}>
 					8
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="9" key={5}>
+				<MultiSelectMenuItem value="9" key={9}>
 					some text
 				</MultiSelectMenuItem>
-				<MultiSelectMenuItem value="10" key={6}>
+				<MultiSelectMenuItem value="10" key={10}>
 					some other text
 				</MultiSelectMenuItem>
 			</FormMultiSelect>
@@ -130,10 +133,4 @@ export const ControlledFormSelectWithDefault = Controlled.bind({});
 ControlledFormSelectWithDefault.args = {
 	label: 'Controlled Multi Select input',
 	defaultValue: ['4', '5'],
-};
-
-export const ControlledFormSelectWithDefaultDisabled = Controlled.bind({});
-ControlledFormSelectWithDefaultDisabled.args = {
-	label: 'Controlled Multi Select input',
-	defaultValue: ['4', '5', '10'],
 };

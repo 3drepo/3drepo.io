@@ -44,11 +44,9 @@ export const FormSelectBase = ({
 	...props
 }: FormSelectBaseProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [tooltipHovered, setTooltipHovered] = useState(false);
 
 	const handleOpen = (e) => {
 		setMenuOpen(true);
-		setTooltipHovered(false);
 		onOpen?.(e);
 	};
 
@@ -65,7 +63,7 @@ export const FormSelectBase = ({
 	};
 
 	const getTooltipTitle = () => {
-		if (menuOpen || !tooltipHovered) return '';
+		if (menuOpen) return '';
 		return renderValueTooltip ?? '';
 	};
 
@@ -77,25 +75,23 @@ export const FormSelectBase = ({
 			render={({ field: { ref, onChange: onFieldChange, ...field } }) => (
 				<FormControl required={required} disabled={disabled} error={!!formError}>
 					<InputLabel id={`${name}-label`}>{label}</InputLabel>
-					<Tooltip
-						title={getTooltipTitle()}
-						onMouseEnter={() => setTooltipHovered(true)}
-						onMouseLeave={() => setTooltipHovered(false)}
-					>
-						<Select
-							{...field}
-							inputRef={ref}
-							labelId={`${name}-label`}
-							id={name}
-							label={label}
-							onOpen={handleOpen}
-							onClose={handleClose}
-							onChange={(...args) => handleChange(args, onFieldChange)}
-							error={!!formError}
-							{...props}
-						>
-							{children}
-						</Select>
+					<Tooltip title={getTooltipTitle()}>
+						<div>
+							<Select
+								{...field}
+								inputRef={ref}
+								labelId={`${name}-label`}
+								id={name}
+								label={label}
+								onOpen={handleOpen}
+								onClose={handleClose}
+								onChange={(...args) => handleChange(args, onFieldChange)}
+								error={!!formError}
+								{...props}
+							>
+								{children}
+							</Select>
+						</div>
 					</Tooltip>
 					<FormHelperText>{formError?.message}</FormHelperText>
 				</FormControl>
