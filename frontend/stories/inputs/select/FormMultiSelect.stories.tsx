@@ -109,7 +109,7 @@ const Controlled: ComponentStory<typeof FormMultiSelect> = ({ formError, ...args
 				</MultiSelectMenuItem>
 				<MultiSelectMenuItem value="7" key={7}>
 					7
-				</MultiSelectMenuItem>	
+				</MultiSelectMenuItem>
 				<MultiSelectMenuItem value="8" key={8}>
 					8
 				</MultiSelectMenuItem>
