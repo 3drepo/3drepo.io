@@ -54,7 +54,9 @@ AuthMiddleware.notLoggedIn = async (req, res, next) => {
 const accountActive = async (req, res, next) => {
 	const { user } = req.body;
 	try {
-		await isAccountActive(user);
+		if (!await isAccountActive(user)) {
+			throw templates.userNotVerified;
+		}
 		await next();
 	} catch (err) {
 		respond(req, res, err);

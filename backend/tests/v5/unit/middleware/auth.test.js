@@ -16,9 +16,17 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../src/v5/models/users');
+const Users = require(`${src}/models/users`);
+
+jest.mock('../../../../src/v5/models/loginRecords');
+const LoginRecords = require(`${src}/models/loginRecords`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const AuthMiddlewares = require(`${src}/middleware/auth`);
@@ -136,8 +144,51 @@ const testIsLoggedIn = () => {
 	});
 };
 
+const testCanLogin = () => {
+	describe('Is account active', () => {
+		test('next() should be called if account is active', () => {
+			const mockCB = jest.fn();
+			Users.canLogin.mockResolvedValueOnce(true);
+			LoginRecords.isAccountLocked.mockResolvedValueOnce(false);
+			const user = generateRandomString();
+			AuthMiddlewares.canLogin(
+				{ body: { user } },
+				{},
+				mockCB,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+
+			expect(Users.canLogin).toHaveBeenCalledTimes(1);
+			expect(Users.canLogin).toHaveBeenCalledWith(user);
+
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test(`should respond with ${templates.userNotVerified.code} if account is inactive`, () => {
+			const mockCB = jest.fn();
+			Users.canLogin.mockResolvedValueOnce(false);
+			const user = generateRandomString();
+			const req = { body: { user } };
+			const res = {};
+			AuthMiddlewares.canLogin(
+				req,
+				res,
+				mockCB,
+			);
+
+			expect(Users.canLogin).toHaveBeenCalledTimes(1);
+			expect(Users.canLogin).toHaveBeenCalledWith(user);
+			expect(mockCB).not.toHaveBeenCalled();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.userNotVerified);
+		});
+	});
+};
+
 describe('middleware/auth', () => {
 	testValidSession();
 	testNotLoggedIn();
 	testIsLoggedIn();
+	testCanLogin();
 });
