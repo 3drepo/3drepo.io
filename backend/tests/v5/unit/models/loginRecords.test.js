@@ -28,6 +28,10 @@ const LoginRecord = require(`${src}/models/loginRecords`);
 
 const loginRecordsCol = 'loginRecords';
 
+const testRecordFailedAttempt = () => {
+	// TOOD:
+};
+
 const testSaveLoginRecord = () => {
 	const sessionId = generateRandomString();
 	const username = generateRandomString();
@@ -119,7 +123,7 @@ const testGetLastLoginDate = () => {
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toEqual(expectedDate);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user }, { loginTime: 1 }, { loginTime: -1 });
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 
 		test('should return undefined if the user has no login record', async () => {
@@ -129,13 +133,14 @@ const testGetLastLoginDate = () => {
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user }, { loginTime: 1 }, { loginTime: -1 });
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 	});
 };
 
 describe('models/loginRecords', () => {
 	testSaveLoginRecord();
+	testRecordFailedAttempt();
 	testRemoveAllUserRecords();
 	testGetLastLoginDate();
 });
