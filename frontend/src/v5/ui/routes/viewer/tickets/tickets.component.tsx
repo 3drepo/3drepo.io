@@ -18,37 +18,12 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
-import TicketsIcon from '@mui/icons-material/FormatListBulleted';
-import { FormattedMessage } from 'react-intl';
-import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
-import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
-import { CardContext, CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
-import { useContext } from 'react';
-import { Button } from '@controls/button';
+import { CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
-import { TicketDetailCard } from './ticketDetails/ticketsDetailsCard.component';
-
-export const TicketNewCard = () => {
-	const contextValue = useContext(CardContext);
-
-	const goBack = () => {
-		contextValue.setCardView(TicketsCardViews.List);
-	};
-
-	return (
-		<CardContainer>
-			<CardHeader>
-				<TicketsIcon fontSize="small" />
-				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
-				<Button onClick={goBack}>back</Button>
-			</CardHeader>
-			<CardContent>
-				Showing the form for a new ticket for the template {JSON.stringify(contextValue.props.template)}
-			</CardContent>
-		</CardContainer>
-	);
-};
+import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
+import { TemplateSelectionCard } from './newTicket/templateSelection.component';
+import { NewTicketCard } from './newTicket/newTicket.component';
 
 export const Tickets = () => (
 	<CardContextComponent defaultView={TicketsCardViews.List}>
@@ -56,10 +31,13 @@ export const Tickets = () => (
 			<TicketsListCard />
 		</CardContextView>
 		<CardContextView cardView={TicketsCardViews.Details}>
-			<TicketDetailCard />
+			<TicketDetailsCard />
+		</CardContextView>
+		<CardContextView cardView={TicketsCardViews.Templates}>
+			<TemplateSelectionCard />
 		</CardContextView>
 		<CardContextView cardView={TicketsCardViews.New}>
-			<TicketNewCard />
+			<NewTicketCard />
 		</CardContextView>
 	</CardContextComponent>
 );

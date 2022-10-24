@@ -18,5 +18,6 @@
 export enum TicketsCardViews {
 	List = 'list',
 	Details = 'details',
-	New= 'new',
+	Templates = 'templates',
+	New = 'new',
 }
