@@ -30,6 +30,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	const { systemLogger } = require("../logger");
 	const cors = require("cors");
 	const bodyParser = require("body-parser");
+	const bodyParserErrorHandler = require("express-body-parser-error-handler");
 	const utils = require("../utils");
 	const keyAuthentication =  require("../middlewares/keyAuthentication");
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
@@ -56,6 +57,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	app.set("view_engine", "pug");
 
 	app.use(bodyParser.json({ limit: "50mb" }));
+	app.use(bodyParserErrorHandler());
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {

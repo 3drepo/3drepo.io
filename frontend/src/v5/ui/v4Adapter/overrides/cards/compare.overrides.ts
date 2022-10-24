@@ -16,6 +16,7 @@
  */
 
 import { Revisions } from '@/v4/routes/viewerGui/components/compare/components/compareDiffItem/compareDiffItem.styles';
+import { FilterPanel } from '@/v4/routes/viewerGui/components/compare/components/compareFilters/compareFilters.styles';
 import { SelectField } from '@/v4/routes/viewerGui/components/compare/components/revisionsSelect/revisionsSelect.styles';
 import { css } from 'styled-components';
 
@@ -29,5 +30,9 @@ export default css`
 	${SelectField} {
 		margin: 2px;
 		height: 24px;
+	}
+
+	${FilterPanel} .MuiInputBase-root {
+		padding-left: 39px;
 	}
 `;

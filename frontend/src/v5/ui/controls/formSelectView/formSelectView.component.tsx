@@ -22,7 +22,7 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Thumbnail, ThumbnailPlaceholder, FormSelect, ViewLabel, MenuItemView } from './formSelectView.styles';
+import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, FormSelect } from './formSelectView.styles';
 
 const getThumbnailBasicPath = (
 	teamspace: string,
@@ -48,9 +48,7 @@ export const FormSelectView = ({ views, containerOrFederationId, isContainer, ..
 	const getThumbnail = getThumbnailBasicPath(teamspace, project, containerOrFederationId, isContainer);
 
 	return (
-		<FormSelect
-			{...formProps}
-		>
+		<FormSelect {...formProps}>
 			{[EMPTY_VIEW].concat(views || []).map((view) => (
 				<MenuItemView
 					key={view._id}
