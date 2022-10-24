@@ -21,6 +21,7 @@ import { Controller } from 'react-hook-form';
 export type FormTextFieldProps = TextFieldProps & {
 	control: any,
 	formError?: any,
+	name: string,
 };
 
 export const FormTextField = ({

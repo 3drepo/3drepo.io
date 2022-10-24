@@ -34,6 +34,8 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { IntlProvider } from 'react-intl';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Version, VersionContext } from './versionContext';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocketIdHeader } from './v4/services/api';
@@ -57,18 +59,20 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<IntlProvider {...getIntlProviderProps()}>
-					<Switch>
-						<Route path="/v5">
-							<VersionContext.Provider value={Version.V5}>
-								<V5Root />
-							</VersionContext.Provider>
-						</Route>
-						<Route>
-							<VersionContext.Provider value={Version.V4}>
-								<V4Root />
-							</VersionContext.Provider>
-						</Route>
-					</Switch>
+					<LocalizationProvider dateAdapter={AdapterDayjs}>
+						<Switch>
+							<Route path="/v5">
+								<VersionContext.Provider value={Version.V5}>
+									<V5Root />
+								</VersionContext.Provider>
+							</Route>
+							<Route>
+								<VersionContext.Provider value={Version.V4}>
+									<V4Root />
+								</VersionContext.Provider>
+							</Route>
+						</Switch>
+					</LocalizationProvider>
 				</IntlProvider>
 			</ConnectedRouter>
 		</Provider>,

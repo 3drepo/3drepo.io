@@ -21,6 +21,8 @@ import { StyledItemText, StyledListItem, CopyText } from '@/v4/routes/components
 import { Item } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
 import _ from 'lodash';
+import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import { createElement } from 'react';
 
 export const theme = createTheme(
 	_.merge(
@@ -58,7 +60,7 @@ export const theme = createTheme(
 							':first-letter': {
 								textTransform: 'uppercase',
 							},
-							'&.Mui-focused': {
+							'&.Mui-focused:not(.Mui-error)': {
 								color: COLOR.BASE_MAIN,
 							},
 						},
@@ -72,11 +74,12 @@ export const theme = createTheme(
 							},
 							'&.Mui-focused': {
 								'.MuiSelect-select': {
-									height: '100%',
 									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
 									boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 									boxSizing: 'border-box',
-									overflow: 'visible',
+								},
+								'&.Mui-error .MuiSelect-select': {
+									boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
 								},
 								fieldset: {
 									borderWidth: '1px !important',
@@ -84,12 +87,6 @@ export const theme = createTheme(
 							},
 							'& input': {
 								padding: '0px 12px !important',
-							},
-							'& svg': {
-								color: COLOR.SECONDARY_MAIN,
-								'& path': {
-									fill: 'currentColor !important',
-								},
 							},
 						},
 						formControl: {
@@ -115,10 +112,11 @@ export const theme = createTheme(
 								lineHeight: 22,
 								height: 26,
 							},
+
 							'& .MuiFormHelperText-root': {
 								position: 'relative',
 								height: 0,
-								top: -2,
+								top: 0,
 							},
 						},
 					},
@@ -127,12 +125,11 @@ export const theme = createTheme(
 					styleOverrides: {
 						select: {
 							border: `1px solid ${COLOR.BASE_LIGHTER}`,
-							lineHeight: '22px',
-							height: '24px',
+							lineHeight: '24px',
+							height: 26,
 							padding: '0 10px',
 							marginTop: 0,
-							left: '-14px',
-							color: `${COLOR.SECONDARY_MAIN} !important`,
+							color: COLOR.SECONDARY_MAIN,
 
 							'& ~ svg': {
 								right: 10,
@@ -265,7 +262,6 @@ export const theme = createTheme(
 							boxShadow: `0px 9px 28px 8px rgb(0 0 0 / 5%),
 										0px 6px 16px 0px rgb(0 0 0 / 8%),
 										0px 3px 6px -4px rgb(0 0 0 / 12%) !important`,
-							padding: '4px 0',
 							'.MuiList-root': {
 								paddingTop: 0,
 								paddingBottom: 0,
@@ -323,6 +319,13 @@ export const theme = createTheme(
 								color: COLOR.SECONDARY_MAIN,
 								fontSize: '0.75rem',
 							},
+							// multiSelect
+							'&[aria-labelledby="multiselect-label"]': {
+								'.MuiMenuItem-root': {
+									padding: 0,
+									minHeight: 34,
+								},
+							},
 						},
 					},
 				},
@@ -377,6 +380,13 @@ export const theme = createTheme(
 								margin: 0,
 							},
 						},
+					},
+				},
+				MuiAccordionSummary: {
+					defaultProps: {
+						// this messes up with existing accordion (WHY is that an accordion!???)
+						// in the viewer (issues/risks card)
+						expandIcon: createElement(ThinChevronIcon),
 					},
 				},
 			},

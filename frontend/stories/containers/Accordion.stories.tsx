@@ -14,46 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
-import { useForm } from 'react-hook-form';
 
-interface IFormCheckboxInput {
-	checkbox: boolean;
-}
+import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Accordion } from '@controls/accordion/accordion.component';
+import Icon from '@assets/icons/stepper_error.svg';
 
 export default {
-	title: 'Inputs/FormCheckbox',
+	title: 'Containers/Accordion',
+	component: Accordion,
 	argTypes: {
-		label: {
+		title: {
 			type: 'string',
 		},
-		defaultValue: {
+		defaultExpanded: {
 			type: 'boolean',
 		},
 	},
-	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError'] } },
-} as ComponentMeta<typeof FormCheckbox>;
+	parameters: { controls: { exclude: ['ref', 'elevation', 'square', 'variant', 'Icon'] } },
+} as ComponentMeta<typeof Accordion>;
 
-const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
-	const {
-		control,
-	} = useForm<IFormCheckboxInput>({
-		mode: 'onChange',
-	});
+const Controlled: ComponentStory<typeof Accordion> = (args) => (<Accordion {...args} />);
 
-	return (
-		<FormCheckbox
-			name="checkbox"
-			control={control}
-			{...args}
-		/>
-	);
-};
-
-export const ControlledFormCheckbox = Controlled.bind({});
+export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormCheckbox.args = {
-	label: 'Controlled Checkbox input',
+ControlledFormSelect.args = {
+	title: 'Accordion container',
+	children: <div>This is some content only visible once expanded</div>,
+	Icon,
 };
