@@ -19,6 +19,7 @@ import { Chip, ChipProps } from '@mui/material';
 import styled, { css } from 'styled-components';
 
 export type ChipType = Omit<ChipProps, 'color'> & {
+	$variant: 'text' | 'outlined' | 'filled';
 	color?: string;
 	$coloroverride: string;
 };
@@ -49,8 +50,8 @@ const textStyles = (color: string) => css`
 `;
 
 export const ChipBase = styled(Chip)<ChipType>`
-	${({ variant, $coloroverride }) => {
-		switch (variant) {
+	${({ $variant, $coloroverride }) => {
+		switch ($variant) {
 			case 'text':
 				return textStyles($coloroverride);
 			case 'filled':

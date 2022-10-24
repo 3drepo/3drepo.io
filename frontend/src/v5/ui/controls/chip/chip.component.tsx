@@ -20,6 +20,6 @@ import { COLOR } from '../../themes/theme';
 import { ChipBase, ChipType } from './chip.styles';
 
 export const Chip = forwardRef((props: ChipType, ref: any) => {
-	const { color = COLOR.PRIMARY_MAIN, ...otherProps } = props;
-	return <ChipBase $coloroverride={color} {...otherProps} ref={ref} />;
+	const { color = COLOR.PRIMARY_MAIN, variant, ...otherProps } = props;
+	return <ChipBase $coloroverride={color} $variant={variant} {...otherProps} ref={ref} />;
 });
