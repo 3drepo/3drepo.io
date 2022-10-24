@@ -18,8 +18,6 @@
 const { src } = require('../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
-jest.mock('../../../../src/v5/models/modelSettings');
-const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -32,7 +30,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const ticketCol = 'tickets';
 
 const testAddTicket = () => {
-	describe('Add ticket', () => {		
+	describe('Add ticket', () => {
 		test('Should add the ticket (Container)', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -193,7 +191,9 @@ const testUpdateTicket = () => {
 		test('should update the ticket to set properties', async () => {
 			const oldPropvalue = generateRandomString();
 			const newPropValue = generateRandomString();
-			const oldTicket = { _id: generateRandomString(), properties: { [propToUpdate]: oldPropvalue } };
+			const oldTicket = { _id: generateRandomString(),
+				type: generateRandomString(),
+				properties: { [propToUpdate]: oldPropvalue } };
 			const updateData = {
 				properties: {
 					[propToUpdate]: newPropValue,
@@ -201,7 +201,7 @@ const testUpdateTicket = () => {
 				},
 				modules: {},
 			};
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);			
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
 			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
 
@@ -219,7 +219,7 @@ const testUpdateTicket = () => {
 				teamspace,
 				project,
 				model,
-				ticket: oldTicket._id,
+				ticket: { _id: oldTicket._id, type: oldTicket.type },
 				author,
 				timestamp: date,
 				changes: { properties: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
@@ -236,6 +236,7 @@ const testUpdateTicket = () => {
 			};
 			const oldTicket = {
 				_id: generateRandomString(),
+				type: generateRandomString(),
 				modules: { [moduleName]: { [propToUpdate]: oldPropvalue } },
 			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
@@ -256,7 +257,7 @@ const testUpdateTicket = () => {
 				teamspace,
 				project,
 				model,
-				ticket: oldTicket._id,
+				ticket: { _id: oldTicket._id, type: oldTicket.type },
 				author,
 				timestamp: date,
 				changes: {
@@ -270,6 +271,7 @@ const testUpdateTicket = () => {
 			const newPropValue = generateRandomString();
 			const oldTicket = {
 				_id: generateRandomString(),
+				type: generateRandomString(),
 				properties: { propToUnset: oldPropvalue },
 				modules: { module: { propToUnset: oldPropvalue } },
 			};
@@ -293,7 +295,7 @@ const testUpdateTicket = () => {
 				teamspace,
 				project,
 				model,
-				ticket: oldTicket._id,
+				ticket: { _id: oldTicket._id, type: oldTicket.type },
 				author,
 				timestamp: date,
 				changes: {
@@ -309,6 +311,7 @@ const testUpdateTicket = () => {
 			const newPropValue = generateRandomString();
 			const oldTicket = {
 				_id: generateRandomString(),
+				type: generateRandomString(),
 				properties: { propToUnset: oldPropvalue },
 				modules: { module: { propToUnset: oldPropvalue } },
 			};

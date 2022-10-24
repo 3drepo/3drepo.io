@@ -20,7 +20,6 @@ const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
-const { isFederation } = require('./modelSettings');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -42,7 +41,7 @@ Tickets.addTicket = async (teamspace, project, model, ticketData) => {
 		{ teamspace,
 			project,
 			model,
-			ticket: { ...ticketData, _id, number }});
+			ticket: { ...ticketData, _id, number } });
 	return _id;
 };
 
@@ -77,7 +76,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 	publish(events.UPDATE_TICKET, { teamspace,
 		project,
 		model,
-		ticket: oldTicket._id,
+		ticket: { _id: oldTicket._id, type: oldTicket.type },
 		author,
 		changes,
 		timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });

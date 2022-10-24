@@ -17,6 +17,7 @@
 
 const {
 	basePropertyLabels,
+	defaultProperties,
 	modulePropertyLabels,
 	presetEnumValues,
 	presetModules,
@@ -219,7 +220,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						shownGroups: Yup.array().of(uuidString),
 						transformGroups: Yup.array().of(uuidString),
 					}).default(undefined),
-				}).default(undefined);
+				}).nullable(true).default(undefined);
 			} else if (type === propTypes.IMAGE) {
 				res[name] = uuidString;
 			}
@@ -248,7 +249,8 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 };
 
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
-	const caster = generateCastObject(fullTemplate, stripDeprecated);
+	const caster = generateCastObject({ ...fullTemplate,
+		properties: fullTemplate.properties.concat(defaultProperties) }, stripDeprecated);
 	return caster.cast(ticket);
 };
 

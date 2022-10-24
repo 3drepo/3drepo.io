@@ -18,7 +18,7 @@
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
-const { generateRandomString, generateTicket } = require('../../../../helper/services');
+const { generateRandomString } = require('../../../../helper/services');
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -30,9 +30,6 @@ const container = ServiceHelper.generateRandomModel();
 const containerToBeDeleted = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ isFederation: true });
 const federationToBeDeleted = ServiceHelper.generateRandomModel({ isFederation: true });
-const template = ServiceHelper.generateTemplate();
-const containerTicket = ServiceHelper.generateTicket(template);
-const federationTicket = ServiceHelper.generateTicket(template);
 
 let agent;
 const setupData = async () => {
@@ -68,9 +65,6 @@ const setupData = async () => {
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id,
 			containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
 	]);
-	await ServiceHelper.db.createTemplates(teamspace, [template]);
-	await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
-	await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
 };
 
 const modelSettingsTest = () => {
@@ -225,116 +219,6 @@ const modelDeletedTest = () => {
 	});
 };
 
-const ticketAddedTest = () => {
-	describe('On adding a new ticket', () => {
-		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET} event when a new container ticket has been added`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-
-			const data = { teamspace, project: project.id, model: container._id };
-			await ServiceHelper.socket.joinRoom(socket, data);
-
-			const socketPromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_NEW_TICKET, resolve);
-				setTimeout(reject, 1000);
-			});
-
-			const newTicket = generateTicket(template);
-			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/?key=${user.apiKey}`)
-				.send(newTicket)
-				.expect(templates.ok.status);
-
-			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${postRes.body._id}?key=${user.apiKey}`)
-				.expect(templates.ok.status);
-
-			await expect(socketPromise).resolves.toEqual({
-				...data,
-				data: {
-					...newTicket,
-					_id: postRes.body._id,
-					properties: {
-						...newTicket.properties,
-						Owner: user.user,
-						'Updated at': new Date(getRes.body.properties['Updated at']).toISOString(),
-						'Created at': new Date(getRes.body.properties['Created at']).toISOString(),
-					},
-					number: 1,
-				},
-			});
-
-			socket.close();
-		});
-
-		test(`should trigger a ${EVENTS.FEDERATION_NEW_TICKET} event when a new federation ticket has been added`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-
-			const data = { teamspace, project: project.id, model: federation._id };
-			await ServiceHelper.socket.joinRoom(socket, data);
-
-			const socketPromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.FEDERATION_NEW_TICKET, resolve);
-				setTimeout(reject, 1000);
-			});
-
-			const newTicket = generateTicket(template);
-			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/?key=${user.apiKey}`)
-				.send(newTicket)
-				.expect(templates.ok.status);
-
-			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${postRes.body._id}?key=${user.apiKey}`)
-				.expect(templates.ok.status);
-
-			await expect(socketPromise).resolves.toEqual({
-				...data,
-				data: {
-					...newTicket,
-					_id: postRes.body._id,
-					properties: {
-						...newTicket.properties,
-						Owner: user.user,
-						'Updated at': new Date(getRes.body.properties['Updated at']).toISOString(),
-						'Created at': new Date(getRes.body.properties['Created at']).toISOString(),
-					},
-					number: 1,
-				},
-			});
-
-			socket.close();
-		});
-	});
-};
-
-const ticketUpdatedTest = () => {
-	describe('On updating a ticket', () => {
-		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET} event when a container ticket has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-
-			const data = { teamspace, project: project.id, model: container._id };
-			await ServiceHelper.socket.joinRoom(socket, data);
-
-			const socketPromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_UPDATE_TICKET, resolve);
-				setTimeout(reject, 1000);
-			});
-
-			const updateData = { title: ServiceHelper.generateRandomString() };
-
-			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}?key=${user.apiKey}`)
-				.send(updateData)
-				.expect(templates.ok.status);
-
-			await expect(socketPromise).resolves.toEqual({
-				...data,
-				data: {
-					_id: containerTicket._id,
-					title: updateData.title,
-				},
-			});
-
-			socket.close();
-		});
-	});
-};
-
 describe('E2E Chat Service (Model Settings)', () => {
 	let server;
 	let chatApp;
@@ -350,6 +234,4 @@ describe('E2E Chat Service (Model Settings)', () => {
 	modelSettingsTest();
 	modelAddedTest();
 	modelDeletedTest();
-	ticketAddedTest();
-	ticketUpdatedTest();
 });
