@@ -22,11 +22,7 @@ import { StyledSelect } from '@/v4/routes/viewerGui/components/gis/gis.styles';
 export default css`
 	#gis-card {
 		${StyledTextField} {
-			margin: 16px 0;
-
-			.MuiFormHelperText-root {
-				top: 22px;
-			}
+			margin: -2px 0 16px;
 		}
 		${StyledSelect} {
 			[role="button"] {

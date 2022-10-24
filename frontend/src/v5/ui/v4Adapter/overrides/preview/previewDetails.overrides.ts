@@ -55,6 +55,16 @@ export default css`
 			align-items: start;
 			min-height: unset;
 
+			.MuiAccordionSummary {
+				&-content {
+					margin: 12px 0 5px;
+				}
+				
+				&-expandIconWrapper {
+					display: none;
+				}
+			}
+
 			${Grid} {
 
 				${TitleNumber} {
@@ -92,10 +102,6 @@ export default css`
 				input::placeholder {
 					font-size: 14px;
 					font-weight: 500;
-				}
-
-				.MuiOutlinedInput-notchedOutline {
-					top: -1px;
 				}
 
 				span {

@@ -16,32 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { Paper as PaperBase } from '@mui/material';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const ActionMenuSection = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 11px;
-
-	&:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
-
-export const ActionMenuTriggerButton = styled.div.attrs({
-	isActionMenuTriggerButton: true,
-})``;
-
-export const Paper = styled(PaperBase)`
-	border-radius: 5px;
-	box-shadow: 
-		0 6px 10px rgb(0 0 0 / 14%),
-		0 1px 18px rgb(0 0 0 / 12%),
-		0 3px 5px rgb(0 0 0 / 20%);
-`;
-
-export const Menu = styled.div`
-	display: flex;
-	flex-direction: column;
-	width: 230px;
+export const FormNumberField = styled(FormTextField).attrs({ type: 'number' })`
+	width: 50%;
 `;

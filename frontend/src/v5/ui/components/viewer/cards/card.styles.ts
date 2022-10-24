@@ -41,8 +41,13 @@ export const CardHeader = styled.div`
 // TODO - fix after new palette is released
 export const CardContentContainer = styled.div`
 	padding: 15px;
+	box-sizing: border-box;
 	background-color: #f9faff;
-	height: 100%;
+	min-height: 100%;
+
+	.MuiFormControl-root {
+		margin-top: 18px;
+	}
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({

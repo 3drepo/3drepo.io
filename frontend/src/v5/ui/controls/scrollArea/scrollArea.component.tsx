@@ -24,7 +24,12 @@ export type IScrollArea = ScrollbarProps & {
 	hideHorizontal?: boolean;
 };
 
-export const ScrollArea = ({ variant = 'base', hideHorizontal = true, children, ...props }: IScrollArea) => (
+export const ScrollArea = ({
+	variant = 'base',
+	hideHorizontal = true,
+	children,
+	...props
+}: IScrollArea) => (
 	<ScrollbarWrapper
 		$hidehorizontal={hideHorizontal}
 		variant={variant}
