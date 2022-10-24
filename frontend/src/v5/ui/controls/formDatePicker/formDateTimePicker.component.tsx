@@ -15,22 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DateTimePicker, DateTimePickerProps } from '@mui/x-date-pickers';
-import { formatMessage } from '@/v5/services/intl';
 import { FormBaseCalendarPicker, FormBaseCalendarPickerProps } from './formBaseCalendarPicker/formBaseCalendarPicker.component';
+import { formatTime, getDateTimeMask } from './dateFormatHelper';
 
 type FormDateTimePickerProps = FormBaseCalendarPickerProps & Partial<DateTimePickerProps<any, any>>;
-export const FormDateTimePicker = (props: FormDateTimePickerProps) => {
-	const formatTime = (time) => time.replace('@', formatMessage({
-		id: 'form.dateTime.at',
-		defaultMessage: 'at',
-	}));
-
-	return (
-		<FormBaseCalendarPicker
-			PickerComponent={DateTimePicker}
-			inputFormat="DD/MM/YYYY @ hh:mma"
-			rifmFormatter={formatTime}
-			{...props}
-		/>
-	);
-};
+export const FormDateTimePicker = (props: FormDateTimePickerProps) => (
+	<FormBaseCalendarPicker
+		PickerComponent={DateTimePicker}
+		inputFormat={getDateTimeMask()}
+		rifmFormatter={formatTime}
+		{...props}
+	/>
+);
