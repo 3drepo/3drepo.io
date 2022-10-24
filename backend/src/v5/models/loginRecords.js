@@ -62,7 +62,7 @@ LoginRecord.isAccountLocked = async (user) => {
 	if (nFailedAttempts.length === maxAttempts) {
 		let lastAttempt = new Date();
 		for (const time of nFailedAttempts) {
-			if ((lastAttempt - time) > lockoutDuration) {
+			if ((lastAttempt - time) >= lockoutDuration) {
 				return false;
 			}
 

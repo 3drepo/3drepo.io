@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
@@ -26,6 +26,7 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { loginPolicy } = require(`${src}/utils/config`);
 
 UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua data' }));
 
@@ -70,7 +71,10 @@ const testSaveRecordHelper = (testFailed = false) => {
 		const loginRecord = { ...expectedResult, ...baseProps };
 		expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { ...loginRecord, user });
 
-		if (!testFailed) {
+		if (testFailed) {
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		} else {
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(
 				events.LOGIN_RECORD_CREATED, { username: user, loginRecord },
 			);
@@ -117,12 +121,121 @@ const testSaveRecordHelper = (testFailed = false) => {
 const testRecordFailedAttempt = () => {
 	describe('Record failed login record', () => {
 		testSaveRecordHelper(true);
+
+		test(`Should emit ${events.ACCOUNT_LOCKED} event if the account becomes locked`, async () => {
+			// for last login time
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			let date = Date.now();
+			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
+				date -= 60000;
+				return { loginTime: new Date(date) };
+			});
+
+			const user = generateRandomString();
+
+			// for all failed login since last login
+			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+			await LoginRecord.recordFailedAttempt(user,
+				generateRandomString(), generateRandomString(), generateRandomString());
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(
+				events.ACCOUNT_LOCKED, { user },
+			);
+		});
 	});
 };
 
 const testSaveLoginRecord = () => {
 	describe('Save new login record', () => {
 		testSaveRecordHelper();
+	});
+};
+const testIsAccountLocked = () => {
+	describe('Is account locked', () => {
+		const user = generateRandomString();
+		test('Should return false if there is no failed login records', async () => {
+			const findLastLoginFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			const findRecordsFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
+
+			expect(findLastLoginFn).toHaveBeenCalledTimes(1);
+
+			expect(findRecordsFn).toHaveBeenCalledTimes(1);
+			expect(findRecordsFn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+				{ user, failed: true }, { loginTime: 1 }, { loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
+		});
+
+		test('Should only search through failed records since the last successful login', async () => {
+			const date = new Date();
+			const findLastLoginFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ loginTime: date });
+			const findRecordsFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
+
+			expect(findLastLoginFn).toHaveBeenCalledTimes(1);
+
+			expect(findRecordsFn).toHaveBeenCalledTimes(1);
+			expect(findRecordsFn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+				{ user, failed: true, loginTime: { $gt: date } }, { loginTime: 1 },
+				{ loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
+		});
+
+		test(`Should return true if there has been ${loginPolicy.maxUnsuccessfulLoginAttempts} failed attempts without timeouts`, async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			let ts = Date.now();
+			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
+				ts -= 60000;
+				return { loginTime: new Date(ts) };
+			});
+
+			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+
+			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeTruthy();
+		});
+
+		test(`Should return false if there has been less than ${loginPolicy.maxUnsuccessfulLoginAttempts} failed attempts without timeouts`, async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			let ts = Date.now();
+			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts - 1, () => {
+				ts -= 60000;
+				return { loginTime: new Date(ts) };
+			});
+
+			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+
+			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
+		});
+
+		test('Should return false if sufficient time has lapsed since the account has been locked', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			let ts = Date.now() - loginPolicy.lockoutDuration;
+			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
+				ts -= 60000;
+				return { loginTime: new Date(ts) };
+			});
+
+			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+
+			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
+		});
+
+		test('Should return false if sufficient time has lapsed in between attempts', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			let ts = Date.now() - loginPolicy.lockoutDuration;
+			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
+				ts -= loginPolicy.lockoutDuration;
+				return { loginTime: new Date(ts) };
+			});
+
+			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+
+			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
+		});
 	});
 };
 
@@ -135,7 +248,7 @@ const testRemoveAllUserRecords = () => {
 			await expect(LoginRecord.removeAllUserRecords(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user });
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { user });
 		});
 	});
 };
@@ -144,23 +257,25 @@ const testGetLastLoginDate = () => {
 	describe('Get last login date', () => {
 		test('should return the last login date in record', async () => {
 			const expectedDate = new Date();
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ loginTime: expectedDate });
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ loginTime: expectedDate });
 
 			const user = generateRandomString();
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toEqual(expectedDate);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+				{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 
 		test('should return undefined if the user has no login record', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 
 			const user = generateRandomString();
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, 'loginRecords', { user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+				{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 	});
 };
@@ -170,4 +285,5 @@ describe('models/loginRecords', () => {
 	testRecordFailedAttempt();
 	testRemoveAllUserRecords();
 	testGetLastLoginDate();
+	testIsAccountLocked();
 });
