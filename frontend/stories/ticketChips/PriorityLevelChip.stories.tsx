@@ -16,50 +16,43 @@
  */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { TicketStatusChip, TicketStatuses } from '@controls/chip';
-import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
+import { PriorityLevelChip, PriorityLevels } from '@controls/chip';
+import { ChipStyleWrapper } from './chips.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Chips/TicketStatusChip',
-	component: TicketStatusChip,
+	title: 'Ticket Chips/PriorityLevelChip',
+	component: PriorityLevelChip,
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 	argTypes: {
 		state: {
-			description: 'The ticket status',
-			options: TicketStatuses,
+			description: 'The priority level',
+			options: PriorityLevels,
 			control: { type: 'select' },
-			defaultValue: TicketStatuses.OPEN,
-		},
-		variant: {
-			options: ['outlined', 'text'],
-			description: 'The chip variant',
-			control: { type: 'select' },
+			defaultValue: PriorityLevels.NONE,
 		},
 	},
-} as ComponentMeta<typeof TicketStatusChip>;
+} as ComponentMeta<typeof PriorityLevelChip>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const AllTemplate: ComponentStory<typeof TicketStatusChip> = ({ variant }) => (
-	<ChipList>
-		{
-			Object.keys(TicketStatuses).map(
-				(key) => <TicketStatusChip state={TicketStatuses[key]} variant={variant} />,
-			)
-		}
-	</ChipList>
+const V5ViewerChip = (props) => (
+	<div id="tickets">
+		<PriorityLevelChip {...props} />
+	</div>
 );
-const SingleTemplate: ComponentStory<typeof TicketStatusChip> = (args) => (
-	<TicketStatusChip {...args} />
+// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
+const AllTemplate: ComponentStory<typeof PriorityLevelChip> = () => (
+	<ChipStyleWrapper>
+		{
+			Object.keys(PriorityLevels).map((key) => <V5ViewerChip state={PriorityLevels[key]} />)
+		}
+	</ChipStyleWrapper>
+);
+const SingleTemplate: ComponentStory<typeof PriorityLevelChip> = (args) => (
+	<ChipStyleWrapper>
+		<V5ViewerChip {...args} />
+	</ChipStyleWrapper>
 );
 
 export const All = AllTemplate.bind({});
 
-export const SingleOutlined = SingleTemplate.bind({});
-SingleOutlined.args = {
-	variant: 'outlined',
-};
-export const SingleText = SingleTemplate.bind({});
-SingleText.args = {
-	variant: 'text',
-};
+export const Single = SingleTemplate.bind({});

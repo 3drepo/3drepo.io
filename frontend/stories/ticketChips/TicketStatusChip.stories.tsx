@@ -16,49 +16,55 @@
  */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Chip } from '@controls/chip';
+import { TicketStatusChip, TicketStatuses } from '@controls/chip';
+import { ChipStyleWrapper } from './chips.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Chips/Chip',
-	component: Chip,
+	title: 'Ticket Chips/TicketStatusChip',
+	component: TicketStatusChip,
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 	argTypes: {
+		state: {
+			description: 'The ticket status',
+			options: TicketStatuses,
+			control: { type: 'select' },
+			defaultValue: TicketStatuses.OPEN,
+		},
 		variant: {
-			description: 'Variant of the chip',
-			options: ['filled', 'outlined', 'text'],
+			options: ['outlined', 'text'],
+			description: 'The chip variant',
 			control: { type: 'select' },
 		},
-		color: {
-			description: 'The primary colour of the chip',
-			control: { type: 'color' },
-		},
-		label: {
-			description: 'The text that appears inside the chip',
-			control: { type: 'text' },
-			defaultValue: 'Treatment',
-		},
 	},
-	// parameters: { controls: { exclude: ['color'] } },
-} as ComponentMeta<typeof Chip>;
+} as ComponentMeta<typeof TicketStatusChip>;
 
+const V5ViewerChip = (props) => (
+	<div id="tickets">
+		<TicketStatusChip {...props} />
+	</div>
+);
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Chip> = (args) => <Chip {...args} />;
+const AllTemplate: ComponentStory<typeof TicketStatusChip> = () => (
+	<ChipStyleWrapper>
+		{
+			Object.keys(TicketStatuses).map((key) => <V5ViewerChip state={TicketStatuses[key]} />)
+		}
+	</ChipStyleWrapper>
+);
+const SingleTemplate: ComponentStory<typeof TicketStatusChip> = (args) => (
+	<ChipStyleWrapper>
+		<V5ViewerChip {...args} />
+	</ChipStyleWrapper>
+);
 
-export const Filled = Template.bind({});
-Filled.args = {
-	variant: 'filled',
-	color: '#00C1D4',
-};
+export const All = AllTemplate.bind({});
 
-export const Text = Template.bind({});
-Text.args = {
-	variant: 'text',
-	color: '#172B4D',
-};
-
-export const Outlined = Template.bind({});
-Outlined.args = {
+export const SingleOutlined = SingleTemplate.bind({});
+SingleOutlined.args = {
 	variant: 'outlined',
-	color: 'hotpink',
+};
+export const SingleText = SingleTemplate.bind({});
+SingleText.args = {
+	variant: 'text',
 };
