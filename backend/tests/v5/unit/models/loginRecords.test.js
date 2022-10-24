@@ -22,26 +22,27 @@ const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua data' }));
 
 const LoginRecord = require(`${src}/models/loginRecords`);
 
 const loginRecordsCol = 'loginRecords';
 
-const testRecordFailedAttempt = () => {
-	// TOOD:
-};
-
-const testSaveLoginRecord = () => {
+const testSaveRecordHelper = (testFailed = false) => {
 	const sessionId = generateRandomString();
 	const username = generateRandomString();
 	const ipAddress = generateRandomString();
 	const browserUserAgent = generateRandomString();
 	const pluginUserAgent = `PLUGIN: ${generateRandomString()}`;
 	const referrer = generateRandomString();
+
 	const formatLoginRecord = (userAgentInfo, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
-			_id: sessionId,
 			ipAddr,
 			...userAgentInfo,
 			location: { country: 'unknown', city: 'unknown' },
@@ -51,51 +52,77 @@ const testSaveLoginRecord = () => {
 			formattedLoginRecord.referrer = referer;
 		}
 
+		if (!testFailed) {
+			formattedLoginRecord._id = sessionId;
+		}
+
 		return formattedLoginRecord;
 	};
 
+	const callFunction = (user, id, ip, userAgent, ref) => (testFailed
+		? LoginRecord.recordFailedAttempt(username, ip, userAgent, ref)
+		: LoginRecord.saveLoginRecord(username, id, ip, userAgent, ref));
+
 	const checkResults = (fn, user, expectedResult) => {
 		expect(fn).toHaveBeenCalledTimes(1);
-		const { loginTime } = fn.mock.calls[0][2];
-		expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { ...expectedResult, user, loginTime });
+		const { loginTime, _id } = fn.mock.calls[0][2];
+		const baseProps = testFailed ? { failed: true, _id, loginTime } : { loginTime };
+		const loginRecord = { ...expectedResult, ...baseProps };
+		expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { ...loginRecord, user });
+
+		if (!testFailed) {
+			expect(EventsManager.publish).toHaveBeenCalledWith(
+				events.LOGIN_RECORD_CREATED, { username: user, loginRecord },
+			);
+		}
 	};
 
+	const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
+
+	test('Should save a new login record if user agent is from plugin', async () => {
+		await callFunction(username, sessionId, ipAddress, pluginUserAgent, referrer);
+		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
+			referrer);
+		checkResults(fn, username, formattedLoginRecord);
+	});
+
+	test('Should save a new login record if user agent is from browser', async () => {
+		await callFunction(username, sessionId, ipAddress, browserUserAgent, referrer);
+		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
+			referrer);
+		checkResults(fn, username, formattedLoginRecord);
+	});
+
+	test('Should save a new login record if user agent empty', async () => {
+		await callFunction(username, sessionId, ipAddress, '', referrer);
+		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
+			referrer);
+		checkResults(fn, username, formattedLoginRecord);
+	});
+
+	test('Should save a new login record if there is no referrer', async () => {
+		await callFunction(username, sessionId, ipAddress, browserUserAgent);
+		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo());
+		checkResults(fn, username, formattedLoginRecord);
+	});
+
+	test('Should save a new login record if there is no location', async () => {
+		await callFunction(username, sessionId, '0.0.0.0', browserUserAgent);
+		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
+			undefined, '0.0.0.0');
+		checkResults(fn, username, formattedLoginRecord);
+	});
+};
+
+const testRecordFailedAttempt = () => {
+	describe('Record failed login record', () => {
+		testSaveRecordHelper(true);
+	});
+};
+
+const testSaveLoginRecord = () => {
 	describe('Save new login record', () => {
-		const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
-
-		test('Should save a new login record if user agent is from plugin', async () => {
-			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, pluginUserAgent, referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
-				referrer);
-			checkResults(fn, username, formattedLoginRecord);
-		});
-
-		test('Should save a new login record if user agent is from browser', async () => {
-			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent, referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
-				referrer);
-			checkResults(fn, username, formattedLoginRecord);
-		});
-
-		test('Should save a new login record if user agent empty', async () => {
-			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, '', referrer);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
-				referrer);
-			checkResults(fn, username, formattedLoginRecord);
-		});
-
-		test('Should save a new login record if there is no referrer', async () => {
-			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo());
-			checkResults(fn, username, formattedLoginRecord);
-		});
-
-		test('Should save a new login record if there is no location', async () => {
-			await LoginRecord.saveLoginRecord(username, sessionId, '0.0.0.0', browserUserAgent);
-			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
-				undefined, '0.0.0.0');
-			checkResults(fn, username, formattedLoginRecord);
-		});
+		testSaveRecordHelper();
 	});
 };
 
