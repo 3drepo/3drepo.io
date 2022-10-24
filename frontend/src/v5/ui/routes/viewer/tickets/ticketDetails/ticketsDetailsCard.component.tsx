@@ -18,7 +18,6 @@ import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext, useEffect } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
@@ -36,10 +35,18 @@ export const TicketDetailsCard = () => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
+	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const goBack = () => {
 		setCardView(TicketsCardViews.List);
 	};
+	const changeTicketIndex = (delta: number) => {
+		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticketId);
+		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
+		setCardView(TicketsCardViews.Details, { ticketId: updatedId });
+	};
+	const goPrev = () => changeTicketIndex(-1);
+	const goNext = () => changeTicketIndex(1);
 
 	const updateTicket = () => {
 		// TicketsActionsDispatchers.updateTicket(
@@ -100,8 +107,10 @@ export const TicketDetailsCard = () => {
 		<CardContainer>
 			<CardHeader>
 				<TicketsIcon fontSize="small" />
-				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
+				{template.code}:{ticket.number}
 				<Button onClick={goBack}>back</Button>
+				<Button onClick={goPrev}>prev</Button>
+				<Button onClick={goNext}>next</Button>
 			</CardHeader>
 			<FormProvider {...useForm()}>
 				<TicketForm template={template} ticket={ticket} />
