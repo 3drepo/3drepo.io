@@ -29,6 +29,7 @@ import bim from './overrides/bim.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 import issues from './overrides/cards/issues/issues.overrides';
 import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
+import tickets from './overrides/cards/tickets.overrides';
 import sharedStyles from './overrides/cards/sharedStyles/sharedStyles.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
 import groups from './overrides/cards/groups.overrides';
@@ -70,6 +71,7 @@ export const V4OverridesContainer = styled.div`
 	${measurements}
 	${issues}
 	${safetiBase}
+	${tickets}
 
 	${views}
 	${gis}

@@ -32,7 +32,7 @@ const filledStyles = (color: string) => css`
 
 const outlinedStyles = (color: string) => css`
 	color: ${color};
-	border-color: ${color};
+	border: 1px solid ${color};
 	background: transparent;
 	svg {
 		color: ${color};
@@ -67,16 +67,15 @@ export const FilterChip = styled(Chip).attrs({
 })<{ selected?: boolean }>`
 	cursor: pointer;
 	height: 18px;
-	border-color: ${({ theme }) => theme.palette.base.main};
 	color: ${({ theme }) => theme.palette.base.main};
+	border: 1px solid currentColor;
+	background-color: none;
 	:hover {
 		background-color: inherit;
-		border-color: ${({ theme }) => theme.palette.primary.main};
 		color: ${({ theme }) => theme.palette.primary.main};
 	}
 	${({ selected }) => selected && css`
 		background-color: ${({ theme }) => theme.palette.primary.lightest};
-		border-color: ${({ theme }) => theme.palette.primary.main};
 		color: ${({ theme }) => theme.palette.primary.main};
 		:hover {
 			background-color: ${({ theme }) => theme.palette.primary.lightest};

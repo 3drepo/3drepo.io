@@ -698,43 +698,6 @@ export const theme = createTheme({
 				},
 			},
 		},
-		MuiChip: {
-			defaultProps: {
-				variant: 'outlined',
-			},
-			styleOverrides: {
-				root: {
-					...typography.body2,
-					fontSize: '0.5rem',
-					textTransform: 'uppercase',
-					padding: '3px 7px',
-					border: '1px solid',
-					borderRadius: 6,
-					height: 20,
-					gap: 4,
-					userSelect: 'none',
-					margin: 0,
-					letterSpacing: 0.7,
-					svg: {
-						height: 11,
-						width: 11,
-					},
-				},
-				label: {
-					padding: 0,
-				},
-				icon: {
-					color: 'inherit',
-					margin: 0,
-				},
-				deleteIcon: {
-					color: 'inherit',
-					height: 15,
-					width: 15,
-					margin: 0,
-				},
-			},
-		},
 		MuiFab: {
 			styleOverrides: {
 				root: {
