@@ -14,8 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
+import { EditableTicket, ITemplate, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { get } from 'lodash';
+import { useFormContext } from 'react-hook-form';
 import { CoordsProperty } from './properties/coordsProperty.component';
 import { DateProperty } from './properties/dateProperty.component';
 import { ImageProperty } from './properties/imageProperty.component';
@@ -40,16 +42,29 @@ const TicketProperty = {
 interface PropertiesPanelProps {
 	properties: PropertyDefinition[] ;
 	propertiesValues: Record<string, any>;
+	module: string;
 }
 
-const PropertiesPanel = ({ properties, propertiesValues = {} }: PropertiesPanelProps) => (
-	<>
-		{properties.map((property) => {
-			const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
-			return (<><hr /><PropertyComponent property={property} value={propertiesValues[property.name]} /></>);
-		})}
-	</>
-);
+const PropertiesPanel = ({ module, properties, propertiesValues = {} }: PropertiesPanelProps) => {
+	const { formState  } = useFormContext();
+	return (
+		<>
+			{properties.map((property) => {
+				const { name } = property;
+				const inputName = `${module}.${name}`;
+				const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
+				return (
+					<PropertyComponent
+						property={property}
+						defaultValue={propertiesValues[name]}
+						name={inputName}
+						formError={get(formState.errors, inputName)}
+					/>
+				);
+			})}
+		</>
+	);
+};
 
 interface ModulePanelProps {
 	module: TemplateModule ;
@@ -57,28 +72,35 @@ interface ModulePanelProps {
 }
 
 const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
-	<DashboardListCollapse
-		title={<>Module: {module.name}</>}
-	>
-		<PropertiesPanel properties={module.properties || []} propertiesValues={moduleValues} />
+	<DashboardListCollapse title={<>Module: {module.name}</>}>
+		<PropertiesPanel module={module.name} properties={module.properties || []} propertiesValues={moduleValues} />
 	</DashboardListCollapse>
 );
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => (
-	<>
-		<TextProperty property={{ name: 'title' }} value={ticket.title} />
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket }) => {
+	const { formState } = useFormContext();
+	const TITLE_INPUT_NAME = 'title';
+	return (
+		<>
+			<TextProperty
+				name={TITLE_INPUT_NAME}
+				property={{ name: TITLE_INPUT_NAME }}
+				defaultValue={ticket[TITLE_INPUT_NAME]}
+				formError={formState.errors[TITLE_INPUT_NAME]}
+			/>
 
-		<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
-		{
-			(template.modules || []).map((module) => (
-				<>
-					<br />
-					<ModulePanel
-						module={module}
-						moduleValues={ticket.modules[module.name]}
-					/>
-				</>
-			))
-		}
-	</>
-);
+			<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
+			{
+				(template.modules || []).map((module) => (
+					<>
+						<br />
+						<ModulePanel
+							module={module}
+							moduleValues={ticket.modules[module.name]}
+						/>
+					</>
+				))
+			}
+		</>
+	);
+};
