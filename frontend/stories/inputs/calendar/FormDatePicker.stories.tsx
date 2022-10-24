@@ -63,5 +63,5 @@ ControlledFormDatePicker.args = {
 export const ControlledFormDatePickerDefaultDate = Controlled.bind({});
 ControlledFormDatePickerDefaultDate.args = {
 	label: 'Controlled Date with today as default date',
-	defaultValue: new Date("2020-01-30"),
+	defaultValue: new Date('2020-01-30'),
 };
