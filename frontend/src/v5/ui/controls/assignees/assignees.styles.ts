@@ -100,7 +100,7 @@ export const AssigneesList = styled.div`
 		}
 	}
 
-	>:last-child {
+	>:last-child .MuiButtonBase-root {
 		margin: 0;
 	}
 `;
