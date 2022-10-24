@@ -172,7 +172,7 @@ const AttachResourcesLink = css`
 			flex-direction: column-reverse;
 
 			${FieldsRow} {
-				min-height: 42px;
+				min-height: 51px;
 
 				& > * {
 					height: fit-content;
@@ -191,7 +191,11 @@ const AttachResourcesLink = css`
 				}
 
 				&:first-of-type {
-					margin-bottom: 20px;
+					margin-bottom: 2px;
+				}
+
+				&:last-of-type {
+					margin-top: 18px;
 				}
 
 				button {

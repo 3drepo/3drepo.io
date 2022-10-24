@@ -46,11 +46,9 @@ export const FormSelect = styled(FormSelectBase)`
 		display: flex;
 		padding-left: 0;
 	}
-
 	img {
 		margin-right: 0;
 	}
-
 	${ThumbnailPlaceholder} {
 		display: none;
 	}

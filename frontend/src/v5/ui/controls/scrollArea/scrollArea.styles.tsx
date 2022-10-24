@@ -37,14 +37,13 @@ const ThumbVertical = styled.div<{ variant: ScrollbarVariant }>`
 	background-color: ${({ variant }) => getBackgroundColor(variant)};
 `;
 
-const ThumbHorizontal = styled.div<{ $hide?: boolean, variant: ScrollbarVariant }>`
+const ThumbHorizontal = styled.div<{ variant: ScrollbarVariant }>`
 	left: 6px;
 	right: 6px;
 	bottom: 6px;
 	border-radius: 3px;
 	height: 6px;
 	background-color: ${({ variant }) => getBackgroundColor(variant)};
-	display: ${({ $hide }) => ($hide ? 'none' : 'block')};
 `;
 
 export const ScrollbarWrapper = styled(Scrollbars).attrs(
@@ -53,7 +52,9 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs(
 		autoHideDuration: 300,
 		renderThumbVertical: ({ style }) => <ThumbVertical style={style} variant={variant} />,
 		renderThumbHorizontal: ({ style }) => (
-			<ThumbHorizontal style={style} variant={variant} $hide={$hidehorizontal} />
+			$hidehorizontal ? (
+				<ThumbHorizontal style={style} variant={variant} />
+			) : (<span />)
 		),
 	}),
 )``;

@@ -14,14 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Select as SelectBase } from '@mui/material';
-import styled from 'styled-components';
+import { formatDate, formatMessage } from '@/v5/services/intl';
 
-export const Select = styled(SelectBase)`
-	&& {
-		background: transparent;
-		width: 100%;
-		cursor: initial;
-		pointer-events: none;
-	}
-`;
+export const getDateMask = () => {
+	const isoString = '2018-10-25'; // example date!
+
+	const intlString = formatDate(isoString); // generate a formatted date
+	const dateParts = isoString.split('-'); // prepare to replace with pattern parts
+
+	return intlString
+		.replace(dateParts[2], 'DD')
+		.replace(dateParts[1], 'MM')
+		.replace(dateParts[0], 'YYYY');
+};
+
+export const getDateTimeMask = () => `${getDateMask()} @ hh:mma`;
+
+export const formatTime = (time) => time.replace('@', formatMessage({
+	id: 'form.dateTime.at',
+	defaultMessage: 'at',
+}));
