@@ -16,7 +16,7 @@
  */
 
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
-import { AvatarWrapper, PopoverContainer, Heading as JobTitle, Data as JobData } from '../userPopover/userPopover.styles';
+import { AvatarWrapper, PopoverContainer, Heading, Data } from '../userPopover/userPopover.styles';
 
 interface IJobPopover {
 	job: string;
@@ -27,8 +27,8 @@ export const JobPopover = ({ job }: IJobPopover) => (
 		<AvatarWrapper>
 			<JobAvatar job={job} />
 		</AvatarWrapper>
-		<JobData>
-			<JobTitle>{job}</JobTitle>
-		</JobData>
+		<Data>
+			<Heading>{job}</Heading>
+		</Data>
 	</PopoverContainer>
 );

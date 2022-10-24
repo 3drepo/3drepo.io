@@ -42,12 +42,12 @@ export const Heading = styled(Typography)`
 	margin: auto 0;
 `;
 
-export const Body = styled(Typography)`
+export const Username = styled(Typography)`
 	${({ theme }) => theme.typography.body1};
 	margin-top: 2px;
 `;
 
-export const Caption = styled(Typography)`
+export const Employment = styled(Typography)`
 	${({ theme }) => theme.typography.caption};
 	margin-top: 2px;
 `;
