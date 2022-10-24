@@ -18,12 +18,12 @@
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { JobPopover } from '@components/shared/jobPopover/jobPopover.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { useSelector } from 'react-redux';
 import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
+import { getMemberImgSrc } from '@/v5/store/users/users.helpers';
 import { JobCircle, UserCircle } from '../assignees.styles';
 
 type IAssigneeListItem = {
@@ -36,7 +36,7 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 	const isJob = jobsInTeamspace.some(({ _id }) => _id === assignee);
 	let user = UsersHooksSelectors.selectUser(teamspace, assignee);
 	if (user) {
-		user = { ...user, avatarUrl: getTeamspaceImgSrc(assignee), hasAvatar: true };
+		user = { ...user, avatarUrl: getMemberImgSrc(teamspace, assignee), hasAvatar: true };
 	}
 
 	if (!isJob && !user) return <></>;
