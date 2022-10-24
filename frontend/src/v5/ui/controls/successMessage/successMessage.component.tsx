@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PostSubmitSuccessfulMessage, TickIcon } from './successMessage.style';
+import { PostSubmitSuccessfulMessage, TickIcon } from './successMessage.styles';
 
 type SuccessMessageProps = {
 	children: any;
