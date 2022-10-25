@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { FormProvider, useForm } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
@@ -84,7 +83,7 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 );
 
 export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => (
-	<FormProvider {...useForm()}>
+	<>
 		<FormTitle name="title" defaultValue={ticket.title} />
 		<CardContent>
 			<PanelsContainer>
@@ -99,5 +98,5 @@ export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket:
 				}
 			</PanelsContainer>
 		</CardContent>
-	</FormProvider>
+	</>
 );

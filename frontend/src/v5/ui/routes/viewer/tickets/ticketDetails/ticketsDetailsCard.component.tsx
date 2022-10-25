@@ -24,12 +24,13 @@ import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { FormProvider, useForm } from 'react-hook-form';
 import { omit } from 'lodash';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
 
-export const TicketDetailCard = () => {
+export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -102,7 +103,9 @@ export const TicketDetailCard = () => {
 				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
 				<Button onClick={goBack}>back</Button>
 			</CardHeader>
-			<TicketForm template={template} ticket={ticket} />
+			<FormProvider {...useForm()}>
+				<TicketForm template={template} ticket={ticket} />
+			</FormProvider>
 			<Button onClick={updateTicket}> Update Ticket! </Button>
 			<Button onClick={cloneTicket}> Clone Ticket!</Button>
 		</CardContainer>
