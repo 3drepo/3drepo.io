@@ -30,7 +30,7 @@ jest.mock('../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 
 jest.mock('../../../../../src/v5/models/loginRecords');
-const LoginRecord = require(`${src}/models/loginRecords`);
+const LoginRecords = require(`${src}/models/loginRecords`);
 
 jest.mock('../../../../../src/v5/models/tickets.logs');
 const TicketLogs = require(`${src}/models/tickets.logs`);
@@ -421,87 +421,109 @@ const testModelEventsListener = () => {
 
 const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
-		test(`Should trigger UserLoggedIn if there is a ${events.SESSION_CREATED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
-			const username = generateRandomString();
-			const sessionID = generateRandomString();
-			const socketId = generateRandomString();
-			const ipAddress = generateRandomString();
-			const userAgent = generateRandomString();
-			const referer = generateRandomString();
-			EventsManager.publish(events.SESSION_CREATED,
-				{ username, sessionID, socketId, ipAddress, userAgent, referer });
+		describe(events.SESSION_CREATED, () => {
+			test(`Should trigger UserLoggedIn if there is a ${events.SESSION_CREATED}`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+				const username = generateRandomString();
+				const sessionID = generateRandomString();
+				const socketId = generateRandomString();
+				const ipAddress = generateRandomString();
+				const userAgent = generateRandomString();
+				const referer = generateRandomString();
+				EventsManager.publish(events.SESSION_CREATED,
+					{ username, sessionID, socketId, ipAddress, userAgent, referer });
 
-			await waitOnEvent;
-			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledTimes(1);
-			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledWith(
-				username, sessionID, ipAddress, userAgent, referer,
-			);
-			expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
-			expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
-			expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createInternalMessage).toHaveBeenCalledWith(chatEvents.LOGGED_IN,
-				{ sessionID, socketId });
+				await waitOnEvent;
+				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledTimes(1);
+				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledWith(
+					username, sessionID, ipAddress, userAgent, referer,
+				);
+				expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
+				expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
+				expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
+				expect(ChatService.createInternalMessage).toHaveBeenCalledWith(chatEvents.LOGGED_IN,
+					{ sessionID, socketId });
+			});
+
+			test(`Should not create an event message if there is a ${events.SESSION_CREATED} event without socketId`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+				const username = generateRandomString();
+				const sessionID = generateRandomString();
+				const ipAddress = generateRandomString();
+				const userAgent = generateRandomString();
+				const referer = generateRandomString();
+				EventsManager.publish(events.SESSION_CREATED,
+					{ username, sessionID, ipAddress, userAgent, referer });
+
+				await waitOnEvent;
+				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledTimes(1);
+				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledWith(
+					username, sessionID, ipAddress, userAgent, referer,
+				);
+				expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
+				expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
+				expect(ChatService.createInternalMessage).not.toHaveBeenCalled();
+			});
+		});
+		describe(events.SESSION_REMOVED, () => {
+			test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+				const data = {
+					ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+				};
+				EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+				await waitOnEvent;
+				expect(ChatService.createDirectMessage).toHaveBeenCalledTimes(1);
+				expect(ChatService.createDirectMessage).toHaveBeenCalledWith(
+					chatEvents.LOGGED_OUT,
+					{ reason: 'You have logged in else where' },
+					data.ids,
+				);
+
+				expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
+				expect(ChatService.createInternalMessage).toHaveBeenCalledWith(
+					chatEvents.LOGGED_OUT,
+					{ sessionIds: data.ids },
+				);
+			});
+
+			test(`Should not send a direct message if the ${events.SESSIONS_REMOVED} was triggered by session owner`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+				const data = {
+					ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+					elective: true,
+				};
+				EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+				await waitOnEvent;
+				expect(ChatService.createDirectMessage).not.toHaveBeenCalled();
+
+				expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
+				expect(ChatService.createInternalMessage).toHaveBeenCalledWith(
+					chatEvents.LOGGED_OUT,
+					{ sessionIds: data.ids },
+				);
+			});
 		});
 
-		test(`Should not create an event message if there is a ${events.SESSION_CREATED} event without socketId`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
-			const username = generateRandomString();
-			const sessionID = generateRandomString();
-			const ipAddress = generateRandomString();
-			const userAgent = generateRandomString();
-			const referer = generateRandomString();
-			EventsManager.publish(events.SESSION_CREATED,
-				{ username, sessionID, ipAddress, userAgent, referer });
+		describe(events.FAILED_LOGIN_ATTEMPT, () => {
+			test(`Should trigger recordFailedAttempt if there is a ${events.FAILED_LOGIN_ATTEMPT}`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.FAILED_LOGIN_ATTEMPT);
+				const data = {
+					user: generateRandomString(),
+					ipAddress: generateRandomString(),
+					userAgent: generateRandomString(),
+					referer: generateRandomString(),
+				};
+				EventsManager.publish(events.FAILED_LOGIN_ATTEMPT, data);
 
-			await waitOnEvent;
-			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledTimes(1);
-			expect(LoginRecord.saveLoginRecord).toHaveBeenCalledWith(
-				username, sessionID, ipAddress, userAgent, referer,
-			);
-			expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
-			expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
-			expect(ChatService.createInternalMessage).not.toHaveBeenCalled();
-		});
+				await waitOnEvent;
 
-		test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
-			const data = {
-				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
-			};
-			EventsManager.publish(events.SESSIONS_REMOVED, data);
-
-			await waitOnEvent;
-			expect(ChatService.createDirectMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createDirectMessage).toHaveBeenCalledWith(
-				chatEvents.LOGGED_OUT,
-				{ reason: 'You have logged in else where' },
-				data.ids,
-			);
-
-			expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createInternalMessage).toHaveBeenCalledWith(
-				chatEvents.LOGGED_OUT,
-				{ sessionIds: data.ids },
-			);
-		});
-
-		test(`Should not send a direct message if the ${events.SESSIONS_REMOVED} was triggered by session owner`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
-			const data = {
-				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
-				elective: true,
-			};
-			EventsManager.publish(events.SESSIONS_REMOVED, data);
-
-			await waitOnEvent;
-			expect(ChatService.createDirectMessage).not.toHaveBeenCalled();
-
-			expect(ChatService.createInternalMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createInternalMessage).toHaveBeenCalledWith(
-				chatEvents.LOGGED_OUT,
-				{ sessionIds: data.ids },
-			);
+				expect(LoginRecords.recordFailedAttempt).toHaveBeenCalledTimes(1);
+				expect(LoginRecords.recordFailedAttempt).toHaveBeenCalledWith(data.user,
+					data.ipAddress, data.userAgent, data.referer);
+			});
 		});
 	});
 };
