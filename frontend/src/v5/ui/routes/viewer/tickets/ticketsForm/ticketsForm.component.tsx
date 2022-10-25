@@ -21,38 +21,18 @@ import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { CoordsProperty } from './properties/coordsProperty.component';
-import { DateProperty } from './properties/dateProperty.component';
-import { ImageProperty } from './properties/imageProperty.component';
-import { LongTextProperty } from './properties/longTextProperty.component';
-import { ManyOfProperty } from './properties/manyOfProperty.component';
-import { NumberProperty } from './properties/numberProperty.component';
-import { OneOfProperty } from './properties/oneOfProperty.component';
-import { TextProperty } from './properties/textProperty.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
-import { BooleanProperty } from './properties/booleanProperty.component';
+import { TicketProperty } from './properties/properties.helper';
 import { FormTitle, PanelsContainer } from './ticketsForm.styles';
 
-const TicketProperty = {
-	text: TextProperty,
-	longText: LongTextProperty,
-	date: DateProperty,
-	oneOf: OneOfProperty,
-	manyOf: ManyOfProperty,
-	boolean: BooleanProperty,
-	coords: CoordsProperty,
-	number: NumberProperty,
-	image: ImageProperty,
-};
-
 interface PropertiesListProps {
-	properties: PropertyDefinition[] ;
+	properties: PropertyDefinition[];
 	propertiesValues: Record<string, any>;
 	module: string;
 }
 
 const PropertiesList = ({ module, properties, propertiesValues = {} }: PropertiesListProps) => {
-	const { formState  } = useFormContext();
+	const { formState } = useFormContext();
 	return (
 		<>
 			{properties.map((property) => {

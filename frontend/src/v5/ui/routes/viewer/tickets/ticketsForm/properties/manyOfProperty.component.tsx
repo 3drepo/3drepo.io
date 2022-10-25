@@ -17,17 +17,18 @@
 
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
 import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { store } from '@/v4/modules/store';
 import _ from 'lodash';
+import { PropertyProps } from './properties.types';
 
 export const ManyOfProperty = ({
 	property: { name, readOnly, required, values },
-	value: defaultValues,
-}: { property: PropertyDefinition, value: any }) => {
-	const selectedValues = (defaultValues || []) as string[];
+	defaultValue,
+	...props
+}: PropertyProps) => {
+	const selectedValues = (defaultValue || []) as string[];
 
 	if (values === 'jobsAndUsers') {
 		const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -44,10 +45,10 @@ export const ManyOfProperty = ({
 		return (
 			<FormMultiSelect
 				label={name}
-				name={name}
 				defaultValue={selectedValues}
 				disabled={readOnly}
 				required={required}
+				{...props}
 			>
 				{jobItems.concat(userItems)}
 			</FormMultiSelect>
@@ -57,10 +58,10 @@ export const ManyOfProperty = ({
 	return (
 		<FormMultiSelect
 			label={name}
-			name={name}
 			defaultValue={selectedValues}
 			disabled={readOnly}
 			required={required}
+			{...props}
 		>
 			{(values as any[]).map((value) => (
 				<MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>

@@ -14,22 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormNumberField } from '@controls/formNumberField/formNumberField.component';
 import { FlexContainer } from './coordsProperty.styles';
+import { PropertyProps } from './properties.types';
 
-export const CoordsProperty = ({
-	property: { name, readOnly, required },
-	value,
-}: { property: PropertyDefinition, value: any }) => {
-	const [x, y, z] = value || [];
+export const CoordsProperty = ({ property: { readOnly, required }, defaultValue, name, ...props }: PropertyProps) => {
+	const [x, y, z] = defaultValue || [];
 
 	return (
 		<FlexContainer>
-			<FormNumberField label="x" name={name} defaultValue={x} disabled={readOnly} required={required} />
-			<FormNumberField label="y" name={name} defaultValue={y} disabled={readOnly} required={required} />
-			<FormNumberField label="z" name={name} defaultValue={z} disabled={readOnly} required={required} />
+			<FormNumberField name={`${name}[0]`} label="x" defaultValue={x} disabled={readOnly} required={required} {...props} />
+			<FormNumberField name={`${name}[1]`} label="y" defaultValue={y} disabled={readOnly} required={required} {...props} />
+			<FormNumberField name={`${name}[2]`} label="z" defaultValue={z} disabled={readOnly} required={required} {...props} />
 		</FlexContainer>
 	);
 };
