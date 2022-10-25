@@ -14,15 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
-import { FormBaseCalendarPicker, FormBaseCalendarPickerProps } from './formBaseCalendarPicker/formBaseCalendarPicker.component';
-import { getDateMask } from './dateFormatHelper';
 
-type FormDatePickerProps = FormBaseCalendarPickerProps & Partial<DatePickerProps<any, any>>;
-export const FormDatePicker = (props: FormDatePickerProps) => (
-	<FormBaseCalendarPicker
-		PickerComponent={DatePicker}
-		inputFormat={getDateMask()}
-		{...props}
-	/>
-);
+const DB = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
+
+const TicketLogs = {};
+const TICKET_LOGS_COL = 'tickets.logs';
+
+TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
+	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
+
+module.exports = TicketLogs;
