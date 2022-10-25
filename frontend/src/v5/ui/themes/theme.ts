@@ -1231,7 +1231,7 @@ export const theme = createTheme({
 						color: 'currentColor',
 					},
 					'&.Mui-expanded': {
-						color: COLOR.PRIMARY_MAIN,
+						color: COLOR.SECONDARY_MAIN,
 					},
 				},
 				content: {

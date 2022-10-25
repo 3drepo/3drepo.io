@@ -16,11 +16,11 @@
  */
 
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { TextField } from '@mui/material';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const TextProperty = ({ property, value }: {property: Partial<PropertyDefinition>, value:any}) => (
-	<div>
-        &nbsp;
-		<TextField label={property.name} value={value} disabled={property.readOnly} />
-	</div>
+export const TextProperty = ({
+	property: { name, readOnly, required },
+	value,
+}: { property: Partial<PropertyDefinition>, value: any }) => (
+	<FormTextField label={name} name={name} defaultValue={value} disabled={readOnly} required={required} />
 );

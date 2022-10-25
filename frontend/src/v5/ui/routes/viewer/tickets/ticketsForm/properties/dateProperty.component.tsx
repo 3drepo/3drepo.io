@@ -16,27 +16,17 @@
  */
 
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { DateTimePicker } from '@mui/lab';
-import { TextField } from '@mui/material';
+import { FormDatePicker } from '@controls/formDatePicker/formDatePicker.component';
 
-export const DateProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => {
-	const maskValue = (val) => (!val ? '' : new Date(val));
-	return (
-		<div>
-    &nbsp;
-			<DateTimePicker
-				label={property.name}
-				inputFormat="MM/DD/YYYY"
-				value={maskValue(value)}
-				onChange={() => { }}
-				renderInput={({ error, ...params }) => (
-					<TextField
-						{...params}
-						value={maskValue(value)}
-						disabled={property.readOnly}
-					/>
-				)}
-			/>
-		</div>
-	);
-};
+export const DateProperty = ({
+	property: { name, readOnly, required },
+	value,
+}: { property: PropertyDefinition, value: any }) => (
+	<FormDatePicker
+		label={name}
+		name={name}
+		disabled={readOnly}
+		defaultValue={value}
+		required={required}
+	/>
+);

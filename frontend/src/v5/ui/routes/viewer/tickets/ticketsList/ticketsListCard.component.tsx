@@ -24,11 +24,12 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { ViewerParams } from '../../../routes.constants';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { TicketsList } from './ticketsList.component';
 import { Button } from '@controls/button';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { TicketsCardViews } from '../tickets.constants';
+import { ViewerParams } from '../../../routes.constants';
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -51,6 +52,7 @@ export const TicketsListCard = () => {
 			containerOrFederation,
 			isFederation,
 		);
+		UsersActionsDispatchers.fetchUsers(teamspace);
 	}, [containerOrFederation]);
 
 	return (

@@ -55,7 +55,7 @@ export const theme = createTheme(
 				MuiInputLabel: {
 					styleOverrides: {
 						root: {
-							fontSize: '13px',
+							fontSize: 10,
 							textTransform: 'lowercase',
 							':first-letter': {
 								textTransform: 'uppercase',
@@ -108,6 +108,9 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							margin: 0,
+							label: {
+								fontSize: 10,
+							},
 							'& .MuiInputBase-root input': {
 								lineHeight: 22,
 								height: 26,

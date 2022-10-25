@@ -16,19 +16,20 @@
  */
 
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { TextField } from '@mui/material';
+import { FormNumberField } from '@controls/formNumberField/formNumberField.component';
+import { FlexContainer } from './coordsProperty.styles';
 
-export const CoordsProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => {
-	const coordsVal = value || [];
+export const CoordsProperty = ({
+	property: { name, readOnly, required },
+	value,
+}: { property: PropertyDefinition, value: any }) => {
+	const [x, y, z] = value || [];
 
 	return (
-		<div>
-        &nbsp;
-			{property.name}
-			<br />
-			x: <TextField name={property.name} value={coordsVal[0]} disabled={property.readOnly} />
-			y: <TextField name={property.name} value={coordsVal[1]} disabled={property.readOnly} />
-			z: <TextField name={property.name} value={coordsVal[2]} disabled={property.readOnly} />
-		</div>
+		<FlexContainer>
+			<FormNumberField label="x" name={name} defaultValue={x} disabled={readOnly} required={required} />
+			<FormNumberField label="y" name={name} defaultValue={y} disabled={readOnly} required={required} />
+			<FormNumberField label="z" name={name} defaultValue={z} disabled={readOnly} required={required} />
+		</FlexContainer>
 	);
 };

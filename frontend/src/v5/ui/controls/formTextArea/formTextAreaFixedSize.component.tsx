@@ -21,7 +21,7 @@ import { ScrollArea } from '@controls/scrollArea';
 import { Container, Input } from './formTextAreaFixedSize.styles';
 
 export type FormTextAreaFixedSizeProps = InputProps & {
-	control: any,
+	control?: any,
 	formError?: any,
 	label?: any,
 	height?: number,

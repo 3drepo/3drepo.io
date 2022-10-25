@@ -36,8 +36,8 @@ export const Accordion = ({ defaultExpanded = false, children, title, Icon, ...p
 	const toggleExpanded = () => setExpanded(!expanded);
 
 	return (
-		<MuiAccordion expanded={expanded} onClick={toggleExpanded} {...props}>
-			<AccordionSummary>
+		<MuiAccordion expanded={expanded} {...props}>
+			<AccordionSummary onClick={toggleExpanded}>
 				{Icon && (
 					<IconContainer>
 						<Icon />

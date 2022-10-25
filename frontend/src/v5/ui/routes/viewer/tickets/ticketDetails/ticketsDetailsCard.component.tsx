@@ -16,7 +16,6 @@
  */
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
-import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -25,6 +24,7 @@ import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { FormProvider, useForm } from 'react-hook-form';
 import { omit } from 'lodash';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsCardViews } from '../tickets.constants';
@@ -103,12 +103,11 @@ export const TicketDetailsCard = () => {
 				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
 				<Button onClick={goBack}>back</Button>
 			</CardHeader>
-			<CardContent>
+			<FormProvider {...useForm()}>
 				<TicketForm template={template} ticket={ticket} />
-				<Button onClick={updateTicket}> Update Ticket! </Button>
-				<Button onClick={cloneTicket}> Clone Ticket!</Button>
-
-			</CardContent>
+			</FormProvider>
+			<Button onClick={updateTicket}> Update Ticket! </Button>
+			<Button onClick={cloneTicket}> Clone Ticket!</Button>
 		</CardContainer>
 	);
 };

@@ -14,10 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { EditableTicket, ITemplate, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { ITicket, ITemplate, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
+import { formatMessage } from '@/v5/services/intl';
+import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
+import { Accordion } from '@controls/accordion/accordion.component';
+import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { CoordsProperty } from './properties/coordsProperty.component';
 import { DateProperty } from './properties/dateProperty.component';
 import { ImageProperty } from './properties/imageProperty.component';
@@ -27,6 +30,8 @@ import { NumberProperty } from './properties/numberProperty.component';
 import { OneOfProperty } from './properties/oneOfProperty.component';
 import { TextProperty } from './properties/textProperty.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
+import { BooleanProperty } from './properties/booleanProperty.component';
+import { FormTitle, PanelsContainer } from './ticketsForm.styles';
 
 const TicketProperty = {
 	text: TextProperty,
@@ -34,31 +39,33 @@ const TicketProperty = {
 	date: DateProperty,
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
+	boolean: BooleanProperty,
 	coords: CoordsProperty,
 	number: NumberProperty,
 	image: ImageProperty,
 };
 
-interface PropertiesPanelProps {
+interface PropertiesListProps {
 	properties: PropertyDefinition[] ;
 	propertiesValues: Record<string, any>;
 	module: string;
 }
 
-const PropertiesPanel = ({ module, properties, propertiesValues = {} }: PropertiesPanelProps) => {
+const PropertiesList = ({ module, properties, propertiesValues = {} }: PropertiesListProps) => {
 	const { formState  } = useFormContext();
 	return (
 		<>
 			{properties.map((property) => {
-				const { name } = property;
+				const { name, type } = property;
 				const inputName = `${module}.${name}`;
-				const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
+				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				return (
 					<PropertyComponent
 						property={property}
-						defaultValue={propertiesValues[name]}
 						name={inputName}
 						formError={get(formState.errors, inputName)}
+						defaultValue={propertiesValues[name]}
+						key={name}
 					/>
 				);
 			})}
@@ -66,41 +73,48 @@ const PropertiesPanel = ({ module, properties, propertiesValues = {} }: Properti
 	);
 };
 
+const PropertiesPanel = (props: PropertiesListProps) => (
+	<Accordion
+		defaultExpanded
+		Icon={PropetiesIcon}
+		title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
+	>
+		<PropertiesList {...props} />
+	</Accordion>
+);
+
 interface ModulePanelProps {
 	module: TemplateModule ;
 	moduleValues: Record<string, any>;
 }
 
 const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
-	<DashboardListCollapse title={<>Module: {module.name}</>}>
-		<PropertiesPanel module={module.name} properties={module.properties || []} propertiesValues={moduleValues} />
-	</DashboardListCollapse>
+	<Accordion title={module.name} Icon={PropetiesIcon}>
+		<PropertiesList module={module.name} properties={module.properties || []} propertiesValues={moduleValues} />
+	</Accordion>
 );
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket }) => {
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => {
 	const { formState } = useFormContext();
 	const TITLE_INPUT_NAME = 'title';
 	return (
-		<>
-			<TextProperty
+		<CardContent>
+			<FormTitle
 				name={TITLE_INPUT_NAME}
-				property={{ name: TITLE_INPUT_NAME }}
 				defaultValue={ticket[TITLE_INPUT_NAME]}
 				formError={formState.errors[TITLE_INPUT_NAME]}
 			/>
-
-			<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
-			{
-				(template.modules || []).map((module) => (
-					<>
-						<br />
+			<PanelsContainer>
+				<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
+				{
+					(template.modules || []).map((module) => (
 						<ModulePanel
 							module={module}
 							moduleValues={ticket.modules[module.name]}
 						/>
-					</>
-				))
-			}
-		</>
+					))
+				}
+			</PanelsContainer>
+		</CardContent>
 	);
 };

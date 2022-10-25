@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
+import { FormToggle } from '@controls/formToggle/formToggle.component';
 
-export const FormNumberField = styled(FormTextField).attrs({ type: 'number' })`
-	width: 50%;
-`;
+export const BooleanProperty = ({
+	property: { name, readOnly, required },
+	value,
+}: { property: PropertyDefinition, value: any }) => (
+	<FormToggle name={name} defaultValue={value} disabled={readOnly} required={required}>{name}</FormToggle>
+);
