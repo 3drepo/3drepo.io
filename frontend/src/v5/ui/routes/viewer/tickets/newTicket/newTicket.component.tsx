@@ -79,6 +79,10 @@ export const NewTicketCard = () => {
 		contextValue.setCardView(TicketsCardViews.List);
 	};
 
+	const goToTicketDetails = (ticketId) => {
+		contextValue.setCardView(TicketsCardViews.Details, { ticketId });
+	};
+
 	const changeTemplate = () => {
 		contextValue.setCardView(TicketsCardViews.Templates);
 	};
@@ -97,15 +101,14 @@ export const NewTicketCard = () => {
 		});
 	};
 
-	const onSubmit = () => {
-		const { title, properties, ...modules } = formData.getValues();
+	const onSubmit = ({ title, properties, ...modules }) => {
 		const ticket = {
 			type: template._id,
 			title,
 			properties,
 			modules,
 		} as NewTicket;
-		TicketsActionsDispatchers.createTicket(teamspace, project, containerOrFederation, ticket, isFederation);
+		TicketsActionsDispatchers.createTicket(teamspace, project, containerOrFederation, ticket, isFederation, goToTicketDetails);
 	};
 
 	useEffect(() => {
