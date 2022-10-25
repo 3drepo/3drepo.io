@@ -19,5 +19,5 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 
 export const getMemberImgSrc = (teamspace: string, member: string) => (
-	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar?${Date.now()}`, clientConfigService.GET_API)
+	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar`, clientConfigService.GET_API)
 );
