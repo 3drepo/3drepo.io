@@ -28,6 +28,7 @@ import { NumberProperty } from './properties/numberProperty.component';
 import { OneOfProperty } from './properties/oneOfProperty.component';
 import { TextProperty } from './properties/textProperty.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
+import { BooleanProperty } from './properties/booleanProperty.component';
 import { FormTitle, PanelsContainer } from './ticketsForm.styles';
 
 const TicketProperty = {
@@ -36,6 +37,7 @@ const TicketProperty = {
 	date: DateProperty,
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
+	boolean: BooleanProperty,
 	coords: CoordsProperty,
 	number: NumberProperty,
 	image: ImageProperty,
