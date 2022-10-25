@@ -52,3 +52,4 @@ export interface ITemplate {
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;
+export type EditableTicket = Omit<NewTicket, 'number'>;
