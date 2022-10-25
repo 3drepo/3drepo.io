@@ -193,6 +193,10 @@ db.createAvatar = async (username, type, avatarData) => {
 	config.defaultStorage = defaultStorage;
 };
 
+db.addLoginRecords = async (records) => {
+	await DbHandler.insertMany(DbHandler.INTERNAL_DB, 'loginRecords', records);
+};
+
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
