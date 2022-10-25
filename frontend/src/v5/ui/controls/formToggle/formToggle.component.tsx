@@ -20,7 +20,7 @@ import { Controller } from 'react-hook-form';
 import { FormControlLabel } from './formToggle.styles';
 
 export type FormToggleProps = SwitchProps & {
-	control: any;
+	control?: any;
 	name: string;
 	children: any;
 };
