@@ -29,7 +29,7 @@ import { OneOfProperty } from './properties/oneOfProperty.component';
 import { TextProperty } from './properties/textProperty.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { BooleanProperty } from './properties/booleanProperty.component';
-import { FormTitle, PanelsContainer } from './ticketsForm.styles';
+import { TitleContainer, FormTitle, PanelsContainer } from './ticketsForm.styles';
 
 const TicketProperty = {
 	text: TextProperty,
@@ -84,21 +84,33 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 	</Accordion>
 );
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => (
-	<>
-		<FormTitle name="title" defaultValue={ticket.title} />
-		<CardContent>
-			<PanelsContainer>
-				<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
-				{
-					(template.modules || []).map((module) => (
-						<ModulePanel
-							module={module}
-							moduleValues={ticket.modules[module.name]}
-						/>
-					))
-				}
-			</PanelsContainer>
-		</CardContent>
-	</>
-);
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => {
+	const TITLE_PLACEHOLDER = formatMessage({
+		id: 'customTicket.newTicket.titlePlaceholder',
+		defaultMessage: 'Ticket name',
+	});
+	return (
+		<>
+			<TitleContainer>
+				<FormTitle
+					name="title"
+					defaultValue={ticket.title}
+					placeholder={TITLE_PLACEHOLDER}
+				/>
+			</TitleContainer>
+			<CardContent>
+				<PanelsContainer>
+					<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
+					{
+						(template.modules || []).map((module) => (
+							<ModulePanel
+								module={module}
+								moduleValues={ticket.modules[module.name]}
+							/>
+						))
+					}
+				</PanelsContainer>
+			</CardContent>
+		</>
+	);
+};
