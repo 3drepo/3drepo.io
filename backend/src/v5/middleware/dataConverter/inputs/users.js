@@ -40,7 +40,7 @@ Users.validateLoginData = async (req, res, next) => {
 
 		const usernameOrEmail = req.body.user;
 		const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, 'customData.sso': 1 });
-		
+
 		if (sso) {
 			throw templates.userNotFound;
 		}
@@ -141,7 +141,7 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 			const usernameOrEmail = req.body.user;
 			const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0 });
 
-			if(sso){
+			if (sso) {
 				throw templates.unknown;
 			}
 
@@ -207,7 +207,7 @@ const generateSignUpSchema = (isSSO) => {
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
 			async (value) => {
-				if (!isSSO && value) {
+				if (value) {
 					try {
 						await getUserByUsername(value, { _id: 1 });
 						return false;

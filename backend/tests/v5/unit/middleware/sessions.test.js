@@ -139,6 +139,37 @@ const testCreateSession = () => {
 	});
 };
 
+const testCreateSessionSso = () => {
+	const req = {
+		session: { regenerate: (callback) => { callback(); }, cookie: { domain: undefined } },
+		body: { user: 'user1' },
+		sessionID: '123',
+		ips: ['0.1.2.3'],
+		ip: '0.1.2.3',
+		headers: {},
+	};
+
+	describe('Regenerate auth session using SSO', () => {
+		test('Should regenerate session and call next()', async () => {
+			const mockCB = jest.fn(() => {});
+			config.cookie.maxAge = 100;
+			await Sessions.createSessionSso(req, {}, mockCB);
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
+				{
+					username: req.body.user,
+					sessionID: req.sessionID,
+					ipAddress: req.ips[0] || req.ip,
+					userAgent: req.headers['user-agent'],
+					referer: req?.session?.user?.referer,
+					socketId: req.headers[SOCKET_HEADER],
+				});
+			expect(mockCB).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
 const testDestroySession = () => {
 	const req = {
 		session: { destroy: (callback) => { callback(); }, user: { username: 'user1' } },
@@ -199,4 +230,5 @@ describe('middleware/sessions', () => {
 	testCreateSession();
 	testDestroySession();
 	testManageSession();
+	testCreateSessionSso();
 });

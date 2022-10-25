@@ -16,11 +16,11 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { deleteIfFalse, deleteIfUndefined } = require('../utils/helper/objects');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
-const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -212,7 +212,6 @@ User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.a
 User.addUser = async (newUserData) => {
 	const customData = {
 		createdAt: new Date(),
-		inactive: true,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
@@ -227,18 +226,14 @@ User.addUser = async (newUserData) => {
 		},
 		permissions: [],
 		...deleteIfUndefined({ sso: newUserData.sso }),
+		...deleteIfFalse({ inactive: !newUserData.sso }),
 	};
 
-	if (newUserData.sso) {
-		customData.sso = newUserData.sso;
+	if (!newUserData.sso) {
+		const expiryAt = new Date();
+		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
+		customData.emailVerifyToken = { token: newUserData.token, expiredAt: expiryAt };
 	}
-
-	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
-	customData.emailVerifyToken = {
-		token: newUserData.token,
-		expiredAt: expiryAt,
-	};
 
 	await db.createUser(newUserData.username, newUserData.password, customData);
 };

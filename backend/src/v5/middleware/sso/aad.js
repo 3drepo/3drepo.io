@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { authenticateRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
+const { getUserByEmail, recordSuccessfulAuthAttempt } = require('../../models/users');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
-const { getUserByEmail, recordSuccessfulAuthAttempt } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
-const { signupRedirectUri, authenticateRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { validateMany } = require('../common');
 
 const Aad = {};
@@ -31,7 +31,7 @@ const redirectWithError = async (res, url, errorCode) => {
 	const urlRedirect = new URL(url);
 	urlRedirect.searchParams.set('error', errorCode);
 	await res.redirect(urlRedirect.href);
-}
+};
 
 const authenticate = (redirectUri) => async (req, res) => {
 	try {
@@ -106,7 +106,7 @@ Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 		try {
 			const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
 
-			if (user.customData.sso?.id != id) {
+			if (user.customData.sso?.id !== id) {
 				redirectWithError(res, state.redirectUri, errorCodes.nonSsoUser);
 			} else {
 				req.loginData = await recordSuccessfulAuthAttempt(user.user);
@@ -119,7 +119,6 @@ Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 		logger.logError(`Failed to fetch user details from Microsoft API: ${err.message}`);
 		respond(req, res, templates.unknown);
 	}
-
 };
 
 module.exports = Aad;

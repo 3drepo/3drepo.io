@@ -46,6 +46,7 @@ WebRequests.post.mockImplementation(() => Promise.resolve({
 
 const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
+const ssoUsername = 'ssoUsername';
 const availableEmail = 'availableEmail@email.com';
 const existingEmail = 'existingEmail@email.com';
 const validPassword = 'Abcdef12345!';
@@ -62,9 +63,11 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	return { user: existingUsername };
 });
 
-UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
+UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {	
 	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
-		return { user: existingUsername };
+		return { user: existingUsername, customData: {} };
+	} else if (usernameOrEmail === ssoUsername) {
+		return { user: existingUsername, customData: { sso: { id: generateRandomString() }} };
 	}
 
 	throw templates.userNotFound;
@@ -101,9 +104,10 @@ const testValidateLoginData = () => {
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
+		[{ body: { user: ssoUsername, password: 'validPassword' } }, false, 'with SSO user that exists', templates.incorrectUsernameOrPassword],
 		[{ body: { user: existingEmail, password: 'validPassword' } }, true, 'with user that exists using email'],
 		[{ body: { user: existingUsername, password: 'validPassword', extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
-	])('Check if req arguments for loggin in are valid', (data, shouldPass, desc, expectedError) => {
+	])('Check if req arguments for login in are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { errorCodes } = require('../services/sso/sso.constants');
 const { isSessionValid } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { errorCodes } = require('../services/sso/sso.constants');
 
 const AuthMiddlewares = {};
 
@@ -40,22 +40,21 @@ AuthMiddlewares.isLoggedIn = (req, res, next) => {
 	}
 };
 
-AuthMiddlewares.notLoggedInSso = (req, res, next) => {
+const notLoggedIn = (isSso) => (req, res, next) => {
 	const { headers, session } = req;
 	if (isSessionValid(session, headers.referer, true)) {
-		res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${errorCodes.alreadyLoggedin}`);
+		if(isSso){
+			res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${errorCodes.alreadyLoggedin}`);
+		} else{
+			respond(req, res, templates.alreadyLoggedIn);
+		}
 	} else {
 		next();
 	}
-};
+}
 
-AuthMiddlewares.notLoggedIn = (req, res, next) => {
-	const { headers, session } = req;
-	if (isSessionValid(session, headers.referer, true)) {
-		respond(req, res, templates.alreadyLoggedIn);
-	} else {
-		next();
-	}
-};
+AuthMiddlewares.notLoggedInSso = notLoggedIn(true);
+
+AuthMiddlewares.notLoggedIn = notLoggedIn(false);
 
 module.exports = AuthMiddlewares;

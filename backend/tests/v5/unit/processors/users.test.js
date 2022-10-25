@@ -235,9 +235,12 @@ const testSignUp = () => {
 			email: generateRandomString(),
 			password: generateRandomString(),
 			firstName: generateRandomString(),
+			lastName: generateRandomString(),
+			company: generateRandomString(),
+			mailListOptOut: true
 		};
 
-		test('should sign a user up', async () => {
+		test('should sign a user up and send verification email (non SSO user)', async () => {
 			await Users.signUp(newUserData);
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: exampleHashString });
@@ -250,22 +253,23 @@ const testSignUp = () => {
 			});
 		});
 
-		test('should generate a password and sign a user up', async () => {
+		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
 			const sso = { id: generateRandomString() };
 			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({
 				...newUserData,
 				password: exampleHashString,
-				token: exampleHashString,
 				sso,
 			});
-			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
-				token: exampleHashString,
-				email: newUserData.email,
-				firstName: newUserData.firstName,
+			expect(Mailer.sendEmail).not.toHaveBeenCalled();
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_VERIFIED, {
 				username: newUserData.username,
+				email: newUserData.email,
+				fullName: `${newUserData.firstName} ${newUserData.lastName}`,
+				company: newUserData.company,
+				mailListOptOut: newUserData.mailListOptOut,
 			});
 		});
 	});

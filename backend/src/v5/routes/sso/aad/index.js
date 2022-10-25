@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, redirectToStateURL, verifyNewUserDetails, checkIfMsAccountIsLinkedTo3DRepo } = require('../../../middleware/sso/aad');
+const { authenticate, checkIfMsAccountIsLinkedTo3DRepo, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { respond } = require('../../../utils/responder');
-const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 const { createSessionSso } = require('../../../middleware/sessions');
 const { notLoggedInSso } = require('../../../middleware/auth');
+const { respond } = require('../../../utils/responder');
+const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 
 const signUpPost = async (req, res, next) => {
 	try {
@@ -56,7 +56,8 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, notLoggedInSso, checkIfMsAccountIsLinkedTo3DRepo, createSessionSso, redirectToStateURL);
+	router.get(authenticateRedirectEndpoint, notLoggedInSso, checkIfMsAccountIsLinkedTo3DRepo,
+		createSessionSso, redirectToStateURL);
 
 	/**
 	 * @openapi
