@@ -23,16 +23,16 @@ import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext } from 'react';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { ViewerParams } from '../../../routes.constants';
 import { useParams } from 'react-router-dom';
 import { Chip } from '@mui/material';
-import { TicketsCardViews } from '../tickets.constants';
 import { sortBy } from 'lodash';
+import { TicketsCardViews } from '../tickets.constants';
+import { ViewerParams } from '../../../routes.constants';
 
 export const TemplateSelectionCard = () => {
 	const contextValue = useContext(CardContext);
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation)
+	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 
 	const goBack = () => {
 		contextValue.setCardView(TicketsCardViews.List);
