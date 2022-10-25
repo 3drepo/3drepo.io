@@ -80,14 +80,16 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 };
 
 const modelTicketAdded = async ({ teamspace, project, model, ticket }) => {
-	const isFed = await isFederationCheck(teamspace, model);
+	const [isFed, template] = await Promise.all([
+		isFederationCheck(teamspace, model),
+		getTemplateById(teamspace, ticket.type),
+	]);
 	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	const template = await getTemplateById(teamspace, ticket.type);
 	const serialisedTicket = serialiseTicket(ticket, template);
 	await createModelMessage(event, serialisedTicket, teamspace, project, model);
 };
 
-const calculateUpdateData = (changes) => {
+const constructUpdatedObject = (changes) => {
 	const { modules = {}, properties, ...rootProps } = changes;
 	const updateData = {};
 	const determineUpdateData = (obj = {}, prefix = '') => {
@@ -108,11 +110,14 @@ const calculateUpdateData = (changes) => {
 };
 
 const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, changes, timestamp }) => {
-	await addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp });
-	const updateData = calculateUpdateData(changes);
-	const isFed = await isFederationCheck(teamspace, model);
+	const [isFed, template] = await Promise.all([
+		isFederationCheck(teamspace, model),
+		getTemplateById(teamspace, ticket.type),
+		addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp }),
+	]);
+
+	const updateData = constructUpdatedObject(changes);
 	const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
-	const template = await getTemplateById(teamspace, ticket.type);
 	const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, template);
 	await createModelMessage(event, serialisedTicket, teamspace, project, model);
 };
