@@ -19,8 +19,6 @@ import { FormTextArea } from '@controls/formTextArea/formTextArea.component';
 import styled from 'styled-components';
 
 export const PanelsContainer = styled.div`
-	display: contents;
-
 	.MuiAccordion-root {
 		&:first-of-type {
 			border-radius: 6px 6px 0 0;
