@@ -18,7 +18,7 @@
 import { TextField, TextFieldProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
-export type FormTextFieldProps = TextFieldProps & {
+export type FormTextFieldProps = Omit<TextFieldProps, 'variant'> & {
 	control?: any,
 	formError?: any,
 	name: string,
