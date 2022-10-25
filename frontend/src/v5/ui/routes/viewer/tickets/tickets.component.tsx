@@ -27,7 +27,7 @@ import { useContext } from 'react';
 import { Button } from '@controls/button';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
-import { TicketDetailCard } from './ticketDetails/ticketsDetailsCard.component';
+import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 
 export const TicketNewCard = () => {
 	const contextValue = useContext(CardContext);
@@ -56,7 +56,7 @@ export const Tickets = () => (
 			<TicketsListCard />
 		</CardContextView>
 		<CardContextView cardView={TicketsCardViews.Details}>
-			<TicketDetailCard />
+			<TicketDetailsCard />
 		</CardContextView>
 		<CardContextView cardView={TicketsCardViews.New}>
 			<TicketNewCard />
