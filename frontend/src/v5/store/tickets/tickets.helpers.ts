@@ -37,7 +37,35 @@ export const propertiesValidator = (properties) => {
 };
 
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
-	let validator = trimmedString;
+	let validator;
+
+	console.log("creating the validators")
+
+	switch(type) {
+		case 'text' || 'longText' || 'oneOf' || 'manyOf':
+			const maxLength = 50;
+			validator = trimmedString.max(maxLength,
+				formatMessage({
+					id: 'validation.ticket.tooLong',
+					defaultMessage: 'Max length of text is {maxLength}',
+				},
+				{ maxLength })
+			);
+			break;
+		case 'coords':
+			validator = Yup.array();
+			break;
+		case 'boolean':
+			validator = Yup.boolean();
+			break;
+		case 'number':
+			validator = Yup.number();
+			break;
+		case 'date':
+			validator = Yup.date();
+			break;
+		default: validator = trimmedString;
+	}
 
 	if (required) {
 		validator = validator.required(
@@ -47,17 +75,6 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			},
 			{ name }),
 		);
-	}
-
-	if (type === 'text') {
-		const maxLength = 50;
-
-		validator = validator.max(maxLength,
-			formatMessage({
-				id: 'validation.ticket.tooLong',
-				defaultMessage: 'Max length of text is {maxLength}',
-			},
-			{ maxLength }));
 	}
 
 	return validator;
