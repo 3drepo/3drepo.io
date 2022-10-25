@@ -18,39 +18,25 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { trimmedString } from '@/v5/validation/shared/validators';
-import { PropertyDefinition } from './tickets.types';
 import * as Yup from 'yup';
+import { PropertyDefinition } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
 
-export const propertiesValidator = (properties) => {
-	const validators = properties.reduce(
-		(validators, property) => ({
-			...validators,
-			[property.name]: propertyValidator(property),
-		}),
-		{},
-	);
-	return Yup.object().shape(validators);
-};
-
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 	let validator;
+	const MAX_STRING_LENGTH = 50;
 
-	console.log("creating the validators")
-
-	switch(type) {
+	switch (type) {
 		case 'text' || 'longText' || 'oneOf' || 'manyOf':
-			const maxLength = 50;
-			validator = trimmedString.max(maxLength,
+			validator = trimmedString.max(MAX_STRING_LENGTH,
 				formatMessage({
 					id: 'validation.ticket.tooLong',
-					defaultMessage: 'Max length of text is {maxLength}',
+					defaultMessage: 'Max length of text is {MAX_STRING_LENGTH}',
 				},
-				{ maxLength })
-			);
+				{ MAX_STRING_LENGTH }));
 			break;
 		case 'coords':
 			validator = Yup.array();
@@ -78,4 +64,15 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 	}
 
 	return validator;
+};
+
+export const propertiesValidator = (properties) => {
+	const validators = properties.reduce(
+		(validatorsObj, property) => ({
+			...validatorsObj,
+			[property.name]: propertyValidator(property),
+		}),
+		{},
+	);
+	return Yup.object().shape(validators);
 };
