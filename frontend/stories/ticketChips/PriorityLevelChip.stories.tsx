@@ -17,7 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { PriorityLevelChip, PriorityLevels } from '@controls/chip';
-import { ChipStyleWrapper } from './chips.styles';
+import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -34,23 +34,18 @@ export default {
 	},
 } as ComponentMeta<typeof PriorityLevelChip>;
 
-const V5ViewerChip = (props) => (
-	<div id="tickets">
-		<PriorityLevelChip {...props} />
-	</div>
-);
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const AllTemplate: ComponentStory<typeof PriorityLevelChip> = () => (
-	<ChipStyleWrapper>
+	<ChipList>
 		{
-			Object.keys(PriorityLevels).map((key) => <V5ViewerChip state={PriorityLevels[key]} />)
+			Object.keys(PriorityLevels).map((key) => <PriorityLevelChip state={PriorityLevels[key]} />)
 		}
-	</ChipStyleWrapper>
+	</ChipList>
 );
 const SingleTemplate: ComponentStory<typeof PriorityLevelChip> = (args) => (
-	<ChipStyleWrapper>
-		<V5ViewerChip {...args} />
-	</ChipStyleWrapper>
+	<ChipList>
+		<PriorityLevelChip {...args} />
+	</ChipList>
 );
 
 export const All = AllTemplate.bind({});

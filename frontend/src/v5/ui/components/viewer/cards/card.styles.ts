@@ -17,9 +17,7 @@
 import styled from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
-export const CardContainer = styled.div.attrs({
-	id: 'tickets',
-})`
+export const CardContainer = styled.div`
 	display: flex;
 	height: 100%;
 	flex-direction: column;

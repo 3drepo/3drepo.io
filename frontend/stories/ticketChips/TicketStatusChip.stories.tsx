@@ -17,7 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { TicketStatusChip, TicketStatuses } from '@controls/chip';
-import { ChipStyleWrapper } from './chips.styles';
+import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -39,23 +39,18 @@ export default {
 	},
 } as ComponentMeta<typeof TicketStatusChip>;
 
-const V5ViewerChip = (props) => (
-	<div id="tickets">
-		<TicketStatusChip {...props} />
-	</div>
-);
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const AllTemplate: ComponentStory<typeof TicketStatusChip> = () => (
-	<ChipStyleWrapper>
+	<ChipList>
 		{
-			Object.keys(TicketStatuses).map((key) => <V5ViewerChip state={TicketStatuses[key]} />)
+			Object.keys(TicketStatuses).map((key) => <TicketStatusChip state={TicketStatuses[key]} />)
 		}
-	</ChipStyleWrapper>
+	</ChipList>
 );
 const SingleTemplate: ComponentStory<typeof TicketStatusChip> = (args) => (
-	<ChipStyleWrapper>
-		<V5ViewerChip {...args} />
-	</ChipStyleWrapper>
+	<ChipList>
+		<TicketStatusChip {...args} />
+	</ChipList>
 );
 
 export const All = AllTemplate.bind({});

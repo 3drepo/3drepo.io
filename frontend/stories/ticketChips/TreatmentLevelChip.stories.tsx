@@ -17,7 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { TreatmentLevelChip, TreatmentLevels } from '@controls/chip';
-import { ChipStyleWrapper } from './chips.styles';
+import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -35,24 +35,18 @@ export default {
 	parameters: { controls: { exclude: ['color'] } },
 } as ComponentMeta<typeof TreatmentLevelChip>;
 
-const V5ViewerChip = (props) => (
-	<div id="tickets">
-		<TreatmentLevelChip {...props} />
-	</div>
-);
-
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const AllTemplate: ComponentStory<typeof TreatmentLevelChip> = () => (
-	<ChipStyleWrapper>
+	<ChipList>
 		{
-			Object.keys(TreatmentLevels).map((key) => <V5ViewerChip state={TreatmentLevels[key]} />)
+			Object.keys(TreatmentLevels).map((key) => <TreatmentLevelChip state={TreatmentLevels[key]} />)
 		}
-	</ChipStyleWrapper>
+	</ChipList>
 );
 const SingleTemplate: ComponentStory<typeof TreatmentLevelChip> = (args) => (
-	<ChipStyleWrapper>
-		<V5ViewerChip {...args} />
-	</ChipStyleWrapper>
+	<ChipList>
+		<TreatmentLevelChip {...args} />
+	</ChipList>
 );
 
 export const All = AllTemplate.bind({});

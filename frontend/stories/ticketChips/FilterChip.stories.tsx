@@ -17,7 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FilterChip } from '@controls/chip';
-import { ChipStyleWrapper } from './chips.styles';
+import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -47,11 +47,9 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 
 const Template: ComponentStory<typeof FilterChip> = (args) => (
-	<ChipStyleWrapper>
-		<div id="tickets">
-			<FilterChip {...args} />
-		</div>
-	</ChipStyleWrapper>
+	<ChipList>
+		<FilterChip {...args} />
+	</ChipList>
 );
 
 export const Unselected = Template.bind({});

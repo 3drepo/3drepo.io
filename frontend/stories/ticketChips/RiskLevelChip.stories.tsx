@@ -17,7 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { RiskLevelChip, RiskLevels } from '@controls/chip';
-import { ChipStyleWrapper } from './chips.styles';
+import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 export default {
 	title: 'Ticket Chips/RiskLevelChip',
@@ -32,23 +32,18 @@ export default {
 	},
 } as ComponentMeta<typeof RiskLevelChip>;
 
-const V5ViewerChip = (props) => (
-	<div id="tickets">
-		<RiskLevelChip {...props} />
-	</div>
-);
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const AllTemplate: ComponentStory<typeof RiskLevelChip> = () => (
-	<ChipStyleWrapper>
+	<ChipList>
 		{
-			Object.keys(RiskLevels).map((key) => <V5ViewerChip state={RiskLevels[key]} />)
+			Object.keys(RiskLevels).map((key) => <RiskLevelChip state={RiskLevels[key]} />)
 		}
-	</ChipStyleWrapper>
+	</ChipList>
 );
 const SingleTemplate: ComponentStory<typeof RiskLevelChip> = (args) => (
-	<ChipStyleWrapper>
-		<V5ViewerChip {...args} />
-	</ChipStyleWrapper>
+	<ChipList>
+		<RiskLevelChip {...args} />
+	</ChipList>
 );
 
 export const All = AllTemplate.bind({});

@@ -20,7 +20,7 @@ import { Chip } from '@controls/chip';
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
 import ClockIcon from '@assets/icons/clock.svg';
 import BellIcon from '@assets/icons/notifications.svg';
-import { ChipStyleWrapper } from './chips.styles';
+import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 const Icons = {
 	star: <StarIcon />,
@@ -62,11 +62,9 @@ export default {
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Chip> = (args) => (
-	<ChipStyleWrapper>
-		<div id="tickets">
-			<Chip {...args} />
-		</div>
-	</ChipStyleWrapper>
+	<ChipList>
+		<Chip {...args} />
+	</ChipList>
 );
 
 export const Filled = Template.bind({});

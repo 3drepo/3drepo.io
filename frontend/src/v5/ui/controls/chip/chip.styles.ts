@@ -50,6 +50,28 @@ const textStyles = (color: string) => css`
 `;
 
 export const ChipBase = styled(Chip)<ChipType>`
+	${({ theme }) => theme.typography.body2};
+	font-size: 0.5rem;
+	text-transform: uppercase;
+	padding: 3px 7px;
+	border-width: 1px;
+	border-radius: 6px;
+	height: 20px;
+	gap: 4px;
+	user-select: none;
+	margin: 0;
+	letter-spacing: 0.7;
+	svg {
+		height: 11px;
+		width: 11px;
+	}
+	.MuiChip-label {
+		padding: 0;
+	}
+	.MuiChip-icon {
+		color: inherit;
+		margin: 0;
+	}
 	${({ $variant, $coloroverride }) => {
 		switch ($variant) {
 			case 'text':
@@ -62,14 +84,13 @@ export const ChipBase = styled(Chip)<ChipType>`
 	}}
 `;
 
-export const FilterChip = styled(Chip).attrs({
+export const FilterChip = styled(ChipBase).attrs({
 	clickable: false,
+	variant: 'outlined',
 })<{ selected?: boolean }>`
 	cursor: pointer;
 	height: 18px;
 	color: ${({ theme }) => theme.palette.base.main};
-	border: 1px solid currentColor;
-	background-color: none;
 	:hover {
 		background-color: inherit;
 		color: ${({ theme }) => theme.palette.primary.main};
