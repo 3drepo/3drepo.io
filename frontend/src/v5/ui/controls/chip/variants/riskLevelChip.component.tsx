@@ -31,27 +31,27 @@ export enum RiskLevels {
 const RISK_LEVELS_MAP = {
 	[RiskLevels.UNSET]: {
 		label: formatMessage({ id: 'chip.riskLevel.unset', defaultMessage: 'Unset Risk' }),
-		$coloroverride: COLOR.BASE_LIGHT,
+		color: COLOR.BASE_LIGHT,
 	},
 	[RiskLevels.VERY_LOW]: {
 		label: formatMessage({ id: 'chip.riskLevel.veryLow', defaultMessage: 'Very Low Risk' }),
-		$coloroverride: COLOR.FAVOURITE_MAIN,
+		color: COLOR.FAVOURITE_MAIN,
 	},
 	[RiskLevels.LOW]: {
 		label: formatMessage({ id: 'chip.riskLevel.low', defaultMessage: 'Low Risk' }),
-		$coloroverride: '#FF9800',
+		color: '#FF9800',
 	},
 	[RiskLevels.MODERATE]: {
 		label: formatMessage({ id: 'chip.riskLevel.moderate', defaultMessage: 'Moderate Risk' }),
-		$coloroverride: '#ED6C02',
+		color: '#ED6C02',
 	},
 	[RiskLevels.HIGH]: {
 		label: formatMessage({ id: 'chip.riskLevel.high', defaultMessage: 'High Risk' }),
-		$coloroverride: COLOR.ERROR_MAIN,
+		color: COLOR.ERROR_MAIN,
 	},
 	[RiskLevels.VERY_HIGH]: {
 		label: formatMessage({ id: 'chip.riskLevel.veryHigh', defaultMessage: 'Very High Risk' }),
-		$coloroverride: '#000000',
+		color: '#000000',
 	},
 };
 

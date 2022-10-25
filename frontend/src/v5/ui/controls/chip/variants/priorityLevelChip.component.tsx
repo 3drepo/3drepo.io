@@ -33,22 +33,22 @@ const PRIORITY_LEVELS_MAP = {
 	[PriorityLevels.NONE]: {
 		label: formatMessage({ id: 'chip.priorityLevel.none.label', defaultMessage: 'None' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.none.tooltip', defaultMessage: 'No priority' }),
-		$coloroverride: COLOR.BASE_LIGHT,
+		color: COLOR.BASE_LIGHT,
 	},
 	[PriorityLevels.LOW]: {
 		label: formatMessage({ id: 'chip.priorityLevel.low.label', defaultMessage: 'Low' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.low.tooltip', defaultMessage: 'Low priority' }),
-		$coloroverride: '#0288D1',
+		color: '#0288D1',
 	},
 	[PriorityLevels.MEDIUM]: {
 		label: formatMessage({ id: 'chip.priorityLevel.medium.label', defaultMessage: 'Medium' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.medium.tooltip', defaultMessage: 'Medium priority' }),
-		$coloroverride: '#ED6C02',
+		color: '#ED6C02',
 	},
 	[PriorityLevels.HIGH]: {
 		label: formatMessage({ id: 'chip.priorityLevel.high.label', defaultMessage: 'High' }),
 		tooltip: formatMessage({ id: 'chip.priorityLevel.high.tooltip', defaultMessage: 'High priority' }),
-		$coloroverride: COLOR.ERROR_MAIN,
+		color: COLOR.ERROR_MAIN,
 	},
 };
 

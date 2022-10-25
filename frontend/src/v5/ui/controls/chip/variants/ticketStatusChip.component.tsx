@@ -35,27 +35,27 @@ export enum TicketStatuses {
 const STATUS_MAP = {
 	[TicketStatuses.OPEN]: {
 		label: formatMessage({ id: 'chip.ticketStatus.open', defaultMessage: 'Open' }),
-		$coloroverride: COLOR.BASE_MAIN,
+		color: COLOR.BASE_MAIN,
 		icon: <StarIcon />,
 	},
 	[TicketStatuses.IN_PROGRESS]: {
 		label: formatMessage({ id: 'chip.ticketStatus.inProgress', defaultMessage: 'In Progress' }),
-		$coloroverride: '#7156FF',
+		color: '#7156FF',
 		icon: <ClockIcon />,
 	},
 	[TicketStatuses.FOR_APPROVAL]: {
 		label: formatMessage({ id: 'chip.ticketStatus.forApproval', defaultMessage: 'For Approval' }),
-		$coloroverride: '#0288D1',
+		color: '#0288D1',
 		icon: <BellIcon />,
 	},
 	[TicketStatuses.CLOSED]: {
 		label: formatMessage({ id: 'chip.ticketStatus.closed', defaultMessage: 'Closed' }),
-		$coloroverride: '#2E7D32',
+		color: '#2E7D32',
 		icon: <TickIcon />,
 	},
 	[TicketStatuses.VOID]: {
 		label: formatMessage({ id: 'chip.ticketStatus.void', defaultMessage: 'Void' }),
-		$coloroverride: '#000',
+		color: '#000',
 		icon: <CrossIcon />,
 	},
 };

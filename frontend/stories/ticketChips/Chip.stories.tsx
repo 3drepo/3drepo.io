@@ -57,7 +57,7 @@ export default {
 			},
 		},
 	},
-	parameters: { controls: { exclude: ['size', '$coloroverride', '$variant', 'onDelete', 'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children'] } },
+	parameters: { controls: { exclude: ['size', 'onDelete', 'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children'] } },
 } as ComponentMeta<typeof Chip>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args

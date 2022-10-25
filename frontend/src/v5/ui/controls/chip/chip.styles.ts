@@ -18,9 +18,8 @@
 import { Chip, ChipProps } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export type ChipType = Omit<ChipProps, 'color'> & {
+export type ChipType = ChipProps & {
 	$variant: 'text' | 'outlined' | 'filled';
-	color?: string;
 	$coloroverride: string;
 };
 
@@ -84,13 +83,13 @@ export const ChipBase = styled(Chip)<ChipType>`
 	}}
 `;
 
-export const FilterChip = styled(ChipBase).attrs({
+export const FilterChip = styled(ChipBase).attrs(({ theme }) => ({
 	clickable: false,
-	variant: 'outlined',
-})<{ selected?: boolean }>`
+	$variant: 'outlined',
+	$coloroverride: theme.palette.base.main,
+}))<{ selected?: boolean }>`
 	cursor: pointer;
 	height: 18px;
-	color: ${({ theme }) => theme.palette.base.main};
 	:hover {
 		background-color: inherit;
 		color: ${({ theme }) => theme.palette.primary.main};
