@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket, ITemplate, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyDefinition, TemplateModule, EditableTicket } from '@/v5/store/tickets/tickets.types';
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
@@ -94,27 +94,31 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 	</Accordion>
 );
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => {
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket }) => {
 	const { formState } = useFormContext();
 	const TITLE_INPUT_NAME = 'title';
 	return (
-		<CardContent>
+		<>
 			<FormTitle
 				name={TITLE_INPUT_NAME}
 				defaultValue={ticket[TITLE_INPUT_NAME]}
 				formError={formState.errors[TITLE_INPUT_NAME]}
+				placeholder={formatMessage({ id: 'customTicket.title.placeholder', defaultMessage: 'Title' })}
 			/>
-			<PanelsContainer>
-				<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
-				{
-					(template.modules || []).map((module) => (
-						<ModulePanel
-							module={module}
-							moduleValues={ticket.modules[module.name]}
-						/>
-					))
-				}
-			</PanelsContainer>
-		</CardContent>
+			<CardContent>
+				<PanelsContainer>
+					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
+					{
+						(template.modules || []).map((module) => (
+							<ModulePanel
+								key={module.name}
+								module={module}
+								moduleValues={ticket.modules[module.name]}
+							/>
+						))
+					}
+				</PanelsContainer>
+			</CardContent>
+		</>
 	);
 };
