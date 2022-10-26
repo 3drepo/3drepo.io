@@ -189,11 +189,11 @@ const testUpdateTicket = () => {
 		const propToUpdate = generateRandomString();
 
 		test('should update the ticket to set properties', async () => {
-			const oldPropvalue = generateRandomString();
+			const oldPropValue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = { _id: generateRandomString(),
 				type: generateRandomString(),
-				properties: { [propToUpdate]: oldPropvalue } };
+				properties: { [propToUpdate]: oldPropValue } };
 			const updateData = {
 				properties: {
 					[propToUpdate]: newPropValue,
@@ -210,9 +210,8 @@ const testUpdateTicket = () => {
 				{
 					$set: {
 						[`properties.${propToUpdate}`]: newPropValue,
-						'properties.Updated at': date,
+						[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
 					},
-					$unset: {},
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
@@ -222,12 +221,12 @@ const testUpdateTicket = () => {
 				ticket: { _id: oldTicket._id, type: oldTicket.type },
 				author,
 				timestamp: date,
-				changes: { properties: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
+				changes: { properties: { [propToUpdate]: { from: oldPropValue, to: newPropValue } } },
 			});
 		});
 
 		test('should update the ticket to set modules', async () => {
-			const oldPropvalue = generateRandomString();
+			const oldPropValue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const moduleName = generateRandomString();
 			const updateData = {
@@ -237,7 +236,7 @@ const testUpdateTicket = () => {
 			const oldTicket = {
 				_id: generateRandomString(),
 				type: generateRandomString(),
-				modules: { [moduleName]: { [propToUpdate]: oldPropvalue } },
+				modules: { [moduleName]: { [propToUpdate]: oldPropValue } },
 			};
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
@@ -248,9 +247,8 @@ const testUpdateTicket = () => {
 				{
 					$set: {
 						[`modules.${moduleName}.${propToUpdate}`]: newPropValue,
-						'properties.Updated at': date,
+						[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
 					},
-					$unset: {},
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
@@ -261,19 +259,19 @@ const testUpdateTicket = () => {
 				author,
 				timestamp: date,
 				changes: {
-					modules: { [moduleName]: { [propToUpdate]: { from: oldPropvalue, to: newPropValue } } },
+					modules: { [moduleName]: { [propToUpdate]: { from: oldPropValue, to: newPropValue } } },
 				},
 			});
 		});
 
 		test('should update the ticket to set and unset data', async () => {
-			const oldPropvalue = generateRandomString();
+			const oldPropValue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = {
 				_id: generateRandomString(),
 				type: generateRandomString(),
-				properties: { propToUnset: oldPropvalue },
-				modules: { module: { propToUnset: oldPropvalue } },
+				properties: { propToUnset: oldPropValue },
+				modules: { module: { propToUnset: oldPropValue } },
 			};
 			const updateData = {
 				[propToUpdate]: newPropValue,
@@ -287,7 +285,7 @@ const testUpdateTicket = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
 				{
-					$set: { 'properties.Updated at': date, [propToUpdate]: newPropValue },
+					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, [propToUpdate]: newPropValue },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
 				});
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
@@ -300,20 +298,221 @@ const testUpdateTicket = () => {
 				timestamp: date,
 				changes: {
 					[propToUpdate]: { from: undefined, to: newPropValue },
-					properties: { propToUnset: { from: oldPropvalue, to: null } },
-					modules: { module: { propToUnset: { from: oldPropvalue, to: null } } },
+					properties: { propToUnset: { from: oldPropValue, to: null } },
+					modules: { module: { propToUnset: { from: oldPropValue, to: null } } },
 				},
 			});
 		});
+		describe('Composite types', () => {
+			test('Should retain other properties within the compsite type if the embedded field has been updated', async () => {
+				const propName = generateRandomString();
+				const embeddedFieldName = generateRandomString();
+				const oldPropValue = {
+					[generateRandomString]: generateRandomString(),
+					[embeddedFieldName]: generateRandomString(),
+				};
+				const newPropValue = { [embeddedFieldName]: generateRandomString() };
+				const oldTicket = {
+					_id: generateRandomString(),
+					type: generateRandomString(),
+					properties: { [propName]: oldPropValue },
+					modules: { module: { [propName]: oldPropValue } },
+				};
+				const updateData = {
+					properties: { [propName]: newPropValue, [basePropertyLabels.UPDATED_AT]: date },
+					modules: { module: { [propName]: newPropValue } },
+				};
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
-		test('should not throw UPDATE_TICKET event if update fails', async () => {
-			const oldPropvalue = generateRandomString();
+				await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
+
+				const expectedValue = { ...oldPropValue, ...newPropValue };
+
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
+					{
+						$set: {
+							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
+							[`properties.${propName}`]: expectedValue,
+							[`modules.module.${propName}`]: expectedValue,
+
+						},
+					});
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
+					teamspace,
+					project,
+					model,
+					ticket: { _id: oldTicket._id, type: oldTicket.type },
+					author,
+					timestamp: date,
+					changes: {
+						properties: { [propName]: { from: oldPropValue, to: expectedValue } },
+						modules: { module: { [propName]: { from: oldPropValue, to: expectedValue } } },
+					},
+				});
+			});
+
+			test('Should retain other properties within the compsite type if the embedded field has been removed', async () => {
+				const propName = generateRandomString();
+				const embeddedFieldName = generateRandomString();
+				const oldPropValue = {
+					[generateRandomString]: generateRandomString(),
+					[embeddedFieldName]: generateRandomString(),
+				};
+				const newPropValue = { [embeddedFieldName]: null };
+				const oldTicket = {
+					_id: generateRandomString(),
+					type: generateRandomString(),
+					properties: { [propName]: oldPropValue },
+					modules: { module: { [propName]: oldPropValue } },
+				};
+				const updateData = {
+					properties: { [propName]: newPropValue, [basePropertyLabels.UPDATED_AT]: date },
+					modules: { module: { [propName]: newPropValue } },
+				};
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+				await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
+
+				const expectedValue = { ...oldPropValue, ...newPropValue };
+				delete expectedValue[embeddedFieldName];
+
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
+					{
+						$set: {
+							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
+							[`properties.${propName}`]: expectedValue,
+							[`modules.module.${propName}`]: expectedValue,
+
+						},
+					});
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
+					teamspace,
+					project,
+					model,
+					ticket: { _id: oldTicket._id, type: oldTicket.type },
+					author,
+					timestamp: date,
+					changes: {
+						properties: { [propName]: { from: oldPropValue, to: expectedValue } },
+						modules: { module: { [propName]: { from: oldPropValue, to: expectedValue } } },
+					},
+				});
+			});
+			test('Should update the property correctly if it was undefined before', async () => {
+				const propName = generateRandomString();
+				const embeddedFieldName = generateRandomString();
+				const oldPropValue = null;
+				const newPropValue = { [embeddedFieldName]: generateRandomString() };
+				const oldTicket = {
+					_id: generateRandomString(),
+					type: generateRandomString(),
+					properties: { [propName]: oldPropValue },
+					modules: { module: { [propName]: oldPropValue } },
+				};
+				const updateData = {
+					properties: { [propName]: newPropValue, [basePropertyLabels.UPDATED_AT]: date },
+					modules: { module: { [propName]: newPropValue } },
+				};
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+				await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
+
+				const expectedValue = { ...oldPropValue, ...newPropValue };
+
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
+					{
+						$set: {
+							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
+							[`properties.${propName}`]: expectedValue,
+							[`modules.module.${propName}`]: expectedValue,
+
+						},
+					});
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
+					teamspace,
+					project,
+					model,
+					ticket: { _id: oldTicket._id, type: oldTicket.type },
+					author,
+					timestamp: date,
+					changes: {
+						properties: { [propName]: { from: oldPropValue, to: expectedValue } },
+						modules: { module: { [propName]: { from: oldPropValue, to: expectedValue } } },
+					},
+				});
+			});
+
+			test('Should remove the property if the removal of embedded field means the property will be {}', async () => {
+				const propName = generateRandomString();
+				const embeddedFieldName = generateRandomString();
+				const oldPropValue = {
+					[embeddedFieldName]: generateRandomString(),
+				};
+				const newPropValue = { [embeddedFieldName]: null };
+				const oldTicket = {
+					_id: generateRandomString(),
+					type: generateRandomString(),
+					properties: { [propName]: oldPropValue },
+					modules: { module: { [propName]: oldPropValue } },
+				};
+				const updateData = {
+					properties: { [propName]: newPropValue, [basePropertyLabels.UPDATED_AT]: date },
+					modules: { module: { [propName]: newPropValue } },
+				};
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+				await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
+
+				const expectedValue = { ...oldPropValue, ...newPropValue };
+				delete expectedValue[embeddedFieldName];
+
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { _id: oldTicket._id },
+					{
+						$set: {
+							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
+						},
+						$unset: {
+
+							[`properties.${propName}`]: 1,
+							[`modules.module.${propName}`]: 1,
+
+						},
+					});
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET, {
+					teamspace,
+					project,
+					model,
+					ticket: { _id: oldTicket._id, type: oldTicket.type },
+					author,
+					timestamp: date,
+					changes: {
+						properties: { [propName]: { from: oldPropValue, to: null } },
+						modules: { module: { [propName]: { from: oldPropValue, to: null } } },
+					},
+				});
+			});
+		});
+
+		test('should not trigger UPDATE_TICKET event if update fails', async () => {
+			const oldPropValue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const oldTicket = {
 				_id: generateRandomString(),
 				type: generateRandomString(),
-				properties: { propToUnset: oldPropvalue },
-				modules: { module: { propToUnset: oldPropvalue } },
+				properties: { propToUnset: oldPropValue },
+				modules: { module: { propToUnset: oldPropValue } },
 			};
 			const updateData = {
 				[propToUpdate]: newPropValue,
@@ -325,6 +524,25 @@ const testUpdateTicket = () => {
 			jest.spyOn(db, 'updateOne').mockRejectedValueOnce(errMsg);
 			await expect(Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author))
 				.rejects.toEqual(errMsg);
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
+
+		test('should not update the ticket if there is nothing to update', async () => {
+			const oldPropValue = generateRandomString();
+			const oldTicket = {
+				_id: generateRandomString(),
+				type: generateRandomString(),
+				properties: { [propToUpdate]: oldPropValue },
+				modules: { module: { [propToUpdate]: oldPropValue } },
+			};
+			const updateData = {
+				properties: {},
+				modules: {},
+			};
+
+			const fn = jest.spyOn(db, 'updateOne');
+			await Ticket.updateTicket(teamspace, project, model, oldTicket, updateData, author);
+			expect(fn).not.toHaveBeenCalled();
 			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 	});

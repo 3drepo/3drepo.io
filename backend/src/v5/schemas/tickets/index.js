@@ -222,7 +222,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						shownGroups: Yup.array().of(uuidString),
 						transformGroups: Yup.array().of(uuidString),
 					}).default(undefined),
-				}).default(undefined);
+				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
 				res[name] = uuidString;
 			}
