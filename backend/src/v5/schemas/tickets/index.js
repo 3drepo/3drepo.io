@@ -24,6 +24,8 @@ const {
 	propTypes,
 	riskLevels,
 	riskLevelsToNum } = require('./templates.constants');
+const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
+const { isDate, isObject } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
@@ -31,7 +33,6 @@ const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
 const { getJobNames } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaces');
-const { isEqual } = require('../../utils/helper/objects');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 
@@ -87,8 +88,18 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 				}
 
 				const oldValue = oldProperties?.[prop.name];
-				validator = stripWhen(validator, (p) => isEqual(p, oldValue)
-						|| (p === null && oldValue === undefined && !prop.required));
+				validator = stripWhen(validator, (p) => {
+					let valueToEval = p;
+					if (isObject(p) && !isDate(p)) {
+						// composite types - merge the old value with new
+						valueToEval = deleteIfUndefined({ ...oldValue, ...p }, true);
+
+						// if the object becomes empty, we're effectively setting it to null
+						valueToEval = isEqual(valueToEval, {}) ? null : valueToEval;
+					}
+					return (valueToEval === null && oldValue === undefined && !prop.required)
+						|| isEqual(valueToEval, oldValue);
+				});
 			}
 
 			obj[prop.name] = validator;
@@ -141,7 +152,8 @@ Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 		await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
-	return Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+	const res = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+	return res;
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
