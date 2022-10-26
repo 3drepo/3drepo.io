@@ -50,7 +50,6 @@ export const TitleContainer = styled.div`
 
 export const FormTitle = styled(FormTextArea).attrs({
 	minRows: 1,
-	inputProps: { maxLength: 120 },
 })`
 	& > .MuiInputBase-root {
 		textarea {
