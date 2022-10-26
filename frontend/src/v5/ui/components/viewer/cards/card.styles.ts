@@ -44,10 +44,6 @@ export const CardContentContainer = styled.div`
 	box-sizing: border-box;
 	background-color: #f9faff;
 	min-height: 100%;
-
-	.MuiFormControl-root {
-		margin-top: 18px;
-	}
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({

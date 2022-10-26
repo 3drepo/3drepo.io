@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { TextField } from '@mui/material';
+import { FormTextAreaFixedSize } from '@controls/formTextArea/formTextAreaFixedSize.component';
 
-export const LongTextProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
-	<div>
-		&nbsp;
-		<TextField
-			label={property.name}
-			value={value}
-			disabled={property.readOnly}
-			multiline
-			rows={2}
-			maxRows={4}
-		/>
-	</div>
+export const LongTextProperty = ({
+	property: { name, readOnly, required },
+	value,
+}: { property: PropertyDefinition, value: any }) => (
+	<FormTextAreaFixedSize
+		label={name}
+		name={name}
+		defaultValue={value}
+		disabled={readOnly}
+		required={required}
+	/>
 );

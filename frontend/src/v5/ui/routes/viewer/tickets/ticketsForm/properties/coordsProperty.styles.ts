@@ -14,42 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import { Switch, SwitchProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
-import { FormControlLabel } from './formToggle.styles';
-
-export type FormToggleProps = SwitchProps & {
-	control?: any;
-	name: string;
-	children: any;
-};
-
-export const FormToggle = ({
-	control,
-	name,
-	children,
-	required,
-	disabled,
-	...props
-}: FormToggleProps) => (
-	<FormControlLabel
-		disabled={disabled}
-		label={children}
-		control={(
-			<Controller
-				control={control}
-				name={name}
-				render={({ field }) => (
-					<Switch
-						{...field}
-						inputRef={field.ref}
-						id={name}
-						disabled={disabled}
-						{...props}
-					/>
-				)}
-			/>
-		)}
-	/>
-);
+export const FlexContainer = styled.div`
+	display: inline-flex;
+	gap: 10px;
+`;

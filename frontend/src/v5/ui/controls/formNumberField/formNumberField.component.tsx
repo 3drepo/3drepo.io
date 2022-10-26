@@ -15,41 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Switch, SwitchProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
-import { FormControlLabel } from './formToggle.styles';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export type FormToggleProps = SwitchProps & {
-	control?: any;
-	name: string;
-	children: any;
-};
-
-export const FormToggle = ({
-	control,
-	name,
-	children,
-	required,
-	disabled,
-	...props
-}: FormToggleProps) => (
-	<FormControlLabel
-		disabled={disabled}
-		label={children}
-		control={(
-			<Controller
-				control={control}
-				name={name}
-				render={({ field }) => (
-					<Switch
-						{...field}
-						inputRef={field.ref}
-						id={name}
-						disabled={disabled}
-						{...props}
-					/>
-				)}
-			/>
-		)}
-	/>
-);
+export const FormNumberField = (props) => (<FormTextField type="number" {...props} />);
