@@ -38,28 +38,36 @@ export const PanelsContainer = styled.div`
 	}
 `;
 
+export const TitleContainer = styled.div`
+	width: 100%;
+	padding: 10px 15px;
+	position: relative;
+	z-index: 1;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	box-sizing: border-box;
+	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
+`;
+
 export const FormTitle = styled(FormTextArea).attrs({
 	minRows: 1,
 	inputProps: { maxLength: 120 },
 })`
-	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
-	position: relative;
-	z-index: 1;
-
 	& > .MuiInputBase-root {
-		padding: 15px 18px;
-		border-radius: 0;
-
 		textarea {
 			${({ theme }) => theme.typography.h3}
 		}
 
-		&, &:hover, &.Mui-focused:not(.Mui-disabled) {
+		/* &.Mui-focused:not(.Mui-disabled) */
+		&:not(.Mui-focused):not(.Mui-error) {
 			fieldset {
 				box-shadow: none;
 				border: none;
 				border-radius: 0;
 			}
 		}
+	}
+	 
+	.MuiFormHelperText-root.Mui-error {
+		display: none;
 	}
 `;

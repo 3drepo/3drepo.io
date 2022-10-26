@@ -23,7 +23,7 @@ import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
-import { FormTitle, PanelsContainer } from './ticketsForm.styles';
+import { TitleContainer, FormTitle, PanelsContainer } from './ticketsForm.styles';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -77,14 +77,20 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket }) => {
 	const { formState } = useFormContext();
 	const TITLE_INPUT_NAME = 'title';
+	const TITLE_PLACEHOLDER = formatMessage({
+		id: 'customTicket.newTicket.titlePlaceholder',
+		defaultMessage: 'Ticket name',
+	});
 	return (
 		<>
-			<FormTitle
-				name={TITLE_INPUT_NAME}
-				defaultValue={ticket[TITLE_INPUT_NAME]}
-				formError={formState.errors[TITLE_INPUT_NAME]}
-				placeholder={formatMessage({ id: 'customTicket.title.placeholder', defaultMessage: 'Title' })}
-			/>
+			<TitleContainer>
+				<FormTitle
+					name={TITLE_INPUT_NAME}
+					defaultValue={ticket[TITLE_INPUT_NAME]}
+					formError={formState.errors[TITLE_INPUT_NAME]}
+					placeholder={TITLE_PLACEHOLDER}
+				/>
+			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
 					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
