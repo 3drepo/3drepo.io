@@ -19,6 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
+import { Pin, PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
 import { CoordsProperty } from './properties/coordsProperty.component';
 import { DateProperty } from './properties/dateProperty.component';
 import { ImageProperty } from './properties/imageProperty.component';
@@ -97,6 +98,7 @@ export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket:
 					defaultValue={ticket.title}
 					placeholder={TITLE_PLACEHOLDER}
 				/>
+				<PinDetails /> {/* conditionally render this when pin logic added */}
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
