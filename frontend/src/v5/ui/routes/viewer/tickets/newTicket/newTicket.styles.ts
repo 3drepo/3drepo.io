@@ -26,7 +26,13 @@ export const Form = styled.form`
 `;
 
 export const SaveButton = styled(SubmitButton)`
-	margin: 15px;
-	width: calc(100% - 30px);
-	justify-self: flex-end;
+	margin: 9px 15px;
+	width: fit-content;
+`;
+
+export const BottomArea = styled.div`
+	box-shadow: 0 -6px 10px rgb(0 0 0 / 4%);
+	z-index: 1;
+	display: flex;
+	justify-content: flex-end;
 `;

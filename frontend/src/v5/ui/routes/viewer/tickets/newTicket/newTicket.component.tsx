@@ -31,7 +31,7 @@ import { EditableTicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { modelIsFederation, propertiesValidator, propertyValidator } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Form, SaveButton } from './newTicket.styles';
+import { BottomArea, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
@@ -137,7 +137,11 @@ export const NewTicketCard = () => {
 				<FormProvider {...formData}>
 					<Form onSubmit={formData.handleSubmit(onSubmit)}>
 						<TicketForm template={editableTemplate} ticket={getBaseTicket()} />
-						<SaveButton disabled={!formData.formState.isValid}>Save</SaveButton>
+						<BottomArea>
+							<SaveButton disabled={!formData.formState.isValid}>
+								<FormattedMessage id="customTicket.button.saveTicket" defaultMessage="Save ticket" />
+							</SaveButton>
+						</BottomArea>
 					</Form>
 				</FormProvider>
 			)}
