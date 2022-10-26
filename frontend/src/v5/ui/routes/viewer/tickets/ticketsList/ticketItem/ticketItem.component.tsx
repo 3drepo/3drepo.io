@@ -14,11 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
+import { DueDate } from '@controls/dueDate/dueDate.component';
 import { useParams } from 'react-router-dom';
-import { Ticket, Id, Title } from './ticketItem.styles';
+import { Ticket, Id, Title, ChipList, Assignees, ExtraInfo, PriorityLevelChip } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -29,15 +32,35 @@ type TicketItemProps = {
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-
+	const {
+		number,
+		properties: {
+			Status: status,
+			Priority: priority,
+			Assignees: assignees,
+			'Due Date': dueDate,
+		},
+	} = ticket;
+	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
+	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
 	return (
 		<Ticket
 			onClick={onClick}
 			key={ticket._id}
 			$selected={selected}
 		>
-			<Id>{template?.code}:{ticket.number}</Id>
+			<Id>{template?.code}:{number}</Id>
 			<Title>{ticket.title}</Title>
+			<ChipList>
+				{status && <TicketStatusChip state={status} />}
+				{riskLevel && <RiskLevelChip state={riskLevel} />}
+				{treatmentStatus && <TreatmentLevelChip state={treatmentStatus} />}
+			</ChipList>
+			<ExtraInfo>
+				{dueDate !== undefined && <DueDate date={dueDate} onClick={() => { /* Edit Due Date */ }} />}
+				{priority && <PriorityLevelChip state={priority} />}
+				{assignees && <Assignees assignees={assignees} max={7} />}
+			</ExtraInfo>
 		</Ticket>
 	);
 };

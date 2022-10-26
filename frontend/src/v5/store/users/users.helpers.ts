@@ -14,26 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Ticket } from './ticketItem/ticketItem.styles';
 
-export const List = styled.div`
-	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 6px;
-	overflow: hidden;
-	display: inline-block;
-	width: 100%;
-	margin-bottom: 15px;
-	${/* sc-selector */ Ticket}:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
 
-export const Filters = styled.div`
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: -2px;
-	margin-bottom: 13px;
-`;
+export const getMemberImgSrc = (teamspace: string, member: string) => (
+	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar`, clientConfigService.GET_API)
+);

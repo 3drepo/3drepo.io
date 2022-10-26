@@ -14,26 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Ticket } from './ticketItem/ticketItem.styles';
 
-export const List = styled.div`
-	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 6px;
-	overflow: hidden;
-	display: inline-block;
-	width: 100%;
-	margin-bottom: 15px;
-	${/* sc-selector */ Ticket}:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
+import AvatarIcon from '@mui/material/Avatar';
+import { StyledIconButton } from '@controls/avatar/avatar.styles';
+import { getAbbreviation } from '@/v5/store/jobs/jobs.helpers';
 
-export const Filters = styled.div`
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: -2px;
-	margin-bottom: 13px;
-`;
+type JobAvatarProps = {
+	job: string;
+	size?: 'small' | 'medium' | 'large';
+	isButton?: boolean;
+	className?: string;
+};
+
+export const JobAvatar = ({ job, isButton, ...props }: JobAvatarProps) => (
+	<StyledIconButton
+		$isButton={isButton}
+		{...props}
+	>
+		<AvatarIcon>
+			{getAbbreviation(job)}
+		</AvatarIcon>
+	</StyledIconButton>
+);

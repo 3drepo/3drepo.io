@@ -55,7 +55,7 @@ export const TicketsListCard = () => {
 				<TicketsIcon fontSize="small" />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 			</CardHeader>
-			<CardContent autoHeightMax="100%">
+			<CardContent>
 				<TicketsList tickets={tickets} />
 			</CardContent>
 		</CardContainer>
