@@ -20,4 +20,5 @@ export interface PropertyProps {
 	property: Partial<PropertyDefinition>;
 	defaultValue?: any;
 	name: string;
+	formError?: any;
 }

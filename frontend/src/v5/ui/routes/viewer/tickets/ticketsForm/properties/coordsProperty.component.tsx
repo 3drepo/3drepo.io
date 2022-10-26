@@ -18,14 +18,14 @@ import { FormNumberField } from '@controls/formNumberField/formNumberField.compo
 import { FlexContainer } from './coordsProperty.styles';
 import { PropertyProps } from './properties.types';
 
-export const CoordsProperty = ({ property: { readOnly, required }, defaultValue, name, ...props }: PropertyProps) => {
+export const CoordsProperty = ({ property: { readOnly, required }, formError, defaultValue, name, ...props }: PropertyProps) => {
 	const [x, y, z] = defaultValue || [];
 
 	return (
 		<FlexContainer>
-			<FormNumberField name={`${name}[0]`} label="x" defaultValue={x} disabled={readOnly} required={required} {...props} />
-			<FormNumberField name={`${name}[1]`} label="y" defaultValue={y} disabled={readOnly} required={required} {...props} />
-			<FormNumberField name={`${name}[2]`} label="z" defaultValue={z} disabled={readOnly} required={required} {...props} />
+			<FormNumberField name={`${name}[0]`} label="x" defaultValue={x} disabled={readOnly} required={required} formError={formError?.[0]} {...props} />
+			<FormNumberField name={`${name}[1]`} label="y" defaultValue={y} disabled={readOnly} required={required} formError={formError?.[1]} {...props} />
+			<FormNumberField name={`${name}[2]`} label="z" defaultValue={z} disabled={readOnly} required={required} formError={formError?.[2]} {...props} />
 		</FlexContainer>
 	);
 };
