@@ -20,6 +20,7 @@ import styled, { css } from 'styled-components';
 
 export const PinContainer = styled.div<{ selected: boolean; }>`
 	width: auto;
+	color: ${({ theme }) => theme.palette.secondary.main};
 	border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	border-radius: 5px;
 	padding: 10px 15px;
@@ -38,11 +39,29 @@ export const PinActions = styled.div`
 export const PinName = styled(Typography).attrs({
 	variant: 'h5',
 })`
-	color: ${({ theme }) => theme.palette.secondary.main};
+	user-select: none;
 `;
 
-export const PinAction = styled(Typography).attrs({
-	variant: 'body1',
-})`
+export const PinAction = styled.div`
+	font-size: 10px;
+	font-weight: 500;
 	color: ${({ theme }) => theme.palette.base.main};
+	display: flex;
+    align-items: center;
+	gap: 3px;
+	user-select: none;
+	cursor: pointer;
+	svg {
+		height: 12px;
+		width: auto;
+	}
+`;
+
+export const SettingLocationText = styled(PinAction)`
+	font-style: italic;
+	color: inherit;
+	svg {
+		height: 10px;
+		margin: 0 5px;
+	}
 `;

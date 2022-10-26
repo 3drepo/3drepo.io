@@ -16,17 +16,66 @@
  */
 
 import { useState } from 'react';
-import { PinAction, PinActions, PinContainer, PinName } from './pinDetails.styles';
+import CircledPlusIcon from '@assets/icons/outlined/add-circle-outlined.svg';
+import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
+import CrossIcon from '@assets/icons/close.svg';
+import DeleteIcon from '@assets/icons/delete.svg';
+import { FormattedMessage } from 'react-intl';
+import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
 export const PinDetails = () => {
-	const [isSelected, setIsSelected] = useState(false);
-	const setPinLocation = () => setIsSelected((state) => !state);
+	const [isEditMode, setIsEditMode] = useState(false);
+	const [hasPin, setHasPin] = useState(false); // This can be removed when pin logic added
+
+	const onClickCancelSetPin = () => setIsEditMode(false);
+	const onClickDelete = () => setHasPin(false);
+	const onClickSetPin = () => {
+		setIsEditMode(true);
+		setHasPin(true);
+	};
+
+	const SetPin = () => {
+		if (!hasPin) {
+			return (
+				<PinAction onClick={onClickSetPin}>
+					<CircledPlusIcon />
+					<FormattedMessage
+						id="tickets.pin.addPin"
+						defaultMessage="Add pin"
+					/>
+				</PinAction>
+			);
+		}
+		return isEditMode ? (
+			<SettingLocationText onClick={onClickCancelSetPin}>
+				<FormattedMessage
+					id="tickets.pin.selectLocation"
+					defaultMessage="Select new location on model"
+				/>
+				<CrossIcon />
+			</SettingLocationText>
+		) : (
+			<PinAction onClick={onClickSetPin}>
+				<PinIcon />
+				<FormattedMessage
+					id="tickets.pin.changeLocation"
+					defaultMessage="Change pin location"
+				/>
+			</PinAction>
+		);
+	};
+
 	return (
-		<PinContainer selected={isSelected}>
-			<PinName>Pin</PinName>
+		<PinContainer selected={isEditMode}>
+			<PinName><FormattedMessage id="tickets.pin.title" defaultMessage="Pin" /></PinName>
 			<PinActions>
-				<PinAction onClick={setPinLocation}>Add Pin</PinAction>
-				<PinAction>Delete Pin</PinAction>
+				<SetPin />
+				{hasPin && (
+					<PinAction onClick={onClickDelete}>
+						<DeleteIcon />
+						<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
+					</PinAction>
+				)}
 			</PinActions>
 		</PinContainer>
 	);
