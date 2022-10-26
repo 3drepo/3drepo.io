@@ -59,6 +59,8 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 			let newValue = obj[key];
 			if (newValue) {
 				if (isObject(newValue) && !isDate(newValue)) {
+					// if this is an object it is a composite type, in which case
+					// we should merge the old value with the new value
 					newValue = deleteIfUndefined({ ...(oldValue ?? {}), ...newValue }, true);
 					if (isEqual(newValue, {})) {
 						newValue = null;
