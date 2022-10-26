@@ -31,6 +31,7 @@ export const FormToggle = ({
 	children,
 	required,
 	disabled,
+	defaultValue,
 	...props
 }: FormToggleProps) => (
 	<FormControlLabel
@@ -40,6 +41,7 @@ export const FormToggle = ({
 			<Controller
 				control={control}
 				name={name}
+				defaultValue={defaultValue}
 				render={({ field }) => (
 					<Switch
 						{...field}
