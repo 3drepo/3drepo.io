@@ -23,9 +23,13 @@ Note: This is currently a work in progress, new events will be added as they are
     + [Container New Revision](#container-new-revision)
     + [Container Revision Update](#container-revision-update)
     + [Container Removed](#container-removed)
+    + [Container New Ticket](#container-new-ticket)
+    + [Container Update Ticket](#container-update-ticket)
     + [Federation Settings Update](#federation-settings-update)
     + [Federation New Revision](#federation-new-revision)
     + [Federation Removed](#federation-removed)
+    + [Federation New Ticket](#federation-new-ticket)
+    + [Federation Update Ticket ](#federation-update-ticket)
   * [Project events](#project-events)
     + [New Container](#new-container)
     + [New Federation](#new-federation)
@@ -160,6 +164,16 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { }}`
   - Description: Used to notify the user of a container deletion. This will be triggered when a container has been removed from a project
 
+#### Container New Ticket
+  - Event name: `containerNewTicket`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { /* ticket data */ }}`
+  - Description: Used to notify the user of a ticket addition to a container.
+
+#### Container Update Ticket
+  - Event name: `containerUpdateTicket`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { _id: "ticketId", /* fields that has been updated */ }}`
+  - Description: Used to notify the user of a ticket update in a container.
+
 #### Federation Settings Update
   - Event name: `federationSettingsUpdate`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { /* Changes on federation settings */}}`
@@ -174,6 +188,16 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Event name: `federationRemoved`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { }}`
   - Description: Used to notify the user of a federation deletion. This will be triggered when a federation has been removed from a project
+
+#### Federation New Ticket
+  - Event name: `federationNewTicket`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { /* ticket data */ }}`
+  - Description: Used to notify the user of a ticket addition to a federation.
+
+#### Federation Update Ticket
+  - Event name: `federationUpdateTicket`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { _id: "ticketId", /* fields that has been updated */ }}`
+  - Description: Used to notify the user of a ticket update in a federation.
 
 ### Project events
 The following events will be emitted if the user has subscribed to [Project notifications](#project-notifications).

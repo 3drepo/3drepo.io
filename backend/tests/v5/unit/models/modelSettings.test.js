@@ -678,6 +678,42 @@ const testRemoveUserFromAllModels = () => {
 	});
 };
 
+const testIsFederation = () => {
+	describe('Return if a model is a federation', () => {
+		test('Should return true if model is federation', async () => {
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ federate: true });
+			await expect(Model.isFederation(teamspace, model)).resolves.toEqual(true);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings',
+				{ _id: model },
+				{ _id: 0, federate: 1 });
+		});
+
+		test('Should return false if model is container', async () => {
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ federate: false });
+			await expect(Model.isFederation(teamspace, model)).resolves.toEqual(false);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'settings',
+				{ _id: model },
+				{ _id: 0, federate: 1 });
+		});
+
+		test('Should fail if model does not exist', async () => {
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			await expect(Model.isFederation(teamspace, model))
+				.rejects.toEqual(templates.modelNotFound);
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -691,4 +727,5 @@ describe('models/modelSettings', () => {
 	testNewRevisionProcessed();
 	testUpdateModelSettings();
 	testRemoveUserFromAllModels();
+	testIsFederation();
 });
