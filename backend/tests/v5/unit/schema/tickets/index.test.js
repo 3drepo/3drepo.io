@@ -26,6 +26,8 @@ const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
+const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspaceModel = require(`${src}/models/teamspaces`);
 
@@ -142,7 +144,8 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 				const outData = ({
 					...fullData,
 					properties: moduleProperty ? {} : propObjOut,
-					modules: moduleProperty && output ? { [modName]: propObjOut } : {},
+					modules: moduleProperty && output
+						? deleteIfUndefined({ [modName]: isEqual(propObjOut, {}) ? undefined : propObjOut }) : {},
 				});
 
 				await expect(TicketSchema.validateTicket(teamspace, template, fullData, oldTicket))

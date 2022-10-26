@@ -88,7 +88,7 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 
 				const oldValue = oldProperties?.[prop.name];
 				validator = stripWhen(validator, (p) => isEqual(p, oldValue)
-					|| (p === null && oldValue === undefined && !prop.required));
+						|| (p === null && oldValue === undefined && !prop.required));
 			}
 
 			obj[prop.name] = validator;
@@ -102,13 +102,15 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, modules, oldModules, isNewTicket) => {
+const generateModuleValidator = async (teamspace, modules, oldModules, isNewTicket, cleanUpPass) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties,
+			const modValidator = await generatePropertiesValidator(teamspace, module.properties,
 				oldModules?.[id], isNewTicket);
+			moduleToSchema[id] = cleanUpPass
+				? stripWhen(modValidator, (val) => isEqual(val, {}) || !val) : modValidator;
 		}
 	});
 
@@ -121,22 +123,25 @@ Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 	const fullTem = generateFullSchema(template);
 	const isNewTicket = !oldTicket;
 
-	const modSchema = await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket);
-
-	const validator = Yup.object().shape({
+	const validatorObj = {
 		title: isNewTicket ? types.strings.title.required()
 			: stripWhen(types.strings.title, (t) => isEqual(t, oldTicket?.title)),
 		properties: await generatePropertiesValidator(teamspace, fullTem.properties,
 			oldTicket?.properties, isNewTicket),
-		modules: Yup.object(modSchema).default({}),
+		modules: Yup.object(
+			await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket),
+		).default({}),
 		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
-	});
+	};
 
-	const formattedTicket = await validator.validate(newTicket, { stripUnknown: true });
-	for (const mod in formattedTicket.modules) {
-		if (isEqual(formattedTicket.modules[mod], {})) delete formattedTicket.modules[mod];
-	}
-	return formattedTicket;
+	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
+
+	// Run it again so we can check for unchanged properties that looked changed due to default values
+	validatorObj.modules = Yup.object(
+		await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket, true),
+	).default({});
+
+	return Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
