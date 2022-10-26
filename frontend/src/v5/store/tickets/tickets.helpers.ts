@@ -28,15 +28,15 @@ export const modelIsFederation = (modelId: string) => (
 
 const MAX_TEXT_LENGTH = 50;
 const MAX_LONG_TEXT_LENGTH = 120;
-const maxStringLength = (type) => type === "longText" ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH;
+const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
 
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 	let validator;
+	const maxLength = maxStringLength(type);
 
 	switch (type) {
 		case 'text':
 		case 'longText':
-			const maxLength = maxStringLength(type);
 			validator = trimmedString.max(maxLength,
 				formatMessage({
 					id: 'validation.ticket.tooLong',
@@ -77,7 +77,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			const requiredCoord = Yup.string().required(
 				formatMessage({
 					id: 'validation.ticket.coord.required',
-					defaultMessage: 'This is required'
+					defaultMessage: 'This is required',
 				}),
 			);
 			validator = Yup.array(requiredCoord);
@@ -109,10 +109,10 @@ const parseModule = (module) => {
 	const parsedModule = {};
 	Object.entries(module)
 		// skip nullish values that are not 0s or false
-		.filter(([_, value]: [string, any]) => ![null, undefined, ""].includes(value))
+		.filter(([_, value]: [string, any]) => ![null, undefined, ''].includes(value))
 		.forEach(([key, value]) => {
 			if (Array.isArray(value)) {
-				if(value.length === 0) return;
+				if (value.length === 0) return;
 				// manyOf should not allow empty or nullish values, but coords may.
 				// If those values are all undefined, the property (coords) shall be filtered.
 				// Otherwise, its elements should be transformed into `0`s
@@ -123,7 +123,7 @@ const parseModule = (module) => {
 			}
 		});
 	return parsedModule;
-}
+};
 
 export const filterEmptyValues = (ticket) => {
 	const parsedTicket = {};

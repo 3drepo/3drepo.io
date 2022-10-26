@@ -118,7 +118,7 @@ export const NewTicketCard = () => {
 			containerOrFederation,
 			parsedTicket,
 			isFederation,
-			goToTicketDetails
+			goToTicketDetails,
 		);
 	};
 
