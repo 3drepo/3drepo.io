@@ -74,9 +74,10 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 	</Accordion>
 );
 
+export const TITLE_INPUT_NAME = 'title';
+
 export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket }) => {
 	const { formState } = useFormContext();
-	const TITLE_INPUT_NAME = 'title';
 	const TITLE_PLACEHOLDER = formatMessage({
 		id: 'customTicket.newTicket.titlePlaceholder',
 		defaultMessage: 'Ticket name',

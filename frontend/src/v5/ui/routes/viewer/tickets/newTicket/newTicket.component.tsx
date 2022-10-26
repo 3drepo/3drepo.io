@@ -32,7 +32,7 @@ import { modelIsFederation, propertiesValidator, propertyValidator } from '@/v5/
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
-import { TicketForm } from '../ticketsForm/ticketsForm.component';
+import { TicketForm, TITLE_INPUT_NAME } from '../ticketsForm/ticketsForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
 
@@ -62,7 +62,7 @@ export const NewTicketCard = () => {
 			title: propertyValidator({
 				required: true,
 				type: 'text',
-				name: 'title',
+				name: TITLE_INPUT_NAME,
 			}),
 		};
 		validators.properties = propertiesValidator(properties);
@@ -73,7 +73,10 @@ export const NewTicketCard = () => {
 		return Yup.object().shape(validators);
 	};
 
-	const formData = useForm({ resolver: yupResolver(getValidators()) });
+	const formData = useForm({
+		resolver: yupResolver(getValidators()),
+		mode: 'onChange',
+	});
 
 	const goBack = () => {
 		contextValue.setCardView(TicketsCardViews.List);
