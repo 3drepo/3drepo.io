@@ -42,7 +42,7 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 
 	const proms = properties.map(async (prop) => {
 		if (prop.deprecated || prop.readOnly) return;
-		let validator = propTypesToValidator[prop.type];
+		let validator = propTypesToValidator(prop.type, !isNewTicket && !prop.required);
 		if (validator) {
 			if (prop.values) {
 				let values;
@@ -82,11 +82,13 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 				}
 			} else {
 				if (!prop.required) {
+					// We still need this line because ONE_OF and MANY_OF rewrites the validator.
 					validator = validator.nullable();
 				}
 
 				const oldValue = oldProperties?.[prop.name];
-				validator = stripWhen(validator, (p) => isEqual(p, oldValue));
+				validator = stripWhen(validator, (p) => isEqual(p, oldValue)
+					|| (p === null && oldValue === undefined && !prop.required));
 			}
 
 			obj[prop.name] = validator;
@@ -220,7 +222,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						shownGroups: Yup.array().of(uuidString),
 						transformGroups: Yup.array().of(uuidString),
 					}).default(undefined),
-				}).nullable(true).default(undefined);
+				}).default(undefined);
 			} else if (type === propTypes.IMAGE) {
 				res[name] = uuidString;
 			}
