@@ -25,11 +25,9 @@ import { PropertyProps } from './properties.types';
 
 export const ManyOfProperty = ({
 	property: { name, readOnly, required, values },
-	defaultValue,
+	defaultValue = [],
 	...props
 }: PropertyProps) => {
-	const selectedValues = (defaultValue || []) as string[];
-
 	if (values === 'jobsAndUsers') {
 		const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 		const users = _.sortBy(UsersHooksSelectors.selectUsersByTeamspace(teamspace), 'firstName');
@@ -45,7 +43,7 @@ export const ManyOfProperty = ({
 		return (
 			<FormMultiSelect
 				label={name}
-				defaultValue={selectedValues}
+				defaultValue={defaultValue}
 				disabled={readOnly}
 				required={required}
 				{...props}
@@ -58,7 +56,7 @@ export const ManyOfProperty = ({
 	return (
 		<FormMultiSelect
 			label={name}
-			defaultValue={selectedValues}
+			defaultValue={defaultValue}
 			disabled={readOnly}
 			required={required}
 			{...props}
