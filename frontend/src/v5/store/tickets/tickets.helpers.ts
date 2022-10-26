@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { trimmedString } from '@/v5/validation/shared/validators';
-import { isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 import * as Yup from 'yup';
 import { PropertyDefinition } from './tickets.types';
 
@@ -26,24 +26,32 @@ export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
 
+const MAX_TEXT_LENGTH = 50;
+const MAX_LONG_TEXT_LENGTH = 120;
+const maxStringLength = (type) => type === "longText" ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH;
+
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 	let validator;
-	const MAX_STRING_LENGTH = 50;
 
 	switch (type) {
 		case 'text':
 		case 'longText':
-		case 'oneOf':
-			validator = trimmedString.max(MAX_STRING_LENGTH,
+			const maxLength = maxStringLength(type);
+			validator = trimmedString.max(maxLength,
 				formatMessage({
 					id: 'validation.ticket.tooLong',
-					defaultMessage: 'Max length of text is {MAX_STRING_LENGTH}',
+					defaultMessage: ' {name} is limited to {maxLength} characters',
 				},
-				{ MAX_STRING_LENGTH }));
+				{ maxLength, name }));
 			break;
 		case 'coords':
+			validator = Yup.array();
+			break;
 		case 'manyOf':
 			validator = Yup.array();
+			break;
+		case 'oneOf':
+			validator = trimmedString;
 			break;
 		case 'boolean':
 			validator = Yup.boolean();
@@ -66,7 +74,13 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				}));
 		}
 		if (type === 'coords') {
-			validator = validator.transform((coords) => coords.filter((c) => !isUndefined(c) && c !== "")).length(3);
+			const requiredCoord = Yup.string().required(
+				formatMessage({
+					id: 'validation.ticket.coord.required',
+					defaultMessage: 'This is required'
+				}),
+			);
+			validator = Yup.array(requiredCoord);
 		}
 		validator = validator.required(
 			formatMessage({
@@ -89,4 +103,47 @@ export const propertiesValidator = (properties) => {
 		{},
 	);
 	return Yup.object().shape(validators);
+};
+
+const parseModule = (module) => {
+	const parsedModule = {};
+	Object.entries(module)
+		// skip nullish values that are not 0s or false
+		.filter(([_, value]: [string, any]) => ![null, undefined, ""].includes(value))
+		.forEach(([key, value]) => {
+			if (Array.isArray(value)) {
+				if(value.length === 0) return;
+				// manyOf should not allow empty or nullish values, but coords may.
+				// If those values are all undefined, the property (coords) shall be filtered.
+				// Otherwise, its elements should be transformed into `0`s
+				if (value.length === 3 && !value.some((v) => !isUndefined(v))) return;
+				parsedModule[key] = value.map((v) => v || 0);
+			} else {
+				parsedModule[key] = value;
+			}
+		});
+	return parsedModule;
+}
+
+export const filterEmptyValues = (ticket) => {
+	const parsedTicket = {};
+	Object.entries(ticket).forEach(([key, value]) => {
+		switch (key) {
+			case 'properties':
+				parsedTicket[key] = parseModule(value);
+				break;
+			case 'modules':
+				parsedTicket[key] = {};
+				Object.entries(value).forEach(([module, moduleValue]) => {
+					const parsedModule = parseModule(moduleValue);
+					if (!isEmpty(parsedModule)) {
+						parsedTicket[key][module] = parsedModule;
+					}
+				});
+				break;
+			default:
+				parsedTicket[key] = value;
+		}
+	});
+	return parsedTicket;
 };
