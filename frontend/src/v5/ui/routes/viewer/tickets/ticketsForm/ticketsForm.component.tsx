@@ -44,7 +44,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {} }: Propertie
 						property={property}
 						name={inputName}
 						formError={get(formState.errors, inputName)}
-						defaultValue={propertiesValues[name]}
+						defaultValue={property.default ?? propertiesValues[name]}
 						key={name}
 					/>
 				);
