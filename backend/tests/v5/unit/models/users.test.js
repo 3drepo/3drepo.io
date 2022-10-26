@@ -503,7 +503,7 @@ const testGetUserByEmail = () => {
 
 const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
-		createdAt,		
+		createdAt,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
@@ -515,7 +515,7 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 				countryCode: newUserData.countryCode,
 				company: newUserData.company,
 			},
-		},		
+		},
 		permissions: newUserData.permissions,
 	};
 

@@ -237,7 +237,7 @@ const testSignUp = () => {
 			firstName: generateRandomString(),
 			lastName: generateRandomString(),
 			company: generateRandomString(),
-			mailListOptOut: true
+			mailListOptOut: true,
 		};
 
 		test('should sign a user up and send verification email (non SSO user)', async () => {

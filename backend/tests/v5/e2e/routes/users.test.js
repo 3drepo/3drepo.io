@@ -21,6 +21,7 @@ const { src, image } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 const session = require('supertest-session');
 const fs = require('fs');
+const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -30,6 +31,7 @@ let agent;
 
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
+const ssoTestUser = ServiceHelper.generateUserCredentials();
 const userWithFsAvatar = ServiceHelper.generateUserCredentials();
 const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 const nonVerifiedUser = ServiceHelper.generateUserCredentials();
@@ -40,6 +42,7 @@ const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
 const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
+const userEmailSso = 'exampleSso@email.com';
 const userEmail2 = 'example2@email.com';
 const fsAvatarData = generateRandomString();
 const gridFsAvatarData = generateRandomString();
@@ -50,6 +53,9 @@ const expiredPasswordToken = { token: generateRandomString(), expiredAt: new Dat
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
+		ServiceHelper.db.createUser(ssoTestUser, [], { email: userEmailSso,
+			sso: { type: providers.AAD,
+				id: generateRandomString() } }),
 		ServiceHelper.db.createUser(userWithFsAvatar, []),
 		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
 		ServiceHelper.db.createUser(nonVerifiedUser, [], {
@@ -522,6 +528,11 @@ const testForgotPassword = () => {
 		test('should fail if a username or email is not provided', async () => {
 			const res = await agent.post('/v5/user/password').expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should not send email but return ok if user is an SSO user', async () => {
+			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })
+				.expect(templates.ok.status);
 		});
 
 		test('should return ok even if user does not exist', async () => {

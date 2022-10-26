@@ -139,7 +139,7 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 
 		try {
 			const usernameOrEmail = req.body.user;
-			const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0 });
+			const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0, 'customData.sso': 1 });
 
 			if (sso) {
 				throw templates.unknown;

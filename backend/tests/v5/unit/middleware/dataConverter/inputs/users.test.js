@@ -63,11 +63,11 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	return { user: existingUsername };
 });
 
-UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {	
+UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
 	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
 		return { user: existingUsername, customData: {} };
-	} else if (usernameOrEmail === ssoUsername) {
-		return { user: existingUsername, customData: { sso: { id: generateRandomString() }} };
+	} if (usernameOrEmail === ssoUsername) {
+		return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
 	}
 
 	throw templates.userNotFound;
@@ -215,6 +215,7 @@ const testForgotPasswordData = () => {
 	describe.each([
 		[{ body: { user: existingUsername } }, true, 'with valid username'],
 		[{ body: { user: availableUsername } }, false, 'with invalid username', templates.ok],
+		[{ body: { user: ssoUsername } }, false, 'with sso user username', templates.ok],
 		[{ body: { user: existingEmail } }, true, 'with valid email'],
 		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],

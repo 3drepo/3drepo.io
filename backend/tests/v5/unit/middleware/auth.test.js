@@ -106,7 +106,8 @@ const testNotLoggedInSso = () => {
 			const mockCB = jest.fn(() => {});
 			const redirectMock = jest.fn(() => {});
 			AuthMiddlewares.notLoggedInSso(
-				{ headers: { referer: 'http://abc.com/' }, session: { user: { referer: 'http://abc.com' } }, 
+				{ headers: { referer: 'http://abc.com/' },
+					session: { user: { referer: 'http://abc.com' } },
 					query: { state: JSON.stringify({ redirectUri }) } },
 				{ redirect: redirectMock },
 				mockCB,

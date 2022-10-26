@@ -104,12 +104,13 @@ Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 			req.session.pkceCodes?.verifier);
 
 		try {
-			const user = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso.id': 1 });
+			const { user, customData: { sso } } = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso': 1 });
 
-			if (user.customData.sso?.id !== id) {
+			if (sso?.id !== id) {
 				redirectWithError(res, state.redirectUri, errorCodes.nonSsoUser);
 			} else {
-				req.loginData = await recordSuccessfulAuthAttempt(user.user);
+				req.body.user = user;
+				req.loginData = await recordSuccessfulAuthAttempt(user);
 				await next();
 			}
 		} catch {
