@@ -23,6 +23,7 @@ export type FormToggleProps = SwitchProps & {
 	control?: any;
 	name: string;
 	children: any;
+	defaultValue?: boolean,
 };
 
 export const FormToggle = ({
@@ -48,6 +49,7 @@ export const FormToggle = ({
 						inputRef={field.ref}
 						id={name}
 						disabled={disabled}
+						checked={field.value}
 						{...props}
 					/>
 				)}
