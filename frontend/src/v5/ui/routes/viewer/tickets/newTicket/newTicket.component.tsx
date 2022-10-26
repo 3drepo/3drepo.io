@@ -28,7 +28,7 @@ import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { EditableTicket, NewTicket } from '@/v5/store/tickets/tickets.types';
-import { modelIsFederation, propertiesValidator, propertyValidator } from '@/v5/store/tickets/tickets.helpers';
+import { filterEmptyValues, modelIsFederation, propertiesValidator, propertyValidator } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
@@ -61,7 +61,7 @@ export const NewTicketCard = () => {
 		const validators: any = {
 			title: propertyValidator({
 				required: true,
-				type: 'text',
+				type: 'longText',
 				name: TITLE_INPUT_NAME,
 			}),
 		};
@@ -110,8 +110,9 @@ export const NewTicketCard = () => {
 			title,
 			properties,
 			modules,
-		} as NewTicket;
-		TicketsActionsDispatchers.createTicket(teamspace, project, containerOrFederation, ticket, isFederation, goToTicketDetails);
+		};
+		const parsedTicket = filterEmptyValues(ticket) as NewTicket;
+		TicketsActionsDispatchers.createTicket(teamspace, project, containerOrFederation, parsedTicket, isFederation, goToTicketDetails);
 	};
 
 	useEffect(() => {
