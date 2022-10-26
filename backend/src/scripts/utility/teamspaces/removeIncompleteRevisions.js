@@ -165,9 +165,10 @@ const processTeamspace = async (teamspace, revisionAge) => {
 	const cols = await getCollectionsEndsWith(teamspace, '.history');
 
 	for (const { name } of cols) {
+		const expiryTS = new Date();
 		const incompleteRevisionFilter = {
 			incomplete: { $exists: true },
-			timestamp: { $lt: new Date(new Date().setDate(new Date().getDate() - revisionAge)) },
+			timestamp: { $lt: new Date(expiryTS.setDate(expiryTS.getDate() - revisionAge)) },
 		};
 		// eslint-disable-next-line no-await-in-loop
 		const badRevisions = await find(teamspace, name, incompleteRevisionFilter, { rFile: 1 });
@@ -187,7 +188,7 @@ const processTeamspace = async (teamspace, revisionAge) => {
 
 const run = async (revisionAge) => {
 	logger.logInfo('Finding all members from all teamspaces...');
-	const teamspaces = await getTeamspaceList();
+	const teamspaces = ['charence']; // await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`\t-${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop

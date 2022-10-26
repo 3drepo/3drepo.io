@@ -20,9 +20,7 @@
 const DB = require("./db");
 const utils = require("../utils");
 
-const cleanColName = (col) => {
-	return col.endsWith(".ref") ? col.slice(0, -4) : col;
-};
+const cleanColName = (col) => col.endsWith(".ref") ? col.slice(0, -4) : col;
 
 class GridFSHandler {
 	constructor() {
