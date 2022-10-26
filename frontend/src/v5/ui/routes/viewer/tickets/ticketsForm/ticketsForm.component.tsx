@@ -93,6 +93,7 @@ export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket:
 		<>
 			<TitleContainer>
 				<FormTitle
+					key={ticket.title}
 					name="title"
 					defaultValue={ticket.title}
 					placeholder={TITLE_PLACEHOLDER}
