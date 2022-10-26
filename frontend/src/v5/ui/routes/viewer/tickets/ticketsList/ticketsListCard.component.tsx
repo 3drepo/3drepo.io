@@ -62,7 +62,7 @@ export const TicketsListCard = () => {
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 				<Button onClick={goToNewTicket}>New Ticket</Button>
 			</CardHeader>
-			<CardContent autoHeightMax="100%">
+			<CardContent>
 				<TicketsList tickets={tickets} />
 			</CardContent>
 		</CardContainer>

@@ -57,12 +57,12 @@ export const FormTitle = styled(FormTextArea).attrs({
 			${({ theme }) => theme.typography.h3}
 		}
 
-		/* &.Mui-focused:not(.Mui-disabled) */
 		&:not(.Mui-focused):not(.Mui-error) {
+			&:hover fieldset {
+				border: solid 1px ${({ theme }) => theme.palette.base.lightest};
+			}
 			fieldset {
-				box-shadow: none;
 				border: none;
-				border-radius: 0;
 			}
 		}
 	}
