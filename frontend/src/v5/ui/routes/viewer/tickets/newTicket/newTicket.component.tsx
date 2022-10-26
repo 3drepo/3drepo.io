@@ -112,7 +112,14 @@ export const NewTicketCard = () => {
 			modules,
 		};
 		const parsedTicket = filterEmptyValues(ticket) as NewTicket;
-		TicketsActionsDispatchers.createTicket(teamspace, project, containerOrFederation, parsedTicket, isFederation, goToTicketDetails);
+		TicketsActionsDispatchers.createTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			parsedTicket,
+			isFederation,
+			goToTicketDetails
+		);
 	};
 
 	useEffect(() => {

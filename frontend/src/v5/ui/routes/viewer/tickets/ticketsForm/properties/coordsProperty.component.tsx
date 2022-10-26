@@ -18,7 +18,13 @@ import { FormNumberField } from '@controls/formNumberField/formNumberField.compo
 import { FlexContainer } from './coordsProperty.styles';
 import { PropertyProps } from './properties.types';
 
-export const CoordsProperty = ({ property: { readOnly, required }, formError, defaultValue, name, ...props }: PropertyProps) => {
+export const CoordsProperty = ({
+	property: { readOnly, required },
+	formError,
+	defaultValue,
+	name,
+	...props
+}: PropertyProps) => {
 	const [x, y, z] = defaultValue || [];
 
 	return (
