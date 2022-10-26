@@ -16,13 +16,18 @@
  */
 
 import { Typography } from '@controls/typography';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const PinContainer = styled.div`
+export const PinContainer = styled.div<{ selected: boolean; }>`
 	width: auto;
 	border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	border-radius: 5px;
 	padding: 10px 15px;
+	margin: 4px 0;
+	${({ selected, theme: { palette } }) => selected && css`
+		box-shadow: 0 0 4px ${palette.primary.main};
+		border-color: ${palette.primary.main};
+	`}
 `;
 
 export const PinActions = styled.div`

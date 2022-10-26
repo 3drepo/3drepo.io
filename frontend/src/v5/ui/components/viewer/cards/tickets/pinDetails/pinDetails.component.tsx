@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useState } from 'react';
 import { PinAction, PinActions, PinContainer, PinName } from './pinDetails.styles';
 
-type IPin = {
-	title?: string;
+export const PinDetails = () => {
+	const [isSelected, setIsSelected] = useState(false);
+	const setPinLocation = () => setIsSelected((state) => !state);
+	return (
+		<PinContainer selected={isSelected}>
+			<PinName>Pin</PinName>
+			<PinActions>
+				<PinAction onClick={setPinLocation}>Add Pin</PinAction>
+				<PinAction>Delete Pin</PinAction>
+			</PinActions>
+		</PinContainer>
+	);
 };
-
-export const PinDetails = (pin: IPin) => (
-	<PinContainer>
-		<PinName>My Pin</PinName>
-		<PinActions>
-			<PinAction>Add Pin</PinAction>
-			<PinAction>Delete Pin</PinAction>
-		</PinActions>
-	</PinContainer>
-);
