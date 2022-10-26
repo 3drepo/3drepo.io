@@ -57,7 +57,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			validator = Yup.boolean();
 			break;
 		case 'number':
-			validator = Yup.number().nullable(true).transform((_, val) => Number(val) || null) ;
+			validator = Yup.number().nullable(true).transform((_, val) => Number(val) || null);
 			break;
 		case 'date':
 			validator = Yup.date().nullable();
