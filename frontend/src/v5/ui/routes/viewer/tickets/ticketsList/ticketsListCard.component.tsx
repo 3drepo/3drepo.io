@@ -24,6 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketsList } from './ticketsList.component';
 
@@ -45,6 +46,7 @@ export const TicketsListCard = () => {
 			containerOrFederation,
 			isFederation,
 		);
+		UsersActionsDispatchers.fetchUsers(teamspace);
 	}, [containerOrFederation]);
 
 	return (
@@ -53,7 +55,7 @@ export const TicketsListCard = () => {
 				<TicketsIcon fontSize="small" />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 			</CardHeader>
-			<CardContent autoHeightMax="100%">
+			<CardContent>
 				<TicketsList tickets={tickets} />
 			</CardContent>
 		</CardContainer>

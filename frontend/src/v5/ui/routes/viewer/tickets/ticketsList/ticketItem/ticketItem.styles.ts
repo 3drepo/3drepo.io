@@ -14,6 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { Assignees as AssigneesBase } from '@controls/assignees/assignees.component';
+import { PriorityLevelChip as PriorityLevelChipBase } from '@controls/chip';
 import styled from 'styled-components';
 
 export const Id = styled.div`
@@ -38,11 +41,35 @@ export const Title = styled.div`
 
 // TODO - fix after new palette is released
 export const Ticket = styled.div<{ $selected?: boolean }>`
+	position: relative;
 	cursor: pointer;
 	padding: 12px 14px 16px;
 	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
 
 	&:hover {
 		${({ $selected }) => !$selected && 'background-color: #f9faff;'}
+	}
+`;
+
+export const ChipList = styled.div`
+	display: inline-flex;
+	gap: 7px;
+	margin: 8px 0 0;
+`;
+
+export const Assignees = styled(AssigneesBase)`
+	margin-left: auto;
+`;
+
+export const ExtraInfo = styled.div`
+	margin: 7px 0 0;
+	display: inline-flex;
+	width: 100%;
+	align-items: center;
+`;
+
+export const PriorityLevelChip = styled(PriorityLevelChipBase)`
+	.MuiChip-label {
+		display: none;
 	}
 `;

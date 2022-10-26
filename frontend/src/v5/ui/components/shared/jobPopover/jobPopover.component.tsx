@@ -14,26 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Ticket } from './ticketItem/ticketItem.styles';
 
-export const List = styled.div`
-	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 6px;
-	overflow: hidden;
-	display: inline-block;
-	width: 100%;
-	margin-bottom: 15px;
-	${/* sc-selector */ Ticket}:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
+import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
+import { AvatarWrapper, PopoverContainer, Heading, Data } from '../userPopover/userPopover.styles';
 
-export const Filters = styled.div`
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: -2px;
-	margin-bottom: 13px;
-`;
+interface IJobPopover {
+	job: string;
+}
+
+export const JobPopover = ({ job }: IJobPopover) => (
+	<PopoverContainer>
+		<AvatarWrapper>
+			<JobAvatar job={job} />
+		</AvatarWrapper>
+		<Data>
+			<Heading>{job}</Heading>
+		</Data>
+	</PopoverContainer>
+);

@@ -16,31 +16,13 @@
  */
 
 import styled from 'styled-components';
-import { Avatar } from '@mui/material';
 
-const EXTENSION_COLOUR_MAP = {
-	ifc: '#A8007A',
-	bim: '#80E0E9',
-	dgn: '#62BB46',
-	rvt: '#186BFE',
-	rfa: '#186BFE',
-	spm: '#62BB46',
-	dwg: '#E51050',
-	dxf: '#1D1D1B',
-	nwd: '#007628',
-};
-const ICON_SIZE = 35;
+export const ExtraAssigneesList = styled.ul`
+	padding: 0 20px;
+`;
 
-export const StyledIconButton = styled(Avatar)<{ extension: string}>`
-	font-weight: 600;
-	font-size: 14px;
-	margin: 0 7px;
-	width: ${ICON_SIZE}px;
-	height: ${ICON_SIZE}px;
-	box-sizing: border-box;
-	text-transform: uppercase;
-
-	color: ${({ extension, theme }) => EXTENSION_COLOUR_MAP[extension] || theme.palette.tertiary.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+export const ExtraAssigneesListItem = styled.li`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	list-style-type: none;
 `;

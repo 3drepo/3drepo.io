@@ -18,17 +18,20 @@
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { MenuItem, Select } from '@mui/material';
 
-export const OneOfProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
-	<div>
-	&nbsp;
-		{property.name}
-		<br />
-		<Select value={value}>
-			{(property.values as string[]).map((propValue) => (
-				<MenuItem key={propValue} value={propValue}>
-					{propValue}
-				</MenuItem>
-			))}
-		</Select>
-	</div>
-);
+export const OneOfProperty = ({ property, value }: {property: PropertyDefinition, value: any}) => {
+	if (typeof property.values !== 'object') return <></>;
+	return (
+		<div>
+		&nbsp;
+			{property.name}
+			<br />
+			<Select value={value}>
+				{(property.values as string[]).map((propValue) => (
+					<MenuItem key={propValue} value={propValue}>
+						{propValue}
+					</MenuItem>
+				))}
+			</Select>
+		</div>
+	);
+};
