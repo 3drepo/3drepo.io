@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, PropertyDefinition, TemplateModule, EditableTicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyDefinition, TemplateModule, EditableTicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
@@ -76,7 +76,7 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 
 export const TITLE_INPUT_NAME = 'title';
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket }) => {
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket | NewTicket }) => {
 	const { formState } = useFormContext();
 	const TITLE_PLACEHOLDER = formatMessage({
 		id: 'customTicket.newTicket.titlePlaceholder',

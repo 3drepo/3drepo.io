@@ -69,6 +69,7 @@ export const TicketDetailsCard = () => {
 			containerOrFederation,
 			newTicket,
 			isFederation,
+			() => {},
 		);
 	};
 
