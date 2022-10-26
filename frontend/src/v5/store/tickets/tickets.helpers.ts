@@ -18,6 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { trimmedString } from '@/v5/validation/shared/validators';
+import { isUndefined } from 'lodash';
 import * as Yup from 'yup';
 import { PropertyDefinition } from './tickets.types';
 
@@ -30,7 +31,9 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 	const MAX_STRING_LENGTH = 50;
 
 	switch (type) {
-		case 'text' || 'longText' || 'oneOf' || 'manyOf':
+		case 'text':
+		case 'longText':
+		case 'oneOf':
 			validator = trimmedString.max(MAX_STRING_LENGTH,
 				formatMessage({
 					id: 'validation.ticket.tooLong',
@@ -39,6 +42,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				{ MAX_STRING_LENGTH }));
 			break;
 		case 'coords':
+		case 'manyOf':
 			validator = Yup.array();
 			break;
 		case 'boolean':
@@ -48,12 +52,22 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			validator = Yup.number();
 			break;
 		case 'date':
-			validator = Yup.date();
+			validator = Yup.date().nullable();
 			break;
 		default: validator = trimmedString;
 	}
 
 	if (required) {
+		if (type === 'manyOf') {
+			validator = validator.min(1,
+				formatMessage({
+					id: 'validation.ticket.manyOf.required',
+					defaultMessage: 'Select at least one option',
+				}));
+		}
+		if (type === 'coords') {
+			validator = validator.transform((coords) => coords.filter((c) => !isUndefined(c) && c !== "")).length(3);
+		}
 		validator = validator.required(
 			formatMessage({
 				id: 'validation.ticket.requiredField',
