@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const moveLoginRecords = require('./moveLoginRecords');
 const removeUnityAssetsJSON = require('./removeUnityAssetsJSON');
 const removeGridFSBackUps = require('./removeGridFSBackUps');
 const moveGridFSToFS = require('./moveGridFSToFS');
 
 const scripts = [
+	{ script: moveLoginRecords, desc: 'Move login records' },
 	{ script: removeUnityAssetsJSON, desc: 'Remove redundant UnityAssets.json files' },
 	{ script: removeGridFSBackUps, desc: 'Remove GridFS backup entries' },
 	{ script: moveGridFSToFS, desc: 'Move gridFS documents to fileshare' },
