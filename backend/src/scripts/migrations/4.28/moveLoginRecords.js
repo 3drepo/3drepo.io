@@ -19,6 +19,7 @@ const { v5Path } = require('../../../interop');
 
 const { INTERNAL_DB, listCollections, dropDatabase, dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
+const { initialise } = require(`${v5Path}/models/loginRecords`);
 
 const loginRecordsCol = 'loginRecords';
 
@@ -31,7 +32,10 @@ const processUser = async (user) => {
 };
 
 const run = async () => {
-	const users = await listCollections(loginRecordsCol);
+	const [users] = await Promise.all([
+		listCollections(loginRecordsCol),
+		initialise(),
+	]);
 	for (let i = 0; i < users.length; ++i) {
 		logger.logInfo(`\t\t-${users[i].name}`);
 		// eslint-disable-next-line no-await-in-loop

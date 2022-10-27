@@ -24,16 +24,16 @@ const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { loginPolicy } = require('../utils/config');
 const { publish } = require('../services/eventsManager/eventsManager');
 
-const LoginRecord = {};
+const LoginRecords = {};
 const LOGIN_RECORDS_COL = 'loginRecords';
 
-LoginRecord.getLastLoginDate = async (user) => {
+LoginRecords.getLastLoginDate = async (user) => {
 	const lastRecord = await db.findOne(db.INTERNAL_DB, LOGIN_RECORDS_COL,
 		{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 	return lastRecord?.loginTime;
 };
 
-LoginRecord.removeAllUserRecords = async (user) => {
+LoginRecords.removeAllUserRecords = async (user) => {
 	await db.deleteMany(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user });
 };
 
@@ -50,8 +50,8 @@ const getFailedAttemptsSince = async (user, limit, dateFrom) => {
 	return res.map(({ loginTime }) => loginTime);
 };
 
-LoginRecord.isAccountLocked = async (user) => {
-	const lastLogin = await LoginRecord.getLastLoginDate(user);
+LoginRecords.isAccountLocked = async (user) => {
+	const lastLogin = await LoginRecords.getLastLoginDate(user);
 	const {
 		maxUnsuccessfulLoginAttempts: maxAttempts,
 		lockoutDuration,
@@ -97,21 +97,24 @@ const generateRecord = (_id, ipAddr, userAgent, referer) => {
 	return loginRecord;
 };
 
-LoginRecord.saveLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
+LoginRecords.saveLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
 	const loginRecord = generateRecord(sessionId, ipAddress, userAgent, referer);
 	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
 
 	publish(events.LOGIN_RECORD_CREATED, { username: user, loginRecord });
 };
 
-LoginRecord.recordFailedAttempt = async (user, ipAddress, userAgent, referer) => {
+LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) => {
 	const loginRecord = generateRecord(generateUUIDString(), ipAddress, userAgent, referer);
 
 	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { failed: true, user, ...loginRecord });
 
-	if (await (LoginRecord.isAccountLocked(user))) {
+	if (await (LoginRecords.isAccountLocked(user))) {
 		publish(events.ACCOUNT_LOCKED, { user });
 	}
 };
 
-module.exports = LoginRecord;
+LoginRecords.initialise = () => db.createIndex(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+	{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
+
+module.exports = LoginRecords;

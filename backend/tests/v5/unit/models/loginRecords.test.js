@@ -280,10 +280,23 @@ const testGetLastLoginDate = () => {
 	});
 };
 
+const testInitialise = () => {
+	describe('Initialise', () => {
+		test('should ensure indices exist', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
+			await LoginRecord.initialise();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+				{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
+		});
+	});
+};
+
 describe('models/loginRecords', () => {
 	testSaveLoginRecord();
 	testRecordFailedAttempt();
 	testRemoveAllUserRecords();
 	testGetLastLoginDate();
 	testIsAccountLocked();
+	testInitialise();
 });
