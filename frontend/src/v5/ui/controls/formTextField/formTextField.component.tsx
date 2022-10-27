@@ -28,11 +28,13 @@ export const FormTextField = ({
 	name,
 	control,
 	formError,
+	defaultValue = '',
 	...otherProps
 }: FormTextFieldProps) => (
 	<Controller
 		name={name}
 		control={control}
+		defaultValue={defaultValue}
 		render={({ field }) => (
 			<TextField
 				inputRef={field.ref}
