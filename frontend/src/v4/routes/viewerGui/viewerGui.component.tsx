@@ -165,6 +165,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
+			this.props.resetPanelsStates();
 			this.props.unsubscribeOnIssueChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.unsubscribeOnRiskChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.fetchData(params.teamspace, params.model);
