@@ -35,6 +35,12 @@ const LoginRecords = require(`${src}/models/loginRecords`);
 jest.mock('../../../../../src/v5/models/tickets.logs');
 const TicketLogs = require(`${src}/models/tickets.logs`);
 
+jest.mock('../../../../../src/v5/models/tickets.templates');
+const TicketTemplates = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../src/v5/schemas/tickets');
+const TicketSchemas = require(`${src}/schemas/tickets`);
+
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
 const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
@@ -393,28 +399,122 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 
-		test(`Should trigger addTicketLog if there is a ${events.MODEL_TICKET_UPDATE}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_TICKET_UPDATE);
+		const updateTicketTest = async (isFederation, changes, expectedData) => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
 				model: generateRandomString(),
-				ticket: generateRandomString(),
+				ticket: { _id: generateRandomString(), title: generateRandomString() },
 				author: generateRandomString(),
 				timestamp: generateRandomDate(),
-				changes: {
-					prop: {
-						from: generateRandomString(),
-						to: generateRandomString(),
+				changes,
+			};
+
+			TicketSchemas.serialiseTicket.mockImplementationOnce(() => ({
+				_id: data.ticket._id, ...expectedData }));
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+			const event = isFederation ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
+			EventsManager.publish(events.UPDATE_TICKET, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
+				data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				event,
+				{
+					_id: data.ticket._id,
+					...expectedData,
+				},
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		};
+
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+				is a ${events.UPDATE_TICKET} (Container)`, async () => {
+			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
+			const expectedData = { title: changes.title.to };
+			await updateTicketTest(false, changes, expectedData);
+		});
+
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+				is a ${events.UPDATE_TICKET} (Container)`, async () => {
+			const changes = { properties: { prop: { from: generateRandomString(), to: generateRandomString() } } };
+			const expectedData = { properties: { prop: changes.properties.prop.to } };
+			await updateTicketTest(false, changes, expectedData);
+		});
+
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+				is a ${events.UPDATE_TICKET} (Container)`, async () => {
+			const changes = {
+				modules: {
+					mod: {
+						modProp: { from: generateRandomString(), to: generateRandomString() },
 					},
 				},
 			};
-			EventsManager.publish(events.MODEL_TICKET_UPDATE, data);
+			const expectedData = { modules: { mod: { modProp: changes.modules.mod.modProp.to } } };
+			await updateTicketTest(false, changes, expectedData);
+		});
+
+		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there 
+				is a ${events.UPDATE_TICKET} (Federation)`, async () => {
+			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
+			const expectedData = { title: changes.title.to };
+			await updateTicketTest(true, changes, expectedData);
+		});
+
+		const addTicketTest = async (isFederation) => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
+			const template = generateRandomString();
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: {
+					type: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
+			TicketSchemas.serialiseTicket.mockImplementationOnce(() => data.ticket);
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+			const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+			EventsManager.publish(events.NEW_TICKET, data);
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			await waitOnEvent;
-			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
-			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
-				data.ticket, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
+			expect(TicketSchemas.serialiseTicket).toHaveBeenCalledTimes(1);
+			expect(TicketSchemas.serialiseTicket).toHaveBeenCalledWith(data.ticket, template);
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				event,
+				data.ticket,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		};
+
+		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there 
+				is a ${events.NEW_TICKET} (Container)`, async () => {
+			await addTicketTest(false);
+		});
+
+		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there 
+				is a ${events.NEW_TICKET} (Federation)`, async () => {
+			await addTicketTest(true);
 		});
 	});
 };
