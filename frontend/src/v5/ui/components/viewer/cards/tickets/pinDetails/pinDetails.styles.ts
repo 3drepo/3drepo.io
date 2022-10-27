@@ -47,7 +47,7 @@ export const PinAction = styled.div`
 	font-weight: 500;
 	color: ${({ theme }) => theme.palette.base.main};
 	display: flex;
-    align-items: center;
+	align-items: center;
 	gap: 3px;
 	user-select: none;
 	cursor: pointer;
