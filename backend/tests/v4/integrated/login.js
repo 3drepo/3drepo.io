@@ -164,8 +164,7 @@ describe("Login", function () {
 			// double login
 				agent.post("/login").send({ username: username , password: password })
 					.expect(400, function(err, res) {
-						console.log(res.body);
-						expect(res.body.value).to.equal(responseCodes.ALREADY_LOGGED_IN.value);
+						expect(res.body.code).to.equal(responseCodesV5.alreadyLoggedIn.code);
 						done(err);
 					});
 
