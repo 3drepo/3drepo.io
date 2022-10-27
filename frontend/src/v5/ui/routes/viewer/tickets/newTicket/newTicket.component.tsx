@@ -136,7 +136,11 @@ export const NewTicketCard = () => {
 		<CardContainer>
 			<CardHeader>
 				<TicketsIcon fontSize="small" />
-				<FormattedMessage id="viewer.cards.ticketsTitle" defaultMessage="Tickets" />
+				<FormattedMessage
+					id="viewer.cards.newTicketTitle"
+					defaultMessage="New {template} ticket"
+					values={{ template: template.name }}
+				/>
 				<Button onClick={goBack}>back</Button>
 				<Button onClick={changeTemplate}>change template</Button>
 			</CardHeader>
