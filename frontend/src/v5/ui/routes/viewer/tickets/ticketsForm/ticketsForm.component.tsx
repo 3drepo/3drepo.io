@@ -14,13 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, PropertyDefinition, TemplateModule, ITicket } from '@/v5/store/tickets/tickets.types';
+import { EditableTicket, ITemplate, NewTicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
+import { TITLE_INPUT_NAME } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
@@ -74,8 +75,6 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 		<PropertiesList module={module.name} properties={module.properties || []} propertiesValues={moduleValues} />
 	</Accordion>
 );
-
-export const TITLE_INPUT_NAME = 'title';
 
 export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>, ticket: Partial<ITicket> }) => {
 	const { formState } = useFormContext();

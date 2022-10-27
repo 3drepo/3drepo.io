@@ -19,28 +19,75 @@ import ChevronLeft from '@mui/icons-material/ArrowBackIosNew';
 import ChevronRight from '@mui/icons-material/ArrowForwardIos';
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { useContext, useEffect } from 'react';
-import { Button } from '@mui/material';
+import { useCallback, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { getTicketDefaultValues, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketDefaultValues, modelIsFederation, getValidators } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
-import { omit } from 'lodash';
-import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { CircleButton } from '@controls/circleButton';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { debounce, isEmpty, isEqual } from 'lodash';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
 import { Form } from '../newTicket/newTicket.styles';
 
+const dirtyValues = (
+	dirtyFields: object | boolean,
+	allValues: object,
+) => {
+// If *any* item in an array was modified, the entire array must be submitted, because there's no way to indicate
+// "placeholders" for unchanged elements. `dirtyFields` is true for leaves.
+	if (dirtyFields === true || Array.isArray(dirtyFields)) return allValues;
+	// Here, we have an object
+	return Object.fromEntries(
+		Object.keys(dirtyFields).map((key) => [
+			key,
+			dirtyValues(dirtyFields[key], allValues[key]),
+		]),
+	);
+};
+
+const diff = (a, b) => {
+	if (isEqual(a, b)) return ({});
+
+	if (a.)
+};
+
+let timeStamp = +new Date();
+
+const updateTicket = debounce((teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
+	const now = +new Date();
+	console.log(`Ellapsed: ${now - timeStamp}`);
+	timeStamp = now;
+
+	let values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
+	// console.log(JSON.stringify(formData.formState.dirtyFields, null, '\t'));
+
+	if (isEmpty(values) || !formData.formState.isDirty) return;
+
+	if (!values.title && !values.properties) {
+		values = { modules: values };
+	}
+
+	TicketsActionsDispatchers.updateTicket(
+		teamspace,
+		project,
+		containerOrFederation,
+		ticketId,
+		values,
+		isFederation,
+	);
+}, 500);
+
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
+
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const formData = useForm();
 
 	const goBack = () => {
 		setCardView(TicketsCardViews.List);
@@ -53,38 +100,6 @@ export const TicketDetailsCard = () => {
 	const goPrev = () => changeTicketIndex(-1);
 	const goNext = () => changeTicketIndex(1);
 
-	const updateTicket = () => {
-		// TicketsActionsDispatchers.updateTicket(
-		// teamspace,
-		// project,
-		// containerOrFederation,
-		// ticketId,
-		// { title },
-		// isFederation,
-		// );
-	};
-
-	const cloneTicket = () => {
-		const newTicket = omit(ticket, [
-			'properties.Updated at',
-			'properties.Created at',
-			'properties.Owner',
-			'_id',
-			'number',
-		]) as NewTicket;
-
-		newTicket.title += '(clone)';
-
-		TicketsActionsDispatchers.createTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			newTicket,
-			isFederation,
-			() => {},
-		);
-	};
-
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
@@ -94,10 +109,6 @@ export const TicketDetailsCard = () => {
 			isFederation,
 		);
 	}, [ticketId]);
-
-	useEffect(() => {
-		formData.reset(getTicketDefaultValues(ticket));
-	}, [ticket.modules, ticket.properties]);
 
 	useEffect(() => {
 		if (!ticket) {
@@ -112,7 +123,32 @@ export const TicketDetailsCard = () => {
 			isFederation,
 		);
 	}, [ticket?.type]);
+
 	if (!ticket) return <></>;
+
+	const formData = useForm({
+		resolver: yupResolver(getValidators(template)),
+		mode: 'onChange',
+	});
+
+	useEffect(() => {
+		formData.reset(getTicketDefaultValues(ticket));
+	}, [ticket.modules, ticket.properties]);
+
+	useEffect(() => {
+		updateTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+			formData,
+		);
+	},
+	[formData.watch()]);
+
+	// console.log(JSON.stringify(ticket, null, '\t'));
+
 	return (
 		<CardContainer>
 			<CardHeader>
@@ -124,12 +160,8 @@ export const TicketDetailsCard = () => {
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...formData}>
-				<Form>
-					<TicketForm template={template} ticket={ticket} />
-				</Form>
+				<TicketForm template={template} ticket={ticket} />
 			</FormProvider>
-			<Button onClick={updateTicket}> Update Ticket! </Button>
-			<Button onClick={cloneTicket}> Clone Ticket!</Button>
 		</CardContainer>
 	);
 };

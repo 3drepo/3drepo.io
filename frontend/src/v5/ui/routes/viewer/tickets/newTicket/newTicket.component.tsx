@@ -27,9 +27,9 @@ import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { modelIsFederation, getValidators, filterEmptyTicketValues, getDefaultTicket } from '@/v5/store/tickets/tickets.helpers';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
 import { TicketsCardViews } from '../tickets.constants';
@@ -43,8 +43,18 @@ export const NewTicketCard = () => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, templateId);
 	const isLoading = !('config' in template);
 
+	const getEditableProperties = () => {
+		const NON_EDITABLE_PROPERTIES = ['Owner', 'Created at', 'Updated at'];
+		return template.properties?.filter(({ name }) => !NON_EDITABLE_PROPERTIES.includes(name));
+	};
+
+	const editableTemplate = {
+		...template,
+		properties: getEditableProperties(),
+	};
+
 	const formData = useForm({
-		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
+		resolver: yupResolver(getValidators(editableTemplate)),
 		mode: 'onChange',
 	});
 
