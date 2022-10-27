@@ -20,7 +20,7 @@ import { Fab } from '@mui/material';
 
 const SIZE_MAP = {
 	small: 22,
-	medium: 28,
+	medium: 32,
 	large: 38,
 };
 
@@ -30,6 +30,7 @@ const getButtonSize = (size) => {
 	if (buttonSize) {
 		return css`
 			height: ${SIZE_MAP[size]}px;
+			min-height: ${SIZE_MAP[size]}px;
 			width: ${SIZE_MAP[size]}px;
 			flex-shrink: 0;
 		`;
@@ -89,9 +90,18 @@ const contrastFabStyles = css<{ disabled?: boolean }>`
 		}
 	}
 `;
+const viewerFabStyles = css<{ disabled?: boolean }>`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 0;
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	}
+`;
 
 export const StyledFab = styled(Fab)<{ size?: any, $variant?: any }>`
 	${({ size }) => getButtonSize(size)};
 	${({ $variant }) => $variant === 'main' && mainFabStyles}
 	${({ $variant }) => $variant === 'contrast' && contrastFabStyles}
+	${({ $variant }) => $variant === 'viewer' && viewerFabStyles}
 `;

@@ -16,11 +16,17 @@
  */
 import styled from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
+import ArrowBackMui from '@mui/icons-material/ArrowBack';
+
+export const ArrowBack = styled(ArrowBackMui)`
+	cursor: pointer;
+`;
 
 export const CardContainer = styled.div`
 	display: flex;
 	height: 100%;
 	flex-direction: column;
+	color: ${({ theme }) => theme.palette.secondary.main};
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 10px;
 	margin-bottom: 20px;
@@ -35,7 +41,13 @@ export const CardHeader = styled.div`
 	min-height: 48px;
 	padding: 0 15px;
 	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
-	gap: 4px;
+	gap: 5px;
+`;
+
+export const HeaderButtons = styled.span`
+	display: flex;
+	gap: 5px;
+	margin-left: auto;
 `;
 
 // TODO - fix after new palette is released

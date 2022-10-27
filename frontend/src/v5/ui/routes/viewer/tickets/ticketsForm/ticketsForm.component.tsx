@@ -87,6 +87,7 @@ export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket:
 			<TitleContainer>
 				<FormTitle
 					name={TITLE_INPUT_NAME}
+					key={ticket.title}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
 					placeholder={TITLE_PLACEHOLDER}
