@@ -67,11 +67,11 @@ export const getEditableTicketFromTemplate = (template: ITemplate): EditableTick
 	});
 };
 
-export const getTemplateValidator = (template) => {
+export const getTicketValidator = (template) => {
 	const validators: any = {
 		title: propertyValidator({
 			required: true,
-			type: 'longText',
+			type: 'text',
 			name: TITLE_INPUT_NAME,
 		}),
 	};
@@ -82,8 +82,8 @@ export const getTemplateValidator = (template) => {
 	return Yup.object().shape(validators);
 };
 
-const MAX_TEXT_LENGTH = 50;
-const MAX_LONG_TEXT_LENGTH = 120;
+const MAX_TEXT_LENGTH = 120;
+const MAX_LONG_TEXT_LENGTH = 1200;
 const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
 
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
@@ -116,7 +116,8 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 		case 'date':
 			validator = Yup.date().nullable();
 			break;
-		default: validator = trimmedString;
+		default:
+			validator = trimmedString;
 	}
 
 	if (required) {

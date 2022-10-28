@@ -27,7 +27,7 @@ import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyValues, filterNonEditablePropertiesFromTemplate, getEditableTicketFromTemplate, getTemplateValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { filterEmptyValues, filterNonEditablePropertiesFromTemplate, getEditableTicketFromTemplate, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
@@ -44,7 +44,7 @@ export const NewTicketCard = () => {
 	const isLoading = !('config' in template);
 
 	const formData = useForm({
-		resolver: yupResolver(isLoading ? null : getTemplateValidator(template)),
+		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
 		mode: 'onChange',
 	});
 
