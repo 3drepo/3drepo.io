@@ -20,14 +20,13 @@ const {
 	validateNewTicketSchema,
 	validateUpdateTicketSchema,
 } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
+const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
 
 const { UUIDToString } = require('../../utils/helper/uuids');
 
 const { castTicketSchemaOutput } = require('../../middleware/dataConverter/outputs/teamspaces/settings');
-
-const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -39,6 +38,19 @@ const addTicketTemplate = async (req, res) => {
 
 		const _id = UUIDToString(await TeamspaceSettings.addTicketTemplate(teamspace, template));
 		respond(req, res, templates.ok, { _id });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getRiskCategories = async (req, res) => {
+	try {
+		const { teamspace } = req.params;
+
+		console.log(TeamspaceSettings);
+		const riskCategories = await TeamspaceSettings.getRiskCategories(teamspace);
+		respond(req, res, templates.ok, { riskCategories });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -222,6 +234,37 @@ const establishRoutes = () => {
 	*               $ref: "#/components/schemas/ticketTemplate"
 	*/
 	router.get('/tickets/templates/:template', isTeamspaceAdmin, checkTicketTemplateExists, castTicketSchemaOutput);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/settings/tickets/riskCategories:
+	*   get:
+	*     description: Get the list of risk categories
+	*     tags: [Teamspaces]
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getRiskCategories
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: returns the array of risk categories
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 riskCategories:
+	*                   type: array
+	*                   items: string
+	*                   example: ["Commerical Issue", "Environmental Issue", "Safety Issue - Struck"]
+	*/
+	router.get('/tickets/riskCategories', hasAccessToTeamspace, getRiskCategories);
 
 	return router;
 };
