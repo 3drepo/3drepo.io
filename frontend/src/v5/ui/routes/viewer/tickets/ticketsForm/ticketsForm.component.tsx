@@ -44,7 +44,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {} }: Propertie
 						property={property}
 						name={inputName}
 						formError={get(formState.errors, inputName)}
-						defaultValue={property.default ?? propertiesValues[name]}
+						defaultValue={propertiesValues[name] ?? property.default}
 						key={name}
 					/>
 				);
@@ -87,7 +87,6 @@ export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket:
 			<TitleContainer>
 				<FormTitle
 					name={TITLE_INPUT_NAME}
-					key={ticket.title}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
 					placeholder={TITLE_PLACEHOLDER}
