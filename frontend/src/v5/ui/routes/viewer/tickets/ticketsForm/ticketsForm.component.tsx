@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, PropertyDefinition, TemplateModule, EditableTicket, NewTicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyDefinition, TemplateModule, ITicket } from '@/v5/store/tickets/tickets.types';
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
@@ -76,12 +76,8 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 
 export const TITLE_INPUT_NAME = 'title';
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: EditableTicket | NewTicket }) => {
+export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: Partial<ITicket> }) => {
 	const { formState } = useFormContext();
-	const TITLE_PLACEHOLDER = formatMessage({
-		id: 'customTicket.newTicket.titlePlaceholder',
-		defaultMessage: 'Ticket name',
-	});
 	return (
 		<>
 			<TitleContainer>
@@ -89,7 +85,10 @@ export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket:
 					name={TITLE_INPUT_NAME}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
-					placeholder={TITLE_PLACEHOLDER}
+					placeholder={formatMessage({
+						id: 'customTicket.newTicket.titlePlaceholder',
+						defaultMessage: 'Ticket name',
+					})}
 				/>
 			</TitleContainer>
 			<CardContent>

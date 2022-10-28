@@ -24,7 +24,7 @@ import { Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketDefaultValues, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import { omit } from 'lodash';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
@@ -40,6 +40,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const formData = useForm({ defaultValues: getTicketDefaultValues(ticket) });
 
 	const goBack = () => {
 		setCardView(TicketsCardViews.List);
@@ -95,6 +96,10 @@ export const TicketDetailsCard = () => {
 	}, [ticketId]);
 
 	useEffect(() => {
+		formData.reset(getTicketDefaultValues(ticket));
+	}, [ticket.modules, ticket.properties]);
+
+	useEffect(() => {
 		if (!ticket) {
 			return;
 		}
@@ -118,7 +123,7 @@ export const TicketDetailsCard = () => {
 					<CircleButton size="medium" variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
 				</HeaderButtons>
 			</CardHeader>
-			<FormProvider {...useForm()}>
+			<FormProvider {...formData}>
 				<Form>
 					<TicketForm template={template} ticket={ticket} />
 				</Form>

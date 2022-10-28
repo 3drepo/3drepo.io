@@ -21,14 +21,20 @@ import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/tick
 import { trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty, isUndefined } from 'lodash';
 import * as Yup from 'yup';
-import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
+import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
 
+export const getTicketDefaultValues = ({ title, properties, modules }: ITicket) => ({
+	title,
+	properties,
+	...modules,
+});
+
 export const filterNonEditablePropertiesFromTemplate = (template) => {
-	const propertyIsEditable = ({ readOnly }) => !readOnly; 
+	const propertyIsEditable = ({ readOnly }) => !readOnly;
 
 	return {
 		...template,
@@ -57,7 +63,7 @@ export const getEditableTicketFromTemplate = (template: ITemplate): EditableTick
 			...ticketModules,
 			[name || type]: templatePropertiesToTicketProperties(moduleProperties),
 		}),
-		{}
+		{},
 	);
 	return ({
 		title: '',
@@ -65,21 +71,6 @@ export const getEditableTicketFromTemplate = (template: ITemplate): EditableTick
 		properties,
 		modules,
 	});
-};
-
-export const getTicketValidator = (template) => {
-	const validators: any = {
-		title: propertyValidator({
-			required: true,
-			type: 'text',
-			name: TITLE_INPUT_NAME,
-		}),
-	};
-	const editableTemplate = filterNonEditablePropertiesFromTemplate(template);
-	validators.properties = propertiesValidator(editableTemplate.properties);
-	editableTemplate.modules.forEach(({ name, properties }) => { validators[name] = propertiesValidator(properties); });
-
-	return Yup.object().shape(validators);
 };
 
 const MAX_TEXT_LENGTH = 120;
@@ -157,6 +148,21 @@ export const propertiesValidator = (properties = []) => {
 		}),
 		{},
 	);
+	return Yup.object().shape(validators);
+};
+
+export const getTicketValidator = (template) => {
+	const validators: any = {
+		title: propertyValidator({
+			required: true,
+			type: 'text',
+			name: TITLE_INPUT_NAME,
+		}),
+	};
+	const editableTemplate = filterNonEditablePropertiesFromTemplate(template);
+	validators.properties = propertiesValidator(editableTemplate.properties);
+	editableTemplate.modules.forEach(({ name, properties }) => { validators[name] = propertiesValidator(properties); });
+
 	return Yup.object().shape(validators);
 };
 
