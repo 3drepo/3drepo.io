@@ -47,8 +47,6 @@ const addTicketTemplate = async (req, res) => {
 const getRiskCategories = async (req, res) => {
 	try {
 		const { teamspace } = req.params;
-
-		console.log(TeamspaceSettings);
 		const riskCategories = await TeamspaceSettings.getRiskCategories(teamspace);
 		respond(req, res, templates.ok, { riskCategories });
 	} catch (err) {
@@ -261,7 +259,8 @@ const establishRoutes = () => {
 	*               properties:
 	*                 riskCategories:
 	*                   type: array
-	*                   items: string
+	*                   items:
+	*                     type: string
 	*                   example: ["Commerical Issue", "Environmental Issue", "Safety Issue - Struck"]
 	*/
 	router.get('/tickets/riskCategories', hasAccessToTeamspace, getRiskCategories);
