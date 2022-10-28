@@ -85,13 +85,12 @@ const addTicketImageTest = async (isView) => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const expectedOutput = generateRandomString();
-
 	const imageTestData = generateImageTestData(isView);
 
 	TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
 
-	await expect(Tickets.addTicket(teamspace, project, model, imageTestData.ticket, imageTestData.template))
-		.resolves.toEqual(expectedOutput);
+	await expect(Tickets.addTicket(teamspace, project, model, imageTestData.template,
+		imageTestData.ticket)).resolves.toEqual(expectedOutput);
 
 	const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
 	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
@@ -192,7 +191,7 @@ const testAddTicket = () => {
 
 			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Tickets.addTicket(teamspace, project, model, ticket, template))
+			await expect(Tickets.addTicket(teamspace, project, model, template, ticket))
 				.resolves.toEqual(expectedOutput);
 
 			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
@@ -220,7 +219,8 @@ const testUpdateTicket = () => {
 			};
 			const author = generateRandomString();
 
-			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket, updateData, author))
+			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket,
+				updateData, author))
 				.resolves.toBeUndefined();
 
 			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
