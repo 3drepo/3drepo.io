@@ -31,6 +31,7 @@ import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { CircleButton } from '@controls/circleButton';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
+import { Form } from '../newTicket/newTicket.styles';
 
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
@@ -118,7 +119,9 @@ export const TicketDetailsCard = () => {
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...useForm()}>
-				<TicketForm template={template} ticket={ticket} />
+				<Form>
+					<TicketForm template={template} ticket={ticket} />
+				</Form>
 			</FormProvider>
 			<Button onClick={updateTicket}> Update Ticket! </Button>
 			<Button onClick={cloneTicket}> Clone Ticket!</Button>
