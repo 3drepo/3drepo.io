@@ -71,6 +71,36 @@ const testCanRemoveTeamspaceMember = () => {
 	});
 };
 
+const testMemberExists = () => {
+	describe('memberExists', () => {
+		test('next() should be called if the provided username is member of the teamspace', async () => {
+			const mockCB = jest.fn(() => {});
+
+			await Teamspaces.memberExists(
+				{ params: { teamspace, member: adminUser } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
+		});
+
+		test('should respond with not authorized if the member has no access', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { teamspace, member: nonTsMemberUser } };
+
+			await Teamspaces.memberExists(req, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, { ...templates.userNotFound, message: 'Teamspace member not found' });
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces', () => {
 	testCanRemoveTeamspaceMember();
+	testMemberExists();
 });

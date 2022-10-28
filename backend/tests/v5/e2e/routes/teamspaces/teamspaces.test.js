@@ -484,9 +484,9 @@ const testGetMemberAvatar = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test('should fail if the member does not have access to the teamspace', async () => {
-			const res = await agent.get(`${route(tsWithGridFsAvatar.name, testUser.user)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		test('should fail the requested user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route(tsWithGridFsAvatar.name, testUser.user)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.userNotFound.status);
+			expect(res.body.code).toEqual(templates.userNotFound.code);
 		});
 
 		test('should fail if the teamspace does not exist', async () => {

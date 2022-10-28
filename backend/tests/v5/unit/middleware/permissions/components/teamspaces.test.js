@@ -25,7 +25,6 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
-const { generateRandomString } = require('../../../../helper/services');
 
 const TSMiddlewares = require(`${src}/middleware/permissions/components/teamspaces`);
 
@@ -88,32 +87,7 @@ const testIsTeamspaceAdmin = () => {
 	});
 };
 
-const testHasMemberAccessToTeamspace = () => {
-	describe('hasMemberAccessToTeamspace', () => {
-		test('next() should be called if the member has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await TSMiddlewares.hasMemberAccessToTeamspace(
-				{ params: { teamspace: 'ts', member: generateRandomString() } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with not authorized if the member has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			const req = { params: { teamspace: 'ts1', member: generateRandomString() } };
-
-			await TSMiddlewares.hasMemberAccessToTeamspace(req, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, { ...templates.notAuthorized, message: 'Member does not have access to the teamspace' });
-		});
-	});
-};
-
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
 	testIsTeamspaceAdmin();
-	testHasMemberAccessToTeamspace();
 });

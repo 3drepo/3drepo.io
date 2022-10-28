@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { canRemoveTeamspaceMember, memberExists } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
-const { canRemoveTeamspaceMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
-const { hasMemberAccessToTeamspace } = require('../../middleware/permissions/components/teamspaces');
 const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -328,7 +327,7 @@ const establishRoutes = () => {
 	*               type: string
 	*               format: binary
 	*/
-	router.get('/:teamspace/members/:member/avatar', hasAccessToTeamspace, hasMemberAccessToTeamspace, getTeamspaceMemberAvatar);
+	router.get('/:teamspace/members/:member/avatar', hasAccessToTeamspace, memberExists, getTeamspaceMemberAvatar);
 
 	return router;
 };

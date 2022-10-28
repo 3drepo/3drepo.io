@@ -49,4 +49,16 @@ Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
 	await next();
 };
 
+Teamspaces.memberExists = async (req, res, next) => {
+	const { params } = req;
+	const { teamspace, member } = params;
+	const hasAccess = await hasAccessToTeamspace(teamspace, member);
+
+	if (hasAccess) {
+		next();
+	} else {
+		respond(req, res, createResponseCode(templates.userNotFound, 'Teamspace member not found'));
+	}
+};
+
 module.exports = Teamspaces;

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
 const TeamspacePerms = {};
 
@@ -50,17 +50,6 @@ TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 		next();
 	} else {
 		respond(req, res, templates.teamspaceNotFound);
-	}
-};
-
-TeamspacePerms.hasMemberAccessToTeamspace = async (req, res, next) => {
-	const { params } = req;
-	const { teamspace, member } = params;
-	const hasAccess = await hasAccessToTeamspace(teamspace, member);
-	if (hasAccess) {
-		next();
-	} else {
-		respond(req, res, createResponseCode(templates.notAuthorized, 'Member does not have access to the teamspace'));
 	}
 };
 
