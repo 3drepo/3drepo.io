@@ -39,7 +39,9 @@ export interface ITicket {
 }
 
 export interface TemplateModule {
-	name: string;
+	// either one of the following 2
+	name?: string;
+	type?: string;
 	deprecated?: boolean;
 	properties: PropertyDefinition[];
 }
@@ -54,6 +56,4 @@ export interface ITemplate {
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;
-export type EditableTicket = Omit<NewTicket, 'number' | 'modules'> & {
-	modules?: Property[],
-};
+export type EditableTicket = Omit<NewTicket, 'number'>;

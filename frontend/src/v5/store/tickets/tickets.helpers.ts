@@ -21,7 +21,7 @@ import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/tick
 import { trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty, isUndefined } from 'lodash';
 import * as Yup from 'yup';
-import { EditableTicket, PropertyDefinition } from './tickets.types';
+import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
@@ -32,19 +32,40 @@ export const filterNonEditablePropertiesFromTemplate = (template) => {
 
 	return {
 		...template,
-		properties: template.properties?.filter(propertyIsEditable),
-		modules: template.modules?.map((module) => ({
+		properties: (template.properties || []).filter(propertyIsEditable),
+		modules: (template.modules || []).map((module) => ({
 			...module,
 			properties: module.properties.filter(propertyIsEditable),
 		})),
 	};
 };
 
-export const getEditableTicketFromTemplate = (template): EditableTicket => ({
-	...template,
-	title: '',
-	type: template._id,
-});
+const templatePropertiesToTicketProperties = (properties = []) => (
+	properties.reduce(
+		(ticketProperties, prop) => ({
+			...ticketProperties,
+			[prop.name]: prop.default,
+		}),
+		{},
+	)
+);
+
+export const getEditableTicketFromTemplate = (template: ITemplate): EditableTicket => {
+	const properties = templatePropertiesToTicketProperties(template.properties);
+	const modules = (template.modules || []).reduce(
+		(ticketModules, { name, type, properties: moduleProperties }) => ({
+			...ticketModules,
+			[name || type]: templatePropertiesToTicketProperties(moduleProperties),
+		}),
+		{}
+	);
+	return ({
+		title: '',
+		type: template._id,
+		properties,
+		modules,
+	});
+};
 
 export const getTemplateValidator = (template) => {
 	const validators: any = {
@@ -127,11 +148,11 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 	return validator;
 };
 
-export const propertiesValidator = (properties) => {
+export const propertiesValidator = (properties = []) => {
 	const validators = properties.reduce(
 		(validatorsObj, property) => ({
 			...validatorsObj,
-			[property.name]: propertyValidator(property),
+			[property.name || property.title]: propertyValidator(property),
 		}),
 		{},
 	);
