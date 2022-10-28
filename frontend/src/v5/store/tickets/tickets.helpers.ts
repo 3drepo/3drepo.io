@@ -17,14 +17,49 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketsForm.component';
 import { trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty, isUndefined } from 'lodash';
 import * as Yup from 'yup';
-import { PropertyDefinition } from './tickets.types';
+import { EditableTicket, PropertyDefinition } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
+
+export const filterNonEditablePropertiesFromTemplate = (template) => {
+	const propertyIsEditable = ({ readOnly }) => !readOnly; 
+
+	return {
+		...template,
+		properties: template.properties?.filter(propertyIsEditable),
+		modules: template.modules?.map((module) => ({
+			...module,
+			properties: module.properties.filter(propertyIsEditable),
+		})),
+	};
+};
+
+export const getEditableTicketFromTemplate = (template): EditableTicket => ({
+	...template,
+	title: '',
+	type: template._id,
+});
+
+export const getTemplateValidator = (template) => {
+	const validators: any = {
+		title: propertyValidator({
+			required: true,
+			type: 'longText',
+			name: TITLE_INPUT_NAME,
+		}),
+	};
+	const editableTemplate = filterNonEditablePropertiesFromTemplate(template);
+	validators.properties = propertiesValidator(editableTemplate.properties);
+	editableTemplate.modules.forEach(({ name, properties }) => { validators[name] = propertiesValidator(properties); });
+
+	return Yup.object().shape(validators);
+};
 
 const MAX_TEXT_LENGTH = 50;
 const MAX_LONG_TEXT_LENGTH = 120;
@@ -45,8 +80,6 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				{ maxLength, name }));
 			break;
 		case 'coords':
-			validator = Yup.array();
-			break;
 		case 'manyOf':
 			validator = Yup.array();
 			break;

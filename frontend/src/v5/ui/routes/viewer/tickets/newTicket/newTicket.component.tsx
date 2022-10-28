@@ -19,7 +19,6 @@ import { FormattedMessage } from 'react-intl';
 import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
-import * as Yup from 'yup';
 import { CircularProgress } from '@mui/material';
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
@@ -27,12 +26,12 @@ import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.compone
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { EditableTicket, NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyValues, modelIsFederation, propertiesValidator, propertyValidator } from '@/v5/store/tickets/tickets.helpers';
+import { NewTicket } from '@/v5/store/tickets/tickets.types';
+import { filterEmptyValues, filterNonEditablePropertiesFromTemplate, getEditableTicketFromTemplate, getTemplateValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
-import { TicketForm, TITLE_INPUT_NAME } from '../ticketsForm/ticketsForm.component';
+import { TicketForm } from '../ticketsForm/ticketsForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
 
@@ -44,37 +43,8 @@ export const NewTicketCard = () => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, templateId);
 	const isLoading = !('config' in template);
 
-	const getEditableProperties = () => {
-		const NON_EDITABLE_PROPERTIES = ['Owner', 'Created at', 'Updated at'];
-		return template.properties?.filter(({ name }) => !NON_EDITABLE_PROPERTIES.includes(name));
-	};
-
-	const editableTemplate = {
-		...template,
-		properties: getEditableProperties(),
-	};
-
-	const getValidators = () => {
-		if (isLoading) return null;
-
-		const { properties, modules } = editableTemplate;
-		const validators: any = {
-			title: propertyValidator({
-				required: true,
-				type: 'longText',
-				name: TITLE_INPUT_NAME,
-			}),
-		};
-		validators.properties = propertiesValidator(properties);
-		modules.forEach((module) => {
-			validators[module.name] = propertiesValidator(module.properties);
-		});
-
-		return Yup.object().shape(validators);
-	};
-
 	const formData = useForm({
-		resolver: yupResolver(getValidators()),
+		resolver: yupResolver(isLoading ? null : getTemplateValidator(template)),
 		mode: 'onChange',
 	});
 
@@ -88,20 +58,6 @@ export const NewTicketCard = () => {
 
 	const changeTemplate = () => {
 		contextValue.setCardView(TicketsCardViews.Templates);
-	};
-
-	const getBaseTicket = (): EditableTicket => {
-		const modules = template.modules.map(({ name, properties }) => ({
-			name,
-			properties,
-			deprecated: false,
-		}));
-		return ({
-			title: '',
-			type: template._id,
-			properties: editableTemplate.properties,
-			modules,
-		});
 	};
 
 	const onSubmit = ({ title, properties, ...modules }) => {
@@ -151,7 +107,10 @@ export const NewTicketCard = () => {
 			) : (
 				<FormProvider {...formData}>
 					<Form onSubmit={formData.handleSubmit(onSubmit)}>
-						<TicketForm template={editableTemplate} ticket={getBaseTicket()} />
+						<TicketForm
+							template={filterNonEditablePropertiesFromTemplate(template)}
+							ticket={getEditableTicketFromTemplate(template)}
+						/>
 						<BottomArea>
 							<SaveButton disabled={!formData.formState.isValid}>
 								<FormattedMessage id="customTicket.button.saveTicket" defaultMessage="Save ticket" />
