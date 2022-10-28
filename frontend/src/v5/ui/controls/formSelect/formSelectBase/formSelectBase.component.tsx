@@ -17,8 +17,8 @@
 import { Controller } from 'react-hook-form';
 import { FormControl, FormHelperText, InputLabel, SelectProps } from '@mui/material';
 import { useState } from 'react';
-import { Select, Tooltip } from './formSelectBase.styles';
 import { isUndefined } from 'lodash';
+import { Select, Tooltip } from './formSelectBase.styles';
 
 export type FormSelectBaseProps = SelectProps & {
 	control?: any;
