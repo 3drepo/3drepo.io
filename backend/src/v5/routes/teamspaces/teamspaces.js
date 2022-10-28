@@ -20,6 +20,7 @@ const Teamspaces = require('../../processors/teamspaces/teamspaces');
 const { canRemoveTeamspaceMember } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
+const { hasMemberAccessToTeamspace } = require('../../middleware/permissions/components/teamspaces');
 const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -46,6 +47,19 @@ const getAvatar = async (req, res) => {
 	try {
 		const { teamspace } = req.params;
 		const buffer = await Teamspaces.getAvatar(teamspace);
+		const fileExt = await fileExtensionFromBuffer(buffer);
+		req.params.format = fileExt || 'png';
+		respond(req, res, templates.ok, buffer);
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const getTeamspaceMemberAvatar = async (req, res) => {
+	try {
+		const { member } = req.params;
+		const buffer = await Teamspaces.getAvatar(member);
 		const fileExt = await fileExtensionFromBuffer(buffer);
 		req.params.format = fileExt || 'png';
 		respond(req, res, templates.ok, buffer);
@@ -282,6 +296,39 @@ const establishRoutes = () => {
 	*
 	*/
 	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, removeTeamspaceMember);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/members/{member}/avatar:
+	*   get:
+	*     description: Gets the avatar of a member of the teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+   	*       - name: member
+	*         description: name of teamspace member
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getTeamspaceMemberAvatar
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Gets the avatar of a member of a teamspace
+	*         content:
+	*           image/png:
+	*             schema:
+	*               type: string
+	*               format: binary
+	*/
+	router.get('/:teamspace/members/:member/avatar', hasAccessToTeamspace, hasMemberAccessToTeamspace, getTeamspaceMemberAvatar);
 
 	return router;
 };
