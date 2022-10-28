@@ -71,9 +71,10 @@ const MultiSelectProperty = ({
 );
 
 export const ManyOfProperty = (props: PropertyProps) => {
+	// eslint-disable-next-line
 	if (props.property.values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty {...props}/>);
+		return (<JobsAndUsersProperty {...props} />);
 	}
 
-	return ( <MultiSelectProperty {...props} />);
+	return (<MultiSelectProperty {...props} />);
 };
