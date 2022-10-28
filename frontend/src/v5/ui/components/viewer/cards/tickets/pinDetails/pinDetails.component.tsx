@@ -25,41 +25,47 @@ import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } fro
 
 export const PinDetails = () => {
 	const [isEditMode, setIsEditMode] = useState(false);
-	const [hasPin, setHasPin] = useState(false); // This can be removed when pin logic added
-
+	const [hasPin, setHasPin] = useState(false); // replace with proper pin logic
 	const onClickCancelSetPin = () => setIsEditMode(false);
-	const onClickDelete = () => setHasPin(false);
-	const onClickSetPin = () => {
-		setIsEditMode(true);
-		setHasPin(true);
+	const onClickEditPin = () => setIsEditMode(true);
+	const onClickDelete = () => {
+		setHasPin(false);
+		setIsEditMode(false);
+	};
+	const onNewPinSet = () => {
+		if (isEditMode) {
+			setIsEditMode(false);
+			setHasPin(true);
+		}
 	};
 
-	const SetPin = () => {
-		if (!hasPin) {
+	const EditPinText = () => {
+		if (isEditMode) {
 			return (
-				<PinAction onClick={onClickSetPin}>
-					<CircledPlusIcon />
+				<SettingLocationText onClick={onClickCancelSetPin}>
 					<FormattedMessage
-						id="tickets.pin.addPin"
-						defaultMessage="Add pin"
+						id="tickets.pin.selectLocation"
+						defaultMessage="Select new location on model"
 					/>
-				</PinAction>
+					<CrossIcon />
+				</SettingLocationText>
 			);
 		}
-		return isEditMode ? (
-			<SettingLocationText onClick={onClickCancelSetPin}>
-				<FormattedMessage
-					id="tickets.pin.selectLocation"
-					defaultMessage="Select new location on model"
-				/>
-				<CrossIcon />
-			</SettingLocationText>
-		) : (
-			<PinAction onClick={onClickSetPin}>
+
+		return hasPin ? (
+			<PinAction onClick={onClickEditPin}>
 				<PinIcon />
 				<FormattedMessage
 					id="tickets.pin.changeLocation"
 					defaultMessage="Change pin location"
+				/>
+			</PinAction>
+		) : (
+			<PinAction onClick={onClickEditPin}>
+				<CircledPlusIcon />
+				<FormattedMessage
+					id="tickets.pin.addPin"
+					defaultMessage="Add pin"
 				/>
 			</PinAction>
 		);
@@ -67,9 +73,11 @@ export const PinDetails = () => {
 
 	return (
 		<PinContainer selected={isEditMode}>
-			<PinName><FormattedMessage id="tickets.pin.title" defaultMessage="Pin" /></PinName>
+			<PinName onClick={onNewPinSet /* Temporary hack to simulate seting pin on model */}>
+				<FormattedMessage id="tickets.pin.title" defaultMessage="Pin" />
+			</PinName>
 			<PinActions>
-				<SetPin />
+				<EditPinText />
 				{hasPin && (
 					<PinAction onClick={onClickDelete}>
 						<DeleteIcon />
