@@ -243,9 +243,3 @@ export const getValidators = (template) => {
 
 	return Yup.object().shape(validators);
 };
-
-export const getTicketDefaultValues = ({ title, properties, modules }: any) => ({
-	title,
-	properties,
-	...modules,
-});

@@ -23,7 +23,7 @@ import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { getValidators, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getValidators, modelIsFederation, TITLE_INPUT_NAME } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -47,22 +47,32 @@ const dirtyValues = (
 	);
 };
 
+const filterFields = (values = {}, errors = {}) => Object.keys(values).reduce((accum, key) => {
+	if (errors[key]) return accum;
+	return { ...accum, [key]: values[key] };
+}, {});
+
 const filterErrors = (values, errors) => {
-	// Object.keys()
+	const fields: any = !errors[TITLE_INPUT_NAME] && values[TITLE_INPUT_NAME]
+		? { [TITLE_INPUT_NAME]: values[TITLE_INPUT_NAME] } : {};
+
+	const properties = filterFields(values.properties, errors.properties);
+	const modules = filterFields(values.modules, errors.modules);
+
+	if (!isEmpty(properties)) {
+		fields.properties = properties;
+	}
+	if (!isEmpty(modules)) {
+		fields.modules = modules;
+	}
+
+	return fields;
 };
 
-let timeStamp = +new Date();
+const updateTicket = debounce((teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
+	const values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
 
-const updateTicket = debounce((teamspace, project, containerOrFederation, ticketId, isFederation, formData, validator) => {
-	const now = +new Date();
-	// console.log(`Ellapsed: ${now - timeStamp}`);
-	timeStamp = now;
-
-	let values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
-	console.log(JSON.stringify(formData.formState.dirtyFields, null, '\t'));
-	console.log(JSON.stringify(values, null, '\t'));
-
-	console.log(JSON.stringify(formData.formState.errors, null, '\t'));
+	const validVals = filterErrors(values, formData.formState.errors);
 
 	if (isEmpty(values) || !formData.formState.isDirty) return;
 
@@ -73,7 +83,7 @@ const updateTicket = debounce((teamspace, project, containerOrFederation, ticket
 		project,
 		containerOrFederation,
 		ticketId,
-		values,
+		validVals,
 		isFederation,
 	);
 }, 500);
@@ -132,7 +142,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		formData.reset(ticket);
-	},  [ticket.modules, ticket.properties]);
+	}, [ticket.modules, ticket.properties]);
 
 	useEffect(() => {
 		updateTicket(
@@ -142,7 +152,6 @@ export const TicketDetailsCard = () => {
 			ticketId,
 			isFederation,
 			formData,
-			getValidators(template),
 		);
 	},
 	[JSON.stringify(formData.watch())]);
