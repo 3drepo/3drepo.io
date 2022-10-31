@@ -212,7 +212,7 @@ const testRedirectToStateURL = () => {
 	});
 };
 
-const testCheckIfMsAccountIsLinkedTo3DRepo = () => {
+const testHasAssociatedAccount = () => {
 	describe('Check if Microsoft account is linked to 3D repo', () => {
 		const aadUserDetails = {
 			data: {
@@ -226,6 +226,7 @@ const testCheckIfMsAccountIsLinkedTo3DRepo = () => {
 		const redirectUri = generateRandomURL();
 		const res = { redirect: jest.fn() };
 		const req = {
+			body:{},
 			query: {
 				code: generateRandomString(),
 				state: JSON.stringify({ redirectUri }),
@@ -237,7 +238,7 @@ const testCheckIfMsAccountIsLinkedTo3DRepo = () => {
 		test(`should respond with ${templates.unknown.code} if state is empty`, async () => {
 			const reqWithNoState = { ...req, query: { code: generateRandomString() } };
 
-			await Aad.checkIfMsAccountIsLinkedTo3DRepo(reqWithNoState, res, mockCB);
+			await Aad.testHasAssociatedAccount(reqWithNoState, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -246,7 +247,7 @@ const testCheckIfMsAccountIsLinkedTo3DRepo = () => {
 
 		test(`should respond with ${templates.unknown.code} if getUserDetails fails`, async () => {
 			AadServices.getUserDetails.mockRejectedValueOnce(new Error());
-			await Aad.checkIfMsAccountIsLinkedTo3DRepo(req, res, mockCB);
+			await Aad.testHasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -256,7 +257,7 @@ const testCheckIfMsAccountIsLinkedTo3DRepo = () => {
 		test(`should redirect with ${errorCodes.userNotFound} if user does not exist`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
-			await Aad.checkIfMsAccountIsLinkedTo3DRepo(req, res, mockCB);
+			await Aad.testHasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
@@ -266,23 +267,26 @@ const testCheckIfMsAccountIsLinkedTo3DRepo = () => {
 		test(`should redirect with ${errorCodes.nonSsoUser} if user is a non SSO user`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
-			await Aad.checkIfMsAccountIsLinkedTo3DRepo(req, res, mockCB);
+			await Aad.testHasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.nonSsoUser}`);
 		});
 
-		test('should set req loginData and call next if ', async () => {
+		test('should set req loginData and call next if MS user is linked to 3D repo ', async () => {
+			const user = generateRandomString();
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } } });
+			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } }, user });			
 			const loginData = { [generateRandomString()]: generateRandomString() };
 			UsersModel.recordSuccessfulAuthAttempt.mockResolvedValueOnce(loginData);
-			await Aad.checkIfMsAccountIsLinkedTo3DRepo(req, res, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(req.loginData).toEqual(loginData);
+			await Aad.testHasAssociatedAccount(req, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);			
+			expect(UsersModel.recordSuccessfulAuthAttempt).toHaveBeenCalledTimes(1);
+			expect(UsersModel.recordSuccessfulAuthAttempt).toHaveBeenCalledWith(user);
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).not.toHaveBeenCalled();
+			expect(req.loginData).toEqual(loginData);
 		});
 	});
 };
@@ -291,5 +295,5 @@ describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
 	testAuthenticate();
 	testRedirectToStateURL();
-	testCheckIfMsAccountIsLinkedTo3DRepo();
+	testHasAssociatedAccount();
 });

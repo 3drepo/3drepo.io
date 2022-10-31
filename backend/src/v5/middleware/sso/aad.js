@@ -27,10 +27,10 @@ const { validateMany } = require('../common');
 
 const Aad = {};
 
-const redirectWithError = async (res, url, errorCode) => {
+const redirectWithError = (res, url, errorCode) => {
 	const urlRedirect = new URL(url);
 	urlRedirect.searchParams.set('error', errorCode);
-	await res.redirect(urlRedirect.href);
+	res.redirect(urlRedirect.href);
 };
 
 const authenticate = (redirectUri) => async (req, res) => {
@@ -96,7 +96,7 @@ Aad.redirectToStateURL = (req, res) => {
 };
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
-Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
+Aad.hasAssociatedAccount = async (req, res, next) => {
 	try {
 		const state = JSON.parse(req.query.state);
 
@@ -108,9 +108,10 @@ Aad.checkIfMsAccountIsLinkedTo3DRepo = async (req, res, next) => {
 
 			if (sso?.id !== id) {
 				redirectWithError(res, state.redirectUri, errorCodes.nonSsoUser);
-			} else {
+			} else {				
 				req.body.user = user;
-				req.loginData = await recordSuccessfulAuthAttempt(user);
+				req.loginData = await recordSuccessfulAuthAttempt(user);			
+				
 				await next();
 			}
 		} catch {

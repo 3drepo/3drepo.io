@@ -40,21 +40,13 @@ AuthMiddlewares.isLoggedIn = (req, res, next) => {
 	}
 };
 
-const notLoggedIn = (isSso) => (req, res, next) => {
+AuthMiddlewares.notLoggedIn = (req, res, next) => {
 	const { headers, session } = req;
 	if (isSessionValid(session, headers.referer, true)) {
-		if (isSso) {
-			res.redirect(`${JSON.parse(req.query.state).redirectUri}?error=${errorCodes.alreadyLoggedin}`);
-		} else {
-			respond(req, res, templates.alreadyLoggedIn);
-		}
+		respond(req, res, templates.alreadyLoggedIn);
 	} else {
 		next();
 	}
 };
-
-AuthMiddlewares.notLoggedInSso = notLoggedIn(true);
-
-AuthMiddlewares.notLoggedIn = notLoggedIn(false);
 
 module.exports = AuthMiddlewares;

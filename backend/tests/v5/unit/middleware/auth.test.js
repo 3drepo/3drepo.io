@@ -99,27 +99,6 @@ const testNotLoggedIn = () => {
 	});
 };
 
-const testNotLoggedInSso = () => {
-	describe('Not logged in SSO middleware', () => {
-		test('should redirect to state redirectUri with alreadyLoggedIn errCode if the session is valid', () => {
-			const redirectUri = 'http://abc.com/';
-			const mockCB = jest.fn(() => {});
-			const redirectMock = jest.fn(() => {});
-			AuthMiddlewares.notLoggedInSso(
-				{ headers: { referer: 'http://abc.com/' },
-					session: { user: { referer: 'http://abc.com' } },
-					query: { state: JSON.stringify({ redirectUri }) } },
-				{ redirect: redirectMock },
-				mockCB,
-			);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(redirectMock).toHaveBeenCalledTimes(1);
-			expect(redirectMock).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.alreadyLoggedin}`);
-		});
-	});
-};
-
 const testIsLoggedIn = () => {
 	describe('Is logged in middleware', () => {
 		test('next() should be called if the session is valid', () => {
@@ -162,5 +141,4 @@ describe('middleware/auth', () => {
 	testValidSession();
 	testNotLoggedIn();
 	testIsLoggedIn();
-	testNotLoggedInSso();
 });
