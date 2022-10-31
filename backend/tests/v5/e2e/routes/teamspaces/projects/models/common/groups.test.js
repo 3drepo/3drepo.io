@@ -24,85 +24,57 @@ const { templates } = require(`${src}/utils/responseCodes`);
 let server;
 let agent;
 
-const users = {
-	tsAdmin: ServiceHelper.generateUserCredentials(),
-	noProjectAccess: ServiceHelper.generateUserCredentials(),
-	nobody: ServiceHelper.generateUserCredentials(),
-};
-
-const teamspace = ServiceHelper.generateRandomString();
-
-const project = {
-	id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-};
-
-const modelWithGroups = {
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	isFavourite: true,
-	properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-};
-const modelWithoutGroups = {
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-};
-const modelForImport = {
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-};
-const notFed = {
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	properties: ServiceHelper.generateRandomModelProperties(),
-};
-
-const groups = [
-	ServiceHelper.generateGroup(teamspace, modelWithGroups._id),
-	ServiceHelper.generateGroup(teamspace, modelWithGroups._id, false, true),
-	ServiceHelper.generateGroup(teamspace, modelWithGroups._id, true, false),
-];
-
-const setupData = async () => {
-	const models = [modelWithGroups, modelWithoutGroups, modelForImport, notFed];
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
-	const customData = { starredModels: {
-		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
-	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key === 'nobody' ? [] : [teamspace], customData));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
-	return Promise.all([
-		...userProms,
-		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		ServiceHelper.db.createGroups(teamspace, modelWithGroups._id, groups),
-	]);
-};
-
 const testExportGroups = () => {
-	const createRoute = ({ projectId = project.id, modelId = modelWithGroups._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/export${apiKey ? `?key=${apiKey}` : ''}`;
-	const postData = { groups: groups.map(({ _id }) => _id) };
-	describe.each([
-		['the user is not authenticated', createRoute({ apiKey: null }), false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', createRoute({ apiKey: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-		['the project does not exist', createRoute({ projectId: 'dslfkjds' }), false, templates.projectNotFound],
-		['the federation does not exist', createRoute({ modelId: 'dslfkjds' }), false, templates.federationNotFound],
-		['the federation is actually a container', createRoute({ modelId: notFed._id }), false, templates.federationNotFound],
-		['the user does not have permissions to access the federation', createRoute({ apiKey: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-		['the data is not of the right schema', createRoute(), false, templates.invalidArguments, { groups: 1 }],
-		['the groups array is empty', createRoute(), false, templates.invalidArguments, { groups: [] }],
-		['the groups requested exists (1)', createRoute(), true, { groups }],
-		['the groups requested exists (2)', createRoute(), true, { groups: [groups[0]] }, { groups: [groups[0]._id] }],
-		['the groups requested doesn\'t exists', createRoute({ modelId: modelWithoutGroups._id }), true, { groups: [] }],
+	const users = {
+		tsAdmin: ServiceHelper.generateUserCredentials(),
+		noProjectAccess: ServiceHelper.generateUserCredentials(),
+		nobody: ServiceHelper.generateUserCredentials(),
+	};
 
-	])('Export groups', (desc, route, success, expectedRes, post = postData) => {
+	const teamspace = ServiceHelper.generateRandomString();
+
+	const project = {
+		id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+	};
+
+	const container = ServiceHelper.generateRandomModel();
+	const containerNoGroups = ServiceHelper.generateRandomModel();
+	const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+	const fedNoGroups = ServiceHelper.generateRandomModel({ isFederation: true });
+
+	const groups = [
+		ServiceHelper.generateGroup(teamspace, container._id),
+		ServiceHelper.generateGroup(teamspace, container._id, false, true),
+		ServiceHelper.generateGroup(teamspace, container._id, true, false),
+	];
+
+	const postData = { groups: groups.map(({ _id }) => _id) };
+
+	const generateTestData = (isFed) => {
+		const createRoute = ({ projectId = project.id, modelId = isFed ? fed._id : container._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${isFed ? 'federations' : 'containers'}/${modelId}/groups/export${apiKey ? `?key=${apiKey}` : ''}`;
+		const modelLabel = isFed ? 'federations' : 'containers';
+		const modelNotFoundRes = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+		const incorrectModelTypeId = isFed ? container._id : fed._id;
+		const modelWithNoGroups = isFed ? fedNoGroups._id : containerNoGroups._id;
+
+		return [
+			['the user is not authenticated', createRoute({ apiKey: null }), false, templates.notLoggedIn],
+			['the user is not a member of the teamspace', createRoute({ apiKey: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+			['the project does not exist', createRoute({ projectId: 'dslfkjds' }), false, templates.projectNotFound],
+			[`the ${modelLabel} does not exist`, createRoute({ modelId: 'dslfkjds' }), false, modelNotFoundRes],
+			[`the model is not a ${modelLabel}`, createRoute({ modelId: incorrectModelTypeId }), false, modelNotFoundRes],
+			[`the user does not have permissions to access the ${modelLabel}`, createRoute({ apiKey: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			['the data is not of the right schema', createRoute(), false, templates.invalidArguments, { groups: 1 }],
+			['the groups array is empty', createRoute(), false, templates.invalidArguments, { groups: [] }],
+			['the groups requested exists (1)', createRoute(), true, { groups }],
+			['the groups requested exists (2)', createRoute(), true, { groups: [groups[0]] }, { groups: [groups[0]._id] }],
+			['the groups requested doesn\'t exist', createRoute({ modelId: modelWithNoGroups }), true, { groups: [] }],
+		];
+	};
+
+	const runTest = (desc, route, success, expectedRes, post = postData) => {
 		test(`Should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;
 			const res = await agent.post(route)
@@ -114,39 +86,92 @@ const testExportGroups = () => {
 				expect(res.body.code).toEqual(expectedRes.code);
 			}
 		});
+	};
+
+	describe('Export groups', () => {
+		beforeAll(async () => {
+			const models = [container, fed, containerNoGroups, fedNoGroups];
+			await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+
+			const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key === 'nobody' ? [] : [teamspace]));
+			const modelProms = models.map((model) => ServiceHelper.db.createModel(
+				teamspace,
+				model._id,
+				model.name,
+				model.properties,
+			));
+			return Promise.all([
+				...userProms,
+				...modelProms,
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+				ServiceHelper.db.createGroups(teamspace, container._id, groups),
+				ServiceHelper.db.createGroups(teamspace, fed._id, groups),
+			]);
+		});
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
 const testImportGroups = () => {
-	const createRoute = ({ projectId = project.id, modelId = modelForImport._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/import${apiKey ? `?key=${apiKey}` : ''}`;
-	const exportRoute = ({ projectId = project.id, modelId = modelForImport._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/export${apiKey ? `?key=${apiKey}` : ''}`;
+	const users = {
+		tsAdmin: ServiceHelper.generateUserCredentials(),
+		noProjectAccess: ServiceHelper.generateUserCredentials(),
+		nobody: ServiceHelper.generateUserCredentials(),
+	};
+
+	const teamspace = ServiceHelper.generateRandomString();
+
+	const project = {
+		id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+	};
+
+	const container = ServiceHelper.generateRandomModel();
+	const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+
+	const groups = [
+		ServiceHelper.generateGroup(teamspace, container._id),
+		ServiceHelper.generateGroup(teamspace, container._id, false, true),
+		ServiceHelper.generateGroup(teamspace, container._id, true, false),
+	];
 
 	const postData = { groups };
 
 	const changedGroup = { ...groups[0], name: ServiceHelper.generateRandomString() };
-	const newGroup = ServiceHelper.generateGroup(teamspace, modelWithGroups._id, true, false);
+	const newGroup = ServiceHelper.generateGroup(teamspace, container._id, true, false);
 	const partialGroupUpdateTestData = [changedGroup, newGroup];
 
-	describe.each([
-		['the user is not authenticated', createRoute({ apiKey: null }), false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', createRoute({ apiKey: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-		['the project does not exist', createRoute({ projectId: 'dslfkjds' }), false, templates.projectNotFound],
-		['the federation does not exist', createRoute({ modelId: 'dslfkjds' }), false, templates.federationNotFound],
-		['the federation is actually a container', createRoute({ modelId: notFed._id }), false, templates.federationNotFound],
-		['the user does not have permissions to access the federation', createRoute({ apiKey: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-		['the data is not of the right schema', createRoute(), false, templates.invalidArguments, { groups: 1 }],
-		['the groups array is empty', createRoute(), false, templates.invalidArguments, { groups: [] }],
-		['the groups are valid', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
-		['the same groups are being imported again', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
-		['the user is updating only some of the groups', createRoute(), true, { post: { groups: [...groups.map(({ _id }) => _id), newGroup._id] }, data: expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]) }, { groups: partialGroupUpdateTestData }],
-	])('Import groups', (desc, route, success, expectedRes, post = postData) => {
+	const generateTestData = (isFed) => {
+		const createRoute = ({ projectId = project.id, modelId = isFed ? fed._id : container._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${isFed ? 'federations' : 'containers'}/${modelId}/groups/import${apiKey ? `?key=${apiKey}` : ''}`;
+		const modelLabel = isFed ? 'federations' : 'containers';
+		const modelNotFoundRes = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+		const incorrectModelTypeId = isFed ? container._id : fed._id;
+
+		return [
+			['the user is not authenticated', createRoute({ apiKey: null }), false, templates.notLoggedIn],
+			['the user is not a member of the teamspace', createRoute({ apiKey: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+			['the project does not exist', createRoute({ projectId: 'dslfkjds' }), false, templates.projectNotFound],
+			[`the ${modelLabel} does not exist`, createRoute({ modelId: 'dslfkjds' }), false, modelNotFoundRes],
+			[`the model is not a ${modelLabel}`, createRoute({ modelId: incorrectModelTypeId }), false, modelNotFoundRes],
+			[`the user does not have permissions to access the ${modelLabel}`, createRoute({ apiKey: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			['the data is not of the right schema', createRoute(), false, templates.invalidArguments, { groups: 1 }],
+			['the groups array is empty', createRoute(), false, templates.invalidArguments, { groups: [] }],
+			['the groups are valid', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
+			['the same groups are being imported again', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
+			['the user is updating only some of the groups', createRoute(), true, { post: { groups: [...groups.map(({ _id }) => _id), newGroup._id] }, data: expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]) }, { groups: partialGroupUpdateTestData }],
+		];
+	};
+
+	const runTest = (desc, route, success, expectedRes, post = postData) => {
 		test(`Should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;
 			const res = await agent.post(route)
 				.send(post)
 				.expect(expectedStatus);
 			if (success) {
-				const exportRes = await agent.post(exportRoute())
+				const exportRes = await agent.post(route.replace('/import', '/export'))
 					.send({ groups: post.groups.map(({ _id }) => _id) })
 					.expect(templates.ok.status);
 				expect(exportRes.body.groups).toEqual(post.groups);
@@ -154,6 +179,28 @@ const testImportGroups = () => {
 				expect(res.body.code).toEqual(expectedRes.code);
 			}
 		});
+	};
+
+	describe('Import groups', () => {
+		beforeAll(async () => {
+			const models = [container, fed];
+			await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+
+			const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key === 'nobody' ? [] : [teamspace]));
+			const modelProms = models.map((model) => ServiceHelper.db.createModel(
+				teamspace,
+				model._id,
+				model.name,
+				model.properties,
+			));
+			return Promise.all([
+				...userProms,
+				...modelProms,
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+			]);
+		});
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
@@ -161,7 +208,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testExportGroups();
