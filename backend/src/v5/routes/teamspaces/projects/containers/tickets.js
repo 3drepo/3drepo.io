@@ -29,7 +29,7 @@ const { templates } = require('../../../../utils/responseCodes');
 const createTicket = async (req, res) => {
 	const { teamspace, project, container } = req.params;
 	try {
-		const _id = await addTicket(teamspace, project, container, req.body, req.templateData);
+		const _id = await addTicket(teamspace, project, container, req.templateData, req.body);
 
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
