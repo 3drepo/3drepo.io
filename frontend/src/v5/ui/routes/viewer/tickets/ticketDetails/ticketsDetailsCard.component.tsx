@@ -19,18 +19,17 @@ import ChevronLeft from '@mui/icons-material/ArrowBackIosNew';
 import ChevronRight from '@mui/icons-material/ArrowForwardIos';
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { useCallback, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { getTicketDefaultValues, modelIsFederation, getValidators } from '@/v5/store/tickets/tickets.helpers';
+import { getValidators, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { debounce, isEmpty, isEqual } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
-import { Form } from '../newTicket/newTicket.styles';
 
 const dirtyValues = (
 	dirtyFields: object | boolean,
@@ -48,27 +47,26 @@ const dirtyValues = (
 	);
 };
 
-const diff = (a, b) => {
-	if (isEqual(a, b)) return ({});
-
-	if (a.)
+const filterErrors = (values, errors) => {
+	// Object.keys()
 };
 
 let timeStamp = +new Date();
 
-const updateTicket = debounce((teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
+const updateTicket = debounce((teamspace, project, containerOrFederation, ticketId, isFederation, formData, validator) => {
 	const now = +new Date();
-	console.log(`Ellapsed: ${now - timeStamp}`);
+	// console.log(`Ellapsed: ${now - timeStamp}`);
 	timeStamp = now;
 
 	let values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
-	// console.log(JSON.stringify(formData.formState.dirtyFields, null, '\t'));
+	console.log(JSON.stringify(formData.formState.dirtyFields, null, '\t'));
+	console.log(JSON.stringify(values, null, '\t'));
+
+	console.log(JSON.stringify(formData.formState.errors, null, '\t'));
 
 	if (isEmpty(values) || !formData.formState.isDirty) return;
 
-	if (!values.title && !values.properties) {
-		values = { modules: values };
-	}
+	// console.log(JSON.stringify(values, null, '\t'));
 
 	TicketsActionsDispatchers.updateTicket(
 		teamspace,
@@ -129,11 +127,12 @@ export const TicketDetailsCard = () => {
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
 		mode: 'onChange',
+		defaultValues: ticket,
 	});
 
 	useEffect(() => {
-		formData.reset(getTicketDefaultValues(ticket));
-	}, [ticket.modules, ticket.properties]);
+		formData.reset(ticket);
+	},  [ticket.modules, ticket.properties]);
 
 	useEffect(() => {
 		updateTicket(
@@ -143,9 +142,10 @@ export const TicketDetailsCard = () => {
 			ticketId,
 			isFederation,
 			formData,
+			getValidators(template),
 		);
 	},
-	[formData.watch()]);
+	[JSON.stringify(formData.watch())]);
 
 	// console.log(JSON.stringify(ticket, null, '\t'));
 

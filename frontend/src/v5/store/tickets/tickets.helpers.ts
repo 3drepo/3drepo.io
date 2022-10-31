@@ -231,9 +231,21 @@ export const getValidators = (template) => {
 	};
 
 	validators.properties = propertiesValidator(properties || []);
-	(modules || []).forEach((module) => {
-		validators[module.name] = propertiesValidator(module.properties);
-	});
+
+	if (modules) {
+		const modulesValidator = {};
+		modules.forEach((module) => {
+			modulesValidator[module.name] = propertiesValidator(module.properties);
+		});
+
+		validators.modules = Yup.object().shape(modulesValidator);
+	}
 
 	return Yup.object().shape(validators);
 };
+
+export const getTicketDefaultValues = ({ title, properties, modules }: any) => ({
+	title,
+	properties,
+	...modules,
+});
