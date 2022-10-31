@@ -154,9 +154,7 @@ export const TicketDetailsCard = () => {
 			formData,
 		);
 	},
-	[JSON.stringify(formData.watch())]);
-
-	// console.log(JSON.stringify(ticket, null, '\t'));
+	[JSON.stringify(formData.getValues())]);
 
 	return (
 		<CardContainer>
