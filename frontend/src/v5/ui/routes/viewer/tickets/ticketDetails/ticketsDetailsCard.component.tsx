@@ -40,7 +40,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const formData = useForm({ defaultValues: getTicketDefaultValues(ticket) });
+	const formData = useForm();
 
 	const goBack = () => {
 		setCardView(TicketsCardViews.List);
