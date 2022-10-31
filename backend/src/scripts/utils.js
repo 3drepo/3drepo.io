@@ -20,15 +20,22 @@ const { v5Path } = require('../interop');
 const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
 const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
 
-const Yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
-
 const Utils = {};
 
-const { argv } = Yargs(hideBin(process.argv));
+let includeTS = [];
+let excludeTS = [];
 
-const includeTS = argv.includeTS ? argv.includeTS.split(',') : [];
-const excludeTS = argv.excludeTS ? argv.excludeTS.split(',') : [];
+process.argv.forEach((arg) => {
+	const res = arg.match(/--includeTS=(\S*)/);
+	if (res?.length > 1) {
+		includeTS = res[1].split(',');
+	}
+
+	const res2 = arg.match(/--excludeTS=(\S*)/);
+	if (res2?.length > 1) {
+		excludeTS = res2[1].split(',');
+	}
+});
 
 if (includeTS.length && excludeTS.length) throw new Error('Cannot declare both includeTS and excludeTS. Please only use one of the options');
 
