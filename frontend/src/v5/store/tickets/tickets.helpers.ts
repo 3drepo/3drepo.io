@@ -18,8 +18,8 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketsForm.component';
-import { trimmedString } from '@/v5/validation/shared/validators';
-import { isEmpty, isNull } from 'lodash';
+import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
+import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
 
@@ -80,15 +80,6 @@ const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : 
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 	let validator;
 	const maxLength = maxStringLength(type);
-	const basicNumber = Yup.number().transform((_, val) => val ? Number(val) : null).nullable(true);
-	const requiredNumber = (requiredError?) => basicNumber.test(
-		'requiredNumber',
-		requiredError || formatMessage({
-			id: 'validation.ticket.number.required',
-			defaultMessage: 'This is required',
-		}),
-		(number) => !isNull(number),
-	);
 
 	switch (type) {
 		case 'text':
@@ -101,7 +92,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				{ maxLength, name }));
 			break;
 		case 'coords':
-			validator = Yup.array(basicNumber);
+			validator = Yup.array(nullableNumber);
 			break;
 		case 'manyOf':
 			validator = Yup.array();
@@ -113,7 +104,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			validator = Yup.boolean();
 			break;
 		case 'number':
-			validator = basicNumber;
+			validator = nullableNumber;
 			break;
 		case 'date':
 			validator = Yup.date().nullable();
@@ -146,8 +137,8 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 					id: 'validation.ticket.requiredField',
 					defaultMessage: '{name} is a required field',
 				},
-				{ name },
-			));
+				{ name }),
+			);
 		}
 	}
 
