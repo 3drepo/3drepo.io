@@ -180,11 +180,11 @@ const filterEmptyModuleValues = (module) => {
 		.forEach(([key, value]) => {
 			if (Array.isArray(value)) {
 				if (value.length === 0) return;
-				// Value is an empty coords property [undefined x 3], so shall be removed
+				// If value is an empty coords property ([undefined x 3]), it shall be removed
 				if (value.length === 3 && !value.some((v) => !NULLISH_VALUES.includes(v))) return;
 				// A this point, we are either dealing with a coords property that has
 				// at least 1 value that is not undefined, or with a manyOf property.
-				// Since the manyOf array of values should not hold fasly values,
+				// Since the manyOf (array of) values should not hold falsy values,
 				// we map all those values to 0s. So, if the property was indeed
 				// a manyOf, nothing happens, but if the property was a coords,
 				// we map all the non-numeric values to 0.
