@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketsForm.component';
 import { trimmedString } from '@/v5/validation/shared/validators';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 import * as Yup from 'yup';
 import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
 
@@ -80,6 +80,15 @@ const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : 
 export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 	let validator;
 	const maxLength = maxStringLength(type);
+	const basicNumber = Yup.number().transform((_, val) => val ? Number(val) : null).nullable(true);
+	const requiredNumber = (requiredError?) => basicNumber.test(
+		'requiredNumber',
+		requiredError || formatMessage({
+			id: 'validation.ticket.number.required',
+			defaultMessage: 'This is required',
+		}),
+		(number) => !isNull(number),
+	);
 
 	switch (type) {
 		case 'text':
@@ -92,6 +101,8 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				{ maxLength, name }));
 			break;
 		case 'coords':
+			validator = Yup.array(basicNumber);
+			break;
 		case 'manyOf':
 			validator = Yup.array();
 			break;
@@ -102,7 +113,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			validator = Yup.boolean();
 			break;
 		case 'number':
-			validator = Yup.number().transform((_, val) => val || 0);
+			validator = basicNumber;
 			break;
 		case 'date':
 			validator = Yup.date().nullable();
@@ -112,6 +123,13 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 	}
 
 	if (required) {
+		validator = validator.required(
+			formatMessage({
+				id: 'validation.ticket.requiredField',
+				defaultMessage: '{name} is a required field',
+			},
+			{ name }),
+		);
 		if (type === 'manyOf') {
 			validator = validator.min(1,
 				formatMessage({
@@ -120,21 +138,17 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				}));
 		}
 		if (type === 'coords') {
-			const requiredCoord = Yup.string().required(
-				formatMessage({
-					id: 'validation.ticket.coord.required',
-					defaultMessage: 'This is required',
-				}),
-			);
-			validator = Yup.array(requiredCoord);
+			validator = Yup.array(requiredNumber());
 		}
-		validator = validator.required(
-			formatMessage({
-				id: 'validation.ticket.requiredField',
-				defaultMessage: '{name} is a required field',
-			},
-			{ name }),
-		);
+		if (type === 'number') {
+			validator = requiredNumber(
+				formatMessage({
+					id: 'validation.ticket.requiredField',
+					defaultMessage: '{name} is a required field',
+				},
+				{ name },
+			));
+		}
 	}
 
 	return validator;
@@ -166,18 +180,23 @@ export const getTicketValidator = (template) => {
 	return Yup.object().shape(validators);
 };
 
-const parseModule = (module) => {
+const filterEmptyModuleValues = (module) => {
 	const parsedModule = {};
+	const NULLISH_VALUES = [null, undefined, ''];
 	Object.entries(module)
 		// skip nullish values that are not 0s or false
-		.filter((entry) => ![null, undefined, ''].includes(entry[1] as any))
+		.filter((entry) => !NULLISH_VALUES.includes(entry[1] as any))
 		.forEach(([key, value]) => {
 			if (Array.isArray(value)) {
 				if (value.length === 0) return;
-				// manyOf should not allow empty or nullish values, but coords may.
-				// If those values are all undefined, the property (coords) shall be filtered.
-				// Otherwise, its elements should be transformed into `0`s
-				if (value.length === 3 && !value.some((v) => !isUndefined(v))) return;
+				// Value is an empty coords property [undefined x 3], so shall be removed
+				if (value.length === 3 && !value.some((v) => !NULLISH_VALUES.includes(v))) return;
+				// A this point, we are either dealing with a coords property that has
+				// at least 1 value that is not undefined, or with a manyOf property.
+				// Since the manyOf array of values should not hold fasly values,
+				// we map all those values to 0s. So, if the property was indeed
+				// a manyOf, nothing happens, but if the property was a coords,
+				// we map all the non-numeric values to 0.
 				parsedModule[key] = value.map((v) => v || 0);
 			} else {
 				parsedModule[key] = value;
@@ -186,17 +205,17 @@ const parseModule = (module) => {
 	return parsedModule;
 };
 
-export const filterEmptyValues = (ticket) => {
+export const filterEmptyTicketValues = (ticket) => {
 	const parsedTicket = {};
 	Object.entries(ticket).forEach(([key, value]) => {
 		switch (key) {
 			case 'properties':
-				parsedTicket[key] = parseModule(value);
+				parsedTicket[key] = filterEmptyModuleValues(value);
 				break;
 			case 'modules':
 				parsedTicket[key] = {};
 				Object.entries(value).forEach(([module, moduleValue]) => {
-					const parsedModule = parseModule(moduleValue);
+					const parsedModule = filterEmptyModuleValues(moduleValue);
 					if (!isEmpty(parsedModule)) {
 						parsedTicket[key][module] = parsedModule;
 					}

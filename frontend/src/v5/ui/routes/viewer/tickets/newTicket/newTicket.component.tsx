@@ -27,7 +27,7 @@ import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyValues, filterNonEditablePropertiesFromTemplate, getEditableTicketFromTemplate, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { filterEmptyTicketValues, filterNonEditablePropertiesFromTemplate, getEditableTicketFromTemplate, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
@@ -67,7 +67,7 @@ export const NewTicketCard = () => {
 			properties,
 			modules,
 		};
-		const parsedTicket = filterEmptyValues(ticket) as NewTicket;
+		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
