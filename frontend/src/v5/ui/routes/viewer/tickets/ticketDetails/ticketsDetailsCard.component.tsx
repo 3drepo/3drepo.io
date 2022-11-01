@@ -35,6 +35,7 @@ import { TicketForm } from '../ticketsForm/ticketsForm.component';
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
+	const ticketForm = useForm();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
@@ -105,7 +106,7 @@ export const TicketDetailsCard = () => {
 			isFederation,
 		);
 	}, [ticket?.type]);
-
+	if (!ticket) return <></>;
 	return (
 		<CardContainer>
 			<CardHeader>
@@ -116,7 +117,7 @@ export const TicketDetailsCard = () => {
 					<CircleButton size="medium" variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
 				</HeaderButtons>
 			</CardHeader>
-			<FormProvider {...useForm()}>
+			<FormProvider {...ticketForm}>
 				<TicketForm template={template} ticket={ticket} />
 			</FormProvider>
 			<Button onClick={updateTicket}> Update Ticket! </Button>

@@ -68,7 +68,7 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 	)),
 );
 
-Tickets.addTicket = async (teamspace, project, model, ticket, template) => {
+Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 	const { toAdd } = processBinaryProperties(template, undefined, ticket);
 	const res = await addTicket(teamspace, project, model, ticket);
 	await storeFiles(teamspace, project, model, res, toAdd);
