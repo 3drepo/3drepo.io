@@ -24,7 +24,8 @@ import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
-import { TitleContainer, FormTitle, PanelsContainer } from './ticketsForm.styles';
+import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
+import { TitleProperty } from './properties/titleProperty.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -82,14 +83,10 @@ export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>
 	return (
 		<>
 			<TitleContainer>
-				<FormTitle
+				<TitleProperty
 					name={TITLE_INPUT_NAME}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
-					placeholder={formatMessage({
-						id: 'customTicket.newTicket.titlePlaceholder',
-						defaultMessage: 'Ticket name',
-					})}
 				/>
 				<PinDetails /> {/* conditionally render this when pin logic added */}
 			</TitleContainer>

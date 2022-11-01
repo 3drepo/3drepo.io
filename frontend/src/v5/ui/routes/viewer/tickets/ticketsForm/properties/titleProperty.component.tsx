@@ -15,34 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { formatMessage } from '@/v5/services/intl';
+import { TitlePropertyBase } from './titleProperty.styles';
 
-export const PanelsContainer = styled.div`
-	.MuiAccordion-root {
-		&:first-of-type {
-			border-radius: 6px 6px 0 0;
-		}
+export const TitleProperty = (props) => {
+	const handleKeyDown = (event) => {
+		if (event.key === 'Enter') event.preventDefault();
+	};
 
-		&:not(:first-of-type) {
-			border-top: 0;
-		}
-
-		&:last-of-type {
-			border-radius: 0 0 6px 6px;
-		}
-
-		.MuiAccordionDetails-root > :not(:first-child) {
-			margin-top: 10px;
-		}
-	}
-`;
-
-export const TitleContainer = styled.div`
-	width: 100%;
-	padding: 10px 15px;
-	position: relative;
-	z-index: 1;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	box-sizing: border-box;
-	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
-`;
+	return (
+		<TitlePropertyBase
+			onKeyDown={handleKeyDown}
+			placeholder={formatMessage({
+				id: 'customTicket.newTicket.titlePlaceholder',
+				defaultMessage: 'Ticket name',
+			})}
+			{...props}
+		/>
+	);
+};
