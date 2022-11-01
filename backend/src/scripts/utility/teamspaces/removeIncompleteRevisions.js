@@ -99,11 +99,6 @@ const processModelStash = async (teamspace, model, revId) => {
 
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: revId, type: 'mesh' }, { _id: 1 })).map((r) => UUIDToString(r._id));
 	supermeshIds.map((supermeshId) => {
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.3drepo.ref`, { _id: { $in: [
-			`${supermeshId}_faces`,
-			`${supermeshId}_normals`,
-			`${supermeshId}_vertices`,
-		] } }));
 		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: { $in: [
 			`${supermeshId}.json.mpc`,
 			`${supermeshId}_unity.json.mpc`,
@@ -126,15 +121,16 @@ const processModelStash = async (teamspace, model, revId) => {
 
 const processModelSequences = async (teamspace, model, revId) => {
 	const sequences = await find(teamspace, `${model}.sequences`, { rev_id: revId }, { frames: 1 });
-	const sequenceFilenames = [];
+	const stateFilenames = [];
 
 	for (const { _id, frames } of sequences) {
 		if (frames) {
 			for (const { state } of frames) {
-				sequenceFilenames.push(state);
+				stateFilenames.push(state);
 			}
 		}
 
+		// TODO
 		// eslint-disable-next-line no-await-in-loop
 		await Promise.all([
 			removeRecords(teamspace, `${model}.activities`, { sequenceId: _id }, '_extRef'),
@@ -142,7 +138,7 @@ const processModelSequences = async (teamspace, model, revId) => {
 		]);
 	}
 
-	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: sequenceFilenames } });
+	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: stateFilenames } });
 
 	await deleteMany(teamspace, `${model}.sequences`, { rev_id: revId });
 };
@@ -170,6 +166,7 @@ const processTeamspace = async (teamspace, revisionAge) => {
 			incomplete: { $exists: true },
 			timestamp: { $lt: new Date(expiryTS.setDate(expiryTS.getDate() - revisionAge)) },
 		};
+
 		// eslint-disable-next-line no-await-in-loop
 		const badRevisions = await find(teamspace, name, incompleteRevisionFilter, { rFile: 1 });
 
@@ -180,9 +177,10 @@ const processTeamspace = async (teamspace, revisionAge) => {
 
 			// eslint-disable-next-line no-await-in-loop
 			await processFilesAndRefs(teamspace, name, { _id: { $in: rFile } });
-			// eslint-disable-next-line no-await-in-loop
-			await removeRecords(teamspace, name, incompleteRevisionFilter);
 		}
+
+		// eslint-disable-next-line no-await-in-loop
+		await removeRecords(teamspace, name, incompleteRevisionFilter);
 	}
 };
 
