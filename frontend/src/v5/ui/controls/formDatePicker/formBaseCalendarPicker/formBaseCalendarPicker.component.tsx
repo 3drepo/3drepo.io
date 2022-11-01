@@ -17,6 +17,7 @@
 import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import dayjs from 'dayjs';
+import { noop } from 'lodash';
 import { TextField } from './formBaseCalendarPicker.styles';
 
 export type FormBaseCalendarPickerProps = any & {
@@ -55,7 +56,10 @@ export const FormBaseCalendarPicker = ({
 					{...field}
 					{...props}
 					onOpen={() => setOpen(true)}
-					onClose={() => setOpen(false)}
+					onClose={() => {
+						(props.onBlur || noop)();
+						setOpen(false);
+					}}
 					open={open}
 					disabled={disabled}
 					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}

@@ -29,7 +29,7 @@ import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { TicketsCardViews } from '../tickets.constants';
-import { TicketForm } from '../ticketsForm/ticketsForm.component';
+import { TicketForm } from '../ticketsForm/ticketForm.component';
 
 const dirtyValues = (
 	dirtyFields: object | boolean,
