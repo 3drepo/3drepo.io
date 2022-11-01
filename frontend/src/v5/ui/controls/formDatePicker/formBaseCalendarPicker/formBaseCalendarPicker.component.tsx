@@ -57,6 +57,7 @@ export const FormBaseCalendarPicker = ({
 					{...props}
 					onOpen={() => setOpen(true)}
 					onClose={() => {
+						// This is to signal that the date has changed (we are using onblur to save changes)
 						(props.onBlur || noop)();
 						setOpen(false);
 					}}
