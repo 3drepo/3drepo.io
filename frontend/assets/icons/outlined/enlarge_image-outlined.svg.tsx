@@ -20,6 +20,6 @@ type IProps = {
 
 export default ({ className }: IProps) => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className={className}>
-		<path d="M5.48 17H1V12.52M17 12.52V17H12.52M12.52 1H17V5.48M1 5.48V1H5.48" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+		<path d="M5.48 17H1V12.52M17 12.52V17H12.52M12.52 1H17V5.48M1 5.48V1H5.48" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 	</svg>
 );
