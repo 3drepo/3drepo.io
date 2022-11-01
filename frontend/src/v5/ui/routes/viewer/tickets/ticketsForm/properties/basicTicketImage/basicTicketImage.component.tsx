@@ -14,10 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
-import { useState } from 'react';
+import { HiddenImageUploader } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import {
 	ActionsList,
 	ActionsSide,
@@ -31,8 +33,6 @@ import {
 	PropertyName,
 } from './basicTicketImage.styles';
 import { TicketImageActionContext } from './actions/ticketImageActionContext';
-import { HiddenImageUploader } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 
 type BasicTicketImageProps = {
 	imgSrc?: string,
@@ -42,7 +42,16 @@ type BasicTicketImageProps = {
 	className?: string,
 	children: any,
 };
-export const BasicTicketImage = ({ children, imgSrc: inputImgSrc, viewPoint: inputViewPoint, onChange, title, className }: BasicTicketImageProps) => {
+export const BasicTicketImage = ({
+	children,
+	imgSrc:
+	inputImgSrc,
+	viewPoint:
+	inputViewPoint,
+	onChange,
+	title,
+	className,
+}: BasicTicketImageProps) => {
 	const [imgSrc, setImgSrc] = useState(inputImgSrc);
 	const [viewPoint, setViewPoint] = useState(inputViewPoint);
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
@@ -65,7 +74,7 @@ export const BasicTicketImage = ({ children, imgSrc: inputImgSrc, viewPoint: inp
 				</TicketImageActionContext.Provider>
 			</ActionsSide>
 			<ImageSide>
-				{!imgSrc ?  (
+				{!imgSrc ? (
 					<HiddenImageUploader onUpload={setImgSrc} disabled={!isAdmin}>
 						<EmptyImageContainer disabled={!isAdmin}>
 							<EmptyImageIcon />
@@ -76,7 +85,7 @@ export const BasicTicketImage = ({ children, imgSrc: inputImgSrc, viewPoint: inp
 					</HiddenImageUploader>
 				) : (
 					<OverlappingContainer>
-						<Image src={imgSrc} alt={title} onClick={() => console.log("click")} onChange={onChange} />
+						<Image src={imgSrc} alt={title} onChange={onChange} />
 						<EnlargeContainer>
 							<EnlargeImageIcon />
 							<IconText>
