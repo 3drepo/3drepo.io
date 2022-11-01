@@ -28,7 +28,7 @@ export type FormTextAreaFixedSizeProps = InputProps & {
 };
 
 export const FormTextAreaFixedSize = ({
-	defaultValue,
+	defaultValue = '',
 	formError,
 	control,
 	name,
@@ -55,13 +55,12 @@ export const FormTextAreaFixedSize = ({
 				<Container $error={!!formError} $height={height}>
 					<ScrollArea autoHeight autoHeightMin={height} autoHeightMax={height} autoHide>
 						<Input
-							{...field}
 							inputRef={field.ref}
 							id={name}
-							name={name}
 							multiline
 							minRows={4}
 							$height={height}
+							{...field}
 							{...props}
 						/>
 					</ScrollArea>

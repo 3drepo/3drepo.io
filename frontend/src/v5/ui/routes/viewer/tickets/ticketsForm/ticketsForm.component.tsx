@@ -14,55 +14,45 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyDefinition, TemplateModule, ITicket } from '@/v5/store/tickets/tickets.types';
+import { get } from 'lodash';
+import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
-import { CoordsProperty } from './properties/coordsProperty.component';
-import { DateProperty } from './properties/dateProperty.component';
-import { ImageProperty } from './properties/imageProperty.component';
-import { LongTextProperty } from './properties/longTextProperty.component';
-import { ManyOfProperty } from './properties/manyOfProperty.component';
-import { NumberProperty } from './properties/numberProperty.component';
-import { OneOfProperty } from './properties/oneOfProperty.component';
-import { TextProperty } from './properties/textProperty.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
-import { BooleanProperty } from './properties/booleanProperty.component';
-import { TitleContainer, FormTitle, PanelsContainer } from './ticketsForm.styles';
-
-const TicketProperty = {
-	text: TextProperty,
-	longText: LongTextProperty,
-	date: DateProperty,
-	oneOf: OneOfProperty,
-	manyOf: ManyOfProperty,
-	boolean: BooleanProperty,
-	coords: CoordsProperty,
-	number: NumberProperty,
-	image: ImageProperty,
-};
+import { TicketProperty } from './properties/properties.helper';
+import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
+import { TitleProperty } from './properties/titleProperty.component';
 
 interface PropertiesListProps {
-	properties: PropertyDefinition[] ;
+	properties: PropertyDefinition[];
 	propertiesValues: Record<string, any>;
+	module: string;
 }
 
-const PropertiesList = ({ properties, propertiesValues = {} }: PropertiesListProps) => (
-	<>
-		{properties.map((property) => {
-			const PropertyComponent = TicketProperty[property.type] || UnsupportedProperty;
-			return (
-				<PropertyComponent
-					property={property}
-					value={propertiesValues[property.name]}
-					key={property.name}
-				/>
-			);
-		})}
-	</>
-);
+const PropertiesList = ({ module, properties, propertiesValues = {} }: PropertiesListProps) => {
+	const { formState } = useFormContext();
+	return (
+		<>
+			{properties.map((property) => {
+				const { name, type } = property;
+				const inputName = `${module}.${name}`;
+				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
+				return (
+					<PropertyComponent
+						property={property}
+						name={inputName}
+						formError={get(formState.errors, inputName)}
+						defaultValue={propertiesValues[name] ?? property.default}
+						key={name}
+					/>
+				);
+			})}
+		</>
+	);
+};
 
 const PropertiesPanel = (props: PropertiesListProps) => (
 	<Accordion
@@ -81,32 +71,30 @@ interface ModulePanelProps {
 
 const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 	<Accordion title={module.name} Icon={PropetiesIcon}>
-		<PropertiesList properties={module.properties || []} propertiesValues={moduleValues} />
+		<PropertiesList module={module.name} properties={module.properties || []} propertiesValues={moduleValues} />
 	</Accordion>
 );
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: ITicket }) => {
-	const TITLE_PLACEHOLDER = formatMessage({
-		id: 'customTicket.newTicket.titlePlaceholder',
-		defaultMessage: 'Ticket name',
-	});
+export const TITLE_INPUT_NAME = 'title';
+
+export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>, ticket: Partial<ITicket> }) => {
+	const { formState } = useFormContext();
 	return (
 		<>
 			<TitleContainer>
-				<FormTitle
-					key={ticket.title}
-					name="title"
-					defaultValue={ticket.title}
-					placeholder={TITLE_PLACEHOLDER}
+				<TitleProperty
+					name={TITLE_INPUT_NAME}
+					defaultValue={ticket[TITLE_INPUT_NAME]}
+					formError={formState.errors[TITLE_INPUT_NAME]}
 				/>
-				<PinDetails /> {/* conditionally render this when pin logic added */}
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
-					<PropertiesPanel properties={template?.properties || []} propertiesValues={ticket.properties} />
+					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
+								key={module.name}
 								module={module}
 								moduleValues={ticket.modules[module.name]}
 							/>

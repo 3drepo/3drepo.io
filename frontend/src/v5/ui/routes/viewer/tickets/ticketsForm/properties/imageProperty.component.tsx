@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { TextField } from '@mui/material';
+import { PropertyProps } from './properties.types';
 
-export const ImageProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
+export const ImageProperty = ({ property: { name, readOnly, required }, ...props }: PropertyProps) => (
 	<div>
         &nbsp;
-		<TextField label={property.name} value={value} disabled={property.readOnly} />
+		<TextField label={name} disabled={readOnly} required={required} {...props} />
 	</div>
 );

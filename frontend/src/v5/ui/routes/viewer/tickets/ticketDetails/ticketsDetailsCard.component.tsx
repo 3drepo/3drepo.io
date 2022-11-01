@@ -24,22 +24,23 @@ import { Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketDefaultValues, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import { omit } from 'lodash';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { CircleButton } from '@controls/circleButton';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
+import { Form } from '../newTicket/newTicket.styles';
 
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
-	const ticketForm = useForm();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const formData = useForm();
 
 	const goBack = () => {
 		setCardView(TicketsCardViews.List);
@@ -80,6 +81,7 @@ export const TicketDetailsCard = () => {
 			containerOrFederation,
 			newTicket,
 			isFederation,
+			() => {},
 		);
 	};
 
@@ -92,6 +94,10 @@ export const TicketDetailsCard = () => {
 			isFederation,
 		);
 	}, [ticketId]);
+
+	useEffect(() => {
+		formData.reset(getTicketDefaultValues(ticket));
+	}, [ticket.modules, ticket.properties]);
 
 	useEffect(() => {
 		if (!ticket) {
@@ -117,8 +123,10 @@ export const TicketDetailsCard = () => {
 					<CircleButton size="medium" variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
 				</HeaderButtons>
 			</CardHeader>
-			<FormProvider {...ticketForm}>
-				<TicketForm template={template} ticket={ticket} />
+			<FormProvider {...formData}>
+				<Form>
+					<TicketForm template={template} ticket={ticket} />
+				</Form>
 			</FormProvider>
 			<Button onClick={updateTicket}> Update Ticket! </Button>
 			<Button onClick={cloneTicket}> Clone Ticket!</Button>

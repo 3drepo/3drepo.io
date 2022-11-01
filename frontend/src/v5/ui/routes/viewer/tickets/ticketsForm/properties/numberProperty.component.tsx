@@ -14,13 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormNumberField } from '@controls/formNumberField/formNumberField.component';
+import { PropertyProps } from './properties.types';
 
-export const NumberProperty = ({
-	property: { name, readOnly, required },
-	value,
-}: { property: PropertyDefinition, value: any }) => (
-	<FormNumberField label={name} name={name} defaultValue={value} disabled={readOnly} required={required} />
+export const NumberProperty = ({ property: { name, readOnly, required }, ...props }: PropertyProps) => (
+	<FormNumberField label={name} disabled={readOnly} required={required} {...props} />
 );
