@@ -33,7 +33,7 @@ export const getTicketDefaultValues = ({ title, properties, modules }: ITicket) 
 	...modules,
 });
 
-export const filterNonEditablePropertiesFromTemplate = (template) => {
+export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;
 
 	return {
@@ -56,7 +56,7 @@ const templatePropertiesToTicketProperties = (properties = []) => (
 	)
 );
 
-export const getEditableTicketFromTemplate = (template: ITemplate): EditableTicket => {
+export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 	const properties = templatePropertiesToTicketProperties(template.properties);
 	const modules = (template.modules || []).reduce(
 		(ticketModules, { name, type, properties: moduleProperties }) => ({
@@ -68,6 +68,7 @@ export const getEditableTicketFromTemplate = (template: ITemplate): EditableTick
 	return ({
 		title: '',
 		type: template._id,
+		// props at root level other than title and type are skipped as they are not required
 		properties,
 		modules,
 	});
@@ -164,7 +165,7 @@ export const getTicketValidator = (template) => {
 			name: TITLE_INPUT_NAME,
 		}),
 	};
-	const editableTemplate = filterNonEditablePropertiesFromTemplate(template);
+	const editableTemplate = getEditableProperties(template);
 	validators.properties = propertiesValidator(editableTemplate.properties);
 	editableTemplate.modules.forEach(({ name, properties }) => { validators[name] = propertiesValidator(properties); });
 

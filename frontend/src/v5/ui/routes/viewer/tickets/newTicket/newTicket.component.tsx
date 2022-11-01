@@ -27,7 +27,7 @@ import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { Button } from '@controls/button';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyTicketValues, filterNonEditablePropertiesFromTemplate, getEditableTicketFromTemplate, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, Form, SaveButton } from './newTicket.styles';
@@ -108,8 +108,8 @@ export const NewTicketCard = () => {
 				<FormProvider {...formData}>
 					<Form onSubmit={formData.handleSubmit(onSubmit)}>
 						<TicketForm
-							template={filterNonEditablePropertiesFromTemplate(template)}
-							ticket={getEditableTicketFromTemplate(template)}
+							template={getEditableProperties(template)}
+							ticket={getDefaultTicket(template)}
 						/>
 						<BottomArea>
 							<SaveButton disabled={!formData.formState.isValid}>
