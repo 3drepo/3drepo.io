@@ -310,7 +310,7 @@ const establishRoutes = () => {
 	*         schema:
 	*           type: string
    	*       - name: member
-	*         description: name of teamspace member
+	*         description: username of teamspace member
 	*         in: path
 	*         required: true
 	*         schema:

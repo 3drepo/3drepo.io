@@ -81,21 +81,35 @@ const testMemberExists = () => {
 				{},
 				mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(1);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
 		});
 
-		test('should respond with not authorized if the member has no access', async () => {
+		test(`should respond with ${templates.unknown.code} if hasAccess throws an error`, async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { teamspace, member: adminUser } };
+			TeamspacesModel.hasAccessToTeamspace.mockRejectedValueOnce(new Error());
+
+			await Teamspaces.memberExists(req, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+		});
+
+		test(`should respond with ${templates.notAuthorized.code} if the member has no access`, async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace, member: nonTsMemberUser } };
 
 			await Teamspaces.memberExists(req, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
+			expect(mockCB).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, { ...templates.userNotFound, message: 'Teamspace member not found' });
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.userNotFound);
 		});
 	});
 };
