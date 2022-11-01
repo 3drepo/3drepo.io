@@ -20,7 +20,6 @@ const AadRoutes = require('./sso/aad');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const ContainerTicketsRoutes = require('./teamspaces/projects/containers/tickets');
 const ContainerViewsRoutes = require('./teamspaces/projects/containers/views');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const FederationGroupsRoutes = require('./teamspaces/projects/federations/groups');
@@ -48,7 +47,7 @@ RoutesManager.init = (app) => {
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/tickets', ContainerTicketsRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/groups', ContainerGroupsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/views', ContainerViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/revisions', ContainerRevisionRoutes);

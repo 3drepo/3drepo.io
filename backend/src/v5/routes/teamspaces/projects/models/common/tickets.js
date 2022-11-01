@@ -15,7 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update } = require('../../../../../processors/teamspaces/projects/models/federations');
+const {
+	addTicket: addConTicket,
+	getTicketById: getConTicketById,
+	getTicketList: getConTicketList,
+	getTicketResourceAsStream: getConTicketResourceAsStream,
+	updateTicket: updateConTicket,
+} = require('../../../../../processors/teamspaces/projects/models/containers');
+const {
+	addTicket: addFedTicket,
+	getTicketById: getFedTicketById,
+	getTicketList: getFedTicketList,
+	getTicketResourceAsStream: getFedTicketResourceAsStream,
+	updateTicket: updateFedTicket,
+} = require('../../../../../processors/teamspaces/projects/models/federations');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -31,9 +44,10 @@ const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../pr
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
 
-const createTicket = async (req, res) => {
+const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
+		const addTicket = isFed ? addFedTicket : addConTicket;
 		const _id = await addTicket(teamspace, project, model, req.templateData, req.body);
 
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
@@ -58,10 +72,11 @@ const getAllTemplates = async (req, res) => {
 	}
 };
 
-const getTicket = async (req, res, next) => {
+const getTicket = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model, ticket } = req.params;
 
 	try {
+		const getTicketById = isFed ? getFedTicketById : getConTicketById;
 		req.ticket = await getTicketById(teamspace, project, model, ticket);
 		req.showDeprecated = req.query.showDeprecated === 'true';
 
@@ -72,10 +87,11 @@ const getTicket = async (req, res, next) => {
 	}
 };
 
-const getTicketsInFederation = async (req, res, next) => {
+const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
 
 	try {
+		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 		req.tickets = await getTicketList(teamspace, project, model);
 		await next();
 	} catch (err) {
@@ -84,10 +100,12 @@ const getTicketsInFederation = async (req, res, next) => {
 	}
 };
 
-const getTicketResource = async (req, res) => {
+const getTicketResource = (isFed) => async (req, res) => {
 	const { teamspace, project, model, ticket, resource } = req.params;
 
 	try {
+		const getTicketResourceAsStream = isFed ? getFedTicketResourceAsStream : getConTicketResourceAsStream;
+
 		const { readStream, size, mimeType } = await getTicketResourceAsStream(
 			teamspace,
 			project,
@@ -103,7 +121,7 @@ const getTicketResource = async (req, res) => {
 	}
 };
 
-const updateTicket = async (req, res) => {
+const updateTicket = (isFed) => async (req, res) => {
 	const {
 		templateData: template,
 		ticketData: oldTicket,
@@ -114,6 +132,7 @@ const updateTicket = async (req, res) => {
 	const user = getUserFromSession(req.session);
 
 	try {
+		const update = isFed ? updateFedTicket : updateConTicket;
 		await update(teamspace, project, model, template, oldTicket, updatedTicket, user);
 
 		respond(req, res, templates.ok);
@@ -343,7 +362,7 @@ const establishRoutes = (isFed) => {
 	 *                   type: string
 	 *                   format: uuid
 	 */
-	router.post('/', hasCommenterAccess, validateNewTicket, createTicket);
+	router.post('/', hasCommenterAccess, validateNewTicket, createTicket(isFed));
 
 	/**
 	 * @openapi
@@ -419,7 +438,7 @@ const establishRoutes = (isFed) => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccess, getTicketsInFederation, serialiseTicketList);
+	router.get('/', hasReadAccess, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi
@@ -502,7 +521,7 @@ const establishRoutes = (isFed) => {
 	 *                   description: ticket modules and their properties
 	 *
 	 */
-	router.get('/:ticket', hasReadAccess, getTicket, serialiseTicket);
+	router.get('/:ticket', hasReadAccess, getTicket(isFed), serialiseTicket);
 
 	/**
 	 * @openapi
@@ -562,7 +581,7 @@ const establishRoutes = (isFed) => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:ticket/resources/:resource', hasReadAccess, getTicketResource);
+	router.get('/:ticket/resources/:resource', hasReadAccess, getTicketResource(isFed));
 
 	/**
 	 * @openapi
@@ -645,7 +664,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: ticket has been successfully updated
 	 */
-	router.patch('/:ticket', hasCommenterAccess, validateUpdateTicket, updateTicket);
+	router.patch('/:ticket', hasCommenterAccess, validateUpdateTicket, updateTicket(isFed));
 
 	return router;
 };
