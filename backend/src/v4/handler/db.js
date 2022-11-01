@@ -138,7 +138,7 @@
 	 * @param {object} sort
 	 * @returns {Promise<Array<Object>}
 	 */
-	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
+	Handler.find = async function (database, colName, query, projection = {}, sort = {}, limit) {
 		const collection = await Handler.getCollection(database, colName);
 		const options = { projection };
 
@@ -146,7 +146,9 @@
 			options.sort = sort;
 		}
 
-		return collection.find(query, options).toArray();
+		const cmd = collection.find(query, options);
+
+		return limit ? cmd.limit(limit).toArray() : cmd.toArray();
 	};
 
 	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
@@ -227,6 +229,11 @@
 				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
 			});
 		});
+	};
+
+	Handler.bulkWrite = async function (database, colName, instructions) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.bulkWrite(instructions);
 	};
 
 	Handler.insertMany = async function (database, colName, data) {
