@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
+import { PropertyProps } from './properties.types';
 
-export const OneOfProperty = ({
-	property: { name, readOnly, required, values },
-	value,
-}: { property: PropertyDefinition, value: any }) => (
-	<FormSelect defaultValue={value} label={name} name={name} disabled={readOnly} required={required}>
+export const OneOfProperty = ({ property: { name, readOnly, required, values }, ...props }: PropertyProps) => (
+	<FormSelect label={name} disabled={readOnly} required={required} {...props}>
 		{(values as string[]).map((propValue) => (
 			<MenuItem key={propValue} value={propValue}>
 				{propValue}

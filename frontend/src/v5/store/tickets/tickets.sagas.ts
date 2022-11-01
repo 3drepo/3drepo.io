@@ -128,13 +128,14 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 	}
 }
 
-export function* createTicket({ teamspace, projectId, modelId, ticket, isFederation }: CreateTicketAction) {
+export function* createTicket({ teamspace, projectId, modelId, ticket, isFederation, onSuccess }: CreateTicketAction) {
 	try {
 		const updateModelTicket = isFederation
 			? API.Tickets.createFederationTicket
 			: API.Tickets.createContainerTicket;
 		const { _id: ticketId } = yield updateModelTicket(teamspace, projectId, modelId, ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
+		onSuccess(ticketId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(

@@ -15,12 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { PropertyProps } from './properties.types';
 
-export const TextProperty = ({
-	property: { name, readOnly, required },
-	value,
-}: { property: Partial<PropertyDefinition>, value: any }) => (
-	<FormTextField label={name} name={name} defaultValue={value} disabled={readOnly} required={required} />
+export const TextProperty = ({ property: { name, readOnly, required }, ...props }: PropertyProps) => (
+	<FormTextField label={name} disabled={readOnly} required={required} {...props} />
 );

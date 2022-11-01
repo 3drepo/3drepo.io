@@ -27,6 +27,11 @@ describe('Tickets: sagas', () => {
 	const projectId = 'project';
 	const modelId = 'modelId';
 	const tickets = [ticketMockFactory()];
+	let onSuccess;
+
+	beforeEach(() => {
+		onSuccess = jest.fn();
+	})
 
 	describe('fetchTickets', () => {
 		describe('tickets', () => {
@@ -89,9 +94,11 @@ describe('Tickets: sagas', () => {
 					.reply(200, { _id });
 
 				await expectSaga(TicketsSaga.default)
-					.dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, false))
+					.dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, false, onSuccess))
 					.put(TicketsActions.upsertTicketSuccess(modelId, {_id, ...newticket}))
 					.silentRun();
+
+				expect(onSuccess).toHaveBeenCalledWith(_id);
 			})
 
 			// Federations
@@ -153,9 +160,11 @@ describe('Tickets: sagas', () => {
 					.reply(200, { _id });
 
 				await expectSaga(TicketsSaga.default)
-					.dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true))
+					.dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess))
 					.put(TicketsActions.upsertTicketSuccess(modelId, {_id, ...newticket}))
 					.silentRun();
+
+				expect(onSuccess).toHaveBeenCalledWith(_id);
 			})
 		})
 

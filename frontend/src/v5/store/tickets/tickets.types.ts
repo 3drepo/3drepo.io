@@ -27,17 +27,21 @@ export interface PropertyDefinition {
 	deprecated?: boolean;
 }
 
+type Property = Record<string, any>;
+
 export interface ITicket {
 	_id: string,
 	title: string,
 	number: number,
 	type: string,
-	properties: Record<string, any>,
-	modules?: Record<string, Record<string, any>>,
+	properties: Property,
+	modules?: Record<string, Property>,
 }
 
 export interface TemplateModule {
-	name: string;
+	// either one of the following 2
+	name?: string;
+	type?: string;
 	deprecated?: boolean;
 	properties: PropertyDefinition[];
 }
@@ -52,3 +56,4 @@ export interface ITemplate {
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;
+export type EditableTicket = Omit<NewTicket, 'number'>;

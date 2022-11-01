@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormToggle } from '@controls/formToggle/formToggle.component';
+import { PropertyProps } from './properties.types';
 
 export const BooleanProperty = ({
 	property: { name, readOnly, required },
-	value,
-}: { property: PropertyDefinition, value: any }) => (
-	<FormToggle name={name} defaultValue={value} disabled={readOnly} required={required}>{name}</FormToggle>
+	defaultValue = false,
+	...props
+}: PropertyProps) => (
+	<FormToggle disabled={readOnly} required={required} defaultValue={defaultValue} {...props}>{name}</FormToggle>
 );

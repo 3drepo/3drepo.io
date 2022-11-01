@@ -24,6 +24,7 @@ export const FormControlLabel = styled(FormControlLabelBase)`
 	justify-content: flex-end;
 	align-items: center;
 	margin: 0;
+	width: fit-content;
 	
 	.MuiSwitch-root {
 		margin-left: 7px;
