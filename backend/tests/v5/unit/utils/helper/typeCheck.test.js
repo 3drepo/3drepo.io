@@ -62,6 +62,8 @@ const testIsObject = () => {
 			[undefined, false],
 			[{}, true],
 			[{ a: 1, b: 'xyz' }, true],
+			[[], false],
+			[[1, 2, 3], false],
 		],
 	)('Is Object', (item, isTrue) => {
 		test(`${item} should return ${isTrue}`, () => {
