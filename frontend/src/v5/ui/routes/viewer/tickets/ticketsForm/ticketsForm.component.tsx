@@ -76,7 +76,7 @@ const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 
 export const TITLE_INPUT_NAME = 'title';
 
-export const TicketForm = ({ template, ticket } : { template: ITemplate, ticket: Partial<ITicket> }) => {
+export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>, ticket: Partial<ITicket> }) => {
 	const { formState } = useFormContext();
 	return (
 		<>
