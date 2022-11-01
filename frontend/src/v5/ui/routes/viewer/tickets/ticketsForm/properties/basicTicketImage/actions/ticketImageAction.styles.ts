@@ -55,8 +55,8 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 		transformOrigin: {
 			vertical: 'top',
 			horizontal: 'left',
-		}
-	}
+		},
+	},
 })`
 	${Menu} {
 		padding: 4px 0;

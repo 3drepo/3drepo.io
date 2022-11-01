@@ -24,16 +24,49 @@ import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuIt
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { isUndefined } from 'lodash';
 import { HiddenImageInput, HiddenInputContainer } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { getImageFromInputEvent } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
+// import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenu, Action, MenuItem, MenuItemDelete } from './ticketImageAction.styles';
 import { TicketImageActionContext } from './ticketImageActionContext';
-import { getImageFromInputEvent } from '../../../../../../../controls/hiddenImageUploader/hiddenImageUploader.component';
+
+type TicketImageActionProps = {
+	onImageChange?: any;
+	onClick?: any;
+	children: any;
+	disabled?: boolean;
+};
+export const TicketImageAction = ({
+	onImageChange,
+	onClick,
+	disabled:
+	disabledInput,
+	...props
+}: TicketImageActionProps) => {
+	const context = useContext(TicketImageActionContext);
+	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
+	const disabled = !isUndefined(disabledInput) ? disabledInput : !isAdmin;
+
+	const handleClick = (e) => {
+		if (!disabled) {
+			onClick?.(context);
+		} else {
+			e.preventDefault();
+			e.stopPropagation();
+		}
+	};
+
+	useEffect(() => {
+		if (isAdmin) (onImageChange?.(context));
+	}, [context.imgSrc]);
+
+	return (<Action onClick={handleClick} disabled={disabled} {...props} />);
+};
 
 export const GoToViewpointAction = () => (
-	<TicketImageAction disabled={false} onClick={() => console.log('Go to viewpoint')}>
+	<TicketImageAction disabled={false}>
 		<GoToViewpoinIcon />
 		<FormattedMessage id="viewer.card.ticket.viewpoint.action.goToViewpoint" defaultMessage="Go to viewpoint" />
 	</TicketImageAction>
@@ -44,7 +77,7 @@ export const ChangeViewPointAction = () => {
 
 	if (!viewPoint) {
 		return (
-			<TicketImageAction onClick={() => setViewPoint("viewpoint")}>
+			<TicketImageAction onClick={() => setViewPoint('viewpoint')}>
 				<AddViewpointIcon />
 				<FormattedMessage id="viewer.card.ticketImage.action.createViewpoint" defaultMessage="Create viewpoint" />
 			</TicketImageAction>
@@ -54,7 +87,7 @@ export const ChangeViewPointAction = () => {
 	return (
 		<ActionMenu>
 			<ActionMenuTriggerButton>
-				<TicketImageAction onClick={() => console.log('Change viewpoint')}>
+				<TicketImageAction>
 					<ChangeViewpointIcon />
 					<FormattedMessage id="viewer.card.ticketImage.action.changeViewpoint" defaultMessage="Change viewpoint" />
 				</TicketImageAction>
@@ -75,10 +108,10 @@ export const ChangeViewPointAction = () => {
 
 export const ChangeImageAction = () => {
 	const { imgSrc, setImgSrc } = useContext(TicketImageActionContext);
-	const [inputId, _] = useState(`${Math.random()}`);
-	
+	const inputId = useRef(`hidden-input-${new Date().getTime()}`);
+
 	const uploadImg = (event) => getImageFromInputEvent(event, setImgSrc);
-	
+
 	const uploadScreenshot = async () => {
 		// TODO - uncomment when component is no longer required in storybook
 		// const screenshot = await ViewerService.getScreenshot();
@@ -96,7 +129,7 @@ export const ChangeImageAction = () => {
 		}
 
 		return (
-			<TicketImageAction onClick={() => console.log('Change Image')}>
+			<TicketImageAction>
 				<EditImageIcon />
 				<FormattedMessage id="viewer.card.ticketImage.action.editImage" defaultMessage="Edit Image" />
 			</TicketImageAction>
@@ -105,7 +138,7 @@ export const ChangeImageAction = () => {
 
 	return (
 		<>
-			<HiddenImageInput onChange={uploadImg} id={inputId} />
+			<HiddenImageInput onChange={uploadImg} id={inputId.current} />
 			<ActionMenu>
 				<ActionMenuTriggerButton>
 					<TriggerButton />
@@ -114,7 +147,7 @@ export const ChangeImageAction = () => {
 					<MenuItem onClick={uploadScreenshot}>
 						<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />
 					</MenuItem>
-					<HiddenInputContainer htmlFor={inputId}>
+					<HiddenInputContainer htmlFor={inputId.current}>
 						<MenuItem>
 							<FormattedMessage id="viewer.card.ticketImage.action.uploadImagte" defaultMessage="Upload image" />
 						</MenuItem>
@@ -128,31 +161,4 @@ export const ChangeImageAction = () => {
 			</ActionMenu>
 		</>
 	);
-};
-
-type TicketImageActionProps = {
-	onImageChange?: any;
-	onClick?: any;
-	children: any;
-	disabled?: boolean;
-};
-export const TicketImageAction = ({ onImageChange, onClick, disabled: disabledInput, ...props }: TicketImageActionProps) => {
-	const context = useContext(TicketImageActionContext);
-	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const disabled = !isUndefined(disabledInput) ? disabledInput : !isAdmin
-
-	const handleClick = (e) => {
-		if (!disabled) {
-			onClick?.(context);
-		} else {
-			e.preventDefault();
-			e.stopPropagation();
-		}
-	}
-
-	useEffect(() => {
-		if (isAdmin) (onImageChange?.(context));
-	}, [context.imgSrc]);
-
-	return (<Action onClick={handleClick} disabled={disabled} {...props} />);
 };
