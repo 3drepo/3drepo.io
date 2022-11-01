@@ -40,9 +40,10 @@ const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
 type ActionMenuProps = {
 	className?: string;
 	children: ReactNode;
+	PopoverProps?: any;
 };
 
-export const ActionMenu = ({ className, children }: ActionMenuProps) => {
+export const ActionMenu = ({ className, children, PopoverProps }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
 	const handleClose = () => setAnchorEl(null);
@@ -77,6 +78,7 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 					vertical: 'top',
 					horizontal: 'center',
 				}}
+				{...PopoverProps}
 			>
 				<ClickAwayListener onClickAway={handleClose}>
 					<Menu>
