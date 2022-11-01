@@ -87,17 +87,18 @@ const testMemberExists = () => {
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
 		});
 
-		test(`should respond with ${templates.unknown.code} if hasAccess throws an error`, async () => {
+		test('should respond with error if hasAccess throws an error', async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace, member: adminUser } };
-			TeamspacesModel.hasAccessToTeamspace.mockRejectedValueOnce(new Error());
+			const err = new Error(generateRandomString());
+			TeamspacesModel.hasAccessToTeamspace.mockRejectedValueOnce(err);
 
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, err);
 		});
 
 		test(`should respond with ${templates.notAuthorized.code} if the member has no access`, async () => {
