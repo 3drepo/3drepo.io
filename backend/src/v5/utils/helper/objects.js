@@ -31,10 +31,11 @@ Objects.getNestedProperty = _.get;
 
 Objects.setNestedProperty = _.set;
 
-Objects.deleteIfUndefined = (obj) => {
+Objects.deleteIfUndefined = (obj, includeNull) => {
 	const res = { ...obj };
 	Object.keys(obj).forEach((key) => {
-		if (obj[key] === undefined) delete res[key];
+		const toDitch = obj[key] === undefined || (includeNull && obj[key] === null);
+		if (toDitch) delete res[key];
 	});
 
 	return res;

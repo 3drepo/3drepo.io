@@ -16,13 +16,16 @@
  */
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { createModelMessage, createProjectMessage } = require('../../chat');
-const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
+const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { addTicketLog } = require('../../../models/tickets.logs');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { getRevisionByIdOrTag } = require('../../../models/revisions');
+const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
+const { serialiseTicket } = require('../../../schemas/tickets');
+const { setNestedProperty } = require('../../../utils/helper/objects');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
@@ -76,8 +79,48 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 	await createModelMessage(event, {}, teamspace, project, model, sender);
 };
 
-const modelTicketUpdate = ({ teamspace, project, model, ticket, author, changes, timestamp }) => addTicketLog(teamspace,
-	project, model, ticket, { author, changes, timestamp });
+const modelTicketAdded = async ({ teamspace, project, model, ticket }) => {
+	const [isFed, template] = await Promise.all([
+		isFederationCheck(teamspace, model),
+		getTemplateById(teamspace, ticket.type),
+	]);
+	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+	const serialisedTicket = serialiseTicket(ticket, template);
+	await createModelMessage(event, serialisedTicket, teamspace, project, model);
+};
+
+const constructUpdatedObject = (changes) => {
+	const { modules = {}, properties, ...rootProps } = changes;
+	const updateData = {};
+	const determineUpdateData = (obj = {}, prefix = '') => {
+		Object.keys(obj).forEach((key) => {
+			const updateObjProp = `${prefix}${key}`;
+			const newValue = obj[key].to;
+			setNestedProperty(updateData, `${updateObjProp}`, newValue);
+		});
+	};
+
+	determineUpdateData(rootProps);
+	determineUpdateData(properties, 'properties.');
+	Object.keys(modules).forEach((mod) => {
+		determineUpdateData(modules[mod], `modules.${mod}.`);
+	});
+
+	return updateData;
+};
+
+const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, changes, timestamp }) => {
+	const [isFed, template] = await Promise.all([
+		isFederationCheck(teamspace, model),
+		getTemplateById(teamspace, ticket.type),
+		addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp }),
+	]);
+
+	const updateData = constructUpdatedObject(changes);
+	const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
+	const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, template);
+	await createModelMessage(event, serialisedTicket, teamspace, project, model);
+};
 
 const ModelEventsListener = {};
 
@@ -90,7 +133,8 @@ ModelEventsListener.init = () => {
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
-	subscribe(events.MODEL_TICKET_UPDATE, modelTicketUpdate);
+	subscribe(events.NEW_TICKET, modelTicketAdded);
+	subscribe(events.UPDATE_TICKET, modelTicketUpdated);
 };
 
 module.exports = ModelEventsListener;

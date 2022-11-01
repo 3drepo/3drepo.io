@@ -22,7 +22,9 @@ const TypeChecker = {};
 
 TypeChecker.isArray = Array.isArray;
 TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
+TypeChecker.isDate = _.isDate;
 TypeChecker.isString = (value) => _.isString(value);
+TypeChecker.isObject = (value) => _.isObject(value) && !TypeChecker.isArray(value);
 TypeChecker.isNumber = (value) => _.isNumber(value);
 TypeChecker.isObject = (value) => _.isObject(value);
 TypeChecker.isUUIDString = (uuid) => {

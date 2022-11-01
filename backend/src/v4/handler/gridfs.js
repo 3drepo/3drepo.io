@@ -44,17 +44,15 @@ class GridFSHandler {
 		));
 	}
 
-	removeFiles(teamspace, col, keys) {
-		return Promise.all(
-			keys.map(async (key) => {
-				const collection = cleanColName(col);
-				const gridFSRef = await DB.findOneAndDelete(teamspace, `${collection}.files`,
-					{ filename: key}, { _id: 1 });
-				if (gridFSRef) {
-					await DB.deleteMany(teamspace, `${collection}.chunks`, { files_id: gridFSRef._id });
-				}
-			})
-		);
+	async removeFiles(teamspace, col, keys) {
+		const collection = cleanColName(col);
+		const res = await DB.find(teamspace, `${collection}.files`, { filename: {$in: keys}}, {_id: 1});
+		const ids = res.map(({_id}) => _id);
+		const query = {$in: ids};
+		return Promise.all([
+			DB.deleteMany(teamspace, `${collection}.files`, { _id: query}),
+			DB.deleteMany(teamspace, `${collection}.chunks`, { files_id: query })
+		]);
 	}
 
 }
