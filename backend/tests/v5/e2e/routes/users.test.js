@@ -25,6 +25,9 @@ const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
+jest.mock('../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+
 let testSession;
 let server;
 let agent;
@@ -533,26 +536,31 @@ const testForgotPassword = () => {
 		test('should not send email but return ok if user is an SSO user', async () => {
 			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })
 				.expect(templates.ok.status);
+			expect(Mailer.sendEmail).not.toHaveBeenCalled();
 		});
 
 		test('should return ok even if user does not exist', async () => {
 			await agent.post('/v5/user/password').send({ user: 'non existing user' })
 				.expect(templates.ok.status);
+			expect(Mailer.sendEmail).not.toHaveBeenCalled();
 		});
 
 		test('should send forgot password email with valid username', async () => {
 			await agent.post('/v5/user/password').send({ user: testUser.user })
 				.expect(templates.ok.status);
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 		});
 
 		test('should send forgot password email with valid email', async () => {
 			await agent.post('/v5/user/password').send({ user: userEmail })
 				.expect(templates.ok.status);
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 		});
 
 		test('should send forgot password email with valid email in upper case', async () => {
 			await agent.post('/v5/user/password').send({ user: userEmail.toUpperCase() })
 				.expect(templates.ok.status);
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 		});
 	});
 };

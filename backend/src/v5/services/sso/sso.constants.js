@@ -27,6 +27,7 @@ SsoConstants.errorCodes = {
 	nonSsoUser: 3,
 	userNotFound: 4,
 	alreadyLoggedin: 5,
+	failedToFetchDetails: 6,
 };
 
 module.exports = SsoConstants;

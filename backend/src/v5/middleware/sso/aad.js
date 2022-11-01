@@ -57,16 +57,15 @@ const authenticate = (redirectUri) => async (req, res) => {
 };
 
 Aad.verifyNewUserDetails = async (req, res, next) => {
-	try {
-		const state = JSON.parse(req.query.state);
+	const state = JSON.parse(req.query.state);
 
+	try {		
 		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByEmail(mail, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
-			const errorCode = user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
-			redirectWithError(res, state.redirectUri, errorCode);
+			throw user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
 		} else {
 			req.body = {
 				...state,
@@ -77,47 +76,56 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 			};
 
 			delete req.body.redirectUri;
-
 			await next();
 		}
-	} catch (err) {
-		logger.logError(`Failed to validate user details for SSO sign up: ${err.message}`);
-		respond(req, res, templates.unknown);
+	} catch (errorCode) {
+		redirectWithError(res, state.redirectUri, errorCode);
 	}
 };
 
 Aad.redirectToStateURL = (req, res) => {
-	try {
-		res.redirect(JSON.parse(req.query.state).redirectUri);
+	const state = JSON.parse(req.query.state);
+	try {		
+		res.redirect(state.redirectUri);
 	} catch (err) {
-		logger.logError(`Failed to parse and redirect user back to the specified URL: ${err.message}`);
+		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
 		respond(req, res, templates.unknown);
 	}
 };
+
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
-Aad.hasAssociatedAccount = async (req, res, next) => {
-	try {
-		const state = JSON.parse(req.query.state);
+Aad.hasAssociatedAccount = async (req, res, next) => {	
+	const state = JSON.parse(req.query.state);
 
+	try {		
 		const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
 			req.session.pkceCodes?.verifier);
 
-		try {
-			const { user, customData: { sso } } = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso': 1 });
+		const { user, customData: { sso } } = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso': 1 });
 
-			if (sso?.id !== id) {
-				redirectWithError(res, state.redirectUri, errorCodes.nonSsoUser);
-			} else {				
-				req.body.user = user;
-				
-				await next();
-			}
-		} catch {
-			redirectWithError(res, state.redirectUri, errorCodes.userNotFound);
+		if (sso?.id !== id) {
+			throw errorCodes.nonSsoUser;
+		} else {				
+			req.body.user = user;			
+			await next();
 		}
 	} catch (err) {
-		logger.logError(`Failed to fetch user details from Microsoft API: ${err.message}`);
+		let errorCode = err;		
+
+		if (errorCode === templates.userNotFound)
+			errorCode = errorCodes.userNotFound;
+
+		redirectWithError(res, state.redirectUri, errorCode);
+	}
+};
+
+Aad.checkStateIsValid = async (req, res, next) => {	
+	try {		
+		JSON.parse(req.query.state);
+		await next();
+	} catch (err) {
+		logger.logError('Failed to parse req.query.state');
 		respond(req, res, templates.unknown);
 	}
 };

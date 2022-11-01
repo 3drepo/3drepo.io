@@ -76,12 +76,6 @@ const testAuthenticate = () => {
 
 const testAuthenticatePost = () => {
 	describe('Authenticate Post', () => {
-		test('should fail if state is not provided', async () => {
-			const res = await agent.get('/v5/sso/aad/authenticate-post')
-				.expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
-		});
-
 		test(`should redirect with ${errorCodes.userNotFound} if user does not exist`, async () => {
 			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
@@ -98,6 +92,15 @@ const testAuthenticatePost = () => {
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.nonSsoUser}`);
+		});
+
+		test(`should retain a query param in the redirectUri if it redirects with error`, async () => {
+			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
+			const state = { redirectUri: `${generateRandomURL()}?queryParam=someValue` };
+			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+				.expect(302);
+			expect(res.headers.location).toEqual(`${state.redirectUri}&error=${errorCodes.userNotFound}`);
 		});
 
 		test('should fail if the user is already logged in', async () => {
@@ -211,12 +214,6 @@ const signupPost = () => {
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
 			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExistsWithSSO.toString());
-		});
-
-		test('should fail if state is not provided', async () => {
-			const res = await agent.get('/v5/sso/aad/signup-post')
-				.expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 
 		test('should sign a new user up and set them to active', async () => {

@@ -27,6 +27,7 @@ const WebRequests = require(`${src}/utils/webRequests`);
 
 jest.mock('@azure/msal-node');
 const msal = require('@azure/msal-node');
+const { errorCodes } = require('../../../../../../src/v5/services/sso/sso.constants');
 
 const { msGraphUserDetailsUri } = require(`${src}/services/sso/aad/aad.constants`);
 
@@ -122,6 +123,21 @@ const testGetUserDetails = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(msGraphUserDetailsUri, { Authorization: `Bearer ${accessToken}` });
 
+			config.sso = initialConfig;
+		});
+
+		test(`should throw ${errorCodes.failedToFetchDetails} if it fails to fetch user details`, async () => {
+			const initialConfig = config.sso;
+			config.sso = {
+				aad: {
+					clientId: generateRandomString(),
+					clientSecret: generateRandomString(),
+				},
+			};
+			
+			await expect(Aad.getUserDetails(generateRandomString(),
+				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.failedToFetchDetails);
+			
 			config.sso = initialConfig;
 		});
 	});
