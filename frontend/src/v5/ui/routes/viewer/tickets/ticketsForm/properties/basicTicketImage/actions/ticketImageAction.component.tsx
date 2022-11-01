@@ -16,7 +16,7 @@
  */
 
 import GoToViewpoinIcon from '@assets/icons/outlined/target-outlined.svg';
-import AddViewpointIcon from '@assets/icons/outlined/add_circle-outlined';
+import AddViewpointIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import ChangeViewpointIcon from '@assets/icons/outlined/rotate_arrow-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { ActionMenuTriggerButton } from '@controls/actionMenu';
@@ -149,7 +149,7 @@ export const ChangeImageAction = () => {
 					</MenuItem>
 					<HiddenInputContainer htmlFor={inputId.current}>
 						<MenuItem>
-							<FormattedMessage id="viewer.card.ticketImage.action.uploadImagte" defaultMessage="Upload image" />
+							<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />
 						</MenuItem>
 					</HiddenInputContainer>
 					{imgSrc && (
