@@ -88,7 +88,6 @@ export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
 				/>
-				<PinDetails /> {/* conditionally render this when pin logic added */}
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
