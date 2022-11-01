@@ -17,4 +17,12 @@
 
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const FormNumberField = (props) => (<FormTextField type="number" {...props} />);
+export const FormNumberField = (props) => {
+	const handleKeyDown = (event) => {
+		if (event.key === 'e') {
+			event.preventDefault();
+		}
+	};
+
+	return (<FormTextField type="number" onKeyDown={handleKeyDown} {...props} />);
+};
