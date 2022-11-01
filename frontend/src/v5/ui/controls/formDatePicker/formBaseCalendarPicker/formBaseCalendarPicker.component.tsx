@@ -39,7 +39,6 @@ export const FormBaseCalendarPicker = ({
 	...props
 }: FormBaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(defaultValue ? dayjs(defaultValue) : null);
 
 	const handleClick = (e) => {
 		e.preventDefault();
@@ -50,8 +49,8 @@ export const FormBaseCalendarPicker = ({
 		<Controller
 			control={control}
 			name={name}
-			defaultValue={value}
-			render={({ field: { onChange, ...field } }) => (
+			defaultValue={defaultValue ? dayjs(defaultValue) : null}
+			render={({ field }) => (
 				<PickerComponent
 					{...field}
 					{...props}
@@ -59,8 +58,6 @@ export const FormBaseCalendarPicker = ({
 					onClose={() => setOpen(false)}
 					open={open}
 					disabled={disabled}
-					value={value}
-					onChange={(e: any) => { onChange(e); setValue(e); }}
 					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
 					disableHighlightToday
 					renderInput={({ ref, inputRef, ...textFieldProps }) => (
