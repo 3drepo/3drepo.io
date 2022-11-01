@@ -167,7 +167,13 @@ export const getTicketValidator = (template) => {
 	};
 	const editableTemplate = getEditableProperties(template);
 	validators.properties = propertiesValidator(editableTemplate.properties);
-	editableTemplate.modules.forEach(({ name, properties }) => { validators[name] = propertiesValidator(properties); });
+
+	const modulesValidators = {};
+	editableTemplate.modules.forEach(({ name, properties }) => {
+		modulesValidators[name] = propertiesValidator(properties);
+	});
+
+	validators.modules = Yup.object().shape(modulesValidators);
 
 	return Yup.object().shape(validators);
 };

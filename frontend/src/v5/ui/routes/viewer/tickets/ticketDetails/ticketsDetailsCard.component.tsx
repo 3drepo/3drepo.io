@@ -27,7 +27,7 @@ import { getValidators, modelIsFederation, TITLE_INPUT_NAME } from '@/v5/store/t
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { debounce, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
 
@@ -69,12 +69,12 @@ const filterErrors = (values, errors) => {
 	return fields;
 };
 
-const updateTicket = debounce((teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
+const updateTicket = (teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
 	const values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
 
 	const validVals = filterErrors(values, formData.formState.errors);
 
-	if (isEmpty(values) || !formData.formState.isDirty) return;
+	if (isEmpty(validVals)) return;
 
 	// console.log(JSON.stringify(values, null, '\t'));
 
@@ -86,7 +86,7 @@ const updateTicket = debounce((teamspace, project, containerOrFederation, ticket
 		validVals,
 		isFederation,
 	);
-}, 500);
+};
 
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
@@ -142,9 +142,9 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		formData.reset(ticket);
-	}, [ticket.modules, ticket.properties]);
+	}, [ticket]);
 
-	useEffect(() => {
+	const onBlurHandler = () => {
 		updateTicket(
 			teamspace,
 			project,
@@ -153,8 +153,7 @@ export const TicketDetailsCard = () => {
 			isFederation,
 			formData,
 		);
-	},
-	[JSON.stringify(formData.getValues())]);
+	};
 
 	return (
 		<CardContainer>
@@ -167,7 +166,7 @@ export const TicketDetailsCard = () => {
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...formData}>
-				<TicketForm template={template} ticket={ticket} />
+				<TicketForm template={template} ticket={ticket} onBlur={onBlurHandler} />
 			</FormProvider>
 		</CardContainer>
 	);
