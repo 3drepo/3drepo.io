@@ -27,8 +27,9 @@ import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { Avatar } from '@controls/avatar';
-import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
+import { ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
 import {
+	ActionMenu,
 	AvatarContainer,
 	AvatarSection,
 	UserFullName,

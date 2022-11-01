@@ -34,5 +34,4 @@ export const ActionMenuTriggerButton = styled.div.attrs({
 export const Menu = styled.div`
 	display: flex;
 	flex-direction: column;
-	width: 230px;
 `;
