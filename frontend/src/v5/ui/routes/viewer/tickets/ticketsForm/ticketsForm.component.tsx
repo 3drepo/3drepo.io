@@ -21,6 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
+import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, FormTitle, PanelsContainer } from './ticketsForm.styles';
@@ -90,6 +91,7 @@ export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>
 						defaultMessage: 'Ticket name',
 					})}
 				/>
+				<PinDetails /> {/* conditionally render this when pin logic added */}
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
