@@ -20,19 +20,13 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federati
 import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
-import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
+import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
 
 export const TITLE_INPUT_NAME = 'title';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
-
-export const getTicketDefaultValues = ({ title, properties, modules }: ITicket) => ({
-	title,
-	properties,
-	...modules,
-});
 
 export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;

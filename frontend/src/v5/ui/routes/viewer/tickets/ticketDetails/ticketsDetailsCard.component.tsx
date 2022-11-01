@@ -76,8 +76,6 @@ const updateTicket = (teamspace, project, containerOrFederation, ticketId, isFed
 
 	if (isEmpty(validVals)) return;
 
-	// console.log(JSON.stringify(values, null, '\t'));
-
 	TicketsActionsDispatchers.updateTicket(
 		teamspace,
 		project,

@@ -60,13 +60,8 @@ export const NewTicketCard = () => {
 		contextValue.setCardView(TicketsCardViews.Templates);
 	};
 
-	const onSubmit = ({ title, properties, ...modules }) => {
-		const ticket = {
-			type: template._id,
-			title,
-			properties,
-			modules,
-		};
+	const onSubmit = (vals) => {
+		const ticket = { type: template._id, ...vals };
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
