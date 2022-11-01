@@ -99,16 +99,9 @@ const processModelStash = async (teamspace, model, revId) => {
 
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: revId, type: 'mesh' }, { _id: 1 })).map((r) => UUIDToString(r._id));
 	supermeshIds.map((supermeshId) => {
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: { $in: [
-			`${supermeshId}.json.mpc`,
-			`${supermeshId}_unity.json.mpc`,
-		] } }));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: { $in: [
-			`${supermeshId}.src.mpc`,
-		] } }));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: { $in: [
-			`${supermeshId}.unity3d`,
-		] } }));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: { $regex: supermeshId } }));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: { $regex: supermeshId } }));
+		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: { $regex: supermeshId } }));
 
 		return supermeshId;
 	});
@@ -122,6 +115,7 @@ const processModelStash = async (teamspace, model, revId) => {
 const processModelSequences = async (teamspace, model, revId) => {
 	const sequences = await find(teamspace, `${model}.sequences`, { rev_id: revId }, { frames: 1 });
 	const stateFilenames = [];
+	const sequenceIds = [];
 
 	for (const { _id, frames } of sequences) {
 		if (frames) {
@@ -130,13 +124,13 @@ const processModelSequences = async (teamspace, model, revId) => {
 			}
 		}
 
-		// TODO
-		// eslint-disable-next-line no-await-in-loop
-		await Promise.all([
-			removeRecords(teamspace, `${model}.activities`, { sequenceId: _id }, '_extRef'),
-			processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: UUIDToString(_id) }),
-		]);
+		sequenceIds.push(_id);
 	}
+
+	await Promise.all([
+		removeRecords(teamspace, `${model}.activities`, { sequenceId: { $in: sequenceIds } }, '_extRef'),
+		processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map((id) => UUIDToString(id)) } }),
+	]);
 
 	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: stateFilenames } });
 
