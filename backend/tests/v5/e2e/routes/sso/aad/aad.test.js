@@ -82,7 +82,7 @@ const testAuthenticatePost = () => {
 			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 
-		test('should redirect and add error to the query if user does not exist', async () => {
+		test(`should redirect with ${errorCodes.userNotFound} if user does not exist`, async () => {
 			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
@@ -91,7 +91,7 @@ const testAuthenticatePost = () => {
 			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.userNotFound}`);
 		});
 
-		test('should redirect and add error to the query if user is a non SSO user', async () => {
+		test(`should redirect with ${errorCodes.nonSsoUser} if user is a non SSO user`, async () => {
 			const userDataFromAad = { mail: userEmail, id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
@@ -109,8 +109,8 @@ const testAuthenticatePost = () => {
 				.expect(302);
 
 			const res = await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
-				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.alreadyLoggedin}`);
+				.expect(templates.alreadyLoggedIn.status);
+			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
 		});
 
 		test('should redirect the user to the redirectUri provided', async () => {
@@ -226,7 +226,7 @@ const signupPost = () => {
 				.expect(302);
 
 			// ensure user is created and is active
-			const user = await getUserByUsername(newUserData.username, { _id: 1, customData: 1 });
+			const user = await getUserByUsername(newUserData.username, { _id: 1, 'customData.inactive': 1 });
 			expect(user.customData.inactive).toBeUndefined();
 		});
 	});

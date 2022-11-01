@@ -251,6 +251,7 @@ const testSignUp = () => {
 				firstName: newUserData.firstName,
 				username: newUserData.username,
 			});
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 
 		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {

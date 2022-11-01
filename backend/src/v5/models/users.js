@@ -16,7 +16,6 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { deleteIfFalse, deleteIfUndefined } = require('../utils/helper/objects');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
@@ -31,7 +30,7 @@ const COLL_NAME = 'system.users';
 const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
 const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
 
-User.recordSuccessfulAuthAttempt = async (user) => {
+const recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
 
 	await updateUser(user, {
@@ -104,7 +103,7 @@ User.authenticate = async (user, password) => {
 		throw err;
 	}
 
-	return User.recordSuccessfulAuthAttempt(user);
+	return recordSuccessfulAuthAttempt(user);
 };
 
 User.getUserByQuery = async (query, projection) => {
@@ -225,8 +224,7 @@ User.addUser = async (newUserData) => {
 			},
 		},
 		permissions: [],
-		...deleteIfUndefined({ sso: newUserData.sso }),
-		...deleteIfFalse({ inactive: !newUserData.sso }),
+		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true } ),		
 	};
 
 	if (!newUserData.sso) {

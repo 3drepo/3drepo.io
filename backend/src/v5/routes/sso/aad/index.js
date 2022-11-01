@@ -20,7 +20,7 @@ const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEnd
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { createSessionSso } = require('../../../middleware/sessions');
-const { notLoggedInSso } = require('../../../middleware/auth');
+const { notLoggedIn } = require('../../../middleware/auth');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 
@@ -56,7 +56,7 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, notLoggedInSso, hasAssociatedAccount,
+	router.get(authenticateRedirectEndpoint, notLoggedIn, hasAssociatedAccount,
 		createSessionSso, redirectToStateURL);
 
 	/**

@@ -41,13 +41,4 @@ Objects.deleteIfUndefined = (obj, includeNull) => {
 	return res;
 };
 
-Objects.deleteIfFalse = (obj) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		if (obj[key] === false) delete res[key];
-	});
-
-	return res;
-};
-
 module.exports = Objects;

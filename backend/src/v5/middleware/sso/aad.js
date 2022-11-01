@@ -110,7 +110,6 @@ Aad.hasAssociatedAccount = async (req, res, next) => {
 				redirectWithError(res, state.redirectUri, errorCodes.nonSsoUser);
 			} else {				
 				req.body.user = user;
-				req.loginData = await recordSuccessfulAuthAttempt(user);			
 				
 				await next();
 			}

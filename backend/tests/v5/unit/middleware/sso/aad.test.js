@@ -238,7 +238,7 @@ const testHasAssociatedAccount = () => {
 		test(`should respond with ${templates.unknown.code} if state is empty`, async () => {
 			const reqWithNoState = { ...req, query: { code: generateRandomString() } };
 
-			await Aad.testHasAssociatedAccount(reqWithNoState, res, mockCB);
+			await Aad.hasAssociatedAccount(reqWithNoState, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -247,7 +247,7 @@ const testHasAssociatedAccount = () => {
 
 		test(`should respond with ${templates.unknown.code} if getUserDetails fails`, async () => {
 			AadServices.getUserDetails.mockRejectedValueOnce(new Error());
-			await Aad.testHasAssociatedAccount(req, res, mockCB);
+			await Aad.hasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -257,7 +257,7 @@ const testHasAssociatedAccount = () => {
 		test(`should redirect with ${errorCodes.userNotFound} if user does not exist`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
-			await Aad.testHasAssociatedAccount(req, res, mockCB);
+			await Aad.hasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
@@ -267,7 +267,7 @@ const testHasAssociatedAccount = () => {
 		test(`should redirect with ${errorCodes.nonSsoUser} if user is a non SSO user`, async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
-			await Aad.testHasAssociatedAccount(req, res, mockCB);
+			await Aad.hasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
@@ -277,16 +277,12 @@ const testHasAssociatedAccount = () => {
 		test('should set req loginData and call next if MS user is linked to 3D repo ', async () => {
 			const user = generateRandomString();
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } }, user });			
-			const loginData = { [generateRandomString()]: generateRandomString() };
-			UsersModel.recordSuccessfulAuthAttempt.mockResolvedValueOnce(loginData);
-			await Aad.testHasAssociatedAccount(req, res, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);			
-			expect(UsersModel.recordSuccessfulAuthAttempt).toHaveBeenCalledTimes(1);
-			expect(UsersModel.recordSuccessfulAuthAttempt).toHaveBeenCalledWith(user);
+			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } }, user });						
+			await Aad.hasAssociatedAccount(req, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);	
+			expect(req.body.user).toEqual(user);		
 			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(res.redirect).not.toHaveBeenCalled();
-			expect(req.loginData).toEqual(loginData);
+			expect(res.redirect).not.toHaveBeenCalled();			
 		});
 	});
 };
