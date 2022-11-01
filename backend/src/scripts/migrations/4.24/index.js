@@ -21,12 +21,6 @@ const removeCurrentIds = require('./removeCurrentIds');
 const updateMetaSchema = require('./updateMetadataSchema');
 const addIndex = require('./addIndices');
 
-const { v5Path } = require('../../../interop');
-
-const { logger } = require(`${v5Path}/utils/logger`);
-
-logger.logWarning('This migration changes the schema of the scene graph. Please ensure there are no active bouncer processes');
-
 const scripts = [
 	{ script: removeIndex, desc: 'Remove deprecated index' },
 	{ script: addRevId, desc: 'Add revision id to all scene nodes' },

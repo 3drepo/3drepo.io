@@ -112,7 +112,7 @@ export const TicketDetailsCard = () => {
 			isFederation,
 		);
 	}, [ticket?.type]);
-
+	if (!ticket) return <></>;
 	return (
 		<CardContainer>
 			<CardHeader>

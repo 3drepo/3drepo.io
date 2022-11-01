@@ -26,6 +26,8 @@ const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
+const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspaceModel = require(`${src}/models/teamspaces`);
 
@@ -142,7 +144,8 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 				const outData = ({
 					...fullData,
 					properties: moduleProperty ? {} : propObjOut,
-					modules: moduleProperty && output ? { [modName]: propObjOut } : {},
+					modules: moduleProperty && output
+						? deleteIfUndefined({ [modName]: isEqual(propObjOut, {}) ? undefined : propObjOut }) : {},
 				});
 
 				await expect(TicketSchema.validateTicket(teamspace, template, fullData, oldTicket))
@@ -356,6 +359,154 @@ const testValidateTicket = () => {
 			};
 			await expect(TicketSchema.validateTicket(teamspace, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		describe('Composite Types', () => {
+			test('Should remove the composite property if it is empty', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					properties: {
+						[propName]: {},
+					},
+				};
+
+				const oldTicket = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							camera: {
+								type: 'perspective',
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+						},
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.resolves.toEqual({ ...input, properties: {}, modules: {} });
+			});
+
+			test('Should remove composite property we are trying to set it to null when it\'s already empty', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					properties: {
+						[propName]: { camera: null },
+					},
+				};
+
+				const oldTicket = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.resolves.toEqual({ ...input, properties: {}, modules: {} });
+			});
+
+			test('Should remove the property if it will be the same after default values', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					properties: {
+						[propName]: {
+							camera: {
+
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+						},
+					},
+				};
+
+				const oldTicket = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							camera: {
+								type: 'perspective',
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+						},
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.resolves.toEqual({ ...input, properties: {}, modules: {} });
+			});
+
+			test('Should remove the composite property if it is the same as before', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					properties: {
+						[propName]: {
+							camera: {
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+						},
+					},
+				};
+
+				const oldTicket = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							camera: {
+								type: 'perspective',
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+						},
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.resolves.toEqual({ ...input, properties: {}, modules: {} });
+			});
 		});
 
 		testPresetValues();

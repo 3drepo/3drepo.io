@@ -19,7 +19,7 @@ const Path = require('path');
 
 const { v5Path } = require('../../../interop');
 
-const { getTeamspaceList } = require('../../common/utils');
+const { getTeamspaceList } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceListByUser, removeTeamspaceMember, removeTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
