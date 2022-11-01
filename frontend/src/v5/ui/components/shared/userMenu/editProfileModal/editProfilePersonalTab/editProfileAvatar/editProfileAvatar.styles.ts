@@ -19,9 +19,9 @@ import UserIconBase from '@assets/icons/filled/user-filled.svg';
 import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
-import { clientConfigService } from '@/v4/services/clientConfig';
 import { Button } from '@controls/button';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
+import { HiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -84,7 +84,6 @@ export const AvatarButton = styled(Button).attrs({
 `;
 
 const AVATAR_ID = 'avatar';
-
 export const AvatarLabel = styled.label.attrs({
 	htmlFor: AVATAR_ID,
 })`
@@ -92,13 +91,9 @@ export const AvatarLabel = styled.label.attrs({
 	padding: 10px 15px;
 `;
 
-export const AvatarInput = styled.input.attrs({
-	type: 'file',
-	accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
+export const AvatarInput = styled(HiddenImageInput).attrs({
 	id: AVATAR_ID,
-})`
-	display: none;
-`;
+})``;
 
 export const ErrorMessage = styled(ErrorMessageBase)`
 	margin-top: 10px;
