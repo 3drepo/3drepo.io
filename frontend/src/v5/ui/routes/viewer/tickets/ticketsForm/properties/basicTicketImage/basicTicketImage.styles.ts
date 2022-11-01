@@ -73,7 +73,7 @@ export const OverlappingContainer = styled.div`
 `;
 
 export const Image = styled.img`
-    object-fit: cover;
+	object-fit: cover;
 	height: 100%;
 	width: 100%;
 `;
