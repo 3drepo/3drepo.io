@@ -37,7 +37,6 @@ export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;
 
 	return {
-		...template,
 		properties: (template.properties || []).filter(propertyIsEditable),
 		modules: (template.modules || []).map((module) => ({
 			...module,
