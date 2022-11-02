@@ -21,6 +21,8 @@ import BrokenImageIcon from '@assets/icons/outlined/broken-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { HiddenImageUploader } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { formatMessage } from '@/v5/services/intl';
+import { validateImg } from '@controls/hiddenImageUploader/Image.helper';
 import {
 	ActionsList,
 	ActionsSide,
@@ -35,8 +37,6 @@ import {
 	PropertyName,
 } from './basicTicketImage.styles';
 import { TicketImageActionContext } from './actions/ticketImageActionContext';
-import { formatMessage } from '@/v5/services/intl';
-import { validateImg } from '@controls/hiddenImageUploader/Image.helper';
 
 const TicketImage = ({ imgIsInvalid }) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
@@ -77,7 +77,7 @@ const TicketImage = ({ imgIsInvalid }) => {
 
 	return (
 		<OverlappingContainer>
-			<Image 
+			<Image
 				src={imgSrc}
 				alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
 				onChange={setImgSrc}
@@ -123,11 +123,11 @@ export const BasicTicketImage = ({
 		setImgIsInvalid(true);
 	};
 
-	const setImgSrc = (imgSrc) => {
-		if (!imgSrc) {
+	const setImgSrc = (newImgSrc) => {
+		if (!newImgSrc) {
 			setImgSrcUnsafe(null);
 		} else {
-			validateImg(imgSrc, onImgUploadSuccess, onImgUploadFail);
+			validateImg(newImgSrc, onImgUploadSuccess, onImgUploadFail);
 		}
 	};
 
@@ -145,9 +145,9 @@ export const BasicTicketImage = ({
 			<TicketImageActionContext.Provider value={contextValue}>
 				<ActionsSide>
 					<PropertyName>{title}</PropertyName>
-						<ActionsList>
-							{children}
-						</ActionsList>
+					<ActionsList>
+						{children}
+					</ActionsList>
 				</ActionsSide>
 				<ImageSide>
 					<TicketImage imgIsInvalid={imgIsInvalid} />

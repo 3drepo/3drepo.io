@@ -27,10 +27,10 @@ import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { useContext, useEffect, useRef } from 'react';
 import { isUndefined } from 'lodash';
 import { HiddenInputContainer } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
+import { HiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
 // import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenu, Action, MenuItem, MenuItemDelete } from './ticketImageAction.styles';
 import { TicketImageActionContext } from './ticketImageActionContext';
-import { HiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
 
 type TicketImageActionProps = {
 	onImageChange?: any;

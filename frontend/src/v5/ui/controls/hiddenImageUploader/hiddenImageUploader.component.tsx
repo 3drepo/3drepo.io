@@ -24,7 +24,7 @@ export const HiddenImageInput = ({ onChange, ...props }) => {
 		onChange(imgSrc);
 	};
 
-	return  (<BasicHiddenImageInput onChange={uploadImage} {...props} />);
+	return (<BasicHiddenImageInput onChange={uploadImage} {...props} />);
 };
 
 type HiddenImageUploaderProps = {

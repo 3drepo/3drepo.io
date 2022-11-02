@@ -20,14 +20,14 @@ import { ChangeEvent } from 'react';
 export const validateImg = (imgSrc, onSuccess?, onError?) => {
 	const img = new Image();
 
-	img.onload = () => onSuccess?(imgSrc);
+	img.onload = () => onSuccess?.(imgSrc);
 	img.onerror = () => onError?.(imgSrc);
 
 	img.src = imgSrc;
 };
 
 export const getImageFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
-	if (!event.target.files.length) return;
+	if (!event.target.files.length) return null;
 	const img = event.target.files[0];
 	return URL.createObjectURL(img);
 };
