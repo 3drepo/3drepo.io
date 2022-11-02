@@ -24,7 +24,7 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota`);
 const { getDatabaseStats } = require(`${v5Path}/handler/db`);
 const { getTotalSize } = require(`${v5Path}/models/fileRefs`);
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const toGB = (bytes) => bytes / (1024 * 1024 * 1024);
 const writeResultsToFile = (res, outFile) => new Promise((resolve) => {
