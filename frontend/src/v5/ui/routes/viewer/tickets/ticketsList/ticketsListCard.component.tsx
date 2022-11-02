@@ -25,19 +25,43 @@ import { useParams } from 'react-router-dom';
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
-import { Button } from '@controls/button';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
+import AddIcon from '@assets/icons/add_circle.svg';
+import { sortBy } from 'lodash';
 import { TicketsList } from './ticketsList.component';
+import { ActionMenu, MenuItem, NewTicketButton } from './ticketsList.styles';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
+
+const NewTicketMenu = () => {
+	const contextValue = useContext(CardContext);
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
+
+	const goToNewTicket = (template) => contextValue.setCardView(TicketsCardViews.New, { template });
+
+	return (
+		<ActionMenu
+			TriggerButton={(
+				<NewTicketButton>
+					<AddIcon />
+					<FormattedMessage id="viewer.cards.tickets.newTicket" defaultMessage="New Ticket" />
+				</NewTicketButton>
+			)}
+		>
+			{sortBy(templates, 'name').map((template) => (
+				<MenuItem onClick={() => goToNewTicket(template)} key={template._id}>
+					{template.name}
+				</MenuItem>
+			))}
+		</ActionMenu>
+	);
+};
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const contextValue = useContext(CardContext);
-
-	const goToNewTicket = () => contextValue.setCardView(TicketsCardViews.Templates);
 
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchTickets(
@@ -60,7 +84,7 @@ export const TicketsListCard = () => {
 			<CardHeader>
 				<TicketsIcon fontSize="small" />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
-				<Button onClick={goToNewTicket}>New Ticket</Button>
+				<NewTicketMenu />
 			</CardHeader>
 			<CardContent>
 				<TicketsList tickets={tickets} />

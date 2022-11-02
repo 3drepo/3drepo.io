@@ -16,6 +16,10 @@
  */
 import styled from 'styled-components';
 import { Ticket } from './ticketItem/ticketItem.styles';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
+import { Menu } from '@controls/actionMenu/actionMenu.styles';
+import MenuItemBase from '@mui/material/MenuItem';
+import { Button } from '@controls/button';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
@@ -36,4 +40,36 @@ export const Filters = styled.div`
 	gap: 6px;
 	margin-top: -2px;
 	margin-bottom: 13px;
+`;
+
+export const NewTicketButton = styled(Button).attrs({
+	variant: 'contained',
+})`
+	margin: 0 0 0 auto;
+	padding: 7px 9px;
+	height: 30px;
+	svg {
+		margin-right: 6px;
+	}
+`;
+
+export const ActionMenu = styled(ActionMenuBase).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'bottom',
+			horizontal: 'left',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})`
+	${Menu} {
+		padding: 4px 0;
+	}
+`;
+
+export const MenuItem = styled(MenuItemBase)`
+	padding: 5px 12px;
 `;
