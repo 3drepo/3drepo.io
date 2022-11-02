@@ -52,7 +52,7 @@ const TicketImage = ({ imgIsInvalid }) => {
 				<EmptyImageContainer disabled={!isAdmin}>
 					<EmptyImageIcon />
 					<IconText>
-						<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add Image" />
+						<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
 					</IconText>
 				</EmptyImageContainer>
 			</HiddenImageUploader>
@@ -68,7 +68,7 @@ const TicketImage = ({ imgIsInvalid }) => {
 				<BrokenImageContainer disabled={!isAdmin}>
 					<BrokenImageIcon />
 					<IconText>
-						<FormattedMessage id="viewer.cards.ticketImage.unsupportedImage" defaultMessage="Unsupported Image" />
+						<FormattedMessage id="viewer.cards.ticketImage.unsupportedImage" defaultMessage="Unsupported image" />
 					</IconText>
 				</BrokenImageContainer>
 			</HiddenImageUploader>
