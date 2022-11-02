@@ -24,7 +24,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
-const { getTeamspaceList } = require('../../common/utils');
+const { getTeamspaceList } = require('../../utils');
 const FS = require('fs');
 const Path = require('path');
 const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
