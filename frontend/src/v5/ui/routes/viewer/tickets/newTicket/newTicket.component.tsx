@@ -95,7 +95,7 @@ export const NewTicketCard = () => {
 				/>
 				<CloseButton onClick={goBack}>
 					<CloseIcon />
-				</CloseButton>	
+				</CloseButton>
 			</CardHeader>
 			{isLoading ? (
 				<CardContent>
