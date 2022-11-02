@@ -14,15 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
+import BrokenImageIcon from '@assets/icons/outlined/broken-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { HiddenImageUploader } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import {
 	ActionsList,
 	ActionsSide,
+	BrokenImageContainer,
 	Container,
 	EmptyImageContainer,
 	EnlargeContainer,
@@ -33,68 +35,124 @@ import {
 	PropertyName,
 } from './basicTicketImage.styles';
 import { TicketImageActionContext } from './actions/ticketImageActionContext';
+import { formatMessage } from '@/v5/services/intl';
+import { validateImg } from '@controls/hiddenImageUploader/Image.helper';
+
+const TicketImage = ({ imgIsInvalid }) => {
+	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
+
+	const { imgSrc, setImgSrc } = useContext(TicketImageActionContext);
+
+	if (!imgSrc && !imgIsInvalid) {
+		return (
+			<HiddenImageUploader
+				onChange={setImgSrc}
+				disabled={!isAdmin}
+			>
+				<EmptyImageContainer disabled={!isAdmin}>
+					<EmptyImageIcon />
+					<IconText>
+						<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add Image" />
+					</IconText>
+				</EmptyImageContainer>
+			</HiddenImageUploader>
+		);
+	}
+
+	if (!imgSrc && imgIsInvalid) {
+		return (
+			<HiddenImageUploader
+				onChange={setImgSrc}
+				disabled={!isAdmin}
+			>
+				<BrokenImageContainer disabled={!isAdmin}>
+					<BrokenImageIcon />
+					<IconText>
+						<FormattedMessage id="viewer.cards.ticketImage.unsupportedImage" defaultMessage="Unsupported Image" />
+					</IconText>
+				</BrokenImageContainer>
+			</HiddenImageUploader>
+		);
+	}
+
+	return (
+		<OverlappingContainer>
+			<Image 
+				src={imgSrc}
+				alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
+				onChange={setImgSrc}
+			/>
+			<EnlargeContainer>
+				<EnlargeImageIcon />
+				<IconText>
+					<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+				</IconText>
+			</EnlargeContainer>
+		</OverlappingContainer>
+	);
+};
 
 type BasicTicketImageProps = {
 	imgSrc?: string,
-	viewPoint?: any,
-	onChange?: (e) => void,
+	viewpoint?: any,
 	title: string,
 	className?: string,
+	onChange?: ({ imgSrc, viewpoint }) => void;
 	children: any,
 };
 export const BasicTicketImage = ({
 	children,
-	imgSrc:
-	inputImgSrc,
-	viewPoint:
-	inputViewPoint,
-	onChange,
+	imgSrc: inputImgSrc,
+	viewpoint:
+	inputViewpoint,
 	title,
 	className,
+	onChange,
 }: BasicTicketImageProps) => {
-	const [imgSrc, setImgSrc] = useState(inputImgSrc);
-	const [viewPoint, setViewPoint] = useState(inputViewPoint);
-	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
+	const [viewpoint, setViewpoint] = useState(inputViewpoint);
+	const [imgSrc, setImgSrcUnsafe] = useState(inputImgSrc);
+	const [imgIsInvalid, setImgIsInvalid] = useState(false);
+
+	const onImgUploadSuccess = (newImgSrc) => {
+		setImgSrcUnsafe(newImgSrc);
+		setImgIsInvalid(false);
+	};
+
+	const onImgUploadFail = () => {
+		setImgSrcUnsafe(null);
+		setImgIsInvalid(true);
+	};
+
+	const setImgSrc = (imgSrc) => {
+		if (!imgSrc) {
+			setImgSrcUnsafe(null);
+		} else {
+			validateImg(imgSrc, onImgUploadSuccess, onImgUploadFail);
+		}
+	};
 
 	const contextValue = {
 		imgSrc,
 		setImgSrc,
-		viewPoint,
-		setViewPoint,
+		viewpoint,
+		setViewpoint,
 	};
+
+	useEffect(() => { onChange?.({ imgSrc, viewpoint }); }, [imgSrc, viewpoint]);
 
 	return (
 		<Container className={className}>
-			<ActionsSide>
-				<PropertyName>{title}</PropertyName>
-				<TicketImageActionContext.Provider value={contextValue}>
-					<ActionsList>
-						{children}
-					</ActionsList>
-				</TicketImageActionContext.Provider>
-			</ActionsSide>
-			<ImageSide>
-				{!imgSrc ? (
-					<HiddenImageUploader onUpload={setImgSrc} disabled={!isAdmin}>
-						<EmptyImageContainer disabled={!isAdmin}>
-							<EmptyImageIcon />
-							<IconText>
-								<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add Image" />
-							</IconText>
-						</EmptyImageContainer>
-					</HiddenImageUploader>
-				) : (
-					<OverlappingContainer>
-						<Image src={imgSrc} alt={title} onChange={onChange} />
-						<EnlargeContainer>
-							<EnlargeImageIcon />
-							<IconText>
-								<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
-							</IconText>
-						</EnlargeContainer>
-					</OverlappingContainer>
-				)}
-			</ImageSide>
+			<TicketImageActionContext.Provider value={contextValue}>
+				<ActionsSide>
+					<PropertyName>{title}</PropertyName>
+						<ActionsList>
+							{children}
+						</ActionsList>
+				</ActionsSide>
+				<ImageSide>
+					<TicketImage imgIsInvalid={imgIsInvalid} />
+				</ImageSide>
+			</TicketImageActionContext.Provider>
 		</Container>
 	);
 };

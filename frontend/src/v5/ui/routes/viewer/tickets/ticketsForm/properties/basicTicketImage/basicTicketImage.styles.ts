@@ -96,4 +96,9 @@ export const EmptyImageContainer = styled(CentredContainer)<{ disabled: boolean 
 	${({ disabled }) => `cursor: ${disabled ? 'unset' : 'pointer'}`};
 `;
 
+export const BrokenImageContainer = styled(EmptyImageContainer)`
+	background-color: ${({ theme }) => theme.palette.error.lightest};
+	color: ${({ theme }) => theme.palette.error.main};
+`;
+
 export const IconText = styled(Typography).attrs({ variant: 'body1' })``;
