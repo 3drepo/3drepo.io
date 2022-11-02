@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { BasicTicketImage } from '../basicTicketImage.component';
-import { ChangeImageAction, ChangeViewPointAction, GoToViewpointAction } from '../actions/ticketImageAction.component';
+import { ChangeImageAction, ChangeViewpointAction, GoToViewpointAction } from '../actions/ticketImageAction.component';
 
 export const TicketViewpoint = (props) => (
 	<BasicTicketImage {...props}>
 		<GoToViewpointAction />
-		<ChangeViewPointAction />
+		<ChangeViewpointAction />
 		<ChangeImageAction />
 	</BasicTicketImage>
 );

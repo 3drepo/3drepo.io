@@ -19,8 +19,8 @@ import { createContext } from 'react';
 interface TicketImageActionContextType {
 	imgSrc?: string;
 	setImgSrc?: (imgSrc) => void;
-	viewPoint?: any;
-	setViewPoint?: (viewpoint) => void;
+	viewpoint?: any;
+	setViewpoint?: (viewpoint) => void;
 }
 export const TicketImageActionContext = createContext<TicketImageActionContextType>({});
 TicketImageActionContext.displayName = 'TicketImageActionContext';

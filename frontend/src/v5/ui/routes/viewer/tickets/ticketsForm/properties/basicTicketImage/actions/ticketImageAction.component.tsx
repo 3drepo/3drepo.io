@@ -26,11 +26,11 @@ import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { useContext, useEffect, useRef } from 'react';
 import { isUndefined } from 'lodash';
-import { HiddenImageInput, HiddenInputContainer } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
-import { getImageFromInputEvent } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
+import { HiddenInputContainer } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
 // import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenu, Action, MenuItem, MenuItemDelete } from './ticketImageAction.styles';
 import { TicketImageActionContext } from './ticketImageActionContext';
+import { HiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
 
 type TicketImageActionProps = {
 	onImageChange?: any;
@@ -72,12 +72,12 @@ export const GoToViewpointAction = () => (
 	</TicketImageAction>
 );
 
-export const ChangeViewPointAction = () => {
-	const { viewPoint, setViewPoint } = useContext(TicketImageActionContext);
+export const ChangeViewpointAction = () => {
+	const { viewpoint, setViewpoint } = useContext(TicketImageActionContext);
 
-	if (!viewPoint) {
+	if (!viewpoint) {
 		return (
-			<TicketImageAction onClick={() => setViewPoint('viewpoint')}>
+			<TicketImageAction onClick={() => setViewpoint('viewpoint')}>
 				<AddViewpointIcon />
 				<FormattedMessage id="viewer.card.ticketImage.action.createViewpoint" defaultMessage="Create viewpoint" />
 			</TicketImageAction>
@@ -98,7 +98,7 @@ export const ChangeViewPointAction = () => {
 				</MenuItem>
 			</ActionMenuItem>
 			<ActionMenuItem>
-				<MenuItemDelete onClick={() => setViewPoint(null)}>
+				<MenuItemDelete onClick={() => setViewpoint(null)}>
 					<FormattedMessage id="viewer.card.ticketImage.action.deleteViewpoint" defaultMessage="Delete viewpoint" />
 				</MenuItemDelete>
 			</ActionMenuItem>
@@ -109,8 +109,6 @@ export const ChangeViewPointAction = () => {
 export const ChangeImageAction = () => {
 	const { imgSrc, setImgSrc } = useContext(TicketImageActionContext);
 	const inputId = useRef(`hidden-input-${new Date().getTime()}`);
-
-	const uploadImg = (event) => getImageFromInputEvent(event, setImgSrc);
 
 	const uploadScreenshot = async () => {
 		// TODO - uncomment when component is no longer required in storybook
@@ -138,7 +136,7 @@ export const ChangeImageAction = () => {
 
 	return (
 		<>
-			<HiddenImageInput onChange={uploadImg} id={inputId.current} />
+			<HiddenImageInput onChange={setImgSrc} id={inputId.current} />
 			<ActionMenu>
 				<ActionMenuTriggerButton>
 					<TriggerButton />
