@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Ticket } from './ticketItem/ticketItem.styles';
 import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
@@ -40,6 +40,23 @@ export const Filters = styled.div`
 	gap: 6px;
 	margin-top: -2px;
 	margin-bottom: 13px;
+`;
+
+export const TemplateName = styled.div<{ $selected?: boolean }>`
+	cursor: pointer;
+	font-size: 8px;
+	line-height: 14px;
+	font-weight: 500;
+	border-radius: 4px;
+	padding: 1px 6px;
+	border: solid 1px ${({ theme }) => theme.palette.base.main};
+	background-color: #f9faff;
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ $selected }) => $selected && css`
+		color: ${({ theme }) => theme.palette.primary.main};
+		border-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) => theme.palette.primary.lightest};
+	`}
 `;
 
 export const NewTicketButton = styled(Button).attrs({
