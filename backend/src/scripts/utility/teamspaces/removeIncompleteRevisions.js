@@ -30,6 +30,7 @@ const Path = require('path');
 const { isString, isObject } = require(`${v5Path}/utils/helper/typeCheck`);
 
 const { deleteMany, find } = require(`${v5Path}/handler/db`);
+const GridFSHandler = require(`${v5Path}/handler/gridfs`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
@@ -73,99 +74,90 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 	await deleteMany(teamspace, collection, filter);
 };
 
-const processModelStash = async (teamspace, model, revId) => {
-	const modelStashPromises = [];
-
-	modelStashPromises.push(processFilesAndRefs(
-		teamspace,
-		`${model}.stash.json_mpc`,
-		{ filename: { $regex: `^/${teamspace}/${model}/revision/${UUIDToString(revId)}/` } },
-	));
-
-	modelStashPromises.push(processFilesAndRefs(
-		teamspace,
-		`${model}.stash.json_mpc.ref`,
-		{ _id: { $regex: `^${UUIDToString(revId)}/` } },
-	));
-
-	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: revId, type: 'mesh' }, { _id: 1 })).map((r) => UUIDToString(r._id));
-	supermeshIds.map((supermeshId) => {
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: { $regex: supermeshId } }));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: { $regex: supermeshId } }));
-		modelStashPromises.push(processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: { $regex: supermeshId } }));
-
-		return supermeshId;
-	});
-
-	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.unity3d`, { _id: revId }));
-	modelStashPromises.push(removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: revId }, '_extRef'));
-
-	await Promise.all(modelStashPromises);
+const removeLegacyCacheFiles = async (teamspace, model, col, revIds) => {
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const fileRegex = new RegExp(`^/${teamspace}/${model}/revision/(?:${revIds.map(UUIDToString).join('|')}).*`);
+	const legacyCache = await find(teamspace, col, { filename: fileRegex });
+	if (legacyCache.length) {
+		GridFSHandler.removeFiles(teamspace, col, legacyCache.map(({ filename }) => filename));
+	}
 };
 
-const processModelSequences = async (teamspace, model, revId) => {
-	const sequences = await find(teamspace, `${model}.sequences`, { rev_id: revId }, { frames: 1 });
-	const stateFilenames = [];
-	const sequenceIds = [];
+const processModelStash = async (teamspace, model, revIds) => {
+	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map((_id) => UUIDToString(_id));
 
-	for (const { _id, frames } of sequences) {
-		if (frames) {
-			for (const { state } of frames) {
-				stateFilenames.push(state);
-			}
-		}
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const superMeshRegex = new RegExp(`.*(?:${supermeshIds.join('|')}).*`);
 
-		sequenceIds.push(_id);
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const revIdsRegex = new RegExp(`.*(?:${revIds.map(UUIDToString).join('|')}).*`);
+
+	const proms = [
+		removeLegacyCacheFiles(teamspace, model, `${model}.stash.json_mpc`, revIds),
+		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
+		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
+		processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
+		processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
+		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
+		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
+	];
+
+	await proms;
+};
+
+const processModelSequences = async (teamspace, model, revIds) => {
+	const sequences = await find(teamspace, `${model}.sequences`, { rev_id: { $in: revIds } }, { frames: 1 });
+	if (sequences.length) {
+		const stateIds = sequences.flatMap(({ frames }) => frames.map(({ state }) => state));
+
+		const sequenceIds = sequences.map(({ _id }) => _id);
+
+		await Promise.all([
+			removeRecords(teamspace, `${model}.activities`, { sequenceId: { $in: sequenceIds } }),
+			processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map(UUIDToString) } }),
+			processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: stateIds } }),
+			deleteMany(teamspace, `${model}.sequences`, { sequenceId: { $in: sequenceIds } }),
+		]);
+	}
+};
+
+const removeRevisions = async (teamspace, model, revNodes) => {
+	const revIds = revNodes.map(({ _id }) => _id);
+	const rFiles = revNodes.flatMap(({ _rFile }) => _rFile ?? []);
+
+	logger.logInfo(`\t\t-${model} - removing ${revIds.length} zombie revisions`);
+
+	await Promise.all([
+		removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef'),
+		processModelSequences(teamspace, model, revIds),
+		processModelStash(teamspace, model, revIds),
+		processFilesAndRefs(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
+	]);
+};
+
+const cleanUpRevisions = async (teamspace, colName, filter) => {
+	const badRevisions = await find(teamspace, colName, filter, { rFile: 1 });
+	if (badRevisions.length) {
+		const model = colName.slice(0, -('.history'.length));
+		removeRevisions(teamspace, model, badRevisions);
 	}
 
-	await Promise.all([
-		removeRecords(teamspace, `${model}.activities`, { sequenceId: { $in: sequenceIds } }, '_extRef'),
-		processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map((id) => UUIDToString(id)) } }),
-	]);
-
-	await processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: stateFilenames } });
-
-	await deleteMany(teamspace, `${model}.sequences`, { rev_id: revId });
-};
-
-const processModelScene = async (teamspace, model, revId) => {
-	await removeRecords(teamspace, `${model}.scene`, { rev_id: revId }, '_extRef');
-};
-
-const removeRevision = async (teamspace, model, revId) => {
-	logger.logInfo(`\t\t-${model}::${UUIDToString(revId)}`);
-
-	await Promise.all([
-		processModelScene(teamspace, model, revId),
-		processModelSequences(teamspace, model, revId),
-		processModelStash(teamspace, model, revId),
-	]);
+	await removeRecords(teamspace, colName, filter);
 };
 
 const processTeamspace = async (teamspace, revisionAge) => {
 	const cols = await getCollectionsEndsWith(teamspace, '.history');
+	const threshold = new Date();
+	threshold.setDate(threshold.getDate() - revisionAge);
+
+	const query = {
+		incomplete: { $exists: true },
+		timestamp: { $lt: threshold },
+	};
 
 	for (const { name } of cols) {
-		const expiryTS = new Date();
-		const incompleteRevisionFilter = {
-			incomplete: { $exists: true },
-			timestamp: { $lt: new Date(expiryTS.setDate(expiryTS.getDate() - revisionAge)) },
-		};
-
 		// eslint-disable-next-line no-await-in-loop
-		const badRevisions = await find(teamspace, name, incompleteRevisionFilter, { rFile: 1 });
-
-		for (const { _id, rFile } of badRevisions) {
-			const model = name.slice(0, -('.history'.length));
-			// eslint-disable-next-line no-await-in-loop
-			await removeRevision(teamspace, model, _id);
-
-			// eslint-disable-next-line no-await-in-loop
-			await processFilesAndRefs(teamspace, name, { _id: { $in: rFile } });
-		}
-
-		// eslint-disable-next-line no-await-in-loop
-		await removeRecords(teamspace, name, incompleteRevisionFilter);
+		cleanUpRevisions(teamspace, name, query);
 	}
 };
 
