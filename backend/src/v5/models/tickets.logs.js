@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v5Path } = require('../../interop');
+const DB = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 
-const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
-const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
+const TicketLogs = {};
+const TICKET_LOGS_COL = 'tickets.logs';
 
-const Utils = {};
+TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
+	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 
-Utils.getTeamspaceList = async () => {
-	const dbList = await listDatabases();
-	return dbList.flatMap(({ name }) => (USERNAME_BLACKLIST.includes(name) ? [] : name));
-};
-
-Utils.getCollectionsEndsWith = async (teamspace, str) => {
-	const collections = await listCollections(teamspace);
-	return collections.filter(({ name }) => name.endsWith(str));
-};
-
-module.exports = Utils;
+module.exports = TicketLogs;

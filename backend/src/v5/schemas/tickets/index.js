@@ -17,12 +17,17 @@
 
 const {
 	basePropertyLabels,
+	defaultProperties,
 	modulePropertyLabels,
 	presetEnumValues,
 	presetModules,
 	propTypes,
 	riskLevels,
 	riskLevelsToNum } = require('./templates.constants');
+const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
+const { isDate, isObject } = require('../../utils/helper/typeCheck');
+const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
+const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
 const { getAllUsersInTeamspace } = require('../../models/teamspaces');
@@ -30,16 +35,15 @@ const { getJobNames } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaces');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
-const { types } = require('../../utils/helper/yup');
 
 const Tickets = {};
 
-const generatePropertiesValidator = async (teamspace, properties, isNewTicket) => {
+const generatePropertiesValidator = async (teamspace, properties, oldProperties, isNewTicket) => {
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
 		if (prop.deprecated || prop.readOnly) return;
-		let validator = propTypesToValidator[prop.type];
+		let validator = propTypesToValidator(prop.type, !isNewTicket && !prop.required);
 		if (validator) {
 			if (prop.values) {
 				let values;
@@ -77,8 +81,25 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 				if (prop.required) {
 					validator = validator.required();
 				}
-			} else if (!prop.required) {
-				validator = validator.nullable();
+			} else {
+				if (!prop.required) {
+					// We still need this line because ONE_OF and MANY_OF rewrites the validator.
+					validator = validator.nullable();
+				}
+
+				const oldValue = oldProperties?.[prop.name];
+				validator = stripWhen(validator, (p) => {
+					let valueToEval = p;
+					if (isObject(p) && !isDate(p)) {
+						// composite types - merge the old value with new
+						valueToEval = deleteIfUndefined({ ...oldValue, ...p }, true);
+
+						// if the object becomes empty, we're effectively setting it to null
+						valueToEval = isEqual(valueToEval, {}) ? null : valueToEval;
+					}
+					return (valueToEval === null && oldValue === undefined && !prop.required)
+						|| isEqual(valueToEval, oldValue);
+				});
 			}
 
 			obj[prop.name] = validator;
@@ -92,12 +113,15 @@ const generatePropertiesValidator = async (teamspace, properties, isNewTicket) =
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
+const generateModuleValidator = async (teamspace, modules, oldModules, isNewTicket, cleanUpPass) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			moduleToSchema[id] = await generatePropertiesValidator(teamspace, module.properties, isNewTicket);
+			const modValidator = await generatePropertiesValidator(teamspace, module.properties,
+				oldModules?.[id], isNewTicket);
+			moduleToSchema[id] = cleanUpPass
+				? stripWhen(modValidator, (val) => isEqual(val, {}) || !val) : modValidator;
 		}
 	});
 
@@ -106,19 +130,30 @@ const generateModuleValidator = async (teamspace, modules, isNewTicket) => {
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, template, data, isNewTicket) => {
+Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 	const fullTem = generateFullSchema(template);
+	const isNewTicket = !oldTicket;
 
-	const moduleSchema = await generateModuleValidator(teamspace, fullTem.modules, isNewTicket);
-
-	const validator = Yup.object().shape({
-		title: isNewTicket ? types.strings.title.required() : types.strings.title,
-		properties: await generatePropertiesValidator(teamspace, fullTem.properties, isNewTicket),
-		modules: Yup.object(moduleSchema).default({}),
+	const validatorObj = {
+		title: isNewTicket ? types.strings.title.required()
+			: stripWhen(types.strings.title, (t) => isEqual(t, oldTicket?.title)),
+		properties: await generatePropertiesValidator(teamspace, fullTem.properties,
+			oldTicket?.properties, isNewTicket),
+		modules: Yup.object(
+			await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket),
+		).default({}),
 		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
-	});
+	};
 
-	return validator.validate(data, { stripUnknown: true });
+	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
+
+	// Run it again so we can check for unchanged properties that looked changed due to default values
+	validatorObj.modules = Yup.object(
+		await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket, true),
+	).default({});
+
+	const res = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+	return res;
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
@@ -174,9 +209,9 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
 			const treatedLevel = calculateLevelOfRisk(
 				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-					?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
 				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
-					?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+				?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
 			);
 			if (treatedLevel) {
 				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
@@ -184,4 +219,58 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 		}
 	}
 };
+
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+
+const generateCastObject = ({ properties, modules }, stripDeprecated) => {
+	const castProps = (props) => {
+		const res = {};
+		props.forEach(({ type, name, deprecated }) => {
+			if (stripDeprecated && deprecated) {
+				res[name] = Yup.mixed().strip();
+			} else if (type === propTypes.DATE) {
+				res[name] = Yup.number().transform((_, val) => val.getTime());
+			} else if (type === propTypes.VIEW) {
+				res[name] = Yup.object({
+					state: Yup.object({
+						highlightedGroups: Yup.array().of(uuidString),
+						colorOverrideGroups: Yup.array().of(uuidString),
+						hiddenGroups: Yup.array().of(uuidString),
+						shownGroups: Yup.array().of(uuidString),
+						transformGroups: Yup.array().of(uuidString),
+					}).default(undefined),
+				}).nullable().default(undefined);
+			} else if (type === propTypes.IMAGE) {
+				res[name] = uuidString;
+			}
+		});
+
+		return Yup.object(res).default(undefined);
+	};
+
+	const modulesCaster = {};
+
+	modules.forEach(({ name, type, deprecated, properties: modProps }) => {
+		const id = name ?? type;
+		if (stripDeprecated && deprecated) {
+			modulesCaster[id] = Yup.mixed().strip();
+		} else {
+			modulesCaster[id] = castProps(modProps);
+		}
+	});
+
+	return Yup.object({
+		_id: uuidString,
+		type: uuidString,
+		properties: castProps(properties),
+		modules: Yup.object(modulesCaster).default(undefined),
+	});
+};
+
+Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
+	const caster = generateCastObject({ ...fullTemplate,
+		properties: fullTemplate.properties.concat(defaultProperties) }, stripDeprecated);
+	return caster.cast(ticket);
+};
+
 module.exports = Tickets;

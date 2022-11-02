@@ -19,20 +19,12 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
-
-const processCollection = (teamspace, collection) => removeFilesWithMeta(
-	teamspace, collection, { _id: /.*unityAssets.json$/i },
-);
+const { createIndex } = require(`${v5Path}/handler/db`);
 
 const processTeamspace = async (teamspace) => {
-	const filesCols = await getCollectionsEndsWith(teamspace, '.json_mpc.ref');
-	for (let i = 0; i < filesCols.length; ++i) {
-		const collection = filesCols[i].name;
-		logger.logInfo(`\t\t\t${collection}`);
-		// eslint-disable-next-line no-await-in-loop
-		await processCollection(teamspace, collection);
-	}
+	const filesCols = await getCollectionsEndsWith(teamspace, '.ref');
+	logger.logInfo(`\t\t\tCreating indices in ${filesCols.length} collections...`);
+	await Promise.all(filesCols.map(({ name }) => createIndex(teamspace, name, { link: 1, type: 1 })));
 };
 
 const run = async () => {

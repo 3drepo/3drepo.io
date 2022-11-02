@@ -25,6 +25,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
+
 const TSMiddlewares = require(`${src}/middleware/permissions/components/teamspaces`);
 
 // Mock respond function to just return the resCode
