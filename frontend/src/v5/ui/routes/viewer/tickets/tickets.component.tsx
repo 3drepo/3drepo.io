@@ -22,7 +22,6 @@ import { CardContextComponent, CardContextView } from '@components/viewer/cards/
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
-import { TemplateSelectionCard } from './newTicket/templateSelection.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
 
 export const Tickets = () => (
@@ -32,9 +31,6 @@ export const Tickets = () => (
 		</CardContextView>
 		<CardContextView cardView={TicketsCardViews.Details}>
 			<TicketDetailsCard />
-		</CardContextView>
-		<CardContextView cardView={TicketsCardViews.Templates}>
-			<TemplateSelectionCard />
 		</CardContextView>
 		<CardContextView cardView={TicketsCardViews.New}>
 			<NewTicketCard />
