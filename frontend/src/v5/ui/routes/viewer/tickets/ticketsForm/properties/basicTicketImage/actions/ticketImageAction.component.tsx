@@ -121,7 +121,7 @@ export const ChangeImageAction = () => {
 			return (
 				<TicketImageAction>
 					<AddImageIcon />
-					<FormattedMessage id="viewer.card.ticketImage.action.addImage" defaultMessage="Add Image" />
+					<FormattedMessage id="viewer.card.ticketImage.action.addImage" defaultMessage="Add image" />
 				</TicketImageAction>
 			);
 		}
@@ -129,7 +129,7 @@ export const ChangeImageAction = () => {
 		return (
 			<TicketImageAction>
 				<EditImageIcon />
-				<FormattedMessage id="viewer.card.ticketImage.action.editImage" defaultMessage="Edit Image" />
+				<FormattedMessage id="viewer.card.ticketImage.action.editImage" defaultMessage="Edit image" />
 			</TicketImageAction>
 		);
 	};
