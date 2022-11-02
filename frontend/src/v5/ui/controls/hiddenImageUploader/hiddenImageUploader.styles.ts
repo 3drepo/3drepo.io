@@ -22,7 +22,7 @@ export const HiddenInputContainer = styled.label`
 	display: contents;
 `;
 
-export const HiddenImageInput = styled.input.attrs({
+export const BasicHiddenImageInput = styled.input.attrs({
 	type: 'file',
 	// accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
 	// TODO remove this as the component is no longer required in storybook

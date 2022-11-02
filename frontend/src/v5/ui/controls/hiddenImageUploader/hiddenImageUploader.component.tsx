@@ -15,27 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChangeEvent } from 'react';
-import { HiddenImageInput, HiddenInputContainer } from './hiddenImageUploader.styles';
+import { BasicHiddenImageInput, HiddenInputContainer } from './hiddenImageUploader.styles';
+import { getImageFromInputEvent } from './Image.helper';
 
-export const getImageFromInputEvent = (event: ChangeEvent<HTMLInputElement>, onUpload: (img: string) => void) => {
-	if (!event.target.files.length) return;
-	const img = event.target.files[0];
-	onUpload(URL.createObjectURL(img));
+export const HiddenImageInput = ({ onChange, ...props }) => {
+	const uploadImage = (event) => {
+		const imgSrc = getImageFromInputEvent(event);
+		onChange(imgSrc);
+	};
+
+	return  (<BasicHiddenImageInput onChange={uploadImage} {...props} />);
 };
 
 type HiddenImageUploaderProps = {
-	onUpload: (img) => void;
 	children: any;
 	disabled?: boolean;
+	onChange: (imgSrc) => void;
 };
-export const HiddenImageUploader = ({ onUpload, children, disabled, ...props }: HiddenImageUploaderProps) => {
-	const uploadImage = (event) => getImageFromInputEvent(event, onUpload);
-
-	return (
-		<HiddenInputContainer {...props}>
-			<HiddenImageInput disabled={disabled} onChange={uploadImage} />
-			{children}
-		</HiddenInputContainer>
-	);
-};
+export const HiddenImageUploader = ({
+	children,
+	disabled,
+	onChange,
+	...props
+}: HiddenImageUploaderProps) => (
+	<HiddenInputContainer {...props}>
+		<HiddenImageInput disabled={disabled} onChange={onChange} />
+		{children}
+	</HiddenInputContainer>
+);

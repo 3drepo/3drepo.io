@@ -21,7 +21,7 @@ import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
 import { Button } from '@controls/button';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
-import { HiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
+import { BasicHiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -91,7 +91,7 @@ export const AvatarLabel = styled.label.attrs({
 	padding: 10px 15px;
 `;
 
-export const AvatarInput = styled(HiddenImageInput).attrs({
+export const AvatarInput = styled(BasicHiddenImageInput).attrs({
 	id: AVATAR_ID,
 })``;
 
