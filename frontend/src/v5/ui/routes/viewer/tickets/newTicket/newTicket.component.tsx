@@ -24,13 +24,13 @@ import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { Button } from '@controls/button';
+import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { BottomArea, Form, SaveButton } from './newTicket.styles';
+import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketsForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
@@ -54,10 +54,6 @@ export const NewTicketCard = () => {
 
 	const goToTicketDetails = (ticketId) => {
 		contextValue.setCardView(TicketsCardViews.Details, { ticketId });
-	};
-
-	const changeTemplate = () => {
-		contextValue.setCardView(TicketsCardViews.Templates);
 	};
 
 	const onSubmit = ({ title, properties, ...modules }) => {
@@ -97,8 +93,9 @@ export const NewTicketCard = () => {
 					defaultMessage="New {template} ticket"
 					values={{ template: template.name }}
 				/>
-				<Button onClick={goBack}>back</Button>
-				<Button onClick={changeTemplate}>change template</Button>
+				<CloseButton onClick={goBack}>
+					<CloseIcon />
+				</CloseButton>	
 			</CardHeader>
 			{isLoading ? (
 				<CardContent>
