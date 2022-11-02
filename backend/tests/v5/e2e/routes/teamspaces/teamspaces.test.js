@@ -42,6 +42,7 @@ const usersInFirstTeamspace = [
 	ServiceHelper.generateUserCredentials(),
 ];
 const userWithFsAvatar = ServiceHelper.generateUserCredentials();
+const userWithNoAvatar = ServiceHelper.generateUserCredentials();
 const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 
 // This is the list of teamspaces the user has access to
@@ -189,6 +190,10 @@ const setupData = async () => {
 			[tsWithFsAvatar.name],
 		),
 		ServiceHelper.db.createUser(
+			userWithNoAvatar,
+			[tsWithGridFsAvatar.name],
+		),
+		ServiceHelper.db.createUser(
 			userWithGridFsAvatar,
 			[tsWithGridFsAvatar.name],
 		),
@@ -262,6 +267,7 @@ const testGetTeamspaceMembers = () => {
 
 				return data;
 			});
+			expectedData.push({ user: teamspaces[0].name });
 			expect(res.body.members.length).toBe(expectedData.length);
 			expect(res.body.members).toEqual(expect.arrayContaining(expectedData));
 		});
@@ -342,7 +348,7 @@ const testGetQuotaInfo = () => {
 					expiryDate: validExpiryDate,
 					freeTier: false,
 					data: { used: 0, available: spaceLimitInBytes },
-					seats: { used: 2, available: collaboratorLimit },
+					seats: { used: 3, available: collaboratorLimit },
 				},
 			);
 		});
@@ -358,7 +364,7 @@ const testGetQuotaInfo = () => {
 					expiryDate: validExpiryDate - 10,
 					freeTier: false,
 					data: { used: 0, available: spaceLimitInBytes },
-					seats: { used: 1, available: collaboratorLimit },
+					seats: { used: 2, available: collaboratorLimit },
 				},
 			);
 		});
@@ -372,7 +378,7 @@ const testGetQuotaInfo = () => {
 					expiryDate: validExpiryDate,
 					freeTier: false,
 					data: { used: 0, available: spaceLimitInBytes },
-					seats: { used: 1, available: 'unlimited' },
+					seats: { used: 2, available: 'unlimited' },
 				},
 			);
 		});
@@ -386,7 +392,7 @@ const testGetQuotaInfo = () => {
 					expiryDate: null,
 					freeTier: true,
 					data: { used: 0, available: spaceLimitInBytes },
-					seats: { used: 4, available: config.subscriptions.basic.collaborators },
+					seats: { used: 5, available: config.subscriptions.basic.collaborators },
 				},
 			);
 		});
@@ -465,6 +471,41 @@ const testRemoveTeamspaceMember = () => {
 	});
 };
 
+const testGetMemberAvatar = () => {
+	describe('Get teamspace member avatar', () => {
+		const route = (ts = tsWithGridFsAvatar.name, member = tsWithGridFsAvatar.name) => `/v5/teamspaces/${ts}/members/${member}/avatar`;
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user does not have access to the teamspace', async () => {
+			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail the requested user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route(tsWithGridFsAvatar.name, testUser.user)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.userNotFound.status);
+			expect(res.body.code).toEqual(templates.userNotFound.code);
+		});
+
+		test('should fail if the teamspace does not exist', async () => {
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test(`should return ${templates.fileNotFound.code} if the member does not have an avatar`, async () => {
+			const res = await agent.get(`${route(tsWithGridFsAvatar.name, userWithNoAvatar.user)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
+		});
+
+		test('should return member avatar', async () => {
+			const res = await agent.get(`${route()}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
+		});
+	});
+};
+
 describe('E2E routes/teamspaces', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -477,4 +518,5 @@ describe('E2E routes/teamspaces', () => {
 	testGetAvatar();
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();
+	testGetMemberAvatar();
 });
