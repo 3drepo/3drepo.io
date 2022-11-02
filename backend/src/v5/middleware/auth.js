@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { errorCodes } = require('../services/sso/sso.constants');
 const { isSessionValid } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');

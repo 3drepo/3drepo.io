@@ -40,7 +40,7 @@ Sessions.manageSessions = async (req, res, next) => {
 	middleware(req, res, next);
 };
 
-const createSession = (isSso) => (req, res, next) => {
+Sessions.createSession = (req, res, next) => {
 	req.session.regenerate((err) => {
 		if (err) {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
@@ -70,17 +70,13 @@ const createSession = (isSso) => (req, res, next) => {
 				socketId: req.headers[SOCKET_HEADER],
 				referer: updatedUser.referer });
 
-			if (isSso) {
-				next();
-			} else {
-				respond(req, res, templates.ok, req.v4 ? updatedUser : undefined);
-			}
+			next();
 		}
 	});
 };
 
-Sessions.createSession = createSession(false);
-Sessions.createSessionSso = createSession(true);
+Sessions.createSessionResponse = (req, res) => respond(req, res,
+	templates.ok, req.v4 ? req.session.user : undefined);
 
 Sessions.destroySession = (req, res) => {
 	const username = req.session?.user?.username;

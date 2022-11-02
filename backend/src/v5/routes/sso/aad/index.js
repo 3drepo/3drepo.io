@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails, checkStateIsValid } = require('../../../middleware/sso/aad');
+const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { createSessionSso } = require('../../../middleware/sessions');
+const { createSession } = require('../../../middleware/sessions');
 const { notLoggedIn } = require('../../../middleware/auth');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
@@ -57,7 +57,7 @@ const establishRoutes = () => {
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
 	router.get(authenticateRedirectEndpoint, notLoggedIn, checkStateIsValid, hasAssociatedAccount,
-		createSessionSso, redirectToStateURL);
+		createSession, redirectToStateURL);
 
 	/**
 	 * @openapi

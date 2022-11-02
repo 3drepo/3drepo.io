@@ -18,9 +18,9 @@ const { authenticateRedirectUri, signupRedirectUri } = require('../../services/s
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
-const { getUserByEmail, recordSuccessfulAuthAttempt } = require('../../models/users');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
+const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
@@ -59,7 +59,7 @@ const authenticate = (redirectUri) => async (req, res) => {
 Aad.verifyNewUserDetails = async (req, res, next) => {
 	const state = JSON.parse(req.query.state);
 
-	try {		
+	try {
 		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
 
@@ -85,7 +85,7 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 
 Aad.redirectToStateURL = (req, res) => {
 	const state = JSON.parse(req.query.state);
-	try {		
+	try {
 		res.redirect(state.redirectUri);
 	} catch (err) {
 		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
@@ -95,10 +95,10 @@ Aad.redirectToStateURL = (req, res) => {
 
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
-Aad.hasAssociatedAccount = async (req, res, next) => {	
+Aad.hasAssociatedAccount = async (req, res, next) => {
 	const state = JSON.parse(req.query.state);
 
-	try {		
+	try {
 		const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
 			req.session.pkceCodes?.verifier);
 
@@ -106,22 +106,21 @@ Aad.hasAssociatedAccount = async (req, res, next) => {
 
 		if (sso?.id !== id) {
 			throw errorCodes.nonSsoUser;
-		} else {				
-			req.body.user = user;			
+		} else {
+			req.body.user = user;
 			await next();
 		}
 	} catch (err) {
-		let errorCode = err;		
+		let errorCode = err;
 
-		if (errorCode === templates.userNotFound)
-			errorCode = errorCodes.userNotFound;
+		if (errorCode === templates.userNotFound) errorCode = errorCodes.userNotFound;
 
 		redirectWithError(res, state.redirectUri, errorCode);
 	}
 };
 
-Aad.checkStateIsValid = async (req, res, next) => {	
-	try {		
+Aad.checkStateIsValid = async (req, res, next) => {
+	try {
 		JSON.parse(req.query.state);
 		await next();
 	} catch (err) {

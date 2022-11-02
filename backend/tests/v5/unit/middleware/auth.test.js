@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { errorCodes } = require('../../../../src/v5/services/sso/sso.constants');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/utils/responder');

@@ -115,7 +115,7 @@ const testGetUserDetails = () => {
 			};
 
 			const userDetails = { mail: generateRandomString() };
-			const fn = jest.spyOn(WebRequests, 'get').mockResolvedValue(userDetails);
+			const fn = jest.spyOn(WebRequests, 'get').mockResolvedValueOnce(userDetails);
 
 			const res = await Aad.getUserDetails(generateRandomString(),
 				generateRandomString(), generateRandomString());
@@ -134,10 +134,10 @@ const testGetUserDetails = () => {
 					clientSecret: generateRandomString(),
 				},
 			};
-			
+			jest.spyOn(WebRequests, 'get').mockRejectedValueOnce(new Error());
 			await expect(Aad.getUserDetails(generateRandomString(),
 				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.failedToFetchDetails);
-			
+
 			config.sso = initialConfig;
 		});
 	});

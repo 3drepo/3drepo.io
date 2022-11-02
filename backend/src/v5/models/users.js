@@ -224,7 +224,7 @@ User.addUser = async (newUserData) => {
 			},
 		},
 		permissions: [],
-		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true } ),		
+		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true }),
 	};
 
 	if (!newUserData.sso) {

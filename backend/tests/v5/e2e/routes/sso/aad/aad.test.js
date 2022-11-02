@@ -94,7 +94,7 @@ const testAuthenticatePost = () => {
 			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.nonSsoUser}`);
 		});
 
-		test(`should retain a query param in the redirectUri if it redirects with error`, async () => {
+		test('should retain a query param in the redirectUri if it redirects with error', async () => {
 			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
 			const state = { redirectUri: `${generateRandomURL()}?queryParam=someValue` };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });

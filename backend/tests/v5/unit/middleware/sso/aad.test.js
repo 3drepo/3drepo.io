@@ -66,7 +66,7 @@ const testVerifyNewUserDetails = () => {
 		};
 
 		test(`should respond with error code ${errorCodes.failedToFetchDetails} if the user details cannot be fetched`, async () => {
-			AadServices.getUserDetails.mockRejectedValueOnce(errorCodes.failedToFetchDetails);			
+			AadServices.getUserDetails.mockRejectedValueOnce(errorCodes.failedToFetchDetails);
 			const mockCB = jest.fn();
 			await Aad.verifyNewUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -195,7 +195,7 @@ const testRedirectToStateURL = () => {
 
 		test(`should respond with ${templates.unknown.code} if something went wrong in redirection`, () => {
 			const req = { query: { state: JSON.stringify({ redirectUri: generateRandomURL() }) } };
-			const res = { redirect: () => { throw templates.unknown } };
+			const res = { redirect: () => { throw templates.unknown; } };
 
 			Aad.redirectToStateURL(req, res);
 
@@ -219,7 +219,7 @@ const testHasAssociatedAccount = () => {
 		const redirectUri = generateRandomURL();
 		const res = { redirect: jest.fn() };
 		const req = {
-			body:{},
+			body: {},
 			query: {
 				code: generateRandomString(),
 				state: JSON.stringify({ redirectUri }),
@@ -260,37 +260,37 @@ const testHasAssociatedAccount = () => {
 		test('should set req loginData and call next if MS user is linked to 3D repo ', async () => {
 			const user = generateRandomString();
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } }, user });						
+			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } },
+				user });
 			await Aad.hasAssociatedAccount(req, res, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);	
-			expect(req.body.user).toEqual(user);		
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.body.user).toEqual(user);
 			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(res.redirect).not.toHaveBeenCalled();			
+			expect(res.redirect).not.toHaveBeenCalled();
 		});
 	});
 };
 
 const testCheckStateIsValid = () => {
 	describe('Check state is valid JSON', () => {
-		test('should call next if state is valid JSON', () => {			
-			const req = { query: { state: JSON.stringify({ redirectUri: generateRandomURL() }) } };			
+		test('should call next if state is valid JSON', () => {
+			const req = { query: { state: JSON.stringify({ redirectUri: generateRandomURL() }) } };
 			const mockCB = jest.fn();
 			Aad.checkStateIsValid(req, {}, mockCB);
 			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(mockCB).toHaveBeenCalledTimes(1);	
+			expect(mockCB).toHaveBeenCalledTimes(1);
 		});
 
-		test(`should respond with ${templates.unknown.code} if state is not valid JSON`, () => {			
-			const req = { query: { state: generateRandomString() } };			
+		test(`should respond with ${templates.unknown.code} if state is not valid JSON`, () => {
+			const req = { query: { state: generateRandomString() } };
 			const mockCB = jest.fn();
 			Aad.checkStateIsValid(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);			
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
 	});
 };
-
 
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();

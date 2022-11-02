@@ -63,16 +63,6 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	return { user: existingUsername };
 });
 
-UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
-	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
-		return { user: existingUsername, customData: {} };
-	} if (usernameOrEmail === ssoUsername) {
-		return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
-	}
-
-	throw templates.userNotFound;
-});
-
 UsersModel.getUserByUsername.mockImplementation((username) => {
 	if (username === existingUsername) {
 		return { user: existingUsername };
@@ -109,6 +99,16 @@ const testValidateLoginData = () => {
 		[{ body: { user: existingUsername, password: 'validPassword', extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 	])('Check if req arguments for login in are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce((usernameOrEmail) => {
+				if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
+					return { user: existingUsername, customData: {} };
+				} if (usernameOrEmail === ssoUsername) {
+					return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
+				}
+
+				throw templates.userNotFound;
+			});
+
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
 			await Users.validateLoginData(req, {}, mockCB);
@@ -222,6 +222,16 @@ const testForgotPasswordData = () => {
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for requesting a reset password email are valid', (req, shouldPass, desc, expectedResponse) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedResponse.code}`}`, async () => {
+			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce((usernameOrEmail) => {
+				if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
+					return { user: existingUsername, customData: {} };
+				} if (usernameOrEmail === ssoUsername) {
+					return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
+				}
+
+				throw templates.userNotFound;
+			});
+
 			const mockCB = jest.fn();
 			await Users.validateForgotPasswordData(req, {}, mockCB);
 			if (shouldPass) {
