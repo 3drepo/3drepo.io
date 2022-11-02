@@ -27,7 +27,7 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const Path = require('path');
 
-const TypeChecker = require(`${v5Path}/utils/helper/typeCheck`);
+const { isString, isObject } = require(`${v5Path}/utils/helper/typeCheck`);
 
 const { deleteMany, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
@@ -47,9 +47,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 		const filesFilter = { ...filter, [refAttribute]: { $exists: true } };
 
 		const results = await find(teamspace, collection, filesFilter, projection);
-		const filenames = [];
-
-		results.flatMap((record) => {
+		const filenames = results.flatMap((record) => {
 			const fileRefs = record[refAttribute];
 			if (fileRefs) {
 				// handle different ref formats
@@ -59,21 +57,14 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 				//        key1: 'key1RefString',
 				//        key2: 'key2RefString',
 				//    }
-				if (TypeChecker.isString(fileRefs)) {
-					filenames.push(fileRefs);
-				} else if (TypeChecker.isObject(fileRefs)) {
-					// for record removal, we want to remove all refs,
-					// i.e. 'key1RefString' and 'key2RefString',
-					// do not need to discern between keys
-					for (const entry of Object.values(fileRefs)) {
-						filenames.push(entry);
-					}
-				} else {
-					logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
+				if (isString(fileRefs)) {
+					return fileRefs;
+				} if (isObject(fileRefs)) {
+					return Object.values(fileRefs);
 				}
+				logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
 			}
-
-			return fileRefs;
+			return [];
 		});
 
 		await processFilesAndRefs(teamspace, collection, { _id: { $in: filenames } });
