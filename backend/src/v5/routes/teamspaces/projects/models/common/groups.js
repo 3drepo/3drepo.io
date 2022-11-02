@@ -138,7 +138,7 @@ const establishRoutes = (isFed) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/groups/import:
 	 *   post:
-	 *     description: Import a list of groups into the model
+	 *     description: Import a list of groups
 	 *     tags: [Groups]
 	 *     operationId: ImportModelGroups
 	 *     parameters:
