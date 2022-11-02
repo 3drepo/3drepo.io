@@ -30,7 +30,6 @@ const Path = require('path');
 const { isString, isObject } = require(`${v5Path}/utils/helper/typeCheck`);
 
 const { deleteMany, find } = require(`${v5Path}/handler/db`);
-const GridFSHandler = require(`${v5Path}/handler/gridfs`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
@@ -74,15 +73,6 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 	await deleteMany(teamspace, collection, filter);
 };
 
-const removeLegacyCacheFiles = async (teamspace, model, col, revIds) => {
-	// eslint-disable-next-line security/detect-non-literal-regexp
-	const fileRegex = new RegExp(`^/${teamspace}/${model}/revision/(?:${revIds.map(UUIDToString).join('|')}).*`);
-	const legacyCache = await find(teamspace, col, { filename: fileRegex });
-	if (legacyCache.length) {
-		GridFSHandler.removeFiles(teamspace, col, legacyCache.map(({ filename }) => filename));
-	}
-};
-
 const processModelStash = async (teamspace, model, revIds) => {
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map((_id) => UUIDToString(_id));
 
@@ -93,7 +83,6 @@ const processModelStash = async (teamspace, model, revIds) => {
 	const revIdsRegex = new RegExp(`.*(?:${revIds.map(UUIDToString).join('|')}).*`);
 
 	const proms = [
-		removeLegacyCacheFiles(teamspace, model, `${model}.stash.json_mpc`, revIds),
 		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
 		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
 		processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
@@ -123,23 +112,26 @@ const processModelSequences = async (teamspace, model, revIds) => {
 
 const removeRevisions = async (teamspace, model, revNodes) => {
 	const revIds = revNodes.map(({ _id }) => _id);
-	const rFiles = revNodes.flatMap(({ _rFile }) => _rFile ?? []);
+	const rFiles = revNodes.flatMap(({ rFile }) => rFile ?? []);
 
 	logger.logInfo(`\t\t-${model} - removing ${revIds.length} zombie revisions`);
 
+	console.log(rFiles);
 	await Promise.all([
-		removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef'),
 		processModelSequences(teamspace, model, revIds),
 		processModelStash(teamspace, model, revIds),
 		processFilesAndRefs(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
 	]);
+
+	// We can't remove mesh nodes until we've processed the stashes
+	await removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef');
 };
 
 const cleanUpRevisions = async (teamspace, colName, filter) => {
 	const badRevisions = await find(teamspace, colName, filter, { rFile: 1 });
 	if (badRevisions.length) {
 		const model = colName.slice(0, -('.history'.length));
-		removeRevisions(teamspace, model, badRevisions);
+		await removeRevisions(teamspace, model, badRevisions);
 	}
 
 	await removeRecords(teamspace, colName, filter);
@@ -157,12 +149,12 @@ const processTeamspace = async (teamspace, revisionAge) => {
 
 	for (const { name } of cols) {
 		// eslint-disable-next-line no-await-in-loop
-		cleanUpRevisions(teamspace, name, query);
+		await cleanUpRevisions(teamspace, name, query);
 	}
 };
 
 const run = async (revisionAge) => {
-	logger.logInfo('Finding all members from all teamspaces...');
+	logger.logInfo(`Finding unfinished revisions from more than ${revisionAge} days ago...`);
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`\t-${teamspace}`);
