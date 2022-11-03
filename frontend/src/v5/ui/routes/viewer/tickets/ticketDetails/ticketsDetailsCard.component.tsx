@@ -140,7 +140,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		formData.reset(ticket);
-	}, [ticket]);
+	}, [JSON.stringify(ticket)]);
 
 	const onBlurHandler = () => {
 		updateTicket(
@@ -164,7 +164,7 @@ export const TicketDetailsCard = () => {
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...formData}>
-				<TicketForm template={template} ticket={ticket} onBlur={onBlurHandler} />
+				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 			</FormProvider>
 		</CardContainer>
 	);

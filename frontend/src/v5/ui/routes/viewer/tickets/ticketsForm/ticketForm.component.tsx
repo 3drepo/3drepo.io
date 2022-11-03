@@ -31,10 +31,10 @@ interface PropertiesListProps {
 	properties: PropertyDefinition[];
 	propertiesValues: Record<string, any>;
 	module: string;
-	onBlur? : (...args) => void;
+	onPropertyBlur?: (...args) => void;
 }
 
-const PropertiesList = ({ module, properties, propertiesValues = {}, ...rest }: PropertiesListProps) => {
+const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -49,7 +49,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, ...rest }: 
 						formError={get(formState.errors, inputName)}
 						defaultValue={propertiesValues[name] ?? property.default}
 						key={name}
-						{...rest}
+						onBlur={onPropertyBlur}
 					/>
 				);
 			})}
@@ -68,7 +68,7 @@ const PropertiesPanel = (props: PropertiesListProps) => (
 );
 
 interface ModulePanelProps {
-	module: TemplateModule ;
+	module: TemplateModule;
 	moduleValues: Record<string, any>;
 }
 
@@ -81,10 +81,10 @@ const ModulePanel = ({ module, moduleValues, ...rest }: ModulePanelProps) => (
 interface Props {
 	template: Partial<ITemplate>;
 	ticket: Partial<ITicket>;
-	onBlur? : (...args) => void;
+	onPropertyBlur?: (...args) => void;
 }
 
-export const TicketForm = ({ template, ticket, ...rest } : Props) => {
+export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -97,7 +97,7 @@ export const TicketForm = ({ template, ticket, ...rest } : Props) => {
 						id: 'customTicket.newTicket.titlePlaceholder',
 						defaultMessage: 'Ticket name',
 					})}
-					{...rest}
+					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>
 			<CardContent>
