@@ -180,13 +180,14 @@ describe('Tickets: sagas', () => {
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false))
 					.put(TicketsActions.fetchTemplatesSuccess(modelId, templates))
+					.put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, templates[0]._id, false))
 					.silentRun();
-			})
+			});
 	
 			it('should call fetchTemplates endpoint with a 404', async () => {
 				mockServer
 					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
-					.reply(400);
+					.reply(404);
 	
 				await expectSaga(TicketsSaga.default)
 					.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false))
