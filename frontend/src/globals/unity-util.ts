@@ -17,9 +17,13 @@
 
 /* eslint-disable no-underscore-dangle */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+/* eslint-enable no-var */
+
+import { IndexedDbCache } from './unity-indexedbcache';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
 declare let createUnityInstance;
-/* eslint-enable no-var */
 
 export class UnityUtil {
 	/** @hidden */
@@ -1949,138 +1953,9 @@ export class UnityUtil {
 
 	/**
 	 * Creates an IndexedDbCache object which provides access to cached web requests using IndexedDb.
-	 * @param unityInstance 
+	 * @param unityInstance
 	 */
-	public static createIndexedDbCache(gameObjectName: string){
+	public static createIndexedDbCache(gameObjectName: string) {
 		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName);
 	}
 }
-
-/**
- * IndexedDbCache is a utility class that acts as the counterpart of an
- * IndexedDbCache Component in Unity. When the Component is started in Unity, 
- * an instance of this class is created by UnityUtil and attached to the 
- * unityInstance.
- * This class receives requests to create transactions against IndexedDb from
- * the IndexedDbPlugins jslib, and returns their results through SendMessage.
- */
-class IndexedDbCache {
-	constructor(unityInstance: any, gameObjectName: string) {
-		this.unityInstance = unityInstance;
-		this.gameObjectName = gameObjectName;
-		this.objectStoreName = "3DRepoCache";
-		this.transactions = {};
-		this.createIndexedDbCache();
-	}
-
-	unityInstance: any;
-	db: any;
-	objectStoreName: string;
-	gameObjectName: string;
-	transactions: any;
-
-	createIndexedDbCache() {
-		const request = indexedDB.open("3DRepoCacheDb", 1);
-
-		request.onerror = (event: any) => {
-			console.error("Why didn't you allow my web app to use IndexedDB?!");
-			this.sendIndexedDbUpdated({
-				state: "Failed"
-			});
-		};
-
-		// When onupgradeneeded completes successfully, onsuccess will be called
-		request.onupgradeneeded = (event: any) => {
-			let db = event.target.result;
-			const objectStore = db.createObjectStore(this.objectStoreName, {}); // The database uses a simple key-pair assocation, where the key is passed explicitly
-		};
-
-		request.onsuccess = (event: any) => {
-			this.db = event.target.result;
-			this.sendIndexedDbUpdated({
-				state: "Opened"
-			});
-		};
-	}
-
-	// When a byte[] array is passed to an imported function, it arrives as
-	// an offset into the managed Heap. We can use this to access
-	// the contents of the byte array directly in the Module's heap ArrayBuffer,
-	// to get or set the contents.
-
-	/**
-	 * Starts a put transaction into the open database.
-	 */
-	createSetTransaction(id: number, key: string, offset: number, size: number){
-		const objectStore = this.db.transaction(this.objectStoreName, "readwrite").objectStore(this.objectStoreName);
-		
-		// This snippet extracts the contents of the managed array. Slice is
-		// used to copy a subsection of the managed heap, pointed to by offset.
-		// This is then wrapped in a TypedArray before being stored. This is 
-		// because we need the TypedArray's set method to copy the data back, 
-		// so we may as well create it here. Writing the TypedArray to the 
-		// database will store the underlying ArrayBuffer along with it.
-
-		const record = {
-			data: new Uint8Array(this.unityInstance.Module.HEAP8.slice(offset, offset + size)),
-			size: size,
-		};
-		const request = objectStore.put(record, key);
-
-		request.onsuccess = (event) => {
-			this.sendSetTransactionComplete({
-				id: id
-			});
-		}
-	}
-	
-	createGetTransaction(id: number, key: string){
-		const objectStore = this.db.transaction(this.objectStoreName, "readwrite").objectStore(this.objectStoreName);
-		const request = objectStore.get(key);
-
-		// When the transaction is complete, we keep the result around so the 
-		// viewer can request the contents asynchronously.
-
-		request.onsuccess = (event) =>{
-			this.transactions[id] = request.result;
-			this.sendGetTransactionComplete({
-				id: id,
-				size: request.result.size
-			});
-		}
-		request.onfailure = (event) =>{ // Where a key is not found, we want to handle this outside the error chain
-			this.sendGetTransactionComplete({
-				id: id,
-				size: -1 //-1 indicates that no key was found or the transaction was aborted
-			});
-		}
-	}
-
-	sendSetTransactionComplete(parms: any){
-		this.unityInstance.SendMessage(this.gameObjectName, "OnSetTransactionComplete", JSON.stringify(parms));	
-	}
-
-	sendGetTransactionComplete(parms: any){
-		this.unityInstance.SendMessage(this.gameObjectName, "OnGetTransactionComplete", JSON.stringify(parms));	
-	}
-
-	sendIndexedDbUpdated(parms: any){
-		this.unityInstance.SendMessage(this.gameObjectName, "OnIndexedDbUpdated", JSON.stringify(parms));	
-	}
-
-	getTransactionData(id: number, offset: number){
-		this.unityInstance.Module.HEAP8.set(	// Set copies the contents of the TypedArray into the destination ArrayBuffer 
-			this.transactions[id].data,
-			offset
-		);
-	}
-
-	/**
-	 * Releases any resources associated with an existing transaction or Db operation.
-	 * Not all oprations will have resources. If an invalid id is passed in, this method does nothing.
-	 * @param id The transaction id whose resources to dispose of
-	 */
-	releaseTransaction(id: number){
-		delete this.transactions[id];
-	}
-};
