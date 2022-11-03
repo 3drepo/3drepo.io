@@ -17,10 +17,10 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
-import { selectTickets, selectTemplates, selectTicketById, selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
+import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
 import { cloneDeep } from 'lodash';
 import { createTestStore } from '../test.helpers';
-import { templateMockFactory, ticketMockFactory } from './tickets.fixture';
+import { mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 
 describe('Tickets: store', () => {
 	let dispatch, getState;
@@ -31,36 +31,37 @@ describe('Tickets: store', () => {
 		({ dispatch, getState } = createTestStore());
 	});
 
-	it('should fetch and set model tickets', () => {
-		const ticket = ticketMockFactory();
-		dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
-		const modelTicketsFromState = selectTickets(getState(), modelId);
-
-		expect(modelTicketsFromState[0]).toEqual(ticket);
-	});
-
-	it('should update the model tickets', () => {
-		const ticket = ticketMockFactory();
-		dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
-
-		const oldTicket = cloneDeep(ticket)
-		const modifications = { _id: ticket._id, title:'modified ticket', properties:{priority:'Top'}}
+	describe('templates', () => {
+		it('should fetch and set model tickets', () => {
+			const ticket = ticketMockFactory();
+			dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
+			const modelTicketsFromState = selectTickets(getState(), modelId);
+	
+			expect(modelTicketsFromState[0]).toEqual(ticket);
+		});
+	
+		it('should update the model tickets', () => {
+			const ticket = ticketMockFactory();
+			dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
+	
+			const oldTicket = cloneDeep(ticket)
+			const modifications = { _id: ticket._id, title:'modified ticket', properties:{priority:'Top'}}
+				
+			dispatch(TicketsActions.upsertTicketSuccess(modelId, modifications));
 			
-		dispatch(TicketsActions.upsertTicketSuccess(modelId, modifications));
-		
-		const modified = {...oldTicket,  ...modifications, properties:{...oldTicket.properties, priority:'Top' } };
-		const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
-
-		expect(ticketFromStore).toEqual(modified);
-	});
-
-	it('should insert a ticket', () => {
-		const ticket = ticketMockFactory();
-		dispatch(TicketsActions.upsertTicketSuccess(modelId, ticket));
-		const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
-		expect(ticketFromStore).toEqual(ticket);
-	});
-
+			const modified = {...oldTicket,  ...modifications, properties:{...oldTicket.properties, priority:'Top' } };
+			const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
+	
+			expect(ticketFromStore).toEqual(modified);
+		});
+	
+		it('should insert a ticket', () => {
+			const ticket = ticketMockFactory();
+			dispatch(TicketsActions.upsertTicketSuccess(modelId, ticket));
+			const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
+			expect(ticketFromStore).toEqual(ticket);
+		});
+	})
 
 	describe('templates', () => {
 		beforeEach(() => {
@@ -89,6 +90,14 @@ describe('Tickets: store', () => {
 
 			expect(ticketFromStore).toEqual(newTemplate);
 		});
-	
-	})
+	});
+
+	describe('settings', () => {
+		const riskCategories = mockRiskCategories();
+		it('should set and fetch the risk categories', () => {
+			dispatch(TicketsActions.fetchRiskCategoriesSuccess(riskCategories));
+			const riskCategoriesFromStore = selectRiskCategories(getState());
+			expect(riskCategoriesFromStore).toEqual(riskCategories);
+		});
+	});
 });
