@@ -17,17 +17,17 @@
 
 import { forwardRef } from 'react';
 import { BasicHiddenImageInput, HiddenInputContainer } from './hiddenImageUploader.styles';
-import { getImageFromInputEvent } from '../image.helper';
+import { getFileFromInputEvent } from '../image.helper';
 
 type HiddenImageInputProps = {
 	disabled?: boolean;
-	onChange: (imgSrc) => void;
+	onChange: (imgFile) => void;
 	className?: string;
 };
 export const HiddenImageInput = forwardRef(({ onChange, ...props }: HiddenImageInputProps, ref: any) => {
 	const uploadImage = (event) => {
-		const imgSrc = getImageFromInputEvent(event);
-		onChange(imgSrc);
+		const imgFile = getFileFromInputEvent(event);
+		onChange(imgFile);
 	};
 
 	return (<BasicHiddenImageInput onChange={uploadImage} {...props} ref={ref} />);

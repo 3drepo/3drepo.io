@@ -26,8 +26,7 @@ export const validateImg = (imgSrc, onSuccess?, onError?) => {
 	img.src = imgSrc;
 };
 
-export const getImageFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
-	if (!event.target.files.length) return null;
-	const img = event.target.files[0];
-	return URL.createObjectURL(img);
+export const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
+	if (!event.target.files.length) return [];
+	return event.target.files[0];
 };
