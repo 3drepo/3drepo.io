@@ -1,31 +1,73 @@
-import { muiTheme } from 'storybook-addon-material-ui5'
 import { theme as V5Theme } from '@/v5/ui/themes/theme';
-import { theme as V4Theme } from '@/v4/styles/theme';
+import { theme as V5ViewerTheme } from '@/v5/ui/routes/viewer/theme';
 import { IntlProvider } from 'react-intl';
 import { getIntlProviderProps } from '@/v5/services/intl';
-
-import { withThemesProvider } from "storybook-addon-styled-component-theme";
+import { GlobalStyle } from '@/v5/ui/themes/global';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { ThemeProvider } from 'styled-components';
+import React from 'react';
+import _ from 'lodash';
 
 export const parameters = {
-  actions: { argTypesRegex: "^on[A-Z].*" },
-  controls: {
-    matchers: {
-      color: /(background|color)$/i,
-      date: /Date$/,
-    },
-    expanded: true,
-  },
-  docs: {
-    transformSource: source => source.replace(/WithStyles\(ForwardRef\(/g, "").replace(/\)\)/g, ""),
-  },
+	actions: { argTypesRegex: "^on[A-Z].*" },
+	controls: {
+		matchers: {
+			color: /(background|color)$/i,
+			date: /Date$/,
+		},
+		expanded: true,
+	},
+	docs: {
+		transformSource: source => source.replace(/WithStyles\(ForwardRef\(/g, "").replace(/\)\)/g, ""),
+	},
+}
+
+const V5_THEME = "V5";
+const V5_VIEWER_THEME = "V5 Viewer";
+
+export const globalTypes = {
+	theme: {
+		name: 'Theme',
+		description: 'Global theme for components',
+		defaultValue: V5_VIEWER_THEME,
+		toolbar: {
+			icon: 'circlehollow',
+			// Array of plain string values or MenuItem shape (see below)
+			items: [
+				{ value: V5_THEME, icon: 'circlehollow', title: V5_THEME },
+				{ value: V5_VIEWER_THEME, icon: 'circle', title: V5_VIEWER_THEME },
+			],
+			// Property that specifies if the name of the item will be displayed
+			showName: true,
+			// Change title based on selected value
+			dynamicTitle: true,
+		},
+	},
+};
+
+const getTheme = (context ) => {
+	const theme = context.parameters.theme || context.globals.theme
+	return theme === V5_THEME ? V5Theme : V5ViewerTheme;
+};
+
+const withThemeProvider = (Story,context)=>{
+	const theme = getTheme(context);
+
+	return (
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				<GlobalStyle />
+				<Story {...context} />
+			</MuiThemeProvider>
+		</ThemeProvider>
+	)
 }
 
 export const decorators = [
-	muiTheme([{themeName: 'V5 theme', ...V5Theme}, {themeName: 'V4 theme', ...V4Theme}]),
-  withThemesProvider([V5Theme]),
-  (Story) => (
-    <IntlProvider {...getIntlProviderProps()}>
-      <Story />
-    </IntlProvider>
-  ),
+	withThemeProvider,
+	(Story) => (
+		<IntlProvider {...getIntlProviderProps()}>
+			<Story />
+		</IntlProvider>
+	),
 ];

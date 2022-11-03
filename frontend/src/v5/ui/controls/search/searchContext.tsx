@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isString } from 'lodash';
+import { get, isString } from 'lodash';
 import { createContext, useEffect, useState } from 'react';
 
 export interface SearchContextType<T> {
@@ -47,8 +47,9 @@ export const SearchContextComponent = ({ items, children, fieldsToFilter, filter
 		} else {
 			filteredItems = (items || []).filter((item) => (fieldsToFilter || Object.keys(item)).some(
 				(key) => {
-					if (!isString(item[key])) return false;
-					return item[key].toLowerCase().includes(query.toLowerCase());
+					const property = get(item, key);
+					if (!isString(property)) return false;
+					return property.toLowerCase().includes(query.toLowerCase());
 				},
 			));
 		}

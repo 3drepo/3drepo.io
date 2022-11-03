@@ -32,7 +32,6 @@ const EXTENSION_COLOUR_MAP = {
 const ICON_SIZE = 35;
 
 export const StyledIconButton = styled(Avatar)<{ extension: string}>`
-	${({ theme }) => theme.typography.fontFamily};
 	font-weight: 600;
 	font-size: 14px;
 	margin: 0 7px;

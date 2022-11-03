@@ -14,53 +14,45 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormControl, SelectProps, InputLabel } from '@mui/material';
-import { Controller } from 'react-hook-form';
-import { Select } from './formSelect.styles';
+import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
+import { isEqual } from 'lodash';
+import { Children, ReactElement, useState } from 'react';
 
-export type FormSelectProps = SelectProps & {
-	control: any;
-	name: string;
+export type FormSelectProps = FormSearchSelectProps & {
+	renderValueTooltip?: any;
+	renderValue?: (value) => any;
 };
 
 export const FormSelect = ({
-	name,
-	required,
-	label,
-	children,
-	control,
-	disabled,
-	hidden,
-	defaultValue = '',
-	...otherProps
-}: FormSelectProps) => (
-	<FormControl>
-		<InputLabel
-			id={`${name}-label`}
-			required={required}
-			disabled={disabled}
-			hidden={hidden}
-		>
-			{label}
-		</InputLabel>
-		<Controller
-			control={control}
-			name={name}
-			defaultValue={defaultValue}
-			render={({ field }) => (
-				<Select
-					{...field}
-					inputRef={field.ref}
-					labelId={`${name}-label`}
-					id={name}
-					label={label}
-					disabled={disabled}
-					hidden={hidden}
-					{...otherProps}
-				>
-					{children}
-				</Select>
-			)}
+	defaultValue: inputDefaultValue,
+	renderValue,
+	...props
+}: FormSearchSelectProps) => {
+	const [selectedItem, setSelectedItem] = useState<any>();
+
+	const formatRenderValue = () => {
+		const childrenToRender = selectedItem?.children;
+		return renderValue?.(childrenToRender) || childrenToRender;
+	};
+
+	const itemIsSelected = (value) => selectedItem && isEqual(selectedItem.value, value);
+
+	const initialiseSelectedItem = (defaultValue, children) => {
+		if (defaultValue === '') return;
+		const itemContainer = (Children.toArray(children) as ReactElement[])
+			.find(({ props: { value } }) => isEqual(defaultValue, value));
+		setSelectedItem(itemContainer?.props);
+	};
+
+	return (
+		<FormSearchSelect
+			defaultValue={inputDefaultValue ?? ''}
+			value={selectedItem?.value}
+			renderValue={formatRenderValue}
+			onItemClick={setSelectedItem}
+			itemIsSelected={itemIsSelected}
+			intialiseSelectedItem={initialiseSelectedItem}
+			{...props}
 		/>
-	</FormControl>
-);
+	);
+};

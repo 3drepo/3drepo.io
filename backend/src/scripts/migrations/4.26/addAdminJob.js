@@ -16,7 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList } = require('../../common/utils');
+const { getTeamspaceList } = require('../../utils');
 
 const { findOne, updateOne, insertOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
