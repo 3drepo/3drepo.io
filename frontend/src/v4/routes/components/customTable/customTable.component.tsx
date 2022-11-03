@@ -172,6 +172,7 @@ interface IProps {
 	rows: any[];
 	defaultSort?: number;
 	onSelectionChange?: (selectedRows) => void;
+	onFilterChange?: (filteredRows) => void;
 	renderCheckbox?: (props, data) => ReactChild;
 	onSearch?: (props) => any[];
 	rowStyle?: any;
@@ -316,6 +317,7 @@ export class CustomTable extends PureComponent<IProps, IState> {
 			onSearch: this.props.onSearch
 		});
 		this.setState({processedRows, searchText});
+		this.props.onFilterChange(processedRows);
 	}
 
 	public handleSelectionChange = (row) => (event, checked) => {
