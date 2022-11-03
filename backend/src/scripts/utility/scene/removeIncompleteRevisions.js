@@ -105,7 +105,7 @@ const processModelSequences = async (teamspace, model, revIds) => {
 			removeRecords(teamspace, `${model}.activities`, { sequenceId: { $in: sequenceIds } }),
 			processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map(UUIDToString) } }),
 			processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: stateIds } }),
-			deleteMany(teamspace, `${model}.sequences`, { sequenceId: { $in: sequenceIds } }),
+			deleteMany(teamspace, `${model}.sequences`, { _id: { $in: sequenceIds } }),
 		]);
 	}
 };
@@ -116,7 +116,6 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 
 	logger.logInfo(`\t\t-${model} - removing ${revIds.length} zombie revisions`);
 
-	console.log(rFiles);
 	await Promise.all([
 		processModelSequences(teamspace, model, revIds),
 		processModelStash(teamspace, model, revIds),
