@@ -17,7 +17,6 @@
 import { Controller } from 'react-hook-form';
 import { FormControl, FormHelperText, InputLabel, SelectProps } from '@mui/material';
 import { useState } from 'react';
-import { isUndefined } from 'lodash';
 import { Select, Tooltip } from './formSelectBase.styles';
 
 export type FormSelectBaseProps = SelectProps & {
@@ -72,7 +71,6 @@ export const FormSelectBase = ({
 		<Controller
 			control={control}
 			name={name}
-			defaultValue={defaultValue}
 			render={({ field: { ref, onChange: onFieldChange, value: fieldValue, ...field } }) => (
 				<FormControl required={required} disabled={disabled} error={!!formError}>
 					<InputLabel id={`${name}-label`}>{label}</InputLabel>
@@ -80,7 +78,7 @@ export const FormSelectBase = ({
 						<div>
 							<Select
 								{...field}
-								value={isUndefined(fieldValue) ? defaultValue : fieldValue}
+								value={fieldValue || []}
 								inputRef={ref}
 								labelId={`${name}-label`}
 								id={name}
@@ -90,6 +88,7 @@ export const FormSelectBase = ({
 								onChange={(...args) => handleChange(args, onFieldChange)}
 								error={!!formError}
 								{...props}
+								defaultValue={undefined}
 							>
 								{children}
 							</Select>
