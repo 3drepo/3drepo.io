@@ -74,22 +74,24 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 };
 
 const processModelStash = async (teamspace, model, revIds) => {
-	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map((_id) => UUIDToString(_id));
-
-	// eslint-disable-next-line security/detect-non-literal-regexp
-	const superMeshRegex = new RegExp(`.*(?:${supermeshIds.join('|')}).*`);
-
 	// eslint-disable-next-line security/detect-non-literal-regexp
 	const revIdsRegex = new RegExp(`.*(?:${revIds.map(UUIDToString).join('|')}).*`);
 
 	const proms = [
 		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
-		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
-		processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
-		processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
 		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
 		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
 	];
+	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map(({ _id }) => UUIDToString(_id));
+	if (supermeshIds.length) {
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		const superMeshRegex = new RegExp(`.*(?:${supermeshIds.join('|')}).*`);
+		proms.push(
+			processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
+			processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
+			processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
+		);
+	}
 
 	await proms;
 };
