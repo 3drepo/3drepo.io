@@ -88,7 +88,7 @@ const processModelStash = async (teamspace, model, revIds) => {
 		}
 	}
 
-	await proms;
+	await Promise.all(proms);
 };
 
 const processModelSequences = async (teamspace, model, revIds) => {
