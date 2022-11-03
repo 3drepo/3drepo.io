@@ -19,7 +19,7 @@ import styled from 'styled-components';
 // import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const HiddenInputContainer = styled.label`
-	display: contents;
+	cursor: pointer;
 `;
 
 export const BasicHiddenImageInput = styled.input.attrs({

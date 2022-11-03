@@ -15,31 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { forwardRef } from 'react';
 import { BasicHiddenImageInput, HiddenInputContainer } from './hiddenImageUploader.styles';
-import { getImageFromInputEvent } from './Image.helper';
+import { getImageFromInputEvent } from '../image.helper';
 
-export const HiddenImageInput = ({ onChange, ...props }) => {
+type HiddenImageInputProps = {
+	disabled?: boolean;
+	onChange: (imgSrc) => void;
+	className?: string;
+};
+export const HiddenImageInput = forwardRef(({ onChange, ...props }: HiddenImageInputProps, ref: any) => {
 	const uploadImage = (event) => {
 		const imgSrc = getImageFromInputEvent(event);
 		onChange(imgSrc);
 	};
 
-	return (<BasicHiddenImageInput onChange={uploadImage} {...props} />);
-};
+	return (<BasicHiddenImageInput onChange={uploadImage} {...props} ref={ref} />);
+});
 
-type HiddenImageUploaderProps = {
+type HiddenImageUploaderProps = HiddenImageInputProps & {
 	children: any;
-	disabled?: boolean;
-	onChange: (imgSrc) => void;
 };
-export const HiddenImageUploader = ({
+export const HiddenImageUploader = forwardRef(({
 	children,
-	disabled,
-	onChange,
+	className,
 	...props
-}: HiddenImageUploaderProps) => (
-	<HiddenInputContainer {...props}>
-		<HiddenImageInput disabled={disabled} onChange={onChange} />
+}: HiddenImageUploaderProps, ref) => (
+	<HiddenInputContainer className={className}>
+		<HiddenImageInput {...props} ref={ref} />
 		{children}
 	</HiddenInputContainer>
-);
+));
