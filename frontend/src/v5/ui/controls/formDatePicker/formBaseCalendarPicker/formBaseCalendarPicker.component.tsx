@@ -17,7 +17,6 @@
 import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import dayjs from 'dayjs';
-import { noop } from 'lodash';
 import { TextField } from './formBaseCalendarPicker.styles';
 
 export type FormBaseCalendarPickerProps = any & {
@@ -58,7 +57,7 @@ export const FormBaseCalendarPicker = ({
 					onOpen={() => setOpen(true)}
 					onClose={() => {
 						// This is to signal that the date has changed (we are using onblur to save changes)
-						(props.onBlur || noop)();
+						props.onBlur?.();
 						setOpen(false);
 					}}
 					open={open}
