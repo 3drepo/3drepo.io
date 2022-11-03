@@ -27,7 +27,7 @@ import { getValidators, modelIsFederation, TITLE_INPUT_NAME } from '@/v5/store/t
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
@@ -69,10 +69,30 @@ const filterErrors = (values, errors) => {
 	return fields;
 };
 
+const nullifyEmptyStrings = (values = {}) => Object.keys(values).reduce((accum, key) => {
+	const val = (isString(values[key]) && !values[key]) ? null : values[key];
+	return { ...accum, [key]: val };
+}, {});
+
+const nullifyAllValuesEmptyStrings = (values) => {
+	const fields: any = values[TITLE_INPUT_NAME] ? { [TITLE_INPUT_NAME]: values[TITLE_INPUT_NAME] } : {};
+
+	const properties = nullifyEmptyStrings(values.properties);
+	const modules = nullifyEmptyStrings(values.modules);
+
+	if (!isEmpty(properties)) {
+		fields.properties = properties;
+	}
+	if (!isEmpty(modules)) {
+		fields.modules = modules;
+	}
+
+	return fields;
+};
+
 const updateTicket = (teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
 	const values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
-
-	const validVals = filterErrors(values, formData.formState.errors);
+	const validVals = nullifyAllValuesEmptyStrings(filterErrors(values, formData.formState.errors));
 
 	if (isEmpty(validVals)) return;
 
