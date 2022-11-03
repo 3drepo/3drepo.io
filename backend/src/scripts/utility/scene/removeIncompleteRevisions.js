@@ -33,14 +33,6 @@ const { deleteMany, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
-const processFilesAndRefs = async (teamspace, collection, filter) => {
-	try {
-		await removeFilesWithMeta(teamspace, collection, filter);
-	} catch (err) {
-		logger.logError(err);
-	}
-};
-
 const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 	if (refAttribute) {
 		const projection = { [refAttribute]: 1 };
@@ -67,7 +59,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 			return [];
 		});
 
-		await processFilesAndRefs(teamspace, collection, { _id: { $in: filenames } });
+		await removeFilesWithMeta(teamspace, collection, { _id: { $in: filenames } });
 	}
 
 	await deleteMany(teamspace, collection, filter);
@@ -78,19 +70,22 @@ const processModelStash = async (teamspace, model, revIds) => {
 	const revIdsRegex = new RegExp(`.*(?:${revIds.map(UUIDToString).join('|')}).*`);
 
 	const proms = [
-		processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
+		removeFilesWithMeta(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
 		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
 		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
 	];
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map(({ _id }) => UUIDToString(_id));
 	if (supermeshIds.length) {
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		const superMeshRegex = new RegExp(`.*(?:${supermeshIds.join('|')}).*`);
-		proms.push(
-			processFilesAndRefs(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
-			processFilesAndRefs(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
-			processFilesAndRefs(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
-		);
+		for (let i = 0; i <= supermeshIds.length; i += 1000) {
+			const meshGroup = supermeshIds.slice(i, i + 1000);
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			const superMeshRegex = new RegExp(`.*(?:${meshGroup.join('|')}).*`);
+			proms.push(
+				removeFilesWithMeta(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
+				removeFilesWithMeta(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
+				removeFilesWithMeta(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
+			);
+		}
 	}
 
 	await proms;
@@ -105,8 +100,8 @@ const processModelSequences = async (teamspace, model, revIds) => {
 
 		await Promise.all([
 			removeRecords(teamspace, `${model}.activities`, { sequenceId: { $in: sequenceIds } }),
-			processFilesAndRefs(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map(UUIDToString) } }),
-			processFilesAndRefs(teamspace, `${model}.sequences.ref`, { _id: { $in: stateIds } }),
+			removeFilesWithMeta(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map(UUIDToString) } }),
+			removeFilesWithMeta(teamspace, `${model}.sequences.ref`, { _id: { $in: stateIds } }),
 			deleteMany(teamspace, `${model}.sequences`, { _id: { $in: sequenceIds } }),
 		]);
 	}
@@ -121,7 +116,7 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 	await Promise.all([
 		processModelSequences(teamspace, model, revIds),
 		processModelStash(teamspace, model, revIds),
-		processFilesAndRefs(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
+		removeFilesWithMeta(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
 	]);
 
 	// We can't remove mesh nodes until we've processed the stashes
