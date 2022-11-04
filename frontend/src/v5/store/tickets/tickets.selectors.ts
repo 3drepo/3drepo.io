@@ -44,3 +44,8 @@ export const selectTicketById = createSelector(
 	(_, modelId, ticketId) => ticketId,
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
 );
+
+export const selectRiskCategories = createSelector(
+	selectTicketsDomain,
+	(state) => state.riskCategories,
+);
