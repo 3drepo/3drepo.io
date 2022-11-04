@@ -19,6 +19,7 @@ import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
+import { FilterChip } from '@controls/chip';
 import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
@@ -42,20 +43,13 @@ export const Filters = styled.div`
 	margin-bottom: 13px;
 `;
 
-export const TemplateName = styled.div<{ $selected?: boolean }>`
-	cursor: pointer;
-	font-size: 8px;
-	line-height: 14px;
-	font-weight: 500;
-	border-radius: 4px;
-	padding: 1px 6px;
-	border: solid 1px ${({ theme }) => theme.palette.base.main};
-	background-color: #f9faff;
-	color: ${({ theme }) => theme.palette.base.main};
-	${({ $selected }) => $selected && css`
-		color: ${({ theme }) => theme.palette.primary.main};
+export const TemplateChip = styled(FilterChip)`
+	letter-spacing: .5px;
+	&:hover {
 		border-color: ${({ theme }) => theme.palette.primary.main};
-		background-color: ${({ theme }) => theme.palette.primary.lightest};
+	}
+	${({ selected }) => selected && css`
+		border-color: ${({ theme }) => theme.palette.primary.main};
 	`}
 `;
 
