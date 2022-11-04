@@ -133,9 +133,17 @@ export const updateFederationTicket = async (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}`, ticket)
 );
 
+export const fetchRiskCategories = async (
+	teamspace: string,
+): Promise<FetchRiskCategoriesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/riskCategories`);
+	return data;
+};
+
 /**
  * Types
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
 type FetchTicketsResponse = { tickets: ITicket[] };
 type CreateTicketResponse = { _id: string };
+type FetchRiskCategoriesResponse = { riskCategories: string[] };

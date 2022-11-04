@@ -32,6 +32,7 @@ module.exports = {
 				ignoreComments: true,
 				ignoreTemplateLiterals: true,
 				ignoreStrings: true,
+				ignorePattern: "<(\S*?)[^>]>.?</\1>|<.*?/>",
 			},
 		],
 		'no-throw-literal': 'off',

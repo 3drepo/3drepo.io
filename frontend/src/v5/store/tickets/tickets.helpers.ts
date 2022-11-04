@@ -21,6 +21,8 @@ import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/tick
 import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
+import WarningIcon from '@assets/icons/stepper_error.svg';
+import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
@@ -217,4 +219,15 @@ export const filterEmptyTicketValues = (ticket) => {
 		}
 	});
 	return parsedTicket;
+};
+
+const moduleTypeProperties = {
+	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: WarningIcon },
+	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }) },
+	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }) },
+};
+
+export const getModulePanelTitle = (module) => {
+	if (module.name) return { title: module.name, Icon: PropetiesIcon };
+	return { Icon: PropetiesIcon, ...moduleTypeProperties[module.type] };
 };

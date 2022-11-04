@@ -20,7 +20,7 @@ import { merge } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { TeamspaceAndProjectId } from '../store.types';
+import { TeamspaceAndProjectId, TeamspaceId } from '../store.types';
 import { ITemplate, ITicket, NewTicket } from './tickets.types';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
@@ -34,11 +34,14 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	updateTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'ticket', 'isFederation'],
 	createTicket: ['teamspace', 'projectId', 'modelId', 'ticket', 'isFederation', 'onSuccess'],
 	upsertTicketSuccess: ['modelId', 'ticket'],
+	fetchRiskCategories: ['teamspace'],
+	fetchRiskCategoriesSuccess: ['riskCategories'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
 	ticketsByModelId: {},
 	templatesByModelId: {},
+	riskCategories: [],
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
@@ -69,16 +72,24 @@ export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates
 	state.templatesByModelId[modelId] = templates;
 };
 
+export const fetchRiskCategoriesSuccess = (
+	state: ITicketsState, { riskCategories }: FetchRiskCategoriesSuccessAction,
+) => {
+	state.riskCategories = riskCategories;
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
+	[TicketsTypes.FETCH_RISK_CATEGORIES_SUCCESS]: fetchRiskCategoriesSuccess,
 }));
 
 export interface ITicketsState {
 	ticketsByModelId: Record<string, ITicket[]>;
 	templatesByModelId: Record<string, ITemplate[]>,
+	riskCategories: string[],
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
@@ -91,6 +102,8 @@ export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & 
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
 export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, templateId: string, isFederation: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & { modelId: string, templates: ITemplate[] };
+export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
+export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -142,4 +155,6 @@ export interface ITicketsActionCreators {
 	) => FetchTemplateAction;
 	upsertTicketSuccess: (modelId: string, ticket: Partial<ITicket>) => UpsertTicketSuccessAction;
 	replaceTemplateSuccess: (modelId: string, ticket: ITemplate) => ReplaceTemplateSuccessAction;
+	fetchRiskCategories: (teamspace: string) => FetchRiskCategoriesAction;
+	fetchRiskCategoriesSuccess: (riskCategories: string[]) => FetchRiskCategoriesSuccessAction;
 }

@@ -15,16 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { PropertyProps } from './properties.types';
 
-export const OneOfProperty = ({ property: { name, readOnly, required, values }, ...props }: PropertyProps) => (
-	<FormSelect label={name} disabled={readOnly} required={required} {...props}>
-		{(values as string[]).map((propValue) => (
-			<MenuItem key={propValue} value={propValue}>
-				{propValue}
-			</MenuItem>
-		))}
-	</FormSelect>
-);
+export const OneOfProperty = ({ property: { name, readOnly, required, values }, ...props }: PropertyProps) => {
+	const riskCategories: string[] = TicketsHooksSelectors.selectRiskCategories() || [];
+	const valuesArray = (values === 'riskCategories') ? riskCategories : values;
+	return (
+		<FormSelect label={name} disabled={readOnly} required={required} {...props}>
+			{(valuesArray as string[]).map((propValue) => (
+				<MenuItem key={propValue} value={propValue}>
+					{propValue}
+				</MenuItem>
+			))}
+		</FormSelect>
+	);
+};
