@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import WarningIcon from '@assets/icons/stepper_error.svg';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
-import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
+import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
 
 export const TITLE_INPUT_NAME = 'title';
 
