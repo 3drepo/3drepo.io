@@ -31,7 +31,7 @@ describe('Tickets: store', () => {
 		({ dispatch, getState } = createTestStore());
 	});
 
-	describe('templates', () => {
+	describe('tickets', () => {
 		it('should fetch and set model tickets', () => {
 			const ticket = ticketMockFactory();
 			dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
