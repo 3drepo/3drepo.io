@@ -16,7 +16,7 @@
  */
 
 import { BasicTicketImage } from '../basicTicketImage.component';
-import { ChangeImageAction } from '../actions/ticketImageAction.component';
+import { ChangeImageAction } from '../ticketImageAction/actions/actions.component';
 
 export const TicketImage = (props) => (
 	<BasicTicketImage {...props}>
