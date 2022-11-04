@@ -16,7 +16,7 @@
  */
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { FormattedMessage } from 'react-intl';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import {
 	Header,
 	ProfilePicture,
@@ -27,38 +27,31 @@ import {
 	TruncatableName,
 	Avatar,
 	AvatarButton,
-	AvatarLabel,
-	AvatarInput,
 	ErrorMessage,
 } from './editProfileAvatar.styles';
+import { FormImage } from '@controls/formImage/formImage.component';
 
 type EditProfilePersonalTabProps = {
 	user: ICurrentUser,
 };
 
 export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
-	const { setValue, getValues, formState: { errors }, control } = useFormContext();
+	const { watch, control, formState: { errors } } = useFormContext();
 
-	const addImage = (event, field) => {
-		if (!event.target.files.length) return;
-		const file = event.target.files[0];
-		setValue('avatarFile', file);
-		field.onChange(file);
-	};
-
+	const AVATAR_NAME = 'avatarFile';
+	const avatarFile = watch(AVATAR_NAME);
 	const error = errors.avatarFile;
-	const newAvatar = getValues('avatarFile');
 
 	const getUserWithAvatar = () => {
-		if (!newAvatar) return user;
+		if (!avatarFile) return user;
 		return {
 			...user,
 			hasAvatar: true,
-			avatarUrl: URL.createObjectURL(newAvatar),
+			avatarUrl: URL.createObjectURL(avatarFile),
 		};
 	};
 
-	const avatarIsAvailable = () => newAvatar || user.hasAvatar;
+	const avatarIsAvailable = () => avatarFile || user.hasAvatar;
 
 	return (
 		<Header>
@@ -75,25 +68,15 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 					<TruncatableName>{user.firstName}</TruncatableName>
 					<TruncatableName>{user.lastName}</TruncatableName>
 				</FullName>
-				<Controller
-					name="avatarFile"
-					control={control}
-					render={({ field: { value, ...field } }) => (
-						<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
-							<AvatarLabel>
-								{avatarIsAvailable() ? (
-									<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
-								) : (
-									<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
-								)}
-								<AvatarInput
-									{...field}
-									onChange={(event) => addImage(event, field)}
-								/>
-							</AvatarLabel>
-						</AvatarButton>
-					)}
-				/>
+				<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
+					<FormImage name={AVATAR_NAME} control={control}>
+						{avatarIsAvailable() ? (
+							<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
+						) : (
+							<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
+						)}
+					</FormImage>
+				</AvatarButton>
 				{error && <ErrorMessage>{error.message}</ErrorMessage>}
 			</UserInfo>
 		</Header>

@@ -21,7 +21,6 @@ import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
 import { Button } from '@controls/button';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
-import { BasicHiddenImageInput } from '@controls/hiddenImageUploader/hiddenImageUploader.styles';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -72,28 +71,19 @@ export const Username = styled.div`
 export const FullName = styled.div`
 	font-size: ${({ theme }) => theme.typography.body1.fontSize};
 	color: ${({ theme }) => theme.palette.base.main};
-	margin-top: 1px;
+	margin: 1px 0 8px;
 `;
 
 export const AvatarButton = styled(Button).attrs({
 	variant: 'outlined',
 })`
-	padding: 0;
-	margin: 8px 0 0;
+	margin: 0;
 	width: fit-content;
+	padding: 0;
+	& > * {
+		padding: 10px 15px;
+	}
 `;
-
-const AVATAR_ID = 'avatar';
-export const AvatarLabel = styled.label.attrs({
-	htmlFor: AVATAR_ID,
-})`
-	cursor: pointer;
-	padding: 10px 15px;
-`;
-
-export const AvatarInput = styled(BasicHiddenImageInput).attrs({
-	id: AVATAR_ID,
-})``;
 
 export const ErrorMessage = styled(ErrorMessageBase)`
 	margin-top: 10px;
