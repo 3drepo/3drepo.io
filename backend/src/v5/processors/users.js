@@ -85,6 +85,7 @@ Users.getProfileByUsername = async (username) => {
 		'customData.apiKey': 1,
 		'customData.billing.billingInfo.company': 1,
 		'customData.billing.billingInfo.countryCode': 1,
+		'customData.sso': 1,
 	});
 
 	const { customData } = user;
@@ -103,6 +104,7 @@ Users.getProfileByUsername = async (username) => {
 		company: customData.billing?.billingInfo?.company,
 		countryCode: customData.billing?.billingInfo?.countryCode,
 		...(intercomRef ? { intercomRef } : {}),
+		...(!!customData.sso ? { isSso: true } : {}),
 	};
 };
 

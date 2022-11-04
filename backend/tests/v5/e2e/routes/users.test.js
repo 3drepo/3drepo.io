@@ -18,7 +18,7 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateUUID } = require('../../helper/services');
 const session = require('supertest-session');
 const fs = require('fs');
 
@@ -30,6 +30,7 @@ let agent;
 
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
+const ssoUser = ServiceHelper.generateUserCredentials();
 const userWithFsAvatar = ServiceHelper.generateUserCredentials();
 const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 const nonVerifiedUser = ServiceHelper.generateUserCredentials();
@@ -50,6 +51,7 @@ const expiredPasswordToken = { token: generateRandomString(), expiredAt: new Dat
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
+		ServiceHelper.db.createUser(ssoUser, [], { sso: { id: generateUUID(), type: generateRandomString() } }),
 		ServiceHelper.db.createUser(userWithFsAvatar, []),
 		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
 		ServiceHelper.db.createUser(nonVerifiedUser, [], {
@@ -226,16 +228,18 @@ const testGetUsername = () => {
 	});
 };
 
-const formatUserProfile = (user, email, hasAvatar) => ({
+const formatUserProfile = (user, email, hasAvatar = false, isSso = false) => ({
 	username: user.user,
 	firstName: user.basicData.firstName,
-	lastName: user.basicData.lastName,
-	email,
+	lastName: user.basicData.lastName,	
 	apiKey: user.apiKey,
 	hasAvatar,
 	countryCode: user.basicData.billing.billingInfo.countryCode,
-	company: user.basicData.billing.billingInfo.company,
+	company: user.basicData.billing.billingInfo.company,		
+	...(isSso ? { isSso: true } : {}),
+	...(email ? { email } : {}),
 });
+
 
 const testGetProfile = () => {
 	describe('Get profile of the logged in user', () => {
@@ -246,7 +250,7 @@ const testGetProfile = () => {
 
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser, userEmail, false));
+			expect(res.body).toEqual(formatUserProfile(testUser, userEmail));
 		});
 
 		test('should return the user profile if the user has a session via an API key and has avatar', async () => {
@@ -264,7 +268,21 @@ const testGetProfile = () => {
 
 			test('should return the user profile if the user is logged in', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(testUser, userEmail, false));
+				expect(res.body).toEqual(formatUserProfile(testUser, userEmail));
+			});
+		});
+
+		describe('With valid authentication (SSO user)', () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: ssoUser.user, password: ssoUser.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should return the user profile if the user is logged in (SSO user)', async () => {
+				const res = await testSession.get('/v5/user/').expect(200);
+				expect(res.body).toEqual(formatUserProfile(ssoUser, undefined, false, true));
 			});
 		});
 	});

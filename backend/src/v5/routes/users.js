@@ -38,14 +38,15 @@ const getUsername = (req, res) => {
 	respond(req, res, templates.ok, { username: req.session.user.username });
 };
 
-const getProfile = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.getProfileByUsername(user).then((profile) => {
+const getProfile = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		const profile = await Users.getProfileByUsername(user);
 		respond(req, res, templates.ok, profile);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 const updateProfile = (req, res) => {
