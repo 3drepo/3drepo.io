@@ -16,6 +16,7 @@
  */
 
 import { SubmitButton } from '@controls/submitButton';
+import { CircleButton } from '@controls/circleButton';
 import styled from 'styled-components';
 
 export const Form = styled.form`
@@ -35,4 +36,14 @@ export const BottomArea = styled.div`
 	z-index: 1;
 	display: flex;
 	justify-content: flex-end;
+`;
+
+export const CloseButton = styled(CircleButton).attrs({
+	size: 'medium',
+	variant: 'viewer',
+})`
+	margin-left: auto;
+	&& > svg {
+		height: 12px;
+	}
 `;

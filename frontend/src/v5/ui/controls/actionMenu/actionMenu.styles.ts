@@ -27,12 +27,7 @@ export const ActionMenuSection = styled.div`
 	}
 `;
 
-export const ActionMenuTriggerButton = styled.div.attrs({
-	isActionMenuTriggerButton: true,
-})``;
-
 export const Menu = styled.div`
 	display: flex;
 	flex-direction: column;
-	width: 230px;
 `;
