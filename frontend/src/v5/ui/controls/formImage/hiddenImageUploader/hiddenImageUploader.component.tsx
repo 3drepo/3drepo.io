@@ -23,6 +23,7 @@ type HiddenImageInputProps = {
 	disabled?: boolean;
 	onChange: (imgFile) => void;
 	className?: string;
+	id?: string;
 };
 export const HiddenImageInput = forwardRef(({ onChange, ...props }: HiddenImageInputProps, ref: any) => {
 	const uploadImage = (event) => {

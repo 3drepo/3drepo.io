@@ -19,18 +19,21 @@ import { HiddenImageUploader } from '@controls/formImage/hiddenImageUploader/hid
 import { Controller } from 'react-hook-form';
 
 type FormImageProps = {
-	imgFile?: any,
+	defaultValue?: any,
 	name: string,
 	control?: any,
 	onChange?: (imgFile) => void,
 	children: any,
+	disabled?: boolean,
+	required?: boolean,
 };
 export const FormImage = ({
-	imgFile = null,
+	defaultValue = '',
 	name,
 	control,
 	onChange,
 	children,
+	...props
 }: FormImageProps) => {
 	const addImage = (imgFile, field) => {
 		field.onChange(imgFile);
@@ -41,10 +44,11 @@ export const FormImage = ({
 		<Controller
 			name={name}
 			control={control}
-			defaultValue={imgFile}
+			defaultValue={defaultValue}
 			render={({ field: { value, ...field } }) => (
 				<HiddenImageUploader
 					{...field}
+					{...props}
 					onChange={(newImgFile) => addImage(newImgFile, field)}
 				>
 					{children}
