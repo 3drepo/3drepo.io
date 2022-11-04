@@ -20,6 +20,16 @@ import styled from 'styled-components';
 import { CentredContainer } from '@controls/centredContainer';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 
+export const Asterisk = styled.span`
+	&::after {
+		font-weight: 400;
+		font-size: 0.75rem;
+		color: ${({ theme }) => theme.palette.error.main};
+		margin-left: 2px;
+		content: '*';
+	}
+`;
+
 export const Container = styled.div`
 	padding: 13px;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};

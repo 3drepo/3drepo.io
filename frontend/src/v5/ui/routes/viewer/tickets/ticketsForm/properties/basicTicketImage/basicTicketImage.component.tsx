@@ -19,10 +19,10 @@ import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import BrokenImageIcon from '@assets/icons/outlined/broken-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
-import { HiddenImageUploader } from '@controls/hiddenImageUploader/hiddenImageUploader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { formatMessage } from '@/v5/services/intl';
-import { validateImg } from '@controls/hiddenImageUploader/Image.helper';
+import { validateImg } from '@controls/formImage/image.helper';
+import { Modal } from '@controls/modal';
 import {
 	ActionsList,
 	ActionsSide,
@@ -35,96 +35,104 @@ import {
 	ImageSide,
 	OverlappingContainer,
 	PropertyName,
+	Asterisk,
 } from './basicTicketImage.styles';
-import { TicketImageActionContext } from './actions/ticketImageActionContext';
+import { TicketImageActionContext } from './ticketImageAction/ticketImageActionContext';
+import { FormImage } from '@controls/formImage/formImage.component';
+import { useFormContext } from 'react-hook-form';
 
-const TicketImage = ({ imgIsInvalid }) => {
-	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-
+const TicketLoadedImage = () => {
+	const [showLargePicture, setShowLargePicture] = useState(false);
 	const { imgSrc, setImgSrc } = useContext(TicketImageActionContext);
-
-	if (!imgSrc && !imgIsInvalid) {
-		return (
-			<HiddenImageUploader
-				onChange={setImgSrc}
-				disabled={!isAdmin}
-			>
-				<EmptyImageContainer disabled={!isAdmin}>
-					<EmptyImageIcon />
-					<IconText>
-						<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
-					</IconText>
-				</EmptyImageContainer>
-			</HiddenImageUploader>
-		);
-	}
-
-	if (!imgSrc && imgIsInvalid) {
-		return (
-			<HiddenImageUploader
-				onChange={setImgSrc}
-				disabled={!isAdmin}
-			>
-				<BrokenImageContainer disabled={!isAdmin}>
-					<BrokenImageIcon />
-					<IconText>
-						<FormattedMessage id="viewer.cards.ticketImage.unsupportedImage" defaultMessage="Unsupported image" />
-					</IconText>
-				</BrokenImageContainer>
-			</HiddenImageUploader>
-		);
-	}
-
 	return (
-		<OverlappingContainer>
-			<Image
-				src={imgSrc}
-				alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
-				onChange={setImgSrc}
-			/>
-			<EnlargeContainer>
-				<EnlargeImageIcon />
+		<>
+			<OverlappingContainer onClick={() => setShowLargePicture(true)}>
+				<Image
+					src={imgSrc}
+					alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
+					onChange={setImgSrc}
+				/>
+				<EnlargeContainer>
+					<EnlargeImageIcon />
+					<IconText>
+						<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+					</IconText>
+				</EnlargeContainer>
+			</OverlappingContainer>
+			<Modal open={showLargePicture} onClickClose={() => setShowLargePicture(false)}>
+				<Image
+					src={imgSrc}
+					alt={formatMessage({ id: 'viewer.cards.ticketImage.largeImage', defaultMessage: 'enlarged image' })}
+				/>
+			</Modal>
+		</>
+	);
+};
+
+const TicketEmptyImage = ({ imgIsInvalid, disabled }) => {
+	if (!imgIsInvalid) {
+		return (
+			<EmptyImageContainer disabled={disabled}>
+				<EmptyImageIcon />
 				<IconText>
-					<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+					<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
 				</IconText>
-			</EnlargeContainer>
-		</OverlappingContainer>
+			</EmptyImageContainer>
+		);
+	}
+	return (
+		<BrokenImageContainer disabled={disabled}>
+			<BrokenImageIcon />
+			<IconText>
+				<FormattedMessage id="viewer.cards.ticketImage.unsupportedImage" defaultMessage="Unsupported image" />
+			</IconText>
+		</BrokenImageContainer>
 	);
 };
 
 type BasicTicketImageProps = {
-	imgSrc?: string,
+	defaultValue?: string,
 	viewpoint?: any,
 	title: string,
+	name: string,
 	className?: string,
 	onChange?: ({ imgSrc, viewpoint }) => void;
 	children: any,
+	required?: boolean;
 };
 export const BasicTicketImage = ({
 	children,
-	imgSrc: inputImgSrc,
+	name,
+	defaultValue,
 	viewpoint:
 	inputViewpoint,
 	title,
 	className,
 	onChange,
+	required,
 }: BasicTicketImageProps) => {
 	const [viewpoint, setViewpoint] = useState(inputViewpoint);
-	const [imgSrc, setImgSrcUnsafe] = useState(inputImgSrc);
+	const [imgSrc, setImgSrcUnsafe] = useState(defaultValue);
 	const [imgIsInvalid, setImgIsInvalid] = useState(false);
+	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
+
+	const { getValues, setValue } = useFormContext();
 
 	const onImgUploadSuccess = (newImgSrc) => {
 		setImgSrcUnsafe(newImgSrc);
+		setValue(name, newImgSrc);
 		setImgIsInvalid(false);
 	};
 
 	const onImgUploadFail = () => {
 		setImgSrcUnsafe(null);
+		setValue(name, '');
 		setImgIsInvalid(true);
 	};
 
 	const setImgSrc = (newImgSrc) => {
 		if (!newImgSrc) {
+			setValue(name, '');
 			setImgSrcUnsafe(null);
 		} else {
 			validateImg(newImgSrc, onImgUploadSuccess, onImgUploadFail);
@@ -138,19 +146,31 @@ export const BasicTicketImage = ({
 		setViewpoint,
 	};
 
-	useEffect(() => { onChange?.({ imgSrc, viewpoint }); }, [imgSrc, viewpoint]);
+	useEffect(() => { onChange?.({ imgSrc: defaultValue, viewpoint }); }, [defaultValue, viewpoint]);
 
 	return (
 		<Container className={className}>
 			<TicketImageActionContext.Provider value={contextValue}>
 				<ActionsSide>
-					<PropertyName>{title}</PropertyName>
+					<PropertyName>
+						{title}{required && <Asterisk />}
+					</PropertyName>
 					<ActionsList>
 						{children}
+						<div style={{ cursor: 'pointer' }} onClick={() => console.log(getValues().properties.Image)}>log</div>
 					</ActionsList>
 				</ActionsSide>
 				<ImageSide>
-					<TicketImage imgIsInvalid={imgIsInvalid} />
+					<FormImage
+						name={name}
+						defaultValue={defaultValue}
+						onChange={setImgSrc}
+						disabled={!isAdmin}
+						required={required}
+					>
+						{!imgSrc && <TicketEmptyImage imgIsInvalid={imgIsInvalid} disabled={!isAdmin} />}
+					</FormImage>
+					{imgSrc && <TicketLoadedImage />}
 				</ImageSide>
 			</TicketImageActionContext.Provider>
 		</Container>
