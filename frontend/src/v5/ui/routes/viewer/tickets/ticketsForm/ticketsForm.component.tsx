@@ -72,7 +72,7 @@ interface ModulePanelProps {
 
 const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
 	<Accordion {...getModulePanelTitle(module)}>
-		<PropertiesList module={module.name} properties={module.properties || []} propertiesValues={moduleValues} />
+		<PropertiesList module={module.name || module.type} properties={module.properties || []} propertiesValues={moduleValues} />
 	</Accordion>
 );
 
