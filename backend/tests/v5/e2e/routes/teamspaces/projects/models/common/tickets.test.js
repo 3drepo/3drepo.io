@@ -31,14 +31,6 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 let server;
 let agent;
 
-const templateWithImage = {
-	...ServiceHelper.generateTemplate(),
-	properties: [{
-		name: ServiceHelper.generateRandomString(),
-		type: propTypes.IMAGE,
-	}],
-};
-
 const requiredPropName = ServiceHelper.generateRandomString();
 const templateWithRequiredProp = {
 	...ServiceHelper.generateTemplate(),
@@ -281,58 +273,98 @@ const testAddTicket = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
-/*
 const testGetTicketResource = () => {
-	const route = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId, resourceId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/resources/${resourceId}${key ? `?key=${key}` : ''}`;
 	describe('Get ticket resource', () => {
-		let ticketID;
-		let resourceID;
+		const { users, teamspace, project } = generateBasicData();
+		const con = ServiceHelper.generateRandomModel();
+		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = {
+			...ServiceHelper.generateTemplate(),
+			properties: [{
+				name: ServiceHelper.generateRandomString(),
+				type: propTypes.IMAGE,
+			}],
+		};
 
 		beforeAll(async () => {
-			const ticket = {
+			const ticketData = {
 				title: ServiceHelper.generateRandomString(),
-				type: templateWithImage._id,
+				type: template._id,
 				properties: {
-					[templateWithImage.properties[0].name]: FS.readFileSync(image, { encoding: 'base64' }),
+					[template.properties[0].name]: FS.readFileSync(image, { encoding: 'base64' }),
 				},
 			};
-			const endpoint = addTicketRoute(users.tsAdmin.apiKey);
-			const res = await agent.post(endpoint).send(ticket);
-			ticketID = res.body._id;
 
-			const getEndpoint = getTicketRoute(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticketID);
-			const { body } = await agent.get(getEndpoint);
-			resourceID = body.properties[templateWithImage.properties[0].name];
+			await setupBasicData(users, teamspace, project, [con, fed]);
+			await ServiceHelper.db.createTemplates(teamspace, [template]);
+
+			await Promise.all([fed, con].map(async (model) => {
+				const modelType = fed === model ? 'federation' : 'container';
+				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
+				const getTicketRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${users.tsAdmin.apiKey}`;
+				const ticket = {};
+				const res = await agent.post(addTicketRoute(model._id)).send(ticketData);
+				ticket._id = res.body._id;
+
+				const { body } = await agent.get(getTicketRoute(model._id, ticket._id));
+				ticket.resourceId = body.properties[template.properties[0].name];
+				// eslint-disable-next-line no-param-reassign
+				model.ticket = ticket;
+			}));
 		});
 
-		describe.each([
-			['the user does not have a valid session', templates.notLoggedIn],
-			['the user is not a member of the teamspace', templates.teamspaceNotFound, undefined, undefined, undefined, undefined, users.nobody.apiKey],
-			['the project does not exist', templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, undefined, undefined, users.tsAdmin.apiKey],
-			['the federation does not exist', templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), undefined, undefined, users.tsAdmin.apiKey],
-			['the federation provided is a container', templates.federationNotFound, project.id, con._id, undefined, undefined, users.tsAdmin.apiKey],
-			['the user does not have access to the federation', templates.notAuthorized, undefined, undefined, undefined, undefined, users.noProjectAccess.apiKey],
-			['the ticket does not exist', templates.fileNotFound, undefined, undefined, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-			['the resource does not exist', templates.fileNotFound, undefined, undefined, undefined, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-		])('Error checks', (desc, expectedOutput, projectId, modelId, ticket, resource, key) => {
-			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
-				const endpoint = route(key, projectId, modelId, ticket ?? ticketID, resource ?? resourceID);
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongTypeModel = isFed ? con : fed;
+			const model = isFed ? fed : con;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
-				const res = await agent.get(endpoint).expect(expectedOutput.status);
-				expect(res.body.code).toEqual(expectedOutput.code);
+			const baseRouteParams = { modelType,
+				key: users.tsAdmin.apiKey,
+				projectId: project.id,
+				model };
+
+			return [
+				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				[`the model is not a ${modelType}`, { ...baseRouteParams, modelId: wrongTypeModel._id }, false, modelNotFound],
+				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
+				['the resource does not exist', { ...baseRouteParams, resourceId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
+				['given the correct resource id', { ...baseRouteParams }, true],
+			];
+		};
+
+		const getRoute = ({ key, projectId, modelId, ticketId, resourceId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/resources/${resourceId}${key ? `?key=${key}` : ''}`;
+
+		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with  ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const route = getRoute({
+					modelId: model._id,
+					ticketId: model.ticket._id,
+					resourceId: model.ticket.resourceId,
+					...routeParams,
+				});
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.header).toEqual(expect.objectContaining({ 'content-type': 'image/png' }));
+					expect(res.body).not.toBeUndefined();
+					expect(Buffer.isBuffer(res.body)).toBeTruthy();
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
 			});
-		});
+		};
 
-		test('should get the resource successfully given the correct resource id', async () => {
-			const endpoint = route(users.tsAdmin.apiKey, project.id, modelWithTemplates._id, ticketID, resourceID);
-			const res = await agent.get(endpoint).expect(templates.ok.status);
-			expect(res.header).toEqual(expect.objectContaining({ 'content-type': 'image/png' }));
-			expect(res.body).not.toBeUndefined();
-			expect(Buffer.isBuffer(res.body)).toBeTruthy();
-		});
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
+/*
 const testGetTicket = () => {
 	describe('Get ticket', () => {
 		const deprecatedPropName = ServiceHelper.generateRandomString();
@@ -616,9 +648,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetAllTemplates();
 	testGetTemplateDetails();
 	testAddTicket();
-	/*
-	testGetTicket();
 	testGetTicketResource();
+	/* testGetTicket();
 	testGetTicketList();
 	testUpdateTicket();
 	*/
