@@ -31,24 +31,6 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 let server;
 let agent;
 
-const templateWithAllModulesAndPresetEnums = {
-	...ServiceHelper.generateTemplate(),
-	config: {
-		comments: true,
-		issueProperties: true,
-		attachments: true,
-		defaultView: true,
-		defaultImage: true,
-		pin: true,
-	},
-	properties: Object.values(presetEnumValues).map((values) => ({
-		name: ServiceHelper.generateRandomString(),
-		type: propTypes.ONE_OF,
-		values,
-	})),
-	modules: Object.values(presetModules).map((type) => ({ type, properties: [] })),
-};
-
 const templateWithImage = {
 	...ServiceHelper.generateTemplate(),
 	properties: [{
@@ -163,7 +145,7 @@ const testGetTemplateDetails = () => {
 		const fedWithTemplates = ServiceHelper.generateRandomModel({ isFederation: true });
 		const template = ServiceHelper.generateTemplate();
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project);
+			await setupBasicData(users, teamspace, project, [conWithTemplates, fedWithTemplates]);
 			await ServiceHelper.db.createTemplates(teamspace, [template]);
 		});
 
@@ -183,6 +165,7 @@ const testGetTemplateDetails = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? conWithTemplates : fedWithTemplates;
 			const modelWithTemplates = isFed ? fedWithTemplates : conWithTemplates;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
 			const getRoute = ({
 				key = users.tsAdmin.apiKey,
@@ -195,8 +178,8 @@ const testGetTemplateDetails = () => {
 				['the user does not have a valid session', false, getRoute({ key: null }), templates.notLoggedIn],
 				['the user is not a member of the teamspace', false, getRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
 				['the project does not exist', false, getRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
-				[`the ${modelType} does not exist`, false, getRoute({ modelId: ServiceHelper.generateRandomString() }), templates.federationNotFound],
-				[`the model provided is not a ${modelType}`, false, getRoute({ modelId: wrongTypeModel._id }), templates.federationNotFound],
+				[`the ${modelType} does not exist`, false, getRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				[`the model provided is not a ${modelType}`, false, getRoute({ modelId: wrongTypeModel._id }), modelNotFound],
 				[`the user does not have access to the ${modelType}`, false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the template id is invalid', false, getRoute({ templateId: ServiceHelper.generateRandomString() }), templates.templateNotFound],
 				['should return the full template', true, getRoute(), generateFullSchema(template), true],
@@ -221,47 +204,84 @@ const testGetTemplateDetails = () => {
 		describe.each(generateTestData(true))('Containers', runTest);
 	});
 };
-/*
-const addTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets${key ? `?key=${key}` : ''}`;
-
-const getTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 
 const testAddTicket = () => {
-	describe.each([
-		['the user does not have a valid session', false, templates.notLoggedIn],
-		['the user is not a member of the teamspace', false, templates.teamspaceNotFound, undefined, undefined, users.nobody.apiKey],
-		['the project does not exist', false, templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-		['the federation does not exist', false, templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-		['the federation provided is a container', false, templates.federationNotFound, project.id, con._id, users.tsAdmin.apiKey],
-		['the user does not have access to the federation', false, templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
-		['the templateId provided does not exist', false, templates.templateNotFound, undefined, undefined, users.tsAdmin.apiKey, { type: ServiceHelper.generateRandomString() }],
-		['the templateId is not provided', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { type: undefined }],
-		['the ticket data does not conforms to the template', false, templates.invalidArguments, undefined, undefined, users.tsAdmin.apiKey, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
-		['the ticket data conforms to the template', true, undefined, undefined, undefined, users.tsAdmin.apiKey],
-		['the ticket data conforms to the template but the user is a viewer', false, templates.notAuthorized, undefined, undefined, users.viewer.apiKey],
-		['the ticket has a template that contains all preset modules, preset enums and configs', true, undefined, undefined, undefined, users.tsAdmin.apiKey, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
-	])('Add Ticket', (desc, success, expectedOutput, projectId, modelId, key, payloadChanges = {}) => {
-		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
-			const payload = { ...ServiceHelper.generateTicket(ticketTemplates[0]), ...payloadChanges };
+	describe('Add ticket', () => {
+		const { users, teamspace, project } = generateBasicData();
+		const conWithTemplates = ServiceHelper.generateRandomModel();
+		const fedWithTemplates = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = ServiceHelper.generateTemplate();
+		const templateWithAllModulesAndPresetEnums = {
+			...ServiceHelper.generateTemplate(),
+			config: {
+				comments: true,
+				issueProperties: true,
+				attachments: true,
+				defaultView: true,
+				defaultImage: true,
+				pin: true,
+			},
+			properties: Object.values(presetEnumValues).map((values) => ({
+				name: ServiceHelper.generateRandomString(),
+				type: propTypes.ONE_OF,
+				values,
+			})),
+			modules: Object.values(presetModules).map((type) => ({ type, properties: [] })),
+		};
 
-			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-			const endpoint = addTicketRoute(key, projectId, modelId);
-
-			const res = await agent.post(endpoint).send(payload).expect(expectedStatus);
-
-			if (success) {
-				expect(res.body._id).not.toBeUndefined();
-
-				const getEndpoint = getTicketRoute(users.tsAdmin.apiKey,
-					project.id, modelWithTemplates._id, res.body._id);
-				await agent.get(getEndpoint).expect(templates.ok.status);
-			} else {
-				expect(res.body.code).toEqual(expectedOutput.code);
-			}
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [conWithTemplates, fedWithTemplates]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithAllModulesAndPresetEnums]);
 		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongTypeModel = isFed ? conWithTemplates : fedWithTemplates;
+			const modelWithTemplates = isFed ? fedWithTemplates : conWithTemplates;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}`;
+
+			return [
+				['the user does not have a valid session', false, getRoute({ key: null }), templates.notLoggedIn],
+				['the user is not a member of the teamspace', false, getRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
+				['the project does not exist', false, getRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
+				[`the ${modelType} does not exist`, false, getRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				[`the model provided is a ${modelType}`, false, getRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				['the user does not have access to the federation', false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
+				['the templateId provided does not exist', false, getRoute(), templates.templateNotFound, { type: ServiceHelper.generateRandomString() }],
+				['the templateId is not provided', false, getRoute(), templates.invalidArguments, { type: undefined }],
+				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+				['the ticket data conforms to the template', true, getRoute()],
+				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
+				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
+			];
+		};
+
+		const runTest = (desc, success, route, expectedOutput, payloadChanges = {}) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const payload = { ...ServiceHelper.generateTicket(template), ...payloadChanges };
+
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+
+				const res = await agent.post(route).send(payload).expect(expectedStatus);
+
+				if (success) {
+					expect(res.body._id).not.toBeUndefined();
+
+					const getEndpoint = route.replace('/tickets', `/tickets/${res.body._id}`);
+					await agent.get(getEndpoint).expect(templates.ok.status);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
-
+/*
 const testGetTicketResource = () => {
 	const route = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId, resourceId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/resources/${resourceId}${key ? `?key=${key}` : ''}`;
 	describe('Get ticket resource', () => {
@@ -595,7 +615,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 	testGetAllTemplates();
 	testGetTemplateDetails();
-	/* testAddTicket();
+	testAddTicket();
+	/*
 	testGetTicket();
 	testGetTicketResource();
 	testGetTicketList();
