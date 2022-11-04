@@ -20,9 +20,8 @@ import { useContext, useState } from 'react';
 import { flatMap } from 'lodash';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { FilterChip } from '@controls/chip';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters } from './ticketsList.styles';
+import { List, TemplateChip, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardViews } from '../tickets.constants';
 
@@ -69,7 +68,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		<>
 			<Filters>
 				{getTemplatesForFilter().map(({ name, _id }) => (
-					<FilterChip
+					<TemplateChip
 						key={_id}
 						selected={selectedTemplates.has(_id)}
 						onClick={() => toggleTemplate(_id)}

@@ -20,7 +20,7 @@ export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' 
 export interface PropertyDefinition {
 	name: string;
 	type: PropertyTypeDefinition;
-	values?: string[] | 'jobsAndUsers';
+	values?: string[] | 'jobsAndUsers' | 'riskCategories';
 	default?: string;
 	readOnly?: boolean;
 	required?: boolean;
@@ -41,7 +41,7 @@ export interface ITicket {
 export interface TemplateModule {
 	// either one of the following 2
 	name?: string;
-	type?: string;
+	type?: 'safetibase' | 'sequencing' | 'shapes';
 	deprecated?: boolean;
 	properties: PropertyDefinition[];
 }

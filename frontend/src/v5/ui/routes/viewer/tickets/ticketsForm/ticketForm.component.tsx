@@ -21,7 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { TITLE_INPUT_NAME } from '@/v5/store/tickets/tickets.helpers';
+import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
@@ -73,8 +73,8 @@ interface ModulePanelProps {
 }
 
 const ModulePanel = ({ module, moduleValues, ...rest }: ModulePanelProps) => (
-	<Accordion title={module.name} Icon={PropetiesIcon}>
-		<PropertiesList module={`modules.${module.name}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
+	<Accordion {...getModulePanelTitle(module)}>
+		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
 	</Accordion>
 );
 

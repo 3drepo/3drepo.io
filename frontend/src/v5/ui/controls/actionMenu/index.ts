@@ -18,4 +18,4 @@
 export { ActionMenu } from './actionMenu.component';
 export { ActionMenuItem } from './actionMenuItem/actionMenuItem.component';
 export { ActionMenuItemLink } from './actionMenuItemLink/actionMenuItemLink.component';
-export { ActionMenuSection, ActionMenuTriggerButton } from './actionMenu.styles';
+export { ActionMenuSection } from './actionMenu.styles';

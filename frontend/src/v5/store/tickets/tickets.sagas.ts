@@ -27,6 +27,7 @@ import {
 	UpdateTicketAction,
 	CreateTicketAction,
 	FetchTemplateAction,
+	FetchRiskCategoriesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { SnackbarActions } from '@/v4/modules/snackbar';
@@ -37,6 +38,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
+		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -73,6 +75,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
 		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
+		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -85,6 +88,21 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 				id: 'tickets.fetchTemplates.error.details',
 				defaultMessage: 'If reloading the page doesn\'t work please contact support',
 			}),
+		}));
+	}
+}
+
+export function* fetchRiskCategories({ teamspace }: FetchRiskCategoriesAction) {
+	try {
+		const { riskCategories } = yield API.Tickets.fetchRiskCategories(teamspace);
+		yield put(TicketsActions.fetchRiskCategoriesSuccess(riskCategories));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchRiskCategories.error.action',
+				defaultMessage: 'trying to fetch the risk categories',
+			}),
+			error,
 		}));
 	}
 }
@@ -156,4 +174,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
+	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 }

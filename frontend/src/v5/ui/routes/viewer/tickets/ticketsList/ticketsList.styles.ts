@@ -14,7 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
+import { Menu } from '@controls/actionMenu/actionMenu.styles';
+import MenuItemBase from '@mui/material/MenuItem';
+import { Button } from '@controls/button';
+import { FilterChip } from '@controls/chip';
 import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
@@ -36,4 +41,46 @@ export const Filters = styled.div`
 	gap: 6px;
 	margin-top: -2px;
 	margin-bottom: 13px;
+`;
+
+export const TemplateChip = styled(FilterChip)`
+	letter-spacing: .5px;
+	&:hover {
+		border-color: ${({ theme }) => theme.palette.primary.main};
+	}
+	${({ selected }) => selected && css`
+		border-color: ${({ theme }) => theme.palette.primary.main};
+	`}
+`;
+
+export const NewTicketButton = styled(Button).attrs({
+	variant: 'contained',
+})`
+	margin: 0 0 0 auto;
+	padding: 7px 9px;
+	height: 30px;
+	svg {
+		margin-right: 6px;
+	}
+`;
+
+export const ActionMenu = styled(ActionMenuBase).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'bottom',
+			horizontal: 'left',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})`
+	${Menu} {
+		padding: 4px 0;
+	}
+`;
+
+export const MenuItem = styled(MenuItemBase)`
+	padding: 5px 12px;
 `;

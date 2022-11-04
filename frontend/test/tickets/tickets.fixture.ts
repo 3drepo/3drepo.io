@@ -18,6 +18,7 @@
  import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
+import { times } from 'lodash';
 
 export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
 	_id: faker.datatype.uuid(),
@@ -42,3 +43,5 @@ export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 	code: faker.random.alpha({ count: 5, upcase: true }),
 	...overrides,
 });
+
+export const mockRiskCategories = (): string[] => times(5, () => faker.random.word())
