@@ -17,7 +17,8 @@
 
 import { ChangeEvent } from 'react';
 
-export const validateImg = (imgSrc, onSuccess?, onError?) => {
+export const validateImg = (imgFile, onSuccess?, onError?) => {
+	const imgSrc = URL.createObjectURL(imgFile);
 	const img = new Image();
 
 	img.onload = () => onSuccess?.(imgSrc);
