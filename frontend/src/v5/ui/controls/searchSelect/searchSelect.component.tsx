@@ -24,7 +24,7 @@ import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
 
 interface SelectWithLabelProps extends SelectProps {
-	required: boolean;
+	required?: boolean;
 	helperText?: string;
 }
 
@@ -59,7 +59,7 @@ export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
 								onKeyDown={preventPropagation}
 							/>
 						</SearchInputContainer>
-						{filteredItems.length && filteredItems}
+						{filteredItems.length > 0 && filteredItems}
 						{!filteredItems.length && (
 							<NoResults>
 								<FormattedMessage

@@ -14,9 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { MenuItem } from '@mui/material';
+import { MenuItem, SelectChangeEvent } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { useState } from 'react';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
@@ -39,6 +41,9 @@ export default {
 		},
 		values: {
 			control: 'array',
+		},
+		multiple: {
+			type: 'boolean',
 		},
 	},
 	component: SearchSelect,
@@ -63,6 +68,40 @@ const Controlled: ComponentStory<typeof SearchSelect> = ({ values, ...args }: an
 export const SelectWithSearchExample = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 SelectWithSearchExample.args = {
+	label: 'Select  search',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+};
+
+const SearchSelectMultipleControlledStory: ComponentStory<typeof SearchSelect> = ({ values, ...args }: any) => {
+	const [value, setValue] = useState([]);
+
+	const handleChange = (event: SelectChangeEvent<any[]>) => {
+		setValue(event.target.value as any[]);
+	};
+
+	return (
+		<FormContainer>
+			<SearchSelect
+				name="select"
+				{...args}
+				value={value}
+				onChange={handleChange}
+				multiple
+				renderValue={(val) => (val as any[]).join(',')}
+			>
+				{values.map((valueItem) => (
+					<MultiSelectMenuItem value={valueItem} key={valueItem} style={{ padding: '8px 14px' }}>
+						{valueItem}
+					</MultiSelectMenuItem>
+				))}
+			</SearchSelect>
+		</FormContainer>
+	);
+};
+
+export const SelectWithSearchMultiple = SearchSelectMultipleControlledStory.bind({});
+// More on args: https://storybook.js.org/docs/react/writing-stories/args
+SelectWithSearchMultiple.args = {
 	label: 'Select  search',
 	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };

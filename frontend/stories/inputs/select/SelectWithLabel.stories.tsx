@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { SelectWithLabel } from '@controls/searchSelect/searchSelect.component';
-import { MenuItem } from '@mui/material';
+import { MenuItem, SelectChangeEvent } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { useState } from 'react';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
@@ -37,6 +38,9 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		multiple: {
+			type: 'boolean',
+		},
 		values: {
 			control: 'array',
 		},
@@ -45,7 +49,7 @@ export default {
 	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
 } as ComponentMeta<typeof SelectWithLabel>;
 
-const Controlled: ComponentStory<typeof SelectWithLabel> = ({ values, ...args }: any) => (
+const SelectWithLabelStory: ComponentStory<typeof SelectWithLabel> = ({ values, ...args }: any) => (
 	<FormContainer>
 		<SelectWithLabel
 			name="select"
@@ -60,9 +64,43 @@ const Controlled: ComponentStory<typeof SelectWithLabel> = ({ values, ...args }:
 	</FormContainer>
 );
 
-export const SelectWithLabelExample = Controlled.bind({});
+export const SelectWithLabelExample = SelectWithLabelStory.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 SelectWithLabelExample.args = {
 	label: 'Just a select with a label and error',
 	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+};
+
+const SelectWithLabelControlledStory: ComponentStory<typeof SelectWithLabel> = ({ values, ...args }: any) => {
+	const [value, setValue] = useState([]);
+
+	const handleChange = (event: SelectChangeEvent<any[]>) => {
+		setValue(event.target.value as any[]);
+	};
+
+	return (
+		<FormContainer>
+			<SelectWithLabel
+				name="select"
+				{...args}
+				value={value}
+				onChange={handleChange}
+			>
+				{values.map((valueItem) => (
+					<MenuItem value={valueItem} key={valueItem} style={{ padding: '8px 14px' }}>
+						{valueItem}
+					</MenuItem>
+				))}
+			</SelectWithLabel>
+		</FormContainer>
+	);
+};
+
+export const SelectWithLabelMultipleExample = SelectWithLabelControlledStory.bind({});
+// More on args: https://storybook.js.org/docs/react/writing-stories/args
+SelectWithLabelMultipleExample.args = {
+	label: 'Just a select with a label and error',
+	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+	multiple: true,
+	value: [],
 };
