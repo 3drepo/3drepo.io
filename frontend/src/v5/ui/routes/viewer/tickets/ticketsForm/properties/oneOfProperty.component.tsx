@@ -21,33 +21,25 @@ import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/
 import { Controller } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 
-const FormSelect = ({ label, name, control, children, required, disabled, formError, ...props }) => {
-	console.log('Im here');
-
-	return (
-		<Controller
-			control={control}
-			name={name}
-			render={({ field: { ref, value, ...field } }) => {
-				console.log(JSON.stringify(field, null, '\t'));
-				return (
-					<FormControl required={required} disabled={disabled} error={!!formError}>
-						<InputLabel id={`${name}-label`}>{label}</InputLabel>
-						<Select
-							{...field}
-							{...props}
-							inputRef={ref}
-							value={value || ''}
-						>
-							{children}
-						</Select>
-						<FormHelperText>{formError?.message}</FormHelperText>
-					</FormControl>
-				);
-			}}
-		/>
-	);
-};
+const FormSelect = ({ label, name, children, required, disabled, formError = null, ...props }) => (
+	<Controller
+		name={name}
+		render={({ field: { ref, value, ...field } }) => (
+			<FormControl required={required} disabled={disabled} error={!!formError}>
+				<InputLabel id={`${name}-label`}>{label}</InputLabel>
+				<Select
+					{...field}
+					{...props}
+					inputRef={ref}
+					value={value || ''}
+				>
+					{children}
+				</Select>
+				<FormHelperText>{formError?.message}</FormHelperText>
+			</FormControl>
+		)}
+	/>
+);
 
 export const OneOfProperty = ({ property: { name, readOnly, required, values }, ...props }: PropertyProps) => {
 	const riskCategories: string[] = TicketsHooksSelectors.selectRiskCategories() || [];

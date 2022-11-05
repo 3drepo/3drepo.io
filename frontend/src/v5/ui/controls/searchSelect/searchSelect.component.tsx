@@ -15,10 +15,62 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
+import { NoResults, SearchInput, SearchInputContainer } from '@controls/formSelect/formSearchSelect/formSearchSelect.styles';
+import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
+import { FormControl, InputLabel, Select, FormHelperText, SelectProps, MenuItem } from '@mui/material';
+import { ReactNode } from 'react';
+import { onlyText } from 'react-children-utilities';
+import { FormattedMessage } from 'react-intl';
 
-const SearchSelect = ({}) => {
-
-
-    
-
+interface SelectWithLabelProps extends SelectProps {
+	required: boolean;
+	helperText?: string;
 }
+
+export const SelectWithLabel = ({ required = false, helperText, label, ...props }: SelectWithLabelProps) => (
+	<FormControl required={required} disabled={props.disabled} error={props.error}>
+		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
+		<Select
+			{...props}
+		/>
+		<FormHelperText>{helperText}</FormHelperText>
+	</FormControl>
+);
+
+export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
+	const preventPropagation = (e) => {
+		if (e.key !== 'Escape') {
+			e.stopPropagation();
+		}
+	};
+
+	const filter = (items, query: string) => items.filter((node) => onlyText(node).includes(query));
+
+	return (
+		<SearchContextComponent filteringFunction={filter} items={children as ReactNode[]}>
+			<SearchContext.Consumer>
+				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => (
+					<SelectWithLabel {...props}>
+						<SearchInputContainer>
+							<SearchInput
+								placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
+								onClick={preventPropagation}
+								onKeyDown={preventPropagation}
+							/>
+						</SearchInputContainer>
+						{filteredItems.length && filteredItems}
+						{!filteredItems.length && (
+							<NoResults>
+								<FormattedMessage
+									id="form.searchSelect.menuContent.emptyList"
+									defaultMessage="No results"
+								/>
+							</NoResults>
+						)}
+					</SelectWithLabel>
+				)}
+			</SearchContext.Consumer>
+		</SearchContextComponent>
+	);
+};
