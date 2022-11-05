@@ -49,15 +49,16 @@ const getProfile = async (req, res) => {
 	}
 };
 
-const updateProfile = (req, res) => {
-	const user = getUserFromSession(req.session);
-	const updatedProfile = req.body;
-	Users.updateProfile(user, updatedProfile).then(() => {
+const updateProfile = async (req, res) => {	
+	try {
+		const user = getUserFromSession(req.session);
+		const updatedProfile = req.body;
+		await Users.updateProfile(user, updatedProfile);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 const generateApiKey = (req, res) => {
@@ -328,7 +329,7 @@ const establishRoutes = () => {
 	*         description: Updates the details of the user
 	*
 	*/
-	router.put('/user', isLoggedIn, validateUpdateData, updateProfile);
+	router.put('/user', validateUpdateData, updateProfile);
 
 	/**
 	* @openapi

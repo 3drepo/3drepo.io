@@ -25,6 +25,7 @@ const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
+const { getUserFromSession } = require('../../../utils/sessions');
 
 const Users = {};
 
@@ -52,10 +53,8 @@ Users.validateLoginData = async (req, res, next) => {
 	}
 };
 
-Users.validateUpdateData = async (req, res, next) => {
-	const schema = Yup.object().shape({
-		firstName: types.strings.name,
-		lastName: types.strings.name,
+const generateUpdateSchema = (isSSO) => {
+	const nonSSOFields = {
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
 			async (value) => {
 				if (value) {
@@ -68,8 +67,6 @@ Users.validateUpdateData = async (req, res, next) => {
 				}
 				return true;
 			}),
-		company: types.strings.title,
-		countryCode: types.strings.countryCode.optional(),
 		oldPassword: Yup.string().optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
 			then: Yup.string().required(),
@@ -87,22 +84,36 @@ Users.validateUpdateData = async (req, res, next) => {
 				return !oldPassword || (value !== oldPassword);
 			},
 		}),
+		firstName: types.strings.name,
+		lastName: types.strings.name,
+	};
+
+	const schema = Yup.object().shape({
+		company: types.strings.title,
+		countryCode: types.strings.countryCode.optional(),
+		...(isSSO ? {} : nonSSOFields),
 	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
 		.test(
 			'at-least-one-property',
 			'You must provide at least one setting value',
 			(value) => Object.keys(value).length,
-		)
-		.required();
+		).required();
 
+	return schema;
+};
+
+Users.validateUpdateData = async (req, res, next) => {
 	try {
+		const username = getUserFromSession(req.session);
+		const { customData: { sso } } = await getUserByUsername(username, { 'customData.sso': 1 });
+		const schema = generateUpdateSchema(!!sso);
 		await schema.validate(req.body);
 
 		if (req.body.oldPassword) {
-			await authenticate(req.session.user.username, req.body.oldPassword);
+			await authenticate(username, req.body.oldPassword);
 		}
 
-		next();
+		await next();
 	} catch (err) {
 		if (err.code === templates.incorrectUsernameOrPassword.code) {
 			respond(req, res, templates.incorrectPassword);
