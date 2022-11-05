@@ -18,25 +18,11 @@
 import { formatMessage } from '@/v5/services/intl';
 import { NoResults, SearchInput, SearchInputContainer } from '@controls/formSelect/formSearchSelect/formSearchSelect.styles';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
-import { FormControl, InputLabel, Select, FormHelperText, SelectProps, MenuItem } from '@mui/material';
+import { SelectWithLabel, SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
+import { MenuItem } from '@mui/material';
 import { ReactNode } from 'react';
 import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
-
-interface SelectWithLabelProps extends SelectProps {
-	required?: boolean;
-	helperText?: string;
-}
-
-export const SelectWithLabel = ({ required = false, helperText, label, ...props }: SelectWithLabelProps) => (
-	<FormControl required={required} disabled={props.disabled} error={props.error}>
-		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
-		<Select
-			{...props}
-		/>
-		<FormHelperText>{helperText}</FormHelperText>
-	</FormControl>
-);
 
 export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
 	const preventPropagation = (e) => {
@@ -45,10 +31,12 @@ export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
 		}
 	};
 
-	const filter = (items, query: string) => items.filter((node) => onlyText(node).includes(query));
+	const filterItems = (items, query: string) => items
+		.filter((node) => onlyText(node).toLowerCase()
+			.includes(query.toLowerCase()));
 
 	return (
-		<SearchContextComponent filteringFunction={filter} items={children as ReactNode[]}>
+		<SearchContextComponent filteringFunction={filterItems} items={children as ReactNode[]}>
 			<SearchContext.Consumer>
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => (
 					<SelectWithLabel {...props}>

@@ -16,8 +16,10 @@
  */
 
 import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { isEqual, isUndefined, pick, some, xorWith } from 'lodash';
 import { Children, ReactElement, useEffect, useState } from 'react';
+import { Controller } from 'react-hook-form';
 import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
 export type FormMultiSelectProps = FormSearchSelectProps & {
@@ -82,3 +84,22 @@ export const FormMultiSelect = ({
 		</FormSearchSelect>
 	);
 };
+
+export const FormMultiSelect2 = ({ formError = null, name, ...props }) => (
+	<Controller
+		name={name}
+		defaultValue={[]}
+		render={({ field: { ref, value, ...field } }) => (
+			<SearchSelect
+				inputRef={ref}
+				value={value || []}
+				error={!!formError}
+				renderValue={(val) => (val as any[]).join(',')}
+				helperText={formError?.message}
+				{...field}
+				{...props}
+				multiple
+			/>
+		)}
+	/>
+);

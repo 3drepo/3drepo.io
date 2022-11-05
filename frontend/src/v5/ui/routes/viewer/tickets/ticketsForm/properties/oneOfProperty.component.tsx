@@ -16,27 +16,24 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { SelectWithLabel } from '@controls/selectWithLabel/selectWithLabel.component';
 // import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 
-const FormSelect = ({ label, name, children, required, disabled, formError = null, ...props }) => (
+const FormSelect = ({ label, name, required, disabled, formError = null, ...props }) => (
 	<Controller
 		name={name}
 		render={({ field: { ref, value, ...field } }) => (
-			<FormControl required={required} disabled={disabled} error={!!formError}>
-				<InputLabel id={`${name}-label`}>{label}</InputLabel>
-				<Select
-					{...field}
-					{...props}
-					inputRef={ref}
-					value={value || ''}
-				>
-					{children}
-				</Select>
-				<FormHelperText>{formError?.message}</FormHelperText>
-			</FormControl>
+			<SelectWithLabel
+				{...field}
+				{...props}
+				inputRef={ref}
+				value={value || ''}
+				error={!!formError}
+				helperText={formError?.message}
+			/>
 		)}
 	/>
 );
