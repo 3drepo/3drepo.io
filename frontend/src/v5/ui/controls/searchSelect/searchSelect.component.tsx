@@ -16,13 +16,13 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { NoResults, SearchInput, SearchInputContainer } from '@controls/formSelect/formSearchSelect/formSearchSelect.styles';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
 import { SelectWithLabel, SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
 import { MenuItem } from '@mui/material';
 import { ReactNode } from 'react';
 import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
+import { SearchInputContainer, SearchInput, NoResults } from './searchSelect.styles';
 
 export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
 	const preventPropagation = (e) => {

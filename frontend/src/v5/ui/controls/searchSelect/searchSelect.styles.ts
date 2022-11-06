@@ -14,27 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Select as SelectBase, Tooltip as TooltipBase } from '@mui/material';
 import styled from 'styled-components';
+import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 
-export const Select = styled(SelectBase)`
-	&& {
-		background: transparent;
-		width: 100%;
-		cursor: initial;
-		pointer-events: none;
-	}
+export const SearchInputContainer = styled.div`
+	display: contents;
+	margin: 0;
+	padding: 0;
 `;
 
-export const Tooltip = styled(TooltipBase).attrs({
-	arrow: true,
-	followCursor: true,
-	componentsProps: {
-		tooltip: {
-			sx: {
-				maxWidth: 230,
-				top: 20,
-			},
-		},
-	},
-})``;
+export const SearchInput = styled(SearchInputBase)`
+	margin: 0;
+	padding: 2px 12px 12px;
+`;
+
+export const NoResults = styled.div`
+	height: 34px;
+	display: flex;
+	align-items: center;
+	padding-left: 12px;
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.body1};
+`;

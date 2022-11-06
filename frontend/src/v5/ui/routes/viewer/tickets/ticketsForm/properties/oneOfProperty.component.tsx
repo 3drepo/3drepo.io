@@ -16,27 +16,9 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { SelectWithLabel } from '@controls/selectWithLabel/selectWithLabel.component';
-// import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
-import { Controller } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
-
-const FormSelect = ({ label, name, required, disabled, formError = null, ...props }) => (
-	<Controller
-		name={name}
-		render={({ field: { ref, value, ...field } }) => (
-			<SelectWithLabel
-				{...field}
-				{...props}
-				inputRef={ref}
-				value={value || ''}
-				error={!!formError}
-				helperText={formError?.message}
-			/>
-		)}
-	/>
-);
 
 export const OneOfProperty = ({ property: { name, readOnly, required, values }, ...props }: PropertyProps) => {
 	const riskCategories: string[] = TicketsHooksSelectors.selectRiskCategories() || [];

@@ -83,6 +83,7 @@ backend/docs/
 backend/tests/v5/fileShare
 npm-debug.log.*
 *.swo
+1
 
 submodules/tests
 scripts/reporting/statsGen/yarn.lock

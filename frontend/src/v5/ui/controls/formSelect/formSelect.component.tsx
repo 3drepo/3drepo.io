@@ -14,45 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
-import { isEqual } from 'lodash';
-import { Children, ReactElement, useState } from 'react';
 
-export type FormSelectProps = FormSearchSelectProps & {
-	renderValueTooltip?: any;
-	renderValue?: (value) => any;
-};
+import { SelectWithLabel } from '@controls/selectWithLabel/selectWithLabel.component';
+import { Controller } from 'react-hook-form';
 
-export const FormSelect = ({
-	defaultValue: inputDefaultValue,
-	renderValue,
-	...props
-}: FormSearchSelectProps) => {
-	const [selectedItem, setSelectedItem] = useState<any>();
-
-	const formatRenderValue = () => {
-		const childrenToRender = selectedItem?.children;
-		return renderValue?.(childrenToRender) || childrenToRender;
-	};
-
-	const itemIsSelected = (value) => selectedItem && isEqual(selectedItem.value, value);
-
-	const initialiseSelectedItem = (defaultValue, children) => {
-		if (defaultValue === '') return;
-		const itemContainer = (Children.toArray(children) as ReactElement[])
-			.find(({ props: { value } }) => isEqual(defaultValue, value));
-		setSelectedItem(itemContainer?.props);
-	};
-
-	return (
-		<FormSearchSelect
-			defaultValue={inputDefaultValue ?? ''}
-			value={selectedItem?.value}
-			renderValue={formatRenderValue}
-			onItemClick={setSelectedItem}
-			itemIsSelected={itemIsSelected}
-			intialiseSelectedItem={initialiseSelectedItem}
-			{...props}
-		/>
-	);
-};
+export const FormSelect = ({ label, name, required, disabled, formError = null, ...props }) => (
+	<Controller
+		name={name}
+		render={({ field: { ref, value, ...field } }) => (
+			<SelectWithLabel
+				{...field}
+				{...props}
+				inputRef={ref}
+				value={value || ''}
+				error={!!formError}
+				helperText={formError?.message}
+			/>
+		)}
+	/>
+);

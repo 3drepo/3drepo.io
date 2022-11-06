@@ -15,77 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormSearchSelect, FormSearchSelectProps } from '@controls/formSelect/formSearchSelect/formSearchSelect.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { isEqual, isUndefined, pick, some, xorWith } from 'lodash';
-import { Children, ReactElement, useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
-import { MultiSelectMenuItem } from './multiSelectMenuItem/multiSelectMenuItem.component';
 
-export type FormMultiSelectProps = FormSearchSelectProps & {
-	children: JSX.Element | JSX.Element[],
-	renderValue?: (selectedItems: any[]) => any;
-};
-
-export const FormMultiSelect = ({
-	children,
-	defaultValue: inputDefaultValue,
-	renderValue,
-	renderValueTooltip,
-	...props
-}: FormMultiSelectProps) => {
-	const [selectedItems, setSelectedItems] = useState<any[]>([]);
-
-	const formatRenderValue = () => {
-		if (!selectedItems.length) return '';
-		const childrenToRender = selectedItems.map((item) => item.children);
-		return renderValue?.(childrenToRender) || childrenToRender.join(', ');
-	};
-
-	const itemIsSelected = (value) => !!selectedItems.find((item) => isEqual(item.value, value));
-
-	const toggleValueSelection = (item) => {
-		setSelectedItems((items) => xorWith(items, [item], isEqual));
-	};
-
-	const verifyChildrenAreValid = () => {
-		Children.forEach(children, (child) => {
-			if (child.type !== MultiSelectMenuItem) {
-				throw new Error('FormMultiSelect only accepts an array of MultiSelectMenuItem as direct children');
-			}
-		});
-	};
-
-	const initialiseSelectedItems = (deafultItemValue, items) => {
-		if (!deafultItemValue?.length) return;
-		setSelectedItems(
-			(Children.toArray(items) as ReactElement[])
-				.filter(({ props: { value } }) => some(deafultItemValue, (v) => isEqual(v, value)))
-				.map((child) => pick(child.props, ['children', 'value'])),
-		);
-	};
-
-	useEffect(() => { verifyChildrenAreValid(); }, [children]);
-
-	return (
-		<FormSearchSelect
-			defaultValue={inputDefaultValue ?? []}
-			value={selectedItems.map(({ value }) => value)}
-			renderValue={formatRenderValue}
-			onItemClick={toggleValueSelection}
-			itemIsSelected={itemIsSelected}
-			intialiseSelectedItem={initialiseSelectedItems}
-			search
-			multiple
-			renderValueTooltip={!isUndefined(renderValueTooltip) ? renderValueTooltip : formatRenderValue()}
-			{...props}
-		>
-			{children}
-		</FormSearchSelect>
-	);
-};
-
-export const FormMultiSelect2 = ({ formError = null, name, ...props }) => (
+export const FormMultiSelect = ({ formError = null, name, ...props }) => (
 	<Controller
 		name={name}
 		defaultValue={[]}
