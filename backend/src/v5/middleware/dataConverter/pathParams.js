@@ -19,13 +19,18 @@ const { stringToUUID } = require('../../utils/helper/uuids');
 
 const PathParams = {};
 
-const paramsToIgnore = ['container', 'federation'];
+const paramsToIgnore = ['container', 'federation', 'model'];
 
 PathParams.convertAllUUIDs = (req, res, next) => {
 	if (req.params) {
 		Object.keys(req.params).forEach((key) => {
 			if (!paramsToIgnore.includes(key)) {
 				req.params[key] = stringToUUID(req.params[key]);
+			}
+
+			if (key === 'model') {
+				req.params.container = req.params[key];
+				req.params.federation = req.params[key];
 			}
 		});
 	}
