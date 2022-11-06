@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SelectWithLabel } from '@controls/selectWithLabel/selectWithLabel.component';
+import { SelectWithLabel, SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
 import { Controller } from 'react-hook-form';
 
-export const FormSelect = ({ label, name, required, disabled, formError = null, ...props }) => (
+export interface FormSelectProps extends SelectWithLabelProps {
+	control?: any;
+	formError?: any;
+}
+
+export const FormSelect = ({ name, control, formError, ...props }:FormSelectProps) => (
 	<Controller
 		name={name}
+		control={control}
 		render={({ field: { ref, value, ...field } }) => (
 			<SelectWithLabel
 				{...field}

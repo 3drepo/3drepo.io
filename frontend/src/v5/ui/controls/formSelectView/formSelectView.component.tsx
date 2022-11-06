@@ -20,8 +20,8 @@ import { View } from '@/v5/store/store.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, FormSelect } from './formSelectView.styles';
 
 const getThumbnailBasicPath = (

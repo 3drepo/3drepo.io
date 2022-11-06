@@ -24,7 +24,7 @@ export type FormToggleProps = SwitchProps & {
 	name: string;
 	children: any;
 	defaultValue?: boolean,
-	formError: any;
+	formError?: any;
 };
 
 export const FormToggle = ({
