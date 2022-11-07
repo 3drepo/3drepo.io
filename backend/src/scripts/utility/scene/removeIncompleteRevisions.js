@@ -33,12 +33,27 @@ const { deleteMany, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
+const removeFilesHelper = async (ts, col, query) => {
+	try {
+		await removeFilesWithMeta(ts, col, query);
+	} catch (err) {
+		logger.logError(`Failed to remove files from ${ts}.${col} with query: ${query}`);
+		throw err;
+	}
+};
+
 const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 	if (refAttribute) {
 		const projection = { [refAttribute]: 1 };
 		const filesFilter = { ...filter, [refAttribute]: { $exists: true } };
 
-		const results = await find(teamspace, collection, filesFilter, projection);
+		let results;
+		try {
+			results = await find(teamspace, collection, filesFilter, projection);
+		} catch (err) {
+			logger.logError(`Failed to find files from ${teamspace}.${collection} with query: ${filesFilter}`);
+			throw err;
+		}
 		const filenames = results.flatMap((record) => {
 			const fileRefs = record[refAttribute];
 			if (fileRefs) {
@@ -59,10 +74,14 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 			return [];
 		});
 
-		await removeFilesWithMeta(teamspace, collection, { _id: { $in: filenames } });
+		await removeFilesHelper(teamspace, collection, { _id: { $in: filenames } });
 	}
-
-	await deleteMany(teamspace, collection, filter);
+	try {
+		await deleteMany(teamspace, collection, filter);
+	} catch (err) {
+		logger.logError(`Failed to remove records from ${teamspace}.${collection} with query: ${filter}`);
+		throw err;
+	}
 };
 
 const processModelStash = async (teamspace, model, revIds) => {
@@ -70,20 +89,21 @@ const processModelStash = async (teamspace, model, revIds) => {
 	const revIdsRegex = new RegExp(`.*(?:${revIds.map(UUIDToString).join('|')}).*`);
 
 	const proms = [
-		removeFilesWithMeta(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
+		removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
 		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
 		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
 	];
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map(({ _id }) => UUIDToString(_id));
 	if (supermeshIds.length) {
-		for (let i = 0; i <= supermeshIds.length; i += 1000) {
-			const meshGroup = supermeshIds.slice(i, i + 1000);
+		const limit = 500;
+		for (let i = 0; i <= supermeshIds.length; i += limit) {
+			const meshGroup = supermeshIds.slice(i, i + limit);
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			const superMeshRegex = new RegExp(`.*(?:${meshGroup.join('|')}).*`);
 			proms.push(
-				removeFilesWithMeta(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
-				removeFilesWithMeta(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
-				removeFilesWithMeta(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
+				removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
+				removeFilesHelper(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
+				removeFilesHelper(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
 			);
 		}
 	}
@@ -100,8 +120,8 @@ const processModelSequences = async (teamspace, model, revIds) => {
 
 		await Promise.all([
 			removeRecords(teamspace, `${model}.activities`, { sequenceId: { $in: sequenceIds } }),
-			removeFilesWithMeta(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map(UUIDToString) } }),
-			removeFilesWithMeta(teamspace, `${model}.sequences.ref`, { _id: { $in: stateIds } }),
+			removeFilesHelper(teamspace, `${model}.activities.ref`, { _id: { $in: sequenceIds.map(UUIDToString) } }),
+			removeFilesHelper(teamspace, `${model}.sequences.ref`, { _id: { $in: stateIds } }),
 			deleteMany(teamspace, `${model}.sequences`, { _id: { $in: sequenceIds } }),
 		]);
 	}
@@ -116,7 +136,7 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 	await Promise.all([
 		processModelSequences(teamspace, model, revIds),
 		processModelStash(teamspace, model, revIds),
-		removeFilesWithMeta(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
+		removeFilesHelper(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
 	]);
 
 	// We can't remove mesh nodes until we've processed the stashes
