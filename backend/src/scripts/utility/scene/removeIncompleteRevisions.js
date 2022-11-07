@@ -37,7 +37,7 @@ const removeFilesHelper = async (ts, col, query) => {
 	try {
 		await removeFilesWithMeta(ts, col, query);
 	} catch (err) {
-		logger.logError(`Failed to remove files from ${ts}.${col} with query: ${query}`);
+		logger.logError(`Failed to remove files from ${ts}.${col} with query: ${JSON.stringify(query)}`);
 		throw err;
 	}
 };
@@ -51,7 +51,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 		try {
 			results = await find(teamspace, collection, filesFilter, projection);
 		} catch (err) {
-			logger.logError(`Failed to find files from ${teamspace}.${collection} with query: ${filesFilter}`);
+			logger.logError(`Failed to find files from ${teamspace}.${collection} with query: ${JSON.stringify(filesFilter)}`);
 			throw err;
 		}
 		const filenames = results.flatMap((record) => {
@@ -79,7 +79,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 	try {
 		await deleteMany(teamspace, collection, filter);
 	} catch (err) {
-		logger.logError(`Failed to remove records from ${teamspace}.${collection} with query: ${filter}`);
+		logger.logError(`Failed to remove records from ${teamspace}.${collection} with query: ${JSON.stringify(filter)}`);
 		throw err;
 	}
 };
