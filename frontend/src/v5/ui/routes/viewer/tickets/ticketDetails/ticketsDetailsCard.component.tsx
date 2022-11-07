@@ -32,22 +32,6 @@ import { dirtyValues, filterErrors, nullifyEmptyStrings } from '@/v5/helpers/for
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
-const updateTicket = (teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
-	const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-	const validVals = nullifyEmptyStrings(filterErrors(values, formData.formState.errors));
-
-	if (isEmpty(validVals)) return;
-
-	TicketsActionsDispatchers.updateTicket(
-		teamspace,
-		project,
-		containerOrFederation,
-		ticketId,
-		validVals,
-		isFederation,
-	);
-};
-
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
 
@@ -105,14 +89,13 @@ export const TicketDetailsCard = () => {
 	}, [JSON.stringify(ticket)]);
 
 	const onBlurHandler = () => {
-		updateTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticketId,
-			isFederation,
-			formData,
-		);
+		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
+		const validVals = nullifyEmptyStrings(filterErrors(values, formData.formState.errors));
+
+		if (isEmpty(validVals)) return;
+
+		// eslint-disable-next-line max-len
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation);
 	};
 
 	return (
