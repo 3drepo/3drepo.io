@@ -28,7 +28,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
-import { dirtyValues, filterErrors, nullifyEmptyStrings } from '@/v5/helpers/form.helper';
+import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
@@ -90,7 +90,7 @@ export const TicketDetailsCard = () => {
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		const validVals = nullifyEmptyStrings(filterErrors(values, formData.formState.errors));
+		const validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
 
 		if (isEmpty(validVals)) return;
 

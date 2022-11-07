@@ -16,7 +16,7 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { isArray, merge, mergeWith } from 'lodash';
+import { isArray, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';

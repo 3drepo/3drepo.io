@@ -87,3 +87,17 @@ export const filterErrors = (
 	}
 	return ({ ...accum, [key]: filterErrors(value, error) });
 }, {});
+
+export const removeEmptyObjects = (tree) => {
+	if (!_.isObject(tree) || Array.isArray(tree) || _.isString(tree)) return tree;
+
+	return Object.keys(tree).reduce((accum, key) => {
+		const value = tree[key];
+
+		if (_.isObject(value) && !Array.isArray(value) && !_.isString(value) && _.isEmpty(value)) {
+			return accum;
+		}
+
+		return ({ ...accum, [key]: removeEmptyObjects(value) });
+	}, {});
+};
