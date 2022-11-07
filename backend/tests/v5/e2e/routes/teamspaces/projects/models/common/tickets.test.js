@@ -496,73 +496,96 @@ const testGetTicket = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
-/*
 const testGetTicketList = () => {
-	const route = (key, projectId = project.id, modelId = modelWithTemplates._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets${key ? `?key=${key}` : ''}`;
 	describe('Get ticket list', () => {
-		const tickets = [];
+		const { users, teamspace, project } = generateBasicData();
+		const con = ServiceHelper.generateRandomModel();
+		const conNoTickets = ServiceHelper.generateRandomModel();
+		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fedNoTickets = ServiceHelper.generateRandomModel({ isFederation: true });
+		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets]);
+			await ServiceHelper.db.createTemplates(teamspace, templatesToUse);
+
+			await Promise.all([fed, con].map(async (model) => {
+				const modelType = fed === model ? 'federation' : 'container';
+				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
+
+				const ticketProms = times(10, async (n) => {
+					const ticket = ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]);
+					const res = await agent.post(addTicketRoute(model._id)).send(ticket);
+					if (!res.body._id) {
+						throw new Error(`Could not add a new ticket: ${res.body.message}`);
+					}
+					ticket._id = res.body._id;
+					return ticket;
+				});
+
+				// eslint-disable-next-line no-param-reassign
+				model.tickets = await Promise.all(ticketProms);
+			}));
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongTypeModel = isFed ? con : fed;
+			const model = isFed ? fed : con;
+			const modelNoTickets = isFed ? fedNoTickets : conNoTickets;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
+
+			return [
+				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
+				['the user does not have access to the federation', { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true],
+				['the model has tickets', baseRouteParams, true],
+			];
+		};
+
+		const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}`;
+
 		const sortById = (a, b) => {
 			if (a._id > b._id) return 1;
 			if (b._id > a._id) return -1;
 			return 0;
 		};
-		beforeAll(async () => {
-			const tickTems = [];
-			times(3, () => {
-				tickTems.push(ServiceHelper.generateTemplate());
+
+		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const endpoint = getRoute({ ...routeParams, modelId: model._id });
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(endpoint).expect(expectedStatus);
+				if (success) {
+					const tickets = model.tickets ?? [];
+					if (res.body?.tickets?.length) {
+						tickets.sort(sortById);
+						res.body.tickets.sort(sortById);
+						res.body.tickets.forEach((tickOut, ind) => {
+							const { _id, title, type } = tickets[ind];
+							expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
+						});
+					} else {
+						expect(res.body).toEqual({ tickets });
+					}
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
 			});
-			await ServiceHelper.db.createTemplates(teamspace, tickTems);
+		};
 
-			const proms = [];
-			const endpoint = addTicketRoute(users.tsAdmin.apiKey, undefined, modelForTicketList._id);
-
-			times(10, (i) => {
-				const ticket = ServiceHelper.generateTicket(tickTems[i % tickTems.length]);
-				const prom = agent.post(endpoint).send(ticket).then(({ body }) => {
-					ticket._id = body._id;
-					tickets.push(ticket);
-				});
-
-				proms.push(prom);
-			});
-
-			await Promise.all(proms);
-			tickets.sort(sortById);
-		});
-
-		describe.each([
-			['the user does not have a valid session', templates.notLoggedIn],
-			['the user is not a member of the teamspace', templates.teamspaceNotFound, undefined, undefined, users.nobody.apiKey],
-			['the project does not exist', templates.projectNotFound, ServiceHelper.generateRandomString(), undefined, users.tsAdmin.apiKey],
-			['the federation does not exist', templates.federationNotFound, project.id, ServiceHelper.generateRandomString(), users.tsAdmin.apiKey],
-			['the federation provided is a container', templates.federationNotFound, project.id, con._id, users.tsAdmin.apiKey],
-			['the user does not have access to the federation', templates.notAuthorized, undefined, undefined, users.noProjectAccess.apiKey],
-		])('Error checks', (desc, expectedOutput, projectId, modelId, key) => {
-			test(`should fail with ${expectedOutput.code} if ${desc}`, async () => {
-				const endpoint = route(key, projectId, modelId);
-				const res = await agent.get(endpoint).expect(expectedOutput.status);
-				expect(res.body.code).toEqual(expectedOutput.code);
-			});
-		});
-
-		test('Should return empty list if model has no tickets', async () => {
-			const endpoint = route(users.tsAdmin.apiKey, undefined, modelWithNoTickets._id);
-			const res = await agent.get(endpoint).expect(templates.ok.status);
-			expect(res.body).toEqual({ tickets: [] });
-		});
-
-		test('Should return all tickets within the model', async () => {
-			const endpoint = route(users.tsAdmin.apiKey, undefined, modelForTicketList._id);
-			const res = await agent.get(endpoint).expect(templates.ok.status);
-			const ticketsOut = res.body.tickets;
-			ticketsOut.sort(sortById);
-			ticketsOut.forEach((tickOut, ind) => {
-				const { _id, title, type } = tickets[ind];
-				expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
-			});
-		});
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
+
+/*
 
 const updateTicketRoute = (key, projectId = project.id, modelId = modelWithTemplates._id, ticketId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 
@@ -673,7 +696,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testAddTicket();
 	testGetTicketResource();
 	testGetTicket();
-	/* testGetTicketList();
-	testUpdateTicket();
+	testGetTicketList();
+	/* testUpdateTicket();
 	*/
 });
