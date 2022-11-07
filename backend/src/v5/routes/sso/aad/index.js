@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, redirectToStateURL, verifyNewUserDetails, isSsoUser } = require('../../../middleware/sso/aad');
+const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails, isSsoUser } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
+const { createSession } = require('../../../middleware/sessions');
+const { notLoggedIn } = require('../../../middleware/auth');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
 const { isLoggedIn } = require('../../../middleware/auth');
@@ -68,7 +70,8 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, redirectToStateURL);
+	router.get(authenticateRedirectEndpoint, notLoggedIn, checkStateIsValid, hasAssociatedAccount,
+		createSession, redirectToStateURL);
 
 	/**
 	 * @openapi
@@ -121,7 +124,7 @@ const establishRoutes = () => {
 	 */
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
+	router.get(signupRedirectEndpoint, checkStateIsValid, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
 	router.post('/unlink', isLoggedIn, isSsoUser, validateUnlinkData, unlink);
 

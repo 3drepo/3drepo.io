@@ -40,7 +40,12 @@ Users.validateLoginData = async (req, res, next) => {
 		await schema.validate(req.body);
 
 		const usernameOrEmail = req.body.user;
-		const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1 });
+		const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, 'customData.sso': 1 });
+
+		if (sso) {
+			throw templates.userNotFound;
+		}
+
 		req.body.user = user;
 
 		next();
@@ -145,7 +150,12 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 
 		try {
 			const usernameOrEmail = req.body.user;
-			const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0 });
+			const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0, 'customData.sso': 1 });
+
+			if (sso) {
+				throw templates.unknown;
+			}
+
 			req.body.user = user;
 			next();
 		} catch {

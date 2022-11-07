@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { authenticateRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
@@ -22,11 +23,16 @@ const { addPkceProtection } = require('./pkce');
 const { getUserByEmail, getUserByUsername } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
-const { signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { validateMany } = require('../common');
 const { getUserFromSession } = require('../../utils/sessions');
 
 const Aad = {};
+
+const redirectWithError = (res, url, errorCode) => {
+	const urlRedirect = new URL(url);
+	urlRedirect.searchParams.set('error', errorCode);
+	res.redirect(urlRedirect.href);
+};
 
 const authenticate = (redirectUri) => async (req, res) => {
 	try {
@@ -52,18 +58,15 @@ const authenticate = (redirectUri) => async (req, res) => {
 };
 
 Aad.verifyNewUserDetails = async (req, res, next) => {
-	try {
-		const state = JSON.parse(req.query.state);
+	const state = JSON.parse(req.query.state);
 
+	try {
 		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByEmail(mail, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
-			const errorCode = user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
-			const urlRedirect = new URL(state.redirectUri);
-			urlRedirect.searchParams.set('error', errorCode);
-			res.redirect(urlRedirect.href);
+			throw user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
 		} else {
 			req.body = {
 				...state,
@@ -74,25 +77,58 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 			};
 
 			delete req.body.redirectUri;
-
 			await next();
 		}
-	} catch (err) {
-		logger.logError(`Failed to validate user details for SSO sign up: ${err.message}`);
-		respond(req, res, templates.unknown);
+	} catch (errorCode) {
+		redirectWithError(res, state.redirectUri, errorCode);
 	}
 };
 
 Aad.redirectToStateURL = (req, res) => {
+	const state = JSON.parse(req.query.state);
 	try {
-		res.redirect(JSON.parse(req.query.state).redirectUri);
+		res.redirect(state.redirectUri);
 	} catch (err) {
-		logger.logError(`Failed to parse and redirect user back to the specified URL: ${err.message}`);
+		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
 		respond(req, res, templates.unknown);
 	}
 };
 
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
+
+Aad.hasAssociatedAccount = async (req, res, next) => {
+	const state = JSON.parse(req.query.state);
+
+	try {
+		const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
+			req.session.pkceCodes?.verifier);
+
+		const { user, customData: { sso } } = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso': 1 });
+
+		if (sso?.id !== id) {
+			throw errorCodes.nonSsoUser;
+		} else {
+			req.body.user = user;
+			await next();
+		}
+	} catch (err) {
+		let errorCode = err;
+
+		if (errorCode === templates.userNotFound) errorCode = errorCodes.userNotFound;
+
+		redirectWithError(res, state.redirectUri, errorCode);
+	}
+};
+
+Aad.checkStateIsValid = async (req, res, next) => {
+	try {
+		JSON.parse(req.query.state);
+		await next();
+	} catch (err) {
+		logger.logError('Failed to parse req.query.state');
+		respond(req, res, templates.unknown);
+	}
+};
 
 Aad.isSsoUser = async (req, res, next) => {
 	try {

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('../../../utils/config');
-const { get } = require('../../../utils/webRequests');
 const aadLabel = require('../../../utils/logger').labels.aad;
+const config = require('../../../utils/config');
+const { errorCodes } = require('../sso.constants');
+const { get } = require('../../../utils/webRequests');
 const logger = require('../../../utils/logger').logWithLabel(aadLabel);
 const { msGraphUserDetailsUri } = require('./aad.constants');
 const msal = require('@azure/msal-node');
@@ -58,11 +59,13 @@ Aad.getAuthenticationCodeUrl = (params) => {
 Aad.getUserDetails = async (code, redirectUri, codeVerifier) => {
 	const tokenRequest = { code, redirectUri, codeVerifier };
 	const clientApp = getClientApplication();
-	const response = await clientApp.acquireTokenByCode(tokenRequest);
-
-	return get(msGraphUserDetailsUri, {
-		Authorization: `Bearer ${response.accessToken}`,
-	});
+	try {
+		const token = await clientApp.acquireTokenByCode(tokenRequest);
+		const response = await get(msGraphUserDetailsUri, { Authorization: `Bearer ${token.accessToken}` });
+		return response;
+	} catch {
+		throw errorCodes.failedToFetchDetails;
+	}
 };
 
 module.exports = Aad;

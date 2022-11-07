@@ -27,6 +27,7 @@ const WebRequests = require(`${src}/utils/webRequests`);
 
 jest.mock('@azure/msal-node');
 const msal = require('@azure/msal-node');
+const { errorCodes } = require('../../../../../../src/v5/services/sso/sso.constants');
 
 const { msGraphUserDetailsUri } = require(`${src}/services/sso/aad/aad.constants`);
 
@@ -114,13 +115,28 @@ const testGetUserDetails = () => {
 			};
 
 			const userDetails = { mail: generateRandomString() };
-			const fn = jest.spyOn(WebRequests, 'get').mockResolvedValue(userDetails);
+			const fn = jest.spyOn(WebRequests, 'get').mockResolvedValueOnce(userDetails);
 
 			const res = await Aad.getUserDetails(generateRandomString(),
 				generateRandomString(), generateRandomString());
 			expect(res).toEqual(userDetails);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(msGraphUserDetailsUri, { Authorization: `Bearer ${accessToken}` });
+
+			config.sso = initialConfig;
+		});
+
+		test(`should throw ${errorCodes.failedToFetchDetails} if it fails to fetch user details`, async () => {
+			const initialConfig = config.sso;
+			config.sso = {
+				aad: {
+					clientId: generateRandomString(),
+					clientSecret: generateRandomString(),
+				},
+			};
+			jest.spyOn(WebRequests, 'get').mockRejectedValueOnce(new Error());
+			await expect(Aad.getUserDetails(generateRandomString(),
+				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.failedToFetchDetails);
 
 			config.sso = initialConfig;
 		});

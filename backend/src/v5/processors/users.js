@@ -33,21 +33,32 @@ const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
 
 Users.signUp = async (newUserData) => {
-	const token = generateHashString();
-
-	const formattedNewUserData = { ...newUserData, token };
-	if (newUserData.sso) {
+	const isSso = !!newUserData.sso;
+	const formattedNewUserData = { ...newUserData };
+	if (isSso) {
 		formattedNewUserData.password = generateHashString();
+	} else {
+		formattedNewUserData.token = generateHashString();
 	}
 
 	await addUser(formattedNewUserData);
 
-	await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
-		token,
-		email: newUserData.email,
-		firstName: newUserData.firstName,
-		username: newUserData.username,
-	});
+	if (isSso) {
+		publish(events.USER_VERIFIED, {
+			username: newUserData.username,
+			email: newUserData.email,
+			fullName: `${newUserData.firstName} ${newUserData.lastName}`,
+			company: newUserData.company,
+			mailListOptOut: newUserData.mailListOptOut,
+		});
+	} else {
+		await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
+			token: formattedNewUserData.token,
+			email: newUserData.email,
+			firstName: newUserData.firstName,
+			username: newUserData.username,
+		});
+	}
 };
 
 Users.verify = async (username, token) => {

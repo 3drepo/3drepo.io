@@ -46,6 +46,7 @@ WebRequests.post.mockImplementation(() => Promise.resolve({
 
 const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
+const ssoUsername = 'ssoUsername';
 const availableEmail = 'availableEmail@email.com';
 const existingEmail = 'existingEmail@email.com';
 const validPassword = 'Abcdef12345!';
@@ -60,14 +61,6 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	}
 
 	return { user: existingUsername };
-});
-
-UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
-	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
-		return { user: existingUsername };
-	}
-
-	throw templates.userNotFound;
 });
 
 UsersModel.getUserByUsername.mockImplementation((username) => {
@@ -101,10 +94,21 @@ const testValidateLoginData = () => {
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
+		[{ body: { user: ssoUsername, password: 'validPassword' } }, false, 'with SSO user that exists', templates.incorrectUsernameOrPassword],
 		[{ body: { user: existingEmail, password: 'validPassword' } }, true, 'with user that exists using email'],
 		[{ body: { user: existingUsername, password: 'validPassword', extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
-	])('Check if req arguments for loggin in are valid', (data, shouldPass, desc, expectedError) => {
+	])('Check if req arguments for login in are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce((usernameOrEmail) => {
+				if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
+					return { user: existingUsername, customData: {} };
+				} if (usernameOrEmail === ssoUsername) {
+					return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
+				}
+
+				throw templates.userNotFound;
+			});
+
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
 			await Users.validateLoginData(req, {}, mockCB);
@@ -223,12 +227,23 @@ const testForgotPasswordData = () => {
 	describe.each([
 		[{ body: { user: existingUsername } }, true, 'with valid username'],
 		[{ body: { user: availableUsername } }, false, 'with invalid username', templates.ok],
+		[{ body: { user: ssoUsername } }, false, 'with sso user username', templates.ok],
 		[{ body: { user: existingEmail } }, true, 'with valid email'],
 		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for requesting a reset password email are valid', (req, shouldPass, desc, expectedResponse) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedResponse.code}`}`, async () => {
+			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce((usernameOrEmail) => {
+				if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
+					return { user: existingUsername, customData: {} };
+				} if (usernameOrEmail === ssoUsername) {
+					return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
+				}
+
+				throw templates.userNotFound;
+			});
+
 			const mockCB = jest.fn();
 			await Users.validateForgotPasswordData(req, {}, mockCB);
 			if (shouldPass) {
