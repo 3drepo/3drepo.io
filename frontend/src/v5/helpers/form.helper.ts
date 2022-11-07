@@ -15,42 +15,75 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isString, isEmpty } from 'lodash';
-import { TITLE_INPUT_NAME } from '../store/tickets/tickets.helpers';
+import _ from 'lodash';
 
 export const dirtyValues = (
-	dirtyFields: object | boolean,
 	allValues: object,
+	dirtyFields: object | boolean,
 ) => {
 // If *any* item in an array was modified, the entire array must be submitted, because there's no way to indicate
 // "placeholders" for unchanged elements. `dirtyFields` is true for leaves.
 	if (dirtyFields === true || Array.isArray(dirtyFields)) return allValues;
+
 	// Here, we have an object
 	return Object.fromEntries(
 		Object.keys(dirtyFields).map((key) => [
 			key,
-			dirtyValues(dirtyFields[key], allValues[key]),
+			dirtyValues(allValues[key], dirtyFields[key]),
 		]),
 	);
 };
 
-const nullifyEmptyStrings = (values = {}) => Object.keys(values).reduce((accum, key) => {
-	const val = (isString(values[key]) && !values[key]) ? null : values[key];
-	return { ...accum, [key]: val };
+/**
+ * returns the tree but if the the leaf is an empty string, it changes it to null
+ * example:
+ * const tree = {
+ *    properties: {
+ *       Description: '',
+ *       AnotherLeaf: 'with a value',
+ *     }
+ *  }
+ *
+ *  returns
+ *    properties: {
+ *       Description: null,
+ *       AnotherLeaf: 'with a value',
+ *     }
+ *  }
+ *
+ */
+
+export const nullifyEmptyStrings = (tree) => Object.fromEntries(
+	Object.keys(tree).map((key) => {
+		const value = tree[key];
+		if (value === '') {
+			return [key, null];
+		}
+
+		if (Array.isArray(value) || !(_.isObject(value))) {
+			return [key, value];
+		}
+
+		return [key, nullifyEmptyStrings(value)];
+	}),
+);
+
+/**
+ * It returns only the values that doesnt match the errors in the errors object
+ */
+export const filterErrors = (
+	allValues: object,
+	errors: object | undefined,
+) => Object.keys(allValues).reduce((accum, key) => {
+	const value = allValues[key];
+	const error = errors[key];
+
+	if (error?.message) {
+		return accum;
+	}
+
+	if (!errors[key]) {
+		return ({ ...accum, [key]: value });
+	}
+	return ({ ...accum, [key]: filterErrors(value, error) });
 }, {});
-
-export const nullifyAllValuesEmptyStrings = (values) => {
-	const fields: any = values[TITLE_INPUT_NAME] ? { [TITLE_INPUT_NAME]: values[TITLE_INPUT_NAME] } : {};
-
-	const properties = nullifyEmptyStrings(values.properties);
-	const modules = nullifyEmptyStrings(values.modules);
-
-	if (!isEmpty(properties)) {
-		fields.properties = properties;
-	}
-	if (!isEmpty(modules)) {
-		fields.modules = modules;
-	}
-
-	return fields;
-};

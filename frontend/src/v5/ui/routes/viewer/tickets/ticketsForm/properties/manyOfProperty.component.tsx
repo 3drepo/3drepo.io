@@ -26,8 +26,6 @@ export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
 	const { name, readOnly, required, values } = property;
 	let items = [];
 
-	useSelector(selectJobs);
-
 	if (values === 'jobsAndUsers') {
 		const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
 		const jobs = useSelector(selectJobs);

@@ -23,60 +23,18 @@ import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { getValidators, modelIsFederation, TITLE_INPUT_NAME } from '@/v5/store/tickets/tickets.helpers';
+import { getValidators, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty, isString } from 'lodash';
+import { isEmpty } from 'lodash';
+import { dirtyValues, filterErrors, nullifyEmptyStrings } from '@/v5/helpers/form.helper';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
-const filterFields = (values = {}, errors = {}) => Object.keys(values).reduce((accum, key) => {
-	if (errors[key]) return accum;
-	return { ...accum, [key]: values[key] };
-}, {});
-
-const filterErrors = (values, errors) => {
-	const fields: any = !errors[TITLE_INPUT_NAME] && values[TITLE_INPUT_NAME]
-		? { [TITLE_INPUT_NAME]: values[TITLE_INPUT_NAME] } : {};
-
-	const properties = filterFields(values.properties, errors.properties);
-	const modules = filterFields(values.modules, errors.modules);
-
-	if (!isEmpty(properties)) {
-		fields.properties = properties;
-	}
-	if (!isEmpty(modules)) {
-		fields.modules = modules;
-	}
-
-	return fields;
-};
-
-const nullifyEmptyStrings = (values = {}) => Object.keys(values).reduce((accum, key) => {
-	const val = (isString(values[key]) && !values[key]) ? null : values[key];
-	return { ...accum, [key]: val };
-}, {});
-
-const nullifyAllValuesEmptyStrings = (values) => {
-	const fields: any = values[TITLE_INPUT_NAME] ? { [TITLE_INPUT_NAME]: values[TITLE_INPUT_NAME] } : {};
-
-	const properties = nullifyEmptyStrings(values.properties);
-	const modules = nullifyEmptyStrings(values.modules);
-
-	if (!isEmpty(properties)) {
-		fields.properties = properties;
-	}
-	if (!isEmpty(modules)) {
-		fields.modules = modules;
-	}
-
-	return fields;
-};
-
 const updateTicket = (teamspace, project, containerOrFederation, ticketId, isFederation, formData) => {
-	const values = dirtyValues(formData.formState.dirtyFields, formData.getValues());
-	const validVals = nullifyAllValuesEmptyStrings(filterErrors(values, formData.formState.errors));
+	const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
+	const validVals = nullifyEmptyStrings(filterErrors(values, formData.formState.errors));
 
 	if (isEmpty(validVals)) return;
 

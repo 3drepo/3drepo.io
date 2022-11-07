@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import _ from 'lodash';
 import { createSelector } from 'reselect';
+import { sortBy } from 'lodash';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IUser, IUsersState } from './users.redux';
 
@@ -39,6 +39,6 @@ export const selectCurrentTeamspaceUsers = createSelector(
 	selectCurrentTeamspace,
 	(state, teamspace) => {
 		const users = (state.usersByTeamspace || {})[teamspace] || [];
-		return _.sortBy(users, 'firstName');
+		return sortBy(users, 'firstName');
 	},
 );
