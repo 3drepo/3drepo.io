@@ -329,7 +329,7 @@ const establishRoutes = () => {
 	*         description: Updates the details of the user
 	*
 	*/
-	router.put('/user', validateUpdateData, updateProfile);
+	router.put('/user', isLoggedIn, validateUpdateData, updateProfile);
 
 	/**
 	* @openapi

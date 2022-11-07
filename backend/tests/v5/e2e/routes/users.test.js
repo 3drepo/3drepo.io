@@ -384,6 +384,29 @@ const testUpdateProfile = () => {
 				await testSession.put('/v5/user/').send({ oldPassword: 'Passport123!', newPassword: testUser.password });
 			});
 		});
+
+		describe('With valid authentication (SSO user)', () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: ssoUser.user, password: ssoUser.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should fail if the user tries to update non sso fields', async () => {
+				const data = { firstName: generateRandomString(), lastName: generateRandomString() };
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+			
+			test('should succeed if the user tries to update sso fields', async () => {				
+				const data = { company: generateRandomString(), countryCode: 'GB' };
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.company).toEqual(data.company);
+				expect(updatedProfileRes.body.countryCode).toEqual(data.countryCode);
+			});
+		});
 	});
 };
 

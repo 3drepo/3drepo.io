@@ -53,13 +53,13 @@ Users.validateLoginData = async (req, res, next) => {
 	}
 };
 
-const generateUpdateSchema = (isSSO) => {
+const generateUpdateSchema = (isSSO, username) => {
 	const nonSSOFields = {
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
 			async (value) => {
 				if (value) {
 					try {
-						await getUserByQuery({ 'customData.email': value, user: { $ne: req.session?.user?.username } }, { _id: 1 });
+						await getUserByQuery({ 'customData.email': value, user: { $ne: username } }, { _id: 1 });
 						return false;
 					} catch {
 						// do nothing
@@ -106,7 +106,7 @@ Users.validateUpdateData = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
 		const { customData: { sso } } = await getUserByUsername(username, { 'customData.sso': 1 });
-		const schema = generateUpdateSchema(!!sso);
+		const schema = generateUpdateSchema(!!sso, username);
 		await schema.validate(req.body);
 
 		if (req.body.oldPassword) {
