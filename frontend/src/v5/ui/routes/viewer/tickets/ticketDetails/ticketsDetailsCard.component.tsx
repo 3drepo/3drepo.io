@@ -99,19 +99,6 @@ export const TicketDetailsCard = () => {
 		formData.reset(getTicketDefaultValues(ticket));
 	}, [ticket.modules, ticket.properties]);
 
-	useEffect(() => {
-		if (!ticket) {
-			return;
-		}
-
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket.type,
-			isFederation,
-		);
-	}, [ticket?.type]);
 	if (!ticket) return <></>;
 	return (
 		<CardContainer>
