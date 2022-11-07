@@ -68,6 +68,28 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 	}
 }
 
+export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateAction) {
+	try {
+		const fetchTicketsTemplate = isFederation
+			? API.Tickets.fetchFederationTemplate
+			: API.Tickets.fetchContainerTemplate;
+		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(TicketsActions.replaceTemplateSuccess(modelId, template));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchTemplate.error.action',
+				defaultMessage: 'trying to fetch a template',
+			}),
+			error,
+			details: formatMessage({
+				id: 'tickets.fetchTemplate.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
 export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
 	try {
 		const fetchModelTemplates = isFederation
@@ -105,28 +127,6 @@ export function* fetchRiskCategories({ teamspace }: FetchRiskCategoriesAction) {
 				defaultMessage: 'trying to fetch the risk categories',
 			}),
 			error,
-		}));
-	}
-}
-
-export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateAction) {
-	try {
-		const fetchTicketsTemplate = isFederation
-			? API.Tickets.fetchFederationTemplate
-			: API.Tickets.fetchContainerTemplate;
-		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
-		yield put(TicketsActions.replaceTemplateSuccess(modelId, template));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'tickets.fetchTemplate.error.action',
-				defaultMessage: 'trying to fetch a template',
-			}),
-			error,
-			details: formatMessage({
-				id: 'tickets.fetchTemplates.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
 		}));
 	}
 }

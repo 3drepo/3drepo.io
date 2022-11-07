@@ -62,10 +62,10 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template }: ReplaceTemplateSuccessAction) => {
 	if (!state.templatesByModelId[modelId]) state.templatesByModelId[modelId] = [];
 
-	state.templatesByModelId[modelId] = state.templatesByModelId[modelId]
-		.filter((loadedTemplate) => loadedTemplate._id !== template._id);
+	const modelTemplate = state.templatesByModelId[modelId]
+		.find((loadedTemplate) => loadedTemplate._id === template._id);
 
-	state.templatesByModelId[modelId].push(template);
+	merge(modelTemplate, template);
 };
 
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {
