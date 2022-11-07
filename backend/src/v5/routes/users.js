@@ -274,6 +274,10 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   description: The API key of the user
 	 *                   example: 23b61deadbba098fec517dc4fcc84d68
+	 *                 isSso:
+	 *                   type: boolean
+	 *                   description: Whether or not the user is an SSO user
+	 *                   example: true
 	 *
 	 */
 	router.get('/user', validSession, getProfile);
@@ -282,7 +286,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /user:
 	*   put:
-	*     description: Updates the profile of the logged in user
+	*     description: Updates the profile of the logged in user. SSO users cannot update their email, password, firstname and lastname
 	*     tags: [User]
 	*     operationId: updateProfile
 	*     requestBody:
