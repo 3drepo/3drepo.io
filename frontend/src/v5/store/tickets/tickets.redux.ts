@@ -16,7 +16,7 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { merge } from 'lodash';
+import { isArray, merge, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
@@ -52,7 +52,11 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
 	const modelTicket = state.ticketsByModelId[modelId].find(({ _id }) => _id === ticket._id);
-	merge(modelTicket, ticket);
+
+	mergeWith(modelTicket, ticket, (objValue, srcValue) => {
+		if (isArray(objValue)) return srcValue; // If its an array that is merging just use the newest
+		return undefined;
+	});
 
 	if (!modelTicket) {
 		state.ticketsByModelId[modelId].push(ticket as ITicket);

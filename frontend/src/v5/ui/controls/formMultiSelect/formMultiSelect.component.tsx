@@ -22,17 +22,25 @@ export const FormMultiSelect = ({ formError = null, name, ...props }) => (
 	<Controller
 		name={name}
 		defaultValue={[]}
-		render={({ field: { ref, value, ...field } }) => (
-			<SearchSelect
-				inputRef={ref}
-				value={value || []}
-				error={!!formError}
-				renderValue={(val) => (val as any[]).join(',')}
-				helperText={formError?.message}
-				{...field}
-				{...props}
-				multiple
-			/>
-		)}
+		render={({ field: { ref, value, ...field } }) => {
+			// console.log('The actual value:');
+			// console.log(JSON.stringify(value, null, '\t'));
+			return (
+				<SearchSelect
+					inputRef={ref}
+					value={value || []}
+					error={!!formError}
+					renderValue={(val) => {
+						// console.log('the val is');
+						// console.log(JSON.stringify(val, null, '\t'));
+						return (val as any[]).join(',');
+					}}
+					helperText={formError?.message}
+					{...field}
+					{...props}
+					multiple
+				/>
+			);
+		}}
 	/>
 );
