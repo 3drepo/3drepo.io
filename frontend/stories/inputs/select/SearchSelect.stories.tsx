@@ -90,7 +90,7 @@ const SearchSelectMultipleControlledStory: ComponentStory<typeof SearchSelect> =
 				renderValue={(val) => (val as any[]).join(',')}
 			>
 				{values.map((valueItem) => (
-					<MultiSelectMenuItem value={valueItem} key={valueItem} style={{ padding: '8px 14px' }}>
+					<MultiSelectMenuItem value={valueItem} key={valueItem}>
 						{valueItem}
 					</MultiSelectMenuItem>
 				))}

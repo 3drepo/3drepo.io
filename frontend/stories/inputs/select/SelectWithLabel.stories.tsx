@@ -87,7 +87,7 @@ const SelectWithLabelControlledStory: ComponentStory<typeof SelectWithLabel> = (
 				onChange={handleChange}
 			>
 				{values.map((valueItem) => (
-					<MenuItem value={valueItem} key={valueItem} style={{ padding: '8px 14px' }}>
+					<MenuItem value={valueItem} key={valueItem}>
 						{valueItem}
 					</MenuItem>
 				))}
