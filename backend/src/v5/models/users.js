@@ -266,4 +266,9 @@ User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
 User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
 	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
+User.unlinkFromSso = async (username, newPassword) => {
+	await updateUser(username, { $unset: { 'customData.sso': 1 } });
+	await User.updatePassword(username, newPassword);
+};
+
 module.exports = User;

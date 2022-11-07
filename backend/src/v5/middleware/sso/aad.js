@@ -19,11 +19,12 @@ const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
-const { getUserByEmail } = require('../../models/users');
+const { getUserByEmail, getUserByUsername } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { validateMany } = require('../common');
+const { getUserFromSession } = require('../../utils/sessions');
 
 const Aad = {};
 
@@ -90,6 +91,22 @@ Aad.redirectToStateURL = (req, res) => {
 		respond(req, res, templates.unknown);
 	}
 };
+
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
+
+Aad.isSsoUser = async (req, res, next) => {
+	try {
+		const username = getUserFromSession(req.session);
+		const { customData: { sso } } = await getUserByUsername(username);
+
+		if (!sso) {
+			throw templates.nonSsoUser;
+		}
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
 
 module.exports = Aad;

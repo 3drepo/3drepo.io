@@ -286,6 +286,19 @@ Users.validateVerifyData = async (req, res, next) => {
 	}
 };
 
+Users.validateUnlinkData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		password: types.strings.password.required(),
+	}).strict(true).noUnknown().required();
+
+	try {
+		await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
 Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
 module.exports = Users;

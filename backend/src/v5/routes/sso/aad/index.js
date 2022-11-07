@@ -15,17 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticate, redirectToStateURL, verifyNewUserDetails, isSsoUser } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { respond } = require('../../../utils/responder');
-const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
+const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
+const { isLoggedIn } = require('../../../middleware/auth');
+const { getUserFromSession } = require('../../../utils/sessions');
 
 const signUpPost = async (req, res, next) => {
 	try {
 		await Users.signUp(req.body);
 		await next();
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const unlink = async (req, res) => {
+	try {		
+		const username = getUserFromSession(req.session);
+		const { password } = req.body; 
+		await Users.unlinkFromSso(username, password);	
+		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -108,6 +122,8 @@ const establishRoutes = () => {
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
 	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
+
+	router.post('/unlink', isLoggedIn, isSsoUser, validateUnlinkData, unlink);
 
 	return router;
 };
