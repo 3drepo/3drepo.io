@@ -17,7 +17,7 @@
 import { useParams } from 'react-router-dom';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getImageUrl, stripBase64Prefix } from '@controls/formImage/image.helper';
 import { useFormContext } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
@@ -27,9 +27,11 @@ export const ImageProperty = ({
 	property: { name: title, readOnly, required },
 	name,
 	defaultValue,
+	onBlur,
 	...props
 }: PropertyProps) => {
 	const { setValue } = useFormContext();
+	const [img, setImg] = useState('');
 	const { props: { ticketId } } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -43,9 +45,13 @@ export const ImageProperty = ({
 	};
 
 	const handleImageChange = ({ imgSrc = '' }) => {
-		if (imgSrc === getResourceUrl()) return;
-		setValue(name, stripBase64Prefix(imgSrc), { shouldValidate: true, shouldDirty: true });
+		if (imgSrc === img || imgSrc === getResourceUrl()) return;
+		const formattedImgSrc = stripBase64Prefix(imgSrc); 
+		setValue(name, formattedImgSrc, { shouldValidate: true, shouldDirty: true });
+		setImg(formattedImgSrc);
 	};
+
+	useEffect(() => { onBlur?.(); }, [img]);
 
 	return (
 		<TicketImage
