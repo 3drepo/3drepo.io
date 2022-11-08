@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, PropertyDefinition, TemplateModule, ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
+import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
@@ -31,9 +31,10 @@ interface PropertiesListProps {
 	properties: PropertyDefinition[];
 	propertiesValues: Record<string, any>;
 	module: string;
+	onPropertyBlur?: (...args) => void;
 }
 
-const PropertiesList = ({ module, properties, propertiesValues = {} }: PropertiesListProps) => {
+const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -48,6 +49,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {} }: Propertie
 						formError={get(formState.errors, inputName)}
 						defaultValue={propertiesValues[name] ?? property.default}
 						key={name}
+						onBlur={onPropertyBlur}
 					/>
 				);
 			})}
@@ -66,19 +68,23 @@ const PropertiesPanel = (props: PropertiesListProps) => (
 );
 
 interface ModulePanelProps {
-	module: TemplateModule ;
+	module: TemplateModule;
 	moduleValues: Record<string, any>;
 }
 
-const ModulePanel = ({ module, moduleValues }: ModulePanelProps) => (
+const ModulePanel = ({ module, moduleValues, ...rest }: ModulePanelProps) => (
 	<Accordion {...getModulePanelTitle(module)}>
-		<PropertiesList module={module.name || module.type} properties={module.properties || []} propertiesValues={moduleValues} />
+		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
 	</Accordion>
 );
 
-export const TITLE_INPUT_NAME = 'title';
+interface Props {
+	template: Partial<ITemplate>;
+	ticket: Partial<ITicket>;
+	onPropertyBlur?: (...args) => void;
+}
 
-export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>, ticket: Partial<ITicket> }) => {
+export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -87,17 +93,23 @@ export const TicketForm = ({ template, ticket } : { template: Partial<ITemplate>
 					name={TITLE_INPUT_NAME}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
+					placeholder={formatMessage({
+						id: 'customTicket.newTicket.titlePlaceholder',
+						defaultMessage: 'Ticket name',
+					})}
+					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
-					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} />
+					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
 								key={module.name}
 								module={module}
 								moduleValues={ticket.modules[module.name]}
+								{...rest}
 							/>
 						))
 					}

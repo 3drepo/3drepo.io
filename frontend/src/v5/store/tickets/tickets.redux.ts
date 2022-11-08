@@ -16,12 +16,17 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { merge } from 'lodash';
+import { isArray, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceId } from '../store.types';
 import { ITemplate, ITicket, NewTicket } from './tickets.types';
+
+const mergeWithArray = (objValue, srcValue ) => mergeWith(objValue, srcValue, (target, src) => {
+	if (isArray(target)) return src; // If its an array that is merging just use the newest
+	return undefined;
+});
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
@@ -52,7 +57,8 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
 	const modelTicket = state.ticketsByModelId[modelId].find(({ _id }) => _id === ticket._id);
-	merge(modelTicket, ticket);
+
+	mergeWithArray(modelTicket, ticket);
 
 	if (!modelTicket) {
 		state.ticketsByModelId[modelId].push(ticket as ITicket);
@@ -65,7 +71,7 @@ export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template
 	const modelTemplate = state.templatesByModelId[modelId]
 		.find((loadedTemplate) => loadedTemplate._id === template._id);
 
-	merge(modelTemplate, template);
+	mergeWithArray(modelTemplate, template);
 };
 
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {

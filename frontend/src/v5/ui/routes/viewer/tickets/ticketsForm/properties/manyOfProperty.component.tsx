@@ -15,66 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
-import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
 import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { store } from '@/v4/modules/store';
-import _ from 'lodash';
+import { useSelector } from 'react-redux';
+import { selectJobs } from '@/v4/modules/jobs';
+import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
 import { PropertyProps } from './properties.types';
 
-const JobsAndUsersProperty = ({
-	property: { name, readOnly, required },
-	defaultValue = [],
-	...props
-}: PropertyProps) => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const users = _.sortBy(UsersHooksSelectors.selectUsersByTeamspace(teamspace), 'firstName');
-	// TODO fix after "jobs" is accessible in v5
-	// @ts-ignore
-	const { jobs } = store.getState();
-	const jobItems = jobs.jobs.map(({ _id }) => (
-		<MultiSelectMenuItem key={_id} value={_id}>{_id}</MultiSelectMenuItem>
-	));
-	const userItems = users.map(({ user, firstName, lastName }) => (
-		<MultiSelectMenuItem key={user} value={user}>{`${firstName} ${lastName}`}</MultiSelectMenuItem>
-	));
+export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
+	const { name, readOnly, required, values } = property;
+	let items = [];
+
+	if (values === 'jobsAndUsers') {
+		const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
+		const jobs = useSelector(selectJobs);
+		items = users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` }));
+		Array.prototype.push.apply(items, jobs.map(({ _id }) => ({ value: _id, label: _id })));
+	} else {
+		items = (values as string[]).map((value) => ({ value, label: value }));
+	}
+
 	return (
 		<FormMultiSelect
 			label={name}
-			defaultValue={defaultValue}
 			disabled={readOnly}
 			required={required}
 			{...props}
 		>
-			{jobItems.concat(userItems)}
+			{(items).map(({ value, label }) => (
+				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
+			))}
 		</FormMultiSelect>
 	);
-};
-
-const MultiSelectProperty = ({
-	property: { name, readOnly, required, values },
-	defaultValue = [],
-	...props
-}: PropertyProps) => (
-	<FormMultiSelect
-		label={name}
-		defaultValue={defaultValue}
-		disabled={readOnly}
-		required={required}
-		{...props}
-	>
-		{(values as any[]).map((value) => (
-			<MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>
-		))}
-	</FormMultiSelect>
-);
-
-export const ManyOfProperty = (props: PropertyProps) => {
-	// eslint-disable-next-line
-	if (props.property.values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty {...props} />);
-	}
-
-	return (<MultiSelectProperty {...props} />);
 };

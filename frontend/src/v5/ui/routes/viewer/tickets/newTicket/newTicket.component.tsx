@@ -31,7 +31,7 @@ import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, getTi
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
-import { TicketForm } from '../ticketsForm/ticketsForm.component';
+import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
 
@@ -56,13 +56,9 @@ export const NewTicketCard = () => {
 		contextValue.setCardView(TicketsCardViews.Details, { ticketId });
 	};
 
-	const onSubmit = ({ title, properties, ...modules }) => {
-		const ticket = {
-			type: template._id,
-			title,
-			properties,
-			modules,
-		};
+	const onSubmit = (vals) => {
+		const ticket = { type: template._id, ...vals };
+
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
