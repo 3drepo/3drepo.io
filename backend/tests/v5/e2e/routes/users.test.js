@@ -152,7 +152,7 @@ const testLogin = () => {
 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
 		});
 
-		test('should fail with an account is locked', async () => {
+		test('should fail when an account is locked', async () => {
 			const res = await agent.post('/v5/login/')
 				.send({ user: lockedUser.user, password: lockedUser.password })
 				.expect(templates.tooManyLoginAttempts.status);

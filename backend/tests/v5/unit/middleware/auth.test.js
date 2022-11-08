@@ -199,6 +199,10 @@ const testCanLogin = () => {
 				res,
 				mockCB,
 			);
+
+			expect(Users.isAccountActive).toHaveBeenCalledTimes(1);
+			expect(Users.isAccountActive).toHaveBeenCalledWith(user);
+
 			expect(LoginRecords.isAccountLocked).toHaveBeenCalledTimes(1);
 			expect(LoginRecords.isAccountLocked).toHaveBeenCalledWith(user);
 

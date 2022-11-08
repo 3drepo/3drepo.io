@@ -16,14 +16,14 @@
  */
 
 const { createDirectMessage, createInternalMessage } = require('../../chat');
-const { recordFailedAttempt, saveLoginRecord } = require('../../../models/loginRecords');
+const { recordFailedAttempt, saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { removeOldSessions } = require('../../sessions');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => Promise.all([
-	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+	saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
 	removeOldSessions(username, sessionID, referer),
 	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 ]);

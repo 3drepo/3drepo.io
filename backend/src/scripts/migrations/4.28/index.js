@@ -22,7 +22,7 @@ const removeGridFSBackUps = require('./removeGridFSBackUps');
 const moveGridFSToFS = require('./moveGridFSToFS');
 
 const scripts = [
-	{ script: moveLoginRecords, desc: 'Move login records' },
+	{ script: moveLoginRecords, desc: 'Move login records into a single collection' },
 	{ script: removeUnityAssetsJSON, desc: 'Remove redundant UnityAssets.json files' },
 	{ script: removeGridFSBackUps, desc: 'Remove GridFS backup entries' },
 	{ script: indexLinksInRef, desc: 'Add index for quicker query for the next script' },

@@ -97,11 +97,11 @@ const generateRecord = (_id, ipAddr, userAgent, referer) => {
 	return loginRecord;
 };
 
-LoginRecords.saveLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
+LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
 	const loginRecord = generateRecord(sessionId, ipAddress, userAgent, referer);
 	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
 
-	publish(events.LOGIN_RECORD_CREATED, { username: user, loginRecord });
+	publish(events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord });
 };
 
 LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) => {

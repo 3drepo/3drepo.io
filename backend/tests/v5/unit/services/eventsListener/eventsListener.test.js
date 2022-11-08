@@ -436,21 +436,21 @@ const testModelEventsListener = () => {
 			);
 		};
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
 			const expectedData = { title: changes.title.to };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = { properties: { prop: { from: generateRandomString(), to: generateRandomString() } } };
 			const expectedData = { properties: { prop: changes.properties.prop.to } };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = {
 				modules: {
@@ -463,7 +463,7 @@ const testModelEventsListener = () => {
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Federation)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
 			const expectedData = { title: changes.title.to };
@@ -507,12 +507,12 @@ const testModelEventsListener = () => {
 			);
 		};
 
-		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there 
+		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there
 				is a ${events.NEW_TICKET} (Container)`, async () => {
 			await addTicketTest(false);
 		});
 
-		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there 
+		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there
 				is a ${events.NEW_TICKET} (Federation)`, async () => {
 			await addTicketTest(true);
 		});
@@ -534,8 +534,8 @@ const testAuthEventsListener = () => {
 					{ username, sessionID, socketId, ipAddress, userAgent, referer });
 
 				await waitOnEvent;
-				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledTimes(1);
-				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledWith(
+				expect(LoginRecords.saveSuccessfulLoginRecord).toHaveBeenCalledTimes(1);
+				expect(LoginRecords.saveSuccessfulLoginRecord).toHaveBeenCalledWith(
 					username, sessionID, ipAddress, userAgent, referer,
 				);
 				expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);
@@ -556,8 +556,8 @@ const testAuthEventsListener = () => {
 					{ username, sessionID, ipAddress, userAgent, referer });
 
 				await waitOnEvent;
-				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledTimes(1);
-				expect(LoginRecords.saveLoginRecord).toHaveBeenCalledWith(
+				expect(LoginRecords.saveSuccessfulLoginRecord).toHaveBeenCalledTimes(1);
+				expect(LoginRecords.saveSuccessfulLoginRecord).toHaveBeenCalledWith(
 					username, sessionID, ipAddress, userAgent, referer,
 				);
 				expect(Sessions.removeOldSessions).toHaveBeenCalledTimes(1);

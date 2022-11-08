@@ -61,8 +61,8 @@ const testSaveRecordHelper = (testFailed = false) => {
 	};
 
 	const callFunction = (user, id, ip, userAgent, ref) => (testFailed
-		? LoginRecord.recordFailedAttempt(username, ip, userAgent, ref)
-		: LoginRecord.saveLoginRecord(username, id, ip, userAgent, ref));
+		? LoginRecord.recordFailedAttempt(user, ip, userAgent, ref)
+		: LoginRecord.saveSuccessfulLoginRecord(user, id, ip, userAgent, ref));
 
 	const checkResults = (fn, user, expectedResult) => {
 		expect(fn).toHaveBeenCalledTimes(1);
@@ -76,7 +76,7 @@ const testSaveRecordHelper = (testFailed = false) => {
 		} else {
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(
-				events.LOGIN_RECORD_CREATED, { username: user, loginRecord },
+				events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord },
 			);
 		}
 	};
