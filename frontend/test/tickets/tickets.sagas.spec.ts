@@ -178,14 +178,16 @@ describe('Tickets: sagas', () => {
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false))
+				.put(TicketsActions.fetchRiskCategories(teamspace))
 				.put(TicketsActions.fetchTemplatesSuccess(modelId, templates))
+				.put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, templates[0]._id, false))
 				.silentRun();
-		})
+		});
 
 		it('should call fetchTemplates endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
-				.reply(400);
+				.reply(404);
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false))
@@ -193,7 +195,7 @@ describe('Tickets: sagas', () => {
 				.silentRun();
 		})
 
-		it('should call fetchContainerTemplate  detail endpoint', async () => {
+		it('should call fetchContainerTemplate detail endpoint', async () => {
 			const template = templateMockFactory();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
@@ -206,18 +208,23 @@ describe('Tickets: sagas', () => {
 		})
 
 		// Basic Federation templates
-		it('should call fetchTemplates endpoint', async () => {
+		it('should call fetchFederationTemplates endpoint', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
 				.reply(200, { templates });
+			mockServer
+				.get(`/teamspaces/${teamspace}/settings/tickets/riskCategories`)
+				.reply(200);
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, true))
+				.put(TicketsActions.fetchRiskCategories(teamspace))
 				.put(TicketsActions.fetchTemplatesSuccess(modelId, templates))
+				.put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, templates[0]._id, true))
 				.silentRun();
 		})
 
-		it('should call fetchTemplates endpoint with a 404', async () => {
+		it('should call fetchFederationTemplates endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
 				.reply(400);

@@ -62,20 +62,6 @@ export const TicketDetailsCard = () => {
 		);
 	}, [ticketId]);
 
-	useEffect(() => {
-		if (!ticket) {
-			return;
-		}
-
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket.type,
-			isFederation,
-		);
-	}, [ticket?.type]);
-
 	if (!ticket) return <></>;
 
 	const formData = useForm({

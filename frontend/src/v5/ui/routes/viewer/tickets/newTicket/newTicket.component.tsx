@@ -70,16 +70,6 @@ export const NewTicketCard = () => {
 		);
 	};
 
-	useEffect(() => {
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			templateId,
-			isFederation,
-		);
-	}, []);
-
 	return (
 		<CardContainer>
 			<CardHeader>
