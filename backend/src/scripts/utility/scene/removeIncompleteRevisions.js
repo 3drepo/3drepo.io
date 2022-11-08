@@ -33,6 +33,8 @@ const { deleteMany, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
+const entriesLimit = 500;
+
 const removeFilesHelper = async (ts, col, query) => {
 	try {
 		await removeFilesWithMeta(ts, col, query);
@@ -74,7 +76,13 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 			return [];
 		});
 
-		await removeFilesHelper(teamspace, collection, { _id: { $in: filenames } });
+		const fileRemoveProms = [];
+		for (let i = 0; i <= filenames.length; i += entriesLimit) {
+			const group = filenames.slice(i, i + entriesLimit);
+			fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
+		}
+
+		await Promise.all(fileRemoveProms);
 	}
 	try {
 		await deleteMany(teamspace, collection, filter);
@@ -95,9 +103,8 @@ const processModelStash = async (teamspace, model, revIds) => {
 	];
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map(({ _id }) => UUIDToString(_id));
 	if (supermeshIds.length) {
-		const limit = 500;
-		for (let i = 0; i <= supermeshIds.length; i += limit) {
-			const meshGroup = supermeshIds.slice(i, i + limit);
+		for (let i = 0; i <= supermeshIds.length; i += entriesLimit) {
+			const meshGroup = supermeshIds.slice(i, i + entriesLimit);
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			const superMeshRegex = new RegExp(`.*(?:${meshGroup.join('|')}).*`);
 			proms.push(
