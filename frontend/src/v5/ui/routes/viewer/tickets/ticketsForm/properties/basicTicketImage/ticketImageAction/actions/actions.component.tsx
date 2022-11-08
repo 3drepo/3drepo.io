@@ -19,7 +19,6 @@ import GoToViewpoinIcon from '@assets/icons/outlined/target-outlined.svg';
 import AddViewpointIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import ChangeViewpointIcon from '@assets/icons/outlined/rotate_arrow-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { ActionMenuTriggerButton } from '@controls/actionMenu';
 import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuItem.component';
 import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
@@ -52,13 +51,14 @@ export const ChangeViewpointAction = () => {
 	}
 
 	return (
-		<ActionMenu>
-			<ActionMenuTriggerButton>
+		<ActionMenu
+			TriggerButton={(
 				<TicketImageAction>
 					<ChangeViewpointIcon />
 					<FormattedMessage id="viewer.card.ticketImage.action.changeViewpoint" defaultMessage="Change viewpoint" />
 				</TicketImageAction>
-			</ActionMenuTriggerButton>
+			)}
+		>
 			<ActionMenuItem>
 				<MenuItem>
 					<FormattedMessage id="viewer.card.ticketImage.action.editViewpoint" defaultMessage="Edit viewpoint" />
@@ -105,10 +105,7 @@ export const ChangeImageAction = () => {
 	return (
 		<>
 			<HiddenImageInput onChange={uploadImage} id={inputId.current} />
-			<ActionMenu>
-				<ActionMenuTriggerButton>
-					<TriggerButton />
-				</ActionMenuTriggerButton>
+			<ActionMenu TriggerButton={<div><TriggerButton /></div>}>
 				<ActionMenuItem>
 					<MenuItem onClick={uploadScreenshot}>
 						<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />
