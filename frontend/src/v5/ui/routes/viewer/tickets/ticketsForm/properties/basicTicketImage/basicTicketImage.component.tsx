@@ -21,7 +21,8 @@ import BrokenImageIcon from '@assets/icons/outlined/broken-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { formatMessage } from '@/v5/services/intl';
-import { validateImg } from '@controls/formImage/image.helper';
+import { validateImgSrc } from '@controls/formImage/image.helper';
+import { HiddenImageUploader } from '@controls/formImage/hiddenImageUploader/hiddenImageUploader.component';
 import { Modal } from '@controls/modal';
 import {
 	ActionsList,
@@ -38,8 +39,6 @@ import {
 	Asterisk,
 } from './basicTicketImage.styles';
 import { TicketImageActionContext } from './ticketImageAction/ticketImageActionContext';
-import { FormImage } from '@controls/formImage/formImage.component';
-import { useFormContext } from 'react-hook-form';
 
 const TicketLoadedImage = () => {
 	const [showLargePicture, setShowLargePicture] = useState(false);
@@ -94,15 +93,13 @@ type BasicTicketImageProps = {
 	defaultValue?: string,
 	viewpoint?: any,
 	title: string,
-	name: string,
 	className?: string,
-	onChange?: ({ imgSrc, viewpoint }) => void;
+	onChange?: ({ imgSrc, viewpoint }) => void,
 	children: any,
-	required?: boolean;
+	required?: boolean,
 };
 export const BasicTicketImage = ({
 	children,
-	name,
 	defaultValue,
 	viewpoint:
 	inputViewpoint,
@@ -112,41 +109,42 @@ export const BasicTicketImage = ({
 	required,
 }: BasicTicketImageProps) => {
 	const [viewpoint, setViewpoint] = useState(inputViewpoint);
-	const [imgSrc, setImgSrcUnsafe] = useState(defaultValue);
+	const [imgSrc, setImgSrc] = useState(defaultValue);
 	const [imgIsInvalid, setImgIsInvalid] = useState(false);
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
-	const { getValues, setValue } = useFormContext();
+	const deleteImg = () => setImgSrc(null);
 
-	const onImgUploadSuccess = (newImgSrc) => {
-		setImgSrcUnsafe(newImgSrc);
-		setValue(name, newImgSrc);
+	const uploadImgSrc = (newImgSrc) => {
+		setImgSrc(newImgSrc);
 		setImgIsInvalid(false);
 	};
 
-	const onImgUploadFail = () => {
-		setImgSrcUnsafe(null);
-		setValue(name, '');
+	const handleInvalidUploadImgSrc = () => {
+		deleteImg();
 		setImgIsInvalid(true);
 	};
 
-	const setImgSrc = (newImgSrc) => {
-		if (!newImgSrc) {
-			setValue(name, '');
-			setImgSrcUnsafe(null);
+	const uploadImgFile = (imgFile) => {
+		if (!imgFile) {
+			deleteImg();
 		} else {
-			validateImg(newImgSrc, onImgUploadSuccess, onImgUploadFail);
+			const reader = new FileReader();
+			reader.onloadend = () => validateImgSrc(reader.result, uploadImgSrc, handleInvalidUploadImgSrc);
+			reader.readAsDataURL(imgFile);
 		}
 	};
 
 	const contextValue = {
 		imgSrc,
-		setImgSrc,
+		setImgSrc: uploadImgSrc,
+		setImgFile: uploadImgFile,
 		viewpoint,
 		setViewpoint,
 	};
 
-	useEffect(() => { onChange?.({ imgSrc: defaultValue, viewpoint }); }, [defaultValue, viewpoint]);
+	useEffect(() => { onChange?.({ imgSrc, viewpoint }); }, [imgSrc, viewpoint]);
+	useEffect(() => { setImgSrc(defaultValue); }, [defaultValue]);
 
 	return (
 		<Container className={className}>
@@ -157,19 +155,15 @@ export const BasicTicketImage = ({
 					</PropertyName>
 					<ActionsList>
 						{children}
-						<div style={{ cursor: 'pointer' }} onClick={() => console.log(getValues().properties.Image)}>log</div>
 					</ActionsList>
 				</ActionsSide>
 				<ImageSide>
-					<FormImage
-						name={name}
-						defaultValue={defaultValue}
-						onChange={setImgSrc}
+					<HiddenImageUploader
+						onChange={uploadImgFile}
 						disabled={!isAdmin}
-						required={required}
 					>
 						{!imgSrc && <TicketEmptyImage imgIsInvalid={imgIsInvalid} disabled={!isAdmin} />}
-					</FormImage>
+					</HiddenImageUploader>
 					{imgSrc && <TicketLoadedImage />}
 				</ImageSide>
 			</TicketImageActionContext.Provider>
