@@ -17,6 +17,7 @@
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
+import { FormImage } from '@controls/formImage/formImage.component';
 import {
 	Header,
 	ProfilePicture,
@@ -29,7 +30,6 @@ import {
 	AvatarButton,
 	ErrorMessage,
 } from './editProfileAvatar.styles';
-import { FormImage } from '@controls/formImage/formImage.component';
 
 type EditProfilePersonalTabProps = {
 	user: ICurrentUser,
