@@ -16,17 +16,9 @@
  */
 
 import styled from 'styled-components';
-// import { clientConfigService } from '@/v4/services/clientConfig';
+import { HiddenInput } from '../hiddenFileUploader/hiddenFileUploader.styles';
+import { getSupportedImageExtensions } from '../image.helper';
 
-export const HiddenInputContainer = styled.label`
-	cursor: pointer;
-`;
-
-export const BasicHiddenImageInput = styled.input.attrs({
-	type: 'file',
-	// accept: clientConfigService.imageExtensions.map((x) => `.${x}`).join(','),
-	// TODO remove this as the component is no longer required in storybook
-	accept: '.png, .jpg, .gif',
-})`
-	display: none;
-`;
+export const HiddenImageInput = styled(HiddenInput).attrs({
+	accept: getSupportedImageExtensions(),
+})``;
