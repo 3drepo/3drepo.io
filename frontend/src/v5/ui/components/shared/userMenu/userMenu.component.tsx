@@ -27,7 +27,7 @@ import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { Avatar } from '@controls/avatar';
-import { ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
+import { ActionMenuSection, ActionMenuItem, ActionMenuItemLink } from '@controls/actionMenu';
 import {
 	ActionMenu,
 	AvatarContainer,
@@ -45,20 +45,14 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {
-	const onClickSignOut = () => AuthActionsDispatchers.logout();
+	const signOut = () => AuthActionsDispatchers.logout();
 
 	const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
 
 	return (
 		<>
 			<AvatarContainer>
-				<ActionMenu>
-					<ActionMenuTriggerButton>
-						<Avatar
-							user={user}
-							isButton
-						/>
-					</ActionMenuTriggerButton>
+				<ActionMenu TriggerButton={<div><Avatar user={user} isButton /></div>}>
 					<ActionMenuSection>
 						<AvatarSection>
 							<Avatar
@@ -128,7 +122,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 					</ActionMenuSection>
 					<ActionMenuSection>
 						<ActionMenuItem>
-							<SignOutButton onClick={onClickSignOut}>
+							<SignOutButton onClick={signOut}>
 								<FormattedMessage
 									id="userMenu.logOut"
 									defaultMessage="Log out"

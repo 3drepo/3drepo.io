@@ -48,6 +48,21 @@ const testConvertAllUUIDs = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 			expect(params).toEqual(expectedResult);
 		});
+
+		test('next() should copy model param to container and def', () => {
+			const mockCB = jest.fn(() => {});
+			const params = {
+				model: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
+			};
+			const expectedResult = {
+				...params,
+				container: params.model,
+				federation: params.model,
+			};
+			PathParams.convertAllUUIDs({ params }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+			expect(params).toEqual(expectedResult);
+		});
 	});
 };
 
