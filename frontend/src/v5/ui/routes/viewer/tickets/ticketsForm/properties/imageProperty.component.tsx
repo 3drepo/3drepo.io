@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {useParams} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext } from 'react';
@@ -23,14 +23,19 @@ import { useFormContext } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
-export const ImageProperty = ({ property: { name: title, readOnly, required }, name, defaultValue, ...props }: PropertyProps) => {
+export const ImageProperty = ({
+	property: { name: title, readOnly, required },
+	name,
+	defaultValue,
+	...props
+}: PropertyProps) => {
 	const { setValue } = useFormContext();
 	const { props: { ticketId } } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 
 	const getResourceUrl = () => {
-		if (!defaultValue) return;
+		if (!defaultValue) return null;
 		const modelType = isFederation ? 'federations' : 'containers';
 		return getImageUrl(
 			`teamspaces/${teamspace}/projects/${project}/${modelType}/${containerOrFederation}/tickets/${ticketId}/resources/${defaultValue}`,
@@ -38,10 +43,10 @@ export const ImageProperty = ({ property: { name: title, readOnly, required }, n
 	};
 
 	const handleImageChange = ({ imgSrc }) => {
-		if (!imgSrc || imgSrc == getResourceUrl()) return;
+		if (!imgSrc || imgSrc === getResourceUrl()) return;
 		setValue(name, stripBase64Prefix(imgSrc));
 	};
-	
+
 	return (
 		<TicketImage
 			onChange={handleImageChange}
