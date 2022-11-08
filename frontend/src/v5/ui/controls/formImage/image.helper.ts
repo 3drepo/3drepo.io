@@ -17,6 +17,7 @@
 
 import { ChangeEvent } from 'react';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
 
 export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
 
@@ -35,3 +36,5 @@ export const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
 };
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
+
+export const getImageUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
