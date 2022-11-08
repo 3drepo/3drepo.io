@@ -58,19 +58,6 @@ export const ActionsList = styled.ul`
 	margin: 0;
 `;
 
-export const ImageSide = styled.div`
-	border-radius: 5px;
-	overflow: hidden;
-	height: 101px;
-	width: 171px;
-	cursor: pointer;
-
-	& > * {
-		height: 100%;
-		width: 100%;
-	}
-`;
-
 export const OverlappingContainer = styled.div`
 	position: relative;
 	color: ${({ theme }) => theme.palette.primary.contrast};
@@ -79,6 +66,18 @@ export const OverlappingContainer = styled.div`
 		top: 0;
 		left: 0;
 		cursor: pointer;
+	}
+`;
+
+export const ImageSide = styled(OverlappingContainer)`
+	border-radius: 5px;
+	overflow: hidden;
+	height: 101px;
+	width: 171px;
+
+	& > * {
+		height: 100%;
+		width: 100%;
 	}
 `;
 

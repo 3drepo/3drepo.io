@@ -19,6 +19,8 @@ import styled from 'styled-components';
 
 export const HiddenInputContainer = styled.label`
 	cursor: pointer;
+	display: block;
+	width: fit-content;
 `;
 
 export const HiddenInput = styled.input.attrs({
