@@ -17,23 +17,18 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { TITLE_INPUT_NAME } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketsForm.component';
 import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import WarningIcon from '@assets/icons/stepper_error.svg';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
-import { EditableTicket, ITemplate, ITicket, PropertyDefinition } from './tickets.types';
+import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
+
+export const TITLE_INPUT_NAME = 'title';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
-
-export const getTicketDefaultValues = ({ title, properties, modules }: ITicket) => ({
-	title,
-	properties,
-	...modules,
-});
 
 export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;
@@ -169,7 +164,13 @@ export const getTicketValidator = (template) => {
 	};
 	const editableTemplate = getEditableProperties(template);
 	validators.properties = propertiesValidator(editableTemplate.properties);
-	editableTemplate.modules.forEach(({ name, properties }) => { validators[name] = propertiesValidator(properties); });
+
+	const modulesValidators = {};
+	editableTemplate.modules.forEach(({ name, properties }) => {
+		modulesValidators[name] = propertiesValidator(properties);
+	});
+
+	validators.modules = Yup.object().shape(modulesValidators);
 
 	return Yup.object().shape(validators);
 };
@@ -220,6 +221,30 @@ export const filterEmptyTicketValues = (ticket) => {
 		}
 	});
 	return parsedTicket;
+};
+
+export const getValidators = (template) => {
+	const { properties, modules } = template;
+	const validators: any = {
+		title: propertyValidator({
+			required: true,
+			type: 'longText',
+			name: TITLE_INPUT_NAME,
+		}),
+	};
+
+	validators.properties = propertiesValidator(properties || []);
+
+	if (modules) {
+		const modulesValidator = {};
+		modules.forEach((module) => {
+			modulesValidator[module.name] = propertiesValidator(module.properties);
+		});
+
+		validators.modules = Yup.object().shape(modulesValidator);
+	}
+
+	return Yup.object().shape(validators);
 };
 
 const moduleTypeProperties = {

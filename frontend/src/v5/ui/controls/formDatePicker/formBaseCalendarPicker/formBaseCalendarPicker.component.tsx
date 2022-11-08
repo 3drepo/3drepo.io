@@ -55,7 +55,11 @@ export const FormBaseCalendarPicker = ({
 					{...field}
 					{...props}
 					onOpen={() => setOpen(true)}
-					onClose={() => setOpen(false)}
+					onClose={() => {
+						// This is to signal that the date has changed (we are using onblur to save changes)
+						props.onBlur?.();
+						setOpen(false);
+					}}
 					open={open}
 					disabled={disabled}
 					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}

@@ -20,27 +20,26 @@ import ChevronRight from '@mui/icons-material/ArrowForwardIos';
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext, useEffect } from 'react';
-import { Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { getTicketDefaultValues, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getValidators, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
-import { omit } from 'lodash';
-import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { CircleButton } from '@controls/circleButton';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { isEmpty } from 'lodash';
+import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsCardViews } from '../tickets.constants';
-import { TicketForm } from '../ticketsForm/ticketsForm.component';
-import { Form } from '../newTicket/newTicket.styles';
+import { TicketForm } from '../ticketsForm/ticketForm.component';
 
 export const TicketDetailsCard = () => {
 	const { props: { ticketId }, setCardView } = useContext(CardContext);
+
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const formData = useForm();
 
 	const goBack = () => {
 		setCardView(TicketsCardViews.List);
@@ -53,38 +52,6 @@ export const TicketDetailsCard = () => {
 	const goPrev = () => changeTicketIndex(-1);
 	const goNext = () => changeTicketIndex(1);
 
-	const updateTicket = () => {
-		// TicketsActionsDispatchers.updateTicket(
-		// teamspace,
-		// project,
-		// containerOrFederation,
-		// ticketId,
-		// { title },
-		// isFederation,
-		// );
-	};
-
-	const cloneTicket = () => {
-		const newTicket = omit(ticket, [
-			'properties.Updated at',
-			'properties.Created at',
-			'properties.Owner',
-			'_id',
-			'number',
-		]) as NewTicket;
-
-		newTicket.title += '(clone)';
-
-		TicketsActionsDispatchers.createTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			newTicket,
-			isFederation,
-			() => {},
-		);
-	};
-
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
@@ -95,24 +62,28 @@ export const TicketDetailsCard = () => {
 		);
 	}, [ticketId]);
 
-	useEffect(() => {
-		formData.reset(getTicketDefaultValues(ticket));
-	}, [ticket.modules, ticket.properties]);
-
-	useEffect(() => {
-		if (!ticket) {
-			return;
-		}
-
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket.type,
-			isFederation,
-		);
-	}, [ticket?.type]);
 	if (!ticket) return <></>;
+
+	const formData = useForm({
+		resolver: yupResolver(getValidators(template)),
+		mode: 'onChange',
+		defaultValues: ticket,
+	});
+
+	useEffect(() => {
+		formData.reset(ticket);
+	}, [JSON.stringify(ticket)]);
+
+	const onBlurHandler = () => {
+		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
+		const validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
+
+		if (isEmpty(validVals)) return;
+
+		// eslint-disable-next-line max-len
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation);
+	};
+
 	return (
 		<CardContainer>
 			<CardHeader>
@@ -124,12 +95,8 @@ export const TicketDetailsCard = () => {
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...formData}>
-				<Form>
-					<TicketForm template={template} ticket={ticket} />
-				</Form>
+				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 			</FormProvider>
-			<Button onClick={updateTicket}> Update Ticket! </Button>
-			<Button onClick={cloneTicket}> Clone Ticket!</Button>
 		</CardContainer>
 	);
 };

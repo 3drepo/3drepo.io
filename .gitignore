@@ -82,8 +82,8 @@ backend/3drepo.log
 backend/docs/
 backend/tests/v5/fileShare
 npm-debug.log.*
-.vscode/
 *.swo
+1
 
 submodules/tests
 scripts/reporting/statsGen/yarn.lock

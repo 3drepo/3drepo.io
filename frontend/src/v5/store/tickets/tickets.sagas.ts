@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
+import { SnackbarActions } from '@/v4/modules/snackbar';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -68,6 +69,28 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 	}
 }
 
+export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateAction) {
+	try {
+		const fetchTicketsTemplate = isFederation
+			? API.Tickets.fetchFederationTemplate
+			: API.Tickets.fetchContainerTemplate;
+		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(TicketsActions.replaceTemplateSuccess(modelId, template));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'tickets.fetchTemplate.error.action',
+				defaultMessage: 'trying to fetch a template',
+			}),
+			error,
+			details: formatMessage({
+				id: 'tickets.fetchTemplate.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
 export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
 	try {
 		const fetchModelTemplates = isFederation
@@ -76,6 +99,9 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
 		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
+		yield all(templates.map(
+			(template) => put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, isFederation)),
+		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
@@ -106,28 +132,6 @@ export function* fetchRiskCategories({ teamspace }: FetchRiskCategoriesAction) {
 	}
 }
 
-export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }: FetchTemplateAction) {
-	try {
-		const fetchTicketsTemplate = isFederation
-			? API.Tickets.fetchFederationTemplate
-			: API.Tickets.fetchContainerTemplate;
-		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
-		yield put(TicketsActions.replaceTemplateSuccess(modelId, template));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'tickets.fetchTemplate.error.action',
-				defaultMessage: 'trying to fetch a template',
-			}),
-			error,
-			details: formatMessage({
-				id: 'tickets.fetchTemplates.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
-		}));
-	}
-}
-
 export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket, isFederation }: UpdateTicketAction) {
 	try {
 		const updateModelTicket = isFederation
@@ -135,6 +139,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 			: API.Tickets.updateContainerTicket;
 		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
+		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateTicket.updated', defaultMessage: 'Ticket updated' })));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -169,7 +174,7 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
-	yield takeLatest(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
+	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
