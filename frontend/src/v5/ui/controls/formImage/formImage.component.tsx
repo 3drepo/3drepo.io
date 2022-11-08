@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HiddenImageUploader } from '@controls/formImage/hiddenImageUploader/hiddenImageUploader.component';
 import { Controller } from 'react-hook-form';
+import { HiddenImageUploader } from './hiddenImageUploader/hiddenImageUploader.component';
 
 type FormImageProps = {
 	defaultValue?: any,
@@ -25,19 +25,18 @@ type FormImageProps = {
 	onChange?: (imgFile) => void,
 	children: any,
 	disabled?: boolean,
-	required?: boolean,
 };
 export const FormImage = ({
-	defaultValue = '',
+	defaultValue = null,
 	name,
 	control,
 	onChange,
 	children,
 	...props
 }: FormImageProps) => {
-	const addImage = (imgFile, field) => {
-		field.onChange(imgFile);
-		onChange?.(imgFile);
+	const handleImageChange = (imgSrc, field) => {
+		field.onChange(imgSrc);
+		onChange?.(imgSrc);
 	};
 
 	return (
@@ -49,7 +48,7 @@ export const FormImage = ({
 				<HiddenImageUploader
 					{...field}
 					{...props}
-					onChange={(newImgFile) => addImage(newImgFile, field)}
+					onChange={(imgSrc) => handleImageChange(imgSrc, field)}
 				>
 					{children}
 				</HiddenImageUploader>
