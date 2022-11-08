@@ -18,6 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
+import { SnackbarActions } from '@/v4/modules/snackbar';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -30,7 +31,6 @@ import {
 	FetchRiskCategoriesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { SnackbarActions } from '@/v4/modules/snackbar';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
