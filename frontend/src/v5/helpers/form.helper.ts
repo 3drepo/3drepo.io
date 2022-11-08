@@ -34,6 +34,10 @@ export const dirtyValues = (
 	);
 };
 
+// eslint-disable-next-line max-len
+const isBasicValue = (value: any) => !!(value.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);
+// value.toDate assumes that is a wrapped date type.
+
 /**
  * returns the tree but if the the leaf is an empty string, it changes it to null
  * example:
@@ -60,7 +64,7 @@ export const nullifyEmptyStrings = (tree) => Object.fromEntries(
 			return [key, null];
 		}
 
-		if (Array.isArray(value) || !(_.isObject(value))) {
+		if (isBasicValue(value)) {
 			return [key, value];
 		}
 
@@ -89,12 +93,12 @@ export const filterErrors = (
 }, {});
 
 export const removeEmptyObjects = (tree) => {
-	if (!_.isObject(tree) || Array.isArray(tree) || _.isString(tree)) return tree;
+	if (isBasicValue(tree)) return tree;
 
 	return Object.keys(tree).reduce((accum, key) => {
 		const value = tree[key];
 
-		if (_.isObject(value) && !Array.isArray(value) && !_.isString(value) && _.isEmpty(value)) {
+		if (_.isEmpty(value)) {
 			return accum;
 		}
 
