@@ -16,9 +16,11 @@
  */
 
 import { ChangeEvent } from 'react';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
-export const validateImg = (imgFile, onSuccess?, onError?) => {
-	const imgSrc = URL.createObjectURL(imgFile);
+export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
+
+export const validateImgSrc = (imgSrc, onSuccess?, onError?) => {
 	const img = new Image();
 
 	img.onload = () => onSuccess?.(imgSrc);
@@ -31,3 +33,5 @@ export const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
 	if (!event.target.files.length) return [];
 	return event.target.files[0];
 };
+
+export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
