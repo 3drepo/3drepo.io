@@ -16,16 +16,23 @@
  */
 
 import { forwardRef } from 'react';
-import { getFileFromInputEvent, getSupportedImageExtensions } from '../image.helper';
-import { HiddenFileUploader, HiddenFileUploaderProps } from '../hiddenFileUploader/hiddenFileUploader.component';
+import { HiddenInput, HiddenInputContainer } from './hiddenFileUploader.styles';
 
-export const HiddenImageUploader = forwardRef(({ onChange, ...props }: HiddenFileUploaderProps, ref: any) => {
-	const accept = getSupportedImageExtensions();
-
-	const uploadImage = (event) => {
-		const imgFile = getFileFromInputEvent(event);
-		onChange(imgFile);
-	};
-
-	return (<HiddenFileUploader onChange={uploadImage} accept={accept} {...props} ref={ref} />);
-});
+export type HiddenFileUploaderProps = {
+	disabled?: boolean;
+	onChange: (imgFile) => void;
+	className?: string;
+	id?: string;
+	children: any;
+	accept?: string;
+};
+export const HiddenFileUploader = forwardRef(({
+	children,
+	className,
+	...props
+}: HiddenFileUploaderProps, ref: any) => (
+	<HiddenInputContainer className={className}>
+		<HiddenInput {...props} ref={ref} />
+		{children}
+	</HiddenInputContainer>
+));

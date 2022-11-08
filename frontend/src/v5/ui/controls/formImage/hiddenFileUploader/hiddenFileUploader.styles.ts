@@ -15,17 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef } from 'react';
-import { getFileFromInputEvent, getSupportedImageExtensions } from '../image.helper';
-import { HiddenFileUploader, HiddenFileUploaderProps } from '../hiddenFileUploader/hiddenFileUploader.component';
+import styled from 'styled-components';
 
-export const HiddenImageUploader = forwardRef(({ onChange, ...props }: HiddenFileUploaderProps, ref: any) => {
-	const accept = getSupportedImageExtensions();
+export const HiddenInputContainer = styled.label`
+	cursor: pointer;
+`;
 
-	const uploadImage = (event) => {
-		const imgFile = getFileFromInputEvent(event);
-		onChange(imgFile);
-	};
-
-	return (<HiddenFileUploader onChange={uploadImage} accept={accept} {...props} ref={ref} />);
-});
+export const HiddenInput = styled.input.attrs({
+	type: 'file',
+})`
+	display: none;
+`;
