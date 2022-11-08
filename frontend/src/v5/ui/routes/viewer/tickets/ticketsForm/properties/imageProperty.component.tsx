@@ -14,15 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PropertyProps } from './properties.types';
 import {useParams} from 'react-router-dom';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext } from 'react';
 import { getImageUrl, stripBase64Prefix } from '@controls/formImage/image.helper';
 import { useFormContext } from 'react-hook-form';
-
+import { PropertyProps } from './properties.types';
+import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
 export const ImageProperty = ({ property: { name: title, readOnly, required }, name, defaultValue, ...props }: PropertyProps) => {
 	const { setValue } = useFormContext();
