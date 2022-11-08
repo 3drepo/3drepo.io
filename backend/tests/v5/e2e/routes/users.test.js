@@ -181,7 +181,7 @@ const testLogin = () => {
 				.send({ user: userWithFailedAttempts.user, password: 'wrongPassword' })
 				.expect(templates.incorrectUsernameOrPassword.status);
 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
-			expect(res.body.message).toEqual('Incorrect username or password (Remaining attempts: 3)');
+			expect(res.body.message).toEqual(`${templates.incorrectUsernameOrPassword.message} (Remaining attempts: 3)`);
 		});
 	});
 };
@@ -281,7 +281,7 @@ const testGetProfile = () => {
 
 		describe('With valid authentication (SSO user)', () => {
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: ssoUser.user, password: ssoUser.password });
+				await testSession.post('/v5/login/').send({ user: ssoTestUser.user, password: ssoTestUser.password });
 			});
 			afterAll(async () => {
 				await testSession.post('/v5/logout/');
@@ -289,7 +289,7 @@ const testGetProfile = () => {
 
 			test('should return the user profile if the user is logged in (SSO user)', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(ssoUser, undefined, false, true));
+				expect(res.body).toEqual(formatUserProfile(ssoTestUser, undefined, false, true));
 			});
 		});
 	});
@@ -394,7 +394,7 @@ const testUpdateProfile = () => {
 
 		describe('With valid authentication (SSO user)', () => {
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: ssoUser.user, password: ssoUser.password });
+				await testSession.post('/v5/login/').send({ user: ssoTestUser.user, password: ssoTestUser.password });
 			});
 			afterAll(async () => {
 				await testSession.post('/v5/logout/');

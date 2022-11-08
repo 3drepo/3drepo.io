@@ -371,7 +371,7 @@ const testAuthenticate = () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(user);
 
 			await expect(User.authenticate(user.user, 'password')).rejects.toEqual({
-				...templates.incorrectUsernameOrPassword, message: 'Incorrect username or password (Remaining attempts: 4)',
+				...templates.incorrectUsernameOrPassword, message: `${templates.incorrectUsernameOrPassword.message} (Remaining attempts: 4)`,
 			});
 		});
 	});
