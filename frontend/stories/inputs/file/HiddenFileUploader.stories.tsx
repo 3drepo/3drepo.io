@@ -31,24 +31,28 @@ export default {
 } as ComponentMeta<typeof HiddenFileUploader>;
 
 const ValidUploaderTemplate: ComponentStory<typeof HiddenFileUploader> = (args) => (
-	<HiddenFileUploader onChange={() => alert("file uploaded")} {...args}>
+	// eslint-disable-next-line
+	<HiddenFileUploader onChange={() => alert('file uploaded')} {...args}>
 		<DashedContainer>I can be the trigger</DashedContainer>
 	</HiddenFileUploader>
 );
 export const ValidUploader = ValidUploaderTemplate.bind({});
 
 const InvalidUploaderTemplate: ComponentStory<typeof HiddenFileUploader> = (args) => (
-	<HiddenFileUploader onChange={() => {}} {...args}>
-		<Button variant="contained" style={{ margin: '0' }}>
-			I&nbsp;<i>CANNOT</i>&nbsp;be the trigger
-		</Button>
-		<br />
-		<a
-			href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label#accessibility_concerns"
-			target="_blank"
-		>
-			<u>Same goes for me, I am an achor</u>
-		</a>
-	</HiddenFileUploader>
+	<div style={{ border: 'solid 1px' }}>
+		<HiddenFileUploader onChange={() => {}} {...args}>
+			<Button variant="contained" style={{ margin: '0' }}>
+				I&nbsp;<i>CANNOT</i>&nbsp;be the trigger
+			</Button>
+			<br />
+			<a
+				href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label#accessibility_concerns"
+				target="_blank"
+				rel="noreferrer"
+			>
+				<u>Same goes for me, I am an achor</u>
+			</a>
+		</HiddenFileUploader>
+	</div>
 );
 export const InvalidUploader = InvalidUploaderTemplate.bind({});
