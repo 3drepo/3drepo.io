@@ -35,16 +35,16 @@ export const ImageProperty = ({
 	const isFederation = modelIsFederation(containerOrFederation);
 
 	const getResourceUrl = () => {
-		if (!defaultValue) return null;
+		if (!defaultValue) return undefined;
 		const modelType = isFederation ? 'federations' : 'containers';
 		return getImageUrl(
 			`teamspaces/${teamspace}/projects/${project}/${modelType}/${containerOrFederation}/tickets/${ticketId}/resources/${defaultValue}`,
 		);
 	};
 
-	const handleImageChange = ({ imgSrc }) => {
-		if (!imgSrc || imgSrc === getResourceUrl()) return;
-		setValue(name, stripBase64Prefix(imgSrc));
+	const handleImageChange = ({ imgSrc = '' }) => {
+		if (imgSrc === getResourceUrl()) return;
+		setValue(name, stripBase64Prefix(imgSrc), { shouldValidate: true, shouldDirty: true });
 	};
 
 	return (

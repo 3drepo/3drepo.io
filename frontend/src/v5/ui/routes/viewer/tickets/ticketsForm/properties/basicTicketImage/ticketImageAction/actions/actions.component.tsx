@@ -116,7 +116,7 @@ export const ChangeImageAction = () => {
 						</MenuItem>
 					</HiddenInputContainer>
 					{imgSrc && (
-						<MenuItemDelete onClick={() => setImgSrc(null)}>
+						<MenuItemDelete onClick={() => setImgSrc('')}>
 							<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />
 						</MenuItemDelete>
 					)}

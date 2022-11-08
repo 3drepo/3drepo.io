@@ -37,7 +37,7 @@ type BasicTicketImageProps = {
 };
 export const BasicTicketImage = ({
 	children,
-	defaultValue,
+	defaultValue = '',
 	viewpoint:
 	inputViewpoint,
 	title,
@@ -49,7 +49,7 @@ export const BasicTicketImage = ({
 	const [imgSrc, setImgSrc] = useState(defaultValue);
 	const [imgIsInvalid, setImgIsInvalid] = useState(false);
 
-	const deleteImg = () => setImgSrc(null);
+	const deleteImg = () => setImgSrc('');
 
 	const uploadImgSrc = (newImgSrc) => {
 		setImgSrc(newImgSrc);
