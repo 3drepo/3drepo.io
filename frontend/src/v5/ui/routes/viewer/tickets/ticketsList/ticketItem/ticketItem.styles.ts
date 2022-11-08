@@ -61,7 +61,7 @@ export const Assignees = styled(AssigneesBase)`
 	margin-left: auto;
 `;
 
-export const ExtraInfo = styled.div`
+export const IssueProperties = styled.div`
 	margin: 7px 0 0;
 	display: inline-flex;
 	width: 100%;

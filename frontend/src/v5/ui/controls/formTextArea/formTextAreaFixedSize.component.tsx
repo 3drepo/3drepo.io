@@ -28,7 +28,6 @@ export type FormTextAreaFixedSizeProps = InputProps & {
 };
 
 export const FormTextAreaFixedSize = ({
-	defaultValue = '',
 	formError,
 	control,
 	name,
@@ -41,7 +40,6 @@ export const FormTextAreaFixedSize = ({
 	<Controller
 		control={control}
 		name={name}
-		defaultValue={defaultValue}
 		render={({ field }) => (
 			<FormControl required={required} disabled={disabled} error={!!formError}>
 				{label && (
@@ -62,6 +60,8 @@ export const FormTextAreaFixedSize = ({
 							$height={height}
 							{...field}
 							{...props}
+							value={field.value || ''} // this is to be certain that is a controlled field
+							defaultValue={undefined} // this is to be certain that is a controlled field
 						/>
 					</ScrollArea>
 				</Container>

@@ -24,6 +24,7 @@ export type FormToggleProps = SwitchProps & {
 	name: string;
 	children: any;
 	defaultValue?: boolean,
+	formError?: any;
 };
 
 export const FormToggle = ({
@@ -33,6 +34,7 @@ export const FormToggle = ({
 	required,
 	disabled,
 	defaultValue,
+	formError,
 	...props
 }: FormToggleProps) => (
 	<FormControlLabel
@@ -42,14 +44,13 @@ export const FormToggle = ({
 			<Controller
 				control={control}
 				name={name}
-				defaultValue={defaultValue}
 				render={({ field }) => (
 					<Switch
 						{...field}
 						inputRef={field.ref}
 						id={name}
 						disabled={disabled}
-						checked={field.value}
+						checked={field.value || false} // This is to fix uncontrolled to controlled change. It always has a value.
 						{...props}
 					/>
 				)}

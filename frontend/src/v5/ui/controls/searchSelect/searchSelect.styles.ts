@@ -15,26 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
+import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 
-export const InvisibleContainer = styled.div`
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	flex-direction: column;
-
-	.MuiFormControl-root {
-		width: 100%;
-
-		&, & * {
-			min-height: 0;
-			height: 0;
-			opacity: 0;
-			padding: 0;
-			margin: 0;
-		}
-	}
+export const SearchInputContainer = styled.div`
+	display: contents;
+	margin: 0;
+	padding: 0;
 `;
 
-export const ButtonContainer = styled.div`
-	display: contents;
+export const SearchInput = styled(SearchInputBase)`
+	margin: 0;
+	padding: 2px 12px 12px;
+`;
+
+export const NoResults = styled.div`
+	height: 34px;
+	display: flex;
+	align-items: center;
+	padding-left: 12px;
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.body1};
 `;
