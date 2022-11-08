@@ -17,8 +17,6 @@
 
 import { Typography } from '@mui/material';
 import styled from 'styled-components';
-import { CentredContainer } from '@controls/centredContainer';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Asterisk = styled.span`
 	&::after {
