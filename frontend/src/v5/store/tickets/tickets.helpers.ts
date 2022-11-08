@@ -98,6 +98,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 			validator = Yup.array();
 			break;
 		case 'oneOf':
+		case 'image':
 			validator = trimmedString;
 			break;
 		case 'boolean':
