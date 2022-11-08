@@ -224,6 +224,14 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
+ServiceHelper.determineTestGroup = (path) => {
+	const match = path.match(/^.*[/|\\](e2e|unit|drivers)[/|\\](.*).test.js$/);
+	if (match?.length === 3) {
+		return `${match[1].toUpperCase()} ${match[2]}`;
+	}
+	return path;
+};
+
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
