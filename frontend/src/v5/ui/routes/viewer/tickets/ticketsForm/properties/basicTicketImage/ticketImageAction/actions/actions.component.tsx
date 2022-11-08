@@ -24,14 +24,13 @@ import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuIt
 import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { useContext, useRef } from 'react';
-import { HiddenInputContainer } from '@controls/formImage/hiddenImageUploader/hiddenImageUploader.styles';
-import { HiddenImageInput } from '@controls/formImage/hiddenImageUploader/hiddenImageUploader.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { getFileFromInputEvent } from '@controls/formImage/image.helper';
+import { HiddenImageInput } from '@controls/formImage/hiddenImageUploader/hiddenImageUploader.styles';
+import { HiddenInputContainer } from '@controls/formImage/hiddenFileUploader/hiddenFileUploader.styles';
 import { ActionMenu, MenuItem, MenuItemDelete } from './actions.styles';
 import { TicketImageActionContext } from '../ticketImageActionContext';
 import { TicketImageAction } from '../ticketImageAction.component';
-
- 
 
 export const GoToViewpointAction = () => (
 	<TicketImageAction disabled={false}>
@@ -75,12 +74,14 @@ export const ChangeViewpointAction = () => {
 };
 
 export const ChangeImageAction = () => {
-	const { imgSrc, setImgSrc } = useContext(TicketImageActionContext);
+	const { imgSrc, setImgSrc, setImgFile } = useContext(TicketImageActionContext);
 	const inputId = useRef(`hidden-input-${new Date().getTime()}`);
 
-	const uploadScreenshot = async () => {
-		const screenshot = await ViewerService.getScreenshot();
-		setImgSrc(screenshot);
+	const uploadScreenshot = async () => setImgSrc(await ViewerService.getScreenshot());
+
+	const uploadImage = (event) => {
+		const imgFile = getFileFromInputEvent(event);
+		setImgFile(imgFile);
 	};
 
 	const TriggerButton = () => {
@@ -103,7 +104,7 @@ export const ChangeImageAction = () => {
 
 	return (
 		<>
-			<HiddenImageInput onChange={setImgSrc} id={inputId.current} />
+			<HiddenImageInput onChange={uploadImage} id={inputId.current} />
 			<ActionMenu>
 				<ActionMenuTriggerButton>
 					<TriggerButton />

@@ -19,6 +19,7 @@ import { createContext } from 'react';
 interface TicketImageActionContextType {
 	imgSrc?: string;
 	setImgSrc?: (imgSrc) => void;
+	setImgFile?: (imgFile) => void;
 	viewpoint?: any;
 	setViewpoint?: (viewpoint) => void;
 }
