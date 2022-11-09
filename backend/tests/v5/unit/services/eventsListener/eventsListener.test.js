@@ -436,21 +436,44 @@ const testModelEventsListener = () => {
 			);
 		};
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+		test(`Should fail gracefully on error if there is an ${events.UPDATE_TICKET} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: { _id: generateRandomString(), title: generateRandomString() },
+				author: generateRandomString(),
+				timestamp: generateRandomDate(),
+				changes: generateRandomString(),
+			};
+
+			ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.UPDATE_TICKET, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
+				data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+		});
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
 			const expectedData = { title: changes.title.to };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = { properties: { prop: { from: generateRandomString(), to: generateRandomString() } } };
 			const expectedData = { properties: { prop: changes.properties.prop.to } };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = {
 				modules: {
@@ -463,7 +486,7 @@ const testModelEventsListener = () => {
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there 
+		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Federation)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
 			const expectedData = { title: changes.title.to };
@@ -507,12 +530,12 @@ const testModelEventsListener = () => {
 			);
 		};
 
-		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there 
+		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there
 				is a ${events.NEW_TICKET} (Container)`, async () => {
 			await addTicketTest(false);
 		});
 
-		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there 
+		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there
 				is a ${events.NEW_TICKET} (Federation)`, async () => {
 			await addTicketTest(true);
 		});
