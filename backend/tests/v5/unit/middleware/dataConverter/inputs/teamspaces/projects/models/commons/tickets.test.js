@@ -27,6 +27,9 @@ const SettingsMW = require(`${src}/middleware/dataConverter/inputs/teamspaces/se
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets');
 const TicketSchema = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates');
+const TemplatesSchema = require(`${src}/schemas/tickets/templates`);
+
 jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 
@@ -76,7 +79,11 @@ const testValidateNewTicket = () => {
 				await next();
 			});
 
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((template) => template);
+
 			await Tickets.validateNewTicket(req, res, fn);
+
+			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
@@ -96,6 +103,8 @@ const testValidateNewTicket = () => {
 				_req.templateData = { };
 				await next();
 			});
+
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((template) => template);
 
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
@@ -121,6 +130,8 @@ const testValidateNewTicket = () => {
 				await next();
 			});
 
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((template) => template);
+
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
@@ -145,6 +156,8 @@ const testValidateNewTicket = () => {
 				_req.templateData = { };
 				await next();
 			});
+
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((template) => template);
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 
@@ -180,11 +193,14 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((tem) => tem);
 
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
 
 			await Tickets.validateUpdateTicket(req, res, fn);
+
+			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
@@ -200,6 +216,7 @@ const testValidateUpdateTicket = () => {
 			const template = { [generateRandomString()]: generateRandomString() };
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((tem) => tem);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 			TicketSchema.validateTicket.mockResolvedValueOnce({ properties: {}, modules: {} });
 
@@ -220,6 +237,7 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((tem) => tem);
 
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
@@ -243,6 +261,7 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((tem) => tem);
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 
@@ -269,6 +288,7 @@ const testValidateUpdateTicket = () => {
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((tem) => tem);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
