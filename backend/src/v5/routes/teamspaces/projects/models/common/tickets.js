@@ -275,7 +275,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{models}/tickets:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   post:
 	 *     description: Create a ticket. The Schema of the payload depends on the ticket template being used
 	 *     tags: [Tickets]
@@ -352,7 +352,7 @@ const establishRoutes = (isFed) => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: ticket has been successfully added, returns the id of the newly created template
+	 *         description: ticket has been successfully added, returns the id of the newly created ticket
 	 *         content:
 	 *           application/json:
 	 *             schema:
