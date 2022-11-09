@@ -666,7 +666,7 @@ const testUpdateTicket = () => {
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
-				['an image property is updated', baseRouteParams, true, undefined, { properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
+				['an image property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
 			];
 		};
 
@@ -694,17 +694,18 @@ const testUpdateTicket = () => {
 					expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
 						.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
 
-					const expectedUpdatedTicket = cloneDeep(ticket);
+					const expectedUpdatedTicket = { ...cloneDeep(ticket), ...payloadChanges };
 					expectedUpdatedTicket.number = updatedTicket.number;
 					expectedUpdatedTicket.properties = {
-						...expectedUpdatedTicket.properties,
+						...ticket.properties,
 						[basePropertyLabels.UPDATED_AT]: updatedTicket.properties[basePropertyLabels.UPDATED_AT],
 						[basePropertyLabels.CREATED_AT]: updatedTicket.properties[basePropertyLabels.CREATED_AT],
 						[basePropertyLabels.OWNER]: updatedTicket.properties[basePropertyLabels.OWNER],
 						...(payloadChanges?.properties ?? {}),
+						[imagePropName]: updatedTicket.properties[imagePropName],
 					};
 
-					expect(updatedTicket).toEqual({ ...expectedUpdatedTicket, ...payloadChanges });
+					expect(updatedTicket).toEqual(expectedUpdatedTicket);
 					await checkTicketLogByDate(updatedTicket.properties[basePropertyLabels.UPDATED_AT]);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
