@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { deleteIfUndefined, isEqual } = require('../utils/helper/objects');
+const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
+const { isDate, isObject } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
+const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const Tickets = {};
@@ -28,44 +34,74 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 	return (lastTicket?.number ?? 0) + 1;
 };
 
-Tickets.addTicket = async (teamspace, project, model, ticket) => {
+Tickets.addTicket = async (teamspace, project, model, ticketData) => {
 	const _id = generateUUID();
-	const number = await determineTicketNumber(teamspace, project, model, ticket.type);
-	await DbHandler.insertOne(teamspace, TICKETS_COL, { ...ticket, teamspace, project, model, _id, number });
+	const number = await determineTicketNumber(teamspace, project, model, ticketData.type);
+	const ticket = { ...ticketData, teamspace, project, model, _id, number };
+	await DbHandler.insertOne(teamspace, TICKETS_COL, ticket);
+	publish(events.NEW_TICKET,
+		{ teamspace,
+			project,
+			model,
+			ticket: { ...ticketData, _id, number } });
 	return _id;
 };
 
-Tickets.updateTicket = async (teamspace, ticketId, data) => {
+Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
 	const toUpdate = {};
 	const toUnset = {};
-
-	const { modules, properties, ...rootProps } = data;
-
+	const { modules, properties, ...rootProps } = updateData;
+	const changes = {};
 	const determineUpdate = (obj, prefix = '') => {
 		Object.keys(obj).forEach((key) => {
-			const value = obj[key];
-			if (value) toUpdate[`${prefix}${key}`] = value;
-			else { toUnset[`${prefix}${key}`] = 1; }
+			const updateObjProp = `${prefix}${key}`;
+			const oldValue = getNestedProperty(oldTicket, updateObjProp);
+			let newValue = obj[key];
+			if (newValue) {
+				if (isObject(newValue) && !isDate(newValue)) {
+					// if this is an object it is a composite type, in which case
+					// we should merge the old value with the new value
+					newValue = deleteIfUndefined({ ...(oldValue ?? {}), ...newValue }, true);
+					if (isEqual(newValue, {})) {
+						newValue = null;
+						toUnset[updateObjProp] = 1;
+					} else {
+						toUpdate[updateObjProp] = newValue;
+					}
+				} else {
+					toUpdate[updateObjProp] = newValue;
+				}
+			} else {
+				toUnset[updateObjProp] = 1;
+			}
+
+			if (updateObjProp !== `properties.${basePropertyLabels.UPDATED_AT}`) {
+				setNestedProperty(changes, `${updateObjProp}.from`, oldValue);
+				setNestedProperty(changes, `${updateObjProp}.to`, newValue);
+			}
 		});
 	};
 
 	determineUpdate(rootProps);
+	determineUpdate(properties, 'properties.');
+	Object.keys(modules).forEach((mod) => {
+		determineUpdate(modules[mod], `modules.${mod}.`);
+	});
 
-	if (properties) { determineUpdate(properties, 'properties.'); }
+	const actions = {};
+	if (!isEqual(toUpdate, {})) actions.$set = toUpdate;
 
-	if (modules) {
-		Object.keys(modules).forEach((mod) => {
-			determineUpdate(modules[mod], `modules.${mod}.`);
-		});
-	}
+	if (!isEqual(toUnset, {})) actions.$unset = toUnset;
+	if (!isEqual(actions, {})) {
+		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, actions);
 
-	const updateJson = {};
-	if (Object.keys(toUpdate).length) { updateJson.$set = toUpdate; }
-
-	if (Object.keys(toUnset).length) { updateJson.$unset = toUnset; }
-
-	if (Object.keys(updateJson).length) {
-		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: ticketId }, updateJson);
+		publish(events.UPDATE_TICKET, { teamspace,
+			project,
+			model,
+			ticket: { _id: oldTicket._id, type: oldTicket.type },
+			author,
+			changes,
+			timestamp: updateData.properties[basePropertyLabels.UPDATED_AT] });
 	}
 };
 

@@ -23,7 +23,8 @@ const DayJS = require('dayjs');
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getTeamspaceList } = require('../../common/utils');
+const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
+const { getTeamspaceList } = require('../../utils');
 const FS = require('fs');
 const Path = require('path');
 const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
@@ -32,23 +33,28 @@ const { find } = require(`${v5Path}/handler/db`);
 
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
-const findMembersInTS = async (teamspace) => {
-	const results = await find(USERS_DB_NAME, 'system.users', { 'roles.db': teamspace }, { user: 1, 'customData.lastLoginAt': 1 });
-	return results.map(({ user, customData: { lastLoginAt } }) => ({ user, lastLoginAt }));
-};
+const findMembersInTS = (teamspace) => find(USERS_DB_NAME, 'system.users', { 'roles.db': teamspace }, { _id: 0, user: 1 });
 
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('Teamspace,User,lastLogin\n');
 	results.forEach(({ teamspace, members }) => {
-		members.forEach(({ user, lastLoginAt }) => {
-			writeStream.write(`${teamspace},${user},${formatDate(lastLoginAt)}\n`);
+		members.forEach(({ user, lastLogin }) => {
+			writeStream.write(`${teamspace},${user},${formatDate(lastLogin)}\n`);
 		});
 	});
 
 	writeStream.end(resolve);
 });
+
+const findMembersLastLogin = async (members) => {
+	await Promise.all(members.map(async (user) => {
+		const date = await getLastLoginDate(user.user);
+		// eslint-disable-next-line no-param-reassign
+		user.lastLogin = date;
+	}));
+};
 
 const run = async (outFile) => {
 	logger.logInfo('Finding all members from all teamspaces...');
@@ -58,6 +64,8 @@ const run = async (outFile) => {
 		logger.logInfo(`\t-${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop
 		const members = await findMembersInTS(teamspace);
+		// eslint-disable-next-line no-await-in-loop
+		await findMembersLastLogin(members);
 		res.push({ teamspace, members });
 	}
 	await writeResultsToFile(res, outFile);

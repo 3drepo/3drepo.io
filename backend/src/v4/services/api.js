@@ -30,9 +30,11 @@ module.exports.createApp = function (config, v5Init = true) {
 	const { systemLogger } = require("../logger");
 	const cors = require("cors");
 	const bodyParser = require("body-parser");
+	const bodyParserErrorHandler = require("express-body-parser-error-handler");
 	const utils = require("../utils");
 	const keyAuthentication =  require("../middlewares/keyAuthentication");
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
+	const { initialiseSystem } = require(`${v5Path}/services/initialiser`);
 
 	// Express app
 	const app = express();
@@ -56,6 +58,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	app.set("view_engine", "pug");
 
 	app.use(bodyParser.json({ limit: "50mb" }));
+	app.use(bodyParserErrorHandler());
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
@@ -75,6 +78,7 @@ module.exports.createApp = function (config, v5Init = true) {
 		require("../models/intercom").subscribeToV5Events();
 		require("../handler/elastic").subscribeToV5Events();
 		require(`${v5Path}/services/modelProcessing`).init();
+		initialiseSystem();
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
 

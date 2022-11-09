@@ -44,7 +44,7 @@ const propSchema = Yup.object().shape({
 				if (isString(value)) {
 					typeToCheck = Yup.string().oneOf(Object.values(presetEnumValues)).required();
 				} else {
-					typeToCheck = Yup.array().of(propTypesToValidator[propTypes.ONE_OF]).min(1).required()
+					typeToCheck = Yup.array().of(propTypesToValidator(propTypes.ONE_OF)).min(1).required()
 						.strict(true);
 				}
 
@@ -60,7 +60,7 @@ const propSchema = Yup.object().shape({
 	}),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
-		const res = propTypesToValidator[type];
+		const res = propTypesToValidator(type);
 		if (type === propTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
 				if (defaultValues?.length) {

@@ -44,12 +44,12 @@ const {
 	getProjectsForAccountsList,
 	removeUserFromProjects
 } = require("./project");
-const FileRef = require("./fileRef");
 const UserProcessorV5 = require("../../v5/processors/users");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { assignUserToJob } = require("../../v5/models/jobs.js");
 const { fileExists } = require("./fileRef");
+const { getSpaceUsed } = require("../../v5/utils/quota.js");
 
 const COLL_NAME = "system.users";
 
@@ -101,10 +101,6 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	}
 };
 
-const hasReadLatestTerms = function (user) {
-	return !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
-};
-
 // Find functions
 const findOne = async function (query, projection) {
 	return await db.findOne("admin", COLL_NAME, query, projection);
@@ -138,15 +134,7 @@ const handleAuthenticateFail = async function (user, username) {
 
 const User = {};
 
-User.getTeamspaceSpaceUsed = async function (dbName) {
-	const settings = await db.find(dbName, "settings", {}, {_id: 1});
-
-	const spacePerModel = await Promise.all(settings.map(async (setting) =>
-		await FileRef.getTotalModelFileSize(dbName, setting._id))
-	);
-
-	return spacePerModel.reduce((total, value) => total + value, 0);
-};
+User.getTeamspaceSpaceUsed = (dbName) => getSpaceUsed(dbName);
 
 User.authenticate =  async function (username, password) {
 	if (!username || !password) {
@@ -190,16 +178,7 @@ User.authenticate =  async function (username, password) {
 		user.customData = {};
 	}
 
-	const termsPrompt = !hasReadLatestTerms(user);
-
-	user.customData.lastLoginAt = new Date();
-
-	await db.updateOne("admin", COLL_NAME, {user: username}, {
-		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
-		$unset: {"customData.loginInfo.failedLoginCount":""}
-	});
-
-	return { username: user.user, flags:{ termsPrompt } };
+	return { username: user.user };
 };
 
 User.getProfileByUsername = async function (username) {

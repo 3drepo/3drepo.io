@@ -16,32 +16,33 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
+const { INTERNAL_DB, listCollections, dropDatabase, dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
-const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
+const { initialise } = require(`${v5Path}/models/loginRecords`);
 
-const processCollection = (teamspace, collection) => removeFilesWithMeta(
-	teamspace, collection, { _id: /.*unityAssets.json$/i },
-);
+const loginRecordsCol = 'loginRecords';
 
-const processTeamspace = async (teamspace) => {
-	const filesCols = await getCollectionsEndsWith(teamspace, '.json_mpc.ref');
-	for (let i = 0; i < filesCols.length; ++i) {
-		const collection = filesCols[i].name;
-		logger.logInfo(`\t\t\t${collection}`);
-		// eslint-disable-next-line no-await-in-loop
-		await processCollection(teamspace, collection);
-	}
+const processUser = async (user) => {
+	const records = await find(loginRecordsCol, user, {});
+	const formattedRecs = records.map((data) => ({ ...data, user }));
+
+	await insertMany(INTERNAL_DB, loginRecordsCol, formattedRecs);
+	await dropCollection(loginRecordsCol, user);
 };
 
 const run = async () => {
-	const teamspaces = await getTeamspaceList();
-	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
+	const [users] = await Promise.all([
+		listCollections(loginRecordsCol),
+		initialise(),
+	]);
+	for (let i = 0; i < users.length; ++i) {
+		logger.logInfo(`\t\t-${users[i].name}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(teamspaces[i]);
+		await processUser(users[i].name);
 	}
+
+	await dropDatabase(loginRecordsCol);
 };
 
 module.exports = run;

@@ -2730,6 +2730,11 @@ expect@^27.5.1:
     jest-matcher-utils "^27.5.1"
     jest-message-util "^27.5.1"
 
+express-body-parser-error-handler@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/express-body-parser-error-handler/-/express-body-parser-error-handler-1.0.4.tgz#ab948ca4e1525a0e0f9ae501a1ae9bf6752f2729"
+  integrity sha512-RUpblgIt9PU7y7gfdCrXnXJQ+XD8msEoLFSAKO1qoFZDPlwh44tc7/+GWx9gQFuLeWy6hzz7jq+YCXvWL8FdYg==
+
 express-session@1.17.0:
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/express-session/-/express-session-1.17.0.tgz#9b50dbb5e8a03c3537368138f072736150b7f9b3"
