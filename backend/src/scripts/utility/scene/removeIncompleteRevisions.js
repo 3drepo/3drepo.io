@@ -107,11 +107,12 @@ const processModelStash = async (teamspace, model, revIds) => {
 			const meshGroup = supermeshIds.slice(i, i + entriesLimit);
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			const superMeshRegex = new RegExp(`.*(?:${meshGroup.join('|')}).*`);
-			proms.push(
+			// eslint-disable-next-line no-await-in-loop
+			await Promise.all([
 				removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: superMeshRegex }),
 				removeFilesHelper(teamspace, `${model}.stash.src.ref`, { _id: superMeshRegex }),
 				removeFilesHelper(teamspace, `${model}.stash.unity3d.ref`, { _id: superMeshRegex }),
-			);
+			]);
 		}
 	}
 

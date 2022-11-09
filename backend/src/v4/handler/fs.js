@@ -118,8 +118,6 @@ class FSHandler {
 			fs.unlink(this.getFullPath(key), (err) => {
 				if (err) {
 					systemLogger.logError("File not removed:", {err, key});
-				} else {
-					systemLogger.logInfo("File removed:", key);
 				}
 			});
 		});
