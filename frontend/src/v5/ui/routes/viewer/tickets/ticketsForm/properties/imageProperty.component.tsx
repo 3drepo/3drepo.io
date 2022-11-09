@@ -46,7 +46,7 @@ export const ImageProperty = ({
 
 	const handleImageChange = ({ imgSrc = '' }) => {
 		if (imgSrc === img || imgSrc === getResourceUrl()) return;
-		const formattedImgSrc = stripBase64Prefix(imgSrc); 
+		const formattedImgSrc = stripBase64Prefix(imgSrc);
 		setValue(name, formattedImgSrc, { shouldValidate: true, shouldDirty: true });
 		setImg(formattedImgSrc);
 	};
