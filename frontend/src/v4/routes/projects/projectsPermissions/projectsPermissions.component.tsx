@@ -31,11 +31,13 @@ interface IProps {
 
 interface IState {
 	selectedUsers: any[];
+	filteredUsers: any[];
 }
 
 export class ProjectsPermissions extends PureComponent<IProps, IState> {
 	public state = {
-		selectedUsers: []
+		selectedUsers: [],
+		filteredUsers: []
 	};
 
 	public hasDisabledPermissions = (row) => {
@@ -53,12 +55,29 @@ export class ProjectsPermissions extends PureComponent<IProps, IState> {
 	}
 
 	public handleSelectionChange = (selectedUsers) => {
-		this.setState({selectedUsers});
+		this.setState({
+			...this.state,
+			selectedUsers
+		});
+	}
+
+	public handleFilterChange = (filteredUsers) => {
+		this.setState({
+			...this.state,
+			filteredUsers
+		});
 	}
 
 	public handlePermissionsChange = (permissions) => {
 		if (this.props.onPermissionsChange) {
 			const permissionsToSave = this.props.permissions.reduce((updatedUserPermissions, currentPermissions) => {
+				const filteredUsernames = this.state.filteredUsers.map(({ user }) => user);
+				if (filteredUsernames.length && !filteredUsernames.includes(currentPermissions.user)) {
+					// search is active, but the current permission is
+					// not included in the search results
+					return updatedUserPermissions;
+				}
+
 				if (!currentPermissions.isAdmin) {
 					const updatedPermissions = permissions.find((userPermissions) => {
 						return userPermissions.user === currentPermissions.user;
@@ -89,6 +108,7 @@ export class ProjectsPermissions extends PureComponent<IProps, IState> {
 					permissions={permissions}
 					roles={PROJECT_ROLES_LIST}
 					onSelectionChange={this.handleSelectionChange}
+					onFilterChange={this.handleFilterChange}
 					onPermissionsChange={this.handlePermissionsChange}
 					rowStateInterceptor={this.hasDisabledPermissions}
 				/>

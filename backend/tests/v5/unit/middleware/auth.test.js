@@ -16,9 +16,17 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../src/v5/models/users');
+const Users = require(`${src}/models/users`);
+
+jest.mock('../../../../src/v5/models/loginRecords');
+const LoginRecords = require(`${src}/models/loginRecords`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const AuthMiddlewares = require(`${src}/middleware/auth`);
@@ -136,8 +144,79 @@ const testIsLoggedIn = () => {
 	});
 };
 
+const testCanLogin = () => {
+	describe('Can login', () => {
+		test('next() should be called if account is active and not locked', async () => {
+			const mockCB = jest.fn();
+			Users.isAccountActive.mockResolvedValueOnce(true);
+			LoginRecords.isAccountLocked.mockResolvedValueOnce(false);
+			const user = generateRandomString();
+			await AuthMiddlewares.canLogin(
+				{ body: { user }, headers: {} },
+				{},
+				mockCB,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+
+			expect(Users.isAccountActive).toHaveBeenCalledTimes(1);
+			expect(Users.isAccountActive).toHaveBeenCalledWith(user);
+
+			expect(LoginRecords.isAccountLocked).toHaveBeenCalledTimes(1);
+			expect(LoginRecords.isAccountLocked).toHaveBeenCalledWith(user);
+
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test(`should respond with ${templates.userNotVerified.code} if account is inactive`, async () => {
+			const mockCB = jest.fn();
+			Users.isAccountActive.mockResolvedValueOnce(false);
+			const user = generateRandomString();
+			const req = { body: { user }, headers: {} };
+			const res = {};
+			await AuthMiddlewares.canLogin(
+				req,
+				res,
+				mockCB,
+			);
+
+			expect(Users.isAccountActive).toHaveBeenCalledTimes(1);
+			expect(Users.isAccountActive).toHaveBeenCalledWith(user);
+			expect(mockCB).not.toHaveBeenCalled();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.userNotVerified);
+		});
+
+		test(`should respond with ${templates.tooManyLoginAttempts.code} if account is locked`, async () => {
+			const mockCB = jest.fn();
+			Users.isAccountActive.mockResolvedValueOnce(true);
+			LoginRecords.isAccountLocked.mockResolvedValueOnce(true);
+			const user = generateRandomString();
+			const req = { body: { user }, headers: {} };
+			const res = {};
+			await AuthMiddlewares.canLogin(
+				req,
+				res,
+				mockCB,
+			);
+
+			expect(Users.isAccountActive).toHaveBeenCalledTimes(1);
+			expect(Users.isAccountActive).toHaveBeenCalledWith(user);
+
+			expect(LoginRecords.isAccountLocked).toHaveBeenCalledTimes(1);
+			expect(LoginRecords.isAccountLocked).toHaveBeenCalledWith(user);
+
+			expect(mockCB).not.toHaveBeenCalled();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.tooManyLoginAttempts);
+		});
+	});
+};
+
 describe('middleware/auth', () => {
 	testValidSession();
 	testNotLoggedIn();
 	testIsLoggedIn();
+	testCanLogin();
 });
