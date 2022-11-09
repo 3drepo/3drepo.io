@@ -31,62 +31,10 @@ const COLL_NAME = 'system.users';
 const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
 const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
 
-const recordSuccessfulAuthAttempt = async (user) => {
-	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
-
-	await updateUser(user, {
-		$set: { 'customData.lastLoginAt': new Date() },
-		$unset: { 'customData.loginInfo.failedLoginCount': '' },
-	});
-
-	const termsPrompt = !lastLoginAt || new Date(config.termsUpdatedAt) > lastLoginAt;
-
-	return { username: user, flags: { termsPrompt } };
-};
-
-const recordFailedAuthAttempt = async (user) => {
-	const projection = { 'customData.loginInfo': 1, 'customData.email': 1 };
-	const { customData: { loginInfo, email } = {} } = await User.getUserByUsername(user, projection);
-
-	const currentTime = new Date();
-
-	const { lastFailedLoginAt = 0, failedLoginCount = 0 } = loginInfo || {};
-
-	const resetCounter = (currentTime - lastFailedLoginAt) > config.loginPolicy.lockoutDuration;
-
-	const newCount = resetCounter ? 1 : failedLoginCount + 1;
-
-	await db.updateOne(USERS_DB_NAME, COLL_NAME, { user }, {
-		$set: {
-			'customData.loginInfo.lastFailedLoginAt': currentTime,
-			'customData.loginInfo.failedLoginCount': newCount,
-		},
-	});
-
-	publish(events.FAILED_LOGIN_ATTEMPT, { email, failedLoginCount: newCount });
-
-	return config.loginPolicy.maxUnsuccessfulLoginAttempts - newCount;
-};
-
-User.canLogIn = async (user) => {
-	const projection = { 'customData.loginInfo': 1, 'customData.inactive': 1 };
-	const { customData: { loginInfo, inactive } = {} } = await User.getUserByUsername(user, projection);
-
-	if (inactive) {
-		throw templates.userNotVerified;
-	}
-
-	const now = new Date();
-	const { lastFailedLoginAt = now, failedLoginCount } = loginInfo || {};
-	const timeElapsed = now - lastFailedLoginAt;
-
-	const { lockoutDuration, maxUnsuccessfulLoginAttempts } = config.loginPolicy;
-
-	if (lastFailedLoginAt
-		&& timeElapsed < lockoutDuration
-		&& failedLoginCount >= maxUnsuccessfulLoginAttempts) {
-		throw templates.tooManyLoginAttempts;
-	}
+User.isAccountActive = async (user) => {
+	const projection = { 'customData.inactive': 1 };
+	const { customData: { inactive } = {} } = await User.getUserByUsername(user, projection);
+	return !inactive;
 };
 
 User.authenticate = async (user, password) => {
@@ -94,17 +42,14 @@ User.authenticate = async (user, password) => {
 		await db.authenticate(user, password);
 	} catch (err) {
 		if (err.code === templates.incorrectUsernameOrPassword.code) {
-			const remainingLoginAttempts = await recordFailedAuthAttempt(user);
-			if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-				throw createResponseCode(templates.incorrectUsernameOrPassword,
-					`${templates.incorrectUsernameOrPassword.message} (Remaining attempts: ${remainingLoginAttempts})`);
-			}
+			publish(events.FAILED_LOGIN_ATTEMPT, { user });
+			throw templates.incorrectUsernameOrPassword;
 		}
 
 		throw err;
 	}
 
-	return recordSuccessfulAuthAttempt(user);
+	return { username: user };
 };
 
 User.getUserByQuery = async (query, projection) => {
