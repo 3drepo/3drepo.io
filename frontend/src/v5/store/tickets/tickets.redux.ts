@@ -23,7 +23,7 @@ import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceId } from '../store.types';
 import { ITemplate, ITicket, NewTicket } from './tickets.types';
 
-const mergeWithArray = (objValue, srcValue ) => mergeWith(objValue, srcValue, (target, src) => {
+const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
 	if (isArray(target)) return src; // If its an array that is merging just use the newest
 	return undefined;
 });
