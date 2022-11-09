@@ -314,7 +314,7 @@ const testGetTicketResource = () => {
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
 				['the resource does not exist', { ...baseRouteParams, resourceId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
-				['given the correct resource id', { ...baseRouteParams }, true],
+				['the resource id is correct', baseRouteParams, true],
 			];
 		};
 
