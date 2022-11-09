@@ -584,6 +584,7 @@ const testUpdateTicket = () => {
 		const con = ServiceHelper.generateRandomModel();
 		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
 		const requiredPropName = ServiceHelper.generateRandomString();
+		const imagePropName = ServiceHelper.generateRandomString();
 		const templateWithRequiredProp = {
 			...ServiceHelper.generateTemplate(),
 			properties: [
@@ -591,6 +592,10 @@ const testUpdateTicket = () => {
 					name: requiredPropName,
 					type: propTypes.TEXT,
 					required: true,
+				},
+				{
+					name: imagePropName,
+					type: propTypes.IMAGE,
 				},
 			],
 		};
@@ -661,6 +666,7 @@ const testUpdateTicket = () => {
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
+				['an image property is updated', baseRouteParams, true, undefined, { properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
 			];
 		};
 
