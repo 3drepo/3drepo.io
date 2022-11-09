@@ -40,6 +40,8 @@ const generateBasicData = () => ({
 	},
 	teamspace: ServiceHelper.generateRandomString(),
 	project: ServiceHelper.generateRandomProject(),
+	con: ServiceHelper.generateRandomModel(),
+	fed: ServiceHelper.generateRandomModel({ isFederation: true }),
 });
 
 const setupBasicData = async (users, teamspace, project, models) => {
@@ -61,22 +63,20 @@ const setupBasicData = async (users, teamspace, project, models) => {
 
 const testGetAllTemplates = () => {
 	describe('Get all templates', () => {
-		const { users, teamspace, project } = generateBasicData();
-		const conWithTemplates = ServiceHelper.generateRandomModel();
-		const fedWithTemplates = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { users, teamspace, project, con, fed } = generateBasicData();
 
 		const ticketTemplates = times(10, (n) => ServiceHelper.generateTemplate(n % 2 === 0 ? true : undefined));
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [conWithTemplates, fedWithTemplates]);
+			await setupBasicData(users, teamspace, project, [con, fed]);
 			await ServiceHelper.db.createTemplates(teamspace, ticketTemplates);
 		});
 
 		const generateTestData = (isFed) => {
-			const modelWithTemplates = isFed ? fedWithTemplates : conWithTemplates;
+			const modelWithTemplates = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const modelWrongType = isFed ? conWithTemplates : fedWithTemplates;
+			const modelWrongType = isFed ? con : fed;
 			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/templates${key ? `?key=${key}` : ''}`;
 
 			return [
@@ -86,12 +86,12 @@ const testGetAllTemplates = () => {
 				[`the ${modelType} does not exist`, false, getRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
 				[`the model is not a ${modelType}`, false, getRoute({ modelId: modelWrongType._id }), modelNotFound],
 				[`the user does not have access to the ${modelType}`, false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
-				['should provide the list of templates that are not deprecated', true, getRoute(),
+				['the user has sufficient privilege and the parameters are correct', true, getRoute(),
 					{
 						templates: ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated ? []
 							: { _id, name, code })),
 					}],
-				['should provide the list of templates including deprecated if the flag is set', true, getRoute(),
+				['the user has sufficient privilege and the parameters are correct (show deprecated)', true, getRoute(),
 					{ templates: ticketTemplates.map(
 						({ _id, name, code, deprecated }) => ({ _id, name, code, deprecated }),
 					) },
@@ -119,12 +119,11 @@ const testGetAllTemplates = () => {
 
 const testGetTemplateDetails = () => {
 	describe('Get Template Details', () => {
-		const { users, teamspace, project } = generateBasicData();
-		const conWithTemplates = ServiceHelper.generateRandomModel();
-		const fedWithTemplates = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [conWithTemplates, fedWithTemplates]);
+			await setupBasicData(users, teamspace, project, [con, fed]);
+
 			await ServiceHelper.db.createTemplates(teamspace, [template]);
 		});
 
@@ -142,8 +141,10 @@ const testGetTemplateDetails = () => {
 			};
 
 			const modelType = isFed ? 'federation' : 'container';
-			const wrongTypeModel = isFed ? conWithTemplates : fedWithTemplates;
-			const modelWithTemplates = isFed ? fedWithTemplates : conWithTemplates;
+
+			const wrongTypeModel = isFed ? con : fed;
+			const modelWithTemplates = isFed ? fed : con;
+
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
 			const getRoute = ({
@@ -161,8 +162,9 @@ const testGetTemplateDetails = () => {
 				[`the model provided is not a ${modelType}`, false, getRoute({ modelId: wrongTypeModel._id }), modelNotFound],
 				[`the user does not have access to the ${modelType}`, false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the template id is invalid', false, getRoute({ templateId: ServiceHelper.generateRandomString() }), templates.templateNotFound],
-				['should return the full template', true, getRoute(), generateFullSchema(template), true],
-				['should return the full template without deprecated fields', true, getRoute(), pruneDeprecated(generateFullSchema(template))],
+				['the user has sufficient privilege and the parameters are correct (show deprecated properties)', true, getRoute(), generateFullSchema(template), true],
+				['the user has sufficient privilege and the parameters are correct', true, getRoute(), pruneDeprecated(generateFullSchema(template))],
+
 			];
 		};
 
@@ -180,15 +182,13 @@ const testGetTemplateDetails = () => {
 		};
 
 		describe.each(generateTestData(true))('Federations', runTest);
-		describe.each(generateTestData(true))('Containers', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
 const testAddTicket = () => {
 	describe('Add ticket', () => {
-		const { users, teamspace, project } = generateBasicData();
-		const conWithTemplates = ServiceHelper.generateRandomModel();
-		const fedWithTemplates = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
 		const templateWithAllModulesAndPresetEnums = {
 			...ServiceHelper.generateTemplate(),
@@ -209,14 +209,14 @@ const testAddTicket = () => {
 		};
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [conWithTemplates, fedWithTemplates]);
+			await setupBasicData(users, teamspace, project, [con, fed]);
 			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithAllModulesAndPresetEnums]);
 		});
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
-			const wrongTypeModel = isFed ? conWithTemplates : fedWithTemplates;
-			const modelWithTemplates = isFed ? fedWithTemplates : conWithTemplates;
+			const wrongTypeModel = isFed ? con : fed;
+			const modelWithTemplates = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
 			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}`;
@@ -262,9 +262,7 @@ const testAddTicket = () => {
 };
 const testGetTicketResource = () => {
 	describe('Get ticket resource', () => {
-		const { users, teamspace, project } = generateBasicData();
-		const con = ServiceHelper.generateRandomModel();
-		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = {
 			...ServiceHelper.generateTemplate(),
 			config: {
@@ -283,6 +281,7 @@ const testGetTicketResource = () => {
 				properties: {
 					[template.properties[0].name]: FS.readFileSync(image, { encoding: 'base64' }),
 					[basePropertyLabels.DEFAULT_IMAGE]: FS.readFileSync(image, { encoding: 'base64' }),
+
 				},
 			};
 
@@ -325,8 +324,8 @@ const testGetTicketResource = () => {
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
 				['the resource does not exist', { ...baseRouteParams, resourceId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
-				['given the correct resource id', baseRouteParams, true],
 				['given the correct resource id (default image)', { ...baseRouteParams, testDefaultImage: true }, true],
+				['the resource id is correct', baseRouteParams, true],
 			];
 		};
 
@@ -405,9 +404,7 @@ const testGetTicket = () => {
 			],
 		};
 
-		const { users, teamspace, project } = generateBasicData();
-		const con = ServiceHelper.generateRandomModel();
-		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { users, teamspace, project, con, fed } = generateBasicData();
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -491,10 +488,8 @@ const testGetTicket = () => {
 };
 const testGetTicketList = () => {
 	describe('Get ticket list', () => {
-		const { users, teamspace, project } = generateBasicData();
-		const con = ServiceHelper.generateRandomModel();
+		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
-		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
 		const fedNoTickets = ServiceHelper.generateRandomModel({ isFederation: true });
 		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
 
@@ -580,9 +575,7 @@ const testGetTicketList = () => {
 
 const testUpdateTicket = () => {
 	describe('Update ticket', () => {
-		const { users, teamspace, project } = generateBasicData();
-		const con = ServiceHelper.generateRandomModel();
-		const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { users, teamspace, project, con, fed } = generateBasicData();
 		const requiredPropName = ServiceHelper.generateRandomString();
 		const imagePropName = ServiceHelper.generateRandomString();
 		const templateWithRequiredProp = {

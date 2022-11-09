@@ -34,6 +34,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	const utils = require("../utils");
 	const keyAuthentication =  require("../middlewares/keyAuthentication");
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
+	const { initialiseSystem } = require(`${v5Path}/services/initialiser`);
 
 	// Express app
 	const app = express();
@@ -77,6 +78,7 @@ module.exports.createApp = function (config, v5Init = true) {
 		require("../models/intercom").subscribeToV5Events();
 		require("../handler/elastic").subscribeToV5Events();
 		require(`${v5Path}/services/modelProcessing`).init();
+		initialiseSystem();
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
 
