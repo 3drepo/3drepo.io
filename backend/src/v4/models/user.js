@@ -101,10 +101,6 @@ const hasReachedLicenceLimit = async function (teamspace) {
 	}
 };
 
-const hasReadLatestTerms = function (user) {
-	return !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
-};
-
 // Find functions
 const findOne = async function (query, projection) {
 	return await db.findOne("admin", COLL_NAME, query, projection);
@@ -182,16 +178,7 @@ User.authenticate =  async function (username, password) {
 		user.customData = {};
 	}
 
-	const termsPrompt = !hasReadLatestTerms(user);
-
-	user.customData.lastLoginAt = new Date();
-
-	await db.updateOne("admin", COLL_NAME, {user: username}, {
-		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
-		$unset: {"customData.loginInfo.failedLoginCount":""}
-	});
-
-	return { username: user.user, flags:{ termsPrompt } };
+	return { username: user.user };
 };
 
 User.getProfileByUsername = async function (username) {
