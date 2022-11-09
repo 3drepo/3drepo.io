@@ -17,6 +17,7 @@
 import { FormattedMessage } from 'react-intl';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { memo } from 'react';
+import { isEqual } from 'lodash';
 import { AssigneesList, ExtraAssignees } from './assignees.styles';
 import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
 import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
@@ -24,10 +25,11 @@ import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component'
 type AssigneesType = {
 	assignees: string[];
 	max?: number;
+	onClick?: (e) => void;
 	className?: string;
 };
 
-export const Assignees = memo(({ assignees = [], max, className }: AssigneesType) => {
+export const Assignees = memo(({ assignees = [], max, onClick, className }: AssigneesType) => {
 	let displayedAssignees = assignees;
 	let extraAssignees = [];
 	if (max && assignees.length > max) {
@@ -36,7 +38,7 @@ export const Assignees = memo(({ assignees = [], max, className }: AssigneesType
 	}
 
 	return (
-		<AssigneesList className={className}>
+		<AssigneesList className={className} onClick={onClick}>
 			{assignees.length && displayedAssignees.length ? (
 				displayedAssignees.map((assignee) => (
 					<AssigneeListItem key={assignee} assignee={assignee} />
@@ -53,4 +55,4 @@ export const Assignees = memo(({ assignees = [], max, className }: AssigneesType
 			) : <></>}
 		</AssigneesList>
 	);
-});
+}, (a, b) => isEqual(a.assignees, b.assignees));

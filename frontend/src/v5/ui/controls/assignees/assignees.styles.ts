@@ -65,11 +65,11 @@ export const ExtraAssignees = styled(ExtraAssigneesCircle)`
 `;
 
 export const AssigneesList = styled.div`
-	pointer-events: none;
-	position: relative;
 	width: fit-content;
 	user-select: none;
 	color: ${({ theme }) => theme.palette.base.main};
+	height: 28px;
+    line-height: 28px;
 
 	.MuiButtonBase-root {
 		z-index: 11;

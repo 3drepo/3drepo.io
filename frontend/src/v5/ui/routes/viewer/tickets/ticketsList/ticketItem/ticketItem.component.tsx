@@ -21,7 +21,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { useParams } from 'react-router-dom';
-import { Ticket, Id, Title, ChipList, Assignees, IssueProperties, PriorityLevelChip } from './ticketItem.styles';
+import { Ticket, Id, Title, ChipList, IssueProperties, PriorityLevelChip, Assignees } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -61,7 +61,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				<IssueProperties>
 					<DueDate date={dueDate ?? null} onClick={() => { /* Edit Due Date */ }} />
 					<PriorityLevelChip state={priority} />
-					<Assignees assignees={assignees ?? []} max={7} />
+					<Assignees value={assignees ?? []} />
 				</IssueProperties>
 			)}
 		</Ticket>
