@@ -135,7 +135,7 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 };
 
 Elastic.subscribeToV5Events = () => {
-	EventsManager.subscribe(EventsV5.LOGIN_RECORD_CREATED, async ({username, loginRecord}) => {
+	EventsManager.subscribe(EventsV5.SUCCESSFUL_LOGIN_ATTEMPT, async ({username, loginRecord}) => {
 		await Elastic.createLoginRecord(username, loginRecord);
 	});
 };
