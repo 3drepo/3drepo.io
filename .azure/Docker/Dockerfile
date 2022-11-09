@@ -11,6 +11,7 @@ FROM node:14 as deploy
 
 RUN apt-get update && apt-get install -y \
         gosu \
+        less \
         && rm -rf /var/lib/apt/lists/*
 
 ARG NODE_USERNAME=node
