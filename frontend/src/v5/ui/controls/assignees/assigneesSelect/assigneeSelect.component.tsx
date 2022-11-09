@@ -24,8 +24,13 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { HiddenSearchSelect } from './assigneeSelect.styles';
 
-export const AssigneesSelect = ({ value: selectedAssignees, ...props }) => {
-	const [values, setValues] = useState(selectedAssignees);
+type AssigneesSelectProps = {
+	values: string[];
+	onBlur: (values) => void;
+};
+
+export const AssigneesSelect = ({ values: initialValues, onBlur, ...props }: AssigneesSelectProps) => {
+	const [values, setValues] = useState(initialValues);
 	const [open, setOpen] = useState(false);
 
 	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
@@ -43,6 +48,7 @@ export const AssigneesSelect = ({ value: selectedAssignees, ...props }) => {
 	const handleClose = (e) => {
 		preventPropagation(e);
 		setOpen(false);
+		onBlur(values);
 	};
 	const onChange = (e) => {
 		preventPropagation(e);

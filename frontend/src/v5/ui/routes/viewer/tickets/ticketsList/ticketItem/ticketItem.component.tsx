@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
@@ -30,7 +32,8 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
 	const hasIssueProperties = template?.config?.issueProperties;
 	const {
@@ -44,6 +47,11 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	} = ticket;
 	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
 	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
+	const updateTicket = (value) => TicketsActionsDispatchers
+		.updateTicket(teamspace, project, containerOrFederation, ticket._id, value, isFederation);
+	const onBlurAssignees = (newVals) => {
+		if (newVals !== assignees) updateTicket({ properties: { Assignees: newVals } });
+	};
 	return (
 		<Ticket
 			onClick={onClick}
@@ -59,9 +67,9 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{hasIssueProperties && (
 				<IssueProperties>
-					<DueDate date={dueDate ?? null} onClick={() => { /* Edit Due Date */ }} />
+					<DueDate date={dueDate ?? null} />
 					<PriorityLevelChip state={priority} />
-					<Assignees value={assignees ?? []} />
+					<Assignees values={assignees ?? []} onBlur={onBlurAssignees} />
 				</IssueProperties>
 			)}
 		</Ticket>
