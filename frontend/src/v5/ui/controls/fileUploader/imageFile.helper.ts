@@ -20,15 +20,12 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 
 export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
 
-export const validateImgSrc = (imgSrc, onSuccess?, onError?) => {
-	const img = new Image();
-
-	img.onload = () => onSuccess?.(imgSrc);
-	img.onerror = () => onError?.(imgSrc);
-
-	img.src = imgSrc;
+export const convertFileToImageSrc = (file, onLoadComplete) => {
+	const reader = new FileReader();
+	reader.onloadend = () => onLoadComplete(reader.result);
+	reader.readAsDataURL(file);
 };
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
 
-export const getImageUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
+export const getImageFromUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
