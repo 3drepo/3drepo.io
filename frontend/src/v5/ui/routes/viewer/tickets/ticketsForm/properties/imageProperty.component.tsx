@@ -14,12 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router-dom';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { useContext, useEffect, useState } from 'react';
-import { getImageUrl, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useFormContext } from 'react-hook-form';
+import { useEffect } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
@@ -30,37 +26,23 @@ export const ImageProperty = ({
 	onBlur,
 	...props
 }: PropertyProps) => {
-	const { setValue } = useFormContext();
-	const [img, setImg] = useState('');
-	const { props: { ticketId } } = useContext(CardContext);
-	const { teamspace, project, containerOrFederation } = useParams();
-	const isFederation = modelIsFederation(containerOrFederation);
-
-	const getResourceUrl = () => {
-		if (!defaultValue) return undefined;
-		const modelType = isFederation ? 'federations' : 'containers';
-		return getImageUrl(
-			`teamspaces/${teamspace}/projects/${project}/${modelType}/${containerOrFederation}/tickets/${ticketId}/resources/${defaultValue}`,
-		);
-	};
-
-	const handleImageChange = ({ imgSrc = '' }) => {
-		if (imgSrc === img || imgSrc === getResourceUrl()) return;
-		const formattedImgSrc = stripBase64Prefix(imgSrc);
-		setValue(name, formattedImgSrc, { shouldValidate: true, shouldDirty: true });
-		setImg(formattedImgSrc);
-	};
-
-	useEffect(() => { onBlur?.(); }, [img]);
+	const { watch } = useFormContext();
+	
+	useEffect(() => { onBlur?.(); }, [watch(name)]);
 
 	return (
-		<TicketImage
-			onChange={handleImageChange}
-			title={title}
-			disabled={readOnly}
-			required={required}
-			defaultValue={getResourceUrl()}
-			{...props}
+		<Controller
+			name={name}
+			defaultValue={defaultValue}
+			render={({ field: { ref, ...field} }) => (
+				<TicketImage
+					{...field}
+					title={title}
+					disabled={readOnly}
+					required={required}
+					{...props}
+				/>
+			)}
 		/>
 	);
 };

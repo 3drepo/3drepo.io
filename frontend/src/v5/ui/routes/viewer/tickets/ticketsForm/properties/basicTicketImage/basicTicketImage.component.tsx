@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
-import { validateImgSrc } from '@controls/formImage/image.helper';
 import {
 	ActionsList,
 	ActionsSide,
@@ -23,78 +21,45 @@ import {
 	PropertyName,
 	Asterisk,
 } from './basicTicketImage.styles';
-import { TicketImageActionContext } from './ticketImageAction/ticketImageActionContext';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 
-type BasicTicketImageProps = {
-	defaultValue?: string,
-	viewpoint?: any,
+export type BasicTicketImageProps = {
+	imgSrc: string,
 	title: string,
 	className?: string,
-	onChange?: ({ imgSrc, viewpoint }) => void,
+	onChange?: (imgSrc) => void,
 	children: any,
 	required?: boolean,
+	disabled?: boolean,
+	onEmptyImageClick: () => void,
 };
 export const BasicTicketImage = ({
 	children,
-	defaultValue = '',
-	viewpoint:
-	inputViewpoint,
+	imgSrc,
 	title,
 	className,
-	onChange,
 	required,
+	disabled,
+	onEmptyImageClick, // TODO think about renaiming
 }: BasicTicketImageProps) => {
-	const [viewpoint, setViewpoint] = useState(inputViewpoint);
-	const [imgSrc, setImgSrc] = useState(defaultValue);
-	const [imgIsInvalid, setImgIsInvalid] = useState(false);
-
-	const deleteImg = () => setImgSrc('');
-
-	const uploadImgSrc = (newImgSrc) => {
-		setImgSrc(newImgSrc);
-		setImgIsInvalid(false);
-	};
-
-	const handleInvalidUploadImgSrc = () => {
-		deleteImg();
-		setImgIsInvalid(true);
-	};
-
-	const uploadImgFile = (imgFile) => {
-		if (!imgFile) {
-			deleteImg();
-		} else {
-			const reader = new FileReader();
-			reader.onloadend = () => validateImgSrc(reader.result, uploadImgSrc, handleInvalidUploadImgSrc);
-			reader.readAsDataURL(imgFile);
-		}
-	};
-
-	const contextValue = {
-		imgSrc,
-		setImgSrc: uploadImgSrc,
-		setImgFile: uploadImgFile,
-		viewpoint,
-		setViewpoint,
-	};
-
-	useEffect(() => { onChange?.({ imgSrc, viewpoint }); }, [imgSrc, viewpoint]);
-	useEffect(() => { setImgSrc(defaultValue); }, [defaultValue]);
+	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
 	return (
 		<Container className={className}>
-			<TicketImageActionContext.Provider value={contextValue}>
-				<ActionsSide>
-					<PropertyName>
-						{title}{required && <Asterisk />}
-					</PropertyName>
-					<ActionsList>
-						{children}
-					</ActionsList>
-				</ActionsSide>
-				<TicketImageDisplayer imgIsInvalid={imgIsInvalid} />
-			</TicketImageActionContext.Provider>
+			<ActionsSide>
+				<PropertyName>
+					{title}{required && <Asterisk />}
+				</PropertyName>
+				<ActionsList>
+					{children}
+				</ActionsList>
+			</ActionsSide>
+			<TicketImageDisplayer
+				imgSrc={imgSrc}
+				disabled={disabled || !isAdmin}
+				onEmptyImageClick={onEmptyImageClick}
+			/>
 		</Container>
 	);
 };
