@@ -20,15 +20,15 @@ import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuItem.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
-import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
-import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
 import { convertFileToImageSrc, getImageFromUrl, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
+import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
+import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
 
 const TriggerButton = ({ imgSrc }) => {
 	if (!imgSrc) {
@@ -73,7 +73,7 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 		setImgSrc(newValue);
 		onChange(stripBase64Prefix(newValue));
 	};
-	
+
 	const uploadScreenshot = async () => handleImageChange(await ViewerService.getScreenshot());
 
 	const uploadImage = () => {
