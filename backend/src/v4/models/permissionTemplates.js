@@ -17,43 +17,27 @@
 
 "use strict";
 
+const C = require("../constants");
+
 const PermissionTemplates = {};
 
 PermissionTemplates.get = function() {
 	return [
 		{
-			"_id" : "admin",
-			"permissions" : [
-				"manage_model_permission"
-			]
+			_id: C.ADMIN_TEMPLATE,
+			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
 		},
 		{
-			"_id" : "viewer",
-			"permissions" : [
-				"view_issue",
-				"view_model"
-			]
+			_id: C.VIEWER_TEMPLATE,
+			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
 		},
 		{
-			"_id" : "commenter",
-			"permissions" : [
-				"create_issue",
-				"comment_issue",
-				"view_issue",
-				"view_model"
-			]
+			_id: C.COMMENTER_TEMPLATE,
+			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
 		},
 		{
-			"_id" : "collaborator",
-			"permissions" : [
-				"upload_files",
-				"create_issue",
-				"comment_issue",
-				"view_issue",
-				"view_model",
-				"download_model",
-				"edit_federation"
-			]
+			_id: C.COLLABORATOR_TEMPLATE,
+			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
 		}
 	];
 };
