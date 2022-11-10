@@ -47,7 +47,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 	};
 
 	const error = errors.avatarFile;
-	const newAvatar = getValues('avatarFile')
+	const newAvatar = getValues('avatarFile');
 
 	const getUserWithAvatar = () => {
 		if (!newAvatar) return user;

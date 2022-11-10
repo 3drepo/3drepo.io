@@ -27,14 +27,14 @@ export const ImageProperty = ({
 	...props
 }: PropertyProps) => {
 	const { watch } = useFormContext();
-	
+
 	useEffect(() => { onBlur?.(); }, [watch(name)]);
 
 	return (
 		<Controller
 			name={name}
 			defaultValue={defaultValue}
-			render={({ field: { ref, ...field} }) => (
+			render={({ field: { ref, ...field } }) => (
 				<TicketImage
 					{...field}
 					title={title}

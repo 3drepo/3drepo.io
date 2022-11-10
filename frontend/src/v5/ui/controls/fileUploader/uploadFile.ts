@@ -21,7 +21,7 @@ export const uploadFile = ({ accept, onUpload }) => {
 	const input = document.createElement('input');
 	input.type = 'file';
 	input.accept = accept;
-	
+
 	const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
 		if (!event.target.files.length) return null;
 		return event.target.files[0];
