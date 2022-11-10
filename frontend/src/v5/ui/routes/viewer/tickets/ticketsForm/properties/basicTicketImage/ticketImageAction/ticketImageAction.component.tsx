@@ -15,40 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
-import { useContext, useEffect } from 'react';
 import { isUndefined } from 'lodash';
 import { Action } from './ticketImageAction.styles';
-import { TicketImageActionContext } from './ticketImageActionContext';
 
 type TicketImageActionProps = {
 	onImageChange?: any;
-	onClick?: any;
 	children: any;
 	disabled?: boolean;
 };
 export const TicketImageAction = ({
 	onImageChange,
-	onClick,
-	disabled:
-	disabledInput,
+	disabled: disabledInput,
 	...props
 }: TicketImageActionProps) => {
-	const context = useContext(TicketImageActionContext);
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const disabled = !isUndefined(disabledInput) ? disabledInput : !isAdmin;
+	const disabled = isUndefined(disabledInput) ? disabledInput : !isAdmin;
 
-	const handleClick = (e) => {
-		if (!disabled) {
-			onClick?.(context);
-		} else {
-			e.preventDefault();
-			e.stopPropagation();
-		}
-	};
-
-	useEffect(() => {
-		if (isAdmin) (onImageChange?.(context));
-	}, [context.imgSrc]);
-
-	return (<Action onClick={handleClick} disabled={disabled} {...props} />);
+	return (<Action disabled={disabled} {...props} />);
 };
