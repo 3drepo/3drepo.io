@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChangeEvent } from 'react';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 
@@ -28,11 +27,6 @@ export const validateImgSrc = (imgSrc, onSuccess?, onError?) => {
 	img.onerror = () => onError?.(imgSrc);
 
 	img.src = imgSrc;
-};
-
-export const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
-	if (!event.target.files.length) return [];
-	return event.target.files[0];
 };
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');

@@ -18,7 +18,7 @@ import { useParams } from 'react-router-dom';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { useContext, useEffect, useState } from 'react';
-import { getImageUrl, stripBase64Prefix } from '@controls/formImage/image.helper';
+import { getImageUrl, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useFormContext } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';

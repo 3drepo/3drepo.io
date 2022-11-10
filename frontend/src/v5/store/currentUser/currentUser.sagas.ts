@@ -17,7 +17,7 @@
 
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { getImageUrl } from '@/v5/ui/controls/formImage/image.helper';
+import { getImageUrl } from '@controls/fileUploader/imageFile.helper';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import {
