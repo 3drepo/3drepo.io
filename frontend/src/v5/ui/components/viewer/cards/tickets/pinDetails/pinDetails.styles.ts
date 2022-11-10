@@ -38,8 +38,18 @@ export const PinActions = styled.div`
 
 export const PinName = styled(Typography).attrs({
 	variant: 'h5',
-})`
+})<{required:boolean}>`
 	user-select: none;
+
+	${({ required }) => required && css`
+		&::after {
+			font-weight: 400;
+			font-size: 0.75rem;
+			color: ${({ theme }) => theme.palette.error.main};
+			margin-left: 2px;
+			content: '*';
+		}
+	`}
 `;
 
 export const PinAction = styled.div`

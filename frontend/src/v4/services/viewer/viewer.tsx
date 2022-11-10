@@ -1153,6 +1153,34 @@ export class ViewerService {
 	public setNavigationOff() {
 		UnityUtil.setNavigationOff();
 	}
+
+	public async dropPin() {
+		return new Promise(async (resolve) => {
+			let pinWasDroped = false;
+
+			const onModeChanged = (mode) => {
+				this.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onCreated);
+				this.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
+
+				if (!pinWasDroped) {
+					resolve(null);
+				}
+			}
+
+			const onCreated = ({ position}) => {
+				pinWasDroped = true;
+				resolve(position);
+				this.clearMeasureMode();
+			};
+
+			await this.setMeasureMode(VIEWER_MEASURING_MODE.POINT);
+			await this.enableEdgeSnapping();
+
+			this.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onCreated);
+			this.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
+		})
+
+	}
 }
 
 export const Viewer = new ViewerService({});
