@@ -20,22 +20,22 @@ import { FormattedMessage } from 'react-intl';
 import { DateContainer, EmptyDateContainer } from './dueDate.styles';
 
 type IDueDate = {
-	date: number;
-	onClick?: () => void;
+	value: number;
+	onClick?: (event) => void;
 };
 
-export const DueDate = ({ date, onClick }: IDueDate) => {
-	if (!date) {
+export const DueDate = ({ value, onClick }: IDueDate) => {
+	if (!value) {
 		return (
 			<EmptyDateContainer onClick={onClick}>
 				<FormattedMessage id="dueDate.emptyText" defaultMessage="Set Due Date" />
 			</EmptyDateContainer>
 		);
 	}
-	const isOverdue = date < Date.now();
-	const formattedDate = formatDate(date);
+	const isOverdue = value < Date.now();
+	const formattedDate = formatDate(value);
 	return (
-		<DateContainer isOverdue={isOverdue}>
+		<DateContainer isOverdue={isOverdue} onClick={onClick}>
 			{isOverdue ? (
 				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
 			) : (

@@ -21,7 +21,7 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
-import { DueDate } from '@controls/dueDate/dueDate.component';
+import { DueDateInput } from '@controls/dueDate/dueDateInput.component';
 import { useParams } from 'react-router-dom';
 import { Ticket, Id, Title, ChipList, IssueProperties, PriorityLevelChip, Assignees } from './ticketItem.styles';
 
@@ -47,10 +47,13 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	} = ticket;
 	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
 	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
-	const updateTicket = (value) => TicketsActionsDispatchers
-		.updateTicket(teamspace, project, containerOrFederation, ticket._id, value, isFederation);
+	const updateTicketProperty = (value) => TicketsActionsDispatchers
+		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
 	const onBlurAssignees = (newVals) => {
-		if (newVals !== assignees) updateTicket({ properties: { Assignees: newVals } });
+		if (newVals !== assignees) updateTicketProperty({ Assignees: newVals });
+	};
+	const onBlurDueDate = (newVal) => {
+		if (newVal !== dueDate) updateTicketProperty({ 'Due Date': newVal });
 	};
 	return (
 		<Ticket
@@ -67,7 +70,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{hasIssueProperties && (
 				<IssueProperties>
-					<DueDate date={dueDate ?? null} />
+					<DueDateInput value={dueDate ?? null} onBlur={onBlurDueDate} />
 					<PriorityLevelChip state={priority} />
 					<Assignees values={assignees ?? []} onBlur={onBlurAssignees} />
 				</IssueProperties>
