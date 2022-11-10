@@ -16,6 +16,9 @@
  */
 
 import styled, { css } from 'styled-components';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
+import { Menu } from '@controls/actionMenu/actionMenu.styles';
+import MenuItemBase from '@mui/material/MenuItem';
 
 export const Action = styled.li<{ disabled?: boolean }>`
 	line-height: 20px;
@@ -41,4 +44,29 @@ export const Action = styled.li<{ disabled?: boolean }>`
 			color: ${theme.palette.secondary.lightest};
 		}
 	`}
+`;
+
+export const ActionMenu = styled(ActionMenuBase).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'bottom',
+			horizontal: 'left',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})`
+	${Menu} {
+		padding: 4px 0;
+	}
+`;
+
+export const MenuItem = styled(MenuItemBase)`
+	padding: 5px 12px;
+`;
+
+export const MenuItemDelete = styled(MenuItem)`
+	color: ${({ theme }) => theme.palette.error.main};
 `;
