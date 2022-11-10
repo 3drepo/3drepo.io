@@ -113,17 +113,14 @@ describe("Permission templates", function () {
 
 		agent.post(`/${username}/${model}/permissions`)
 			.send([{ user: "testing", permission: "viewer"}])
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.PERM_NOT_FOUND.value);
-				done(err);
-			});
+			.expect(404, done);
 
 	});
 
 	it("should fail to assign a permission to a non existing user", function(done) {
 
 		agent.post(`/${username}/${model}/permissions`)
-			.send([{ user: "nonses", permission: "customB"}])
+			.send([{ user: "nonses", permission: "viewer"}])
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
