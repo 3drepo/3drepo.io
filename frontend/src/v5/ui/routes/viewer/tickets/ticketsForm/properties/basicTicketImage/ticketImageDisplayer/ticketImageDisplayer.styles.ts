@@ -31,7 +31,7 @@ export const OverlappingContainer = styled.div`
 	}
 `;
 
-export const Container = styled(OverlappingContainer)`
+export const Container = styled.div`
 	border-radius: 5px;
 	overflow: hidden;
 	height: 101px;
@@ -65,11 +65,6 @@ export const EmptyImageContainer = styled(CentredContainer)<{ disabled: boolean 
 	color: ${({ theme }) => theme.palette.base.main};
 	text-align: center;
 	${({ disabled }) => `cursor: ${disabled ? 'unset' : 'pointer'}`};
-`;
-
-export const BrokenImageContainer = styled(EmptyImageContainer)`
-	background-color: ${({ theme }) => theme.palette.error.lightest};
-	color: ${({ theme }) => theme.palette.error.main};
 `;
 
 export const IconText = styled(Typography).attrs({ variant: 'body1' })``;
