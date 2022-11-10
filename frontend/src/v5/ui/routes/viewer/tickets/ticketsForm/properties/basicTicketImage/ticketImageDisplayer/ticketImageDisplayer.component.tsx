@@ -14,17 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
-import BrokenImageIcon from '@assets/icons/outlined/broken-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { formatMessage } from '@/v5/services/intl';
-import { HiddenImageUploader } from '@controls/formImage/hiddenImageUploader/hiddenImageUploader.component';
 import { Modal } from '@controls/modal';
 import {
-	BrokenImageContainer,
 	EmptyImageContainer,
 	EnlargeContainer,
 	IconText,
@@ -32,18 +28,15 @@ import {
 	Container,
 	OverlappingContainer,
 } from './ticketImageDisplayer.styles';
-import { TicketImageActionContext } from '../ticketImageAction/ticketImageActionContext';
 
-const LoadedImage = () => {
+const LoadedImage = ({ imgSrc }) => {
 	const [showLargePicture, setShowLargePicture] = useState(false);
-	const { imgSrc, setImgSrc } = useContext(TicketImageActionContext);
 	return (
 		<>
 			<OverlappingContainer onClick={() => setShowLargePicture(true)}>
 				<Image
 					src={imgSrc}
 					alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
-					onChange={setImgSrc}
 				/>
 				<EnlargeContainer>
 					<EnlargeImageIcon />
@@ -62,40 +55,18 @@ const LoadedImage = () => {
 	);
 };
 
-const EmptyImage = ({ imgIsInvalid, disabled }) => {
-	if (!imgIsInvalid) {
-		return (
-			<EmptyImageContainer disabled={disabled}>
-				<EmptyImageIcon />
-				<IconText>
-					<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
-				</IconText>
-			</EmptyImageContainer>
-		);
-	}
-	return (
-		<BrokenImageContainer disabled={disabled}>
-			<BrokenImageIcon />
-			<IconText>
-				<FormattedMessage id="viewer.cards.ticketImage.unsupportedImage" defaultMessage="Unsupported image" />
-			</IconText>
-		</BrokenImageContainer>
-	);
-};
+const EmptyImage = (props) => (
+	<EmptyImageContainer {...props}>
+		<EmptyImageIcon />
+		<IconText>
+			<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
+		</IconText>
+	</EmptyImageContainer>
+);
 
-export const TicketImageDisplayer = ({ imgIsInvalid }) => {
-	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const { setImgFile, imgSrc } = useContext(TicketImageActionContext);
-
-	return (
-		<Container>
-			<HiddenImageUploader
-				onChange={setImgFile}
-				disabled={!isAdmin}
-			>
-				{!imgSrc && <EmptyImage imgIsInvalid={imgIsInvalid} disabled={!isAdmin} />}
-			</HiddenImageUploader>
-			{imgSrc && <LoadedImage />}
-		</Container>
-	);
-};
+export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled }) => (
+	<Container>
+		{!imgSrc && <EmptyImage disabled={disabled} onClick={onEmptyImageClick} />}
+		{imgSrc && <LoadedImage imgSrc={imgSrc} />}
+	</Container>
+);
