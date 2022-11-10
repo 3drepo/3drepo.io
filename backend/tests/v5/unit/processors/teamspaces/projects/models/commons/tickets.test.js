@@ -24,6 +24,10 @@ const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = r
 
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
+
+jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
+const TemplatesModel = require(`${src}/schemas/tickets/templates`);
+
 const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
 
 jest.mock('../../../../../../../../src/v5/services/filesManager');
@@ -88,6 +92,7 @@ const addTicketImageTest = async (isView) => {
 	const imageTestData = generateImageTestData(isView);
 
 	TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+	TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 	await expect(Tickets.addTicket(teamspace, project, model, imageTestData.template,
 		imageTestData.ticket)).resolves.toEqual(expectedOutput);
@@ -110,6 +115,9 @@ const addTicketImageTest = async (isView) => {
 			},
 		});
 
+	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
+
 	const meta = { teamspace, project, model, ticket: expectedOutput };
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
@@ -125,6 +133,8 @@ const updateTicketImageTest = async (isView) => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const author = generateRandomString();
+
+	TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 	const imageTestData = generateImageTestData(isView);
 	const updatePropBuffer = Buffer.from(generateRandomString());
@@ -161,6 +171,9 @@ const updateTicketImageTest = async (isView) => {
 		},
 		author);
 
+	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
+
 	const meta = { teamspace, project, model, ticket: imageTestData.ticket._id };
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
@@ -190,9 +203,13 @@ const testAddTicket = () => {
 			const expectedOutput = generateRandomString();
 
 			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 			await expect(Tickets.addTicket(teamspace, project, model, template, ticket))
 				.resolves.toEqual(expectedOutput);
+
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
 			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, ticket);
@@ -218,6 +235,7 @@ const testUpdateTicket = () => {
 				properties: {},
 			};
 			const author = generateRandomString();
+			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket,
 				updateData, author))
@@ -226,6 +244,8 @@ const testUpdateTicket = () => {
 			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model, ticket,
 				updateData, author);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 			expect(FilesManager.removeFile).not.toHaveBeenCalled();

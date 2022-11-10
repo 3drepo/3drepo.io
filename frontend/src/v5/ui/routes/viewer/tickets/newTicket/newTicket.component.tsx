@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';

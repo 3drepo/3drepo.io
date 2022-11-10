@@ -468,7 +468,8 @@
 		"local",
 		"root",
 		"notifications",
-		"loginRecords"
+		"loginRecords",
+		"internal"
 	]);
 
 	// -----------------------------------------------------------------------------

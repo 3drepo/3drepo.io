@@ -16,14 +16,14 @@
  */
 
 const { createDirectMessage, createInternalMessage } = require('../../chat');
+const { recordFailedAttempt, saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { removeOldSessions } = require('../../sessions');
-const { saveLoginRecord } = require('../../../models/loginRecords');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => Promise.all([
-	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+	saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
 	removeOldSessions(username, sessionID, referer),
 	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 ]);
@@ -35,11 +35,16 @@ const sessionsRemoved = async ({ ids, elective }) => {
 	await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 };
 
+const loginFailed = async ({ user, ipAddress, userAgent, referer }) => {
+	await recordFailedAttempt(user, ipAddress, userAgent, referer);
+};
+
 const AuthEventsListener = {};
 
 AuthEventsListener.init = () => {
 	subscribe(events.SESSION_CREATED, userLoggedIn);
 	subscribe(events.SESSIONS_REMOVED, sessionsRemoved);
+	subscribe(events.FAILED_LOGIN_ATTEMPT, loginFailed);
 };
 
 module.exports = AuthEventsListener;
