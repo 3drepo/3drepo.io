@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
-import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { UploadFileForm } from './uploadFileForm.component';
+import { ChangeEvent } from 'react';
 
-export const uploadToContainer = (presetContainerId: string) => {
-	const accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
-	const onUpload = (file) => {
-		DialogsActionsDispatchers.open(UploadFileForm, {
-			file,
-			presetContainerId,
-		});
+export const uploadFile = ({ accept, onUpload }) => {
+	const input = document.createElement('input');
+	input.type = 'file';
+	input.accept = accept;
+	
+	const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
+		if (!event.target.files.length) return [];
+		return event.target.files[0];
 	};
-	uploadFile({ accept, onUpload });
+
+	input.onchange = (e) => onUpload(getFileFromInputEvent(e as any));
+
+	input.click();
 };
