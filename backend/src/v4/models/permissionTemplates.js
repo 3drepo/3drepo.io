@@ -18,52 +18,48 @@
 "use strict";
 
 const PermissionTemplates = {};
-const C = require("../constants");
-const _ = require("lodash");
-const responseCodes = require("../response_codes.js");
 
-PermissionTemplates.get = function(user) {
-	return user.customData.permissionTemplates;
+PermissionTemplates.get = function() {
+	return [
+		{
+			"_id" : "admin",
+			"permissions" : [
+				"manage_model_permission"
+			]
+		},
+		{
+			"_id" : "viewer",
+			"permissions" : [
+				"view_issue",
+				"view_model"
+			]
+		},
+		{
+			"_id" : "commenter",
+			"permissions" : [
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model"
+			]
+		},
+		{
+			"_id" : "collaborator",
+			"permissions" : [
+				"upload_files",
+				"create_issue",
+				"comment_issue",
+				"view_issue",
+				"view_model",
+				"download_model",
+				"edit_federation"
+			]
+		}
+	];
 };
 
 PermissionTemplates.findById = function(user, id) {
 	return this.get(user).find(({_id}) => _id === id);
-};
-
-const updatePermissions = async (teamspace, updatedPermissions) => {
-	const User = require("./user");
-	await User.updatePermissionTemplates(teamspace.user, updatedPermissions);
-	return updatedPermissions;
-};
-
-PermissionTemplates.add = async function (teamspace, permission) {
-	const isPermissionInvalid = !Array.isArray(permission.permissions) ||
-	_.intersection(permission.permissions, C.MODEL_PERM_LIST).length !== permission.permissions.length;
-
-	if (this.findById(teamspace, permission._id)) {
-		throw (responseCodes.DUP_PERM_TEMPLATE);
-	}
-
-	if (isPermissionInvalid) {
-		throw (responseCodes.INVALID_PERM);
-	}
-
-	return await updatePermissions(teamspace, this.get(teamspace).concat(permission));
-};
-
-PermissionTemplates.remove = async function(teamspace, id) {
-
-	if(id === C.ADMIN_TEMPLATE) {
-		throw (responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE);
-	}
-
-	const permission = this.findById(teamspace, id);
-
-	if (!permission) {
-		throw (responseCodes.PERM_NOT_FOUND);
-	}
-
-	return await updatePermissions(teamspace, this.get(teamspace).filter(({_id}) => _id !== id));
 };
 
 module.exports = PermissionTemplates;
