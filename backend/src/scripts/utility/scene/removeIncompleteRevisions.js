@@ -96,11 +96,7 @@ const processModelStash = async (teamspace, model, revIds) => {
 	// eslint-disable-next-line security/detect-non-literal-regexp
 	const revIdsRegex = new RegExp(`.*(?:${revIds.map(UUIDToString).join('|')}).*`);
 
-	const proms = [
-		removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
-		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
-		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
-	];
+	logger.logInfo('\t\t\t\tRemoving supermesh stashes');
 	const supermeshIds = (await find(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds }, type: 'mesh' }, { _id: 1 })).map(({ _id }) => UUIDToString(_id));
 	if (supermeshIds.length) {
 		for (let i = 0; i <= supermeshIds.length; i += entriesLimit) {
@@ -115,6 +111,14 @@ const processModelStash = async (teamspace, model, revIds) => {
 			]);
 		}
 	}
+
+	logger.logInfo('\t\t\t\tRemoving revision based stashes');
+
+	const proms = [
+		removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
+		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
+		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
+	];
 
 	await Promise.all(proms);
 };
@@ -141,12 +145,16 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 
 	logger.logInfo(`\t\t-${model} - removing ${revIds.length} zombie revisions`);
 
+	logger.logInfo('\t\t\tRemoving stashes');
+	await processModelStash(teamspace, model, revIds);
+
+	logger.logInfo('\t\t\tRemoving sequences and model files');
 	await Promise.all([
 		processModelSequences(teamspace, model, revIds),
-		processModelStash(teamspace, model, revIds),
 		removeFilesHelper(teamspace, `${model}.history.ref`, { _id: { $in: rFiles } }),
 	]);
 
+	logger.logInfo('\t\t\tRemoving scene objects');
 	// We can't remove mesh nodes until we've processed the stashes
 	await removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef');
 };
