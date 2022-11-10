@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const UUIDParse = require('uuid-parse');
 const _ = require('lodash');
 const { fromBuffer: fileTypeFromBuffer } = require('file-type');
 
@@ -30,6 +31,14 @@ TypeChecker.isUUIDString = (uuid) => {
 	if (!TypeChecker.isString(uuid)) return false;
 	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 	return hasMatch?.length > 0;
+};
+TypeChecker.isUUID = (uuid) => {
+	if (!TypeChecker.isObject(uuid)) return false;
+	try {
+		return !!UUIDParse.unparse(uuid.buffer);
+	} catch {
+		return false;
+	}
 };
 
 const getTypeFromBuffer = (fileBuffer) => (Buffer.isBuffer(fileBuffer) ? fileTypeFromBuffer(fileBuffer) : null);

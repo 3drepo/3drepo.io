@@ -15,21 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getTicketById, getTicketList, getTicketResourceAsStream, updateTicket: update } = require('../../../../processors/teamspaces/projects/models/containers');
-const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { respond, writeStreamRespond } = require('../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const {
+	addTicket: addConTicket,
+	getTicketById: getConTicketById,
+	getTicketList: getConTicketList,
+	getTicketResourceAsStream: getConTicketResourceAsStream,
+	updateTicket: updateConTicket,
+} = require('../../../../../processors/teamspaces/projects/models/containers');
+const {
+	addTicket: addFedTicket,
+	getTicketById: getFedTicketById,
+	getTicketList: getFedTicketList,
+	getTicketResourceAsStream: getFedTicketResourceAsStream,
+	updateTicket: updateFedTicket,
+} = require('../../../../../processors/teamspaces/projects/models/federations');
+const {
+	hasCommenterAccessToContainer,
+	hasCommenterAccessToFederation,
+	hasReadAccessToContainer,
+	hasReadAccessToFederation,
+} = require('../../../../../middleware/permissions/permissions');
+const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
-const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { getAllTemplates: getAllTemplatesInProject } = require('../../../../processors/teamspaces/projects');
-const { getUserFromSession } = require('../../../../utils/sessions');
-const { templates } = require('../../../../utils/responseCodes');
+const { UUIDToString } = require('../../../../../utils/helper/uuids');
+const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
+const { getUserFromSession } = require('../../../../../utils/sessions');
+const { templates } = require('../../../../../utils/responseCodes');
 
-const createTicket = async (req, res) => {
-	const { teamspace, project, container } = req.params;
+const createTicket = (isFed) => async (req, res) => {
+	const { teamspace, project, model } = req.params;
 	try {
-		const _id = await addTicket(teamspace, project, container, req.templateData, req.body);
+		const addTicket = isFed ? addFedTicket : addConTicket;
+		const _id = await addTicket(teamspace, project, model, req.templateData, req.body);
 
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
@@ -53,11 +72,12 @@ const getAllTemplates = async (req, res) => {
 	}
 };
 
-const getTicket = async (req, res, next) => {
-	const { teamspace, project, container, ticket } = req.params;
+const getTicket = (isFed) => async (req, res, next) => {
+	const { teamspace, project, model, ticket } = req.params;
 
 	try {
-		req.ticket = await getTicketById(teamspace, project, container, ticket);
+		const getTicketById = isFed ? getFedTicketById : getConTicketById;
+		req.ticket = await getTicketById(teamspace, project, model, ticket);
 		req.showDeprecated = req.query.showDeprecated === 'true';
 
 		await next();
@@ -67,11 +87,12 @@ const getTicket = async (req, res, next) => {
 	}
 };
 
-const getTicketsInContainer = async (req, res, next) => {
-	const { teamspace, project, container } = req.params;
+const getTicketsInModel = (isFed) => async (req, res, next) => {
+	const { teamspace, project, model } = req.params;
 
 	try {
-		req.tickets = await getTicketList(teamspace, project, container);
+		const getTicketList = isFed ? getFedTicketList : getConTicketList;
+		req.tickets = await getTicketList(teamspace, project, model);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -79,14 +100,16 @@ const getTicketsInContainer = async (req, res, next) => {
 	}
 };
 
-const getTicketResource = async (req, res) => {
-	const { teamspace, project, container, ticket, resource } = req.params;
+const getTicketResource = (isFed) => async (req, res) => {
+	const { teamspace, project, model, ticket, resource } = req.params;
 
 	try {
+		const getTicketResourceAsStream = isFed ? getFedTicketResourceAsStream : getConTicketResourceAsStream;
+
 		const { readStream, size, mimeType } = await getTicketResourceAsStream(
 			teamspace,
 			project,
-			container,
+			model,
 			ticket,
 			resource,
 		);
@@ -98,18 +121,19 @@ const getTicketResource = async (req, res) => {
 	}
 };
 
-const updateTicket = async (req, res) => {
+const updateTicket = (isFed) => async (req, res) => {
 	const {
 		templateData: template,
 		ticketData: oldTicket,
 		params,
 		body: updatedTicket,
 	} = req;
-	const { teamspace, project, container } = params;
+	const { teamspace, project, model } = params;
 	const user = getUserFromSession(req.session);
 
 	try {
-		await update(teamspace, project, container, template, oldTicket, updatedTicket, user);
+		const update = isFed ? updateFedTicket : updateConTicket;
+		await update(teamspace, project, model, template, oldTicket, updatedTicket, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -118,16 +142,17 @@ const updateTicket = async (req, res) => {
 	}
 };
 
-const establishRoutes = () => {
+const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
-
+	const hasReadAccess = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
+	const hasCommenterAccess = isFed ? hasCommenterAccessToFederation : hasCommenterAccessToContainer;
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/templates:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates:
 	 *   get:
-	 *     description: Get the the available ticket templates for this container
-	 *     tags: [Containers]
-	 *     operationId: getContainerTicketTemplates
+	 *     description: Get the the available ticket templates for this model
+	 *     tags: [Tickets]
+	 *     operationId: getModelTicketTemplates
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -142,13 +167,20 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *           format: uuid
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
 	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated schemas (default is false)
 	 *         in: query
@@ -179,15 +211,15 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         example: Risk
 	 */
-	router.get('/templates', hasReadAccessToContainer, getAllTemplates);
+	router.get('/templates', hasReadAccess, getAllTemplates);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/templates/{template}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates/{template}:
 	 *   get:
 	 *     description: Get the full definition of a template
-	 *     tags: [Containers]
-	 *     operationId: getContainerTicketTemplateDetails
+	 *     tags: [Tickets]
+	 *     operationId: getModelTicketTemplateDetails
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -201,8 +233,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -232,15 +271,15 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/ticketTemplate"
 	 */
-	router.get('/templates/:template', hasReadAccessToContainer, templateExists, serialiseFullTicketTemplate);
+	router.get('/templates/:template', hasReadAccess, templateExists, serialiseFullTicketTemplate);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   post:
 	 *     description: Create a ticket. The Schema of the payload depends on the ticket template being used
-	 *     tags: [Containers]
-	 *     operationId: createContainerTicket
+	 *     tags: [Tickets]
+	 *     operationId: createTicket
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -254,8 +293,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/ Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -306,7 +352,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: ticket has been successfully added, returns the id of the newly created template
+	 *         description: ticket has been successfully added, returns the id of the newly created ticket
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -316,15 +362,15 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   format: uuid
 	 */
-	router.post('/', hasCommenterAccessToContainer, validateNewTicket, createTicket);
+	router.post('/', hasCommenterAccess, validateNewTicket, createTicket(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   get:
-	 *     description: Get all tickets within the container
-	 *     tags: [Containers]
-	 *     operationId: GetContainerTicketList
+	 *     description: Get all tickets within the model
+	 *     tags: [Tickets]
+	 *     operationId: GetTicketList
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -338,8 +384,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -385,15 +438,15 @@ const establishRoutes = () => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccessToContainer, getTicketsInContainer, serialiseTicketList);
+	router.get('/', hasReadAccess, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/{ticket}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}:
 	 *   get:
 	 *     description: Get ticket by ID
-	 *     tags: [Containers]
-	 *     operationId: GetContainerTicket
+	 *     tags: [Tickets]
+	 *     operationId: GetTicket
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -407,8 +460,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -459,16 +519,17 @@ const establishRoutes = () => {
 	 *                 modules:
 	 *                   type: object
 	 *                   description: ticket modules and their properties
+	 *
 	 */
-	router.get('/:ticket', hasReadAccessToContainer, getTicket, serialiseTicket);
+	router.get('/:ticket', hasReadAccess, getTicket(isFed), serialiseTicket);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/{ticket}/resources/{resource}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/resources/{resource}:
 	 *   get:
 	 *     description: Get the binary resource associated with the given ticket
-	 *     tags: [Containers]
-	 *     operationId: getContainerTicketResource
+	 *     tags: [Tickets]
+	 *     operationId: getTicketResource
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -482,8 +543,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -513,15 +581,15 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:ticket/resources/:resource', hasReadAccessToContainer, getTicketResource);
+	router.get('/:ticket/resources/:resource', hasReadAccess, getTicketResource(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/tickets/{ticket}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}:
 	 *   patch:
 	 *     description: Update a ticket. The Schema of the payload depends on the ticket template being used
-	 *     tags: [Containers]
-	 *     operationId: updateContainerTicket
+	 *     tags: [Tickets]
+	 *     operationId: updateTicket
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -535,8 +603,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -589,9 +664,9 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: ticket has been successfully updated
 	 */
-	router.patch('/:ticket', hasCommenterAccessToContainer, validateUpdateTicket, updateTicket);
+	router.patch('/:ticket', hasCommenterAccess, validateUpdateTicket, updateTicket(isFed));
 
 	return router;
 };
 
-module.exports = establishRoutes();
+module.exports = establishRoutes;
