@@ -43,7 +43,7 @@ export const DueDateInput = ({ value: initialValue, disabled, onBlur }: DueDateI
 	};
 
 	return (
-		<div onClick={preventPropagation}>
+		<div onClick={preventPropagation} aria-hidden="true">
 			<Backdrop /* Prevents clicking background elements */
 				sx={{ zIndex: 15 }}
 				open={open}
