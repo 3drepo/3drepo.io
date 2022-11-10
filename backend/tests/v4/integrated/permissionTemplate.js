@@ -108,15 +108,6 @@ describe("Permission templates", function () {
 		], done);
 
 	});
-
-	it("should fail to assign a non existing permission to user", function(done) {
-
-		agent.post(`/${username}/${model}/permissions`)
-			.send([{ user: "testing", permission: "viewer"}])
-			.expect(404, done);
-
-	});
-
 	it("should fail to assign a permission to a non existing user", function(done) {
 
 		agent.post(`/${username}/${model}/permissions`)
