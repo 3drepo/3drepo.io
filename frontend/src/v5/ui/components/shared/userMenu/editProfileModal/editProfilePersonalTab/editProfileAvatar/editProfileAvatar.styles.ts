@@ -21,6 +21,7 @@ import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
 import { Button } from '@controls/button';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
+import { getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 
 export const ScrollArea = styled(ScrollAreaBase).attrs({
 	variant: 'base',
@@ -71,18 +72,31 @@ export const Username = styled.div`
 export const FullName = styled.div`
 	font-size: ${({ theme }) => theme.typography.body1.fontSize};
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 1px 0 8px;
+	margin-top: 1px;
 `;
 
 export const AvatarButton = styled(Button).attrs({
 	variant: 'outlined',
 })`
-	margin: 0;
+	cursor: pointer;
+	padding: 10px 15px;
+	margin: 8px 0 0;
 	width: fit-content;
-	padding: 0;
-	& > * {
-		padding: 10px 15px;
-	}
+`;
+
+const AVATAR_ID = 'avatar';
+
+export const AvatarLabel = styled.label.attrs({
+	htmlFor: AVATAR_ID,
+})`
+`;
+
+export const AvatarInput = styled.input.attrs({
+	type: 'file',
+	accept: getSupportedImageExtensions(),
+	id: AVATAR_ID,
+})`
+	display: none;
 `;
 
 export const ErrorMessage = styled(ErrorMessageBase)`
