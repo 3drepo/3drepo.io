@@ -23,11 +23,14 @@ export const uploadFile = ({ accept, onUpload }) => {
 	input.accept = accept;
 	
 	const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files.length) return [];
+		if (!event.target.files.length) return null;
 		return event.target.files[0];
 	};
 
-	input.onchange = (e) => onUpload(getFileFromInputEvent(e as any));
+	input.onchange = (e) => {
+		const file = getFileFromInputEvent(e as any);
+		onUpload(file);
+	};
 
 	input.click();
 };
