@@ -62,8 +62,8 @@ describe("Permission templates", function () {
 	it("should able to assign permission to user on model level", function(done) {
 
 		const permissions = [
-			{ user: "testing", permission: "customB"},
-			{ user: "user1", permission: "customB"}
+			{ user: "testing", permission: "viewer"},
+			{ user: "user1", permission: "collaborator"}
 		];
 
 		const agent2 = request.agent(server);
@@ -112,7 +112,7 @@ describe("Permission templates", function () {
 	it("should fail to assign a non existing permission to user", function(done) {
 
 		agent.post(`/${username}/${model}/permissions`)
-			.send([{ user: "testing", permission: "nonsense"}])
+			.send([{ user: "testing", permission: "viewer"}])
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.PERM_NOT_FOUND.value);
 				done(err);
