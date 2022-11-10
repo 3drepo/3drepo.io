@@ -449,26 +449,6 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 		permissions: [C.PERM_TEAMSPACE_ADMIN]
 	}];
 
-	// default templates
-	cleanedCustomData.permissionTemplates = [
-		{
-			_id: C.ADMIN_TEMPLATE,
-			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.VIEWER_TEMPLATE,
-			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.COMMENTER_TEMPLATE,
-			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.COLLABORATOR_TEMPLATE,
-			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
-		}
-	];
-
 	cleanedCustomData.emailVerifyToken = {
 		token: utils.generateHashString(),
 		expiredAt: expiryAt
@@ -1113,10 +1093,6 @@ User.updateAvatar = async function(username, avatarBuffer) {
 
 User.updatePermissions = async function(username, updatedPermissions) {
 	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
-};
-
-User.updatePermissionTemplates = async function(username, updatedPermissions) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissionTemplates": updatedPermissions}});
 };
 
 User.updateSubscriptions = async function(username, subscriptions) {

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,36 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
+const { v5Path } = require('../../../interop');
 
-const C = require("../constants");
+const { updateMany } = require(`${v5Path}/handler/db`);
 
-const PermissionTemplates = {};
-
-PermissionTemplates.get = function() {
-	return [
-		{
-			_id: C.ADMIN_TEMPLATE,
-			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.VIEWER_TEMPLATE,
-			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.COMMENTER_TEMPLATE,
-			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
-		},
-		{
-			_id: C.COLLABORATOR_TEMPLATE,
-			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
-		}
-	];
+const run = async () => {
+	await updateMany('admin', 'system.users', {}, { $unset: { 'customData.permissionTemplates': 1 } });
 };
 
-PermissionTemplates.findById = function(user, id) {
-	return this.get().find(({_id}) => _id === id);
-};
-
-module.exports = PermissionTemplates;
-
+module.exports = run;

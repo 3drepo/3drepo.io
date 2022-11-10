@@ -58,68 +58,12 @@ describe("Permission templates", function () {
 		});
 	});
 
-	it("should able to create new template", function(done) {
-
-		agent.post(`/${username}/permission-templates`)
-			.send(permission)
-			.expect(200, function(err, res) {
-				done(err);
-			});
-
-	});
-
-	it("should fail to create duplicated template", async function() {
-		const {body} = await agent.post(`/${username}/permission-templates`)
-			.send(permission)
-			.expect(400);
-
-		expect(body.value).to.equal(responseCodes.DUP_PERM_TEMPLATE.value);
-	});
-
-	it("should able to create another template", function(done) {
-		agent.post(`/${username}/permission-templates`)
-			.send(permission1)
-			.expect(200, function(err, res) {
-				done(err);
-			});
-
-	});
-
-	it("should fail to create template with invalid permission", function(done) {
-
-		agent.post(`/${username}/permission-templates`)
-			.send({ _id: "customC", permissions: ["nonsense"]})
-			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
-				done(err);
-			});
-
-	});
-
-	it("should able to remove template", function(done) {
-
-		agent.delete(`/${username}/permission-templates/${permission._id}`)
-			.expect(200, function(err, res) {
-				done(err);
-			});
-
-	});
-
-	it("should fail to remove template that doesnt exist", function(done) {
-
-		agent.delete(`/${username}/permission-templates/nonsense`)
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.PERM_NOT_FOUND.value);
-				done(err);
-			});
-
-	});
 
 	it("should able to assign permission to user on model level", function(done) {
 
 		const permissions = [
-			{ user: "testing", permission: "customB"},
-			{ user: "user1", permission: "customB"}
+			{ user: "testing", permission: "viewer"},
+			{ user: "user1", permission: "collaborator"}
 		];
 
 		const agent2 = request.agent(server);
@@ -164,22 +108,10 @@ describe("Permission templates", function () {
 		], done);
 
 	});
-
-	it("should fail to assign a non existing permission to user", function(done) {
-
-		agent.post(`/${username}/${model}/permissions`)
-			.send([{ user: "testing", permission: "nonsense"}])
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.PERM_NOT_FOUND.value);
-				done(err);
-			});
-
-	});
-
 	it("should fail to assign a permission to a non existing user", function(done) {
 
 		agent.post(`/${username}/${model}/permissions`)
-			.send([{ user: "nonses", permission: "customB"}])
+			.send([{ user: "nonses", permission: "viewer"}])
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
@@ -233,15 +165,6 @@ describe("Permission templates", function () {
 					});
 			}
 		], done);
-
-	});
-
-	it("should fail to remove admin template", function(done) {
-		agent.delete(`/${username}/permission-templates/admin`)
-			.expect(400, function(err, res) {
-				expect(res.body.value).equal(responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE.value);
-				done(err);
-			});
 
 	});
 
