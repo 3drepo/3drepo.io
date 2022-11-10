@@ -18,7 +18,6 @@
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { processReadOnlyValues, validateTicket } = require('../../../../../../../schemas/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
-const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
@@ -33,7 +32,6 @@ const validate = (isNewTicket) => async (req, res, next) => {
 	try {
 		const oldTicket = req.ticketData;
 		const newTicket = req.body;
-		req.templateData = generateFullSchema(req.templateData);
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
 		const { teamspace } = req.params;
