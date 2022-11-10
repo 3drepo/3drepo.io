@@ -34,7 +34,7 @@ export const DueDateInput = ({ value: initialValue, disabled, onBlur }: DueDateI
 	const handleClose = () => setOpen(false);
 	const onClickDueDate = () => setOpen(true);
 	const onDateChange = (newValue) => {
-		setValue(new Date(newValue));
+		setValue(new Date(newValue).getTime());
 		onBlur(newValue);
 	};
 	const onClickBackdrop = (e) => {
@@ -60,7 +60,7 @@ export const DueDateInput = ({ value: initialValue, disabled, onBlur }: DueDateI
 				disableHighlightToday
 				renderInput={({ ref, inputRef, ...props }) => (
 					<div ref={inputRef}>
-						<DueDate value={value} inputRef={inputRef} onClick={onClickDueDate} {...props} />
+						<DueDate onClick={onClickDueDate} {...props} value={value} />
 					</div>
 				)}
 			/>

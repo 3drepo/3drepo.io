@@ -24,7 +24,7 @@ type IDueDate = {
 	onClick?: (event) => void;
 };
 
-export const DueDate = ({ value, onClick }: IDueDate) => {
+export const DueDate = ({ value, onClick }: IDueDate): JSX.Element => {
 	if (!value) {
 		return (
 			<EmptyDateContainer onClick={onClick}>
