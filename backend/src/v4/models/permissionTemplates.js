@@ -59,7 +59,7 @@ PermissionTemplates.get = function() {
 };
 
 PermissionTemplates.findById = function(user, id) {
-	return this.get(user).find(({_id}) => _id === id);
+	return this.get().find(({_id}) => _id === id);
 };
 
 module.exports = PermissionTemplates;
