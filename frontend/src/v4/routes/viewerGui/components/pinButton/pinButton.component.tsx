@@ -22,7 +22,6 @@ import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container, PinIcon } from './pinButton.styles';
 
-
 interface IProps {
 	viewer: any;
 	hasPin: boolean;
