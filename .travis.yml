@@ -72,8 +72,8 @@ matrix:
         - cd ./frontend
        #- unbuffer yarn test
 
-    # replaced with .github/workflows/onPullRequestCommit.yml
-    
+    # replaced with .github/workflows/automaticTesting.yml
+
     #  #test (v5 be)
     # - language: node_js
     #   dist: focal
