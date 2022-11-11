@@ -109,6 +109,7 @@ interface IProps {
 	roles: any[];
 	context?: string;
 	onSelectionChange?: (selectedUsers) => void;
+	onFilterChange?: (filteredUsers) => void;
 	onPermissionsChange?: (permissions) => void;
 	rowStateInterceptor?: (props) => void;
 }
@@ -307,6 +308,7 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 						cells={cells}
 						rows={rows}
 						onSelectionChange={onSelectionChange}
+						onFilterChange={this.props.onFilterChange}
 						renderCheckbox={this.renderCustomCheckbox}
 					/>
 				) : null }

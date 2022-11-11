@@ -15,36 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const UserConstants = {};
+const { src } = require('../../helper/path');
 
-UserConstants.AVATARS_COL_NAME = 'avatars.ref';
-UserConstants.USERS_DB_NAME = 'admin';
+jest.mock('../../../../src/v5/models/loginRecords');
+const LoginRecords = require(`${src}/models/loginRecords`);
+const Initialiser = require(`${src}/services/initialiser`);
 
-UserConstants.USERNAME_BLACKLIST = [
-	'payment',
-	'test',
-	'config',
-	'os',
-	'info',
-	'contact',
-	'config',
-	'cookies',
-	'password-change',
-	'password-forgot',
-	'pricing',
-	'privacy',
-	'register-request',
-	'register-verify',
-	'signUp',
-	'termsAndConditions',
-	'false',
-	'admin',
-	'local',
-	'root',
-	'notifications',
-	'loginRecords',
-	'sessions',
-	'internal',
-];
+const testInitialiseSystem = () => {
+	describe('Initialise System', () => {
+		test('All initialising functions should be called', async () => {
+			await Initialiser.initialiseSystem();
 
-module.exports = UserConstants;
+			expect(LoginRecords.initialise).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
+describe('services/initialiser', () => {
+	testInitialiseSystem();
+});

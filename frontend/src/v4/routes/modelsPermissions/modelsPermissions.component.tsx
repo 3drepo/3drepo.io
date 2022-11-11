@@ -74,6 +74,7 @@ interface IProps {
 
 interface IState {
 	modelRows: any[];
+	filteredUsers: any[];
 	currentUser: any;
 	permissionsRevision: number;
 }
@@ -81,6 +82,7 @@ interface IState {
 export class ModelsPermissions extends PureComponent<IProps, IState> {
 	public state = {
 		modelRows: [],
+		filteredUsers: [],
 		currentUser: {},
 		permissionsRevision: 0
 	};
@@ -123,10 +125,24 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 		});
 	}
 
+	public handleFilterChange = (filteredUsers) => {
+		this.setState({
+			...this.state,
+			filteredUsers
+		});
+	}
+
 	public handlePermissionsChange = (permissions) => {
 		if (this.props.onPermissionsChange) {
 			const modelsWithPermissions = this.props.selectedModels.map(({ model, ...modelProps }) => {
 				const permissionsToSave = modelProps.permissions.reduce((updatedUserPermissions, currentPermissions) => {
+					const filteredUsernames = this.state.filteredUsers.map(({ user }) => user);
+					if (filteredUsernames.length && !filteredUsernames.includes(currentPermissions.user)) {
+						// search is active, but the current permission is
+						// not included in the search results
+						return updatedUserPermissions;
+					}
+
 					if (!currentPermissions.isAdmin) {
 						const updatedPermissions = permissions.find(({ user }) =>
 								user === currentPermissions.user
@@ -192,6 +208,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 						permissions={permissions}
 						roles={MODEL_ROLES_LIST}
 						onPermissionsChange={this.handlePermissionsChange}
+						onFilterChange={this.handleFilterChange}
 						rowStateInterceptor={this.hasDisabledPermissions}
 					/>
 					{

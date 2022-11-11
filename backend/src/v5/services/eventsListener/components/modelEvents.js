@@ -110,16 +110,20 @@ const constructUpdatedObject = (changes) => {
 };
 
 const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, changes, timestamp }) => {
-	const [isFed, template] = await Promise.all([
-		isFederationCheck(teamspace, model),
-		getTemplateById(teamspace, ticket.type),
-		addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp }),
-	]);
+	try {
+		const [isFed, template] = await Promise.all([
+			isFederationCheck(teamspace, model),
+			getTemplateById(teamspace, ticket.type),
+			addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp }),
+		]);
 
-	const updateData = constructUpdatedObject(changes);
-	const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
-	const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, template);
-	await createModelMessage(event, serialisedTicket, teamspace, project, model);
+		const updateData = constructUpdatedObject(changes);
+		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
+		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, template);
+		await createModelMessage(event, serialisedTicket, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to process ticket updated event ${err.message}`);
+	}
 };
 
 const ModelEventsListener = {};
