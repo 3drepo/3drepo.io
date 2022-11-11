@@ -2,11 +2,7 @@ name: Automatic Testing
 
 on:
   # Trigger the workflow on push or pull request,
-  # but only for the main branch
   push:
-    branches:
-      - master
-      - staging
 
   # Replace pull_request with pull_request_target if you
   # plan to use this action with forks, see the Limitations section
@@ -47,10 +43,10 @@ jobs:
         run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
       - name: Run Backend tests
-        run: cd backend ; yarn lint
+        run: cd backend ; yarn test:v5 
 
       - name: Run Backend tests
-        run: cd backend ; yarn test:v5 
+        run: cd backend ; yarn lint
 
   run-frontend-tests:
     name: Run Frontend tests
@@ -68,14 +64,17 @@ jobs:
       - name: Install Frontend Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
+      - name: Run Frontend yarn test
+        run: cd frontend ; yarn test
+
+      - name: Run Frontend yarn build:test
+        run: cd frontend ; yarn build:test
+
       - name: Run Frontend tests
         run: cd frontend ; yarn lint
 
-      - name: Run Frontend tests
-        run: cd frontend ; yarn test
-
   # make sure we're not merging DevOps changes
-  devOpsSanityCheck:
+  devops-sanity-check:
     name: Ensure that custom settings are not being merged
     runs-on: ubuntu-latest
     steps:
