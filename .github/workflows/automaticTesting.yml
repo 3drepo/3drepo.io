@@ -30,36 +30,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version-file: backend/package.json
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
 
-      - name: Install Backend Node.js dependencies
-        run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
+      # - name: Install Backend Node.js dependencies
+      #   run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Backend test:v5
         run: cd backend ; yarn test:v5 
-
-  run-frontend-tests:
-    name: Run Frontend tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
-          cache: 'yarn'
-          cache-dependency-path: frontend/yarn.lock
-
-      - name: Install Frontend Node.js dependencies
-        run: cd frontend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
-
-      - name: Run Frontend yarn test
-        run: cd frontend ; yarn test
 
   run-backend-lint:
     name: Run Backend lint
@@ -82,15 +61,37 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version-file: backend/package.json
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
 
-      - name: Install Backend Node.js dependencies
-        run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+      # - name: Install Backend Node.js dependencies
+      #   run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
       - name: Run Backend lint
         run: cd backend ; yarn lint
+
+  run-frontend-tests:
+    name: Run Frontend tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: frontend/package.json
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install Frontend Node.js dependencies
+        run: cd frontend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
+
+      - name: Run Frontend yarn test
+        run: cd frontend ; yarn test
+
 
   run-frontend-lint:
     name: Run Frontend lint
@@ -103,12 +104,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version-file: frontend/package.json
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
 
-      - name: Install Backend Node.js dependencies
-        run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+      # - name: Install Backend Node.js dependencies
+      #   run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
       - name: Run Frontend yarn build:test
         run: cd frontend ; yarn build:test
