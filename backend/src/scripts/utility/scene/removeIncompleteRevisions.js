@@ -76,13 +76,13 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 			return [];
 		});
 
-		const fileRemoveProms = [];
 		for (let i = 0; i <= filenames.length; i += entriesLimit) {
 			const group = filenames.slice(i, i + entriesLimit);
+			const fileRemoveProms = [];
 			fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
+			// eslint-disable-next-line no-await-in-loop
+			await Promise.all(fileRemoveProms);
 		}
-
-		await Promise.all(fileRemoveProms);
 	}
 	try {
 		await deleteMany(teamspace, collection, filter);

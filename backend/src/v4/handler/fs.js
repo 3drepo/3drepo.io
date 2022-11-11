@@ -116,7 +116,7 @@ class FSHandler {
 	removeFiles(keys) {
 		keys.forEach((key) => {
 			fs.unlink(this.getFullPath(key), (err) => {
-				if (err) {
+				if (err && err.code !== "ENOENT") {
 					systemLogger.logError("File not removed:", {err, key});
 				}
 			});
