@@ -180,7 +180,6 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
 
@@ -220,7 +219,6 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-
 			const errMsg = generateRandomString();
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
@@ -243,7 +241,6 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
@@ -269,7 +266,6 @@ const testValidateUpdateTicket = () => {
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-
 			await Tickets.validateUpdateTicket(req, res, fn);
 
 			expect(fn).toHaveBeenCalled();
