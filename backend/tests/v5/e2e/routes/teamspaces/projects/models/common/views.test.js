@@ -129,62 +129,61 @@ const testViewList = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
-/*
+
 const testViewThumbnail = () => {
-	const createRoute = (projectId = project.id, modelId = modelWithViews._id, viewId = viewWithThumbnail._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/views/${viewId}/thumbnail`;
 	describe('View thumbnail', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(createRoute()).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed]);
+
+			await Promise.all([con, fed].map(async (model) => {
+				await ServiceHelper.db.createViews(teamspace, model._id,
+					[model.viewWithThumbnail, model.viewNoThumbnail]);
+			}));
 		});
 
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${createRoute()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
+		const generateTestData = (isFed) => {
+			const model = isFed ? fed : con;
+			const modelType = isFed ? 'federation' : 'container';
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const modelWrongType = isFed ? con : fed;
 
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`${createRoute('dflfkjdsl')}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
+			const getRoute = ({
+				projectId = project.id,
+				modelId = model._id,
+				key = users.tsAdmin.apiKey,
+				viewId = model.viewWithThumbnail._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/views/${viewId}/thumbnail${key ? `?key=${key}` : ''}`;
 
-		test('should fail if the federation does not exist', async () => {
-			const res = await agent.get(`${createRoute(project.id, 'dslfkjds')}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.status).toEqual(templates.federationNotFound.status);
-		});
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the model is not a ${modelType}`, getRoute({ modelId: modelWrongType._id }), false, modelNotFound],
+				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the view has a thumbnail', getRoute(), true],
+				['the view does not exist', getRoute({ viewId: ServiceHelper.generateRandomString() }), false, templates.viewNotFound],
+				['the view does not have a thumbnail', getRoute({ viewId: model.viewNoThumbnail._id }), false, templates.thumbnailNotFound],
+			];
+		};
 
-		test('should fail if the federation is actually a container', async () => {
-			const res = await agent.get(`${createRoute(project.id, notFed._id)}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.status).toEqual(templates.federationNotFound.status);
-		});
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.headers['content-type']).toEqual('image/png');
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
 
-		test('should fail if the user does not have permissions to access the federation', async () => {
-			const res = await agent.get(`${createRoute()}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.notAuthorized.status);
-			expect(res.body.status).toEqual(templates.notAuthorized.status);
-		});
-
-		test('should return the thumbnail if the user has sufficient access', async () => {
-			const res = await agent.get(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status);
-			expect(res.headers['content-type']).toEqual('image/png');
-		});
-
-		test('should fail if the view does not exist', async () => {
-			const res = await agent.get(`${createRoute(project.id, modelWithViews._id, ServiceHelper.generateUUIDString())}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.viewNotFound.status);
-			expect(res.body.status).toEqual(templates.viewNotFound.status);
-		});
-
-		test('should fail if the view does not have a thumbnail', async () => {
-			const res = await agent.get(`${createRoute(project.id, modelWithViews._id, viewNoThumbnail._id)}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.thumbnailNotFound.status);
-			expect(res.body.status).toEqual(templates.thumbnailNotFound.status);
-		});
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
-}; */
+};
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
@@ -193,5 +192,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testViewList();
-	// testViewThumbnail();
+	testViewThumbnail();
 });
