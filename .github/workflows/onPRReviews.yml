@@ -27,7 +27,7 @@ jobs:
       content-id: ${{ steps.commitMsgParser.outputs.content-id }}
     steps:
       - name: Extract Issue Number from PR
-        uses: 3drepo/extract-issue-number-from-PR-merge@v1
+        uses: 3drepo/extract-issue-number-from-PR@v1
         with:
           pr: ${{ needs.getPRNumber.outputs.issue-number }}
           base: staging
@@ -60,7 +60,7 @@ jobs:
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
-          project_number: 1
+          project_number: 22
           content_id: ${{ needs.getIssueNumber.outputs.content-id }}
           field: Status
           value: 'Done'
@@ -101,7 +101,7 @@ jobs:
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
-          project_number: 1
+          project_number: 22
           content_id: ${{ needs.getIssueNumber.outputs.content-id }}
           field: Status
           value: ${{ steps.setStatusOutput.outputs.status }}
