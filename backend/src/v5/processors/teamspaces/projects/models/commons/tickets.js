@@ -19,6 +19,7 @@ const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../..
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 
 const Tickets = {};
@@ -26,6 +27,8 @@ const Tickets = {};
 const processBinaryProperties = (template, oldTicket, updatedTicket) => {
 	const toRemove = [];
 	const toAdd = [];
+
+	const fullTemplate = generateFullSchema(template);
 
 	const updateReferences = (templateProperties, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
@@ -52,9 +55,9 @@ const processBinaryProperties = (template, oldTicket, updatedTicket) => {
 		});
 	};
 
-	updateReferences(template.properties, oldTicket?.properties, updatedTicket.properties);
+	updateReferences(fullTemplate.properties, oldTicket?.properties, updatedTicket.properties);
 
-	template.modules.forEach(({ properties, name, type }) => {
+	fullTemplate.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
 		updateReferences(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
