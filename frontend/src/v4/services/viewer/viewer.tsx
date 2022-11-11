@@ -486,6 +486,7 @@ export class ViewerService {
 		if (!mode) {
 			UnityUtil.disableMeasuringTool();
 			UnityUtil.disableSnapping();
+			this.measurementModeChanged(mode);
 			return;
 		}
 

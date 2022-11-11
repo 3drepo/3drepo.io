@@ -18,17 +18,25 @@
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const PinContainer = styled.div<{ selected: boolean; }>`
+export const PinContainer = styled.div<{ selected: boolean, error: boolean }>`
 	width: auto;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	border-radius: 5px;
 	padding: 10px 15px;
 	margin: 4px 0;
+
 	${({ selected, theme: { palette } }) => selected && css`
 		box-shadow: 0 0 4px ${palette.primary.main};
 		border-color: ${palette.primary.main};
 	`}
+
+	${({ error, theme: { palette } }) => error && css`
+		color: ${palette.error.main};
+		background-color: ${palette.error.lightest};
+		border-color: ${palette.error.main};
+	`}
+
 `;
 
 export const PinActions = styled.div`

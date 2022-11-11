@@ -27,7 +27,14 @@ export const CoordsProperty = ({
 	<Controller
 		name={props.name}
 		render={({ field: { ref, ...field } }) => (
-			<PinDetails label={name} required={required} {...field} {...props} />
+			<PinDetails
+				label={name}
+				required={required}
+				{...field}
+				{...props}
+				error={!!formError}
+				helperText={formError?.message}
+			/>
 		)}
 	/>
 );
