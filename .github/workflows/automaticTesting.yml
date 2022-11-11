@@ -57,9 +57,6 @@ jobs:
       - name: Run Frontend yarn test
         run: cd frontend ; yarn test
 
-      - name: Run Frontend yarn build:test
-        run: cd frontend ; yarn build:test
-
   run-backend-lint:
     name: Run Backend lint
     runs-on: ubuntu-latest
@@ -104,6 +101,9 @@ jobs:
 
       - name: Install Backend Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+
+      - name: Run Frontend yarn build:test
+        run: cd frontend ; yarn build:test
 
       - name: Run Frontend lint
         run: cd frontend ; yarn lint
