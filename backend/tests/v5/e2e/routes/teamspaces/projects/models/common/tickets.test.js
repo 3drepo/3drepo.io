@@ -123,6 +123,7 @@ const testGetTemplateDetails = () => {
 		const template = ServiceHelper.generateTemplate();
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
+
 			await ServiceHelper.db.createTemplates(teamspace, [template]);
 		});
 
@@ -140,8 +141,10 @@ const testGetTemplateDetails = () => {
 			};
 
 			const modelType = isFed ? 'federation' : 'container';
+
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
+
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
 			const getRoute = ({
@@ -161,6 +164,7 @@ const testGetTemplateDetails = () => {
 				['the template id is invalid', false, getRoute({ templateId: ServiceHelper.generateRandomString() }), templates.templateNotFound],
 				['the user has sufficient privilege and the parameters are correct (show deprecated properties)', true, getRoute(), generateFullSchema(template), true],
 				['the user has sufficient privilege and the parameters are correct', true, getRoute(), pruneDeprecated(generateFullSchema(template))],
+
 			];
 		};
 
@@ -261,6 +265,9 @@ const testGetTicketResource = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = {
 			...ServiceHelper.generateTemplate(),
+			config: {
+				defaultImage: true,
+			},
 			properties: [{
 				name: ServiceHelper.generateRandomString(),
 				type: propTypes.IMAGE,
@@ -273,6 +280,8 @@ const testGetTicketResource = () => {
 				type: template._id,
 				properties: {
 					[template.properties[0].name]: FS.readFileSync(image, { encoding: 'base64' }),
+					[basePropertyLabels.DEFAULT_IMAGE]: FS.readFileSync(image, { encoding: 'base64' }),
+
 				},
 			};
 
@@ -289,6 +298,7 @@ const testGetTicketResource = () => {
 
 				const { body } = await agent.get(getTicketRoute(model._id, ticket._id));
 				ticket.resourceId = body.properties[template.properties[0].name];
+				ticket.defaultImageResourceId = body.properties[basePropertyLabels.DEFAULT_IMAGE];
 				// eslint-disable-next-line no-param-reassign
 				model.ticket = ticket;
 			}));
@@ -314,19 +324,20 @@ const testGetTicketResource = () => {
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
 				['the resource does not exist', { ...baseRouteParams, resourceId: ServiceHelper.generateRandomString() }, false, templates.fileNotFound],
+				['given the correct resource id (default image)', { ...baseRouteParams, testDefaultImage: true }, true],
 				['the resource id is correct', baseRouteParams, true],
 			];
 		};
 
 		const getRoute = ({ key, projectId, modelId, ticketId, resourceId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/resources/${resourceId}${key ? `?key=${key}` : ''}`;
 
-		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
+		const runTest = (desc, { model, testDefaultImage, ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with  ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const route = getRoute({
 					modelId: model._id,
 					ticketId: model.ticket._id,
-					resourceId: model.ticket.resourceId,
+					resourceId: testDefaultImage ? model.ticket.defaultImageResourceId : model.ticket.resourceId,
 					...routeParams,
 				});
 				const res = await agent.get(route).expect(expectedStatus);
@@ -566,6 +577,7 @@ const testUpdateTicket = () => {
 	describe('Update ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const requiredPropName = ServiceHelper.generateRandomString();
+		const imagePropName = ServiceHelper.generateRandomString();
 		const templateWithRequiredProp = {
 			...ServiceHelper.generateTemplate(),
 			properties: [
@@ -573,6 +585,10 @@ const testUpdateTicket = () => {
 					name: requiredPropName,
 					type: propTypes.TEXT,
 					required: true,
+				},
+				{
+					name: imagePropName,
+					type: propTypes.IMAGE,
 				},
 			],
 		};
@@ -643,6 +659,7 @@ const testUpdateTicket = () => {
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
+				['an image property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
 			];
 		};
 
@@ -670,17 +687,18 @@ const testUpdateTicket = () => {
 					expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
 						.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
 
-					const expectedUpdatedTicket = cloneDeep(ticket);
+					const expectedUpdatedTicket = { ...cloneDeep(ticket), ...payloadChanges };
 					expectedUpdatedTicket.number = updatedTicket.number;
 					expectedUpdatedTicket.properties = {
-						...expectedUpdatedTicket.properties,
+						...ticket.properties,
 						[basePropertyLabels.UPDATED_AT]: updatedTicket.properties[basePropertyLabels.UPDATED_AT],
 						[basePropertyLabels.CREATED_AT]: updatedTicket.properties[basePropertyLabels.CREATED_AT],
 						[basePropertyLabels.OWNER]: updatedTicket.properties[basePropertyLabels.OWNER],
 						...(payloadChanges?.properties ?? {}),
+						[imagePropName]: updatedTicket.properties[imagePropName],
 					};
 
-					expect(updatedTicket).toEqual({ ...expectedUpdatedTicket, ...payloadChanges });
+					expect(updatedTicket).toEqual(expectedUpdatedTicket);
 					await checkTicketLogByDate(updatedTicket.properties[basePropertyLabels.UPDATED_AT]);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
