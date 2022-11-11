@@ -38,9 +38,6 @@ jobs:
       - name: Run Backend test:v5
         run: cd backend ; yarn test:v5 
 
-      - name: Run Backend lint
-        run: cd backend ; yarn lint
-
   run-frontend-tests:
     name: Run Frontend tests
     runs-on: ubuntu-latest
@@ -62,6 +59,51 @@ jobs:
 
       - name: Run Frontend yarn build:test
         run: cd frontend ; yarn build:test
+
+  run-backend-lint:
+    name: Run Backend lint
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3.10.5-management
+        ports:
+          - "5672:5672"
+          - "15671:15671"
+          - "15672:15672"
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+          
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install Backend Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+
+      - name: Run Backend lint
+        run: cd backend ; yarn lint
+
+  run-frontend-lint:
+    name: Run Frontend lint
+    runs-on: ubuntu-latest
+       
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install Backend Node.js dependencies
+        run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
       - name: Run Frontend lint
         run: cd frontend ; yarn lint
