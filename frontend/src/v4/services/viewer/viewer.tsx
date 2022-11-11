@@ -26,9 +26,6 @@ import {
 	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
 import { uuid as UUID } from '../../helpers/uuid';
-import { DialogActions } from '../../modules/dialog';
-import { dispatch, getState } from '../../modules/store';
-import { selectMemory } from '../../modules/viewer';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
 
@@ -97,9 +94,9 @@ export class ViewerService {
 		return !!this.element;
 	}
 
-	public setupInstance = (container) => {
+	public setupInstance = (container, onError) => {
 		this.element = container;
-		UnityUtil.init(this.handleUnityError, this.onUnityProgress, this.onModelProgress);
+		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
 		const unityHolder = document.createElement('canvas');
@@ -127,12 +124,6 @@ export class ViewerService {
 	/**
 	 * Initialization
 	 */
-
-	public get memory() {
-		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
-		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
-		return Math.min(assignedMemory, MAX_MEMORY);
-	}
 
 	public init = async () => {
 		if (IS_DEVELOPMENT) {
@@ -320,26 +311,6 @@ export class ViewerService {
 	/**
 	 * Handlers
 	 */
-
-	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
-		let errorType = '3D Repo Error';
-
-		if (isUnity) {
-			errorType = 'Unity Error';
-		}
-
-		dispatch(DialogActions.showDialog({
-			title: errorType,
-			content: message,
-			onCancel: () => {
-				if (reload) {
-					location.reload();
-				}
-			}
-		}));
-
-		console.error('Unity errored and user canceled reload', message);
-	}
 
 	private onUnityProgress = (progress) => {
 		if (progress === 1) {
