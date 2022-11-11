@@ -46,7 +46,9 @@ export const Container = styled.div`
 export const Image = styled.img`
 	object-fit: cover;
 	height: 100%;
+	max-height: calc(100vh - 64px);
 	width: 100%;
+	max-width: calc(100vw - 64px);
 `;
 
 export const EnlargeContainer = styled(CentredContainer)`
