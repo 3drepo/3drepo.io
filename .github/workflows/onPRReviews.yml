@@ -70,18 +70,15 @@ jobs:
         run: |
           set -ex 
           case $ACTION in
+            submitted ) 
+              echo "status=Address Feedback" >> $GITHUB_OUTPUT
+              ;;
             review_requested ) 
-              echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
+              echo "status=To Review" >> $GITHUB_OUTPUT
               ;;
             ready_for_review ) 
               echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
               ;;
-            opened )
-              echo "status=In Progress" >> $GITHUB_OUTPUT
-              ;;
-            review_request_removed )
-              echo "status=In Progress" >> $GITHUB_OUTPUT
-              ;;            
           esac
         env:
           ACTION: ${{ github.event.action }}
