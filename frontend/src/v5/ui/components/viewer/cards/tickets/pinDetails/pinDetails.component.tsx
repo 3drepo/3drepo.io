@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add-circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
 import CrossIcon from '@assets/icons/close.svg';
@@ -38,35 +38,22 @@ interface PinDetailsProps {
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }:PinDetailsProps) => {
 	const [editMode, setEditMode] = useState(false);
 
-	const cancelEdit = () => {
-		if (!editMode) return;
-
+	const stopEdit = async (val) => {
 		setEditMode(false);
-		onChange?.(value);
-		onBlur?.();
-		ViewerService.clearMeasureMode();
+		onChange?.(val);
+		await ViewerService.clearMeasureMode();
 	};
+
+	const cancelEdit = () => stopEdit(value);
+	const onClickDelete = () => stopEdit(null);
 
 	const onClickEditPin = async () => {
 		setEditMode(true);
 		const pin = await ViewerService.dropPin();
-		setEditMode(false);
-
-		if (!pin) { //  If the returned pin is null, edit mode has been cancelled
-			onChange?.(value);
-			onBlur?.();
-			return;
-		}
-
-		onChange?.(pin);
-		onBlur?.();
+		stopEdit(pin || value); //  If the returned pin is null, edit mode has been cancelled
 	};
 
-	const onClickDelete = () => {
-		setEditMode(false);
-		onChange?.(null);
-		onBlur?.();
-	};
+	useEffect(() => onBlur?.(), [value]);
 
 	const hasPin = !!value;
 
