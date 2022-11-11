@@ -34,8 +34,8 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
 
-      # - name: Install Backend Node.js dependencies
-      #   run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
+      - name: Install Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Backend test:v5
         run: cd backend ; yarn test:v5 
@@ -65,8 +65,8 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
 
-      # - name: Install Backend Node.js dependencies
-      #   run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+      - name: Install Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
       - name: Run Backend lint
         run: cd backend ; yarn lint
@@ -86,7 +86,7 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
 
-      - name: Install Frontend Node.js dependencies
+      - name: Install Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Frontend yarn test
@@ -108,8 +108,8 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
 
-      # - name: Install Backend Node.js dependencies
-      #   run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+      - name: Install Node.js dependencies
+        run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
       - name: Run Frontend yarn build:test
         run: cd frontend ; yarn build:test
