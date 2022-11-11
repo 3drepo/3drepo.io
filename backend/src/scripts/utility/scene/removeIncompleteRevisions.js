@@ -29,7 +29,7 @@ const Path = require('path');
 
 const { isString, isObject } = require(`${v5Path}/utils/helper/typeCheck`);
 
-const { deleteMany, find } = require(`${v5Path}/handler/db`);
+const { deleteMany, count, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
@@ -49,47 +49,47 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 		const projection = { [refAttribute]: 1 };
 		const filesFilter = { ...filter, [refAttribute]: { $exists: true } };
 
-		let results;
-		try {
-			results = await find(teamspace, collection, filesFilter, projection);
-		} catch (err) {
-			logger.logError(`Failed to find files from ${teamspace}.${collection} with query: ${JSON.stringify(filesFilter)}`);
-			throw err;
-		}
-		logger.logInfo(`found ${results.length} records with external references`);
-		const filenames = results.flatMap((record) => {
-			const fileRefs = record[refAttribute];
-			if (fileRefs) {
-				// handle different ref formats
-				// record refs currently stored in the following formats:
-				// 1) { ref: 'refString' }
-				// 2) { ref: {
-				//        key1: 'key1RefString',
-				//        key2: 'key2RefString',
-				//    }
-				if (isString(fileRefs)) {
-					return fileRefs;
-				} if (isObject(fileRefs)) {
-					return Object.values(fileRefs);
-				}
-				logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
-			}
-			return [];
-		});
-
-		logger.logInfo(`${filenames.length} associated files found`);
-
-		for (let i = 0; i <= filenames.length; i += entriesLimit) {
-			logger.logInfo(`removing ${i} - ${i + entriesLimit > filenames.length ? filenames.length : i + entriesLimit} files`);
-			const group = filenames.slice(i, i + entriesLimit);
-			const fileRemoveProms = [];
-			fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
+		const objsWithRefs = await count(teamspace, collection, filesFilter);
+		const batch = 10000;
+		for (let j = 0; j < objsWithRefs?.length; j += batch) {
 			// eslint-disable-next-line no-await-in-loop
-			await Promise.all(fileRemoveProms);
+			const results = await find(teamspace, collection, filesFilter, projection, undefined, batch);
+			if (results?.length) {
+				const filenames = results.flatMap((record) => {
+					const fileRefs = record[refAttribute];
+					if (fileRefs) {
+						// handle different ref formats
+						// record refs currently stored in the following formats:
+						// 1) { ref: 'refString' }
+						// 2) { ref: {
+						//        key1: 'key1RefString',
+						//        key2: 'key2RefString',
+						//    }
+						if (isString(fileRefs)) {
+							return fileRefs;
+						} if (isObject(fileRefs)) {
+							return Object.values(fileRefs);
+						}
+						logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
+					}
+					return [];
+				});
+
+				for (let i = 0; i <= filenames.length; i += entriesLimit) {
+					logger.logInfo(`removing ${i} - ${i + entriesLimit > filenames.length ? filenames.length : i + entriesLimit} files`);
+					const group = filenames.slice(i, i + entriesLimit);
+					const fileRemoveProms = [];
+					fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
+					// eslint-disable-next-line no-await-in-loop
+					await Promise.all(fileRemoveProms);
+				}
+
+				// eslint-disable-next-line no-await-in-loop
+				await deleteMany(teamspace, collection, { _id: { $in: results.map(({ _id }) => _id) } });
+			}
 		}
 	}
 	try {
-		logger.logInfo('Removing scene nodes...');
 		await deleteMany(teamspace, collection, filter);
 	} catch (err) {
 		logger.logError(`Failed to remove records from ${teamspace}.${collection} with query: ${JSON.stringify(filter)}`);
