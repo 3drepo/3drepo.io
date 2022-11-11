@@ -1,23 +1,120 @@
 name: On review update
 on:
   pull_request:
-    types: [review_requested, review_request_removed]
+    types: [ready_for_review, review_requested, review_request_removed]
   pull_request_review:
     types: [edited, dismissed, submitted]
 jobs:
+  getPRNumber:
+    name: Get Current PR Number
+    runs-on: ubuntu-latest
+    outputs: 
+      issue-number: ${{ steps.condval.outputs.value }}
+    steps:
+      - uses: 3drepo/action-cond@v1
+        id: condval
+        with:
+          cond: ${{ github.event_name == 'pull_request' }}
+          if_true: ${{ github.event.number }}
+          if_false: ${{ github.event.pull_request.number }}
+
+  getIssueNumber:
+    name: Get Current Issue Number
+    needs: [ getPRNumber ]
+    runs-on: ubuntu-latest
+    outputs: 
+      issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
+      content-id: ${{ steps.commitMsgParser.outputs.content-id }}
+    steps:
+      - name: Extract Issue Number from PR
+        uses: 3drepo/extract-issue-number-from-PR-merge@v1
+        with:
+          pr: ${{ needs.getPRNumber.outputs.issue-number }}
+          base: staging
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        id: commitMsgParser
+
   checkMergeReady:
     name: Ensure all reviewers have approved the PR
     runs-on: ubuntu-latest
+    needs: [ getIssueNumber ]
+    outputs: 
+      approved: ${{ steps.checkReviews.outputs.approved }}
     steps:
-      - uses: haya14busa/action-cond@v1
+      - uses: 3drepo/action-cond@v1
         id: condval
         with:
           cond: ${{ github.event_name == 'pull_request' }}
           if_true: ${{ github.event.number }}
           if_false: ${{ github.event.pull_request.number }}
       - name: Check reviews
-        uses: carmenfan/all-reviewers-approved@v1.0
+        id: checkReviews
+        uses: 3drepo/all-reviewers-approved@v1
         with:
           pr: ${{ steps.condval.outputs.value }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update status
+        if: ${{ steps.checkReviews.outputs.approved }}
+        id: update_status
+        uses: 3drepo/update-project-action@1.1
+        with:
+          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          organization: 3drepo
+          project_number: 1
+          content_id: ${{ needs.getIssueNumber.outputs.content-id }}
+          field: Status
+          value: 'Done'
 
+#  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
+  updateProjectTicketStatus:
+    name: Update Project Ticket Status
+    if: failure() # if not reviewer approved let's modify the status.
+    runs-on: ubuntu-latest
+    outputs: 
+      content-id: ${{ needs.getIssueNumber.outputs.content-id }}
+      status: ${{ steps.setStatusOutput.outputs.status }}
+    needs: [ getIssueNumber, checkMergeReady ]
+    steps:
+      - name: Set status message from input 
+        id: setStatusOutput   
+        run: |
+          set -ex 
+          case $ACTION in
+            review_requested ) 
+              echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
+              ;;
+            ready_for_review ) 
+              echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
+              ;;
+            opened )
+              echo "status=In Progress" >> $GITHUB_OUTPUT
+              ;;
+            review_request_removed )
+              echo "status=In Progress" >> $GITHUB_OUTPUT
+              ;;            
+          esac
+        env:
+          ACTION: ${{ github.event.action }}
+      - name: Update status
+        id: update_status
+        uses: 3drepo/update-project-action@1.1
+        with:
+          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          organization: 3drepo
+          project_number: 1
+          content_id: ${{ needs.getIssueNumber.outputs.content-id }}
+          field: Status
+          value: ${{ steps.setStatusOutput.outputs.status }}
+  
+  #Ensure the issue number is in the pull request title.
+  ensureWellFormattedIssueTitle:
+    runs-on: ubuntu-latest
+    name: Ensure a well formatted Issue Title
+    steps:
+    - uses: 3drepo/pr-update-action@v1
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        base-branch-regex: '[a-z\d-_.\\/]+'
+        head-branch-regex: 'ISSUE_\d+'
+        lowercase-branch: false
+        title-template: '%headbranch% - '
