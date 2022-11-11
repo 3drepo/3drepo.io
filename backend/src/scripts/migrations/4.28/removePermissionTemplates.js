@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,36 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const UserConstants = {};
+const { v5Path } = require('../../../interop');
 
-UserConstants.AVATARS_COL_NAME = 'avatars.ref';
-UserConstants.USERS_DB_NAME = 'admin';
+const { updateMany } = require(`${v5Path}/handler/db`);
 
-UserConstants.USERNAME_BLACKLIST = [
-	'payment',
-	'test',
-	'config',
-	'os',
-	'info',
-	'contact',
-	'config',
-	'cookies',
-	'password-change',
-	'password-forgot',
-	'pricing',
-	'privacy',
-	'register-request',
-	'register-verify',
-	'signUp',
-	'termsAndConditions',
-	'false',
-	'admin',
-	'local',
-	'root',
-	'notifications',
-	'loginRecords',
-	'sessions',
-	'internal',
-];
+const run = async () => {
+	await updateMany('admin', 'system.users', {}, { $unset: { 'customData.permissionTemplates': 1 } });
+};
 
-module.exports = UserConstants;
+module.exports = run;

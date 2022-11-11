@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
@@ -24,6 +25,8 @@ const fs = require('fs');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const { loginPolicy } = require(`${src}/utils/config`);
 
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
@@ -43,7 +46,6 @@ const testUserWithToken = ServiceHelper.generateUserCredentials();
 const testUserWithExpiredToken = ServiceHelper.generateUserCredentials();
 const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
-const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
 const userEmailSso = 'exampleSso@email.com';
 const userEmail2 = 'example2@email.com';
@@ -89,26 +91,22 @@ const setupData = async () => {
 				token: expiredPasswordToken.token, expiredAt: expiredPasswordToken.expiredAt,
 			},
 		}),
-		ServiceHelper.db.createUser(lockedUser, [], {
-			loginInfo: {
-				failedLoginCount: 10,
-				lastFailedLoginAt: new Date(),
-			},
-		}),
-		ServiceHelper.db.createUser(lockedUserWithExpiredLock, [], {
-			loginInfo: {
-				failedLoginCount: 10,
-				lastFailedLoginAt: new Date('1/1/18'),
-			},
-		}),
-		ServiceHelper.db.createUser(userWithFailedAttempts, [], {
-			loginInfo: {
-				failedLoginCount: 6,
-				lastFailedLoginAt: new Date(),
-			},
-		}),
+		ServiceHelper.db.createUser(lockedUser, []),
+		ServiceHelper.db.createUser(lockedUserWithExpiredLock, []),
+
 		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
 		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
+		ServiceHelper.db.addLoginRecords(times(loginPolicy.maxUnsuccessfulLoginAttempts, (count) => ({
+			user: lockedUser.user,
+			loginTime: new Date(Date.now() - count),
+			failed: true,
+		}))),
+		ServiceHelper.db.addLoginRecords(times(loginPolicy.maxUnsuccessfulLoginAttempts, () => ({
+			user: lockedUserWithExpiredLock.user,
+			loginTime: new Date(1 / 1 / 18),
+			failed: true,
+		}))),
+
 	]);
 };
 
@@ -163,7 +161,7 @@ const testLogin = () => {
 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
 		});
 
-		test('should fail with a locked account', async () => {
+		test('should fail when an account is locked', async () => {
 			const res = await agent.post('/v5/login/')
 				.send({ user: lockedUser.user, password: lockedUser.password })
 				.expect(templates.tooManyLoginAttempts.status);
@@ -174,14 +172,6 @@ const testLogin = () => {
 			await agent.post('/v5/login/')
 				.send({ user: lockedUserWithExpiredLock.user, password: lockedUserWithExpiredLock.password })
 				.expect(templates.ok.status);
-		});
-
-		test('should fail with wrong password and many failed login attempts', async () => {
-			const res = await agent.post('/v5/login/')
-				.send({ user: userWithFailedAttempts.user, password: 'wrongPassword' })
-				.expect(templates.incorrectUsernameOrPassword.status);
-			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
-			expect(res.body.message).toEqual('Incorrect username or password (Remaining attempts: 3)');
 		});
 	});
 };

@@ -18,7 +18,7 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
+const { addUser, authenticate, deleteApiKey, generateApiKey,
 	getUserByUsername, removeUser, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
@@ -82,10 +82,7 @@ Users.remove = async (username) => {
 	]);
 };
 
-Users.login = async (username, password) => {
-	await canLogIn(username);
-	return authenticate(username, password);
-};
+Users.login = authenticate;
 
 Users.getProfileByUsername = async (username) => {
 	const user = await getUserByUsername(username, {
