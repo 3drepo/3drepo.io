@@ -20,7 +20,7 @@ import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuItem.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { convertFileToImageSrc, getImageFromUrl, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
+import { convertFileToImageSrc, getImageUrl, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -64,7 +64,7 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 
 	const getResourceUrl = () => {
 		const modelType = isFederation ? 'federations' : 'containers';
-		return getImageFromUrl(
+		return getImageUrl(
 			`teamspaces/${teamspace}/projects/${project}/${modelType}/${containerOrFederation}/tickets/${ticketId}/resources/${value}`,
 		);
 	};

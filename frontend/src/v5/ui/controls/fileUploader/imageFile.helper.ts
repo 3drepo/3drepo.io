@@ -28,4 +28,4 @@ export const convertFileToImageSrc = (file, onLoadComplete) => {
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
 
-export const getImageFromUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
+export const getImageUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
