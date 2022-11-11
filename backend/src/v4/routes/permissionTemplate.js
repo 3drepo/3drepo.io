@@ -22,7 +22,6 @@
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
-	const User = require("../models/user");
 	const utils = require("../utils");
 	const PermissionTemplates = require("../models/permissionTemplates");
 
@@ -61,39 +60,6 @@
 	 */
 
 	/**
-	 * @api {post} /:teamspace/permission-templates Create a template
-	 * @apiName createTemplate
-	 * @apiGroup PermissionTemplate
-	 * @apiDescription Create a permission template.
-	 *
-	 * @apiUse PermissionTemplate
-	 *
-	 * @apiParam (Request body) {String} _id Template name
-	 * @apiParam (Request body) {String[]} permissions List of model level permissions
-	 * @apiSuccess {String} _id Template name
-	 * @apiSuccess {String[]} permissions List of model level permissions
-	 *
-	 * @apiExample {post} Example usage:
-	 * POST /acme/permission-templates HTTP/1.1
-	 * {
-	 * 	"_id":"Template1",
-	 * 	"permissions":[
-	 * 		"view_model"
-	 * 	]
-	 * }
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * {
-	 * 	"_id":"Template1",
-	 * 	"permissions":[
-	 * 		"view_model"
-	 * 	]
-	 * }
-	 */
-	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
-
-	/**
 	 * @api {get} /:teamspace/permission-templates Get all templates
 	 * @apiName listTemplates
 	 * @apiGroup PermissionTemplate
@@ -124,70 +90,8 @@
 	 */
 	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
 
-	/**
-	 * @api {delete} /:teamspace/permission-templates/:permissionId Delete a template
-	 * @apiName deleteTemplate
-	 * @apiGroup PermissionTemplate
-	 * @apiDescription Delete a permission template.
-	 *
-	 * @apiUse PermissionTemplate
-	 *
-	 * @apiParam {String} permissionId Permission ID
-	 *
-	 * @apiExample {delete} Example usage:
-	 * DELETE /acme/permission-templates/Template1 HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * {}
-	 */
-	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
-
 	function listTemplates(req, res, next) {
-		User.findByUserName(req.params.account).then(user => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, PermissionTemplates.get(user));
-		}).catch(err => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function createTemplate(req, res, next) {
-
-		User.findByUserName(req.params.account).then(user => {
-
-			const permission = {
-				_id: req.body._id,
-				permissions: req.body.permissions
-			};
-
-			return PermissionTemplates.add(user, permission);
-
-		}).then(permission => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-
-		}).catch(err => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-
-	}
-
-	function deleteTemplate(req, res, next) {
-
-		User.findByUserName(req.params.account).then(user => {
-
-			return PermissionTemplates.remove(user, req.params.permissionId);
-
-		}).then(() => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-
-		}).catch(err => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, PermissionTemplates.get());
 	}
 
 	module.exports = router;

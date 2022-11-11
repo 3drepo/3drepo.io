@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../helper/path');
+const { src, image } = require('../../../helper/path');
 const fs = require('fs');
-const { image } = require('../../../helper/path');
 
 const TypeChecker = require(`${src}/utils/helper/typeCheck`);
+const { generateUUID } = require(`${src}/utils/helper/uuids`);
 
 const testIsBuffer = () => {
 	describe.each(
@@ -69,6 +69,23 @@ const testIsUUIDString = () => {
 	});
 };
 
+const testIsUUID = () => {
+	describe.each(
+		[
+			['7591fbdb-52b9-490a-8a77-fdb57c57dbc8', false],
+			[generateUUID(), true],
+			['', false],
+			['some random string', false],
+			[3, false],
+			[undefined, false],
+		],
+	)('Is UUID', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isUUID(item)).toBe(isTrue);
+		});
+	});
+};
+
 const testFileMimeFromBuffer = () => {
 	const buffer = fs.readFileSync(image);
 
@@ -109,4 +126,5 @@ describe('utils/helpers/typeCheck', () => {
 	testIsUUIDString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
+	testIsUUID();
 });

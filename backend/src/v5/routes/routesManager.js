@@ -17,21 +17,20 @@
 
 const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
-const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const ContainerTicketsRoutes = require('./teamspaces/projects/containers/tickets');
 const ContainerViewsRoutes = require('./teamspaces/projects/containers/views');
-const FederationGroupsRoutes = require('./teamspaces/projects/federations/groups');
+const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
+const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const FederationRevisionRoutes = require('./teamspaces/projects/federations/revisions');
 const FederationRoutes = require('./teamspaces/projects/federations/federations');
-const FederationTicketsRoutes = require('./teamspaces/projects/federations/tickets');
 const FederationViewsRoutes = require('./teamspaces/projects/federations/views');
 const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
+
 const UserRoutes = require('./users');
 
 RoutesManager.init = (app) => {
@@ -48,16 +47,16 @@ RoutesManager.init = (app) => {
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/tickets', ContainerTicketsRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/groups', ContainerGroupsRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/groups', CreateGroupRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/views', ContainerViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/revisions', ContainerRevisionRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', FederationRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/tickets', FederationTicketsRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/groups', FederationGroupsRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets', CreateTicketRoutes(true));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/groups', CreateGroupRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/views', FederationViewsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
 };

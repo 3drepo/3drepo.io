@@ -15,49 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
-const { validateGroupsExportData, validateGroupsImportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
-const Groups = require('../../../../processors/teamspaces/projects/models/federations');
+const {
+	getGroups: getContainerGroups,
+	importGroups: importContainerGroups,
+} = require('../../../../../processors/teamspaces/projects/models/containers');
+
+const {
+	getGroups: getFedGroups,
+	importGroups: importFedGroups,
+} = require('../../../../../processors/teamspaces/projects/models/federations');
+
+const {
+	hasCommenterAccessToContainer,
+	hasCommenterAccessToFederation,
+	hasReadAccessToContainer,
+	hasReadAccessToFederation,
+} = require('../../../../../middleware/permissions/permissions');
+
+const { validateGroupsExportData, validateGroupsImportData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
 const { Router } = require('express');
-const { respond } = require('../../../../utils/responder');
-const { serialiseGroupArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups');
-const { templates } = require('../../../../utils/responseCodes');
+const { respond } = require('../../../../../utils/responder');
+const { serialiseGroupArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups');
+const { templates } = require('../../../../../utils/responseCodes');
 
-const exportGroups = (req, res, next) => {
-	const { teamspace, federation } = req.params;
+const hasReadAccessToModel = (isFed) => (isFed ? hasReadAccessToFederation : hasReadAccessToContainer);
+const hasCommenterAccessToModel = (isFed) => (isFed ? hasCommenterAccessToFederation : hasCommenterAccessToContainer);
+
+const exportGroups = (isFed) => async (req, res, next) => {
+	const { teamspace, model } = req.params;
 	const { groups: groupIds } = req.body;
-	Groups.getGroups(teamspace, federation, groupIds)
-		.then((groups) => {
-			req.outputData = groups;
-			next();
-		})
-		.catch(
-			// istanbul ignore next
-			(err) => respond(req, res, err),
-		);
+	const fn = isFed ? getFedGroups : getContainerGroups;
+
+	const groups = await fn(teamspace, model, groupIds);
+
+	try {
+		req.outputData = groups;
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
-const importGroups = (req, res) => {
-	const { teamspace, federation } = req.params;
+const importGroups = (isFed) => async (req, res) => {
+	const { teamspace, model } = req.params;
 	const { groups } = req.body;
-	Groups.importGroups(teamspace, federation, groups)
-		.then(() => respond(req, res, templates.ok))
-		.catch(
-			// istanbul ignore next
-			(err) => respond(req, res, err),
-		);
+
+	const fn = isFed ? importFedGroups : importContainerGroups;
+
+	try {
+		await fn(teamspace, model, groups);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
-const establishRoutes = () => {
+const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/groups/export:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/groups/export:
 	 *   post:
-	 *     description: Export a list of groups from the federation
-	 *     tags: [Federations]
-	 *     operationId: ExportFederationGroups
+	 *     description: Export a list of groups from the container/federation
+	 *     tags: [Groups]
+	 *     operationId: ExportModelGroups
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -71,8 +95,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: federation
-	 *         description: Federation ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+ 	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -94,24 +125,22 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/federationNotFound"
 	 *       200:
-	 *         description: returns list of federations
+	 *         description: returns list of groups
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/group"
 	 *
 	 */
-	router.post('/export', hasReadAccessToFederation, validateGroupsExportData, exportGroups, serialiseGroupArray);
+	router.post('/export', hasReadAccessToModel(isFed), validateGroupsExportData, exportGroups(isFed), serialiseGroupArray);
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/groups/import:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/groups/import:
 	 *   post:
-	 *     description: Import a list of groups into the federation
-	 *     tags: [Federations]
-	 *     operationId: ImportFederationGroups
+	 *     description: Import a list of groups
+	 *     tags: [Groups]
+	 *     operationId: ImportModelGroups
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -125,8 +154,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: federation
-	 *         description: Federation ID
+   	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+ 	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -147,15 +183,13 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/federationNotFound"
 	 *       200:
 	 *         description: Imported successfully
 	 *
 	 */
-	router.post('/import', hasCommenterAccessToFederation, validateGroupsImportData, importGroups);
+	router.post('/import', hasCommenterAccessToModel(isFed), validateGroupsImportData, importGroups(isFed));
 
 	return router;
 };
 
-module.exports = establishRoutes();
+module.exports = establishRoutes;

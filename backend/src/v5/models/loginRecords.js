@@ -18,26 +18,73 @@
 // detects edge as browser but not device
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateUUIDString } = require('../utils/helper/uuids');
 const geoip = require('geoip-lite');
 const { getUserAgentInfo } = require('../utils/helper/userAgent');
+const { loginPolicy } = require('../utils/config');
 const { publish } = require('../services/eventsManager/eventsManager');
 
-const LoginRecord = {};
-const LOGIN_RECORDS_DB = 'loginRecords';
+const LoginRecords = {};
+const LOGIN_RECORDS_COL = 'loginRecords';
 
-LoginRecord.removeAllUserRecords = (user) => db.dropCollection(LOGIN_RECORDS_DB, user);
+LoginRecords.getLastLoginDate = async (user) => {
+	const lastRecord = await db.findOne(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+		{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
+	return lastRecord?.loginTime;
+};
 
-LoginRecord.saveLoginRecord = async (username, sessionId, ipAddress, userAgent, referer) => {
+LoginRecords.removeAllUserRecords = async (user) => {
+	await db.deleteMany(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user });
+};
+
+const getFailedAttemptsSince = async (user, limit, dateFrom) => {
+	const query = { user, failed: true };
+
+	if (dateFrom) {
+		query.loginTime = { $gt: dateFrom };
+	}
+
+	const res = await db.find(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+		query, { loginTime: 1 }, { loginTime: -1 }, limit);
+
+	return res.map(({ loginTime }) => loginTime);
+};
+
+LoginRecords.isAccountLocked = async (user) => {
+	const lastLogin = await LoginRecords.getLastLoginDate(user);
+	const {
+		maxUnsuccessfulLoginAttempts: maxAttempts,
+		lockoutDuration,
+	} = loginPolicy;
+
+	const nFailedAttempts = await getFailedAttemptsSince(user, maxAttempts, lastLogin);
+
+	if (nFailedAttempts.length === maxAttempts) {
+		let lastAttempt = new Date();
+		for (const time of nFailedAttempts) {
+			if ((lastAttempt - time) >= lockoutDuration) {
+				return false;
+			}
+
+			lastAttempt = time;
+		}
+		return true;
+	}
+	return false;
+};
+
+const generateRecord = (_id, ipAddr, userAgent, referer) => {
 	const uaInfo = getUserAgentInfo(userAgent);
 
 	const loginRecord = {
-		_id: sessionId,
+		_id,
 		loginTime: new Date(),
-		ipAddr: ipAddress,
+		ipAddr,
 		...uaInfo,
 	};
 
-	const location = geoip.lookup(ipAddress);
+	const location = geoip.lookup(ipAddr);
+
 	loginRecord.location = {
 		country: location?.country ?? 'unknown',
 		city: location?.city ?? 'unknown',
@@ -47,9 +94,27 @@ LoginRecord.saveLoginRecord = async (username, sessionId, ipAddress, userAgent, 
 		loginRecord.referrer = referer;
 	}
 
-	await db.insertOne(LOGIN_RECORDS_DB, username, loginRecord);
-
-	publish(events.LOGIN_RECORD_CREATED, { username, loginRecord });
+	return loginRecord;
 };
 
-module.exports = LoginRecord;
+LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
+	const loginRecord = generateRecord(sessionId, ipAddress, userAgent, referer);
+	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
+
+	publish(events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord });
+};
+
+LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) => {
+	const loginRecord = generateRecord(generateUUIDString(), ipAddress, userAgent, referer);
+
+	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { failed: true, user, ...loginRecord });
+
+	if (await (LoginRecords.isAccountLocked(user))) {
+		publish(events.ACCOUNT_LOCKED, { user });
+	}
+};
+
+LoginRecords.initialise = () => db.createIndex(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+	{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
+
+module.exports = LoginRecords;
