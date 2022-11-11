@@ -19,7 +19,7 @@ const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateUR
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { createSession } = require('../../../middleware/sessions');
+const { updateSession } = require('../../../middleware/sessions');
 const { notLoggedIn } = require('../../../middleware/auth');
 const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
@@ -57,7 +57,7 @@ const establishRoutes = () => {
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
 	router.get(authenticateRedirectEndpoint, notLoggedIn, checkStateIsValid, hasAssociatedAccount,
-		createSession, redirectToStateURL);
+		updateSession, redirectToStateURL);
 
 	/**
 	 * @openapi

@@ -28,7 +28,7 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
-const { createSession, createSessionResponse, destroySession } = require(`${v5Path}/middleware/sessions`);
+const { createSession, destroySession } = require(`${v5Path}/middleware/sessions`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
 const { validateLoginData} = require(`${v5Path}/middleware/dataConverter/inputs/users`);
 
@@ -73,7 +73,7 @@ const { fileExists } = require("../models/fileRef");
  * 	"username": "alice"
  * }
  */
-router.post("/login", middlewares.formatV5LogInData, validateLoginData, login, middlewares.flagAsV4Request, createSession, createSessionResponse);
+router.post("/login", middlewares.formatV5LogInData, validateLoginData, login, middlewares.flagAsV4Request, createSession);
 
 /**
  * @api {post} /logout Logout

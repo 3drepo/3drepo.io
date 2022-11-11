@@ -40,43 +40,54 @@ Sessions.manageSessions = async (req, res, next) => {
 	middleware(req, res, next);
 };
 
-Sessions.createSession = (req, res, next) => {
-	req.session.regenerate((err) => {
+const updateSessionDetails = (req, setCookieDomain) => {
+	const updatedUser = { ...req.loginData, webSession: false };
+	const session = req.session;
+
+	if (req.headers['user-agent']) {
+		updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
+	}
+
+	if (req.headers.referer) {
+		updatedUser.referer = getURLDomain(req.headers.referer);
+	}
+
+	session.user = updatedUser;
+
+	if (setCookieDomain) {
+		session.cookie.domain = config.cookie_domain;
+	}
+
+	if (config.cookie.maxAge) {
+		session.cookie.maxAge = config.cookie.maxAge;
+	}
+
+	publish(events.SESSION_CREATED, { username: req.body.user,
+		sessionID: req.sessionID,
+		ipAddress: req.ips[0] || req.ip,
+		userAgent: req.headers['user-agent'],
+		socketId: req.headers[SOCKET_HEADER],
+		referer: updatedUser.referer });	
+	
+	return session;
+}
+
+Sessions.updateSession = async (req, res, next) => {	
+	updateSessionDetails(req);	
+	await next();
+}
+
+Sessions.createSession = (req, res) => {	
+	req.session.regenerate((err) => {		
 		if (err) {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
 			respond(req, res, err);
-		} else {
-			const updatedUser = { ...req.loginData, webSession: false };
-
-			if (req.headers['user-agent']) {
-				updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
-			}
-
-			if (req.headers.referer) {
-				updatedUser.referer = getURLDomain(req.headers.referer);
-			}
-
-			req.session.user = updatedUser;
-			req.session.cookie.domain = config.cookie_domain;
-
-			if (config.cookie.maxAge) {
-				req.session.cookie.maxAge = config.cookie.maxAge;
-			}
-
-			publish(events.SESSION_CREATED, { username: req.body.user,
-				sessionID: req.sessionID,
-				ipAddress: req.ips[0] || req.ip,
-				userAgent: req.headers['user-agent'],
-				socketId: req.headers[SOCKET_HEADER],
-				referer: updatedUser.referer });
-
-			next();
+		} else {		
+			const session = updateSessionDetails(req, true);
+			respond(req, res, templates.ok, req.v4 ? session.user : undefined);
 		}
 	});
 };
-
-Sessions.createSessionResponse = (req, res) => respond(req, res,
-	templates.ok, req.v4 ? req.session.user : undefined);
 
 Sessions.destroySession = (req, res) => {
 	const username = req.session?.user?.username;
