@@ -5,7 +5,7 @@ on:
   pull_request_review:
     types: [edited, dismissed, submitted]
 jobs:
-  getPRNumber:
+  get-pr-number:
     name: Get Current PR Number
     runs-on: ubuntu-latest
     outputs: 
@@ -18,9 +18,9 @@ jobs:
           if_true: ${{ github.event.number }}
           if_false: ${{ github.event.pull_request.number }}
 
-  getIssueNumber:
+  get-issue-number:
     name: Get Current Issue Number
-    needs: [ getPRNumber ]
+    needs: [ get-pr-number ]
     runs-on: ubuntu-latest
     outputs: 
       issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
@@ -29,15 +29,15 @@ jobs:
       - name: Extract Issue Number from PR
         uses: 3drepo/extract-issue-number-from-PR@v1
         with:
-          pr: ${{ needs.getPRNumber.outputs.issue-number }}
+          pr: ${{ needs.get-pr-number.outputs.issue-number }}
           base: staging
           github-token: ${{ secrets.GITHUB_TOKEN }}
         id: commitMsgParser
 
-  checkMergeReady:
+  check-merge-ready:
     name: Ensure all reviewers have approved the PR
     runs-on: ubuntu-latest
-    needs: [ getIssueNumber ]
+    needs: [ get-issue-number ]
     outputs: 
       approved: ${{ steps.checkReviews.outputs.approved }}
     steps:
@@ -53,27 +53,17 @@ jobs:
         with:
           pr: ${{ steps.condval.outputs.value }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update status
-        if: ${{ steps.checkReviews.outputs.approved }}
-        id: update_status
-        uses: 3drepo/update-project-action@1.1
-        with:
-          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
-          organization: 3drepo
-          project_number: 22
-          content_id: ${{ needs.getIssueNumber.outputs.content-id }}
-          field: Status
-          value: 'Done'
+
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
-  updateProjectTicketStatus:
-    name: Update Project Ticket Status
+  update-project-ticket-status:
+    name: Update Project Issue Status
     if: failure() # if not reviewer approved let's modify the status.
     runs-on: ubuntu-latest
     outputs: 
-      content-id: ${{ needs.getIssueNumber.outputs.content-id }}
+      content-id: ${{ needs.get-issue-number.outputs.content-id }}
       status: ${{ steps.setStatusOutput.outputs.status }}
-    needs: [ getIssueNumber, checkMergeReady ]
+    needs: [ get-issue-number, check-merge-ready ]
     steps:
       - name: Set status message from input 
         id: setStatusOutput   
@@ -102,12 +92,12 @@ jobs:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
           project_number: 22
-          content_id: ${{ needs.getIssueNumber.outputs.content-id }}
+          content_id: ${{ needs.get-issue-number.outputs.content-id }}
           field: Status
           value: ${{ steps.setStatusOutput.outputs.status }}
   
   #Ensure the issue number is in the pull request title.
-  ensureWellFormattedIssueTitle:
+  ensure-well-formatted-issue-title:
     runs-on: ubuntu-latest
     name: Ensure a well formatted Issue Title
     steps:
