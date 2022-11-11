@@ -83,6 +83,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
 
       - name: Install Backend Node.js dependencies
         run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
@@ -102,6 +104,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
 
       - name: Install Backend Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
