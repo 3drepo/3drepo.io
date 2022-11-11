@@ -123,8 +123,8 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/views/{view}/thumbnail:
 	 *   get:
 	 *     description: Get the thumbnail of the view specified
-	 *     tags: [Federations]
-	 *     operationId: FederationViewThumbnail
+	 *     tags: [Views]
+	 *     operationId: ViewThumbnail
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
