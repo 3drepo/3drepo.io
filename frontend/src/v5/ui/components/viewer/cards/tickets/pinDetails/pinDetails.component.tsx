@@ -54,6 +54,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	};
 
 	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => () => { ViewerService.clearMeasureMode(); }, []);
 
 	const hasPin = !!value;
 
