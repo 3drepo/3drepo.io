@@ -19,7 +19,7 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dial
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { UploadFileForm } from './uploadFileForm.component';
 
-export const uploadToContainer = (presetContainerId: string) => {
+export const uploadToContainer = async (presetContainerId: string) => {
 	const accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 	const onUpload = (file) => {
 		DialogsActionsDispatchers.open(UploadFileForm, {
@@ -27,5 +27,6 @@ export const uploadToContainer = (presetContainerId: string) => {
 			presetContainerId,
 		});
 	};
-	uploadFile({ accept, onUpload });
+	const file = await uploadFile(accept);
+	onUpload(file);
 };

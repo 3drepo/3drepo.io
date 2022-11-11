@@ -17,7 +17,7 @@
 
 import { ChangeEvent } from 'react';
 
-export const uploadFile = ({ accept, onUpload }) => {
+export const uploadFile = (accept) => new Promise((resolve) => {
 	const input = document.createElement('input');
 	input.type = 'file';
 	input.accept = accept;
@@ -29,8 +29,8 @@ export const uploadFile = ({ accept, onUpload }) => {
 
 	input.onchange = (e) => {
 		const file = getFileFromInputEvent(e as any);
-		onUpload(file);
+		resolve(file);
 	};
 
 	input.click();
-};
+});

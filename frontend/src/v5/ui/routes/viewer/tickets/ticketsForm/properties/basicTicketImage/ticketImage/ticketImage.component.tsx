@@ -76,11 +76,9 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 
 	const uploadScreenshot = async () => handleImageChange(await ViewerService.getScreenshot());
 
-	const uploadImage = () => {
-		uploadFile({
-			accept: getSupportedImageExtensions(),
-			onUpload: (file) => convertFileToImageSrc(file, handleImageChange),
-		});
+	const uploadImage = async () => {
+		const file = await uploadFile(getSupportedImageExtensions());
+		convertFileToImageSrc(file, handleImageChange);
 	};
 
 	useEffect(() => {
