@@ -31,9 +31,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
 
       - name: Install Backend Node.js dependencies
-        run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+        run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Backend test:v5
         run: cd backend ; yarn test:v5 
@@ -50,9 +52,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
 
       - name: Install Frontend Node.js dependencies
-        run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+        run: cd frontend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Frontend yarn test
         run: cd frontend ; yarn test
