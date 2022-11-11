@@ -1,0 +1,91 @@
+name: Automatic Testing
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - master
+      - staging
+
+  # Replace pull_request with pull_request_target if you
+  # plan to use this action with forks, see the Limitations section
+  pull_request:
+    branches:
+      - master
+      - staging
+
+permissions:
+  checks: write
+  contents: write
+
+jobs:
+  run-backend-tests:
+    name: Run Backend tests
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3.10.5-management
+        ports:
+          - "5672:5672"
+          - "15671:15671"
+          - "15672:15672"
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+          
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install Backend Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+
+      - name: Run Backend tests
+        run: cd backend ; yarn lint
+
+      - name: Run Backend tests
+        run: cd backend ; yarn test:v5 
+
+  run-frontend-tests:
+    name: Run Frontend tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install Frontend Node.js dependencies
+        run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+
+      - name: Run Frontend tests
+        run: cd frontend ; yarn lint
+
+      - name: Run Frontend tests
+        run: cd frontend ; yarn test
+
+  # make sure we're not merging DevOps changes
+  devOpsSanityCheck:
+    name: Ensure that custom settings are not being merged
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout .azure/build-and-deploy.yaml
+        uses: Bhacaz/checkout-files@v2
+        with:
+          files: .azure/build-and-deploy.yaml
+          branch: ${{ github.head_ref || github.ref_name }}
+      - name: Check to see if customHelmOverride has any APP settings
+        id: customHelmOverride
+        uses: mikefarah/yq@master
+        with:
+          cmd: if ( $(yq eval '.variables.customHelmOverride | ( contains("APP_") )' .azure/build-and-deploy.yaml) === "true" ); then echo $(yq eval '.variables.customHelmOverride' .azure/build-and-deploy.yaml); exit 1;  fi
