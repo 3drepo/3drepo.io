@@ -56,6 +56,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 			logger.logError(`Failed to find files from ${teamspace}.${collection} with query: ${JSON.stringify(filesFilter)}`);
 			throw err;
 		}
+		logger.logInfo(`found ${results.length} records with external references`);
 		const filenames = results.flatMap((record) => {
 			const fileRefs = record[refAttribute];
 			if (fileRefs) {
@@ -76,7 +77,10 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 			return [];
 		});
 
+		logger.logInfo(`${filenames.length} associated files found`);
+
 		for (let i = 0; i <= filenames.length; i += entriesLimit) {
+			logger.logInfo(`removing ${i} - ${i + entriesLimit > filenames.length ? filenames.length : i + entriesLimit} files`);
 			const group = filenames.slice(i, i + entriesLimit);
 			const fileRemoveProms = [];
 			fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
@@ -85,6 +89,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 		}
 	}
 	try {
+		logger.logInfo('Removing scene nodes...');
 		await deleteMany(teamspace, collection, filter);
 	} catch (err) {
 		logger.logError(`Failed to remove records from ${teamspace}.${collection} with query: ${JSON.stringify(filter)}`);
