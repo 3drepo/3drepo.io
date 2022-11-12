@@ -19,11 +19,11 @@ const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { getURLDomain } = require('../utils/helper/strings');
+const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
-const { session } = require('../services/sessions');
 const { templates } = require('../utils/responseCodes');
 
 const Sessions = {};
@@ -35,14 +35,14 @@ Sessions.manageSessions = async (req, res, next) => {
 		return;
 	}
 
-	const { middleware } = await session;
+	const { middleware } = await initSession;
 
 	middleware(req, res, next);
 };
 
-const updateSessionDetails = (req, setCookieDomain) => {
+const updateSessionDetails = (req) => {
 	const updatedUser = { ...req.loginData, webSession: false };
-	const session = req.session;
+	const { session } = req;
 
 	if (req.headers['user-agent']) {
 		updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
@@ -53,10 +53,7 @@ const updateSessionDetails = (req, setCookieDomain) => {
 	}
 
 	session.user = updatedUser;
-
-	if (setCookieDomain) {
-		session.cookie.domain = config.cookie_domain;
-	}
+	session.cookie.domain = config.cookie_domain;
 
 	if (config.cookie.maxAge) {
 		session.cookie.maxAge = config.cookie.maxAge;
@@ -67,23 +64,23 @@ const updateSessionDetails = (req, setCookieDomain) => {
 		ipAddress: req.ips[0] || req.ip,
 		userAgent: req.headers['user-agent'],
 		socketId: req.headers[SOCKET_HEADER],
-		referer: updatedUser.referer });	
-	
+		referer: updatedUser.referer });
+
 	return session;
-}
+};
 
-Sessions.updateSession = async (req, res, next) => {	
-	updateSessionDetails(req);	
+Sessions.updateSession = async (req, res, next) => {
+	updateSessionDetails(req);
 	await next();
-}
+};
 
-Sessions.createSession = (req, res) => {	
-	req.session.regenerate((err) => {		
+Sessions.createSession = (req, res) => {
+	req.session.regenerate((err) => {
 		if (err) {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
 			respond(req, res, err);
-		} else {		
-			const session = updateSessionDetails(req, true);
+		} else {
+			const session = updateSessionDetails(req);
 			respond(req, res, templates.ok, req.v4 ? session.user : undefined);
 		}
 	});

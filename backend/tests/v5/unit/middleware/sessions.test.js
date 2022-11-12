@@ -59,7 +59,7 @@ const urlDomain = 'url domain';
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
 StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
 
-const testCreateSession = () => {	
+const testCreateSession = () => {
 	const checkResults = (request) => {
 		expect(Responder.respond).toHaveBeenCalledTimes(1);
 		expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
@@ -74,7 +74,7 @@ const testCreateSession = () => {
 				socketId: request.headers[SOCKET_HEADER],
 			});
 	};
-	
+
 	const req = {
 		session: { regenerate: (callback) => { callback(); }, cookie: { domain: undefined } },
 		body: { user: 'user1' },
@@ -201,7 +201,7 @@ const testUpdateSession = () => {
 	const mockCB = jest.fn();
 
 	const checkResults = (request) => {
-		expect(mockCB).toHaveBeenCalledTimes(1);		
+		expect(mockCB).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
 			{

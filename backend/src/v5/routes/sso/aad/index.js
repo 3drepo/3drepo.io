@@ -19,9 +19,9 @@ const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateUR
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { updateSession } = require('../../../middleware/sessions');
 const { notLoggedIn } = require('../../../middleware/auth');
 const { respond } = require('../../../utils/responder');
+const { updateSession } = require('../../../middleware/sessions');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 
 const signUpPost = async (req, res, next) => {
