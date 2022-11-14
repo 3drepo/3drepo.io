@@ -49,16 +49,19 @@ jobs:
           if_false: ${{ github.event.pull_request.number }}
       - name: Check reviews
         id: checkReviews
-        continue-on-error: true
         uses: 3drepo/all-reviewers-approved@v1
         with:
           pr: ${{ steps.condval.outputs.value }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check reviews 
+        if: always()
+        id: setStatusOutputToTrue   
+        run: exit 0
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:
     name: Update Project Issue Status
-    if: failure() # if not reviewer approved let's modify the status.
+    if: {{ ! needs.check-merge-ready.outputs.approved }} # if not reviewer approved let's modify the status.
     runs-on: ubuntu-latest
     outputs: 
       content-id: ${{ needs.get-issue-number.outputs.content-id }}
