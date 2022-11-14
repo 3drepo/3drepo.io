@@ -242,7 +242,7 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
-		if (this.measureMode !== 'PointPin') {
+		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT) {
 			return;
 		}
 
@@ -451,19 +451,21 @@ export class ViewerService {
 	public async setMeasureMode(mode: string, labels: boolean = true) {
 		await this.isViewerReady();
 
+		if (this.measureMode) {
+			this.clearMeasureMode();
+		}
+
 		this.measureMode = mode;
 		this.measureModeLabels = labels;
 
 		if (!mode) {
-			UnityUtil.disableMeasuringTool();
-			UnityUtil.disableSnapping();
-			this.measurementModeChanged(mode);
 			return;
 		}
 
 		this.setVisibilityOfMeasurementsLabels(labels);
 		MultiSelect.toggleAreaSelect(false);
 
+		// For point it only checks the pickPointEvent, so the actual measuring tool should be disabled.
 		if (mode === VIEWER_MEASURING_MODE.POINT)  {
 			UnityUtil.disableMeasuringTool();
 		} else {
@@ -475,7 +477,9 @@ export class ViewerService {
 	}
 
 	public async clearMeasureMode() {
-		return await this.setMeasureMode('');
+		UnityUtil.disableMeasuringTool();
+		UnityUtil.disableSnapping();
+		this.measurementModeChanged('');
 	}
 
 	public async setVisibilityOfMeasurementsLabels(visible) {
