@@ -118,11 +118,11 @@ jobs:
       - name: Install Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
 
-      - name: Run Frontend yarn build:test
-        run: cd frontend ; yarn build:test
-
       - name: Run Frontend lint
         run: cd frontend ; yarn lint
+
+      - name: Run Frontend yarn build:test
+        run: cd frontend ; yarn build:test
 
   # make sure we're not merging DevOps changes
   devops-sanity-check:
