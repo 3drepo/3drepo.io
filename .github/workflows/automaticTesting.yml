@@ -29,6 +29,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
+          # node-version: 14
           node-version-file: backend/package.json
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
@@ -60,6 +61,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
+          # node-version: 14
           node-version-file: backend/package.json
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
@@ -81,6 +83,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
+          # node-version: 14
           node-version-file: frontend/package.json
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
@@ -103,6 +106,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
+          # node-version: 14
           node-version-file: frontend/package.json
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
