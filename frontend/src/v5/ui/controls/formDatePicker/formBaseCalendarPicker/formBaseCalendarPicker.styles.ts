@@ -38,7 +38,7 @@ export const TextField = styled(TextFieldBase)`
 
 	.MuiIconButton-edgeEnd {
 		margin: 0;
-		padding: 5px 12px;
+		padding: 5px 10px;
 
 		&:hover {
 			background-color: transparent;
