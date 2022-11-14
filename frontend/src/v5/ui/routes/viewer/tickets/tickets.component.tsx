@@ -19,21 +19,48 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import { CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import {
+	enableRealtimeContainerNewTicket,
+	enableRealtimeContainerUpdateTicket,
+	enableRealtimeFederationNewTicket,
+	enableRealtimeFederationUpdateTicket,
+} from '@/v5/services/realtime/ticket.events';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
+import { ViewerParams } from '../../routes.constants';
 
-export const Tickets = () => (
-	<CardContextComponent defaultView={TicketsCardViews.List}>
-		<CardContextView cardView={TicketsCardViews.List}>
-			<TicketsListCard />
-		</CardContextView>
-		<CardContextView cardView={TicketsCardViews.Details}>
-			<TicketDetailsCard />
-		</CardContextView>
-		<CardContextView cardView={TicketsCardViews.New}>
-			<NewTicketCard />
-		</CardContextView>
-	</CardContextComponent>
-);
+export const Tickets = () => {
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
+
+	useEffect(() => (
+		isFederation
+			? combineSubscriptions(
+				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
+			) : combineSubscriptions(
+				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
+				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+			)
+	), [containerOrFederation]);
+
+	return (
+		<CardContextComponent defaultView={TicketsCardViews.List}>
+			<CardContextView cardView={TicketsCardViews.List}>
+				<TicketsListCard />
+			</CardContextView>
+			<CardContextView cardView={TicketsCardViews.Details}>
+				<TicketDetailsCard />
+			</CardContextView>
+			<CardContextView cardView={TicketsCardViews.New}>
+				<NewTicketCard />
+			</CardContextView>
+		</CardContextComponent>
+	);
+};

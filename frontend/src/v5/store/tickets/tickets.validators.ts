@@ -117,8 +117,8 @@ export const getTicketValidator = (template) => {
 	validators.properties = propertiesValidator(editableTemplate.properties);
 
 	const modulesValidators = {};
-	editableTemplate.modules.forEach(({ name, properties }) => {
-		modulesValidators[name] = propertiesValidator(properties);
+	editableTemplate.modules.forEach(({ name, type, properties }) => {
+		modulesValidators[name || type] = propertiesValidator(properties);
 	});
 
 	validators.modules = Yup.object().shape(modulesValidators);
@@ -141,7 +141,7 @@ export const getValidators = (template) => {
 	if (modules) {
 		const modulesValidator = {};
 		modules.forEach((module) => {
-			modulesValidator[module.name] = propertiesValidator(module.properties);
+			modulesValidator[module.name || module.type] = propertiesValidator(module.properties);
 		});
 
 		validators.modules = Yup.object().shape(modulesValidator);
