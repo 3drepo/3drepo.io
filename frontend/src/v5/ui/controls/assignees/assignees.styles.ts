@@ -104,3 +104,7 @@ export const AssigneesList = styled.div`
 		margin: 0;
 	}
 `;
+
+export const UnassignedPlaceholder = styled.div`
+	font-size: 10px;
+`;

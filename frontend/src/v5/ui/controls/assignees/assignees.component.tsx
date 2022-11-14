@@ -17,7 +17,7 @@
 import { FormattedMessage } from 'react-intl';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { memo } from 'react';
-import { AssigneesList, ExtraAssignees } from './assignees.styles';
+import { AssigneesList, ExtraAssignees, UnassignedPlaceholder } from './assignees.styles';
 import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
 import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
 
@@ -42,7 +42,9 @@ export const Assignees = memo(({ assignees = [], max, className }: AssigneesType
 					<AssigneeListItem key={assignee} assignee={assignee} />
 				))
 			) : (
-				<FormattedMessage id="assignedAssignees.unassigned" defaultMessage="Unassigned" />
+				<UnassignedPlaceholder>
+					<FormattedMessage id="assignedAssignees.unassigned" defaultMessage="Unassigned" />
+				</UnassignedPlaceholder>
 			)}
 			{extraAssignees.length ? (
 				<HoverPopover
