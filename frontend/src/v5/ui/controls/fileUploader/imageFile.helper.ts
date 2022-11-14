@@ -18,6 +18,7 @@
 import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
+export const addBase64Prefix = (value, imageType = 'png') => `data:image/${imageType};base64,${value}`;
 
 export const convertFileToImageSrc = (file) => new Promise((resolve) => {
 	const reader = new FileReader();
