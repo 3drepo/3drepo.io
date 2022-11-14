@@ -15,13 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
-import {
-	ActionsList,
-	ActionsSide,
-	Container,
-	PropertyName,
-	Asterisk,
-} from './basicTicketImage.styles';
+import { ActionsList, ActionsSide, Container, PropertyName } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
 export type BasicTicketImageProps = {
@@ -48,8 +42,8 @@ export const BasicTicketImage = ({
 	return (
 		<Container className={className}>
 			<ActionsSide>
-				<PropertyName>
-					{title}{required && <Asterisk />}
+				<PropertyName required={required}>
+					{title}
 				</PropertyName>
 				<ActionsList>
 					{children}

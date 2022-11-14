@@ -16,17 +16,7 @@
  */
 
 import { Typography } from '@mui/material';
-import styled from 'styled-components';
-
-export const Asterisk = styled.span`
-	&::after {
-		font-weight: 400;
-		font-size: 0.75rem;
-		color: ${({ theme }) => theme.palette.error.main};
-		margin-left: 2px;
-		content: '*';
-	}
-`;
+import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
 	padding: 13px;
@@ -40,9 +30,19 @@ export const Container = styled.div`
 
 export const PropertyName = styled(Typography).attrs({
 	variant: 'h5',
-})`
+})<{ required?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 2px;
+
+	${({ theme, required }) => required && css`
+		&::after {
+			font-weight: 400;
+			font-size: 0.75rem;
+			color: ${theme.palette.error.main};
+			margin-left: 2px;
+			content: '*';
+		}
+	`}
 `;
 
 export const ActionsSide = styled.div`
