@@ -450,17 +450,17 @@ export class ViewerService {
 
 	public async setMeasureMode(mode: string, labels: boolean = true) {
 		await this.isViewerReady();
+		this.measureModeLabels = labels;
 
 		if (this.measureMode) {
 			this.clearMeasureMode();
+			if (!mode) {
+				return;
+			}
 		}
 
 		this.measureMode = mode;
-		this.measureModeLabels = labels;
 
-		if (!mode) {
-			return;
-		}
 
 		this.setVisibilityOfMeasurementsLabels(labels);
 		MultiSelect.toggleAreaSelect(false);
@@ -479,6 +479,7 @@ export class ViewerService {
 	public async clearMeasureMode() {
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.disableSnapping();
+		this.measureMode = '';
 		this.measurementModeChanged('');
 	}
 

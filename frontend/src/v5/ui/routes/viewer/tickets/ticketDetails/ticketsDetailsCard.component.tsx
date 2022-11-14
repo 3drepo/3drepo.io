@@ -66,7 +66,7 @@ export const TicketDetailsCard = () => {
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
-		mode: 'all',
+		mode: 'onChange',
 		defaultValues: ticket,
 	});
 
