@@ -35,6 +35,7 @@ export const PinContainer = styled.div<{ selected: boolean, error: boolean }>`
 		color: ${palette.error.main};
 		background-color: ${palette.error.lightest};
 		border-color: ${palette.error.main};
+		box-shadow: 0 0 4px ${palette.error.main};
 	`}
 
 `;
