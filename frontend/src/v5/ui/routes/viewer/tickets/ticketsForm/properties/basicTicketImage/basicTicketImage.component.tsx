@@ -21,7 +21,7 @@ import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplaye
 
 export type BasicTicketImageProps = {
 	imgSrc: string,
-	formError: any,
+	formError?: any,
 	title: string,
 	className?: string,
 	onChange?: (imgSrc) => void,
