@@ -17,12 +17,10 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import { isEmpty } from 'lodash';
-import * as Yup from 'yup';
 import WarningIcon from '@assets/icons/stepper_error.svg';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
-import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
+import { EditableTicket, ITemplate } from './tickets.types';
 
 export const TITLE_INPUT_NAME = 'title';
 
@@ -68,111 +66,6 @@ export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 		properties,
 		modules,
 	});
-};
-
-const MAX_TEXT_LENGTH = 120;
-const MAX_LONG_TEXT_LENGTH = 1200;
-const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
-
-export const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
-	let validator;
-	const maxLength = maxStringLength(type);
-
-	switch (type) {
-		case 'text':
-		case 'longText':
-			validator = trimmedString.max(maxLength,
-				formatMessage({
-					id: 'validation.ticket.tooLong',
-					defaultMessage: ' {name} is limited to {maxLength} characters',
-				},
-				{ maxLength, name }));
-			break;
-		case 'coords':
-			validator = Yup.array(nullableNumber);
-			break;
-		case 'manyOf':
-			validator = Yup.array();
-			break;
-		case 'oneOf':
-		case 'image':
-			validator = trimmedString;
-			break;
-		case 'boolean':
-			validator = Yup.boolean();
-			break;
-		case 'number':
-			validator = nullableNumber;
-			break;
-		case 'date':
-			validator = Yup.date().nullable();
-			break;
-		default:
-			validator = trimmedString;
-	}
-
-	if (required) {
-		validator = validator.required(
-			formatMessage({
-				id: 'validation.ticket.requiredField',
-				defaultMessage: '{name} is a required field',
-			},
-			{ name }),
-		);
-		if (type === 'manyOf') {
-			validator = validator.min(1,
-				formatMessage({
-					id: 'validation.ticket.manyOf.required',
-					defaultMessage: 'Select at least one option',
-				}));
-		}
-		if (type === 'coords') {
-			validator = Yup.array(requiredNumber());
-		}
-		if (type === 'number') {
-			validator = requiredNumber(
-				formatMessage({
-					id: 'validation.ticket.requiredField',
-					defaultMessage: '{name} is a required field',
-				},
-				{ name }),
-			);
-		}
-	}
-
-	return validator;
-};
-
-export const propertiesValidator = (properties = []) => {
-	const validators = properties.reduce(
-		(validatorsObj, property) => ({
-			...validatorsObj,
-			[property.name || property.title]: propertyValidator(property),
-		}),
-		{},
-	);
-	return Yup.object().shape(validators);
-};
-
-export const getTicketValidator = (template) => {
-	const validators: any = {
-		title: propertyValidator({
-			required: true,
-			type: 'text',
-			name: TITLE_INPUT_NAME,
-		}),
-	};
-	const editableTemplate = getEditableProperties(template);
-	validators.properties = propertiesValidator(editableTemplate.properties);
-
-	const modulesValidators = {};
-	editableTemplate.modules.forEach(({ name, properties }) => {
-		modulesValidators[name] = propertiesValidator(properties);
-	});
-
-	validators.modules = Yup.object().shape(modulesValidators);
-
-	return Yup.object().shape(validators);
 };
 
 const filterEmptyModuleValues = (module) => {
@@ -221,30 +114,6 @@ export const filterEmptyTicketValues = (ticket) => {
 		}
 	});
 	return parsedTicket;
-};
-
-export const getValidators = (template) => {
-	const { properties, modules } = template;
-	const validators: any = {
-		title: propertyValidator({
-			required: true,
-			type: 'longText',
-			name: TITLE_INPUT_NAME,
-		}),
-	};
-
-	validators.properties = propertiesValidator(properties || []);
-
-	if (modules) {
-		const modulesValidator = {};
-		modules.forEach((module) => {
-			modulesValidator[module.name] = propertiesValidator(module.properties);
-		});
-
-		validators.modules = Yup.object().shape(modulesValidator);
-	}
-
-	return Yup.object().shape(validators);
 };
 
 const moduleTypeProperties = {
