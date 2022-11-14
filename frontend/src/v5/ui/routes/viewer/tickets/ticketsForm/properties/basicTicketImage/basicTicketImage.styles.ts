@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@mui/material';
+import { FormLabel } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div`
+export const Container = styled.div<{ error?: string }>`
 	padding: 13px;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -26,23 +26,17 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+
+	${({ error, theme }) => error && css`
+		border: solid 1px ${theme.palette.error.main};
+		background-color: ${theme.palette.error.lightest};
+	`}
 `;
 
-export const PropertyName = styled(Typography).attrs({
-	variant: 'h5',
-})<{ required?: boolean }>`
+export const PropertyName = styled(FormLabel)`
+	${({ theme }) => theme.typography.h5}
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 2px;
-
-	${({ theme, required }) => required && css`
-		&::after {
-			font-weight: 400;
-			font-size: 0.75rem;
-			color: ${theme.palette.error.main};
-			margin-left: 2px;
-			content: '*';
-		}
-	`}
 `;
 
 export const ActionsSide = styled.div`

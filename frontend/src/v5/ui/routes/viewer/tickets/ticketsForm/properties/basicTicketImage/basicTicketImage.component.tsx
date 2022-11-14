@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { FormControl, FormHelperText } from '@mui/material';
 import { ActionsList, ActionsSide, Container, PropertyName } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
 export type BasicTicketImageProps = {
 	imgSrc: string,
+	formError: any,
 	title: string,
 	className?: string,
 	onChange?: (imgSrc) => void,
@@ -33,27 +35,32 @@ export const BasicTicketImage = ({
 	imgSrc,
 	title,
 	className,
+	formError,
 	required,
 	disabled,
 	onEmptyImageClick,
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
+	const error = formError?.message;
 
 	return (
-		<Container className={className}>
-			<ActionsSide>
-				<PropertyName required={required}>
-					{title}
-				</PropertyName>
-				<ActionsList>
-					{children}
-				</ActionsList>
-			</ActionsSide>
-			<TicketImageDisplayer
-				imgSrc={imgSrc}
-				disabled={disabled || !isAdmin}
-				onEmptyImageClick={onEmptyImageClick}
-			/>
-		</Container>
+		<FormControl error={error}>
+			<Container className={className} error={error}>
+				<ActionsSide>
+					<PropertyName required={required}>
+						{title}
+					</PropertyName>
+					<ActionsList>
+						{children}
+					</ActionsList>
+				</ActionsSide>
+				<TicketImageDisplayer
+					imgSrc={imgSrc}
+					disabled={disabled || !isAdmin}
+					onEmptyImageClick={onEmptyImageClick}
+				/>
+			</Container>
+			<FormHelperText>{error}</FormHelperText>
+		</FormControl>
 	);
 };
