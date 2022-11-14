@@ -97,6 +97,7 @@ export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 						id: 'customTicket.newTicket.titlePlaceholder',
 						defaultMessage: 'Ticket name',
 					})}
+					inputProps={{ autoFocus: true }}
 					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>
