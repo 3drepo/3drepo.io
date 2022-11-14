@@ -20,6 +20,7 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federati
 import { isEmpty } from 'lodash';
 import WarningIcon from '@assets/icons/stepper_error.svg';
 import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
+import { getUrl } from '@/v5/services/api/default';
 import { EditableTicket, ITemplate } from './tickets.types';
 
 export const TITLE_INPUT_NAME = 'title';
@@ -125,4 +126,23 @@ const moduleTypeProperties = {
 export const getModulePanelTitle = (module) => {
 	if (module.name) return { title: module.name, Icon: PropetiesIcon };
 	return { Icon: PropetiesIcon, ...moduleTypeProperties[module.type] };
+};
+
+export const getTicketResourceUrl = (
+	teamspace,
+	project,
+	containerOrFederation,
+	ticketId,
+	resource,
+	isFederation,
+) => {
+	const modelType = isFederation ? 'federations' : 'containers';
+	return getUrl(
+		`teamspaces/${teamspace}/projects/${project}/${modelType}/${containerOrFederation}/tickets/${ticketId}/resources/${resource}`,
+	);
+};
+
+export const isResourceId = (str) => {
+	const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+	return regexExp.test(str);
 };
