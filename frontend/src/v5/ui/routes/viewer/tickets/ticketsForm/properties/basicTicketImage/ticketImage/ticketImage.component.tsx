@@ -20,15 +20,16 @@ import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuItem.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { convertFileToImageSrc, getImageUrl, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
+import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
 import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
+import { CardContext } from '@components/viewer/cards/cardContext.component';
+import { isFederation } from '@/v5/store/store.helpers';
 
 const TriggerButton = ({ imgSrc }) => {
 	if (!imgSrc) {
@@ -52,44 +53,31 @@ type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSr
 	value?: string;
 };
 export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => {
-	const [imgSrc, setImgSrc] = useState<string>();
 	const { props: { ticketId } } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 
-	const valueIsResourceId = () => {
-		const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-		return regexExp.test(value);
-	};
-
-	const getResourceUrl = () => {
-		const modelType = isFederation ? 'federations' : 'containers';
-		return getImageUrl(
-			`teamspaces/${teamspace}/projects/${project}/${modelType}/${containerOrFederation}/tickets/${ticketId}/resources/${value}`,
-		);
-	};
-
-	const handleImageChange = (newValue) => {
-		setImgSrc(newValue);
-		onChange(stripBase64Prefix(newValue));
-	};
+	const handleImageChange = (newValue) => onChange(stripBase64Prefix(newValue));
 
 	const uploadScreenshot = async () => handleImageChange(await ViewerService.getScreenshot());
 
 	const uploadImage = async () => {
 		const file = await uploadFile(getSupportedImageExtensions());
-		convertFileToImageSrc(file, handleImageChange);
+		const imgSrc = await convertFileToImageSrc(file);
+		handleImageChange(imgSrc);
 	};
 
-	useEffect(() => {
-		if (!imgSrc && valueIsResourceId()) {
-			setImgSrc(getResourceUrl());
+	const getImgSrc = () => {
+		if (value && isResourceId(value)) {
+			const imgResourceUrl = getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, value, isFederation);
+			return addBase64Prefix(imgResourceUrl);
 		}
-	}, [value]);
+		return value;
+	};
 
 	return (
-		<BasicTicketImage imgSrc={imgSrc} onEmptyImageClick={uploadImage} {...props}>
-			<ActionMenu TriggerButton={<div><TriggerButton imgSrc={imgSrc} /></div>}>
+		<BasicTicketImage imgSrc={getImgSrc()} onEmptyImageClick={uploadImage} {...props}>
+			<ActionMenu TriggerButton={<div><TriggerButton imgSrc={getImgSrc()} /></div>}>
 				<ActionMenuItem>
 					<MenuItem onClick={uploadScreenshot}>
 						<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />
@@ -97,7 +85,7 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 					<MenuItem onClick={uploadImage}>
 						<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />
 					</MenuItem>
-					{imgSrc && (
+					{getImgSrc() && (
 						<MenuItemDelete onClick={() => handleImageChange('')}>
 							<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />
 						</MenuItemDelete>
