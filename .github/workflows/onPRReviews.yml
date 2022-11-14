@@ -79,6 +79,8 @@ jobs:
             ready_for_review ) 
               echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
               ;;
+            * )
+              echo "Action = $ACTION"
           esac
         env:
           ACTION: ${{ github.event.action }}
