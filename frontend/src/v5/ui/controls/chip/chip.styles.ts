@@ -59,7 +59,7 @@ export const ChipBase = styled(Chip)<ChipType>`
 	gap: 4px;
 	user-select: none;
 	margin: 0;
-	letter-spacing: 0.7;
+	letter-spacing: 0.3px;
 	svg {
 		height: 11px;
 		width: 11px;
