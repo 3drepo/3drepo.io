@@ -15,7 +15,7 @@ module.exports = {
 	},
 	parser: '@typescript-eslint/parser',
 	rules: {
-		'license-header': ['error','./internals/eslint-rules/license-header.js'],
+		'license-header': 'error',
 		'arrow-parens': ['error', 'always'],
 		'no-tabs': [
 			'error',
