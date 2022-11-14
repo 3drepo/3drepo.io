@@ -40,8 +40,11 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 
 	const stopEdit = async (val) => {
 		setEditMode(false);
-		onChange?.(val);
-		await ViewerService.clearMeasureMode();
+
+		if (val !== undefined) {
+			await ViewerService.clearMeasureMode();
+			onChange?.(val);
+		}
 	};
 
 	const cancelEdit = () => stopEdit(value);
@@ -50,10 +53,8 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	const onClickEditPin = async () => {
 		setEditMode(true);
 		const pin = await ViewerService.dropPin();
-
-		if (pin) { //  If the returned pin is null, edit mode has been cancelled
-			stopEdit(pin);
-		}
+		//  If the returned pin is undefined, edit mode has been cancelled
+		stopEdit(pin);
 	};
 
 	useEffect(() => onBlur?.(), [value]);

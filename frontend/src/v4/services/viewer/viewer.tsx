@@ -1140,7 +1140,7 @@ export class ViewerService {
 				this.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
 
 				if (!pinWasDroped) {
-					resolve(null);
+					resolve(undefined);
 				}
 			}
 
