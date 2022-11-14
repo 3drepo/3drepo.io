@@ -21,12 +21,11 @@ import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
 import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 
 const BaseCircle = css`
-	margin: 0 -10px 0 0;
+	margin: 0 -8px 0 0;
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 28px;
 	width: 28px;
-	
 	pointer-events: auto;
 	
 	.MuiAvatar-root {
@@ -34,6 +33,7 @@ const BaseCircle = css`
 		box-sizing: border-box;
 		height: 100%;
 		width: 100%;
+		font-size: 10px;
 	}
 `;
 
