@@ -20,8 +20,8 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { FilterChip } from '@controls/chip';
-import { Ticket } from './ticketItem/ticketItem.styles';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
+import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
