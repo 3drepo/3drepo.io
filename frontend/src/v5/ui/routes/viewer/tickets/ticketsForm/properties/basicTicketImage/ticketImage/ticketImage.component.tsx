@@ -67,6 +67,7 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 	};
 
 	const getImgSrc = () => {
+		if (!value) return '';
 		if (value && isResourceId(value)) {
 			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, value, isFederation);
 		}
