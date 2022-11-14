@@ -16,7 +16,7 @@
 		"import/order": 0,
 	    "require-sort/require-sort": "error",
 	    "no-console": "error",
-		"license-header": [ 2, "./eslint-rules/license-header.js"],
+		"license-header": 2,
 		"arrow-parens": ["error", "always"],
 		"indent": ["error", "tab"],
 		"no-plusplus" : 0,
