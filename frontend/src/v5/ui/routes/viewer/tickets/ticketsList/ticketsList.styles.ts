@@ -45,6 +45,7 @@ export const Filters = styled.div`
 `;
 
 export const TemplateChip = styled(FilterChip)`
+	border-radius: 5px;
 	&:hover {
 		border-color: ${({ theme }) => theme.palette.primary.main};
 	}
