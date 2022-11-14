@@ -49,11 +49,11 @@ jobs:
           if_false: ${{ github.event.pull_request.number }}
       - name: Check reviews
         id: checkReviews
+        allow-failure: true
         uses: 3drepo/all-reviewers-approved@v1
         with:
           pr: ${{ steps.condval.outputs.value }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:
