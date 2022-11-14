@@ -22,14 +22,13 @@ import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuIt
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
 import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { isFederation } from '@/v5/store/store.helpers';
 
 const TriggerButton = ({ imgSrc }) => {
 	if (!imgSrc) {
