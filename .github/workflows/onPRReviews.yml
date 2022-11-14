@@ -4,6 +4,11 @@ on:
     types: [ready_for_review, review_requested, review_request_removed]
   pull_request_review:
     types: [edited, dismissed, submitted]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   get-pr-number:
     name: Get Current PR Number
