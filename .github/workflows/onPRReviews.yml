@@ -49,7 +49,7 @@ jobs:
           if_false: ${{ github.event.pull_request.number }}
       - name: Check reviews
         id: checkReviews
-        allow-failure: true
+        continue-on-error: true
         uses: 3drepo/all-reviewers-approved@v1
         with:
           pr: ${{ steps.condval.outputs.value }}
