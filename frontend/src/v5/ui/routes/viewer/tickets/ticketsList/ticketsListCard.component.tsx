@@ -28,6 +28,7 @@ import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersA
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
+import { EmptyList } from './ticketsList.styles';
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -58,7 +59,13 @@ export const TicketsListCard = () => {
 				<NewTicketMenu />
 			</CardHeader>
 			<CardContent>
-				<TicketsList tickets={tickets} />
+				{tickets.length ? (
+					<TicketsList tickets={tickets} />
+				) : (
+					<EmptyList>
+						<FormattedMessage id="viewer.cards.tickets.emptyList" defaultMessage="No tickets have been created yet" />
+					</EmptyList>
+				)}
 			</CardContent>
 		</CardContainer>
 	);
