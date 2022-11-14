@@ -70,7 +70,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 		<FormControl required={required} error={error}>
 			<PinContainer selected={editMode} error={error}>
 				<PinName onClick={onClickEditPin} required={required}>
-					{label} - {JSON.stringify(value)}
+					{label}
 				</PinName>
 				<PinActions>
 					{editMode && (
