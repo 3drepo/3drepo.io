@@ -57,7 +57,11 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 		stopEdit(pin);
 	};
 
-	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => {
+		// There seems to be some sort of race condition in react-hook-form
+		// so onBlur cant be called inmmediatly after onchange because the validation wont be there.
+		setTimeout(() => onBlur?.(), 200);
+	}, [value]);
 	useEffect(() => () => { ViewerService.clearMeasureMode(); }, []);
 
 	const hasPin = !!value;
@@ -66,7 +70,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 		<FormControl required={required} error={error}>
 			<PinContainer selected={editMode} error={error}>
 				<PinName onClick={onClickEditPin} required={required}>
-					{label}
+					{label} - {JSON.stringify(value)}
 				</PinName>
 				<PinActions>
 					{editMode && (
