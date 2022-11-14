@@ -1133,19 +1133,19 @@ export class ViewerService {
 
 	public async dropPin() {
 		return new Promise(async (resolve) => {
-			let pinWasDroped = false;
+			let pinDropped = false;
 
 			const onModeChanged = (mode) => {
 				this.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onCreated);
 				this.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
 
-				if (!pinWasDroped) {
+				if (!pinDropped) {
 					resolve(undefined);
 				}
 			}
 
 			const onCreated = ({ position}) => {
-				pinWasDroped = true;
+				pinDropped = true;
 				resolve(position);
 				this.clearMeasureMode();
 			};
