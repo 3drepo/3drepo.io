@@ -37,17 +37,13 @@ export const DueDateInput = ({ value: initialValue, disabled, onBlur }: DueDateI
 		setValue(new Date(newValue).getTime());
 		onBlur(newValue);
 	};
-	const onClickBackdrop = (e) => {
-		preventPropagation(e);
-		handleClose();
-	};
 
 	return (
 		<div onClick={preventPropagation} aria-hidden="true">
 			<Backdrop /* Prevents clicking background elements */
 				sx={{ zIndex: 15 }}
 				open={open}
-				onClick={onClickBackdrop}
+				onClick={handleClose}
 			/>
 			<DatePicker
 				value={value}

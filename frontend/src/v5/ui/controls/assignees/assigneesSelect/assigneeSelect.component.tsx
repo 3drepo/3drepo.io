@@ -50,10 +50,7 @@ export const AssigneesSelect = ({ values: initialValues, onBlur, ...props }: Ass
 		setOpen(false);
 		onBlur(values);
 	};
-	const onChange = (e) => {
-		preventPropagation(e);
-		setValues(e?.target?.value);
-	};
+	const onChange = (e) => setValues(e?.target?.value);
 	return (
 		<>
 			<Assignees assignees={values} max={7} onClick={onClick} {...props} />
