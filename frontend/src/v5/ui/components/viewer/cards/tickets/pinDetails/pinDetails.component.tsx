@@ -38,23 +38,26 @@ interface PinDetailsProps {
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }:PinDetailsProps) => {
 	const [editMode, setEditMode] = useState(false);
 
-	const stopEdit = async (val) => {
+	const cancelEdit = () => {
+		if (!editMode) return;
 		setEditMode(false);
-
-		if (val !== undefined) {
-			ViewerService.clearMeasureMode();
-			onChange?.(val);
-		}
+		ViewerService.clearMeasureMode();
 	};
 
-	const cancelEdit = () => stopEdit(value);
-	const onClickDelete = () => stopEdit(null);
+	const onClickDelete = () => {
+		onChange?.(null);
+		cancelEdit();
+	};
 
 	const onClickEditPin = async () => {
 		setEditMode(true);
 		const pin = await ViewerService.dropPin();
+		setEditMode(false);
+
 		//  If the returned pin is undefined, edit mode has been cancelled
-		stopEdit(pin);
+		if (pin !== undefined) {
+			onChange?.(pin);
+		}
 	};
 
 	useEffect(() => {
