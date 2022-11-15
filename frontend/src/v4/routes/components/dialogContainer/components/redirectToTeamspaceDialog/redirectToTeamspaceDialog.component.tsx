@@ -17,6 +17,7 @@
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import { Container } from './redirectToTeamspaceDialog.styles';
 
 interface IProps {
 	content?: string;
@@ -27,7 +28,7 @@ interface IProps {
 
 export const RedirectToTeamspaceDialog = ({ content, message, status, handleResolve }: IProps) => {
 	return (
-		<>
+		<Container>
 			<DialogContent>
 				{content}
 				<br /><br />
@@ -41,6 +42,6 @@ export const RedirectToTeamspaceDialog = ({ content, message, status, handleReso
 			<DialogActions>
 				<Button onClick={handleResolve} variant="contained" color="secondary">Back to teamspace</Button>
 			</DialogActions>
-		</>
+		</Container>
 	);
 };
