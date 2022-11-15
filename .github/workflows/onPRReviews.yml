@@ -59,14 +59,14 @@ jobs:
           pr: ${{ steps.condval.outputs.value }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check reviews 
-        if: always()
+        if: failure()
         id: setStatusOutputToTrue   
         run: exit 0
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:
     name: Update Project Issue Status
-    if: ${{ needs.check-merge-ready.outputs.approved != '' }} # if not reviewer approved let's modify the status.
+    if: ${{ always() && needs.check-merge-ready.outputs.approved = '' }} # if not reviewer approved let's modify the status.
     runs-on: ubuntu-latest
     outputs: 
       content-id: ${{ needs.get-issue-number.outputs.content-id }}
