@@ -26,6 +26,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const Path = require('path');
+const readline = require('readline');
 
 const { isString, isObject } = require(`${v5Path}/utils/helper/typeCheck`);
 
@@ -191,6 +192,19 @@ const processTeamspace = async (teamspace, revisionAge) => {
 };
 
 const run = async (revisionAge) => {
+	if (revisionAge < 2) {
+		logger.logWarning(`Revision Age is ${revisionAge}; currently processing jobs will be removed when revision age is set to 0.`);
+
+		const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+		const response = await new Promise((resolve) => rl.question('Continue? (y/N): ', (ans) => {
+			rl.close();
+			resolve(ans);
+		}));
+		if (!response.match(/^y/i)) {
+			process.abort();
+		}
+	}
+
 	logger.logInfo(`Finding unfinished revisions from more than ${revisionAge} days ago...`);
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
