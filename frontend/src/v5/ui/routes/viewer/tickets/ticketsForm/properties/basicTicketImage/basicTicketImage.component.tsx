@@ -16,7 +16,7 @@
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { FormControl, FormHelperText } from '@mui/material';
-import { ActionsList, ActionsSide, Container, PropertyName } from './basicTicketImage.styles';
+import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
 export type BasicTicketImageProps = {
@@ -48,9 +48,9 @@ export const BasicTicketImage = ({
 		<FormControl error={error}>
 			<Container className={className} error={error}>
 				<ActionsSide>
-					<PropertyName required={required}>
+					<Label required={required}>
 						{title}
-					</PropertyName>
+					</Label>
 					<ActionsList>
 						{children}
 					</ActionsList>

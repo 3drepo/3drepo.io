@@ -33,7 +33,7 @@ export const Container = styled.div<{ error?: string }>`
 	`}
 `;
 
-export const PropertyName = styled(FormLabel)`
+export const Label = styled(FormLabel)`
 	${({ theme }) => theme.typography.h5}
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 2px;
