@@ -48,10 +48,11 @@ const TriggerButton = ({ imgSrc }) => {
 	);
 };
 
-type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSrc' | 'children'> & {
-	value?: string;
+type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSrc' | 'children' | 'error' | 'helperText'> & {
+	value?: string,
+	formError?: any,
 };
-export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => {
+export const TicketImage = ({ value, onChange, formError, ...props }: TicketImageProps) => {
 	const { props: { ticketId } } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -75,7 +76,13 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 	};
 
 	return (
-		<BasicTicketImage imgSrc={getImgSrc()} onEmptyImageClick={uploadImage} {...props}>
+		<BasicTicketImage
+			imgSrc={getImgSrc()}
+			onEmptyImageClick={uploadImage}
+			error={formError}
+			helperText={formError?.message}
+			{...props}
+		>
 			<ActionMenu TriggerButton={<div><TriggerButton imgSrc={getImgSrc()} /></div>}>
 				<ActionMenuItem>
 					<MenuItem onClick={uploadScreenshot}>

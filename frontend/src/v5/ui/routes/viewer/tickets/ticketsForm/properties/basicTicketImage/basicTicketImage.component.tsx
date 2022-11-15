@@ -21,7 +21,8 @@ import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplaye
 
 export type BasicTicketImageProps = {
 	imgSrc: string,
-	formError?: any,
+	error?: any,
+	helperText?: string,
 	title: string,
 	className?: string,
 	onChange?: (imgSrc) => void,
@@ -35,13 +36,13 @@ export const BasicTicketImage = ({
 	imgSrc,
 	title,
 	className,
-	formError,
+	error,
+	helperText,
 	required,
 	disabled,
 	onEmptyImageClick,
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const error = formError?.message;
 
 	return (
 		<FormControl error={error}>
@@ -60,7 +61,7 @@ export const BasicTicketImage = ({
 					onEmptyImageClick={onEmptyImageClick}
 				/>
 			</Container>
-			<FormHelperText>{error}</FormHelperText>
+			<FormHelperText>{helperText}</FormHelperText>
 		</FormControl>
 	);
 };
