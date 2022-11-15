@@ -50,7 +50,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 		const filesFilter = { ...filter, [refAttribute]: { $exists: true } };
 
 		const objsWithRefs = await count(teamspace, collection, filesFilter);
-		const batch = 10000;
+		const batch = entriesLimit;
 		for (let j = 0; j < objsWithRefs?.length; j += batch) {
 			// eslint-disable-next-line no-await-in-loop
 			const results = await find(teamspace, collection, filesFilter, projection, undefined, batch);
