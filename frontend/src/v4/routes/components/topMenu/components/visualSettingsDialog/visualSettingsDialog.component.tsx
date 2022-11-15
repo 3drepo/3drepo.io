@@ -183,6 +183,162 @@ const AdvancedSettings = (props) => {
 		</List>
 	);
 };
+const StreamingSettings = (props) => {
+	return (
+		<List>
+			<FormListItem>
+				Memory Reserved
+				<Field name="memoryThreshold" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.memoryThreshold || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.memoryThreshold)}
+						{...field}
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Memory Limit
+				<Field name="memoryLimit" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.memoryLimit)}
+						{...field}
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+				<FormListItem>
+				Placeholder bundle fade distance
+				<Field name="phBundleFadeDistance" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFadeDistance || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFadeDistance)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Placeholder bundle fade bias
+				<Field name="phBundleFadeBias" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFadeBias || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFadeBias)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Placeholder bundle fade power
+				<Field name="phBundleFadePower" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFadePower || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFadePower)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Placeholder Bundle color
+				<Field name="phBundleColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
+			</FormListItem>
+			<FormListItem>
+				Placeholder bundle face alpha
+				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFaceAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Placeholder bundle line alpha
+				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleLineAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+		<FormListItem>
+				Placeholder element rendering radius
+				<Field name="phElementRenderingRadius" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phElementRenderingRadius || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phElementRenderingRadius)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+
+			<FormListItem>
+				Placeholder Element color
+				<Field name="phElementColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
+				</FormListItem>
+					<FormListItem>
+				Placeholder element face alpha
+				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFaceAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+		<FormListItem>
+				Placeholder element line alpha
+				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleLineAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+
+		</List>
+	)
+};
 
 const CacheWarning = (props) => {
 	return (
@@ -299,6 +455,7 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 				>
 					<DialogTab label="Basic" />
 					<DialogTab label="Advanced" />
+					<DialogTab label="Streaming" />
 				</DialogTabs>
 				<Formik
 					validationSchema={SettingsSchema}
@@ -309,6 +466,7 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 					<Form>
 						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
 						{selectedTab === 1 && <AdvancedSettings />}
+						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
 						<Buttons onClickCancel={handleClose} />
 					</Form>
