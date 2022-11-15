@@ -15,11 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from './confirmDialog/confirmDialog.component';
-export * from './errorDialog/errorDialog.component';
-export * from './loadingDialog/loadingDialog.component';
-export * from './newUpdateDialog/newUpdateDialog.component';
-export * from './suggestedTreatmentsDialog/suggestedTreatmentsDialog.component';
-export * from './redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
-export * from './textOnlyDialog/textOnlyDialog.component';
-export { default as RevisionsDialog } from './revisionsDialog/revisionsDialog.container';
+import styled from 'styled-components';
+
+export const Container = styled.div``;

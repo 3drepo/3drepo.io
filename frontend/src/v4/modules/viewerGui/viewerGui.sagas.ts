@@ -386,7 +386,7 @@ function* loadModel() {
 		const content = 'The model was either not found, failed to load correctly ' +
 			'or you are not authorized to view it. ' +
 			' You will now be redirected to the teamspace page.';
-		yield put(DialogActions.showDialog({ title: 'Model Error', content }));
+		yield put(DialogActions.showTextOnlyDialog({ title: 'Model Error', content }));
 
 		if (v5) {
 			if (matchPath(location.pathname, { path: ROUTES.V5_MODEL_VIEWER })) {

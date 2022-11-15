@@ -14,12 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { DialogContent } from '@mui/material';
+import { Container } from './textOnlyDialog.styles';
 
-export * from './confirmDialog/confirmDialog.component';
-export * from './errorDialog/errorDialog.component';
-export * from './loadingDialog/loadingDialog.component';
-export * from './newUpdateDialog/newUpdateDialog.component';
-export * from './suggestedTreatmentsDialog/suggestedTreatmentsDialog.component';
-export * from './redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
-export * from './textOnlyDialog/textOnlyDialog.component';
-export { default as RevisionsDialog } from './revisionsDialog/revisionsDialog.container';
+interface IProps {
+	content?: string;
+}
+
+export const TextOnlyDialog = ({ content }: IProps) => {
+	return (
+		<Container>
+			<DialogContent>{content}</DialogContent>
+		</Container>
+	);
+};
