@@ -17,7 +17,7 @@
 
 const { deleteIfUndefined, isEqual } = require('../utils/helper/objects');
 const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
-const { isDate, isObject } = require('../utils/helper/typeCheck');
+const { isDate, isObject, isUUID } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -58,7 +58,7 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 			const oldValue = getNestedProperty(oldTicket, updateObjProp);
 			let newValue = obj[key];
 			if (newValue) {
-				if (isObject(newValue) && !isDate(newValue)) {
+				if (isObject(newValue) && !isDate(newValue) && !isUUID(newValue)) {
 					// if this is an object it is a composite type, in which case
 					// we should merge the old value with the new value
 					newValue = deleteIfUndefined({ ...(oldValue ?? {}), ...newValue }, true);
@@ -90,8 +90,8 @@ Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, 
 
 	const actions = {};
 	if (!isEqual(toUpdate, {})) actions.$set = toUpdate;
-
 	if (!isEqual(toUnset, {})) actions.$unset = toUnset;
+
 	if (!isEqual(actions, {})) {
 		await DbHandler.updateOne(teamspace, TICKETS_COL, { _id: oldTicket._id }, actions);
 

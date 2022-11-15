@@ -257,14 +257,14 @@ const testHasAssociatedAccount = () => {
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.nonSsoUser}`);
 		});
 
-		test('should set req loginData and call next if MS user is linked to 3D repo ', async () => {
+		test('should set req session and call next if MS user is linked to 3D repo ', async () => {
 			const user = generateRandomString();
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } },
 				user });
 			await Aad.hasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(req.body.user).toEqual(user);
+			expect(req.loginData).toEqual({ username: user });
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).not.toHaveBeenCalled();
 		});

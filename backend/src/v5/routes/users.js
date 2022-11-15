@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createSession, createSessionResponse, destroySession } = require('../middleware/sessions');
-const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
+const { canLogin, isLoggedIn, validSession } = require('../middleware/auth');
+const { createSession, destroySession } = require('../middleware/sessions');
 const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
 	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
@@ -183,7 +183,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Authenticates the user and establish a session
 	 */
-	router.post('/login', validateLoginData, notLoggedIn, login, createSession, createSessionResponse);
+	router.post('/login', validateLoginData, canLogin, login, createSession);
 
 	/**
 	 * @openapi

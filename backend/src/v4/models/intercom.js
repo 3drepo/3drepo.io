@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,6 @@ const { get } = require("lodash");
 const axios = require("axios");
 const accessToken = get(intercom, "accessToken");
 const secretKey = get(intercom, "secretKey");
-const config = require("../config");
 const { v5Path } = require("../../interop");
 const { systemLogger } = require("../logger");
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
@@ -90,13 +89,13 @@ Intercom.submitLoginLockoutEvent = async (email) => {
 };
 
 Intercom.subscribeToV5Events = () => {
-	EventsManager.subscribe(EventsV5.FAILED_LOGIN_ATTEMPT, async ({email, failedLoginCount}) => {
-		if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
-			try {
-				await Intercom.submitLoginLockoutEvent(email);
-			} catch (err) {
-				// Do nothing
-			}
+	EventsManager.subscribe(EventsV5.ACCOUNT_LOCKED, async ({user}) => {
+		try {
+			const {findByUserName} = require("./user");
+			const { customData: { email } } = await findByUserName(user);
+			await Intercom.submitLoginLockoutEvent(email);
+		} catch (err) {
+			systemLogger.logError(`Failed to submit lockout event to intercome: ${err?.message}`);
 		}
 	});
 

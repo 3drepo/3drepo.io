@@ -83,21 +83,21 @@ UsersModel.getUserByUsername.mockImplementation((username) => {
 });
 
 const verifyMock = UsersModel.verify.mockImplementation(() => user.customData);
-UsersModel.canLogIn.mockImplementation(() => user);
-UsersModel.authenticate.mockResolvedValue(user.user);
 Strings.generateHashString.mockImplementation(() => exampleHashString);
 Strings.formatPronouns.mockImplementation((str) => str);
 
 const testLogin = () => {
 	describe('Login', () => {
 		test('should login with username', async () => {
+			UsersModel.authenticate.mockResolvedValueOnce(user.user);
 			const res = await Users.login(user.user);
 			expect(res).toEqual(user.user);
 		});
 
-		test('should fail if canLogIn fails', async () => {
-			UsersModel.canLogIn.mockImplementationOnce(() => { throw templates.userNotFound; });
-			await expect(Users.login(user.user)).rejects.toEqual(templates.userNotFound);
+		test('should return whatever failure authentication returns', async () => {
+			const err = new Error(generateRandomString());
+			UsersModel.authenticate.mockRejectedValueOnce(err);
+			await expect(Users.login(user.user)).rejects.toEqual(err);
 		});
 	});
 };

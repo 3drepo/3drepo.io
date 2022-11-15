@@ -128,7 +128,7 @@ Aad.hasAssociatedAccount = async (req, res, next) => {
 		if (sso?.id !== id) {
 			throw errorCodes.nonSsoUser;
 		} else {
-			req.body.user = user;
+			req.loginData = { username: user };
 			await next();
 		}
 	} catch (err) {

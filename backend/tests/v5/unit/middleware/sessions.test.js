@@ -35,10 +35,10 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
-jest.mock('express-session', () => () => {});
+jest.mock('express-session', () => () => { });
 jest.mock('../../../../src/v5/handler/db', () => ({
 	...jest.requireActual('../../../../src/v5/handler/db'),
-	getSessionStore: () => {},
+	getSessionStore: () => { },
 }));
 
 jest.mock('../../../../src/v5/services/sessions');
@@ -60,10 +60,9 @@ UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent ===
 StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
 
 const testCreateSession = () => {
-	const mockCB = jest.fn();
-
 	const checkResults = (request) => {
-		expect(mockCB).toHaveBeenCalledTimes(1);
+		expect(Responder.respond).toHaveBeenCalledTimes(1);
+		expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
 			{
@@ -88,56 +87,56 @@ const testCreateSession = () => {
 	describe('Regenerate auth session', () => {
 		test('Should regenerate session', async () => {
 			config.cookie.maxAge = 100;
-			await Sessions.createSession(req, {}, mockCB);
-			checkResults(req, mockCB);
+			await Sessions.createSession(req, {});
+			checkResults(req);
 		});
 
 		test('Should regenerate session with request with referer', async () => {
 			const reqWithReferer = { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } };
-			await Sessions.createSession(reqWithReferer, {}, mockCB);
-			checkResults(reqWithReferer, mockCB);
+			await Sessions.createSession(reqWithReferer, {});
+			checkResults(reqWithReferer);
 		});
 
 		test('Should regenerate session with request with socket id', async () => {
 			const reqWithSocket = { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } };
-			await Sessions.createSession(reqWithSocket, {}, mockCB);
-			checkResults(reqWithSocket, mockCB);
+			await Sessions.createSession(reqWithSocket, {});
+			checkResults(reqWithSocket);
 		});
 
 		test('Should regenerate session with request with user agent', async () => {
 			const reqWithUserAgent = { ...req, headers: { ...req.headers, 'user-agent': 'some user agent' } };
-			await Sessions.createSession(reqWithUserAgent, {}, mockCB);
-			checkResults(reqWithUserAgent, mockCB);
+			await Sessions.createSession(reqWithUserAgent, {});
+			checkResults(reqWithUserAgent);
 		});
 
 		test('Should regenerate session with request with web user agent', async () => {
 			const reqWithWebUserAgent = { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } };
-			await Sessions.createSession(reqWithWebUserAgent, {}, mockCB);
-			checkResults(reqWithWebUserAgent, mockCB);
+			await Sessions.createSession(reqWithWebUserAgent, {});
+			checkResults(reqWithWebUserAgent);
 		});
 
 		test('Should regenerate session without cookie.maxAge', async () => {
 			config.cookie.maxAge = undefined;
-			await Sessions.createSession(req, {}, mockCB);
-			checkResults(req, mockCB);
+			await Sessions.createSession(req, {});
+			checkResults(req);
 		});
 
 		test('Should regenerate session and respond with user data if v4 is flagged', async () => {
-			await Sessions.createSession({ ...req, v4: true }, {}, mockCB);
-			checkResults(req, mockCB);
+			await Sessions.createSession({ ...req, v4: true }, {});
+			checkResults(req);
 		});
 
 		test('Should regenerate session wit request with empty ips array', async () => {
 			const emptyIpsRequest = { ...req, ips: [] };
-			await Sessions.createSession(emptyIpsRequest, {}, mockCB);
-			checkResults(emptyIpsRequest, mockCB);
+			await Sessions.createSession(emptyIpsRequest, {});
+			checkResults(emptyIpsRequest);
 		});
 
 		test('Should respond with error if the session cannot be regenerated', async () => {
-			await Sessions.createSession({ ...req, session: { regenerate: (callback) => { callback(1); } } }, {});
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toBe(templates.unknown.code);
-			expect(mockCB).not.toHaveBeenCalled();
+			const errorRequest = { ...req, session: { regenerate: (callback) => { callback(1); } } };
+			await Sessions.createSession(errorRequest, {});
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(errorRequest, {}, 1);
 		});
 	});
 };
@@ -191,25 +190,80 @@ const testManageSession = () => {
 		});
 		test('Should call next() after trying to establish a session', async () => {
 			const fn = jest.fn();
-			await Sessions.manageSessions({ }, {}, fn);
+			await Sessions.manageSessions({}, {}, fn);
 			expect(sessionMiddleware).toBeCalled();
 			expect(fn).toBeCalled();
 		});
 	});
 };
 
-const testCreateSessionResponse = () => {
-	describe('Create session response', () => {
-		test('Should call respond with the updated user in the body if req is coming from v4', async () => {
-			const req = { v4: true, session: { user: generateRandomString() } };
-			await Sessions.createSessionResponse(req, {}, {});
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, req.session.user);
+const testUpdateSession = () => {
+	const mockCB = jest.fn();
+
+	const checkResults = (request) => {
+		expect(mockCB).toHaveBeenCalledTimes(1);
+		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
+			{
+				username: request.body.user,
+				sessionID: request.sessionID,
+				ipAddress: request.ips[0] || request.ip,
+				userAgent: request.headers['user-agent'],
+				referer: request?.session?.user?.referer,
+				socketId: request.headers[SOCKET_HEADER],
+			});
+	};
+
+	const req = {
+		session: { cookie: { domain: generateRandomString() } },
+		body: { user: 'user1' },
+		sessionID: '123',
+		ips: ['0.1.2.3'],
+		ip: '0.1.2.3',
+		headers: {},
+	};
+
+	describe('Update auth session', () => {
+		test('Should update session', async () => {
+			config.cookie.maxAge = 100;
+			await Sessions.updateSession(req, {}, mockCB);
+			checkResults(req, mockCB);
 		});
 
-		test('Should call respond with the updated user in the body if req is coming from v5', async () => {
-			const req = { v4: false };
-			await Sessions.createSessionResponse(req, {}, {});
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, undefined);
+		test('Should update session with request with referer', async () => {
+			const reqWithReferer = { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } };
+			await Sessions.updateSession(reqWithReferer, {}, mockCB);
+			checkResults(reqWithReferer, mockCB);
+		});
+
+		test('Should update session with request with socket id', async () => {
+			const reqWithSocket = { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } };
+			await Sessions.updateSession(reqWithSocket, {}, mockCB);
+			checkResults(reqWithSocket, mockCB);
+		});
+
+		test('Should update session with request with user agent', async () => {
+			const reqWithUserAgent = { ...req, headers: { ...req.headers, 'user-agent': 'some user agent' } };
+			await Sessions.updateSession(reqWithUserAgent, {}, mockCB);
+			checkResults(reqWithUserAgent, mockCB);
+		});
+
+		test('Should update session with request with web user agent', async () => {
+			const reqWithWebUserAgent = { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } };
+			await Sessions.updateSession(reqWithWebUserAgent, {}, mockCB);
+			checkResults(reqWithWebUserAgent, mockCB);
+		});
+
+		test('Should update session without cookie.maxAge', async () => {
+			config.cookie.maxAge = undefined;
+			await Sessions.updateSession(req, {}, mockCB);
+			checkResults(req, mockCB);
+		});
+
+		test('Should update session wit request with empty ips array', async () => {
+			const emptyIpsRequest = { ...req, ips: [] };
+			await Sessions.updateSession(emptyIpsRequest, {}, mockCB);
+			checkResults(emptyIpsRequest, mockCB);
 		});
 	});
 };
@@ -218,5 +272,5 @@ describe('middleware/sessions', () => {
 	testCreateSession();
 	testDestroySession();
 	testManageSession();
-	testCreateSessionResponse();
+	testUpdateSession();
 });

@@ -163,8 +163,8 @@ describe("Login", function () {
 
 			// double login
 				agent.post("/login").send({ username: username , password: password })
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.ALREADY_LOGGED_IN.value);
+					.expect(401, function(err, res) {
+						expect(res.body.code).to.equal(responseCodesV5.alreadyLoggedIn.code);
 						done(err);
 					});
 
@@ -291,29 +291,6 @@ describe("Login", function () {
 					.post("/login")
 					.send({ username, password: "wrongPassword" })
 					.expect(400);
-			}
-
-			const {body} = await request(server)
-				.post("/login")
-				.send({ username, password: newPassword })
-				.expect(200);
-		});
-
-		it("remaining attempts warning should warn user of imminent account locking", async function() {
-			const attempts = 8;
-
-			for (let i = 0; i < attempts; i++) {
-				const remaining = 9 - i;
-				const {body} = await request(server)
-					.post("/login")
-					.send({ username, password: "wrongPassword" })
-					.expect(400);
-
-				expect(body.code).to.equal(responseCodesV5.incorrectUsernameOrPassword.code);
-
-				if (remaining <= 5) {
-					expect(body.message).to.equal("Incorrect username or password (Remaining attempts: " + remaining + ")");
-				}
 			}
 
 			const {body} = await request(server)
