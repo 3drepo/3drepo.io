@@ -21,6 +21,7 @@ const indexLinksInRef = require('./indexLinksInRef');
 const removeUnityAssetsJSON = require('./removeUnityAssetsJSON');
 const removeGridFSBackUps = require('./removeGridFSBackUps');
 const moveGridFSToFS = require('./moveGridFSToFS');
+const moveTeamspacePermissions = require('./moveTeamspacePermissions');
 
 const scripts = [
 	{ script: moveLoginRecords, desc: 'Move login records into a single collection' },
@@ -30,6 +31,7 @@ const scripts = [
 	{ script: indexLinksInRef, desc: 'Add index for quicker query for the next script' },
 	{ script: moveGridFSToFS, desc: 'Move gridFS documents to fileshare' },
 	{ script: removeGridFSBackUps, desc: 'Remove redundant GridFS files (due to last script)' },
+	{ script: moveTeamspacePermissions, desc: 'Move teamspace permissions to teamspace settings' },
 ];
 
 const argsDef = (yargs) => yargs.option('maxParallelSizeMB',
