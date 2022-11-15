@@ -17,9 +17,12 @@
 import { createElement } from 'react';
 import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@mui/material';
 import { TooltipProps } from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { omit } from 'lodash';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
+
+export const Headline = styled(Typography)``;
 
 export const NegativeActionButton = styled(Button)`
 	&&:not(.Mui-disabled) {

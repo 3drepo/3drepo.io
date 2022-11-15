@@ -24,9 +24,10 @@ import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
-import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
-		ShortInput, VisualSettingsButtonsContainer,
-		VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
+import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
+	NegativeActionButton, NeutralActionButton,
+	ShortInput, VisualSettingsButtonsContainer,
+	VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
@@ -186,8 +187,9 @@ const AdvancedSettings = (props) => {
 const StreamingSettings = (props) => {
 	return (
 		<List>
+			<Headline color="primary" variant="subtitle1">Memory</Headline>
 			<FormListItem>
-				Memory Reserved
+				Reserved
 				<Field name="memoryThreshold" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.memoryThreshold || ''} placement="bottom-end">
@@ -200,7 +202,7 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Memory Limit
+				Limit
 				<Field name="memoryLimit" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
@@ -212,8 +214,9 @@ const StreamingSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
-				<FormListItem>
-				Placeholder bundle fade distance
+			<Headline color="primary" variant="subtitle1">Placeholder Bundles</Headline>
+			<FormListItem>
+				 Fade distance
 				<Field name="phBundleFadeDistance" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleFadeDistance || ''} placement="bottom-end">
@@ -226,7 +229,7 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Placeholder bundle fade bias
+				 Fade bias
 				<Field name="phBundleFadeBias" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleFadeBias || ''} placement="bottom-end">
@@ -239,7 +242,7 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Placeholder bundle fade power
+				 Fade power
 				<Field name="phBundleFadePower" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleFadePower || ''} placement="bottom-end">
@@ -252,7 +255,7 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Placeholder Bundle color
+				Color
 				<Field name="phBundleColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
 						// this is because colorpicker doenst use the standard events for inputs
@@ -261,7 +264,7 @@ const StreamingSettings = (props) => {
 				)} />
 			</FormListItem>
 			<FormListItem>
-				Placeholder bundle face alpha
+				 Face alpha
 				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
@@ -274,7 +277,7 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Placeholder bundle line alpha
+				 Line alpha
 				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
@@ -286,8 +289,9 @@ const StreamingSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
+		<Headline color="primary" variant="subtitle1">Placeholder Elements</Headline>
 		<FormListItem>
-				Placeholder element rendering radius
+				 Rendering radius
 				<Field name="phElementRenderingRadius" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phElementRenderingRadius || ''} placement="bottom-end">
@@ -301,7 +305,7 @@ const StreamingSettings = (props) => {
 			</FormListItem>
 
 			<FormListItem>
-				Placeholder Element color
+				Color
 				<Field name="phElementColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
 						// this is because colorpicker doenst use the standard events for inputs
@@ -310,7 +314,7 @@ const StreamingSettings = (props) => {
 				)} />
 				</FormListItem>
 					<FormListItem>
-				Placeholder element face alpha
+				 Face alpha
 				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
@@ -323,7 +327,7 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 		<FormListItem>
-				Placeholder element line alpha
+				 Line alpha
 				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
