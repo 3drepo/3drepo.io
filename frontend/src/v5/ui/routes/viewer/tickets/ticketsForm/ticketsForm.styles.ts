@@ -20,7 +20,8 @@ import styled from 'styled-components';
 export const PanelsContainer = styled.div`
 	.MuiAccordion-root {
 		&:first-of-type {
-			border-radius: 6px 6px 0 0;
+			border-top-left-radius: 6px;
+			border-top-right-radius: 6px;
 		}
 
 		&:not(:first-of-type) {
@@ -28,7 +29,8 @@ export const PanelsContainer = styled.div`
 		}
 
 		&:last-of-type {
-			border-radius: 0 0 6px 6px;
+			border-bottom-left-radius: 6px;
+			border-bottom-right-radius: 6px;
 		}
 
 		.MuiAccordionDetails-root > :not(:first-child) {
