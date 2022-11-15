@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Backdrop } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { useState } from 'react';
 import { DueDate } from './dueDate.component';
+import { StopBackgroundInteraction } from './dueDate.styles';
 
 type DueDateInputProps = {
 	value: number;
@@ -40,11 +40,7 @@ export const DueDateInput = ({ value: initialValue, disabled, onBlur }: DueDateI
 
 	return (
 		<div onClick={preventPropagation} aria-hidden="true">
-			<Backdrop /* Prevents clicking background elements */
-				sx={{ zIndex: 15 }}
-				open={open}
-				onClick={handleClose}
-			/>
+			<StopBackgroundInteraction open={open} onClick={handleClose} />
 			<DatePicker
 				value={value}
 				open={open}
