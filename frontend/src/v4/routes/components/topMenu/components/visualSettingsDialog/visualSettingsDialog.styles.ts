@@ -64,7 +64,7 @@ export const VisualSettingsButtonsContainer = styled.div`
 `;
 
 export const VisualSettingsDialogContent = styled(DialogContent)`
-	width: 335px;
+	width: 400px;
 	height: 280px;
 	margin-bottom: 68px;
 	&& {
@@ -98,7 +98,7 @@ export const ShortInput = styled(Input).attrs({
 })`
 	.shortInput {
 		text-align: right;
-		width: 40px;
+		width: 75px;
 	}
 `;
 
