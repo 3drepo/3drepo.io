@@ -29,7 +29,7 @@ const BaseCircle = css`
 	pointer-events: auto;
 	
 	.MuiAvatar-root {
-		border: 1px solid;
+		border: 2px solid ${({ theme }) => theme.palette.primary.contrast};
 		box-sizing: border-box;
 		height: 100%;
 		width: 100%;
@@ -40,18 +40,16 @@ const BaseCircle = css`
 export const UserCircle = styled(Avatar)`
 	${BaseCircle}
 	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		border-color: currentColor;
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.secondary.main};
 	}
 `;
 
 export const JobCircle = styled(JobAvatar)`
 	${BaseCircle}
 	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		color: ${({ theme }) => theme.palette.secondary.main};
-		border-color: currentColor;
+		background-color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;
 
@@ -59,7 +57,6 @@ export const ExtraAssignees = styled(ExtraAssigneesCircle)`
 	${BaseCircle}
 	.MuiAvatar-root {
 		background-color: ${({ theme }) => theme.palette.primary.main};
-		border-color: ${({ theme }) => theme.palette.primary.main};
 		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;
