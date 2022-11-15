@@ -335,6 +335,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static toUnity(methodName, requireStatus?, params?) {
+		console.log(methodName, params);
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -882,7 +883,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 */
 	public static setStreamingMemoryThreshold(thresholdInMb: number) {
-		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, thresholdInMb);
+		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, Number(thresholdInMb));
 	}
 
 	/**
@@ -893,7 +894,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 */
 	public static setStreamingMemoryLimit(maxMemoryInMb: number) {
-		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, maxMemoryInMb);
+		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, Number(maxMemoryInMb));
 	}
 
 	/**
@@ -928,7 +929,7 @@ export class UnityUtil {
 	 * @param power - how sharply the fade out occurs
 	 * @code UnityUtil.SetStreamingBundlesFade(0.7,1.6,5);
 	 */
-	public static SetStreamingBundlesFade(distance: number, bias: number, power: number) {
+	public static setStreamingBundlesFade(distance: number, bias: number, power: number) {
 		const params = {
 			bias,
 			distance,
@@ -942,8 +943,8 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingBundlesFacesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingBundlesFacesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -951,8 +952,8 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingBundlesLinesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingBundlesLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -960,8 +961,8 @@ export class UnityUtil {
 	 * will disable the Elements Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingElementsFacesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingElementsFacesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -969,8 +970,8 @@ export class UnityUtil {
 	 * will disable the Elements Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingElementsLinesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingElementsLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -979,8 +980,8 @@ export class UnityUtil {
 	 * @category Streaming
 	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
 	 */
-	public static SetStreamingElementRadius(radius: number) {
-		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, radius);
+	public static setStreamingElementsRadius(radius: number) {
+		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius));
 	}
 
 	/**

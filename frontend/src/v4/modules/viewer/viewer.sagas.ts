@@ -24,6 +24,7 @@ import { DialogActions } from '../dialog';
 import { ViewerActions, ViewerTypes } from './viewer.redux';
 import { selectSettings } from './viewer.selectors';
 
+const BUNDLE_FADE_PREFIX = "phBundleFade";
 const updateHandlers = {
 	farPlaneAlgorithm: Viewer.setFarPlaneAlgorithm,
 	farPlaneSamplingPoints: Viewer.setFarPlaneSamplingPoints,
@@ -37,7 +38,16 @@ const updateHandlers = {
 	numCacheThreads: Viewer.setNumCacheThreads,
 	clipPlaneBorderWidth: Viewer.setPlaneBorderWidth,
 	clipPlaneBorderColor: Viewer.setPlaneBorderColor,
-
+	memoryThreshold: Viewer.setStreamingMemoryThreshold,
+	memoryLimit: Viewer.setStreamingMemoryLimit,
+	phBundleColor: Viewer.setStreamingBundlesColor,
+	[BUNDLE_FADE_PREFIX]: Viewer.setStreamingBundlesFade,
+	phBundleFaceAlpha: Viewer.setStreamingBundlesFacesAlpha,
+	phBundleLineAlpha: Viewer.setStreamingBundlesLinesAlpha,
+	phElementColor: Viewer.setStreamingElementsColor,
+	phElementRenderingRadius: Viewer.setStreamingElementsRenderingRadius,
+	phElementFaceAlpha: Viewer.setStreamingElementsFacesAlpha,
+	phElementLineAlpha: Viewer.setStreamingElementsLinesAlpha,
 };
 
 const callUpdateHandlers = (oldSettings, settings) => {
@@ -47,12 +57,25 @@ const callUpdateHandlers = (oldSettings, settings) => {
 			settings[key] = 'standard';
 		}
 		if (oldSettings[key] !== settings[key]) {
+			if (key.startsWith(BUNDLE_FADE_PREFIX)) {
+				const update = updateHandlers[BUNDLE_FADE_PREFIX];
+			if (!update) {
+				return;
+			}
+
+				update(
+					settings[`${BUNDLE_FADE_PREFIX}Distance`],
+					settings[`${BUNDLE_FADE_PREFIX}Bias`],
+					settings[`${BUNDLE_FADE_PREFIX}Power`]
+				);
+			} else {
 			const update = updateHandlers[key];
 			if (!update) {
 				return;
 			}
 
-			update(settings[key]);
+				update(settings[key]);
+			}
 		}
 	});
 };

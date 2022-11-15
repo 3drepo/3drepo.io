@@ -326,11 +326,11 @@ const StreamingSettings = (props) => {
 				</FormListItem>
 					<FormListItem>
 				 Face alpha
-				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
+				<Field name="phElementFaceAlpha" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
+					<ErrorTooltip title={form.errors.phElementFaceAlpha || ''} placement="bottom-end">
 					<ShortInput
-						error={Boolean(form.errors.phBundleFaceAlpha)}
+						error={Boolean(form.errors.phElementFaceAlpha)}
 						{...field}
 						/>
 					</ErrorTooltip>
@@ -339,11 +339,11 @@ const StreamingSettings = (props) => {
 			</FormListItem>
 		<FormListItem>
 				 Line alpha
-				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
+				<Field name="phElementLineAlpha" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
+					<ErrorTooltip title={form.errors.phElementLineAlpha || ''} placement="bottom-end">
 					<ShortInput
-						error={Boolean(form.errors.phBundleLineAlpha)}
+						error={Boolean(form.errors.phElementLineAlpha)}
 						{...field}
 						/>
 					</ErrorTooltip>
