@@ -980,7 +980,7 @@ export class UnityUtil {
 	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
 	 */
 	public static setStreamingElementsRadius(radius: number) {
-		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius)));
+		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius));
 	}
 
 	/**
