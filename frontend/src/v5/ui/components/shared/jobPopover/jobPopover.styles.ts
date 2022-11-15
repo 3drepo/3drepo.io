@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AvatarWrapper, PopoverContainer, Heading, Data } from '../userPopover/userPopover.styles';
-import { JobAvatar } from './jobPopover.styles';
+import styled from 'styled-components';
+import { JobAvatar as JobAvatarBase } from '@controls/jobAvatar/jobAvatar.component';
 
-interface IJobPopover {
-	job: string;
-}
-
-export const JobPopover = ({ job }: IJobPopover) => (
-	<PopoverContainer>
-		<AvatarWrapper>
-			<JobAvatar job={job} />
-		</AvatarWrapper>
-		<Data>
-			<Heading>{job}</Heading>
-		</Data>
-	</PopoverContainer>
-);
+export const JobAvatar = styled(JobAvatarBase)`
+	.MuiAvatar-root {
+		background-color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;
