@@ -89,7 +89,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 				{ maxLength, name }));
 			break;
 		case 'coords':
-			validator = Yup.array(nullableNumber);
+			validator = Yup.array().nullable();
 			break;
 		case 'manyOf':
 			validator = Yup.array();
@@ -125,9 +125,7 @@ export const propertyValidator = ({ required, name, type }: PropertyDefinition) 
 					defaultMessage: 'Select at least one option',
 				}));
 		}
-		if (type === 'coords') {
-			validator = Yup.array(requiredNumber());
-		}
+
 		if (type === 'number') {
 			validator = requiredNumber(
 				formatMessage({

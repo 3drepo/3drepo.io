@@ -17,6 +17,8 @@
 import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import { isV5 } from '@/v4/helpers/isV5';
+import { dispatch } from '@/v4/modules/store';
+import { DialogActions } from '@/v4/modules/dialog';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -63,6 +65,26 @@ interface IProps {
 export class ViewerCanvas extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 
+	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
+		let errorType = '3D Repo Error';
+
+		if (isUnity) {
+			errorType = 'Unity Error';
+		}
+
+		dispatch(DialogActions.showDialog({
+			title: errorType,
+			content: message,
+			onCancel: () => {
+				if (reload) {
+					location.reload();
+				}
+			}
+		}));
+
+		console.error('Unity errored and user canceled reload', message);
+	}
+
 	constructor(props) {
 		super(props);
 		this.renderMeasurements = queuableFunction(this.renderMeasurements, this);
@@ -74,7 +96,7 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		const { viewer } = this.props;
-		viewer.setupInstance(this.containerRef.current);
+		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
 		if (isV5()) {
 			viewer.setBackgroundColor([0.949, 0.965, 0.988, 1])
 		}
