@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectJobs } from '@/v4/modules/jobs';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { Assignees } from '@controls/assignees/assignees.component';
 import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { HiddenSearchSelect } from './assigneeSelect.styles';
 
 type AssigneesSelectProps = {
@@ -31,11 +29,7 @@ type AssigneesSelectProps = {
 export const AssigneesSelect = ({ values: initialValues, onBlur, ...props }: AssigneesSelectProps) => {
 	const [values, setValues] = useState(initialValues);
 	const [open, setOpen] = useState(false);
-
-	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
-	const jobs = useSelector(selectJobs);
-	const allUsersAndJobs = users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` }));
-	Array.prototype.push.apply(allUsersAndJobs, jobs.map(({ _id }) => ({ value: _id, label: _id })));
+	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
 
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
