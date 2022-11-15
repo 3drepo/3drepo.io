@@ -54,7 +54,7 @@ export const TicketsListCard = () => {
 	return (
 		<CardContainer>
 			<CardHeader>
-				<TicketsIcon fontSize="small" />
+				<TicketsIcon />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 				<NewTicketMenu />
 			</CardHeader>

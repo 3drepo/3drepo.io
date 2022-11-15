@@ -73,7 +73,7 @@ export const NewTicketCard = () => {
 	return (
 		<CardContainer>
 			<CardHeader>
-				<TicketsIcon fontSize="small" />
+				<TicketsIcon />
 				<FormattedMessage
 					id="viewer.cards.newTicketTitle"
 					defaultMessage="New {template} ticket"
