@@ -23,11 +23,9 @@ export interface SelectWithLabelProps extends SelectProps {
 }
 
 export const SelectWithLabel = ({ required = false, helperText, label, ...props }: SelectWithLabelProps) => (
-	<FormControl required={required} disabled={props.disabled} error={props.error}>
+	<FormControl required={required} disabled={props.disabled} error={props.error} className={props.className}>
 		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
-		<Select
-			{...props}
-		/>
+		<Select {...props} />
 		<FormHelperText>{helperText}</FormHelperText>
 	</FormControl>
 );

@@ -16,17 +16,10 @@
  */
 
 import styled from 'styled-components';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 
-export const HiddenSearchSelect = styled.div`
+export const HiddenSearchSelect = styled(SearchSelect)`
 	height: 0;
 	width: 0;
-	.MuiFormControl-root {
-		&, & * {
-			min-height: 0;
-			height: 0;
-			opacity: 0;
-			padding: 0;
-			margin: 0;
-		}
-	}
+	overflow: hidden;
 `;

@@ -19,7 +19,6 @@ import { selectJobs } from '@/v4/modules/jobs';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { Assignees } from '@controls/assignees/assignees.component';
 import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { HiddenSearchSelect } from './assigneeSelect.styles';
@@ -54,20 +53,18 @@ export const AssigneesSelect = ({ values: initialValues, onBlur, ...props }: Ass
 	return (
 		<>
 			<Assignees assignees={values} max={7} onClick={onClick} {...props} />
-			<HiddenSearchSelect>
-				<SearchSelect
-					value={values}
-					multiple
-					open={open}
-					onClose={handleClose}
-					onChange={onChange}
-				>
-					{(allUsersAndJobs).map(({ value, label }) => (
-						<MultiSelectMenuItem key={value} value={value} onClick={preventPropagation}>
-							{label}
-						</MultiSelectMenuItem>
-					))}
-				</SearchSelect>
+			<HiddenSearchSelect
+				value={values}
+				multiple
+				open={open}
+				onClose={handleClose}
+				onChange={onChange}
+			>
+				{(allUsersAndJobs).map(({ value, label }) => (
+					<MultiSelectMenuItem key={value} value={value} onClick={preventPropagation}>
+						{label}
+					</MultiSelectMenuItem>
+				))}
 			</HiddenSearchSelect>
 		</>
 	);
