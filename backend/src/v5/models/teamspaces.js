@@ -118,9 +118,16 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 
 Teamspace.removeAddOns = (teamspace) => teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
 
-Teamspace.getTeamspaceAdmins = async (ts) => {
-	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
-	return data.customData.permissions.flatMap(
+Teamspace.getTeamspaceAdmins = async (teamspace) => {
+	const tsSettings = await db.findOne(
+		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { permissions: 1 },
+	);
+
+	if (!tsSettings) {
+		throw templates.teamspaceNotFound;
+	}
+
+	return tsSettings.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
 };
@@ -167,7 +174,7 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 };
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
-	await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $pull: { permissions: { user } } });
 };
 
 Teamspace.getRiskCategories = async (teamspace) => {

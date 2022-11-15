@@ -48,13 +48,11 @@ const testTeamspaceAdmins = () => {
 	describe('Get teamspace admins', () => {
 		test('should return list of admins if teamspace exists', async () => {
 			const expectedData = {
-				customData: {
-					permissions: [
-						{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
-						{ user: 'personB', permissions: ['someOtherPerm'] },
-						{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
-					],
-				},
+				permissions: [
+					{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
+					{ user: 'personB', permissions: ['someOtherPerm'] },
+					{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
+				],
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
 
@@ -432,7 +430,8 @@ const testRemoveUserFromAdminPrivileges = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
 			await expect(Teamspace.removeUserFromAdminPrivilege(teamspace, user)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $pull: { permissions: { user } } });
 		});
 	});
 };
