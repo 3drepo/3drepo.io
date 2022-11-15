@@ -335,7 +335,6 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static toUnity(methodName, requireStatus?, params?) {
-		console.log(methodName, params);
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -981,7 +980,7 @@ export class UnityUtil {
 	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
 	 */
 	public static setStreamingElementsRadius(radius: number) {
-		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius));
+		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius)));
 	}
 
 	/**
