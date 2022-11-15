@@ -41,8 +41,8 @@ jobs:
       - name: Check out node_modules cache if available
         uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: backend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('backend/yarn.lock') }}
 
       - name: Install Node.js dependencies
         run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
@@ -78,8 +78,8 @@ jobs:
       - name: Check out node_modules cache if available
         uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: backend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('backend/yarn.lock') }}
 
       - name: Install Node.js dependencies
         run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
@@ -105,8 +105,8 @@ jobs:
       - name: Check out node_modules cache if available
         uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: frontend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('frontend/yarn.lock') }}
 
       - name: Install Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
@@ -133,8 +133,8 @@ jobs:
       - name: Check out node_modules cache if available
         uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: frontend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('frontend/yarn.lock') }}
 
       - name: Install Node.js dependencies
         run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
