@@ -30,8 +30,8 @@ import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticke
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
 import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
 
-const TriggerButton = ({ imgSrc }) => {
-	if (!imgSrc) {
+const TriggerButton = ({ hasImage }) => {
+	if (!hasImage) {
 		return (
 			<TicketImageAction>
 				<AddImageIcon />
@@ -56,6 +56,7 @@ export const TicketImage = ({ value, onChange, formError, ...props }: TicketImag
 	const { props: { ticketId } } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const hasImage = !!value;
 
 	const handleImageChange = (newValue) => onChange(stripBase64Prefix(newValue));
 
@@ -83,7 +84,7 @@ export const TicketImage = ({ value, onChange, formError, ...props }: TicketImag
 			helperText={formError?.message}
 			{...props}
 		>
-			<ActionMenu TriggerButton={<div><TriggerButton imgSrc={getImgSrc()} /></div>}>
+			<ActionMenu TriggerButton={<div><TriggerButton hasImage={hasImage} /></div>}>
 				<ActionMenuItem>
 					<MenuItem onClick={uploadScreenshot}>
 						<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />
@@ -91,7 +92,7 @@ export const TicketImage = ({ value, onChange, formError, ...props }: TicketImag
 					<MenuItem onClick={uploadImage}>
 						<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />
 					</MenuItem>
-					{getImgSrc() && (
+					{hasImage && (
 						<MenuItemDelete onClick={() => handleImageChange('')}>
 							<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />
 						</MenuItemDelete>
