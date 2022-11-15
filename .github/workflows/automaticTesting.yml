@@ -38,7 +38,8 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
 
-      - uses: actions/cache@v3
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -70,12 +71,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          # node-version: 14
           node-version-file: backend/package.json
           cache: 'yarn'
           cache-dependency-path: backend/yarn.lock
 
-      - uses: actions/cache@v3
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -97,12 +98,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          # node-version: 14
           node-version-file: frontend/package.json
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
 
-      - uses: actions/cache@v3
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -125,12 +126,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          # node-version: 14
           node-version-file: frontend/package.json
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
 
-      - uses: actions/cache@v3
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
