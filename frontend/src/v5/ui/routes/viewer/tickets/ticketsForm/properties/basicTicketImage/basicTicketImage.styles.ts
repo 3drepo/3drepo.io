@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormLabel } from '@mui/material';
+import { InputLabel } from '@mui/material';
 import styled, { css } from 'styled-components';
 
 export const Container = styled.div<{ error?: string }>`
@@ -33,10 +33,11 @@ export const Container = styled.div<{ error?: string }>`
 	`}
 `;
 
-export const Label = styled(FormLabel)`
+export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5}
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 2px;
+	max-width: unset;
 `;
 
 export const ActionsSide = styled.div`

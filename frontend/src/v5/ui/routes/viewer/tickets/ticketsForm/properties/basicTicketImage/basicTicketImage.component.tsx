@@ -45,15 +45,11 @@ export const BasicTicketImage = ({
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
 	return (
-		<FormControl error={error}>
+		<FormControl error={error} required={required}>
 			<Container className={className} error={error}>
 				<ActionsSide>
-					<Label required={required}>
-						{title}
-					</Label>
-					<ActionsList>
-						{children}
-					</ActionsList>
+					<Label>{title}</Label>
+					<ActionsList>{children}</ActionsList>
 				</ActionsSide>
 				<TicketImageDisplayer
 					imgSrc={imgSrc}
