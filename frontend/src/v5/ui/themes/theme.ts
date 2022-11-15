@@ -930,7 +930,7 @@ export const theme = createTheme({
 		},
 		MuiSelect: {
 			defaultProps: {
-				IconComponent: ChevronIcon,
+				IconComponent: ThinChevronIcon,
 				variant: 'outlined',
 			},
 			styleOverrides: {
@@ -948,7 +948,10 @@ export const theme = createTheme({
 					'& ~ svg': {
 						position: 'absolute',
 						right: 14,
+						width: 10,
+						top: '40%',
 						pointerEvents: 'none',
+						color: COLOR.SECONDARY_MAIN,
 					},
 				},
 			},
