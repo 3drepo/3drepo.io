@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails, isSsoUser } = require('../../../middleware/sso/aad');
-const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails, isSsoUser, verifyLinkEmail } = require('../../../middleware/sso/aad');
+const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri, linkRedirectEndpoint, linkRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { createSession } = require('../../../middleware/sessions');
@@ -25,10 +25,23 @@ const { respond } = require('../../../utils/responder');
 const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
 const { isLoggedIn } = require('../../../middleware/auth');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { templates } = require('../../../utils/responseCodes');
 
 const signUpPost = async (req, res, next) => {
 	try {
 		await Users.signUp(req.body);
+		await next();
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const linkPost = async (req, res, next) => {
+	try {
+		const username = getUserFromSession(req.session);
+		const { email, sso } = req.body;
+		await Users.linkToSso(username, email, sso);
 		await next();
 	} catch (err) {
 		/* istanbul ignore next */
@@ -125,6 +138,10 @@ const establishRoutes = () => {
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
 	router.get(signupRedirectEndpoint, checkStateIsValid, verifyNewUserDetails, signUpPost, redirectToStateURL);
+
+	router.get('/link', isLoggedIn, authenticate(linkRedirectUri));
+
+	router.get(linkRedirectEndpoint, checkStateIsValid, verifyLinkEmail, linkPost, redirectToStateURL);
 
 	router.post('/unlink', isLoggedIn, isSsoUser, validateUnlinkData, unlink);
 

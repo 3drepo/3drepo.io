@@ -19,7 +19,7 @@ const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey,
-	getUserByUsername, removeUser, updatePassword, updateProfile, updateResetPasswordToken, verify, unlinkFromSso } = require('../models/users');
+	getUserByUsername, removeUser, updatePassword, updateProfile, updateResetPasswordToken, verify, unlinkFromSso, linkToSso } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
@@ -159,5 +159,7 @@ Users.generateResetPasswordToken = async (username) => {
 Users.updatePassword = updatePassword;
 
 Users.unlinkFromSso = unlinkFromSso;
+
+Users.linkToSso = linkToSso;
 
 module.exports = Users;

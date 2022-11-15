@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticateRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
+const { authenticateRedirectUri, signupRedirectUri, linkRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
-const { getUserByEmail, getUserByUsername } = require('../../models/users');
+const { getUserByEmail, getUserByUsername, getUserByQuery } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
@@ -84,6 +84,26 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 	}
 };
 
+Aad.verifyLinkEmail = async (req, res, next) => {		
+	try {
+		const username = getUserFromSession(req.session);
+		const { data: { mail, id } } = await getUserDetails(req.query.code,
+			linkRedirectUri, req.session.pkceCodes?.verifier);
+
+		const user = await getUserByQuery({ 'customData.email': mail, user: { $ne: username } }, 
+			{ 'customData.sso': 1 }).catch(() => undefined);
+		if (user) {
+			throw user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
+		} else {
+			req.body = { email: mail, sso: { type: providers.AAD, id } };
+			await next();
+		}
+	} catch (errorCode) {
+		const state = JSON.parse(req.query.state);
+		redirectWithError(res, state.redirectUri, errorCode);
+	}
+};
+
 Aad.redirectToStateURL = (req, res) => {
 	const state = JSON.parse(req.query.state);
 	try {
@@ -130,13 +150,28 @@ Aad.checkStateIsValid = async (req, res, next) => {
 	}
 };
 
+const isSsoUser = async (req) => {
+	const username = getUserFromSession(req.session);
+	const { customData: { sso } } = await getUserByUsername(username);
+	return !!sso;
+}
+
 Aad.isSsoUser = async (req, res, next) => {
 	try {
-		const username = getUserFromSession(req.session);
-		const { customData: { sso } } = await getUserByUsername(username);
-
-		if (!sso) {
+		if (!await isSsoUser(req)) {
 			throw templates.nonSsoUser;
+		}
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Aad.isNonSsoUser = async (req, res, next) => {
+	try {
+		if (await isSsoUser(req)) {
+			throw templates.ssoUser;
 		}
 
 		await next();
