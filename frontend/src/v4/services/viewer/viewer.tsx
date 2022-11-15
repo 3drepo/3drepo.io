@@ -332,7 +332,7 @@ export class ViewerService {
 		UnityUtil.reset();
 		this.isInitialised = false;
 		this.removeAllListeners();
-		await this.clearMeasureMode();
+		this.clearMeasureMode();
 	}
 
 	/**
@@ -476,7 +476,7 @@ export class ViewerService {
 		this.measurementModeChanged(mode);
 	}
 
-	public async clearMeasureMode() {
+	public clearMeasureMode() {
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.disableSnapping();
 		this.measureMode = '';

@@ -42,7 +42,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 		setEditMode(false);
 
 		if (val !== undefined) {
-			await ViewerService.clearMeasureMode();
+			ViewerService.clearMeasureMode();
 			onChange?.(val);
 		}
 	};
