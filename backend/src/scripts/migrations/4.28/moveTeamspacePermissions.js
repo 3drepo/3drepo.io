@@ -29,12 +29,12 @@ const run = async () => {
 	);
 	for (let i = 0; i < users.length; ++i) {
 		const db = users[i].user;
-		const permissions = users[i].customData.permissions;
+		const { permissions } = users[i].customData;
 
 		if (permissions) {
 			logger.logInfo(`\t\t-${db}`);
 			// eslint-disable-next-line no-await-in-loop
-			await updateOne(db, 'teamspace', {}, { $set: { 'permissions': users[i].customData.permissions } });
+			await updateOne(db, 'teamspace', {}, { $set: { permissions: users[i].customData.permissions } });
 		}
 	}
 
