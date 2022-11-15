@@ -35,7 +35,18 @@ const SettingsSchema = Yup.object().shape({
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
-	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY)
+	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
+	memoryThreshold: schema.number(0, 2032),
+	memoryLimit: schema.number(0, 2032),
+	phBundleFadeDistance: schema.number(0, Number.POSITIVE_INFINITY),
+	phBundleFadeBias: schema.number(0, Number.POSITIVE_INFINITY),
+	phBundleFadePower: schema.number(0, Number.POSITIVE_INFINITY),
+	phBundleFaceAlpha: schema.number(0, 1),
+	phBundleLineAlpha: schema.number(0, 1),
+	phElementRenderingRadius: schema.number(0, 1),
+	phElementFaceAlpha: schema.number(0, 1),
+	phElementLineAlpha: schema.number(0, 1),
+
 });
 
 const BasicSettings = (props) => {
