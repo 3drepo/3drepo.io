@@ -23,7 +23,7 @@ import SequencesIcon from '@mui/icons-material/Movie';
 import ViewsIcon from '@mui/icons-material/PhotoCamera';
 import IssuesIcon from '@mui/icons-material/Place';
 import MeasureIcon from '@mui/icons-material/Straighten';
-import TicketsIcon from '@assets/icons/outlined/tickets_outlined.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 

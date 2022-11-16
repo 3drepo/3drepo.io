@@ -20,7 +20,7 @@ import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
-import TicketsIcon from '@assets/icons/outlined/tickets_outlined.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 import { CardContext } from '@components/viewer/cards/cardContext.component';

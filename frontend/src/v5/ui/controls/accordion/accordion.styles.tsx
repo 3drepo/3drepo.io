@@ -25,8 +25,8 @@ export const IconContainer = styled.div`
 
 	svg {
 		color: currentColor;
+		width: 16px;
 		height: 16px;
-		width: auto;
 	}
 `;
 

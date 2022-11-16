@@ -22,7 +22,7 @@ import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles'
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import TicketsIcon from '@assets/icons/outlined/tickets_outlined.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { TicketsList } from './ticketsList.component';
