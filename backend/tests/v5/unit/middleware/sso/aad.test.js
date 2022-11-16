@@ -45,7 +45,7 @@ const addPkceCodes = (req) => {
 };
 
 const testVerifyNewUserDetails = () => {
-	describe('Get user details and check email availability', () => {
+	describe('Get user MS details, check email availability and assign details to body', () => {
 		const aadUserDetails = {
 			data: {
 				mail: 'example@email.com',
@@ -108,6 +108,65 @@ const testVerifyNewUserDetails = () => {
 					email: aadUserDetails.data.mail,
 					firstName: aadUserDetails.data.givenName,
 					lastName: aadUserDetails.data.surname,
+					sso: { type: providers.AAD, id: aadUserDetails.data.id },
+				},
+			);
+		});
+	});
+};
+
+const testVerifyNewEmail = () => {
+	describe('Get user MS email, check email availability and assign email and SSO id to body', () => {
+		const aadUserDetails = { data: { mail: 'example@email.com', id: generateRandomString() } };
+		const redirectUri = generateRandomURL();
+		const res = { redirect: jest.fn() };
+		const req = {
+			query: {
+				code: generateRandomString(),
+				state: JSON.stringify({ username: generateRandomString(), redirectUri }),
+			},
+			session: { pkceCodes: { verifier: generateRandomString() } },
+		};
+
+		test(`should respond with error code ${errorCodes.failedToFetchDetails} if the user details cannot be fetched`, async () => {
+			AadServices.getUserDetails.mockRejectedValueOnce(errorCodes.failedToFetchDetails);
+			const mockCB = jest.fn();
+			await Aad.verifyNewEmail(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.failedToFetchDetails}`);
+		});
+
+		test(`should respond with error code ${errorCodes.emailExists} if the email already exists by another user`, async () => {
+			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
+			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: {} });
+			const mockCB = jest.fn();
+			await Aad.verifyNewEmail(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExists}`);
+		});
+
+		test(`should respond with error code ${errorCodes.emailExistsWithSSO} if the email already exists by another user (SSO user)`, async () => {
+			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
+			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
+			const mockCB = jest.fn();
+			await Aad.verifyNewEmail(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExistsWithSSO}`);
+		});
+
+		test('should call next if email is available', async () => {
+			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
+			UsersModel.getUserByQuery.mockRejectedValueOnce(templates.userNotFound);
+			const mockCB = jest.fn();
+			await Aad.verifyNewEmail(req, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(res.redirect).not.toHaveBeenCalled();
+			expect(req.body).toEqual(
+				{
+					email: aadUserDetails.data.mail,
 					sso: { type: providers.AAD, id: aadUserDetails.data.id },
 				},
 			);
@@ -292,10 +351,73 @@ const testCheckStateIsValid = () => {
 	});
 };
 
+const testIsSsoUser = () => {
+	describe('Check if a user is an SSO user', () => {
+		test(`should respond with ${templates.userNotFound.code} if user is not found`, async () => {
+			UsersModel.getUserByUsername.mockRejectedValueOnce(templates.userNotFound);
+			const mockCB = jest.fn();
+			await Aad.isSsoUser({}, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.userNotFound);
+		});
+
+		test(`should respond with ${templates.nonSsoUser.code} if user is not an SSO user`, async () => {
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: {} });
+			const mockCB = jest.fn();
+			await Aad.isSsoUser({}, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.nonSsoUser);
+		});
+
+		test('should call next if user is an SSO user', async () => {
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { sso: {} } });
+			const mockCB = jest.fn();
+			await Aad.isSsoUser({}, {}, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testIsNonSsoUser = () => {
+	describe('Check if a user is a non SSO user', () => {
+		test(`should respond with ${templates.userNotFound.code} if user is not found`, async () => {
+			UsersModel.getUserByUsername.mockRejectedValueOnce(templates.userNotFound);
+			const mockCB = jest.fn();
+			await Aad.isNonSsoUser({}, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.userNotFound);
+		});
+
+		test(`should respond with ${templates.ssoUser.code} if user is not SSO user`, async () => {
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { sso: {} } });
+			const mockCB = jest.fn();
+			await Aad.isNonSsoUser({}, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.ssoUser);
+		});
+
+		test('should call next if user is a non SSO user', async () => {
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { } });
+			const mockCB = jest.fn();
+			await Aad.isNonSsoUser({}, {}, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
+	testVerifyNewEmail();
 	testAuthenticate();
 	testRedirectToStateURL();
 	testHasAssociatedAccount();
 	testCheckStateIsValid();
+	testIsSsoUser();
+	testIsNonSsoUser();
 });

@@ -129,7 +129,7 @@ const tesGetProfileByUsername = () => {
 		};
 
 		test('should return user profile', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce(user);			
+			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
 			FilesManager.fileExists.mockResolvedValueOnce(false);
 
 			const res = await Users.getProfileByUsername(user.user);
@@ -139,7 +139,7 @@ const tesGetProfileByUsername = () => {
 		});
 
 		test('should return user profile with intercom reference if configured', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce(user);			
+			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
 			FilesManager.fileExists.mockResolvedValueOnce(false);
 
 			const hash = generateRandomString();
@@ -161,7 +161,9 @@ const tesGetProfileByUsername = () => {
 		});
 
 		test('should return user profile with SSO user', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ ...user, customData: { ...user.customData, sso : { id: generateRandomString() } }});
+			UsersModel.getUserByUsername.mockResolvedValueOnce({
+				...user, customData: { ...user.customData, sso: { id: generateRandomString() } },
+			});
 			FilesManager.fileExists.mockResolvedValueOnce(true);
 
 			const res = await Users.getProfileByUsername(user.user);

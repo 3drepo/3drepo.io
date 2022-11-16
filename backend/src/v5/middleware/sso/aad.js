@@ -14,17 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticateRedirectUri, signupRedirectUri, linkRedirectUri } = require('../../services/sso/aad/aad.constants');
+const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
+const { getUserByEmail, getUserByQuery, getUserByUsername } = require('../../models/users');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
-const { getUserByEmail, getUserByUsername, getUserByQuery } = require('../../models/users');
+const { getUserFromSession } = require('../../utils/sessions');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
-const { getUserFromSession } = require('../../utils/sessions');
 
 const Aad = {};
 
@@ -84,13 +84,13 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 	}
 };
 
-Aad.verifyLinkEmail = async (req, res, next) => {		
+Aad.verifyNewEmail = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
 		const { data: { mail, id } } = await getUserDetails(req.query.code,
 			linkRedirectUri, req.session.pkceCodes?.verifier);
 
-		const user = await getUserByQuery({ 'customData.email': mail, user: { $ne: username } }, 
+		const user = await getUserByQuery({ 'customData.email': mail, user: { $ne: username } },
 			{ 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
 			throw user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
@@ -154,7 +154,7 @@ const isSsoUser = async (req) => {
 	const username = getUserFromSession(req.session);
 	const { customData: { sso } } = await getUserByUsername(username);
 	return !!sso;
-}
+};
 
 Aad.isSsoUser = async (req, res, next) => {
 	try {

@@ -151,20 +151,22 @@ const testValidateUpdateData = () => {
 		[{ body: { oldPassword: 'invalid password', newPassword: 'Abcdef123456!' } }, false, false, 'with wrong oldPassword', templates.incorrectPassword],
 		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, false, true, 'with password (SSO user)', templates.invalidArguments],
 		[{ body: {} }, false, false, 'with empty body', templates.invalidArguments],
-		[{ body: undefined }, false, false, 'with undefined body', templates.invalidArguments],		
+		[{ body: undefined }, false, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for updating profile are valid', (data, ssoUser, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: ssoUser ? { sso: { id: generateRandomString() } } : {} });
+			UsersModel.getUserByUsername.mockResolvedValueOnce({
+				customData: ssoUser ? { sso: { id: generateRandomString() } } : {},
+			});
 
 			await Users.validateUpdateData(req, {}, mockCB);
-						
+
 			if (shouldPass) {
 				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
 				expect(mockCB).not.toHaveBeenCalled();
-				expect(Responder.respond).toHaveBeenCalledTimes(1)
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
 
@@ -436,6 +438,28 @@ const testVerifyData = () => {
 	});
 };
 
+const testUnlinkData = () => {
+	describe.each([
+		[{ body: { password: generateRandomString() } }, true, 'with valid password'],
+		[{ body: { password: generateRandomString(1) } }, false, 'with weak password'],
+		[{ body: { password: generateRandomString(), [generateRandomString()]: generateRandomString() } }, false, 'with extra properties'],
+		[{ body: {} }, false, 'with empty body'],
+		[{ body: undefined }, false, 'with undefined body'],
+	])('Check if req arguments for verifying user are valid', (req, shouldPass, desc) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${templates.invalidArguments.code}`}`, async () => {
+			const mockCB = jest.fn();
+			await Users.validateUnlinkData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+			} else {
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 	testValidateUpdateData();
@@ -445,4 +469,5 @@ describe('middleware/dataConverter/inputs/users', () => {
 	testValidateSignUpData();
 	testValidateSsoSignUpData();
 	testVerifyData();
+	testUnlinkData();
 });

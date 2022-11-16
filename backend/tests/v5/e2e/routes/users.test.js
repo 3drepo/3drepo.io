@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const { generateRandomString, generateUUID } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/services');
 const session = require('supertest-session');
 const fs = require('fs');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
@@ -228,15 +228,14 @@ const testGetUsername = () => {
 const formatUserProfile = (user, email, hasAvatar = false, isSso = false) => ({
 	username: user.user,
 	firstName: user.basicData.firstName,
-	lastName: user.basicData.lastName,	
+	lastName: user.basicData.lastName,
 	apiKey: user.apiKey,
 	hasAvatar,
 	countryCode: user.basicData.billing.billingInfo.countryCode,
-	company: user.basicData.billing.billingInfo.company,		
+	company: user.basicData.billing.billingInfo.company,
 	...(isSso ? { isSso: true } : {}),
 	...(email ? { email } : {}),
 });
-
 
 const testGetProfile = () => {
 	describe('Get profile of the logged in user', () => {
@@ -395,8 +394,8 @@ const testUpdateProfile = () => {
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-			
-			test('should succeed if the user tries to update sso fields', async () => {				
+
+			test('should succeed if the user tries to update sso fields', async () => {
 				const data = { company: generateRandomString(), countryCode: 'GB' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');

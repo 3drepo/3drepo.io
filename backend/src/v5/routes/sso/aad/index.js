@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails, isSsoUser, verifyLinkEmail } = require('../../../middleware/sso/aad');
-const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri, linkRedirectEndpoint, linkRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticate, checkStateIsValid, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
+const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
-const { respond } = require('../../../utils/responder');
-const { updateSession } = require('../../../middleware/sessions');
-const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
+const { updateSession } = require('../../../middleware/sessions');
 
 const signUpPost = async (req, res, next) => {
 	try {
@@ -49,10 +49,10 @@ const linkPost = async (req, res, next) => {
 };
 
 const unlink = async (req, res) => {
-	try {		
+	try {
 		const username = getUserFromSession(req.session);
-		const { password } = req.body; 
-		await Users.unlinkFromSso(username, password);	
+		const { password } = req.body;
+		await Users.unlinkFromSso(username, password);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -138,10 +138,54 @@ const establishRoutes = () => {
 
 	router.get(signupRedirectEndpoint, checkStateIsValid, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
+	/**
+	 * @openapi
+	 * /sso/aad/link:
+	 *   get:
+	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email 2 there is a SSO account witht he same email
+	 *     tags: [Aad]
+	 *     operationId: aadLink
+	 *     parameters:
+	 *       - in: query
+	 *         name: redirectUri
+	 *         schema:
+	 *           type: string
+	 *         description: a URI to redirect to when authentication finished
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/invalidArguments"
+	 *       302:
+	 *         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
+	 */
 	router.get('/link', isLoggedIn, authenticate(linkRedirectUri));
 
-	router.get(linkRedirectEndpoint, checkStateIsValid, verifyLinkEmail, linkPost, redirectToStateURL);
+	router.get(linkRedirectEndpoint, checkStateIsValid, verifyNewEmail, linkPost, redirectToStateURL);
 
+	/**
+	 * @openapi
+	 * /sso/aad/unlink:
+	 *   post:
+	 *     description: Unlinks an SSO user's account from SSO
+	 *     tags: [Aad]
+	 *     operationId: aadUnlink
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             required:
+	 *             - password
+	 *             properties:
+	 *               - name: password
+	 *                 type: string
+	 *                 description: The new password of the user
+	 *                 example: password123
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/invalidArguments"
+	 *       200:
+	 *         description: Unlinks the users account from SSO
+	 */
 	router.post('/unlink', isLoggedIn, isSsoUser, validateUnlinkData, unlink);
 
 	return router;

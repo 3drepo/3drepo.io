@@ -20,12 +20,12 @@ const { createResponseCode, templates } = require('../../../utils/responseCodes'
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { getUserFromSession } = require('../../../utils/sessions');
 const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
-const { getUserFromSession } = require('../../../utils/sessions');
 
 const Users = {};
 
@@ -102,7 +102,8 @@ const generateUpdateSchema = (isSSO, username) => {
 			'at-least-one-property',
 			'You must provide at least one setting value',
 			(value) => Object.keys(value).length,
-		).required();
+		)
+		.required();
 
 	return schema;
 };
@@ -299,7 +300,8 @@ Users.validateVerifyData = async (req, res, next) => {
 Users.validateUnlinkData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		password: types.strings.password.required(),
-	}).strict(true).noUnknown().required();
+	}).strict(true).noUnknown()
+		.required();
 
 	try {
 		await schema.validate(req.body);

@@ -49,7 +49,7 @@ const getProfile = async (req, res) => {
 	}
 };
 
-const updateProfile = async (req, res) => {	
+const updateProfile = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const updatedProfile = req.body;
