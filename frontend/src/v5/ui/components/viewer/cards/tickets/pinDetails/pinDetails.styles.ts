@@ -18,17 +18,26 @@
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const PinContainer = styled.div<{ selected: boolean; }>`
+export const PinContainer = styled.div<{ selected: boolean, error: boolean }>`
 	width: auto;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	border-radius: 5px;
 	padding: 10px 15px;
 	margin: 4px 0;
+
 	${({ selected, theme: { palette } }) => selected && css`
 		box-shadow: 0 0 4px ${palette.primary.main};
 		border-color: ${palette.primary.main};
 	`}
+
+	${({ error, theme: { palette } }) => error && css`
+		color: ${palette.error.main};
+		background-color: ${palette.error.lightest};
+		border-color: ${palette.error.main};
+		box-shadow: 0 0 4px ${palette.error.main};
+	`}
+
 `;
 
 export const PinActions = styled.div`
@@ -38,8 +47,18 @@ export const PinActions = styled.div`
 
 export const PinName = styled(Typography).attrs({
 	variant: 'h5',
-})`
+})<{required:boolean}>`
 	user-select: none;
+
+	${({ required }) => required && css`
+		&::after {
+			font-weight: 400;
+			font-size: 0.75rem;
+			color: ${({ theme }) => theme.palette.error.main};
+			margin-left: 2px;
+			content: '*';
+		}
+	`}
 `;
 
 export const PinAction = styled.div`
