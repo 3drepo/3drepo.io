@@ -18,7 +18,6 @@
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { Container } from './errorDialog.styles';
 
 interface IProps {
 	method: string;
@@ -31,7 +30,7 @@ export const ErrorDialog = (props: IProps) => {
 	const { method, dataType, message, status } = props;
 
 	return (
-		<Container>
+		<>
 			<DialogContent>
 				{ method && dataType ?
 					`Something went wrong trying to ${method} the ${dataType}:` :
@@ -49,6 +48,6 @@ export const ErrorDialog = (props: IProps) => {
 			<DialogActions>
 				<Button onClick={props.handleResolve} variant="contained" color="secondary">Ok</Button>
 			</DialogActions>
-		</Container>
+		</>
 	);
 };
