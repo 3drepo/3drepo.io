@@ -18,8 +18,11 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { createSelector } from 'reselect';
-import { selectTickets } from '../tickets.selectors';
+import { selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
+import { ITicketsCardState } from './ticketsCard.redux';
+
+const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
 export const selectCurrentTickets = createSelector(
 	(state) => state,
@@ -39,4 +42,21 @@ export const selectTicketPins = createSelector(
 		? [...accum, ticketToPin(ticket)]
 		: accum), [])
 	,
+);
+
+export const selectView = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.view,
+);
+
+const selectSelectedTicketId = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.selectedTicketId,
+);
+
+export const selectSelectedTicket = createSelector(
+	(state) => state,
+	selectCurrentModel,
+	selectSelectedTicketId,
+	selectTicketById,
 );

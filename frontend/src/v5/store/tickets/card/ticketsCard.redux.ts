@@ -28,7 +28,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setView: ['view'],
 }, { prefix: 'TICKETSCARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
-interface ITicketsCardState {
+export interface ITicketsCardState {
 	selectedTicketId: string | null,
 	editingTicket: ITicket | null,
 	view: TicketsCardViews

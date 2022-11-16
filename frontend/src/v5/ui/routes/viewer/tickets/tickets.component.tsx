@@ -29,6 +29,7 @@ import {
 	enableRealtimeFederationNewTicket,
 	enableRealtimeFederationUpdateTicket,
 } from '@/v5/services/realtime/ticket.events';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
@@ -38,6 +39,8 @@ import { ViewerParams } from '../../routes.constants';
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const view = TicketsCardHooksSelectors.selectView();
+	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
 	useEffect(() => (
 		isFederation
@@ -52,6 +55,8 @@ export const Tickets = () => {
 
 	return (
 		<CardContextComponent defaultView={TicketsCardViews.List}>
+			The view is: {view.toString()}
+			The selected ticket is: {JSON.stringify(selectedTicket)}
 			<CardContextView cardView={TicketsCardViews.List}>
 				<TicketsListCard />
 			</CardContextView>

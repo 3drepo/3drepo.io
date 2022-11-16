@@ -20,6 +20,7 @@ import { useContext, useState } from 'react';
 import { flatMap } from 'lodash';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { CardContext } from '@components/viewer/cards/cardContext.component';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, TemplateChip, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -57,8 +58,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
 
 	const onTicketClick = (ticket: ITicket) => {
+		TicketsActionsDispatchers.selectTicket(ticket._id);
 		if (ticketIsSelected(ticket)) {
 			contextValue.setCardView(TicketsCardViews.Details, { ticketId: ticket._id });
+			TicketsActionsDispatchers.setView(TicketsCardViews.Details);
 		} else {
 			setSelectedTicket(ticket);
 		}
