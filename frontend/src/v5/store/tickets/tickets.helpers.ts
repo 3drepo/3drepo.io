@@ -21,8 +21,7 @@ import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/s
 import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
-import SafetibaseIcon from '@assets/icons/outlined/warning-outlined.svg';
-import ShapesIcon from '@assets/icons/outlined/sequence-outlined.svg';
+import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { EditableTicket, ITemplate, PropertyDefinition } from './tickets.types';
 
@@ -251,7 +250,7 @@ export const getValidators = (template) => {
 const moduleTypeProperties = {
 	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: SafetibaseIcon },
 	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }), Icon: SequencingIcon },
-	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
+	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: CustomModuleIcon },
 };
 
 export const getModulePanelTitle = (module) => {
