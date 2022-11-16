@@ -21,5 +21,4 @@ export * from './loadingDialog/loadingDialog.component';
 export * from './newUpdateDialog/newUpdateDialog.component';
 export * from './suggestedTreatmentsDialog/suggestedTreatmentsDialog.component';
 export * from './redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
-export * from './textOnlyDialog/textOnlyDialog.component';
 export { default as RevisionsDialog } from './revisionsDialog/revisionsDialog.container';

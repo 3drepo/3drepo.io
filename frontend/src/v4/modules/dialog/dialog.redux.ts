@@ -52,7 +52,6 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
-	showTextOnlyDialog: ['config'],
 	showRevisionsDialog: ['config'],
 	hideDialog: ['dialogId'],
 	setPendingState: ['isPending'],
@@ -76,14 +75,6 @@ const showDialog = (state = INITIAL_STATE, action) => {
 
 	const dialogs = [...state.dialogs, dialog];
 	return { ...state, dialogs };
-};
-
-const showTextOnlyDialog = (state = INITIAL_STATE, action) => {
-	const config = {
-		...action.config,
-		template: Dialogs.TextOnlyDialog,
-	};
-	return showDialog(state, {config});
 };
 
 const showErrorDialog = (state = INITIAL_STATE, action) => {
@@ -198,7 +189,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
-	[DialogTypes.SHOW_TEXT_ONLY_DIALOG]: showTextOnlyDialog,
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
