@@ -66,7 +66,7 @@ const buttonContainerStyling = css`
 			0 3px 16px rgb(0 0 0 / 12%),
 			0 9px 12px rgb(0 0 0 / 14%);
 
-		.MuiButtonBase-root.MuiButtonBase-root {
+		.MuiButtonBase-root.MuiButtonBase-root:last-child {
 			${labelButtonPrimaryStyles}
 			line-height: 1;
 			border: solid 1px ${({ theme }) => theme.palette.primary.main};
