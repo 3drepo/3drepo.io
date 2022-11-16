@@ -37,13 +37,13 @@ interface IViewerConstructor {
 	name?: string;
 }
 
-interface IPin {
+export interface IPin {
 	id: string;
-	type: string;
+	type?: string;
 	position: number[];
-	norm: number[];
+	norm?: number[];
 	colour: number[];
-	isSelected: boolean;
+	isSelected?: boolean;
 }
 
 export class ViewerService {
