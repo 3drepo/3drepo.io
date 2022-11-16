@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectTicketPins } from '@/v5/store/tickets/card/ticketCard.selectors';
+import { selectTicketPins } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
