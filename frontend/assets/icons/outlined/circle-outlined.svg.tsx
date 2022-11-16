@@ -20,6 +20,6 @@ type IProps = {
 
 export default ({ className }: IProps) => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" className={className}>
-		<circle cx="512" cy="512" r="476" stroke="currentColor" strokeWidth="72"/>
+		<circle cx="512" cy="512" r="476" stroke="currentColor" strokeWidth="72" />
 	</svg>
 );
