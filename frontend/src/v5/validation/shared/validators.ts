@@ -18,7 +18,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { isNull } from 'lodash';
 import * as Yup from 'yup';
 
-export const trimmedString = Yup.string().transform((value) => value.trim());
+export const trimmedString = Yup.string().transform((value) => (value ?? '').trim());
 
 export const nullableNumber = Yup.number().transform(
 	(_, val) => ((val || val === 0) ? Number(val) : null),
