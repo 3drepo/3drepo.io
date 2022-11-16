@@ -202,7 +202,7 @@ const run = async (revisionAge, force) => {
 				resolve(ans);
 			}));
 			if (!response.match(/^y/i)) {
-				process.abort();
+				return;
 			}
 		}
 	}
