@@ -72,10 +72,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModal) =
 		}
 	};
 
-	const onSubmit: SubmitHandler<IFormInput> = () => {
-		setIsSubmitting(true);
-		// TODO - check if these are being passed 
-		const { teamspace, projectName } = getValues();
+	const onSubmit: SubmitHandler<IFormInput> = ({ teamspace, projectName }) => {
 		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};
