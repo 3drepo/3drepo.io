@@ -87,7 +87,7 @@ export type CreateProjectAction = Action<'CREATE_PROJECT'> & OnSuccess & OnError
 };
 export type CreateProjectSuccessAction = Action<'CREATE_PROJECT_SUCCESS'> & { teamspace: string, project: IProject };
 export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError & { project: Partial<IProject> };
-export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & TeamspaceAndProjectId & { project: IProject };
+export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & TeamspaceAndProjectId & { project: Partial<IProject> };
 export type DeleteProjectAction = Action<'DELETE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError;
 export type DeleteProjectSuccessAction = Action<'DELETE_PROJECT_SUCCESS'> & TeamspaceAndProjectId;
 
@@ -110,7 +110,7 @@ export interface IProjectsActions {
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdateProjectAction;
-	updateProjectSuccess: (teamspace: string, projectId: string, project: IProject) => UpdateProjectSuccessAction;
+	updateProjectSuccess: (teamspace: string, projectId: string, project: Partial<IProject>) => UpdateProjectSuccessAction;
 	deleteProject: (
 		teamspace: string,
 		projectId: string,
