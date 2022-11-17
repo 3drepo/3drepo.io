@@ -20,14 +20,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
-import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
+import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { useExistingProjectsByTeamspace } from '../baseProjectModal/useExistingProjectsByTeamspace';
+import { useExistingProjectsByTeamspace } from '../useExistingProjectsByTeamspace';
 
 interface CreateProjectModalProps {
 	open: boolean;
@@ -42,7 +42,7 @@ interface IFormInput {
 export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
 	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const { existingProjectsByTeamspace, addProjectByTeamspace } = useExistingProjectsByTeamspace();
+	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const DEFAULT_VALUES = {
@@ -60,7 +60,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(ProjectSchema),
+		resolver: yupResolver(CreateProjectSchema),
 		context: { existingProjectsByTeamspace },
 		defaultValues: DEFAULT_VALUES,
 	});
@@ -68,7 +68,13 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
 			const { teamspace, projectName } = getValues();
-			addProjectByTeamspace(teamspace, projectName);
+			setExistingProjectsByTeamspace({
+				...existingProjectsByTeamspace,
+				[teamspace]: [
+					...(existingProjectsByTeamspace[teamspace] || []),
+					projectName,
+				],
+			});
 		}
 	};
 
