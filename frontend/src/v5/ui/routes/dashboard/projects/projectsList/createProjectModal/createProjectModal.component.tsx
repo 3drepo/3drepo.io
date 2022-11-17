@@ -28,7 +28,7 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 
-interface ICreateProject {
+interface ICreateProjectModal {
 	open: boolean;
 	onClickClose: () => void;
 }
@@ -38,7 +38,7 @@ interface IFormInput {
 	teamspace: string;
 }
 
-export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
+export const CreateProjectModal = ({ open, onClickClose }: ICreateProjectModal) => {
 	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 
