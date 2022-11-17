@@ -16,11 +16,11 @@
  */
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { flatMap } from 'lodash';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, TemplateChip, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -31,11 +31,10 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const contextValue = useContext(CardContext);
-	const [selectedTicket, setSelectedTicket] = useState<ITicket>(null);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
+	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
 	const ticketIsSelected = (ticket: ITicket) => selectedTicket === ticket;
 
@@ -58,12 +57,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
 
 	const onTicketClick = (ticket: ITicket) => {
-		TicketsActionsDispatchers.selectTicket(ticket._id);
 		if (ticketIsSelected(ticket)) {
-			contextValue.setCardView(TicketsCardViews.Details, { ticketId: ticket._id });
-			TicketsActionsDispatchers.setView(TicketsCardViews.Details);
+			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details, ticket._id);
 		} else {
-			setSelectedTicket(ticket);
+			TicketsCardActionsDispatchers.selectTicket(ticket._id);
 		}
 	};
 

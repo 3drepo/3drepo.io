@@ -18,4 +18,4 @@
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { TicketsCardActions, ITicketsCardActionCreators } from '@/v5/store/tickets/card/ticketsCard.redux';
 
-export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);
+export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);

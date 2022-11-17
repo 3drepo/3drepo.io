@@ -18,8 +18,7 @@
 import ChevronLeft from '@mui/icons-material/ArrowBackIosNew';
 import ChevronRight from '@mui/icons-material/ArrowForwardIos';
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
@@ -29,26 +28,27 @@ import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
 export const TicketDetailsCard = () => {
-	const { props: { ticketId }, setCardView } = useContext(CardContext);
-
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const goBack = () => {
-		setCardView(TicketsCardViews.List);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	};
+
 	const changeTicketIndex = (delta: number) => {
-		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticketId);
-		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
-		setCardView(TicketsCardViews.Details, { ticketId: updatedId });
+		// const currentIndex = tickets.findIndex((tckt) => tckt._id === ticketId);
+		// const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
+		// setCardView(TicketsCardViews.Details, { ticketId: updatedId });
 	};
+
 	const goPrev = () => changeTicketIndex(-1);
 	const goNext = () => changeTicketIndex(1);
 
@@ -57,10 +57,10 @@ export const TicketDetailsCard = () => {
 			teamspace,
 			project,
 			containerOrFederation,
-			ticketId,
+			ticket._id,
 			isFederation,
 		);
-	}, [ticketId]);
+	}, [ticket._id]);
 
 	if (!ticket) return <></>;
 

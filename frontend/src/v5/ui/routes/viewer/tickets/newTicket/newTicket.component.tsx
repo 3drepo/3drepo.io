@@ -16,31 +16,28 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import TicketsIcon from '@mui/icons-material/FormatListBulleted';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, getTicketValidator, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
 
 export const NewTicketCard = () => {
-	const contextValue = useContext(CardContext);
-	const templateId = contextValue.props.template._id;
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, templateId);
+	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const isLoading = !('config' in template);
 
 	const formData = useForm({
@@ -49,11 +46,11 @@ export const NewTicketCard = () => {
 	});
 
 	const goBack = () => {
-		contextValue.setCardView(TicketsCardViews.List);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	};
 
 	const goToTicketDetails = (ticketId) => {
-		contextValue.setCardView(TicketsCardViews.Details, { ticketId });
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details, ticketId);
 	};
 
 	const onSubmit = (vals) => {

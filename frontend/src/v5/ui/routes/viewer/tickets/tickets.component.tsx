@@ -14,11 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable jsx-a11y/anchor-is-valid */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 
-import { CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
@@ -40,7 +36,6 @@ export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
-	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
 	useEffect(() => (
 		isFederation
@@ -54,18 +49,10 @@ export const Tickets = () => {
 	), [containerOrFederation]);
 
 	return (
-		<CardContextComponent defaultView={TicketsCardViews.List}>
-			The view is: {view.toString()}
-			The selected ticket is: {JSON.stringify(selectedTicket)}
-			<CardContextView cardView={TicketsCardViews.List}>
-				<TicketsListCard />
-			</CardContextView>
-			<CardContextView cardView={TicketsCardViews.Details}>
-				<TicketDetailsCard />
-			</CardContextView>
-			<CardContextView cardView={TicketsCardViews.New}>
-				<NewTicketCard />
-			</CardContextView>
-		</CardContextComponent>
+		<>
+			{view === TicketsCardViews.List && <TicketsListCard />}
+			{view === TicketsCardViews.Details && <TicketDetailsCard />}
+			{view === TicketsCardViews.New && <NewTicketCard />}
+		</>
 	);
 };

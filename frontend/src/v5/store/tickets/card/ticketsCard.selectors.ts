@@ -18,7 +18,7 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { createSelector } from 'reselect';
-import { selectTicketById, selectTickets } from '../tickets.selectors';
+import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
 import { ITicketsCardState } from './ticketsCard.redux';
 
@@ -49,9 +49,14 @@ export const selectView = createSelector(
 	(ticketCardState) => ticketCardState.view,
 );
 
-const selectSelectedTicketId = createSelector(
+export const selectSelectedTicketId = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.selectedTicketId,
+);
+
+export const selectSelectedTemplateId = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.selectedTemplateId,
 );
 
 export const selectSelectedTicket = createSelector(
@@ -59,4 +64,11 @@ export const selectSelectedTicket = createSelector(
 	selectCurrentModel,
 	selectSelectedTicketId,
 	selectTicketById,
+);
+
+export const selectSelectedTemplate = createSelector(
+	(state) => state,
+	selectCurrentModel,
+	selectSelectedTemplateId,
+	selectTemplateById,
 );

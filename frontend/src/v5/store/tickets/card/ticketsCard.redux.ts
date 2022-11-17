@@ -25,17 +25,19 @@ import { ITicket } from '../tickets.types';
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	selectTicket: ['ticketId'],
 	updateEditingTicket: ['ticket'],
-	setView: ['view'],
+	setCardView: ['view', 'ticketId', 'templateId'],
 }, { prefix: 'TICKETSCARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
 	selectedTicketId: string | null,
+	selectedTemplateId: string | null,
 	editingTicket: ITicket | null,
 	view: TicketsCardViews
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
 	selectedTicketId: null,
+	selectedTemplateId: null,
 	editingTicket: null,
 	view: TicketsCardViews.List,
 };
@@ -48,22 +50,23 @@ export const updateEditingTicket = (state: ITicketsCardState, { ticket }: Update
 	state.editingTicket = ticket;
 };
 
-export const setView = (state: ITicketsCardState, { view }: SetViewAction) => {
+export const setCardView = (state: ITicketsCardState, { view, ticketId, templateId }: SetCardViewAction) => {
 	state.view = view;
+	state.selectedTicketId = ticketId;
+	state.selectedTicketId = templateId;
 };
 
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SELECT_TICKET]: selectTicket,
 	[TicketsCardTypes.UPDATE_EDITING_TICKET]: updateEditingTicket,
-	[TicketsCardTypes.SET_VIEW]: setView,
+	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 }));
 
 export type SelectTicketAction = Action<'SELECT_TICKET'> & { ticketId: string };
-export type SetViewAction = Action<'SET_VIEW'> & { view: TicketsCardViews };
+export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, ticketId?: string, templateId? };
 export type UpdateEditingTicketAction = Action<'UPDATE_EDITING_TICKET'> & { ticket: ITicket | null };
-
 export interface ITicketsCardActionCreators {
 	selectTicket: (ticketId: string) => SelectTicketAction,
 	updateEditingTicket: (ticket: ITicket | null) => UpdateEditingTicketAction,
-	setView : (view: TicketsCardViews) => SelectTicketAction,
+	setCardView : (view: TicketsCardViews, ticketId?: string, templateId?: string) => SelectTicketAction,
 }
