@@ -27,7 +27,6 @@ import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { useExistingProjectsByTeamspace } from '../useExistingProjectsByTeamspace';
 
 interface CreateProjectModalProps {
 	open: boolean;
