@@ -29,7 +29,7 @@ import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { useExistingProjectsByTeamspace } from '../baseProjectModal/useExistingProjectsByTeamspace';
 
-interface CreateProjectModal {
+interface CreateProjectModalProps {
 	open: boolean;
 	onClickClose: () => void;
 }
@@ -39,7 +39,7 @@ interface IFormInput {
 	teamspace: string;
 }
 
-export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModal) => {
+export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
 	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const { existingProjectsByTeamspace, addProjectByTeamspace } = useExistingProjectsByTeamspace();
