@@ -55,6 +55,7 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 		formState,
 		formState: { errors, touchedFields },
 		reset,
+		watch,
 		handleSubmit,
 		getValues,
 		trigger,
@@ -95,10 +96,11 @@ export const CreateProjectForm = ({ open, onClickClose }: ICreateProject) => {
 	}, [errors, JSON.stringify(alreadyExistingProjectsByTeamspace)]);
 
 	useEffect(() => {
+		ProjectsActionsDispatchers.fetch(getValues('teamspace'));
 		if (touchedFields.projectName) {
 			trigger('projectName');
 		}
-	}, [getValues('teamspace')]);
+	}, [watch('teamspace')]);
 
 	return (
 		<FormModal
