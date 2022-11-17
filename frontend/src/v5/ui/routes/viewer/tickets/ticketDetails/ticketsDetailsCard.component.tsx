@@ -37,6 +37,7 @@ export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 
 	const goBack = () => {
@@ -44,9 +45,9 @@ export const TicketDetailsCard = () => {
 	};
 
 	const changeTicketIndex = (delta: number) => {
-		// const currentIndex = tickets.findIndex((tckt) => tckt._id === ticketId);
-		// const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
-		// setCardView(TicketsCardViews.Details, { ticketId: updatedId });
+		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
+		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details, updatedId);
 	};
 
 	const goPrev = () => changeTicketIndex(-1);
