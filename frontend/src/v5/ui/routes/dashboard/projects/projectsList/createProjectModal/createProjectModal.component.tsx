@@ -54,7 +54,6 @@ export const CreateProjectModal = ({ open, onClickClose }: ICreateProjectModal) 
 		control,
 		formState,
 		formState: { errors, touchedFields },
-		reset,
 		watch,
 		handleSubmit,
 		getValues,
@@ -85,11 +84,6 @@ export const CreateProjectModal = ({ open, onClickClose }: ICreateProjectModal) 
 		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};
-
-	useEffect(() => {
-		reset(DEFAULT_VALUES);
-		setAlreadyExistingProjectsByTeamspace({});
-	}, [open]);
 
 	useEffect(() => {
 		if (Object.keys(alreadyExistingProjectsByTeamspace).length) trigger('projectName');
