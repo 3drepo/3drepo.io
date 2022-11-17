@@ -50,6 +50,16 @@ export function* createProject({ teamspace, projectName, onSuccess, onError }) {
 	}
 }
 
+export function* updateProject({ teamspace, projectId, project, onSuccess, onError }) {
+	try {
+		yield API.Projects.updateProject(teamspace, projectId, project);
+		yield put(ProjectsActions.updateProjectSuccess(teamspace, project));
+		onSuccess();
+	} catch (error) {
+		onError(error);
+	}
+}
+
 export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	try {
 		yield API.Projects.deleteProject(teamspace, projectId);
