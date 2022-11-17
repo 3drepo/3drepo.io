@@ -29,8 +29,8 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	setCurrentProject: ['projectId'],
 	createProject: ['teamspace', 'projectName', 'onSuccess', 'onError'],
 	createProjectSuccess: ['teamspace', 'project'],
-	updateProject: ['teamspace', 'projectName', 'onSuccess', 'onError'],
-	updateProjectSuccess: ['teamspace', 'project'],
+	updateProject: ['teamspace', 'projectId', 'project', 'onSuccess', 'onError'],
+	updateProjectSuccess: ['teamspace', 'projectId', 'project'],
 	deleteProject: ['teamspace', 'projectId', 'onSuccess', 'onError'],
 	deleteProjectSuccess: ['teamspace', 'projectId'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
@@ -52,8 +52,8 @@ export const createProjectSuccess = (state, { teamspace, project }: CreateProjec
 	state.projectsByTeamspace[teamspace].push(project);
 };
 
-export const updateProjectSuccess = (state, { teamspace, project }: CreateProjectSuccessAction) => {
-	const oldProject = state.projectsByTeamspace[teamspace].find(({ _id }) => _id === project._id);
+export const updateProjectSuccess = (state, { teamspace, projectId, project }: UpdateProjectSuccessAction) => {
+	const oldProject = state.projectsByTeamspace[teamspace].find(({ _id }) => _id === projectId);
 	Object.assign(oldProject, project);
 };
 
@@ -86,10 +86,8 @@ export type CreateProjectAction = Action<'CREATE_PROJECT'> & OnSuccess & OnError
 	projectName: string,
 };
 export type CreateProjectSuccessAction = Action<'CREATE_PROJECT_SUCCESS'> & { teamspace: string, project: IProject };
-export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError & {
-	project: Partial<IProject>,
-};
-export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & { teamspace: string, project: IProject };
+export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError & { project: Partial<IProject> };
+export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & TeamspaceAndProjectId & { project: IProject };
 export type DeleteProjectAction = Action<'DELETE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError;
 export type DeleteProjectSuccessAction = Action<'DELETE_PROJECT_SUCCESS'> & TeamspaceAndProjectId;
 
@@ -112,7 +110,7 @@ export interface IProjectsActions {
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdateProjectAction;
-	updateProjectSuccess: (teamspace: string, project: IProject) => UpdateProjectSuccessAction;
+	updateProjectSuccess: (teamspace: string, projectId: string, project: IProject) => UpdateProjectSuccessAction;
 	deleteProject: (
 		teamspace: string,
 		projectId: string,
