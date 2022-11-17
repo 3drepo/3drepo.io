@@ -26,7 +26,11 @@ export const createProject = async (teamspace: string, projectName: string): Pro
 	return data._id;
 };
 
-export const updateProject = (teamspace: string, projectId: string, project: Partial<IProject>): Promise<AxiosResponse<void>> => (
+export const updateProject = (
+	teamspace: string,
+	projectId: string,
+	project: Partial<IProject>,
+): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}`, project)
 );
 
