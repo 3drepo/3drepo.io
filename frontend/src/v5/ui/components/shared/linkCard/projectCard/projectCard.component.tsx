@@ -25,7 +25,6 @@ import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { EditProjectModal } from '@/v5/ui/routes/dashboard/projects/projectsList/editProjectModal/editProjectModal.component';
 import { ProjectImage, EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -63,8 +62,6 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 		});
 	};
 
-	const onClickEdit = () => DialogsActionsDispatchers.open(EditProjectModal, { project });
-
 	const onClickShare = () => {
 		const link = prefixBaseDomain(projectRoute(teamspace, project));
 		const subject = formatMessage({ id: 'shareModal.project.subject', defaultMessage: 'project' });
@@ -87,14 +84,6 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 			<ProjectImage src={DEFAULT_IMAGE} />
 			<EllipsisMenuContainer onClick={preventNavigation}>
 				<EllipsisMenu>
-					<EllipsisMenuItem
-						title={formatMessage({
-							id: 'projectCard.ellipsisMenu.edit',
-							defaultMessage: 'Edit',
-						})}
-						onClick={onClickEdit}
-						disabled={!project.isAdmin}
-					/>
 					<EllipsisMenuItem
 						title={formatMessage({
 							id: 'projectCard.ellipsisMenu.share',
