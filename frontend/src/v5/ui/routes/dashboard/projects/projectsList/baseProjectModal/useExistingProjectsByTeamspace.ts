@@ -25,7 +25,7 @@ export const useExistingProjectsByTeamspace = () => {
 				...(existingProjectsByTeamspace[teamspace] || []),
 				projectName,
 			],
-		})
+		});
 	};
 	return {
 		existingProjectsByTeamspace,
