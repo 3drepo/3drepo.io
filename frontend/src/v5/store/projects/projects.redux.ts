@@ -110,7 +110,11 @@ export interface IProjectsActions {
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdateProjectAction;
-	updateProjectSuccess: (teamspace: string, projectId: string, project: Partial<IProject>) => UpdateProjectSuccessAction;
+	updateProjectSuccess: (
+		teamspace: string,
+		projectId: string,
+		project: Partial<IProject>,
+	) => UpdateProjectSuccessAction;
 	deleteProject: (
 		teamspace: string,
 		projectId: string,
