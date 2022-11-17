@@ -56,6 +56,7 @@ export const EditProjectModal = ({ open, project, onClickClose }: EditProjectMod
 		formState: { errors },
 		handleSubmit,
 		getValues,
+		watch,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ProjectSchema),
@@ -83,7 +84,7 @@ export const EditProjectModal = ({ open, project, onClickClose }: EditProjectMod
 		setIsSubmitting(false);
 	};
 
-	const nameWasChanged = () => getValues('projectName') !== project.name;
+	const nameWasChanged = () => watch('projectName').trim() !== project.name;
 
 	return (
 		<FormModal
