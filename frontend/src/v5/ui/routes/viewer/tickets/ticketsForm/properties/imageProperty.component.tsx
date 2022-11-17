@@ -22,7 +22,6 @@ export const ImageProperty = ({
 	property: { name: title, readOnly, required },
 	name,
 	defaultValue,
-	onBlur,
 	formError,
 	...props
 }: PropertyProps) => (
