@@ -16,12 +16,13 @@
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { FormControl, FormHelperText } from '@mui/material';
-import { ActionsList, ActionsSide, Container, PropertyName } from './basicTicketImage.styles';
+import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
 export type BasicTicketImageProps = {
 	imgSrc: string,
-	formError?: any,
+	error?: any,
+	helperText?: string,
 	title: string,
 	className?: string,
 	onChange?: (imgSrc) => void,
@@ -35,24 +36,20 @@ export const BasicTicketImage = ({
 	imgSrc,
 	title,
 	className,
-	formError,
+	error,
+	helperText,
 	required,
 	disabled,
 	onEmptyImageClick,
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const error = formError?.message;
 
 	return (
-		<FormControl error={error}>
+		<FormControl error={error} required={required}>
 			<Container className={className} error={error}>
 				<ActionsSide>
-					<PropertyName required={required}>
-						{title}
-					</PropertyName>
-					<ActionsList>
-						{children}
-					</ActionsList>
+					<Label>{title}</Label>
+					<ActionsList>{children}</ActionsList>
 				</ActionsSide>
 				<TicketImageDisplayer
 					imgSrc={imgSrc}
@@ -60,7 +57,7 @@ export const BasicTicketImage = ({
 					onEmptyImageClick={onEmptyImageClick}
 				/>
 			</Container>
-			<FormHelperText>{error}</FormHelperText>
+			<FormHelperText>{helperText}</FormHelperText>
 		</FormControl>
 	);
 };
