@@ -81,7 +81,7 @@ export const TicketDetailsCard = () => {
 		if (isEmpty(validVals)) return;
 
 		// eslint-disable-next-line max-len
-		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation);
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
 	};
 
 	return (

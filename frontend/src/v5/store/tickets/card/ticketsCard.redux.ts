@@ -53,7 +53,7 @@ export const updateEditingTicket = (state: ITicketsCardState, { ticket }: Update
 export const setCardView = (state: ITicketsCardState, { view, ticketId, templateId }: SetCardViewAction) => {
 	state.view = view;
 	state.selectedTicketId = ticketId;
-	state.selectedTicketId = templateId;
+	state.selectedTemplateId = templateId;
 };
 
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
