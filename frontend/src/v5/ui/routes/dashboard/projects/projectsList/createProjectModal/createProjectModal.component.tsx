@@ -20,15 +20,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
-import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
+import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { useExistingProjectsByTeamspace } from '../baseProjectModal/useExistingProjectsByTeamspace';
 
-interface ICreateProjectModal {
+interface CreateProjectModal {
 	open: boolean;
 	onClickClose: () => void;
 }
@@ -38,11 +39,10 @@ interface IFormInput {
 	teamspace: string;
 }
 
-export const CreateProjectModal = ({ open, onClickClose }: ICreateProjectModal) => {
+export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModal) => {
 	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-
-	const [alreadyExistingProjectsByTeamspace, setAlreadyExistingProjectsByTeamspace] = useState({});
+	const { existingProjectsByTeamspace, addProjectByTeamspace } = useExistingProjectsByTeamspace();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const DEFAULT_VALUES = {
@@ -60,34 +60,29 @@ export const CreateProjectModal = ({ open, onClickClose }: ICreateProjectModal) 
 		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(CreateProjectSchema),
-		context: { alreadyExistingProjectsByTeamspace },
+		resolver: yupResolver(ProjectSchema),
+		context: { existingProjectsByTeamspace },
 		defaultValues: DEFAULT_VALUES,
 	});
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
-			const { projectName, teamspace } = getValues();
-			setAlreadyExistingProjectsByTeamspace({
-				...alreadyExistingProjectsByTeamspace,
-				[teamspace]: [
-					...(alreadyExistingProjectsByTeamspace[teamspace] || []),
-					projectName,
-				],
-			});
+			const { teamspace, projectName } = getValues();
+			addProjectByTeamspace(teamspace, projectName);
 		}
 	};
 
 	const onSubmit: SubmitHandler<IFormInput> = () => {
 		setIsSubmitting(true);
+		// TODO - check if these are being passed 
 		const { teamspace, projectName } = getValues();
 		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};
 
 	useEffect(() => {
-		if (Object.keys(alreadyExistingProjectsByTeamspace).length) trigger('projectName');
-	}, [errors, JSON.stringify(alreadyExistingProjectsByTeamspace)]);
+		if (Object.keys(existingProjectsByTeamspace).length) trigger('projectName');
+	}, [errors, JSON.stringify(existingProjectsByTeamspace)]);
 
 	useEffect(() => {
 		ProjectsActionsDispatchers.fetch(getValues('teamspace'));
