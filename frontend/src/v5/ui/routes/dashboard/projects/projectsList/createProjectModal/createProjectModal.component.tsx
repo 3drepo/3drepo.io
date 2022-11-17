@@ -90,11 +90,11 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModal) =
 
 	return (
 		<FormModal
-			title={formatMessage({ id: 'projects.creation.title', defaultMessage: 'Create new Project' })}
+			title={formatMessage({ id: 'project.creation.form.title', defaultMessage: 'Create new Project' })}
 			open={open}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
-			confirmLabel={formatMessage({ id: 'projects.creation.ok', defaultMessage: 'Create Project' })}
+			confirmLabel={formatMessage({ id: 'project.creation.form.createButton', defaultMessage: 'Create Project' })}
 			isValid={formState.isValid}
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
@@ -102,7 +102,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModal) =
 			<FormSelect
 				required
 				name="teamspace"
-				label={formatMessage({ id: 'projects.creation.form.teamspace', defaultMessage: 'Teamspace' })}
+				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
 				control={control}
 			>
 				{teamspaces.map((ts) => (
@@ -114,7 +114,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModal) =
 			<FormTextField
 				required
 				name="projectName"
-				label={formatMessage({ id: 'projects.creation.form.name', defaultMessage: 'Project name' })}
+				label={formatMessage({ id: 'project.creation.form.name', defaultMessage: 'Project name' })}
 				control={control}
 				formError={errors.projectName}
 			/>
