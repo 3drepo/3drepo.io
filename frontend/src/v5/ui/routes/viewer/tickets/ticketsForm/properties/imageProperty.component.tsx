@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
@@ -24,25 +23,22 @@ export const ImageProperty = ({
 	name,
 	defaultValue,
 	onBlur,
+	formError,
 	...props
-}: PropertyProps) => {
-	const { watch } = useFormContext();
-
-	useEffect(() => { onBlur?.(); }, [watch(name)]);
-
-	return (
-		<Controller
-			name={name}
-			defaultValue={defaultValue}
-			render={({ field: { ref, ...field } }) => (
-				<TicketImage
-					{...field}
-					title={title}
-					disabled={readOnly}
-					required={required}
-					{...props}
-				/>
-			)}
-		/>
-	);
-};
+}: PropertyProps) => (
+	<Controller
+		name={name}
+		defaultValue={defaultValue}
+		render={({ field: { ref, ...field } }) => (
+			<TicketImage
+				{...field}
+				title={title}
+				disabled={readOnly}
+				required={required}
+				error={!!formError}
+				helperText={formError?.message}
+				{...props}
+			/>
+		)}
+	/>
+);
