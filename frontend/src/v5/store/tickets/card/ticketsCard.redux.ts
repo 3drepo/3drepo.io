@@ -20,34 +20,26 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { ITicket } from '../tickets.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	selectTicket: ['ticketId'],
-	updateEditingTicket: ['ticket'],
 	setCardView: ['view', 'ticketId', 'templateId'],
 }, { prefix: 'TICKETSCARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
 	selectedTicketId: string | null,
 	selectedTemplateId: string | null,
-	editingTicket: ITicket | null,
 	view: TicketsCardViews
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
 	selectedTicketId: null,
 	selectedTemplateId: null,
-	editingTicket: null,
 	view: TicketsCardViews.List,
 };
 
 export const selectTicket = (state: ITicketsCardState, { ticketId }: SelectTicketAction) => {
 	state.selectedTicketId = ticketId;
-};
-
-export const updateEditingTicket = (state: ITicketsCardState, { ticket }: UpdateEditingTicketAction) => {
-	state.editingTicket = ticket;
 };
 
 export const setCardView = (state: ITicketsCardState, { view, ticketId, templateId }: SetCardViewAction) => {
@@ -58,15 +50,13 @@ export const setCardView = (state: ITicketsCardState, { view, ticketId, template
 
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SELECT_TICKET]: selectTicket,
-	[TicketsCardTypes.UPDATE_EDITING_TICKET]: updateEditingTicket,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 }));
 
 export type SelectTicketAction = Action<'SELECT_TICKET'> & { ticketId: string };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, ticketId?: string, templateId? };
-export type UpdateEditingTicketAction = Action<'UPDATE_EDITING_TICKET'> & { ticket: ITicket | null };
+
 export interface ITicketsCardActionCreators {
 	selectTicket: (ticketId: string) => SelectTicketAction,
-	updateEditingTicket: (ticket: ITicket | null) => UpdateEditingTicketAction,
 	setCardView : (view: TicketsCardViews, ticketId?: string, templateId?: string) => SelectTicketAction,
 }

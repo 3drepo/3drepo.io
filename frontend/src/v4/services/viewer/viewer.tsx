@@ -28,6 +28,7 @@ import {
 import { uuid as UUID } from '../../helpers/uuid';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
+import { isString } from 'lodash';
 
 const UNITY_LOADER_PATH = 'unity/Build/unity.loader.js';
 
@@ -683,10 +684,15 @@ export class ViewerService {
 		if (isSelected) {
 			UnityUtil.selectPin(id);
 		}
+
+		console.log('added' + JSON.stringify(id));
+
 	}
 
-	public removePin(pin: IPin) {
-		UnityUtil.removePin(pin.id);
+	public removePin(pin: IPin | string) {
+		console.log('removed' + JSON.stringify(pin));
+
+		UnityUtil.removePin(isString(pin) ? pin : pin.id);
 	}
 
 	/**
@@ -1135,7 +1141,7 @@ export class ViewerService {
 		UnityUtil.setNavigationOff();
 	}
 
-	public async dropPin() {
+	public async getClickPoint() {
 		return new Promise(async (resolve) => {
 			let pinDropped = false;
 

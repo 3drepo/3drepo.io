@@ -17,6 +17,7 @@
 
 import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
+import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
@@ -35,14 +36,6 @@ const ticketToPin = (ticket:ITicket): IPin => ({
 	position: ticket.properties.Pin,
 	colour: [195 / 255, 235 / 255, 52 / 255],
 });
-
-export const selectTicketPins = createSelector(
-	selectCurrentTickets,
-	(tickets) => tickets.reduce((accum, ticket) => (ticket.properties?.Pin
-		? [...accum, ticketToPin(ticket)]
-		: accum), [])
-	,
-);
 
 export const selectView = createSelector(
 	selectTicketsCardDomain,
@@ -71,4 +64,17 @@ export const selectSelectedTemplate = createSelector(
 	selectCurrentModel,
 	selectSelectedTemplateId,
 	selectTemplateById,
+);
+
+export const selectTicketPins = createSelector(
+	selectCurrentTickets,
+	selectView,
+	(tickets, view) => {
+		if (view !== TicketsCardViews.List) return [];
+
+		return tickets.reduce(
+			(accum, ticket) => (ticket.properties?.Pin ? [...accum, ticketToPin(ticket)] : accum),
+			[],
+		);
+	},
 );
