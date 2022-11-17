@@ -128,7 +128,7 @@ const testEmbeddedImage = () => {
 		[null, true],
 	])('Image validator', (data, res) => {
 		test(`${data} characters should return ${res}`, async () => {
-			await expect(YupHelper.types.embeddedImage.isValid(data)).resolves.toBe(res);
+			await expect(YupHelper.types.embeddedImage(true).isValid(data)).resolves.toBe(res);
 		});
 	});
 };
