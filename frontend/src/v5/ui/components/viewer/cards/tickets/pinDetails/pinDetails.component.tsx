@@ -23,6 +23,8 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormControl, FormHelperText } from '@mui/material';
+import { theme } from '@/v5/ui/themes/theme';
+import { hexToGLColor } from '@/v4/helpers/colors';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
 interface PinDetailsProps {
@@ -74,7 +76,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 
 			if (value) {
 				ViewerService.addPin({
-					id: pinId, position: value, colour: [1, 0, 0] });
+					id: pinId, position: value, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
 			}
 		}
 

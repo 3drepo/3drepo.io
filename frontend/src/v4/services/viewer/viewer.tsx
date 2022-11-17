@@ -18,6 +18,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
+import { isString } from 'lodash';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -28,7 +29,6 @@ import {
 import { uuid as UUID } from '../../helpers/uuid';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
-import { isString } from 'lodash';
 
 const UNITY_LOADER_PATH = 'unity/Build/unity.loader.js';
 
@@ -40,7 +40,7 @@ interface IViewerConstructor {
 
 export interface IPin {
 	id: string;
-	type?: string;
+	type?: 'issue' | 'risk' | 'bookmark' | null;
 	position: number[];
 	norm?: number[];
 	colour: number[];
@@ -684,14 +684,9 @@ export class ViewerService {
 		if (isSelected) {
 			UnityUtil.selectPin(id);
 		}
-
-		console.log('added' + JSON.stringify(id));
-
 	}
 
 	public removePin(pin: IPin | string) {
-		console.log('removed' + JSON.stringify(pin));
-
 		UnityUtil.removePin(isString(pin) ? pin : pin.id);
 	}
 
