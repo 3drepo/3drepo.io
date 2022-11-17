@@ -61,17 +61,13 @@ const contentStyling = css`
 
 const buttonContainerStyling = css`
 	.MuiDialogActions-root {
-		box-shadow:
-			0 5px 6px rgb(0 0 0 / 20%),
-			0 3px 16px rgb(0 0 0 / 12%),
-			0 9px 12px rgb(0 0 0 / 14%);
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 
 		.MuiButtonBase-root.MuiButtonBase-root:last-child {
 			${labelButtonPrimaryStyles}
 			line-height: 1;
-			border: solid 1px ${({ theme }) => theme.palette.primary.main};
 
-			&:hover, &:active {
+			&, &:hover, &:active {
 				border: 0;
 			}
 		}
