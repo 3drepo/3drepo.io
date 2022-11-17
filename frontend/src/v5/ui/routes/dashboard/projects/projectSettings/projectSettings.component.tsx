@@ -32,7 +32,7 @@ import { Form, SubmitButton, SuccessMessage } from './projectSettings.styles';
 
 type IFormInput = {
 	projectName: string,
-}
+};
 export const ProjectSettings = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
@@ -76,7 +76,7 @@ export const ProjectSettings = () => {
 		reset(defaultValues);
 		setSubmitWasSuccessful(false);
 	}, [currentProject]);
-	
+
 	useEffect(() => { ProjectsActionsDispatchers.fetch(currentTeamspace); }, []);
 
 	if (_.isEmpty(currentProject)) return (<></>);
@@ -97,7 +97,7 @@ export const ProjectSettings = () => {
 					isPending={isSubmitting}
 				>
 					<FormattedMessage id="project.settings.form.save" defaultMessage="Save" />
-				</SubmitButton> 
+				</SubmitButton>
 			</Form>
 			{submitWasSuccessful && (
 				<SuccessMessage>
@@ -106,5 +106,5 @@ export const ProjectSettings = () => {
 			)}
 			<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists]} />
 		</>
-	)
+	);
 };
