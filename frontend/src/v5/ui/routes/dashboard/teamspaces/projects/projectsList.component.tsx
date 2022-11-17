@@ -21,8 +21,8 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
-import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
 import { CreateProjectModal } from '../../projects/projectsList/createProjectModal/createProjectModal.component';
 
 export const ProjectsList = () => {
