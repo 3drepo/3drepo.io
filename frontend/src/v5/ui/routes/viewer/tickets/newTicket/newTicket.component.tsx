@@ -40,9 +40,12 @@ export const NewTicketCard = () => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const isLoading = !('config' in template);
 
+	const defaultTicket = getDefaultTicket(template);
+
 	const formData = useForm({
 		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
 		mode: 'onChange',
+		defaultValues: defaultTicket,
 	});
 
 	const goBack = () => {
@@ -89,7 +92,8 @@ export const NewTicketCard = () => {
 					<Form onSubmit={formData.handleSubmit(onSubmit)}>
 						<TicketForm
 							template={getEditableProperties(template)}
-							ticket={getDefaultTicket(template)}
+							// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
+							ticket={defaultTicket}
 						/>
 						<BottomArea>
 							<SaveButton disabled={!formData.formState.isValid}>
