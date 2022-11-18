@@ -21,7 +21,7 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
-import { DueDateInput } from '@controls/dueDate/dueDateInput.component';
+import { DueDate } from '@controls/dueDate/dueDate.component';
 import { useParams } from 'react-router-dom';
 import { Ticket, Id, Title, ChipList, IssueProperties, PriorityLevelChip, Assignees } from './ticketItem.styles';
 
@@ -70,7 +70,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{hasIssueProperties && (
 				<IssueProperties>
-					<DueDateInput value={dueDate ?? null} onBlur={onBlurDueDate} />
+					<DueDate value={dueDate ?? null} onBlur={onBlurDueDate} />
 					<PriorityLevelChip state={priority} />
 					<Assignees values={assignees ?? []} onBlur={onBlurAssignees} />
 				</IssueProperties>

@@ -15,32 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
-import { DateContainer, EmptyDateContainer } from './dueDate.styles';
+import { DatePicker } from '@mui/x-date-pickers';
+import { useState } from 'react';
+import { DueDateLabel } from './dueDateLabel.component';
+import { StopBackgroundInteraction } from './dueDate.styles';
 
-type IDueDate = {
+type DueDateProps = {
 	value: number;
-	onClick?: (event) => void;
+	disabled?: boolean;
+	onBlur?: (val) => void;
 };
 
-export const DueDate = ({ value, onClick }: IDueDate): JSX.Element => {
-	if (!value) {
-		return (
-			<EmptyDateContainer onClick={onClick}>
-				<FormattedMessage id="dueDate.emptyText" defaultMessage="Set Due Date" />
-			</EmptyDateContainer>
-		);
-	}
-	const isOverdue = value < Date.now();
-	const formattedDate = formatDate(value);
+export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps) => {
+	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState<number>(initialValue);
+
+	const preventPropagation = (e) => { if (e.key !== 'Escape') e.stopPropagation(); };
+	const handleClose = () => setOpen(false);
+	const onClickDueDate = () => setOpen(!disabled && true);
+	const onDateChange = (newValue) => {
+		setValue(new Date(newValue).getTime());
+		onBlur?.(newValue);
+	};
+
 	return (
-		<DateContainer isOverdue={isOverdue} onClick={onClick}>
-			{isOverdue ? (
-				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
-			) : (
-				<FormattedMessage id="dueDate.due" defaultMessage="Due {date}" values={{ date: formattedDate }} />
-			)}
-		</DateContainer>
+		<div onClick={preventPropagation} aria-hidden="true">
+			<StopBackgroundInteraction open={open} onClick={handleClose} />
+			<DatePicker
+				value={value}
+				open={open}
+				onChange={() => true}
+				onAccept={onDateChange}
+				onClose={handleClose}
+				dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
+				disableHighlightToday
+				renderInput={({ ref, inputRef, ...props }) => (
+					<div ref={inputRef}>
+						<DueDateLabel onClick={onClickDueDate} clickable={!disabled} {...props} value={value} />
+					</div>
+				)}
+			/>
+		</div>
 	);
 };

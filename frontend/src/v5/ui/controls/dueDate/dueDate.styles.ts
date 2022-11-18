@@ -16,15 +16,17 @@
  */
 
 import { Backdrop as MuiBackdrop } from '@mui/material';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const DateContainer = styled.span<{ isOverdue?: boolean; }>`
+export const DateContainer = styled.span<{ isOverdue?: boolean; clickable: boolean }>`
 	font-size: 10px;
 	padding: 3px 0;
 	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
-	&:hover {
-		text-decoration: underline;
-	}
+	${({ clickable }) => clickable && css`
+		&:hover {
+			text-decoration: underline;
+		}
+	`}
 `;
 
 export const EmptyDateContainer = styled(DateContainer)`
