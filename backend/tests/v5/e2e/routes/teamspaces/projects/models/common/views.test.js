@@ -47,7 +47,7 @@ const generateBasicData = () => {
 	return data;
 };
 
-const setupBasicData = async (users, teamspace, project, models) => {
+const setupBasicData = async (users, teamspace, project, models, modelsWithViews) => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
@@ -62,6 +62,11 @@ const setupBasicData = async (users, teamspace, project, models) => {
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 	]);
+
+	await Promise.all(modelsWithViews.map(async (model) => {
+		await ServiceHelper.db.createViews(teamspace, model._id,
+			[model.viewWithThumbnail, model.viewNoThumbnail]);
+	}));
 };
 
 const testViewList = () => {
@@ -70,12 +75,7 @@ const testViewList = () => {
 		const conNoViews = ServiceHelper.generateRandomModel();
 		const fedNoViews = ServiceHelper.generateRandomModel({ isFederation: true });
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed, conNoViews, fedNoViews]);
-
-			await Promise.all([con, fed].map(async (model) => {
-				await ServiceHelper.db.createViews(teamspace, model._id,
-					[model.viewWithThumbnail, model.viewNoThumbnail]);
-			}));
+			await setupBasicData(users, teamspace, project, [con, fed, conNoViews, fedNoViews], [con, fed]);
 		});
 
 		const generateTestData = (isFed) => {
@@ -98,8 +98,8 @@ const testViewList = () => {
 				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: modelWrongType._id }), false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-				['the all parameters are valid', getRoute(), true, [model.viewWithThumbnail, model.viewNoThumbnail]],
-				['the all parameters are valid (no views)', getRoute({ modelId: modelNoViews._id }), true, []],
+				['all the parameters are valid', getRoute(), true, [model.viewWithThumbnail, model.viewNoThumbnail]],
+				['all the parameters are valid (no views)', getRoute({ modelId: modelNoViews._id }), true, []],
 			];
 		};
 
@@ -134,12 +134,7 @@ const testViewThumbnail = () => {
 	describe('View thumbnail', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed]);
-
-			await Promise.all([con, fed].map(async (model) => {
-				await ServiceHelper.db.createViews(teamspace, model._id,
-					[model.viewWithThumbnail, model.viewNoThumbnail]);
-			}));
+			await setupBasicData(users, teamspace, project, [con, fed], [con, fed]);
 		});
 
 		const generateTestData = (isFed) => {
