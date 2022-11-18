@@ -60,6 +60,7 @@ interface IProps {
 	risksShapes: any[];
 	issuesHighlightedShapes: any[];
 	risksHighlightedShapes: any[];
+	ticketPins: any;
 }
 
 export class ViewerCanvas extends PureComponent<IProps, any> {
@@ -181,8 +182,10 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
-			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes
+			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
+			ticketPins
 		} = this.props;
+
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -206,6 +209,10 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 
 		if (!isEqual(measurementPins, prevProps.measurementPins)) {
 			this.renderPins(prevProps.measurementPins, measurementPins);
+		}
+
+		if (!isEqual(ticketPins, prevProps.ticketPins)) {
+			this.renderPins(prevProps.ticketPins, ticketPins);
 		}
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisCoordinates, gisCoordinates)) {

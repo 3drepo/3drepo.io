@@ -18,6 +18,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
+import { isString } from 'lodash';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -37,13 +38,13 @@ interface IViewerConstructor {
 	name?: string;
 }
 
-interface IPin {
+export interface IPin {
 	id: string;
-	type: string;
+	type?: 'issue' | 'risk' | 'bookmark' | null;
 	position: number[];
-	norm: number[];
+	norm?: number[];
 	colour: number[];
-	isSelected: boolean;
+	isSelected?: boolean;
 }
 
 export class ViewerService {
@@ -685,8 +686,8 @@ export class ViewerService {
 		}
 	}
 
-	public removePin(pin: IPin) {
-		UnityUtil.removePin(pin.id);
+	public removePin(pin: IPin | string) {
+		UnityUtil.removePin(isString(pin) ? pin : pin.id);
 	}
 
 	/**
@@ -1135,7 +1136,7 @@ export class ViewerService {
 		UnityUtil.setNavigationOff();
 	}
 
-	public async dropPin() {
+	public async getClickPoint() {
 		return new Promise(async (resolve) => {
 			let pinDropped = false;
 
