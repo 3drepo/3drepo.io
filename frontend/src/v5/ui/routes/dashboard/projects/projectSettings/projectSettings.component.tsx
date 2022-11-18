@@ -36,19 +36,19 @@ type IFormInput = {
 export const ProjectSettings = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
+	const [existingNames, setExistingNames] = useState([]);
 
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const existingNames = ProjectsHooksSelectors.selectCurrentProjects()
-		.map((p) => p.name)
-		.filter((name) => name !== currentProject.name);
 
 	const defaultValues = currentProject.name ? { projectName: currentProject.name } : undefined;
 	const {
 		control,
 		formState: { errors, isValid },
 		handleSubmit,
+		getValues,
 		watch,
+		trigger,
 		reset,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
@@ -56,6 +56,14 @@ export const ProjectSettings = () => {
 		context: { existingNames },
 		defaultValues,
 	});
+
+	const onSubmitError = (error) => {
+		setSubmitWasSuccessful(false);
+		if (projectAlreadyExists(error)) {
+			const { projectName } = getValues();
+			setExistingNames(existingNames.concat(projectName));
+		}
+	};
 
 	const onSubmit: SubmitHandler<IFormInput> = ({ projectName }) => {
 		setIsSubmitting(true);
@@ -65,7 +73,7 @@ export const ProjectSettings = () => {
 			currentProject._id,
 			projectUpdate,
 			() => setSubmitWasSuccessful(true),
-			() => setSubmitWasSuccessful(false),
+			onSubmitError,
 		);
 		setIsSubmitting(false);
 	};
@@ -77,7 +85,7 @@ export const ProjectSettings = () => {
 		setSubmitWasSuccessful(false);
 	}, [currentProject]);
 
-	useEffect(() => { ProjectsActionsDispatchers.fetch(currentTeamspace); }, []);
+	useEffect(() => { trigger('projectName'); }, [existingNames]);
 
 	if (_.isEmpty(currentProject)) return (<></>);
 
