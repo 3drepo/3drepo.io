@@ -27,7 +27,7 @@ export interface PropertyDefinition {
 	deprecated?: boolean;
 }
 
-type Property = Record<string, any> & {Pin: number[] };
+type Property = Record<string, any>;
 
 export interface ITicket {
 	_id: string,
