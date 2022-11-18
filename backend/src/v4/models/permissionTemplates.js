@@ -17,53 +17,33 @@
 
 "use strict";
 
-const PermissionTemplates = {};
 const C = require("../constants");
-const _ = require("lodash");
-const responseCodes = require("../response_codes.js");
 
-PermissionTemplates.get = function(user) {
-	return user.customData.permissionTemplates;
+const PermissionTemplates = {};
+
+PermissionTemplates.get = function() {
+	return [
+		{
+			_id: C.ADMIN_TEMPLATE,
+			permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.VIEWER_TEMPLATE,
+			permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COMMENTER_TEMPLATE,
+			permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+		},
+		{
+			_id: C.COLLABORATOR_TEMPLATE,
+			permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+		}
+	];
 };
 
 PermissionTemplates.findById = function(user, id) {
-	return this.get(user).find(({_id}) => _id === id);
-};
-
-const updatePermissions = async (teamspace, updatedPermissions) => {
-	const User = require("./user");
-	await User.updatePermissionTemplates(teamspace.user, updatedPermissions);
-	return updatedPermissions;
-};
-
-PermissionTemplates.add = async function (teamspace, permission) {
-	const isPermissionInvalid = !Array.isArray(permission.permissions) ||
-	_.intersection(permission.permissions, C.MODEL_PERM_LIST).length !== permission.permissions.length;
-
-	if (this.findById(teamspace, permission._id)) {
-		throw (responseCodes.DUP_PERM_TEMPLATE);
-	}
-
-	if (isPermissionInvalid) {
-		throw (responseCodes.INVALID_PERM);
-	}
-
-	return await updatePermissions(teamspace, this.get(teamspace).concat(permission));
-};
-
-PermissionTemplates.remove = async function(teamspace, id) {
-
-	if(id === C.ADMIN_TEMPLATE) {
-		throw (responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE);
-	}
-
-	const permission = this.findById(teamspace, id);
-
-	if (!permission) {
-		throw (responseCodes.PERM_NOT_FOUND);
-	}
-
-	return await updatePermissions(teamspace, this.get(teamspace).filter(({_id}) => _id !== id));
+	return this.get().find(({_id}) => _id === id);
 };
 
 module.exports = PermissionTemplates;

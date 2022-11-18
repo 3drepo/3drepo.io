@@ -14,27 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
-import { Controller } from 'react-hook-form';
-import { PropertyProps } from './properties.types';
 
-export const CoordsProperty = ({
-	property: { required, name },
-	formError,
-	defaultValue,
-	...props
-}: PropertyProps) => (
-	<Controller
-		name={props.name}
-		render={({ field: { ref, ...field } }) => (
-			<PinDetails
-				label={name}
-				required={required}
-				{...field}
-				{...props}
-				error={!!formError}
-				helperText={formError?.message}
-			/>
-		)}
-	/>
-);
+const { v5Path } = require('../../../interop');
+
+const { updateMany } = require(`${v5Path}/handler/db`);
+
+const run = async () => {
+	await updateMany('admin', 'system.users', {}, { $unset: { 'customData.permissionTemplates': 1 } });
+};
+
+module.exports = run;

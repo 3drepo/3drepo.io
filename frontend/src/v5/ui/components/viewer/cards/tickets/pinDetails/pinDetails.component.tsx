@@ -15,76 +15,112 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add-circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
 import CrossIcon from '@assets/icons/close.svg';
 import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { FormControl, FormHelperText } from '@mui/material';
+import { theme } from '@/v5/ui/themes/theme';
+import { hexToGLColor } from '@/v4/helpers/colors';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
-export const PinDetails = () => {
-	const [isEditMode, setIsEditMode] = useState(false);
-	const [hasPin, setHasPin] = useState(false); // replace with proper pin logic
-	const onClickCancelSetPin = () => setIsEditMode(false);
-	const onClickEditPin = () => setIsEditMode(true);
+interface PinDetailsProps {
+	value?: any;
+	error?: boolean;
+	helperText?: string;
+	label?: string;
+	onChange?: (...args) => void;
+	onBlur?: (...args) => void;
+	required?: boolean;
+}
+
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }:PinDetailsProps) => {
+	const [editMode, setEditMode] = useState(false);
+	const prevValue = useRef(undefined);
+	const pinId = `new-${label}`;
+
+	const cancelEdit = () => {
+		if (!editMode) return;
+		setEditMode(false);
+		ViewerService.clearMeasureMode();
+	};
+
 	const onClickDelete = () => {
-		setHasPin(false);
-		setIsEditMode(false);
+		onChange?.(null);
+		cancelEdit();
 	};
-	const onNewPinSet = () => {
-		if (isEditMode) {
-			setIsEditMode(false);
-			setHasPin(true);
+
+	const onClickEditPin = async () => {
+		setEditMode(true);
+		const pin = await ViewerService.getClickPoint();
+		setEditMode(false);
+
+		//  If the returned pin is undefined, edit mode has been cancelled
+		if (pin !== undefined) {
+			onChange?.(pin);
 		}
 	};
 
-	const EditPinText = () => {
-		if (isEditMode) {
-			return (
-				<SettingLocationText onClick={onClickCancelSetPin}>
-					<FormattedMessage
-						id="tickets.pin.selectLocation"
-						defaultMessage="Select new location on model"
-					/>
-					<CrossIcon />
-				</SettingLocationText>
-			);
+	useEffect(() => {
+		// There seems to be some sort of race condition in react-hook-form
+		// so onBlur cant be called inmmediatly after onchange because the validation wont be there.
+		setTimeout(() => onBlur?.(), 200);
+
+		if (value !== prevValue.current) {
+			if (prevValue.current) {
+				ViewerService.removePin(pinId);
+			}
+
+			if (value) {
+				ViewerService.addPin({
+					id: pinId, position: value, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
+			}
 		}
 
-		return hasPin ? (
-			<PinAction onClick={onClickEditPin}>
-				<PinIcon />
-				<FormattedMessage
-					id="tickets.pin.changeLocation"
-					defaultMessage="Change pin location"
-				/>
-			</PinAction>
-		) : (
-			<PinAction onClick={onClickEditPin}>
-				<CircledPlusIcon />
-				<FormattedMessage
-					id="tickets.pin.addPin"
-					defaultMessage="Add pin"
-				/>
-			</PinAction>
-		);
-	};
+		prevValue.current = value;
+	}, [value]);
+	useEffect(() => () => {
+		ViewerService.clearMeasureMode();
+
+		if (prevValue.current) {
+			ViewerService.removePin(pinId);
+		}
+	}, []);
+
+	const hasPin = !!value;
 
 	return (
-		<PinContainer selected={isEditMode}>
-			<PinName onClick={onNewPinSet /* Temporary hack to simulate seting pin on model */}>
-				<FormattedMessage id="tickets.pin.title" defaultMessage="Pin" />
-			</PinName>
-			<PinActions>
-				<EditPinText />
-				{hasPin && (
-					<PinAction onClick={onClickDelete}>
-						<DeleteIcon />
-						<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
-					</PinAction>
-				)}
-			</PinActions>
-		</PinContainer>
+		<FormControl required={required} error={error}>
+			<PinContainer selected={editMode} error={error}>
+				<PinName onClick={onClickEditPin} required={required}>
+					{label}
+				</PinName>
+				<PinActions>
+					{editMode && (
+						<SettingLocationText onClick={cancelEdit}>
+							<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
+						</SettingLocationText>
+					)}
+
+					{!editMode && (
+						<PinAction onClick={onClickEditPin}>
+							{hasPin && (<><PinIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
+							{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
+						</PinAction>
+					)}
+
+					{hasPin && (
+						<PinAction onClick={onClickDelete}>
+							<DeleteIcon />
+							<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
+						</PinAction>
+					)}
+				</PinActions>
+				<FormHelperText>{helperText}</FormHelperText>
+			</PinContainer>
+		</FormControl>
 	);
 };

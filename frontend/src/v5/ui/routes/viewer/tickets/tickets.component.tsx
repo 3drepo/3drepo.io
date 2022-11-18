@@ -14,26 +14,45 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable jsx-a11y/anchor-is-valid */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 
-import { CardContextComponent, CardContextView } from '@components/viewer/cards/cardContext.component';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import {
+	enableRealtimeContainerNewTicket,
+	enableRealtimeContainerUpdateTicket,
+	enableRealtimeFederationNewTicket,
+	enableRealtimeFederationUpdateTicket,
+} from '@/v5/services/realtime/ticket.events';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
+import { ViewerParams } from '../../routes.constants';
 
-export const Tickets = () => (
-	<CardContextComponent defaultView={TicketsCardViews.List}>
-		<CardContextView cardView={TicketsCardViews.List}>
-			<TicketsListCard />
-		</CardContextView>
-		<CardContextView cardView={TicketsCardViews.Details}>
-			<TicketDetailsCard />
-		</CardContextView>
-		<CardContextView cardView={TicketsCardViews.New}>
-			<NewTicketCard />
-		</CardContextView>
-	</CardContextComponent>
-);
+export const Tickets = () => {
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
+	const view = TicketsCardHooksSelectors.selectView();
+
+	useEffect(() => (
+		isFederation
+			? combineSubscriptions(
+				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
+			) : combineSubscriptions(
+				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
+				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+			)
+	), [containerOrFederation]);
+
+	return (
+		<>
+			{view === TicketsCardViews.List && <TicketsListCard />}
+			{view === TicketsCardViews.Details && <TicketDetailsCard />}
+			{view === TicketsCardViews.New && <NewTicketCard />}
+		</>
+	);
+};

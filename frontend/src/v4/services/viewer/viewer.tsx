@@ -18,6 +18,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
+import { isString } from 'lodash';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -26,9 +27,6 @@ import {
 	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
 import { uuid as UUID } from '../../helpers/uuid';
-import { DialogActions } from '../../modules/dialog';
-import { dispatch, getState } from '../../modules/store';
-import { selectMemory } from '../../modules/viewer';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
 
@@ -40,13 +38,13 @@ interface IViewerConstructor {
 	name?: string;
 }
 
-interface IPin {
+export interface IPin {
 	id: string;
-	type: string;
+	type?: 'issue' | 'risk' | 'bookmark' | null;
 	position: number[];
-	norm: number[];
+	norm?: number[];
 	colour: number[];
-	isSelected: boolean;
+	isSelected?: boolean;
 }
 
 export class ViewerService {
@@ -97,9 +95,9 @@ export class ViewerService {
 		return !!this.element;
 	}
 
-	public setupInstance = (container) => {
+	public setupInstance = (container, onError) => {
 		this.element = container;
-		UnityUtil.init(this.handleUnityError, this.onUnityProgress, this.onModelProgress);
+		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
 		const unityHolder = document.createElement('canvas');
@@ -127,12 +125,6 @@ export class ViewerService {
 	/**
 	 * Initialization
 	 */
-
-	public get memory() {
-		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
-		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
-		return Math.min(assignedMemory, MAX_MEMORY);
-	}
 
 	public init = async () => {
 		if (IS_DEVELOPMENT) {
@@ -251,7 +243,7 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
-		if (this.measureMode !== 'PointPin') {
+		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT) {
 			return;
 		}
 
@@ -321,26 +313,6 @@ export class ViewerService {
 	 * Handlers
 	 */
 
-	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
-		let errorType = '3D Repo Error';
-
-		if (isUnity) {
-			errorType = 'Unity Error';
-		}
-
-		dispatch(DialogActions.showDialog({
-			title: errorType,
-			content: message,
-			onCancel: () => {
-				if (reload) {
-					location.reload();
-				}
-			}
-		}));
-
-		console.error('Unity errored and user canceled reload', message);
-	}
-
 	private onUnityProgress = (progress) => {
 		if (progress === 1) {
 			this.emit(VIEWER_EVENTS.VIEWER_INIT_SUCCESS, progress);
@@ -361,7 +333,7 @@ export class ViewerService {
 		UnityUtil.reset();
 		this.isInitialised = false;
 		this.removeAllListeners();
-		await this.clearMeasureMode();
+		this.clearMeasureMode();
 	}
 
 	/**
@@ -479,19 +451,22 @@ export class ViewerService {
 
 	public async setMeasureMode(mode: string, labels: boolean = true) {
 		await this.isViewerReady();
-
-		this.measureMode = mode;
 		this.measureModeLabels = labels;
 
-		if (!mode) {
-			UnityUtil.disableMeasuringTool();
-			UnityUtil.disableSnapping();
-			return;
+		if (this.measureMode) {
+			this.clearMeasureMode();
+			if (!mode) {
+				return;
+			}
 		}
+
+		this.measureMode = mode;
+
 
 		this.setVisibilityOfMeasurementsLabels(labels);
 		MultiSelect.toggleAreaSelect(false);
 
+		// For point it only checks the pickPointEvent, so the actual measuring tool should be disabled.
 		if (mode === VIEWER_MEASURING_MODE.POINT)  {
 			UnityUtil.disableMeasuringTool();
 		} else {
@@ -502,8 +477,15 @@ export class ViewerService {
 		this.measurementModeChanged(mode);
 	}
 
-	public async clearMeasureMode() {
-		return await this.setMeasureMode('');
+	public clearMeasureMode() {
+		if (!this.measureMode) {
+			return;
+		}
+
+		UnityUtil.disableMeasuringTool();
+		UnityUtil.disableSnapping();
+		this.measureMode = '';
+		this.measurementModeChanged('');
 	}
 
 	public async setVisibilityOfMeasurementsLabels(visible) {
@@ -704,8 +686,8 @@ export class ViewerService {
 		}
 	}
 
-	public removePin(pin: IPin) {
-		UnityUtil.removePin(pin.id);
+	public removePin(pin: IPin | string) {
+		UnityUtil.removePin(isString(pin) ? pin : pin.id);
 	}
 
 	/**
@@ -1152,6 +1134,34 @@ export class ViewerService {
 
 	public setNavigationOff() {
 		UnityUtil.setNavigationOff();
+	}
+
+	public async getClickPoint() {
+		return new Promise(async (resolve) => {
+			let pinDropped = false;
+
+			const onModeChanged = (mode) => {
+				this.off(VIEWER_EVENTS.MEASUREMENT_CREATED, onCreated);
+				this.off(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
+
+				if (!pinDropped) {
+					resolve(undefined);
+				}
+			}
+
+			const onCreated = ({ position}) => {
+				pinDropped = true;
+				resolve(position);
+				this.clearMeasureMode();
+			};
+
+			await this.setMeasureMode(VIEWER_MEASURING_MODE.POINT);
+			await this.enableEdgeSnapping();
+
+			this.on(VIEWER_EVENTS.MEASUREMENT_CREATED, onCreated);
+			this.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
+		})
+
 	}
 }
 

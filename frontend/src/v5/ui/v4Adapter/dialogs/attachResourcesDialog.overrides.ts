@@ -39,6 +39,8 @@ const AttachResourcesContainer = css`
 
 	${DialogTabs} {
 		padding-left: 10px;
+		margin: -30px -30px 0;
+		width: unset;
 		box-shadow: 0px 1px 10px rgba(23, 43, 77, 0.15);
 	}
 
@@ -50,6 +52,8 @@ const AttachResourcesContainer = css`
 					0px 1px 18px rgb(0 0 0 / 12%),
 					0px 3px 5px rgb(0 0 0 / 20%);
 		padding: 8px;
+		margin: 0 -30px -30px;
+		width: unset;
 		box-sizing: border-box;
 
 		${NeutralActionButton} {
@@ -73,10 +77,12 @@ const AttachResourcesContainer = css`
 
 	${AttachResourcesMainContainer} {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-		width: 520px;
+		width: 460px;
 		
 		${Content} {
 			min-height: 160px;
+			margin: 0 -30px;
+			width: 520px;
 		}
 	}
 `;
