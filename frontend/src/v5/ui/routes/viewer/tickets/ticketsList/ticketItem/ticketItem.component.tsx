@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
-import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsCardViews } from '../../tickets.constants';
 import { Ticket, Id, Title, ChipList, Assignees, IssueProperties, PriorityLevelChip } from './ticketItem.styles';
@@ -33,7 +32,6 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
-	const contextValue = useContext(CardContext);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
 	const hasIssueProperties = template?.config?.issueProperties;
@@ -49,7 +47,10 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
 	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
 
-	const expandTicket = () => contextValue.setCardView(TicketsCardViews.Details, { ticketId: ticket._id });
+	const expandTicket = () => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+	};
 
 	return (
 		<Ticket
