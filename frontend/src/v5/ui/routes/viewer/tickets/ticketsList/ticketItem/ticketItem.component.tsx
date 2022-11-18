@@ -22,6 +22,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
+import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Ticket, Id, Title, ChipList, IssueProperties, PriorityLevelChip, Assignees } from './ticketItem.styles';
 
@@ -50,7 +51,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
 	const onBlurAssignees = (newVals) => {
-		if (newVals !== assignees) updateTicketProperty({ Assignees: newVals });
+		if (!isEqual(newVals, assignees)) updateTicketProperty({ Assignees: newVals });
 	};
 	const onBlurDueDate = (newVal) => {
 		if (newVal !== dueDate) updateTicketProperty({ 'Due Date': newVal });
