@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ComponentType } from 'react';
 import CompareIcon from '@mui/icons-material/Compare';
 import TreeIcon from '@mui/icons-material/DeviceHub';
 import GroupsIcon from '@mui/icons-material/GroupWork';
@@ -49,7 +50,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
 	[VIEWER_PANELS.RISKS]: RisksIcon,
-	[VIEWER_PANELS.TICKETS]: TicketsIcon,
+	[VIEWER_PANELS.TICKETS]: TicketsIcon as ComponentType,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,
