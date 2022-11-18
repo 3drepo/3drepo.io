@@ -37,7 +37,7 @@ export const NewTicketMenu = () => {
 	return (
 		<ActionMenu
 			TriggerButton={(
-				<NewTicketButton>
+				<NewTicketButton disabled={!templates?.length}>
 					<AddIcon />
 					<FormattedMessage id="viewer.cards.tickets.newTicket" defaultMessage="New Ticket" />
 				</NewTicketButton>

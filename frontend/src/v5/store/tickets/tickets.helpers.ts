@@ -18,9 +18,10 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { isEmpty } from 'lodash';
-import WarningIcon from '@assets/icons/stepper_error.svg';
-import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
 import { getUrl } from '@/v5/services/api/default';
+import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
+import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
+import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { EditableTicket, ITemplate } from './tickets.types';
 
 export const TITLE_INPUT_NAME = 'title';
@@ -118,14 +119,14 @@ export const filterEmptyTicketValues = (ticket) => {
 };
 
 const moduleTypeProperties = {
-	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: WarningIcon },
-	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }) },
-	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }) },
+	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: SafetibaseIcon },
+	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }), Icon: SequencingIcon },
+	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: CustomModuleIcon },
 };
 
 export const getModulePanelTitle = (module) => {
-	if (module.name) return { title: module.name, Icon: PropetiesIcon };
-	return { Icon: PropetiesIcon, ...moduleTypeProperties[module.type] };
+	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
+	return moduleTypeProperties[module.type];
 };
 
 export const getTicketResourceUrl = (

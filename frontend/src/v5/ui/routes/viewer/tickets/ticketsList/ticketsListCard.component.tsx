@@ -22,12 +22,13 @@ import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles'
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import TicketsIcon from '@mui/icons-material/FormatListBulleted';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
+import { EmptyList } from './ticketsList.styles';
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -53,12 +54,18 @@ export const TicketsListCard = () => {
 	return (
 		<CardContainer>
 			<CardHeader>
-				<TicketsIcon fontSize="small" />
+				<TicketsIcon />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 				<NewTicketMenu />
 			</CardHeader>
 			<CardContent>
-				<TicketsList tickets={tickets} />
+				{tickets.length ? (
+					<TicketsList tickets={tickets} />
+				) : (
+					<EmptyList>
+						<FormattedMessage id="viewer.cards.tickets.emptyList" defaultMessage="No tickets have been created yet" />
+					</EmptyList>
+				)}
 			</CardContent>
 		</CardContainer>
 	);
