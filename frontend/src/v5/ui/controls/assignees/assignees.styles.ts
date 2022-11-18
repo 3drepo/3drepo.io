@@ -47,10 +47,6 @@ export const UserCircle = styled(Avatar)`
 
 export const JobCircle = styled(JobAvatar)`
 	${BaseCircle}
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.base.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
 `;
 
 export const ExtraAssignees = styled(ExtraAssigneesCircle)`

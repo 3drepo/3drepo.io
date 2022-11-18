@@ -16,9 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { JobAvatar as JobAvatarBase } from '@controls/jobAvatar/jobAvatar.component';
+import { StyledIconButton } from '@controls/avatar/avatar.styles';
 
-export const JobAvatar = styled(JobAvatarBase)`
+export const Container = styled(StyledIconButton)`
 	.MuiAvatar-root {
 		background-color: ${({ theme }) => theme.palette.base.main};
 		color: ${({ theme }) => theme.palette.primary.contrast};

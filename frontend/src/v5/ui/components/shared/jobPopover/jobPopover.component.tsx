@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
 import { AvatarWrapper, PopoverContainer, Heading, Data } from '../userPopover/userPopover.styles';
-import { JobAvatar } from './jobPopover.styles';
 
 interface IJobPopover {
 	job: string;
