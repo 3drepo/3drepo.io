@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { useParams } from 'react-router-dom';
+import { TicketsCardViews } from '../../tickets.constants';
 import { Ticket, Id, Title, ChipList, Assignees, IssueProperties, PriorityLevelChip } from './ticketItem.styles';
 
 type TicketItemProps = {
@@ -44,6 +46,12 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	} = ticket;
 	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
 	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
+
+	const expandTicket = () => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+	};
+
 	return (
 		<Ticket
 			onClick={onClick}
@@ -51,7 +59,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			$selected={selected}
 		>
 			<Id>{template?.code}:{number}</Id>
-			<Title>{ticket.title}</Title>
+			<Title onClick={expandTicket}>{ticket.title}</Title>
 			<ChipList>
 				{status && <TicketStatusChip state={status} />}
 				{riskLevel && <RiskLevelChip state={riskLevel} />}

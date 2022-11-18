@@ -16,8 +16,8 @@
  */
 
 import AvatarIcon from '@mui/material/Avatar';
-import { StyledIconButton } from '@controls/avatar/avatar.styles';
 import { getAbbreviation } from '@/v5/store/jobs/jobs.helpers';
+import { Container } from './jobAvatar.styles';
 
 type JobAvatarProps = {
 	job: string;
@@ -27,12 +27,12 @@ type JobAvatarProps = {
 };
 
 export const JobAvatar = ({ job, isButton, ...props }: JobAvatarProps) => (
-	<StyledIconButton
+	<Container
 		$isButton={isButton}
 		{...props}
 	>
 		<AvatarIcon>
 			{getAbbreviation(job)}
 		</AvatarIcon>
-	</StyledIconButton>
+	</Container>
 );
