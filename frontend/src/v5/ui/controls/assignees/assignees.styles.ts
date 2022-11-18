@@ -18,7 +18,14 @@
 import { Avatar } from '@controls/avatar';
 import styled, { css } from 'styled-components';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
+
+export const HiddenSearchSelect = styled(SearchSelect)`
+	height: 0;
+	width: 0;
+	overflow: hidden;
+`;
 
 const BaseCircle = css`
 	margin: 0 -10px 0 0;

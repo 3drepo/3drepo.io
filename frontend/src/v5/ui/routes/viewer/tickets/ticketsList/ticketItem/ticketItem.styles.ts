@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AssigneesSelect } from '@controls/assignees/assigneesSelect/assigneeSelect.component';
+import { Assignees as AssigneesSelect } from '@controls/assignees/assignees.component';
 import { PriorityLevelChip as PriorityLevelChipBase } from '@controls/chip';
 import styled from 'styled-components';
 

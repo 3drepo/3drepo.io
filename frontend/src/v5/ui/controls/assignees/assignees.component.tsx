@@ -14,45 +14,85 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormattedMessage } from 'react-intl';
-import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { memo } from 'react';
-import { isEqual } from 'lodash';
-import { AssigneesList, ExtraAssignees } from './assignees.styles';
-import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
-import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
 
-type AssigneesType = {
-	assignees: string[];
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
+import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
+import { isEqual } from 'lodash';
+import { memo, useState } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
+import { AssigneesList, ExtraAssignees, HiddenSearchSelect } from './assignees.styles';
+import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
+
+type AssigneesProps = {
+	values: string[];
 	max?: number;
-	onClick?: (e) => void;
+	disabled?: boolean;
+	onBlur: (values) => void;
 	className?: string;
 };
 
-export const Assignees = memo(({ assignees = [], max, onClick, className }: AssigneesType) => {
-	let displayedAssignees = assignees;
+export const Assignees = memo(({
+	values: initialValues,
+	onBlur,
+	max = 7,
+	disabled,
+	...props
+}: AssigneesProps) => {
+	const [values, setValues] = useState(initialValues);
+	const [open, setOpen] = useState(false);
+	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
+
+	let displayedAssignees = values;
 	let extraAssignees = [];
-	if (max && assignees.length > max) {
-		displayedAssignees = assignees.slice(0, max - 1);
-		extraAssignees = assignees.slice(max - 1);
+	if (max && values.length > max) {
+		displayedAssignees = values.slice(0, max - 1);
+		extraAssignees = values.slice(max - 1);
 	}
 
+	const preventPropagation = (e) => {
+		if (e.key !== 'Escape') e.stopPropagation();
+	};
+	const onClick = (e) => {
+		preventPropagation(e);
+		setOpen(!disabled && true);
+	};
+	const handleClose = (e) => {
+		preventPropagation(e);
+		setOpen(false);
+		onBlur(values);
+	};
+	const onChange = (e) => setValues(e?.target?.value);
 	return (
-		<AssigneesList className={className} onClick={onClick}>
-			{assignees.length && displayedAssignees.length ? (
+		<AssigneesList onClick={onClick} {...props}>
+			<HiddenSearchSelect
+				value={values}
+				multiple
+				open={open}
+				onClose={handleClose}
+				onChange={onChange}
+			>
+				{(allUsersAndJobs).map(({ value, label }) => (
+					<MultiSelectMenuItem key={value} value={value} onClick={preventPropagation}>
+						{label}
+					</MultiSelectMenuItem>
+				))}
+			</HiddenSearchSelect>
+			{values.length && displayedAssignees.length ? (
 				displayedAssignees.map((assignee) => (
 					<AssigneeListItem key={assignee} assignee={assignee} />
 				))
 			) : (
-				<FormattedMessage id="assignedAssignees.unassigned" defaultMessage="Unassigned" />
+				<FormattedMessage id="assignees.unassigned" defaultMessage="Unassigned" />
 			)}
 			{extraAssignees.length ? (
 				<HoverPopover
-					anchor={(props) => <ExtraAssignees assignees={extraAssignees} {...props} />}
+					anchor={(extraProps) => <ExtraAssignees assignees={extraAssignees} {...extraProps} />}
 				>
 					<ExtraAssigneesPopover assignees={extraAssignees} />
 				</HoverPopover>
 			) : <></>}
 		</AssigneesList>
 	);
-}, (a, b) => isEqual(a.assignees, b.assignees));
+}, (a, b) => isEqual(a.values, b.values));
