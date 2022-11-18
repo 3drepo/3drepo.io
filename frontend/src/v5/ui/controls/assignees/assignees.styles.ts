@@ -67,6 +67,7 @@ export const AssigneesList = styled.div`
 	width: fit-content;
 	user-select: none;
 	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 
 	.MuiButtonBase-root {
 		z-index: 11;
@@ -100,8 +101,4 @@ export const AssigneesList = styled.div`
 	>:last-child .MuiButtonBase-root {
 		margin: 0;
 	}
-`;
-
-export const UnassignedPlaceholder = styled.div`
-	font-size: 10px;
 `;
