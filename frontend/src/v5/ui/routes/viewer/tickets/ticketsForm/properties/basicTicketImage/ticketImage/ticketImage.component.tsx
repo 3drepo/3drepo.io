@@ -22,13 +22,12 @@ import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuIt
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
 import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
 import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
 
 const TriggerButton = ({ hasImage }) => {
 	if (!hasImage) {
@@ -53,8 +52,8 @@ type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSr
 	value?: string,
 };
 export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => {
-	const { props: { ticketId } } = useContext(CardContext);
 	const { teamspace, project, containerOrFederation } = useParams();
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const hasImage = !!value;
 
