@@ -16,22 +16,23 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
-import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import { CardContext } from '@components/viewer/cards/cardContext.component';
 import AddIcon from '@assets/icons/add_circle.svg';
 import { sortBy } from 'lodash';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { ActionMenu, MenuItem, NewTicketButton } from '../ticketsList.styles';
 import { TicketsCardViews } from '../../tickets.constants';
 import { ViewerParams } from '../../../../routes.constants';
 
 export const NewTicketMenu = () => {
-	const contextValue = useContext(CardContext);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 
-	const goToNewTicket = (template) => contextValue.setCardView(TicketsCardViews.New, { template });
+	const goToNewTicket = ({ _id }) => {
+		TicketsCardActionsDispatchers.setSelectedTemplate(_id);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.New);
+	};
 
 	return (
 		<ActionMenu

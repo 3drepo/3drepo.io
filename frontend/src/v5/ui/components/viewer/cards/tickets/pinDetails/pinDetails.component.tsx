@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
-import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import { useEffect, useRef, useState } from 'react';
+import CircledPlusIcon from '@assets/icons/outlined/add-circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
 import CrossIcon from '@assets/icons/close.svg';
 import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormControl, FormHelperText } from '@mui/material';
+import { theme } from '@/v5/ui/themes/theme';
+import { hexToGLColor } from '@/v4/helpers/colors';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
 interface PinDetailsProps {
@@ -37,6 +39,8 @@ interface PinDetailsProps {
 
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }:PinDetailsProps) => {
 	const [editMode, setEditMode] = useState(false);
+	const prevValue = useRef(undefined);
+	const pinId = `new-${label}`;
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -51,7 +55,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 
 	const onClickEditPin = async () => {
 		setEditMode(true);
-		const pin = await ViewerService.dropPin();
+		const pin = await ViewerService.getClickPoint();
 		setEditMode(false);
 
 		//  If the returned pin is undefined, edit mode has been cancelled
@@ -64,8 +68,27 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 		// There seems to be some sort of race condition in react-hook-form
 		// so onBlur cant be called inmmediatly after onchange because the validation wont be there.
 		setTimeout(() => onBlur?.(), 200);
+
+		if (value !== prevValue.current) {
+			if (prevValue.current) {
+				ViewerService.removePin(pinId);
+			}
+
+			if (value) {
+				ViewerService.addPin({
+					id: pinId, position: value, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
+			}
+		}
+
+		prevValue.current = value;
 	}, [value]);
-	useEffect(() => () => { ViewerService.clearMeasureMode(); }, []);
+	useEffect(() => () => {
+		ViewerService.clearMeasureMode();
+
+		if (prevValue.current) {
+			ViewerService.removePin(pinId);
+		}
+	}, []);
 
 	const hasPin = !!value;
 
