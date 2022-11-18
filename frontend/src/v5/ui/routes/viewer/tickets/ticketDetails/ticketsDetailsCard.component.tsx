@@ -47,7 +47,8 @@ export const TicketDetailsCard = () => {
 	const changeTicketIndex = (delta: number) => {
 		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
 		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details, updatedId);
+		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 	};
 
 	const goPrev = () => changeTicketIndex(-1);

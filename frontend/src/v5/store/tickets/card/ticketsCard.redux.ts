@@ -22,8 +22,9 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
-	selectTicket: ['ticketId'],
-	setCardView: ['view', 'ticketId', 'templateId'],
+	setSelectedTicket: ['ticketId'],
+	setSelectedTemplate: ['templateId'],
+	setCardView: ['view'],
 }, { prefix: 'TICKETSCARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -38,25 +39,30 @@ export const INITIAL_STATE: ITicketsCardState = {
 	view: TicketsCardViews.List,
 };
 
-export const selectTicket = (state: ITicketsCardState, { ticketId }: SelectTicketAction) => {
+export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
 	state.selectedTicketId = ticketId;
 };
 
-export const setCardView = (state: ITicketsCardState, { view, ticketId, templateId }: SetCardViewAction) => {
-	state.view = view;
-	state.selectedTicketId = ticketId;
+export const setSelectedTemplate = (state: ITicketsCardState, { templateId }: SetSelectedTemplateAction) => {
 	state.selectedTemplateId = templateId;
 };
 
+export const setCardView = (state: ITicketsCardState, { view }: SetCardViewAction) => {
+	state.view = view;
+};
+
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
-	[TicketsCardTypes.SELECT_TICKET]: selectTicket,
+	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
+	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 }));
 
-export type SelectTicketAction = Action<'SELECT_TICKET'> & { ticketId: string };
-export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, ticketId?: string, templateId? };
+export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
+export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { templateId: string };
+export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews };
 
 export interface ITicketsCardActionCreators {
-	selectTicket: (ticketId: string) => SelectTicketAction,
-	setCardView : (view: TicketsCardViews, ticketId?: string, templateId?: string) => SelectTicketAction,
+	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
+	setSelectedTemplate: (templateId: string) => SetSelectedTicketAction,
+	setCardView : (view: TicketsCardViews) => SetSelectedTicketAction,
 }

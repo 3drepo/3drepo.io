@@ -57,10 +57,11 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
 
 	const onTicketClick = (ticket: ITicket) => {
-		if (ticketIsSelected(ticket)) {
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details, ticket._id);
-		} else {
-			TicketsCardActionsDispatchers.selectTicket(ticket._id);
+		const wasSelected = ticketIsSelected(ticket);
+
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+		if (wasSelected) {
+			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 		}
 	};
 

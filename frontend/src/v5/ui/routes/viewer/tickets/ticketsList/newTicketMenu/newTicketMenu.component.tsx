@@ -29,7 +29,10 @@ export const NewTicketMenu = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 
-	const goToNewTicket = ({ _id }) => TicketsCardActionsDispatchers.setCardView(TicketsCardViews.New, null, _id);
+	const goToNewTicket = ({ _id }) => {
+		TicketsCardActionsDispatchers.setSelectedTemplate(_id);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.New);
+	};
 
 	return (
 		<ActionMenu

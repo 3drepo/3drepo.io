@@ -53,7 +53,8 @@ export const NewTicketCard = () => {
 	};
 
 	const goToTicketDetails = (ticketId) => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details, ticketId);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 	};
 
 	const onSubmit = (vals) => {
