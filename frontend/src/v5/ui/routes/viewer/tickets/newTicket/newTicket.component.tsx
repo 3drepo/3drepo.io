@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
-import TicketsIcon from '@mui/icons-material/FormatListBulleted';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
@@ -74,7 +74,7 @@ export const NewTicketCard = () => {
 	return (
 		<CardContainer>
 			<CardHeader>
-				<TicketsIcon fontSize="small" />
+				<TicketsIcon />
 				<FormattedMessage
 					id="viewer.cards.newTicketTitle"
 					defaultMessage="New {template} ticket"

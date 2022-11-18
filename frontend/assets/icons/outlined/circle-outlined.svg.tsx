@@ -14,34 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import TextFieldBase from '@mui/material/TextField';
+type IProps = {
+	className?: string,
+};
 
-export const TextField = styled(TextFieldBase)`
-	caret-color: transparent;
-
-	button, .MuiInputAdornment {
-		color: currentColor;
-	}
-
-	.MuiInputBase-root {
-		padding: 0;
-		&, & * {
-			cursor: pointer;
-		}
-		&.Mui-disabled {
-			&, & * {
-				cursor: context-menu;
-			}
-		}
-	}
-
-	.MuiIconButton-edgeEnd {
-		margin: 0;
-		padding: 5px 10px;
-
-		&:hover {
-			background-color: transparent;
-		}
-	}
-`;
+export default ({ className }: IProps) => (
+	<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" className={className}>
+		<circle cx="512" cy="512" r="476" stroke="currentColor" strokeWidth="72" />
+	</svg>
+);

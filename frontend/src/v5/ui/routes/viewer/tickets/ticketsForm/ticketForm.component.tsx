@@ -18,7 +18,7 @@ import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/sto
 import { get } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
-import PropetiesIcon from '@assets/icons/outlined/properties-outlined.svg';
+import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
@@ -97,6 +97,7 @@ export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 						id: 'customTicket.newTicket.titlePlaceholder',
 						defaultMessage: 'Ticket name',
 					})}
+					inputProps={{ autoFocus: true }}
 					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>

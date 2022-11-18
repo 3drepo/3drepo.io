@@ -16,6 +16,7 @@
  */
 
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
@@ -24,7 +25,8 @@ import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/c
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
-import { Ticket, Id, Title, ChipList, IssueProperties, PriorityLevelChip, Assignees } from './ticketItem.styles';
+import { TicketsCardViews } from '../../tickets.constants';
+import { Ticket, Id, Title, ChipList, Assignees, IssueProperties, PriorityLevelChip } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -56,6 +58,12 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const onBlurDueDate = (newVal) => {
 		if (newVal !== dueDate) updateTicketProperty({ 'Due Date': newVal });
 	};
+
+	const expandTicket = () => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+	};
+
 	return (
 		<Ticket
 			onClick={onClick}
@@ -63,7 +71,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			$selected={selected}
 		>
 			<Id>{template?.code}:{number}</Id>
-			<Title>{ticket.title}</Title>
+			<Title onClick={expandTicket}>{ticket.title}</Title>
 			<ChipList>
 				{status && <TicketStatusChip state={status} />}
 				{riskLevel && <RiskLevelChip state={riskLevel} />}

@@ -14,34 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled from 'styled-components';
-import TextFieldBase from '@mui/material/TextField';
+import { StyledIconButton } from '@controls/avatar/avatar.styles';
 
-export const TextField = styled(TextFieldBase)`
-	caret-color: transparent;
-
-	button, .MuiInputAdornment {
-		color: currentColor;
-	}
-
-	.MuiInputBase-root {
-		padding: 0;
-		&, & * {
-			cursor: pointer;
-		}
-		&.Mui-disabled {
-			&, & * {
-				cursor: context-menu;
-			}
-		}
-	}
-
-	.MuiIconButton-edgeEnd {
-		margin: 0;
-		padding: 5px 10px;
-
-		&:hover {
-			background-color: transparent;
-		}
+export const Container = styled(StyledIconButton)`
+	.MuiAvatar-root {
+		background-color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;

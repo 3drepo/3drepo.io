@@ -20,6 +20,7 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { FilterChip } from '@controls/chip';
+import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
@@ -44,7 +45,7 @@ export const Filters = styled.div`
 `;
 
 export const TemplateChip = styled(FilterChip)`
-	letter-spacing: .5px;
+	border-radius: 5px;
 	&:hover {
 		border-color: ${({ theme }) => theme.palette.primary.main};
 	}
@@ -83,4 +84,20 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
+`;
+
+export const EmptyList = styled(DashedContainer).attrs({
+	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	borderRadius: 5,
+	dashSize: 2,
+	gapSize: 2,
+	strokeWidth: 2,
+	zeroPadding: true,
+})`
+	text-align: center;
+	font-size: 13px;
+	background-color: transparent;
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 10px;
+	box-sizing: border-box;
 `;
