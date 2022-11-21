@@ -33,6 +33,8 @@ import { INotification } from './components/notificationItem/notificationItem.co
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
 import { NotificationsIcon, NotificationsList, NotificationWeekHeader } from './notifications.styles';
+import V5NotificationsIcon from '@assets/icons/notifications.svg';
+import { isV5 } from '@/v4/helpers/isV5';
 
 interface IProps {
 	notifications: INotification[];
@@ -71,7 +73,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
 		>
-			<NotificationsIcon fontSize="small" />
+			{isV5() ? <V5NotificationsIcon /> : <NotificationsIcon fontSize="small" />}
 		</Badge>
 	</IconButton>
 );
