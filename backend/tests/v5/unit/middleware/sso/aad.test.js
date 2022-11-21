@@ -147,16 +147,6 @@ const testVerifyNewEmail = () => {
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExists}`);
 		});
 
-		test(`should respond with error code ${errorCodes.emailExistsWithSSO} if the email already exists by another user (SSO user)`, async () => {
-			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: { sso: { _id: generateRandomString() } } });
-			const mockCB = jest.fn();
-			await Aad.verifyNewEmail(req, res, mockCB);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.emailExistsWithSSO}`);
-		});
-
 		test('should call next if email is available', async () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByQuery.mockRejectedValueOnce(templates.userNotFound);

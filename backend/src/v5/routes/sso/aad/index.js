@@ -174,9 +174,9 @@ const establishRoutes = () => {
 	 *           schema:
 	 *             type: object
 	 *             required:
-	 *             - password
+	 *               - password
 	 *             properties:
-	 *               - name: password
+	 *               password:
 	 *                 type: string
 	 *                 description: The new password of the user
 	 *                 example: password123

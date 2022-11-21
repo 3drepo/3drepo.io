@@ -301,7 +301,7 @@ const testLinkPost = () => {
 		});
 
 		test('should link user if email is taken by the logged in user', async () => {
-			const userDataFromAad = { mail: testUser.email, id: generateRandomString() };
+			const userDataFromAad = { mail: userEmail, id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
 
