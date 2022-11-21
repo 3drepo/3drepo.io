@@ -125,10 +125,11 @@ const testTimestamp = () => {
 
 const testEmbeddedImage = () => {
 	describe.each([
-		[null, true],
-	])('Image validator', (data, res) => {
+		[null, true, true],
+		[null, false, false],
+	])('Image validator', (data, isNullable, res) => {
 		test(`${data} characters should return ${res}`, async () => {
-			await expect(YupHelper.types.embeddedImage(true).isValid(data)).resolves.toBe(res);
+			await expect(YupHelper.types.embeddedImage(isNullable).isValid(data)).resolves.toBe(res);
 		});
 	});
 };
