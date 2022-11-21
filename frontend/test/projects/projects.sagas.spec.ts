@@ -71,7 +71,7 @@ describe('Teamspaces: sagas', () => {
 		it('should call deleteProject endpoint with 404 and open alert modal', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
-				.reply(400)
+				.reply(404)
 
 			await expectSaga(ProjectsSaga.default)
 				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
@@ -138,7 +138,7 @@ describe('Teamspaces: sagas', () => {
 		it('should call updateProject endpoint with 404 and open alert modal', async () => {
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
-				.reply(400)
+				.reply(404)
 
 			await expectSaga(ProjectsSaga.default)
 				.dispatch(ProjectsActions.updateProject(teamspace, projectId, project, onSuccess, onError))
