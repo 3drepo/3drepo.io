@@ -25,7 +25,7 @@ jobs:
         env:
           RABBITMQ_DEFAULT_USER: guest
           RABBITMQ_DEFAULT_PASS: guest
-          
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -48,22 +48,11 @@ jobs:
         run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Backend test:v5
-        run: cd backend ; yarn test:v5 
+        run: cd backend ; yarn test:v5
 
   run-backend-lint:
     name: Run Backend lint
     runs-on: ubuntu-latest
-    services:
-      rabbitmq:
-        image: rabbitmq:3.10.5-management
-        ports:
-          - "5672:5672"
-          - "15671:15671"
-          - "15672:15672"
-        env:
-          RABBITMQ_DEFAULT_USER: guest
-          RABBITMQ_DEFAULT_PASS: guest
-          
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -118,7 +107,7 @@ jobs:
   run-frontend-lint:
     name: Run Frontend lint
     runs-on: ubuntu-latest
-       
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
