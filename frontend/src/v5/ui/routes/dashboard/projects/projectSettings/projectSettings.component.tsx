@@ -41,7 +41,7 @@ export const ProjectSettings = () => {
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
-	const defaultValues = currentProject.name ? { projectName: currentProject.name } : undefined;
+	const defaultValues = { projectName: currentProject.name || '' };
 	const {
 		control,
 		formState: { errors, isValid },
@@ -85,7 +85,9 @@ export const ProjectSettings = () => {
 		setSubmitWasSuccessful(false);
 	}, [currentProject]);
 
-	useEffect(() => { trigger('projectName'); }, [existingNames]);
+	useEffect(() => {
+		if(existingNames.length) trigger('projectName');
+	}, [existingNames]);
 
 	if (_.isEmpty(currentProject)) return (<></>);
 
