@@ -33,15 +33,25 @@ type IViewpoint = {
 	camera: ICamera;
 };
 
+type ITicketView = {
+	value: IViewpoint;
+	label: string;
+	error: boolean;
+	helperText: string;
+	required: boolean;
+	onBlur: () => void;
+	onChange: (newValue) => void;
+};
+
 export const TicketView = ({
 	value,
 	label,
 	error,
-	required,
 	helperText,
+	required,
 	onBlur,
 	onChange,
-}) => {
+}: ITicketView) => {
 	const { teamspace, containerOrFederation } = useParams<DashboardParams>();
 	const convertCameraToUnity = (
 		{ position, up, forward: view_dir, type, size: orthographicSize }: ICamera,
