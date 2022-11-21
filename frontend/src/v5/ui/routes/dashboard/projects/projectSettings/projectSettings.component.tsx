@@ -86,7 +86,7 @@ export const ProjectSettings = () => {
 	}, [currentProject]);
 
 	useEffect(() => {
-		if(existingNames.length) trigger('projectName');
+		if (existingNames.length) trigger('projectName');
 	}, [existingNames]);
 
 	if (_.isEmpty(currentProject)) return (<></>);
