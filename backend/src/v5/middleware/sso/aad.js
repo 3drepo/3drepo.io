@@ -93,7 +93,7 @@ Aad.verifyNewEmail = async (req, res, next) => {
 		const user = await getUserByQuery({ 'customData.email': mail, user: { $ne: username } },
 			{ 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
-			throw user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
+			throw errorCodes.emailExists;
 		} else {
 			req.body = { email: mail, sso: { type: providers.AAD, id } };
 			await next();

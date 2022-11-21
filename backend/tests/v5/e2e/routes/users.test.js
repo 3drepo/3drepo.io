@@ -19,9 +19,10 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomURL } = require('../../helper/services');
 const session = require('supertest-session');
 const fs = require('fs');
+const User = require('../../../../src/v5/models/users');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -30,6 +31,9 @@ const { loginPolicy } = require(`${src}/utils/config`);
 
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
+
+jest.mock('../../../../src/v5/services/sso/aad');
+const Aad = require(`${src}/services/sso/aad`);
 
 let testSession;
 let server;
@@ -48,6 +52,7 @@ const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
 const userEmailSso = 'exampleSso@email.com';
+const ssoUserId = generateRandomString();
 const userEmail2 = 'example2@email.com';
 const fsAvatarData = generateRandomString();
 const gridFsAvatarData = generateRandomString();
@@ -58,9 +63,9 @@ const expiredPasswordToken = { token: generateRandomString(), expiredAt: new Dat
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
-		ServiceHelper.db.createUser(ssoTestUser, [], { email: userEmailSso,
-			sso: { type: providers.AAD,
-				id: generateRandomString() } }),
+		ServiceHelper.db.createUser(ssoTestUser, [], {
+			email: userEmailSso, sso: { type: providers.AAD, id: ssoUserId },
+		}),
 		ServiceHelper.db.createUser(userWithFsAvatar, []),
 		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
 		ServiceHelper.db.createUser(nonVerifiedUser, [], {
@@ -270,15 +275,16 @@ const testGetProfile = () => {
 
 		describe('With valid authentication (SSO user)', () => {
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: ssoTestUser.user, password: ssoTestUser.password });
+				Aad.getUserDetails.mockResolvedValueOnce({ data: { mail: userEmailSso, id: ssoUserId } });
+				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
 			});
 			afterAll(async () => {
 				await testSession.post('/v5/logout/');
 			});
 
-			test('should return the user profile if the user is logged in (SSO user)', async () => {
+			test('should return the user profile if the user is logged in', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(ssoTestUser, undefined, false, true));
+				expect(res.body).toEqual(formatUserProfile(ssoTestUser, userEmailSso, false, true));
 			});
 		});
 	});
@@ -383,7 +389,8 @@ const testUpdateProfile = () => {
 
 		describe('With valid authentication (SSO user)', () => {
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: ssoTestUser.user, password: ssoTestUser.password });
+				Aad.getUserDetails.mockResolvedValueOnce({ data: { mail: userEmailSso, id: ssoUserId } });
+				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
 			});
 			afterAll(async () => {
 				await testSession.post('/v5/logout/');
@@ -562,8 +569,12 @@ const testForgotPassword = () => {
 		});
 
 		test('should not send email but return ok if user is an SSO user', async () => {
+			await User.linkToSso(ssoTestUser.user, userEmailSso, {
+				type: generateRandomString(), id: generateRandomString(),
+			});
 			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })
 				.expect(templates.ok.status);
+			await User.unlinkFromSso(ssoTestUser.user, ssoTestUser.password);
 			expect(Mailer.sendEmail).not.toHaveBeenCalled();
 		});
 
