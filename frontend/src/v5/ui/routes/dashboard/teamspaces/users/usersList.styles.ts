@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRouteMatch } from 'react-router-dom';
-import { discardTab } from '@/v5/services/routing/routing';
-import { FormattedMessage } from 'react-intl';
-import { Container, Link } from '../navigationTabs.styles';
 
-export const TeamspaceNavigation = (): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardTab(url);
+import { Users } from '@/v4/routes/users';
+import styled from 'styled-components';
 
-	return (
-		<Container>
-			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
-			<Link to={`${url}/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>
-		</Container>
-	);
-};
+export const V4UsersList = styled(Users)`
+`;

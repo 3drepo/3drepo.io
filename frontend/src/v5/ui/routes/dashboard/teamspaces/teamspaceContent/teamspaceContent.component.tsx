@@ -22,6 +22,7 @@ import { Route } from '@/v5/services/routing/route.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { ProjectsList } from '../projects/projectsList.component';
+import { UsersList } from '../users/usersList.component';
 
 export const TeamspaceContent = () => {
 	let { path } = useRouteMatch();
@@ -37,7 +38,7 @@ export const TeamspaceContent = () => {
 					Settings
 				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })} exact path={`${path}/t/users`}>
-					Users
+					<UsersList />
 				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })} exact path={`${path}/t/jobs`}>
 					Jobs
