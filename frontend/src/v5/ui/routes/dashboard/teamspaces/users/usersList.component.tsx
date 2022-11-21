@@ -15,10 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UserManagementActions } from '@/v4/modules/userManagement';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { V4UsersList } from './usersList.styles';
 
 export const UsersList = () => {
-	console.log('users list');
+	const dispatch = useDispatch();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+
+	useEffect(() => {
+		if (!teamspace) return;
+
+		dispatch(UserManagementActions.fetchTeamspaceUsers());
+	}, [teamspace]);
 	return (
 		<V4UsersList />
 	);
