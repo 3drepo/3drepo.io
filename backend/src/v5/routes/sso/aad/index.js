@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, checkStateIsValid, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticate, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
@@ -56,7 +56,7 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, notLoggedIn, checkStateIsValid, hasAssociatedAccount,
+	router.get(authenticateRedirectEndpoint, notLoggedIn, hasAssociatedAccount,
 		updateSession, redirectToStateURL);
 
 	/**
@@ -110,7 +110,7 @@ const establishRoutes = () => {
 	 */
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(signupRedirectEndpoint, checkStateIsValid, verifyNewUserDetails, signUpPost, redirectToStateURL);
+	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
 	return router;
 };

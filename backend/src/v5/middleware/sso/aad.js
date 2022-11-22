@@ -27,6 +27,16 @@ const { validateMany } = require('../common');
 
 const Aad = {};
 
+const checkStateIsValid = async (req, res, next) => {
+	try {
+		req.state = JSON.parse(req.query.state);
+		await next();
+	} catch (err) {
+		logger.logError('Failed to parse req.query.state');
+		respond(req, res, templates.unknown);
+	}
+};
+
 const redirectWithError = (res, url, errorCode) => {
 	const urlRedirect = new URL(url);
 	urlRedirect.searchParams.set('error', errorCode);
@@ -56,9 +66,7 @@ const authenticate = (redirectUri) => async (req, res) => {
 	}
 };
 
-Aad.verifyNewUserDetails = async (req, res, next) => {
-	const state = JSON.parse(req.query.state);
-
+const verifyNewUserDetails = async (req, res, next) => {
 	try {
 		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
@@ -68,7 +76,7 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 			throw user.customData.sso ? errorCodes.emailExistsWithSSO : errorCodes.emailExists;
 		} else {
 			req.body = {
-				...state,
+				...req.state,
 				email: mail,
 				firstName: givenName,
 				lastName: surname,
@@ -79,14 +87,15 @@ Aad.verifyNewUserDetails = async (req, res, next) => {
 			await next();
 		}
 	} catch (errorCode) {
-		redirectWithError(res, state.redirectUri, errorCode);
+		redirectWithError(res, req.state.redirectUri, errorCode);
 	}
 };
 
+Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails]);
+
 Aad.redirectToStateURL = (req, res) => {
-	const state = JSON.parse(req.query.state);
 	try {
-		res.redirect(state.redirectUri);
+		res.redirect(req.state.redirectUri);
 	} catch (err) {
 		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
 		respond(req, res, templates.unknown);
@@ -95,9 +104,7 @@ Aad.redirectToStateURL = (req, res) => {
 
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
 
-Aad.hasAssociatedAccount = async (req, res, next) => {
-	const state = JSON.parse(req.query.state);
-
+const hasAssociatedAccount = async (req, res, next) => {
 	try {
 		const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
 			req.session.pkceCodes?.verifier);
@@ -115,18 +122,10 @@ Aad.hasAssociatedAccount = async (req, res, next) => {
 
 		if (errorCode === templates.userNotFound) errorCode = errorCodes.userNotFound;
 
-		redirectWithError(res, state.redirectUri, errorCode);
+		redirectWithError(res, req.state.redirectUri, errorCode);
 	}
 };
 
-Aad.checkStateIsValid = async (req, res, next) => {
-	try {
-		JSON.parse(req.query.state);
-		await next();
-	} catch (err) {
-		logger.logError('Failed to parse req.query.state');
-		respond(req, res, templates.unknown);
-	}
-};
+Aad.hasAssociatedAccount = validateMany([checkStateIsValid, hasAssociatedAccount]);
 
 module.exports = Aad;

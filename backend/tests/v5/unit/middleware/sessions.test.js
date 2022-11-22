@@ -66,7 +66,7 @@ const testCreateSession = () => {
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
 			{
-				username: request.body.user,
+				username: request.loginData.username,
 				sessionID: request.sessionID,
 				ipAddress: request.ips[0] || request.ip,
 				userAgent: request.headers['user-agent'],
@@ -76,6 +76,7 @@ const testCreateSession = () => {
 	};
 
 	const req = {
+		loginData: { username: generateRandomString() },
 		session: { regenerate: (callback) => { callback(); }, cookie: { domain: undefined } },
 		body: { user: 'user1' },
 		sessionID: '123',
@@ -205,7 +206,7 @@ const testUpdateSession = () => {
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
 			{
-				username: request.body.user,
+				username: request.loginData.username,
 				sessionID: request.sessionID,
 				ipAddress: request.ips[0] || request.ip,
 				userAgent: request.headers['user-agent'],
@@ -215,6 +216,7 @@ const testUpdateSession = () => {
 	};
 
 	const req = {
+		loginData: { username: generateRandomString() },
 		session: { cookie: { domain: generateRandomString() } },
 		body: { user: 'user1' },
 		sessionID: '123',
