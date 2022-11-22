@@ -42,21 +42,16 @@ export const Assignees = memo(({
 }: AssigneesProps) => {
 	const [values, setValues] = useState(initialValues);
 	const [open, setOpen] = useState(false);
+	const listedAssignees = initialValues.slice(0, max - 1);
+	const overflowAssignees = initialValues.slice(max - 1);
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
-
-	let displayedAssignees = values;
-	let extraAssignees = [];
-	if (max && values.length > max) {
-		displayedAssignees = values.slice(0, max - 1);
-		extraAssignees = values.slice(max - 1);
-	}
 
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
 	};
 	const onClick = (e) => {
 		preventPropagation(e);
-		setOpen(!disabled && true);
+		setOpen(!disabled);
 	};
 	const handleClose = (e) => {
 		preventPropagation(e);
@@ -64,6 +59,7 @@ export const Assignees = memo(({
 		onBlur(values);
 	};
 	const onChange = (e) => setValues(e?.target?.value);
+
 	return (
 		<AssigneesList onClick={onClick} {...props}>
 			<HiddenSearchSelect
@@ -79,18 +75,18 @@ export const Assignees = memo(({
 					</MultiSelectMenuItem>
 				))}
 			</HiddenSearchSelect>
-			{values.length && displayedAssignees.length ? (
-				displayedAssignees.map((assignee) => (
+			{listedAssignees.length ? (
+				listedAssignees.map((assignee) => (
 					<AssigneeListItem key={assignee} assignee={assignee} />
 				))
 			) : (
 				<FormattedMessage id="assignees.unassigned" defaultMessage="Unassigned" />
 			)}
-			{extraAssignees.length ? (
+			{overflowAssignees.length ? (
 				<HoverPopover
-					anchor={(extraProps) => <ExtraAssignees assignees={extraAssignees} {...extraProps} />}
+					anchor={(extraProps) => <ExtraAssignees assignees={overflowAssignees} {...extraProps} />}
 				>
-					<ExtraAssigneesPopover assignees={extraAssignees} />
+					<ExtraAssigneesPopover assignees={overflowAssignees} />
 				</HoverPopover>
 			) : <></>}
 		</AssigneesList>
