@@ -34,3 +34,5 @@ export const formatTime = (time) => time.replace('@', formatMessage({
 	id: 'form.dateTime.at',
 	defaultMessage: 'at',
 }));
+
+export const formatDayOfWeek = (day) => day[0].toUpperCase() + day[1];

@@ -17,6 +17,7 @@
 
 import { DatePicker } from '@mui/x-date-pickers';
 import { useState } from 'react';
+import { formatDayOfWeek } from '@controls/formDatePicker/dateFormatHelper';
 import { FilledDueDateLabel } from './label/filledLabel.component';
 import { EmptyDueDateLabel } from './label/emptyLabel.component';
 import { StopBackgroundInteraction } from './dueDate.styles';
@@ -50,7 +51,7 @@ export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps)
 				onChange={() => true}
 				onAccept={onDateChange}
 				onClose={handleClose}
-				dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
+				dayOfWeekFormatter={formatDayOfWeek}
 				disableHighlightToday
 				renderInput={({ ref, inputRef, ...props }) => (
 					<div ref={inputRef}>
