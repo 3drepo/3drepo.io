@@ -68,6 +68,19 @@ describe('Projects: store', () => {
 			expect(projectIsIncluded).toBeTruthy();
 		});
 
+		it('should update project', () => {
+			createAndAddProjectToStore();
+			const mockProject = projectMockFactory();
+			dispatch(ProjectsActions.createProjectSuccess(teamspace, mockProject));
+
+			const newName = mockProject.name + mockProject.name;
+			const update = { name: newName };
+			dispatch(ProjectsActions.updateProjectSuccess(teamspace, mockProject._id, update));
+
+			const updatedProject = selectCurrentProjects(getState()).find(({ _id }) => _id === mockProject._id);
+			expect(updatedProject.name).toEqual(newName);
+		});
+
 		it('should delete project', () => {
 			const mockProjectId = "123";
 			createAndAddProjectToStore({ _id: mockProjectId });
