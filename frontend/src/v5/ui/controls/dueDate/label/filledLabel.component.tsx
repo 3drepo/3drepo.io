@@ -17,26 +17,14 @@
 
 import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { DateContainer, EmptyDateContainer } from './dueDate.styles';
+import { IEmptyDueDateLabel } from './emptyLabel.component';
+import { DateContainer } from './label.styles';
 
-type IDueDateLabel = {
+type IFilledDueDateLabel = IEmptyDueDateLabel & {
 	value: number;
-	disabled: boolean;
-	onClick?: (event) => void;
 };
 
-export const DueDateLabel = ({ value, disabled, onClick }: IDueDateLabel): JSX.Element => {
-	if (!value) {
-		return (
-			<EmptyDateContainer disabled={disabled} onClick={onClick}>
-				{disabled ? (
-					<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
-				) : (
-					<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
-				)}
-			</EmptyDateContainer>
-		);
-	}
+export const FilledDueDateLabel = ({ value, disabled, onClick }: IFilledDueDateLabel): JSX.Element => {
 	const isOverdue = value < Date.now();
 	const formattedDate = formatDate(value);
 	return (

@@ -17,7 +17,8 @@
 
 import { DatePicker } from '@mui/x-date-pickers';
 import { useState } from 'react';
-import { DueDateLabel } from './dueDateLabel.component';
+import { FilledDueDateLabel } from './label/filledLabel.component';
+import { EmptyDueDateLabel } from './label/emptyLabel.component';
 import { StopBackgroundInteraction } from './dueDate.styles';
 
 type DueDateProps = {
@@ -44,6 +45,8 @@ export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps)
 			<DatePicker
 				value={value}
 				open={open}
+				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
+				// (onChange triggers when changing year, onAccept only when a date is finally chosen)
 				onChange={() => true}
 				onAccept={onDateChange}
 				onClose={handleClose}
@@ -51,7 +54,11 @@ export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps)
 				disableHighlightToday
 				renderInput={({ ref, inputRef, ...props }) => (
 					<div ref={inputRef}>
-						<DueDateLabel onClick={onClickDueDate} clickable={!disabled} {...props} value={value} />
+						{ value ? (
+							<FilledDueDateLabel onClick={onClickDueDate} disabled={!disabled} {...props} value={value} />
+						) : (
+							<EmptyDueDateLabel onClick={onClickDueDate} disabled={!disabled} {...props} />
+						)}
 					</div>
 				)}
 			/>

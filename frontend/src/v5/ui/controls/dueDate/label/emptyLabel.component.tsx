@@ -15,9 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Backdrop as MuiBackdrop } from '@mui/material';
-import styled from 'styled-components';
+import { FormattedMessage } from 'react-intl';
+import { EmptyDateContainer } from './label.styles';
 
-export const StopBackgroundInteraction = styled(MuiBackdrop)`
-	z-index: 15;
-`;
+export type IEmptyDueDateLabel = {
+	disabled: boolean;
+	onClick: (event) => void;
+};
+
+export const EmptyDueDateLabel = ({ disabled, onClick }: IEmptyDueDateLabel): JSX.Element => (
+	<EmptyDateContainer disabled={disabled} onClick={onClick}>
+		{disabled ? (
+			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
+		) : (
+			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
+		)}
+	</EmptyDateContainer>
+);
