@@ -436,6 +436,30 @@ const testModelEventsListener = () => {
 			);
 		};
 
+		test(`Should fail gracefully on error if there is an ${events.UPDATE_TICKET} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: { _id: generateRandomString(), title: generateRandomString() },
+				author: generateRandomString(),
+				timestamp: generateRandomDate(),
+				changes: generateRandomString(),
+			};
+
+			ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.UPDATE_TICKET, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
+			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
+				data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+		});
+
 		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} (Container)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
