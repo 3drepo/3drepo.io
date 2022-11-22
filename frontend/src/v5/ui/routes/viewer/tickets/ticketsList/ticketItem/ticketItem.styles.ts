@@ -61,7 +61,7 @@ export const Assignees = styled(AssigneesSelect)`
 	margin-left: auto;
 `;
 
-export const IssueProperties = styled.div`
+export const IssuePropertiesRow = styled.div`
 	margin: 7px 0 0;
 	display: inline-flex;
 	width: 100%;

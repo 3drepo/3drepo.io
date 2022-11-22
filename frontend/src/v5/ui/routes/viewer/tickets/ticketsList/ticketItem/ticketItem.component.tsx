@@ -25,8 +25,8 @@ import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/c
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
-import { TicketsCardViews } from '../../tickets.constants';
-import { Ticket, Id, Title, ChipList, Assignees, IssueProperties, PriorityLevelChip } from './ticketItem.styles';
+import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
+import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow, PriorityLevelChip } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -42,21 +42,21 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const {
 		number,
 		properties: {
-			Status: status,
-			Priority: priority,
-			Assignees: assignees,
-			'Due Date': dueDate,
+			[IssueProperties.STATUS]: status,
+			[IssueProperties.PRIORITY]: priority,
+			[IssueProperties.ASSIGNEES]: assignees,
+			[IssueProperties.DUE_DATE]: dueDate,
 		},
 	} = ticket;
-	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
-	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
+	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
+	const treatmentStatus = ticket.modules?.safetibase?.[SafetibaseProperties.TREATMENT_STATUS];
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
 	const onBlurAssignees = (newVals) => {
-		if (!isEqual(newVals, assignees)) updateTicketProperty({ Assignees: newVals });
+		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
 	};
 	const onBlurDueDate = (newVal) => {
-		if (newVal !== dueDate) updateTicketProperty({ 'Due Date': newVal });
+		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
 	const expandTicket = () => {
@@ -78,11 +78,11 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				{treatmentStatus && <TreatmentLevelChip state={treatmentStatus} />}
 			</ChipList>
 			{hasIssueProperties && (
-				<IssueProperties>
+				<IssuePropertiesRow>
 					<DueDate value={dueDate ?? null} onBlur={onBlurDueDate} />
 					<PriorityLevelChip state={priority} />
 					<Assignees values={assignees ?? []} onBlur={onBlurAssignees} />
-				</IssueProperties>
+				</IssuePropertiesRow>
 			)}
 		</Ticket>
 	);
