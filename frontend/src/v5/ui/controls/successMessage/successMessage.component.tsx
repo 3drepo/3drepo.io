@@ -19,10 +19,11 @@ import { PostSubmitSuccessfulMessage, TickIcon } from './successMessage.styles';
 
 type SuccessMessageProps = {
 	children: any;
+	className?: string;
 };
 
-export const SuccessMessage = ({ children }: SuccessMessageProps) => (
-	<PostSubmitSuccessfulMessage>
+export const SuccessMessage = ({ children, className }: SuccessMessageProps) => (
+	<PostSubmitSuccessfulMessage className={className}>
 		<TickIcon />
 		{children}
 	</PostSubmitSuccessfulMessage>

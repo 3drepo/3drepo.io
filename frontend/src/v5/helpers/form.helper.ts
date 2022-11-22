@@ -35,7 +35,7 @@ export const dirtyValues = (
 };
 
 // eslint-disable-next-line max-len
-const isBasicValue = (value: any) => !!(value?.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);
+const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);
 // value.toDate assumes that is a wrapped date type.
 
 /**
@@ -98,7 +98,7 @@ export const removeEmptyObjects = (tree) => {
 	return Object.keys(tree).reduce((accum, key) => {
 		const value = tree[key];
 
-		if (_.isEmpty(value) && value != null) {
+		if (_.isEmpty(value) && value !== null) {
 			return accum;
 		}
 

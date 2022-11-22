@@ -22,7 +22,8 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { getValidators, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -64,7 +65,7 @@ export const TicketDetailsCard = () => {
 		);
 	}, [ticket._id]);
 
-	if (!ticket) return <></>;
+	if (!ticket) return (<></>);
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),

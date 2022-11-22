@@ -21,4 +21,5 @@ export interface PropertyProps {
 	defaultValue?: any;
 	name: string;
 	formError?: any;
+	onBlur?: (...args) => void;
 }

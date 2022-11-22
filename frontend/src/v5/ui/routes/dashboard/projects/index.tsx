@@ -30,6 +30,7 @@ import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
 import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
 import { Content, DashboardScroll } from './projects.styles';
+import { ProjectSettings } from './projectSettings/projectSettings.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -57,7 +58,7 @@ export const ProjectContent = () => {
 						Tasks
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} exact path={`${path}/t/project_settings`}>
-						Project settings
+						<ProjectSettings />
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} exact path={`${path}/t/project_permissions`}>
 						<ProjectPermissions />

@@ -14,30 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Controller } from 'react-hook-form';
-import { PropertyProps } from './properties.types';
-import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
-export const ImageProperty = ({
-	property: { name: title, readOnly, required },
-	name,
-	defaultValue,
-	formError,
-	...props
-}: PropertyProps) => (
-	<Controller
-		name={name}
-		defaultValue={defaultValue}
-		render={({ field: { ref, ...field } }) => (
-			<TicketImage
-				{...field}
-				title={title}
-				disabled={readOnly}
-				required={required}
-				error={!!formError}
-				helperText={formError?.message}
-				{...props}
-			/>
-		)}
-	/>
-);
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
+import { SuccessMessage as SuccessMessageBase } from '@controls/successMessage/successMessage.component';
+import styled from 'styled-components';
+
+export const SubmitButton = styled(SubmitButtonBase)`
+	width: fit-content;
+	margin: 0 0 0 8px;
+`;
+
+export const Form = styled.form`
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	width: 470px;
+`;
+
+export const SuccessMessage = styled(SuccessMessageBase)`
+	width: 470px;
+`;

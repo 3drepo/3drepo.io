@@ -14,30 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Controller } from 'react-hook-form';
-import { PropertyProps } from './properties.types';
-import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
-export const ImageProperty = ({
-	property: { name: title, readOnly, required },
-	name,
-	defaultValue,
-	formError,
-	...props
-}: PropertyProps) => (
-	<Controller
-		name={name}
-		defaultValue={defaultValue}
-		render={({ field: { ref, ...field } }) => (
-			<TicketImage
-				{...field}
-				title={title}
-				disabled={readOnly}
-				required={required}
-				error={!!formError}
-				helperText={formError?.message}
-				{...props}
-			/>
-		)}
-	/>
-);
+import { ChangeEvent } from 'react';
+
+export const uploadFile = (accept) => new Promise((resolve) => {
+	const input = document.createElement('input');
+	input.type = 'file';
+	input.accept = accept;
+
+	const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
+		if (!event.target.files.length) return null;
+		return event.target.files[0];
+	};
+
+	input.onchange = (e) => {
+		const file = getFileFromInputEvent(e as any);
+		resolve(file);
+	};
+
+	input.click();
+});
