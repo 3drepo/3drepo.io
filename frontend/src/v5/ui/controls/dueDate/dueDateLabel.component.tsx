@@ -21,18 +21,18 @@ import { DateContainer, EmptyDateContainer } from './dueDate.styles';
 
 type IDueDateLabel = {
 	value: number;
-	clickable: boolean;
+	disabled: boolean;
 	onClick?: (event) => void;
 };
 
-export const DueDateLabel = ({ value, clickable, onClick }: IDueDateLabel): JSX.Element => {
+export const DueDateLabel = ({ value, disabled, onClick }: IDueDateLabel): JSX.Element => {
 	if (!value) {
 		return (
-			<EmptyDateContainer clickable={clickable} onClick={onClick}>
-				{clickable ? (
-					<FormattedMessage id="dueDate.emptyText.clickable" defaultMessage="Set Due Date" />
+			<EmptyDateContainer disabled={disabled} onClick={onClick}>
+				{disabled ? (
+					<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
 				) : (
-					<FormattedMessage id="dueDate.emptyText.nonClickable" defaultMessage="Due Date Unset" />
+					<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
 				)}
 			</EmptyDateContainer>
 		);
@@ -40,7 +40,7 @@ export const DueDateLabel = ({ value, clickable, onClick }: IDueDateLabel): JSX.
 	const isOverdue = value < Date.now();
 	const formattedDate = formatDate(value);
 	return (
-		<DateContainer clickable={clickable} isOverdue={isOverdue} onClick={onClick}>
+		<DateContainer disabled={disabled} isOverdue={isOverdue} onClick={onClick}>
 			{isOverdue ? (
 				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
 			) : (

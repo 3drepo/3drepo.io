@@ -18,11 +18,11 @@
 import { Backdrop as MuiBackdrop } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const DateContainer = styled.span<{ isOverdue?: boolean; clickable: boolean }>`
+export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
 	font-size: 10px;
 	padding: 3px 0;
 	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
-	${({ clickable }) => clickable && css`
+	${({ disabled }) => disabled && css`
 		&:hover {
 			text-decoration: underline;
 		}
