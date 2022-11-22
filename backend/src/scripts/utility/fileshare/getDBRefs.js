@@ -25,6 +25,8 @@ const { find } = require(`${v5Path}/handler/db`);
 const Path = require('path');
 const FS = require('fs');
 
+const DEFAULT_OUT_FILE = 'links.csv';
+
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
@@ -35,7 +37,7 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	writeStream.end(resolve);
 });
 
-const run = async (dbNames, outFile) => {
+const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 	if (!dbNames) {
 		throw new Error('Database name must be provided to execute this script');
 	}
@@ -67,7 +69,7 @@ const genYargs = (yargs) => {
 	}).option('outFile', {
 		describe: 'Name of output file',
 		type: 'string',
-		default: 'links.csv',
+		default: DEFAULT_OUT_FILE,
 	});
 	return yargs.command(
 		commandName,
