@@ -1,66 +1,59 @@
 /**
- * IndexedDbCache is a utility class that acts as the counterpart of an
- * IndexedDbCache Component in Unity. When the Component is started in Unity,
- * an instance of this class is created by UnityUtil and attached to the
- * unityInstance. This reference is used by functions in the indexedDb.jslib
- * plug-in in Unity to make calls directly to this instance from the viewer.
- * This class receives requests to create transactions against IndexedDb from
- * the plugin, and returns their results through SendMessage.
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * An IndexedDbCache instance acts as the counterpart of an IndexedDbCache
+ * Component in Unity. When the Component is started in Unity, an instance of
+ * this class is created by UnityUtil and attached to the unityInstance.
+ * This reference is used by functions in the indexedDb.jslib plug-in in Unity
+ * to make calls directly from the viewer. This class receives requests to
+ * create transactions against IndexedDb, and returns their results through
+ * SendMessage. In practice, IndexedDb operations are offloaded to a WebWorker,
+ * so this implementation is primarily used to maintain the worker and translate
+ * between it and Unity.
  */
 export class IndexedDbCache {
 	constructor(unityInstance: any, gameObjectName: string) {
 		this.unityInstance = unityInstance;
 		this.gameObjectName = gameObjectName;
-		this.objectStoreName = '3DRepoCache';
-		this.transactions = {};
-		this.memoryCache = {};
+		this.createWorker();
 		this.clearStats();
-		this.createIndexedDbCache();
-        setInterval(()=>{
+		setInterval(() => {
 			this.printStats();
-			this.clearStats();	
-		},1000);
+			this.clearStats();
+		}, 1000);
 	}
 
-	/** The unityInstance used for SendMessage */
+	/** The Unity Instance created by the loader; this is used for SendMessage */
 	unityInstance: any;
 
-	/** Reference to the open database. */
-	db: any;
-
-	/** Name of the object store for the cache. This is set once when the db is created. */
-	objectStoreName: string;
-
-	/** The gameObject which should be passed to SendMessage when making the callbacks to the viewer */
+	/** The gameObject which should be passed to SendMessage when making the
+	 * callbacks to the viewer */
 	gameObjectName: string;
 
 	/** Resources for in-progress get requests */
 	transactions: any;
 
-	/** A dicationary of records that are waiting to be committed. */
-	memoryCache: any;
-
-	/** The running read transaction all get requests should be added to. */
-	readTransaction: any;
-
-	/** The object store for readTransaction. */
-	objectStore: any;
-
-	/** Is there a running readwrite transaction? If so don't start another one or we may commit records multiple times. */
-	committing: boolean;
-
-	/** The local index is used to keep track of which keys are in the object store(s).
-	 * This is initialised when the database is opened and updated when set requests are made. 
-	 * It is used to perform early rejects on get requests we know will fail (because there is no key in the store),
-	 * avoiding expensive database transactions. */
-	index: any;
-
+	/** The WebWorker that handles the IndexedDb requests. Each instance of this
+	 * class gets its own worker. */
 	worker: any;
 
 	stats: {
 		readtimes: number[],
-		writetimes: number[],
-		copytimes: number[],
 		starttimes: {}
 	};
 
@@ -69,44 +62,39 @@ export class IndexedDbCache {
 		this.stats.readtimes.forEach((x) => { meanReadTime += x; });
 		meanReadTime /= this.stats.readtimes.length;
 
-		let meanCopyTime = 0;
-		this.stats.copytimes.forEach((x) => { meanCopyTime += x; });
-		meanCopyTime /= this.stats.copytimes.length;
-
-		let meanWriteTime = 0;
-		this.stats.writetimes.forEach((x) => { meanWriteTime += x; });
-		meanWriteTime /= this.stats.writetimes.length;
-
-		console.log(`g54234, ${meanReadTime}, ${this.stats.readtimes.length}, ${meanCopyTime}, ${this.stats.copytimes.length}, ${meanWriteTime}, ${this.stats.writetimes.length}`);
+		console.log(`g54234, ${meanReadTime}, ${this.stats.readtimes.length}, ${0}, ${0}`);
 	}
 
-	clearStats(){
+	clearStats() {
 		this.stats = {
 			readtimes: [],
-			writetimes: [],
-			copytimes: [],
-			starttimes: {}
+			starttimes: {},
 		};
 	}
 
-	createIndexedDbCache() {
-		this.worker = new Worker(new URL("https://3drepo.local/dist/unityworker.js"));
-		this.worker.onmessage = (ev) =>{
+	// IndexedDb actions are offloaded to a WebWorker. This is for performance
+	// reasons. WebWorkers run individual scripts in their own thread, and
+	// interact with the main thread (of their creator) by posting messages.
+	// When messages are passed, a deep copy is created.
 
-			if(ev.data.type == "OnIndexedDbUpdated"){
+	createWorker() {
+		this.worker = new Worker(new URL('https://3drepo.local/dist/unityworker.js'));
+		this.worker.onmessage = (ev) => {
+			// The state of the IndexedDb has changed, so we may need to pause
+			// requests.
+			if (ev.data.type === 'OnIndexedDbUpdated') {
 				this.sendIndexedDbUpdated(ev.data.parms);
 			}
 
-			if(ev.data.type == "OnCommitted"){
-				delete this.memoryCache[ev.data.key];
-				this.stats.writetimes.push(performance.now() - this.stats.starttimes[ev.data.key]);
-			}
+			// Data has been retrieved from the worker. The result will have
+			// been copied into this thread, so we don't need to do anything
+			// on the worker side, but will need to store it until Unity
+			// has allocated the memory in which to recieve it.
+			if (ev.data.type === 'OnGetTransactionComplete') {
+				const { id } = ev.data.parms;
+				const { size } = ev.data.parms;
 
-			if(ev.data.type == "OnGetTransactionComplete"){
-				const id = ev.data.parms.id;
-				const size = ev.data.parms.size;
-
-				if(ev.data.parms.size >= 0){
+				if (ev.data.parms.size >= 0) {
 					this.transactions[id] = ev.data.parms.result;
 				}
 
@@ -114,11 +102,11 @@ export class IndexedDbCache {
 
 				this.sendGetTransactionComplete({
 					id,
-					size
+					size,
 				});
 			}
-		}
-		this.worker.postMessage({message:"createIndexedDb"});
+		};
+		this.worker.postMessage({ message: 'createIndexedDb' });
 	}
 
 	// When a byte[] array (or other managed object) is passed to an imported
@@ -127,7 +115,7 @@ export class IndexedDbCache {
 	// ArrayBuffer, to get or set the contents.
 
 	/**
-	 * Starts a put transaction into the open database.
+	 * Requests data be inserted into the database with a put request.
 	 */
 	createSetTransaction(id: number, key: string, offset: number, size: number) {
 		// This snippet extracts the contents of the managed array. Slice is
@@ -146,59 +134,49 @@ export class IndexedDbCache {
 
 		this.stats.copytimes.push(performance.now() - start);
 
-		// Store in local memory until we have time to write to indexeddb
-
-		this.memoryCache[key] = record;
-
 		this.stats.starttimes[key] = performance.now();
 
 		this.worker.postMessage({
-			message: "Set",
-			key: key,
-			record: record // This will perform a deep copy
+			message: 'Set',
+			key,
+			record,
 		});
 
-		// Get requests will return from memory first, so its safe to mark
-		// this request as completed.
+		// Once the message has been posted, the memory is copied so for set
+		// requests we can tell Unity we are done right away.
 
 		this.sendSetTransactionComplete({
 			id,
 		});
 	}
 
+	/**
+	 * Requests data from the database with the specified key. In practice, the
+	 * worker will maintain a local memory cache, but the implementation is
+	 * invisible from this side.
+	 * The id is used to reference this specific transaction between calls to
+	 * createGetTransaction, getTransactionData & releaseTransaction. Multiple
+	 * transactions may access the the same key but may not share an id.
+	 */
 	createGetTransaction(id: number, key: string) {
 		if (this.transactions[id] !== undefined) {
 			console.error('Found duplicate transaction Id');
 		}
 
-		// Before anything else, check if the key is in our local memory cache
+		this.stats.starttimes[id] = performance.now();
 
-		const record = this.memoryCache[key];
-		if (record !== undefined) {
-			this.transactions[id] = record;
-			this.sendGetTransactionComplete({
-				id,
-				size: record.size,
-			});
-		} else {
-			this.stats.starttimes[id] = performance.now();
-
-			this.worker.postMessage({message: "Get", id: id, key: key});
-		}
+		this.worker.postMessage({
+			message: 'Get',
+			id,
+			key,
+		});
 	}
 
-	sendSetTransactionComplete(parms: any) {
-		this.unityInstance.SendMessage(this.gameObjectName, 'OnSetTransactionComplete', JSON.stringify(parms));
-	}
-
-	sendGetTransactionComplete(parms: any) {
-		this.unityInstance.SendMessage(this.gameObjectName, 'OnGetTransactionComplete', JSON.stringify(parms));
-	}
-
-	sendIndexedDbUpdated(parms: any) {
-		this.unityInstance.SendMessage(this.gameObjectName, 'OnIndexedDbUpdated', JSON.stringify(parms));
-	}
-
+	/**
+	 * Copies the data returned from a get request into the heap at offset.
+	 * Once this is done the local resources should be released by calling
+	 * releaseTransaction.
+	 */
 	getTransactionData(id: number, offset: number) {
 		this.unityInstance.Module.HEAP8.set( // Set copies the contents of the TypedArray into the destination ArrayBuffer
 			this.transactions[id].data,
@@ -217,20 +195,21 @@ export class IndexedDbCache {
 		delete this.transactions[id];
 	}
 
-	benchmarkIndexeddb(){
+	// These calls update the Unity viewer
 
-		const transaction = this.db.transaction(this.objectStoreName,"readonly");
-		const objectStore = transaction.objectStore(this.objectStoreName);
+	sendSetTransactionComplete(parms: any) {
+		this.unityInstance.SendMessage(this.gameObjectName, 'OnSetTransactionComplete', JSON.stringify(parms));
+	}
 
-		for(var i = 0 ; i < 100; i++){
-			var key = Math.floor(Object.keys(this.index).length * Math.random());
-			
-			const start = performance.now();
-			const request = objectStore.get(key);
+	sendGetTransactionComplete(parms: any) {
+		this.unityInstance.SendMessage(this.gameObjectName, 'OnGetTransactionComplete', JSON.stringify(parms));
+	}
 
-			request.onsuccess = (ev) =>{
-				console.log(`Time ${performance.now() - start}`);
-			};
-		}
+	sendIndexedDbUpdated(parms: any) {
+		this.unityInstance.SendMessage(this.gameObjectName, 'OnIndexedDbUpdated', JSON.stringify(parms));
+	}
+
+	benchmarkIndexeddb() {
+
 	}
 }

@@ -1,4 +1,31 @@
-class IndexedDbCache {
+/**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * This entire script/file is run inside a WebWorker to service requests from
+ * an instance of IndexedDbCache. IndexedDbCache posts messages to this worker
+ * which are received through the locally scoped onmessage function. Messages
+ * are sent back with self.postMessage, where self is the WorkerGlobalScope
+ * the worker runs in. IndexedDbCacheWorker is a convenience class that
+ * encompasses the actual IndexedDb API usage. An instance is created for use
+ * by this worker.
+ */
+
+class IndexedDbCacheWorker {
 	constructor() {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
@@ -9,46 +36,44 @@ class IndexedDbCache {
 		// to commit the memory cache.
 		// This is because writes are typically started after all reads are done
 		// but if no reads happen for a while then no writes will be dispatched!
-		setInterval(()=>{
-			if(this.readTransaction === undefined){ 
+		setInterval(() => {
+			if (this.readTransaction === undefined) {
 				this.commitMemoryCache();
 			}
 		},
 		2000);
-        setInterval(()=>{
-			this.printStats();
-			this.clearStats();	
-		},1000);
 	}
 
 	/** Reference to the open database. */
 	db: any;
 
-	/** Name of the object store for the cache. This is set once when the db is created. */
+	/** Name of the object store for the cache. This is set once when the db is
+	 * created. */
 	objectStoreName: string;
 
-	/** A dicationary of records that are waiting to be committed. */
+	/** A dictionary of records that are waiting to be committed. */
 	memoryCache: any;
 
-	/** The running read transaction all get requests should be added to. */
+	/** The running read transaction that all get requests should be added to. */
 	readTransaction: any;
 
 	/** The object store for readTransaction. */
 	objectStore: any;
 
-	/** Is there a running readwrite transaction? If so don't start another one or we may commit records multiple times. */
+	/** Is there a running readwrite transaction? If so don't start another one
+	 * or we may commit records multiple times (wasting time). */
 	committing: boolean;
 
-	/** The local index is used to keep track of which keys are in the object store(s).
-	 * This is initialised when the database is opened and updated when set requests are made. 
-	 * It is used to perform early rejects on get requests we know will fail (because there is no key in the store),
+	/** The local index is used to keep track of which keys are in the object
+	 * store(s). This is initialised when the database is opened and updated
+	 * when set requests are made. It is used to perform early rejects on get
+	 * requests we know will fail (because there is no key in the store),
 	 * avoiding expensive database transactions. */
 	index: any;
 
 	stats: {
 		readtimes: number[],
 		writetimes: number[],
-		copytimes: number[]
 	};
 
 	printStats() {
@@ -56,22 +81,17 @@ class IndexedDbCache {
 		this.stats.readtimes.forEach((x) => { meanReadTime += x; });
 		meanReadTime /= this.stats.readtimes.length;
 
-		let meanCopyTime = 0;
-		this.stats.copytimes.forEach((x) => { meanCopyTime += x; });
-		meanCopyTime /= this.stats.copytimes.length;
-
 		let meanWriteTime = 0;
 		this.stats.writetimes.forEach((x) => { meanWriteTime += x; });
 		meanWriteTime /= this.stats.writetimes.length;
 
-		console.log(`g54234, ${meanReadTime}, ${this.stats.readtimes.length}, ${meanCopyTime}, ${this.stats.copytimes.length}, ${meanWriteTime}, ${this.stats.writetimes.length}`);
+		console.log(`g54234, ${meanReadTime}, ${this.stats.readtimes.length}, ${meanWriteTime}, ${this.stats.writetimes.length}`);
 	}
 
-	clearStats(){
+	clearStats() {
 		this.stats = {
 			readtimes: [],
 			writetimes: [],
-			copytimes: []
 		};
 	}
 
@@ -95,12 +115,12 @@ class IndexedDbCache {
 			this.db = event.target.result;
 
 			// Populate our index
-			const transaction = this.db.transaction(this.objectStoreName, 'readonly')
+			const transaction = this.db.transaction(this.objectStoreName, 'readonly');
 			const objectStore = transaction.objectStore(this.objectStoreName);
-			const request = objectStore.getAllKeys();
-			request.onsuccess = () =>{
+			const req = objectStore.getAllKeys();
+			req.onsuccess = () => {
 				this.index = {};
-				request.result.forEach(x => this.index[x] = 1) // Give any value here - we will only check the existence of the key (property)
+				req.result.forEach((x) => this.index[x] = 1); // Give any value here - we will only check the existence of the key (property)
 				this.sendIndexedDbUpdated({
 					state: 'Open',
 				});
@@ -135,119 +155,118 @@ class IndexedDbCache {
 			this.sendGetTransactionComplete({
 				id,
 				size: record.size,
-                result: record
+				result: record,
+			});
+		} else if (!this.index.hasOwnProperty(key)) {
+			// We know the database doesnt have the key, so return immediately again
+			this.sendGetTransactionComplete({
+				id,
+				size: -1,
 			});
 		} else {
-			// The key is not local, see if its in the index
-			if (!this.index.hasOwnProperty(key)){
-				// We know the database doesnt have the key, so return immediately
+			// We believe the key is in the database, so go ahead and request it
+			try {
+				// It is more efficient to have one transaction of multiple
+				// requests, than many transactions of one request, so append
+				// requests to the existing transaction so long as it is
+				// alive.
+				if (this.readTransaction === undefined) {
+					this.readTransaction = this.db.transaction(this.objectStoreName, 'readonly');
+					this.objectStore = this.readTransaction.objectStore(this.objectStoreName);
+				}
+
+				const start = performance.now();
+
+				const request = this.objectStore.get(key);
+
+				request.onsuccess = () => {
+					this.stats.readtimes.push(performance.now() - start);
+					if (request.result === undefined) {
+						this.sendGetTransactionComplete({ // Where a key is not found, we want to handle this outside the error chain
+							id,
+							size: -1, // -1 indicates that no key was found or the transaction was aborted
+						});
+					} else {
+						this.sendGetTransactionComplete({
+							id,
+							size: request.result.size,
+							result: request.result,
+						});
+					}
+				};
+
+				// The request can fail in two ways: an exception is thrown when
+				// creating the request (handled below) or during processing of
+				// the request (handled here).
+				// In both cases the request needs to be marked as complete on
+				// the viewer to prevent the viewer stalling.
+
+				request.onerror = (ev) => {
+					console.error(`IndexedDb Cache Error: ${ev.currentTarget.error}`);
+					this.sendGetTransactionComplete({
+						id,
+						size: -1,
+					});
+					ev.stopPropagation(); // Don't bubble the error up
+				};
+
+				// Make sure we clean up the transaction reference no matter how
+				// it completes, otherwise we will keep adding requests to an
+				// invalid transaction.
+				// If we end up with multiple parallel read transactions for a
+				// while because we've cleared this reference, that is no
+				// problem.
+
+				this.readTransaction.oncomplete = () => {
+					this.readTransaction = undefined;
+					this.commitMemoryCache();
+				};
+
+				this.readTransaction.onerror = () => {
+					this.readTransaction = undefined;
+				};
+
+				this.readTransaction.onabort = () => {
+					this.readTransaction = undefined;
+				};
+			} catch (e) {
+				if (e.name === 'InvalidStateError' && this.db !== undefined) {
+					this.recreateIndexedDb();
+				}
+
+				// Requests aren't queued anywhere, so if one fails it won't
+				// automatically try again, so signal the viewer that the request
+				// has been handled to prevent stalling.
+
 				this.sendGetTransactionComplete({
 					id,
 					size: -1,
 				});
-			}else{ // We believe the key is in the database, so go ahead and request it
-				// The key is not local, so request it from indexeddb
-				try {
-					// It is more efficient to have one transaction of multiple
-					// requests, than many transactions of one request, so append
-					// requests to the existing transaction so long as it is
-					// alive.
 
-					if (this.readTransaction === undefined) {
-						this.readTransaction = this.db.transaction(this.objectStoreName, 'readonly');
-						this.objectStore = this.readTransaction.objectStore(this.objectStoreName);
-					}
-
-					const start = performance.now();
-
-					const request = this.objectStore.get(key);
-
-					// When the transaction is complete, we keep the result around so
-					// the viewer can request the contents asynchronously.
-
-					request.onsuccess = () => {
-						this.stats.readtimes.push(performance.now() - start);
-						if (request.result === undefined) {
-							this.sendGetTransactionComplete({ // Where a key is not found, we want to handle this outside the error chain
-								id,
-								size: -1, // -1 indicates that no key was found or the transaction was aborted
-							});
-						} else {
-							this.sendGetTransactionComplete({
-								id,
-								size: request.result.size,
-                                result: request.result
-							});
-						}
-					};
-
-					// Make sure we clean up the transaction reference no matter how
-					// it completes.
-					// If we end up with multiple parallel read transactions for a
-					// while because we've cleared this reference, that is no problem.
-
-					this.readTransaction.oncomplete = () => {
-						this.readTransaction = undefined;
-						this.commitMemoryCache();
-					};
-
-					this.readTransaction.onerror = () => {
-						this.readTransaction = undefined;
-					};
-
-					this.readTransaction.onabort = () => {
-						this.readTransaction = undefined;
-					};
-
-					// The request can fail in two ways: an exception is thrown when
-					// creating the request (handled below) or during processing of the
-					// request (handled here).
-					// In both cases the transaction needs to be marked as complete on
-					// the viewer to prevent stalling.
-
-					request.onerror = (ev) => {
-						console.error(`IndexedDb Cache Error: ${ev.currentTarget.error}`);
-						this.sendGetTransactionComplete({
-							id,
-							size: -1,
-						});
-						ev.stopPropagation(); // don't bubble error up
-					};
-				} catch (e) {
-					if (e.name === 'InvalidStateError' && this.db !== undefined) {
-						this.recreateIndexedDb();
-					}
-
-					this.sendGetTransactionComplete({ // Where a key is not found, we want to handle this outside the error chain
-						id,
-						size: -1, // -1 indicates that no key was found or the transaction was aborted
-					});
-
-					this.readTransaction = undefined;
-				}
+				this.readTransaction = undefined;
 			}
 		}
 	}
 
 	sendSetTransactionComplete(parms: any) {
 		self.postMessage({
-            type: 'OnSetTransactionComplete',
-            parms: parms
-        });
+			type: 'OnSetTransactionComplete',
+			parms,
+		});
 	}
 
 	sendGetTransactionComplete(parms: any) {
 		self.postMessage({
-            type: 'OnGetTransactionComplete',
-            parms: parms
-        });
+			type: 'OnGetTransactionComplete',
+			parms,
+		});
 	}
 
 	sendIndexedDbUpdated(parms: any) {
 		self.postMessage({
-            type: 'OnIndexedDbUpdated',
-            parms: parms
-        });
+			type: 'OnIndexedDbUpdated',
+			parms,
+		});
 	}
 
 	commitMemoryCache() {
@@ -283,13 +302,12 @@ class IndexedDbCache {
 			for (const key of keys) {
 				const record = this.memoryCache[key];
 
-				const start  = performance.now()
+				const start = performance.now();
 				const request = objectStore.put(record, key);
 				request.onsuccess = () => {
 					this.stats.writetimes.push(performance.now() - start);
 					delete this.memoryCache[key]; // Delete the local copy
 					this.index[key] = 1; // Update the index as we go
-                    self.postMessage({type:"OnCommitted", key:key});
 				};
 				if (numRequests++ > 5) { // Don't try and commit too much in one transaction otherwise we may block users' get requests
 					break;
@@ -298,8 +316,8 @@ class IndexedDbCache {
 
 			transaction.oncomplete = () => {
 				this.committing = false;
-				if (this.readTransaction === undefined) {
-					this.commitMemoryCache(); // If there are pending get requests, they take priority, otherwise, chain additional commits
+				if (this.readTransaction === undefined) { // If there are pending get requests, they take priority.
+					this.commitMemoryCache(); // Otherwise, chain additional commits.
 				}
 			};
 
@@ -315,9 +333,16 @@ class IndexedDbCache {
 			// creating the request (handled below) or during processing of the
 			// request (handled here).
 
+			// (We don't set error handlers on the request, so any errors bubble
+			// to the object store.)
+
+			// Unless the request succeeds, any record will remain in the local
+			// cache where this method will try to commit it again. So in the
+			// case of an error, we simply note it and continue.
+
 			objectStore.onerror = (ev) => {
 				console.error(`IndexedDb Cache Error: ${ev.currentTarget.error}`);
-				ev.stopPropagation(); // don't bubble error up
+				ev.stopPropagation(); // Don't bubble up further
 			};
 		} catch (e) {
 			if (e.name === 'InvalidStateError' && this.db !== undefined) {
@@ -329,44 +354,37 @@ class IndexedDbCache {
 		}
 	}
 
-	benchmarkIndexeddb(){
-
-		const transaction = this.db.transaction(this.objectStoreName,"readonly");
+	benchmarkIndexeddb() {
+		const transaction = this.db.transaction(this.objectStoreName, 'readonly');
 		const objectStore = transaction.objectStore(this.objectStoreName);
 
-		for(var i = 0 ; i < 100; i++){
-			var key = Math.floor(Object.keys(this.index).length * Math.random());
-			
+		for (let i = 0; i < 100; i++) {
+			const key = Math.floor(Object.keys(this.index).length * Math.random());
+
 			const start = performance.now();
 			const request = objectStore.get(key);
 
-			request.onsuccess = (ev) =>{
+			request.onsuccess = (ev) => {
 				console.log(`Time ${performance.now() - start}`);
 			};
 		}
 	}
 }
 
-
-let cache;
-
 onmessage = (e) => {
+	if (e.data.message === 'createIndexedDb') {
+		self.cache = new IndexedDbCacheWorker();
+	}
 
-    if(e.data.message == "createIndexedDb"){
-        cache = new IndexedDbCache();
-    }
+	if (e.data.message === 'Set') {
+		const { key } = e.data;
+		const { record } = e.data;
+		self.cache.memoryCache[key] = record; // Will be written later by commitCache
+	}
 
-    if(e.data.message == "Set"){
-        const key = e.data.key;
-        const record = e.data.record;
-        cache.memoryCache[key] = record; // Will be written later by commitCache
-    }
-
-    if(e.data.message == "Get"){
-        const key = e.data.key;
-        const id = e.data.id;
-        cache.createGetTransaction(id, key);
-    }
-   
-
-}
+	if (e.data.message === 'Get') {
+		const { key } = e.data;
+		const { id } = e.data;
+		self.cache.createGetTransaction(id, key);
+	}
+};
