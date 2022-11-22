@@ -67,6 +67,10 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 		handleImageChange(imgSrc);
 	};
 
+	const deleteImage = () => {
+		setTimeout(() => { handleImageChange(''); }, 200);
+	};
+
 	const getImgSrc = () => {
 		if (!value) return '';
 		if (isResourceId(value)) {
@@ -90,7 +94,7 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 						<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />
 					</MenuItem>
 					{hasImage && (
-						<MenuItemDelete onClick={() => handleImageChange('')}>
+						<MenuItemDelete onClick={deleteImage}>
 							<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />
 						</MenuItemDelete>
 					)}
