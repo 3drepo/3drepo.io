@@ -16,7 +16,6 @@
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { FormControl, FormHelperText } from '@mui/material';
-import { useEffect } from 'react';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
@@ -29,7 +28,6 @@ export type BasicTicketImageProps = {
 	children: any,
 	required?: boolean,
 	disabled?: boolean,
-	onBlur?: () => void;
 	onEmptyImageClick: () => void,
 };
 export const BasicTicketImage = ({
@@ -41,12 +39,9 @@ export const BasicTicketImage = ({
 	helperText,
 	required,
 	disabled,
-	onBlur,
 	onEmptyImageClick,
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-
-	useEffect(() => { onBlur?.(); }, [imgSrc]);
 
 	return (
 		<FormControl error={error} required={required}>

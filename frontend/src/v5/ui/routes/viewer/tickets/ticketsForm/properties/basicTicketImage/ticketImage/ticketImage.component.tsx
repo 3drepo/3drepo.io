@@ -18,6 +18,7 @@
 import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { FormattedMessage } from 'react-intl';
+import { useEffect } from 'react';
 import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuItem.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
@@ -49,9 +50,10 @@ const TriggerButton = ({ hasImage }) => {
 
 type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSrc' | 'children'> & {
 	onChange?: (imgSrc) => void,
+	onBlur?: () => void;
 	value?: string,
 };
-export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => {
+export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImageProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -67,9 +69,7 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 		handleImageChange(imgSrc);
 	};
 
-	const deleteImage = () => {
-		setTimeout(() => { handleImageChange(''); }, 200);
-	};
+	const deleteImage = () => handleImageChange('');
 
 	const getImgSrc = () => {
 		if (!value) return '';
@@ -78,6 +78,8 @@ export const TicketImage = ({ value, onChange, ...props }: TicketImageProps) => 
 		}
 		return addBase64Prefix(value);
 	};
+
+	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	return (
 		<BasicTicketImage
