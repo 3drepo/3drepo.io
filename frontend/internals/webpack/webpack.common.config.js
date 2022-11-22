@@ -14,11 +14,12 @@ module.exports = (env, options) => ({
 		maintenance: './src/maintenance.ts',
 		support: './src/support.ts',
 		main: './src/main.tsx',
+		unityworker: './src/globals/unity-indexeddb-worker.ts',
 		...options.entry
 	},
 	output: {
 		path: PATHS.DIST_DIR,
-		filename: '[name].[chunkhash].js',
+		filename: '[name].js',
 		...options.output
 	},
 	module: {
