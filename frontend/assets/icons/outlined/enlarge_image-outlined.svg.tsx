@@ -14,30 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Controller } from 'react-hook-form';
-import { PropertyProps } from './properties.types';
-import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
+type IProps = {
+	className?: any;
+};
 
-export const ImageProperty = ({
-	property: { name: title, readOnly, required },
-	name,
-	defaultValue,
-	formError,
-	...props
-}: PropertyProps) => (
-	<Controller
-		name={name}
-		defaultValue={defaultValue}
-		render={({ field: { ref, ...field } }) => (
-			<TicketImage
-				{...field}
-				title={title}
-				disabled={readOnly}
-				required={required}
-				error={!!formError}
-				helperText={formError?.message}
-				{...props}
-			/>
-		)}
-	/>
+export default ({ className }: IProps) => (
+	<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className={className}>
+		<path d="M5.48 17H1V12.52M17 12.52V17H12.52M12.52 1H17V5.48M1 5.48V1H5.48" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+	</svg>
 );

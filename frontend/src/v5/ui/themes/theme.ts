@@ -985,6 +985,10 @@ export const theme = createTheme({
 						display: 'none',
 					},
 				},
+			},
+		},
+		MuiFormLabel: {
+			styleOverrides: {
 				asterisk: {
 					color: COLOR.ERROR_MAIN,
 				},

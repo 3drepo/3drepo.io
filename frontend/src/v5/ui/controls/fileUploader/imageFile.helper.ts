@@ -14,30 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Controller } from 'react-hook-form';
-import { PropertyProps } from './properties.types';
-import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
-export const ImageProperty = ({
-	property: { name: title, readOnly, required },
-	name,
-	defaultValue,
-	formError,
-	...props
-}: PropertyProps) => (
-	<Controller
-		name={name}
-		defaultValue={defaultValue}
-		render={({ field: { ref, ...field } }) => (
-			<TicketImage
-				{...field}
-				title={title}
-				disabled={readOnly}
-				required={required}
-				error={!!formError}
-				helperText={formError?.message}
-				{...props}
-			/>
-		)}
-	/>
-);
+import { clientConfigService } from '@/v4/services/clientConfig';
+
+export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
+export const addBase64Prefix = (value, imageType = 'png') => `data:image/${imageType};base64,${value}`;
+
+export const convertFileToImageSrc = (file) => new Promise((resolve) => {
+	const reader = new FileReader();
+	reader.onloadend = () => resolve(reader.result);
+	reader.readAsDataURL(file);
+});
+
+export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');

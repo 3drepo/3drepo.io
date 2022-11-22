@@ -100,12 +100,13 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-YupHelper.types.embeddedImage = Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n))
-	.test('Image', `must be smaller than ${fileUploads.resourceSizeLimit} Bytes`, (buffer) => !buffer || buffer.length <= fileUploads.resourceSizeLimit)
-	.test('Image', `must be of type ${fileUploads.imageExtensions.join(',')}`, async (buffer) => {
+YupHelper.types.embeddedImage = (isNullable) => Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n))
+	.test('Too large image', `Image must be smaller than ${fileUploads.resourceSizeLimit} Bytes`, (buffer) => !buffer || buffer.length <= fileUploads.resourceSizeLimit)
+	.test('Non supported type', `Image must be of type ${fileUploads.imageExtensions.join(',')}`, async (buffer) => {
 		if (!buffer) return true;
 		const ext = await fileExtensionFromBuffer(buffer);
 		return ext && fileUploads.imageExtensions.includes(ext.toLowerCase());
-	});
+	})
+	.test('Not null', 'Image cannot be null', (val) => isNullable || val !== null);
 
 module.exports = YupHelper;

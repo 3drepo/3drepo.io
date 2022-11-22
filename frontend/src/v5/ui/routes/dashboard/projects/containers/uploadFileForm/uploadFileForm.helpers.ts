@@ -16,18 +16,17 @@
  */
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { UploadFileForm } from './uploadFileForm.component';
 
-export const uploadToContainer = (presetContainerId: string) => {
-	const f = document.createElement('input');
-	f.type = 'file';
-	f.accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
-	f.onchange = (e: Event) => {
-		const presetFile = (<HTMLInputElement>e.target).files[0];
+export const uploadToContainer = async (presetContainerId: string) => {
+	const accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+	const onUpload = (file) => {
 		DialogsActionsDispatchers.open(UploadFileForm, {
-			presetFile,
+			file,
 			presetContainerId,
 		});
 	};
-	f.click();
+	const file = await uploadFile(accept);
+	onUpload(file);
 };

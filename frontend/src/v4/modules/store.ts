@@ -19,7 +19,6 @@ import { routerMiddleware } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
 import { applyMiddleware, compose, createStore } from 'redux';
 
-import { pickBy } from 'lodash';
 import createSagaMiddleware from 'redux-saga';
 import { IS_DEVELOPMENT } from '../constants/environment';
 import createReducer from './reducers';
