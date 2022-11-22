@@ -43,6 +43,28 @@ type ITicketView = {
 	onChange: (newValue) => void;
 };
 
+/**
+
+screenshot: types.embeddedImage(isNullable),
+state: imposeNullableRule(Yup.object({
+	showHiddenObjects: Yup.boolean().default(false),
+	highlightedGroups: Yup.array().of(groupIdOrData),
+	colorOverrideGroups: Yup.array().of(groupIdOrData),
+	hiddenGroups: Yup.array().of(groupIdOrData),
+	shownGroups: Yup.array().of(groupIdOrData),
+	transformGroups: Yup.array().of(groupIdOrData),
+}).default(undefined)),
+camera: imposeNullableRule(Yup.object({
+	type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
+		.default(CameraType.PERSPECTIVE),
+	position: types.position.required(),
+	forward: types.position.required(),
+	up: types.position.required(),
+	size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
+}).default(undefined)),
+clippingPlanes: imposeNullableRule(Yup.array().of(
+*/
+
 export const TicketView = ({
 	value,
 	label,
@@ -74,7 +96,7 @@ export const TicketView = ({
 		await ViewerService.setCamera(convertCameraToUnity(value.camera));
 	};
 	const deleteViewpoint = async () => {
-		console.log('Delete Viewpoint');
+		onChange?.(null);
 	};
 
 	useEffect(() => onBlur?.(), [value]);
@@ -83,9 +105,9 @@ export const TicketView = ({
 	return (
 		<>
 			{label}
-			<button onClick={createViewpoint}> Create viewpoint </button>
-			<button onClick={goToViewpoint}> Go to viewpoint </button>
-			<button onClick={deleteViewpoint}> Delete viewpoint </button>
+			<button type="button" onClick={createViewpoint}> Create viewpoint </button>
+			<button type="button" onClick={goToViewpoint}> Go to viewpoint </button>
+			<button type="button" onClick={deleteViewpoint}> Delete viewpoint </button>
 			{error && helperText}
 		</>
 	);
