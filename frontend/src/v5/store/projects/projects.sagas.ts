@@ -50,6 +50,16 @@ export function* createProject({ teamspace, projectName, onSuccess, onError }) {
 	}
 }
 
+export function* updateProject({ teamspace, projectId, project, onSuccess, onError }) {
+	try {
+		yield API.Projects.updateProject(teamspace, projectId, project);
+		yield put(ProjectsActions.updateProjectSuccess(teamspace, projectId, project));
+		onSuccess();
+	} catch (error) {
+		onError(error);
+	}
+}
+
 export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	try {
 		yield API.Projects.deleteProject(teamspace, projectId);
@@ -63,5 +73,6 @@ export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 export default function* ProjectsSaga() {
 	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
 	yield takeLatest(ProjectsTypes.CREATE_PROJECT as any, createProject);
+	yield takeLatest(ProjectsTypes.UPDATE_PROJECT as any, updateProject);
 	yield takeLatest(ProjectsTypes.DELETE_PROJECT as any, deleteProject);
 }
