@@ -36,7 +36,6 @@ const navbarButtonStyles = css`
 const containerStyles = css`
 	.MuiDrawer-docked > .MuiPaper-root {
 		border: none;
-		// TODO - fix when color is added to palette
 		box-shadow: 2px 3px 45px ${hexToOpacity('#000000', 15)};
 		width: 520px;
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -83,13 +82,11 @@ const itemsBatch = css`
 		color: ${({ theme }) => theme.palette.base.main};
 	}
 
-	// notifications batch
 	${NotificationTeamspace} {
-		// header
 		.MuiGrid-root {
 			font-weight: 700;
 		}
-		// notifications block
+
 		ul {
 			padding: 0;
 			margin-bottom: 14px;
@@ -123,7 +120,6 @@ const itemsStyles = css`
 			background-color: transparent;
 		}
 		
-		// read/delete icons
 		${ItemSecondaryAction} span {
 			margin: 0;
 			padding: 13px;
@@ -143,7 +139,6 @@ const itemsStyles = css`
 			box-sizing: border-box;
 		}
 
-		// notification text
 		.MuiListItemText-root {
 			* {
 				box-sizing: border-box;
@@ -152,12 +147,10 @@ const itemsStyles = css`
 				white-space: nowrap;
 			}
 
-			// header
 			& > span {
 				font-weight: 700;
 			}
 
-			// subtitle
 			& > p > span {
 				font-weight: 500;
 			}
