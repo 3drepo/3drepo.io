@@ -76,7 +76,7 @@ const genYargs =/* istanbul ignore next */ (yargs) => {
 		commandName,
 		'Get all ref links from database and output to console',
 		argsSpec,
-		(argv) => run(argv._[1], argv.outFile),
+		(argv) => run(argv.database, argv.outFile),
 	);
 };
 
