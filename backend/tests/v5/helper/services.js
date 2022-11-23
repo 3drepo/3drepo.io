@@ -18,6 +18,7 @@
 const Crypto = require('crypto');
 const amqp = require('amqplib');
 const http = require('http');
+const fs = require('fs');
 
 const { src, srcV4 } = require('./path');
 
@@ -62,6 +63,22 @@ queue.purgeQueues = async () => {
 	} catch (err) {
 		// doesn't really matter if purge queue failed. it's just for clean up.
 	}
+};
+
+db.reset = async () => {
+	const dbs = await DbHandler.listDatabases(true);
+	const dbProms = dbs.map(({ name }) => {
+		if (name !== USERS_DB_NAME) {
+			return DbHandler.dropDatabase(name);
+		}
+		return Promise.resolve();
+	});
+
+	const cols = await DbHandler.listCollections(USERS_DB_NAME);
+
+	const colProms = cols.map(({ name }) => DbHandler.deleteMany(USERS_DB_NAME, name, {}));
+
+	await Promise.all([...dbProms, ...colProms]);
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
@@ -198,6 +215,15 @@ db.addLoginRecords = async (records) => {
 };
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+ServiceHelper.fileExists = (filePath) => {
+	let flag = true;
+	try {
+		fs.accessSync(filePath, fs.constants.F_OK);
+	} catch (e) {
+		flag = false;
+	}
+	return flag;
+};
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
@@ -225,7 +251,7 @@ ServiceHelper.generateUserCredentials = () => ({
 });
 
 ServiceHelper.determineTestGroup = (path) => {
-	const match = path.match(/^.*[/|\\](e2e|unit|drivers)[/|\\](.*).test.js$/);
+	const match = path.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
 	if (match?.length === 3) {
 		return `${match[1].toUpperCase()} ${match[2]}`;
 	}

@@ -38,7 +38,7 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 });
 
 const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
-	if (!dbNames) {
+	if (!dbNames?.length) {
 		throw new Error('Database name must be provided to execute this script');
 	}
 
@@ -61,11 +61,12 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 	await writeResultsToFile(results, outFile);
 };
 
-const genYargs = (yargs) => {
+const genYargs =/* istanbul ignore next */ (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.positional('database', {
+	const argsSpec = (subYargs) => subYargs.option('database', {
 		describe: 'Database name (comma separated)',
 		type: 'string',
+		demandOption: true,
 	}).option('outFile', {
 		describe: 'Name of output file',
 		type: 'string',
