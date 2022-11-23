@@ -30,7 +30,6 @@ class IndexedDbCacheWorker {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
 		this.numReadTransactions = 0;
-		this.clearStats();
 		this.createIndexedDbCache();
 
 		// Check at low frequency if there is anything going on, and if not try
@@ -68,32 +67,6 @@ class IndexedDbCacheWorker {
 	 * requests we know will fail (because there is no key in the store),
 	 * avoiding expensive database transactions. */
 	index: any;
-
-	stats: {
-		readtimes: number[],
-		writetimes: number[],
-		duplicates: number
-	};
-
-	printStats() {
-		let meanReadTime = 0;
-		this.stats.readtimes.forEach((x) => { meanReadTime += x; });
-		meanReadTime /= this.stats.readtimes.length;
-
-		let meanWriteTime = 0;
-		this.stats.writetimes.forEach((x) => { meanWriteTime += x; });
-		meanWriteTime /= this.stats.writetimes.length;
-
-		console.log(`g54234, ${meanReadTime}, ${this.stats.readtimes.length}, ${meanWriteTime}, ${this.stats.writetimes.length}`);
-	}
-
-	clearStats() {
-		this.stats = {
-			readtimes: [],
-			writetimes: [],
-			duplicates: 0,
-		};
-	}
 
 	createIndexedDbCache() {
 		const request = indexedDB.open('3DRepoCacheDb', 1);
@@ -168,13 +141,9 @@ class IndexedDbCacheWorker {
 			try {
 				const readTransaction = this.db.transaction(this.objectStoreName, 'readonly');
 				const objectStore = readTransaction.objectStore(this.objectStoreName);
-
-				const start = performance.now();
-
 				const request = objectStore.get(key);
 
 				request.onsuccess = () => {
-					this.stats.readtimes.push(performance.now() - start);
 					if (request.result === undefined) {
 						this.sendGetTransactionComplete({ // Where a key is not found, we want to handle this outside the error chain
 							id,
@@ -304,17 +273,9 @@ class IndexedDbCacheWorker {
 			// eslint-disable-next-line guard-for-in
 			for (const key of keys) {
 				const record = this.memoryCache[key];
-
-				const start = performance.now();
 				const request = objectStore.put(record, key);
 				request.onsuccess = () => {
-					this.stats.writetimes.push(performance.now() - start);
 					delete this.memoryCache[key]; // Delete the local copy
-
-					if (this.index.hasOwnProperty(key)) {
-						this.stats.duplicates++;
-					}
-
 					this.index[key] = 1; // Update the index as we go
 				};
 				if (numRequests++ > 5) { // Don't try and commit too much in one transaction otherwise we may block users' get requests
@@ -387,7 +348,7 @@ onmessage = (e) => {
 	if (e.data.message === 'Set') {
 		const { key } = e.data;
 		const { record } = e.data;
-		self.repoCache.memoryCache[key] = record; // Will be written later by commitCache
+		self.repoCache.memoryCache[key] = record; // Will be written later by commitMemoryCache
 	}
 
 	if (e.data.message === 'Get') {

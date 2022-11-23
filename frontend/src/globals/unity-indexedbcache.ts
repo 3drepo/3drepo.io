@@ -32,7 +32,6 @@ export class IndexedDbCache {
 		this.gameObjectName = gameObjectName;
 		this.transactions = {};
 		this.createWorker();
-		this.clearStats();
 	}
 
 	/** The Unity Instance created by the loader; this is used for SendMessage */
@@ -48,32 +47,6 @@ export class IndexedDbCache {
 	/** The WebWorker that handles the IndexedDb requests. Each instance of this
 	 * class gets its own worker. */
 	worker: any;
-
-	stats: {
-		readtimes: number[],
-		starttimes: {},
-		hits: number,
-		misses: number,
-		writes: number
-	};
-
-	printStats() {
-		let meanReadTime = 0;
-		this.stats.readtimes.forEach((x) => { meanReadTime += x; });
-		meanReadTime /= this.stats.readtimes.length;
-
-		console.log(`g54234, ${meanReadTime}, ${this.stats.hits}, ${this.stats.misses} ${this.stats.writes}`);
-	}
-
-	clearStats() {
-		this.stats = {
-			readtimes: [],
-			starttimes: {},
-			hits: 0,
-			misses: 0,
-			writes: 0,
-		};
-	}
 
 	// IndexedDb actions are offloaded to a WebWorker. This is for performance
 	// reasons. WebWorkers run individual scripts in their own thread, and
@@ -99,12 +72,7 @@ export class IndexedDbCache {
 
 				if (ev.data.parms.size >= 0) {
 					this.transactions[id] = ev.data.parms.result;
-					this.stats.hits++;
-				} else {
-					this.stats.misses++;
 				}
-
-				this.stats.readtimes.push(performance.now() - this.stats.starttimes[id]);
 
 				this.sendGetTransactionComplete({
 					id,
@@ -136,9 +104,6 @@ export class IndexedDbCache {
 			size,
 		};
 
-		this.stats.starttimes[key] = performance.now();
-		this.stats.writes++;
-
 		this.worker.postMessage({
 			message: 'Set',
 			key,
@@ -163,10 +128,8 @@ export class IndexedDbCache {
 	 */
 	createGetTransaction(id: number, key: string) {
 		if (this.transactions[id] !== undefined) {
-			console.error('Found duplicate transaction Id');
+			console.error('Found duplicate transaction Id. This should not happen.');
 		}
-
-		this.stats.starttimes[id] = performance.now();
 
 		this.worker.postMessage({
 			message: 'Get',
