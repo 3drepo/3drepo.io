@@ -20,9 +20,6 @@
  */
 const { v5Path } = require('../../../interop');
 
-const Yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
-
 const { getCollectionsEndsWith } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
@@ -78,8 +75,7 @@ const run = async (removeFiles = false) => {
 	await removeEntriesWithRef(fileList);
 	logger.logInfo(`${fileList.size} zombie file(s) found`);
 	if (fileList.size) {
-		const { argv } = Yargs(hideBin(process.argv));
-		if (removeFiles || argv.remove) {
+		if (removeFiles) {
 			await Promise.all(Array.from(fileList).map((name) => unlink(joinPath(fsPath, name))));
 			logger.logInfo(`${fileList.size} file(s) removed.`);
 		} else {
@@ -88,7 +84,7 @@ const run = async (removeFiles = false) => {
 	}
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('removeFiles', {
 		type: 'boolean',

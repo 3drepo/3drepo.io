@@ -67,8 +67,9 @@ queue.purgeQueues = async () => {
 
 db.reset = async () => {
 	const dbs = await DbHandler.listDatabases(true);
+	const protectedDB = [USERS_DB_NAME, 'local'];
 	const dbProms = dbs.map(({ name }) => {
-		if (name !== USERS_DB_NAME) {
+		if (!protectedDB.includes(name)) {
 			return DbHandler.dropDatabase(name);
 		}
 		return Promise.resolve();
@@ -76,7 +77,7 @@ db.reset = async () => {
 
 	const cols = await DbHandler.listCollections(USERS_DB_NAME);
 
-	const colProms = cols.map(({ name }) => DbHandler.deleteMany(USERS_DB_NAME, name, {}));
+	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
 
 	await Promise.all([...dbProms, ...colProms]);
 };
@@ -535,6 +536,12 @@ ServiceHelper.closeApp = async (server) => {
 	if (server) await server.close();
 	EventsManager.reset();
 	QueueHandler.close();
+};
+
+ServiceHelper.resetFileshare = () => {
+	const fsDir = config.fs.path;
+	fs.rmSync(fsDir, { recursive: true });
+	fs.mkdirSync(fsDir);
 };
 
 module.exports = ServiceHelper;
