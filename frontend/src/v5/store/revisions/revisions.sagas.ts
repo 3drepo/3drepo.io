@@ -19,7 +19,7 @@ import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateRevisionAction,
 	FetchAction,
 	RevisionsActions,

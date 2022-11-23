@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { SocketEvents, subscribeToSocketEvent } from './realtime.service';
 
 export const enableKickedOutEvent = () => subscribeToSocketEvent(SocketEvents.LOGGED_OUT,
