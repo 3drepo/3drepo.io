@@ -16,9 +16,7 @@
  */
 
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 type ICamera = {
 	type: 'perspective' | 'orthographic';
@@ -28,9 +26,16 @@ type ICamera = {
 	size?: number;
 };
 
+type ClippingPlane = {
+	normal: number[];
+	distance: number[];
+	clipDirection: 1 | -1;
+};
+
 type IViewpoint = {
 	screenshot?: any;
 	camera: ICamera;
+	clippingPlanes: ClippingPlane[];
 };
 
 type ITicketView = {
@@ -74,7 +79,6 @@ export const TicketView = ({
 	onBlur,
 	onChange,
 }: ITicketView) => {
-	const { teamspace, containerOrFederation } = useParams<DashboardParams>();
 	const convertCameraToUnity = (
 		{ position, up, forward: view_dir, type, size: orthographicSize }: ICamera,
 	) => ({ position, up, view_dir, type, orthographicSize });
@@ -84,7 +88,7 @@ export const TicketView = ({
 	): ICamera => ({ position, up, forward, type, size });
 
 	const createViewpoint = async () => {
-		const currentViewpoint = await ViewerService.getCurrentViewpoint({ teamspace, model: containerOrFederation });
+		const currentViewpoint = await ViewerService.getCurrentViewpoint();
 		const camera: ICamera = convertCameraFromUnity(currentViewpoint);
 		const generatedObject: IViewpoint = {
 			camera,

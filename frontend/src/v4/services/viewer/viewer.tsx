@@ -285,8 +285,8 @@ export class ViewerService {
 		return UnityUtil.requestScreenShot();
 	}
 
-	public getCurrentViewpointInfo(account, model) {
-		return UnityUtil.requestViewpoint(account, model);
+	public getCurrentViewpointInfo() {
+		return UnityUtil.requestViewpoint('', '');
 	}
 
 	public hideHiddenByDefaultObjects() {
@@ -954,9 +954,9 @@ export class ViewerService {
 		return await this.getUnityObjectsStatus(teamspace, model);
 	}
 
-	public async getCurrentViewpoint({ teamspace, model }) {
+	public async getCurrentViewpoint() {
 		await this.isViewerReady();
-		return await this.getCurrentViewpointInfo(teamspace, model);
+		return await this.getCurrentViewpointInfo();
 	}
 
 	public async goToDefaultViewpoint() {
