@@ -34,7 +34,7 @@ export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps)
 
 	const preventPropagation = (e) => { if (e.key !== 'Escape') e.stopPropagation(); };
 	const handleClose = () => setOpen(false);
-	const onClickDueDate = () => setOpen(!disabled && true);
+	const onClickDueDate = () => setOpen(!disabled);
 	const onDateChange = (newValue) => {
 		setValue(new Date(newValue).getTime());
 		onBlur?.(newValue);
@@ -56,9 +56,9 @@ export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps)
 				renderInput={({ ref, inputRef, ...props }) => (
 					<div ref={inputRef}>
 						{ value ? (
-							<FilledDueDateLabel onClick={onClickDueDate} disabled={!disabled} {...props} value={value} />
+							<FilledDueDateLabel onClick={onClickDueDate} {...props} value={value} disabled={disabled} />
 						) : (
-							<EmptyDueDateLabel onClick={onClickDueDate} disabled={!disabled} {...props} />
+							<EmptyDueDateLabel onClick={onClickDueDate} {...props} disabled={disabled} />
 						)}
 					</div>
 				)}
