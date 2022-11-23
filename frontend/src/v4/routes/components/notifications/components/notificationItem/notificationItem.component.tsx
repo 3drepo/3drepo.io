@@ -28,6 +28,8 @@ import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
 import notificationsContainer from '../../notifications.container';
 import { Container, Item, ItemSecondaryAction, ItemText } from './notificationItem.styles';
+import { isV5 } from '@/v4/helpers/isV5';
+import { COLOR } from '@/v5/ui/themes/theme';
 
 export interface INotification {
 	_id: string;
@@ -90,6 +92,7 @@ const NotificationItemText = (props) => {
 			secondaryTypographyProps={{style: secondaryStyle}}
 			primary={props.primary}
 			secondary={<LabelWithTooltip {...props} />}
+			sx={props.sx}
 		/>
 	);
 };
@@ -218,10 +221,25 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			onClick: this.onClick
 		};
 
+		const v5Color = read ? COLOR.BASE_LIGHT: COLOR.SECONDARY_MAIN;
+
+		const v5StylingOverride = isV5() ? {
+			primaryColor: v5Color,
+			fontWeight: undefined,
+			sx: {
+				'&:hover > span': {
+					textDecoration: read ? 'none' : 'underline',
+				},
+				'& p > span': {
+					color: v5Color,
+				},
+			},
+		}: {};
+
 		return (
 			<Container {...containerProps}>
 				<Item>
-					<Avatar>
+					<Avatar sx={isV5() && { color: v5Color }}>
 						{icon}
 					</Avatar>
 
@@ -231,6 +249,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 						fontWeight={read ? FONT_WEIGHT.NORMAL : FONT_WEIGHT.BOLD}
 						primary={details}
 						secondary={summary}
+						{...v5StylingOverride}
 					/>
 
 					<ItemSecondaryAction>
