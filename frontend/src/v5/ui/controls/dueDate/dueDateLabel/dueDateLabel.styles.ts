@@ -14,25 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatDate, formatMessage } from '@/v5/services/intl';
 
-export const getDateMask = () => {
-	const isoString = '2018-10-25'; // example date!
+import styled, { css } from 'styled-components';
 
-	const intlString = formatDate(isoString); // generate a formatted date
-	const dateParts = isoString.split('-'); // prepare to replace with pattern parts
+export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
+	font-size: 10px;
+	padding: 3px 0;
+	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
+	${({ disabled }) => !disabled && css`
+		&:hover {
+			text-decoration: underline;
+		}
+	`}
+`;
 
-	return intlString
-		.replace(dateParts[2], 'DD')
-		.replace(dateParts[1], 'MM')
-		.replace(dateParts[0], 'YYYY');
-};
-
-export const getDateTimeMask = () => `${getDateMask()} @ hh:mma`;
-
-export const formatTime = (time) => time.replace('@', formatMessage({
-	id: 'form.dateTime.at',
-	defaultMessage: 'at',
-}));
-
-export const formatDayOfWeek = (day) => day[0].toUpperCase() + day[1];
+export const EmptyDateContainer = styled(DateContainer)`
+	color: ${({ theme }) => theme.palette.base.main};
+`;

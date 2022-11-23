@@ -17,8 +17,6 @@
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { useSelector } from 'react-redux';
-import { selectJobs } from '@/v4/modules/jobs';
 import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
 import { PropertyProps } from './properties.types';
 
@@ -27,10 +25,7 @@ export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
 	let items = [];
 
 	if (values === 'jobsAndUsers') {
-		const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
-		const jobs = useSelector(selectJobs);
-		items = users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` }));
-		Array.prototype.push.apply(items, jobs.map(({ _id }) => ({ value: _id, label: _id })));
+		items = UsersHooksSelectors.selectAssigneesListItems();
 	} else {
 		items = (values as string[]).map((value) => ({ value, label: value }));
 	}

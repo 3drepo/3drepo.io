@@ -16,6 +16,8 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { DueDate } from '@controls/dueDate/dueDate.component';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -24,29 +26,38 @@ export default {
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 
 	argTypes: {
-		date: {
+		value: {
 			description: 'The due date',
 			control: {
 				type: 'date',
 			},
 		},
+		disabled: {
+			type: 'boolean',
+		},
 	},
 } as ComponentMeta<typeof DueDate>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof DueDate> = (args) => <DueDate {...args} />;
+const Template: ComponentStory<typeof DueDate> = (args) => (
+	<LocalizationProvider dateAdapter={AdapterDayjs}>
+		<DueDate {...args} />
+	</LocalizationProvider>
+);
 
 export const Overdue = Template.bind({});
 Overdue.args = {
-	date: 1665572857000,
+	value: 1665572857000,
 };
 
 export const Due = Template.bind({});
 Due.args = {
-	date: 2020202020202,
+	value: 2020202020202,
 };
 
 export const Unset = Template.bind({});
-Unset.args = {
-	date: null,
+
+export const UnsetDisabled = Template.bind({});
+UnsetDisabled.args = {
+	disabled: true,
 };

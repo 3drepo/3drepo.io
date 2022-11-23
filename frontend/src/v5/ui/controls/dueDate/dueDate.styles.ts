@@ -15,17 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Backdrop as MuiBackdrop } from '@mui/material';
 import styled from 'styled-components';
 
-export const DateContainer = styled.span<{ isOverdue?: boolean; }>`
-	font-size: 10px;
-	padding: 3px 0;
-	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
-	&:hover {
-		text-decoration: underline;
-	}
-`;
-
-export const EmptyDateContainer = styled(DateContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
+export const StopBackgroundInteraction = styled(MuiBackdrop)`
+	z-index: 15;
 `;

@@ -20,3 +20,18 @@ export enum TicketsCardViews {
 	Details = 'details',
 	New = 'new',
 }
+
+export enum IssueProperties {
+	DUE_DATE = 'Due Date',
+	STATUS = 'Status',
+	PRIORITY = 'Priority',
+	ASSIGNEES = 'Assignees',
+	DEFAULT_VIEW = 'Default View',
+	PIN = 'Pin',
+}
+
+export enum SafetibaseProperties {
+	TREATMENT_STATUS = 'Treatment Status',
+	LEVEL_OF_RISK = 'Level of Risk',
+	TREATED_LEVEL_OF_RISK = 'Treated Level of Risk',
+}

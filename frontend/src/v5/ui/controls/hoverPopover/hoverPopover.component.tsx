@@ -29,7 +29,7 @@ export const HoverPopover = ({ anchor: AnchorEl, children }: IHoverPopover) => {
 	const onMouseLeave = () => setAnchorEl(null);
 
 	return (
-		<span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+		<span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onBlur={onMouseLeave}>
 			<AnchorEl />
 			<PopoverContainer
 				open={!!anchorEl}

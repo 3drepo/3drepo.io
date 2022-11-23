@@ -14,25 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatDate, formatMessage } from '@/v5/services/intl';
 
-export const getDateMask = () => {
-	const isoString = '2018-10-25'; // example date!
+import { FormattedMessage } from 'react-intl';
+import { EmptyDateContainer } from './dueDateLabel.styles';
 
-	const intlString = formatDate(isoString); // generate a formatted date
-	const dateParts = isoString.split('-'); // prepare to replace with pattern parts
-
-	return intlString
-		.replace(dateParts[2], 'DD')
-		.replace(dateParts[1], 'MM')
-		.replace(dateParts[0], 'YYYY');
+export type IDueDateEmptyLabel = {
+	disabled: boolean;
+	onClick: (event) => void;
 };
 
-export const getDateTimeMask = () => `${getDateMask()} @ hh:mma`;
-
-export const formatTime = (time) => time.replace('@', formatMessage({
-	id: 'form.dateTime.at',
-	defaultMessage: 'at',
-}));
-
-export const formatDayOfWeek = (day) => day[0].toUpperCase() + day[1];
+export const DueDateEmptyLabel = ({ disabled, onClick }: IDueDateEmptyLabel): JSX.Element => (
+	<EmptyDateContainer disabled={disabled} onClick={onClick}>
+		{disabled ? (
+			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
+		) : (
+			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
+		)}
+	</EmptyDateContainer>
+);

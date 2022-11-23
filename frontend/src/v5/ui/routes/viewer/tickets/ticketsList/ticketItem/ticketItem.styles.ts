@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Assignees as AssigneesBase } from '@controls/assignees/assignees.component';
+import { Assignees as AssigneesSelect } from '@controls/assignees/assignees.component';
 import { PriorityLevelChip as PriorityLevelChipBase } from '@controls/chip';
 import styled from 'styled-components';
 
@@ -57,11 +57,11 @@ export const ChipList = styled.div`
 	margin: 8px 0 0;
 `;
 
-export const Assignees = styled(AssigneesBase)`
+export const Assignees = styled(AssigneesSelect)`
 	margin-left: auto;
 `;
 
-export const IssueProperties = styled.div`
+export const IssuePropertiesRow = styled.div`
 	margin: 7px 0 0;
 	display: inline-flex;
 	width: 100%;
