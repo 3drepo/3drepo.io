@@ -23,6 +23,8 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
+import V5NotificationsIcon from '@assets/icons/notifications.svg';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
@@ -33,8 +35,6 @@ import { INotification } from './components/notificationItem/notificationItem.co
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
 import { NotificationsIcon, NotificationsList, NotificationWeekHeader } from './notifications.styles';
-import V5NotificationsIcon from '@assets/icons/notifications.svg';
-import { isV5 } from '@/v4/helpers/isV5';
 
 interface IProps {
 	notifications: INotification[];
