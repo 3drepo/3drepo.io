@@ -46,7 +46,7 @@ WebRequests.post.mockImplementation(() => Promise.resolve({
 
 const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
-const ssoUsername = 'ssoUsername';
+const ssoUsername = generateRandomString();
 const availableEmail = 'availableEmail@email.com';
 const existingEmail = 'existingEmail@email.com';
 const validPassword = 'Abcdef12345!';

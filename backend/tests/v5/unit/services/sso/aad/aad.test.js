@@ -126,7 +126,7 @@ const testGetUserDetails = () => {
 			config.sso = initialConfig;
 		});
 
-		test(`should throw ${errorCodes.failedToFetchDetails} if it fails to fetch user details`, async () => {
+		test(`should throw ${errorCodes.UNKNOWN} if it fails to fetch user details`, async () => {
 			const initialConfig = config.sso;
 			config.sso = {
 				aad: {
@@ -136,7 +136,7 @@ const testGetUserDetails = () => {
 			};
 			jest.spyOn(WebRequests, 'get').mockRejectedValueOnce(new Error());
 			await expect(Aad.getUserDetails(generateRandomString(),
-				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.failedToFetchDetails);
+				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.UNKNOWN);
 
 			config.sso = initialConfig;
 		});

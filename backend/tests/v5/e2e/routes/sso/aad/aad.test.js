@@ -76,22 +76,22 @@ const testAuthenticate = () => {
 
 const testAuthenticatePost = () => {
 	describe('Authenticate Post', () => {
-		test(`should redirect with ${errorCodes.userNotFound} if user does not exist`, async () => {
+		test(`should redirect with ${errorCodes.USER_NOT_FOUND} if user does not exist`, async () => {
 			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.userNotFound}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
-		test(`should redirect with ${errorCodes.nonSsoUser} if user is a non SSO user`, async () => {
+		test(`should redirect with ${errorCodes.NON_SSO_USER} if user is a non SSO user`, async () => {
 			const userDataFromAad = { mail: userEmail, id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.nonSsoUser}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.NON_SSO_USER}`);
 		});
 
 		test('should retain a query param in the redirectUri if it redirects with error', async () => {
@@ -203,7 +203,7 @@ const signupPost = () => {
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
-			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExists.toString());
+			expect(resUri.searchParams.get('error')).toEqual(errorCodes.EMAIL_EXISTS.toString());
 		});
 
 		test('should redirect and add error to the query if email already exists (SSO user)', async () => {
@@ -213,7 +213,7 @@ const signupPost = () => {
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
-			expect(resUri.searchParams.get('error')).toEqual(errorCodes.emailExistsWithSSO.toString());
+			expect(resUri.searchParams.get('error')).toEqual(errorCodes.EMAIL_EXISTS_WITH_SSO.toString());
 		});
 
 		test('should sign a new user up and set them to active', async () => {
