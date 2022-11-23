@@ -30,12 +30,9 @@ export class IndexedDbCache {
 	constructor(unityInstance: any, gameObjectName: string) {
 		this.unityInstance = unityInstance;
 		this.gameObjectName = gameObjectName;
+		this.transactions = {};
 		this.createWorker();
 		this.clearStats();
-		setInterval(() => {
-			this.printStats();
-			this.clearStats();
-		}, 1000);
 	}
 
 	/** The Unity Instance created by the loader; this is used for SendMessage */
@@ -54,7 +51,10 @@ export class IndexedDbCache {
 
 	stats: {
 		readtimes: number[],
-		starttimes: {}
+		starttimes: {},
+		hits: number,
+		misses: number,
+		writes: number
 	};
 
 	printStats() {
@@ -62,13 +62,16 @@ export class IndexedDbCache {
 		this.stats.readtimes.forEach((x) => { meanReadTime += x; });
 		meanReadTime /= this.stats.readtimes.length;
 
-		console.log(`g54234, ${meanReadTime}, ${this.stats.readtimes.length}, ${0}, ${0}`);
+		console.log(`g54234, ${meanReadTime}, ${this.stats.hits}, ${this.stats.misses} ${this.stats.writes}`);
 	}
 
 	clearStats() {
 		this.stats = {
 			readtimes: [],
 			starttimes: {},
+			hits: 0,
+			misses: 0,
+			writes: 0,
 		};
 	}
 
@@ -96,6 +99,9 @@ export class IndexedDbCache {
 
 				if (ev.data.parms.size >= 0) {
 					this.transactions[id] = ev.data.parms.result;
+					this.stats.hits++;
+				} else {
+					this.stats.misses++;
 				}
 
 				this.stats.readtimes.push(performance.now() - this.stats.starttimes[id]);
@@ -125,16 +131,13 @@ export class IndexedDbCache {
 		// so we may as well create it here. Writing the TypedArray to the
 		// database will store the underlying ArrayBuffer along with it.
 
-		const start = performance.now();
-
 		const record = {
 			data: new Uint8Array(this.unityInstance.Module.HEAP8.slice(offset, offset + size)),
 			size,
 		};
 
-		this.stats.copytimes.push(performance.now() - start);
-
 		this.stats.starttimes[key] = performance.now();
+		this.stats.writes++;
 
 		this.worker.postMessage({
 			message: 'Set',
@@ -207,9 +210,5 @@ export class IndexedDbCache {
 
 	sendIndexedDbUpdated(parms: any) {
 		this.unityInstance.SendMessage(this.gameObjectName, 'OnIndexedDbUpdated', JSON.stringify(parms));
-	}
-
-	benchmarkIndexeddb() {
-
 	}
 }

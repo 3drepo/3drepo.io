@@ -29,6 +29,7 @@ class IndexedDbCacheWorker {
 	constructor() {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
+		this.numReadTransactions = 0;
 		this.clearStats();
 		this.createIndexedDbCache();
 
@@ -37,9 +38,7 @@ class IndexedDbCacheWorker {
 		// This is because writes are typically started after all reads are done
 		// but if no reads happen for a while then no writes will be dispatched!
 		setInterval(() => {
-			if (this.readTransaction === undefined) {
-				this.commitMemoryCache();
-			}
+			this.commitMemoryCache();
 		},
 		2000);
 	}
@@ -54,11 +53,10 @@ class IndexedDbCacheWorker {
 	/** A dictionary of records that are waiting to be committed. */
 	memoryCache: any;
 
-	/** The running read transaction that all get requests should be added to. */
-	readTransaction: any;
-
-	/** The object store for readTransaction. */
-	objectStore: any;
+	/** How many read transactions are currently created. We always want read
+	 * transactions to take priority over writes, so when this is non-zero
+	 * the write chain is interrupted. */
+	numReadTransactions: number;
 
 	/** Is there a running readwrite transaction? If so don't start another one
 	 * or we may commit records multiple times (wasting time). */
@@ -74,6 +72,7 @@ class IndexedDbCacheWorker {
 	stats: {
 		readtimes: number[],
 		writetimes: number[],
+		duplicates: number
 	};
 
 	printStats() {
@@ -92,6 +91,7 @@ class IndexedDbCacheWorker {
 		this.stats = {
 			readtimes: [],
 			writetimes: [],
+			duplicates: 0,
 		};
 	}
 
@@ -166,18 +166,12 @@ class IndexedDbCacheWorker {
 		} else {
 			// We believe the key is in the database, so go ahead and request it
 			try {
-				// It is more efficient to have one transaction of multiple
-				// requests, than many transactions of one request, so append
-				// requests to the existing transaction so long as it is
-				// alive.
-				if (this.readTransaction === undefined) {
-					this.readTransaction = this.db.transaction(this.objectStoreName, 'readonly');
-					this.objectStore = this.readTransaction.objectStore(this.objectStoreName);
-				}
+				const readTransaction = this.db.transaction(this.objectStoreName, 'readonly');
+				const objectStore = readTransaction.objectStore(this.objectStoreName);
 
 				const start = performance.now();
 
-				const request = this.objectStore.get(key);
+				const request = objectStore.get(key);
 
 				request.onsuccess = () => {
 					this.stats.readtimes.push(performance.now() - start);
@@ -193,6 +187,7 @@ class IndexedDbCacheWorker {
 							result: request.result,
 						});
 					}
+					// At the end of this function the transaction will exit the active state, after which no more changes can be made to it
 				};
 
 				// The request can fail in two ways: an exception is thrown when
@@ -217,18 +212,20 @@ class IndexedDbCacheWorker {
 				// while because we've cleared this reference, that is no
 				// problem.
 
-				this.readTransaction.oncomplete = () => {
-					this.readTransaction = undefined;
+				readTransaction.oncomplete = () => {
+					this.numReadTransactions--;
 					this.commitMemoryCache();
 				};
 
-				this.readTransaction.onerror = () => {
-					this.readTransaction = undefined;
+				readTransaction.onerror = () => {
+					this.numReadTransactions--;
 				};
 
-				this.readTransaction.onabort = () => {
-					this.readTransaction = undefined;
+				readTransaction.onabort = () => {
+					this.numReadTransactions--;
 				};
+
+				this.numReadTransactions++;
 			} catch (e) {
 				if (e.name === 'InvalidStateError' && this.db !== undefined) {
 					this.recreateIndexedDb();
@@ -243,7 +240,7 @@ class IndexedDbCacheWorker {
 					size: -1,
 				});
 
-				this.readTransaction = undefined;
+				console.error('Unexpected IndexedDb read exception', e);
 			}
 		}
 	}
@@ -275,15 +272,21 @@ class IndexedDbCacheWorker {
 			// records have been successfully written are they removed from
 			// the memory cache.
 			// If something goes wrong (e.g. the browser tab is closed), the
-			// memory cache is lost, which is not ideal, but also not a problem
+			// memory cache is lost, which is not ideal, but also not terrible
 			// for our use case.
 
 			// If we already have a readwrite transaction running, then don't
 			// do anything. readwrite transactions cannot overlap, and this
 			// function will chain them when there is nothing else to do
-			// automatically.
+			// automatically. readwrites will also block reads, which are more
+			// important to the user experience, so dont attempt to write if
+			// there are any outstanding (when they are complete, they will call
+			// back here to try again.)
 
 			if (this.committing) {
+				return;
+			}
+			if (this.numReadTransactions > 0) {
 				return;
 			}
 			const keys = Object.keys(this.memoryCache);
@@ -307,6 +310,11 @@ class IndexedDbCacheWorker {
 				request.onsuccess = () => {
 					this.stats.writetimes.push(performance.now() - start);
 					delete this.memoryCache[key]; // Delete the local copy
+
+					if (this.index.hasOwnProperty(key)) {
+						this.stats.duplicates++;
+					}
+
 					this.index[key] = 1; // Update the index as we go
 				};
 				if (numRequests++ > 5) { // Don't try and commit too much in one transaction otherwise we may block users' get requests
@@ -316,9 +324,7 @@ class IndexedDbCacheWorker {
 
 			transaction.oncomplete = () => {
 				this.committing = false;
-				if (this.readTransaction === undefined) { // If there are pending get requests, they take priority.
-					this.commitMemoryCache(); // Otherwise, chain additional commits.
-				}
+				this.commitMemoryCache(); // Try to chain additional commits. If there a pending reads the chain will be broken at the start of commitMemoryCache().
 			};
 
 			transaction.onerror = () => {
@@ -351,14 +357,16 @@ class IndexedDbCacheWorker {
 				this.recreateIndexedDb();
 			}
 			this.committing = false;
+
+			console.error('Unexpected IndexedDb write exception', e);
 		}
 	}
 
 	benchmarkIndexeddb() {
-		const transaction = this.db.transaction(this.objectStoreName, 'readonly');
-		const objectStore = transaction.objectStore(this.objectStoreName);
-
 		for (let i = 0; i < 100; i++) {
+			const transaction = this.db.transaction(this.objectStoreName, 'readonly');
+			const objectStore = transaction.objectStore(this.objectStoreName);
+
 			const key = Math.floor(Object.keys(this.index).length * Math.random());
 
 			const start = performance.now();
@@ -373,18 +381,18 @@ class IndexedDbCacheWorker {
 
 onmessage = (e) => {
 	if (e.data.message === 'createIndexedDb') {
-		self.cache = new IndexedDbCacheWorker();
+		self.repoCache = new IndexedDbCacheWorker();
 	}
 
 	if (e.data.message === 'Set') {
 		const { key } = e.data;
 		const { record } = e.data;
-		self.cache.memoryCache[key] = record; // Will be written later by commitCache
+		self.repoCache.memoryCache[key] = record; // Will be written later by commitCache
 	}
 
 	if (e.data.message === 'Get') {
 		const { key } = e.data;
 		const { id } = e.data;
-		self.cache.createGetTransaction(id, key);
+		self.repoCache.createGetTransaction(id, key);
 	}
 };
