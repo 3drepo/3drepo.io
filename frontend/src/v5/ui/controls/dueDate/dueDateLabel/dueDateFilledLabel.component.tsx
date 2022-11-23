@@ -17,14 +17,14 @@
 
 import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { IEmptyDueDateLabel } from './emptyLabel.component';
-import { DateContainer } from './label.styles';
+import { IDueDateEmptyLabel } from './dueDateEmptyLabel.component';
+import { DateContainer } from './dueDateLabel.styles';
 
-type IFilledDueDateLabel = IEmptyDueDateLabel & {
+type IDueDateFilledLabel = IDueDateEmptyLabel & {
 	value: number;
 };
 
-export const FilledDueDateLabel = ({ value, disabled, onClick }: IFilledDueDateLabel): JSX.Element => {
+export const DueDateFilledLabel = ({ value, disabled, onClick }: IDueDateFilledLabel): JSX.Element => {
 	const isOverdue = value < Date.now();
 	const formattedDate = formatDate(value);
 	return (

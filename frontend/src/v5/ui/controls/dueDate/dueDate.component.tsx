@@ -18,8 +18,8 @@
 import { DatePicker } from '@mui/x-date-pickers';
 import { useState } from 'react';
 import { formatDayOfWeek } from '@controls/formDatePicker/dateFormatHelper';
-import { FilledDueDateLabel } from './label/filledLabel.component';
-import { EmptyDueDateLabel } from './label/emptyLabel.component';
+import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
+import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
 import { StopBackgroundInteraction } from './dueDate.styles';
 
 type DueDateProps = {
@@ -56,9 +56,9 @@ export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps)
 				renderInput={({ ref, inputRef, ...props }) => (
 					<div ref={inputRef}>
 						{ value ? (
-							<FilledDueDateLabel onClick={onClickDueDate} {...props} value={value} disabled={disabled} />
+							<DueDateFilledLabel onClick={onClickDueDate} {...props} value={value} disabled={disabled} />
 						) : (
-							<EmptyDueDateLabel onClick={onClickDueDate} {...props} disabled={disabled} />
+							<DueDateEmptyLabel onClick={onClickDueDate} {...props} disabled={disabled} />
 						)}
 					</div>
 				)}

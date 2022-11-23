@@ -16,14 +16,14 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { EmptyDateContainer } from './label.styles';
+import { EmptyDateContainer } from './dueDateLabel.styles';
 
-export type IEmptyDueDateLabel = {
+export type IDueDateEmptyLabel = {
 	disabled: boolean;
 	onClick: (event) => void;
 };
 
-export const EmptyDueDateLabel = ({ disabled, onClick }: IEmptyDueDateLabel): JSX.Element => (
+export const DueDateEmptyLabel = ({ disabled, onClick }: IDueDateEmptyLabel): JSX.Element => (
 	<EmptyDateContainer disabled={disabled} onClick={onClick}>
 		{disabled ? (
 			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
