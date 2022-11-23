@@ -112,7 +112,7 @@ const itemsStyles = css`
 
 	${Item} {
 		padding: 5px 15px 5px 3px;
-		margin: 0px;
+		margin: 0;
 		border-radius: 6px;
 
 		&:hover {
