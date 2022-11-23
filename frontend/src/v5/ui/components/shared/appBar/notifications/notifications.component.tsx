@@ -16,7 +16,10 @@
  */
 
 import V4Notifications from '@/v4/routes/components/notifications/notifications.container';
+import { Container } from './notifications.styles';
 
 export const Notifications = () => (
-	<V4Notifications />
+	<Container>
+		<V4Notifications />
+	</Container>
 );
