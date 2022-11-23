@@ -22,6 +22,7 @@ import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
 import customTable from './overrides/customTable.overrides';
+import newUserForm from './overrides/newUserForm.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
@@ -44,6 +45,7 @@ export const V4OverridesContainer = styled.div`
 	height: 100%;
 
 	${customTable}
+	${newUserForm}
 
 	${avatarPopover}
 
