@@ -39,12 +39,12 @@ const containerStyles = css`
 		// TODO - fix when color is added to palette
 		box-shadow: 2px 3px 45px ${hexToOpacity('#000000', 15)};
 		width: 520px;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 		
 		& > ul {
 			cursor: initial;
 			height: unset;
 			width: 100%;
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			padding: 15px 20px 10px 25px;
 			box-sizing: border-box;
 			color: ${({ theme }) => theme.palette.secondary.main};
