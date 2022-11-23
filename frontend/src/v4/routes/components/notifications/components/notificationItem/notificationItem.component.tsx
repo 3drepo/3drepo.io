@@ -24,18 +24,21 @@ import Clear from '@mui/icons-material/Clear';
 import Lens from '@mui/icons-material/Lens';
 import PanoramaFishEye from '@mui/icons-material/PanoramaFishEye';
 
+import { isV5 } from '@/v4/helpers/isV5';
+import { COLOR } from '@/v5/ui/themes/theme';
+import { viewerRoute } from '@/v5/services/routing/routing';
+
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
 import notificationsContainer from '../../notifications.container';
 import { Container, Item, ItemSecondaryAction, ItemText } from './notificationItem.styles';
-import { isV5 } from '@/v4/helpers/isV5';
-import { COLOR } from '@/v5/ui/themes/theme';
 
 export interface INotification {
 	_id: string;
 	type: string;
 	read: boolean;
 	modelId: string;
+	project?: string;
 	teamSpace: string;
 	modelName: string;
 	issuesId?: string[];
@@ -160,8 +163,10 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			return;
 		}
 
-		const {teamSpace, modelId, history, issuesId} = this.props;
-		let pathname = `/viewer/${teamSpace}/${modelId}`;
+		const {teamSpace, project, modelId, history, issuesId} = this.props;
+		let pathname = isV5()
+			? viewerRoute(teamSpace, project, modelId)
+			: `/viewer/${teamSpace}/${modelId}`;
 		let search = '';
 
 		if (this.props.type === TYPES.ISSUE_CLOSED) {
@@ -181,7 +186,11 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
-			pathname += `/${this.props.revision}`;
+			if (isV5()) {
+				pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
+			} else {
+				pathname += `/${this.props.revision}`;
+			}
 		}
 
 		history.push({pathname, search});
