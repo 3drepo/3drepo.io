@@ -61,7 +61,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			validator = Yup.date().nullable();
 			break;
 		default:
-			validator = Yup.object();
+			validator = Yup.object().nullable();
 	}
 
 	if (required) {
