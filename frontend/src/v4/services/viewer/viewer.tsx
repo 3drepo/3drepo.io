@@ -959,6 +959,23 @@ export class ViewerService {
 		return await this.getCurrentViewpointInfo();
 	}
 
+	// This is for v5, matching the view schema
+	public async getViewpoint() {
+		await this.isViewerReady();
+		const { position, up, view_dir: forward, type, orthographicSize: size , clippingPlanes} = await this.getCurrentViewpointInfo();
+		const camera = { position, up, forward, type, size };
+		return {camera, clippingPlanes};
+	}
+
+	// This is for v5, matching the view schema
+	public async setViewpoint(viewpoint) {
+		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
+		const camera =  { position, up, view_dir, type, orthographicSize, look_at: null,  account: null, model: null };
+
+		this.updateClippingPlanes(viewpoint.clippingPlanes, '', '');
+		await this.setCamera(camera);
+	}
+
 	public async goToDefaultViewpoint() {
 		await this.isViewerReady();
 		return this.showAll();

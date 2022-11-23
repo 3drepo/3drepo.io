@@ -48,28 +48,6 @@ type ITicketView = {
 	onChange: (newValue) => void;
 };
 
-/**
-
-screenshot: types.embeddedImage(isNullable),
-state: imposeNullableRule(Yup.object({
-	showHiddenObjects: Yup.boolean().default(false),
-	highlightedGroups: Yup.array().of(groupIdOrData),
-	colorOverrideGroups: Yup.array().of(groupIdOrData),
-	hiddenGroups: Yup.array().of(groupIdOrData),
-	shownGroups: Yup.array().of(groupIdOrData),
-	transformGroups: Yup.array().of(groupIdOrData),
-}).default(undefined)),
-camera: imposeNullableRule(Yup.object({
-	type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
-		.default(CameraType.PERSPECTIVE),
-	position: types.position.required(),
-	forward: types.position.required(),
-	up: types.position.required(),
-	size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
-}).default(undefined)),
-clippingPlanes: imposeNullableRule(Yup.array().of(
-*/
-
 export const TicketView = ({
 	value,
 	label,
@@ -79,25 +57,13 @@ export const TicketView = ({
 	onBlur,
 	onChange,
 }: ITicketView) => {
-	const convertCameraToUnity = (
-		{ position, up, forward: view_dir, type, size: orthographicSize }: ICamera,
-	) => ({ position, up, view_dir, type, orthographicSize });
-
-	const convertCameraFromUnity = (
-		{ position, up, view_dir: forward, type, orthographicSize: size },
-	): ICamera => ({ position, up, forward, type, size });
-
 	const createViewpoint = async () => {
-		const currentViewpoint = await ViewerService.getCurrentViewpoint();
-		const camera: ICamera = convertCameraFromUnity(currentViewpoint);
-		const generatedObject: IViewpoint = {
-			camera,
-		};
-		onChange?.(generatedObject);
+		const currentViewpoint = await ViewerService.getViewpoint();
+		onChange?.(currentViewpoint);
 	};
 	const goToViewpoint = async () => {
-		if (!value.camera) return;
-		await ViewerService.setCamera(convertCameraToUnity(value.camera));
+		if (!value) return;
+		await ViewerService.setViewpoint(value);
 	};
 	const deleteViewpoint = async () => {
 		onChange?.(null);
