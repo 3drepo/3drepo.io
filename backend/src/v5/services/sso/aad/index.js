@@ -61,7 +61,7 @@ Aad.getUserDetails = async (code, redirectUri, codeVerifier) => {
 	const clientApp = getClientApplication();
 	try {
 		const token = await clientApp.acquireTokenByCode(tokenRequest);
-		return await get(msGraphUserDetailsUri, { Authorization: `Bearer ${token.accessToken}` });		
+		return await get(msGraphUserDetailsUri, { Authorization: `Bearer ${token.accessToken}` });
 	} catch (err) {
 		logger.logError(`Failed to fetch MS user details: ${err.message}`);
 		throw errorCodes.UNKNOWN;

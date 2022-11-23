@@ -100,7 +100,7 @@ const testAuthenticatePost = () => {
 			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}&error=${errorCodes.userNotFound}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test('should fail if the user is already logged in', async () => {

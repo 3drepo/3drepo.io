@@ -93,21 +93,21 @@ const testCreateSession = () => {
 			['the request has web user agent', true, { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } }],
 			['the request has empty ips array', true, { ...req, ips: [] }],
 			['v4 is flagged', true, { ...req, v4: true }],
-			['the session cannot be regenerated', false,{ ...req, session: { regenerate: (callback) => { callback(1); } } }, 1 ],
+			['the session cannot be regenerated', false, { ...req, session: { regenerate: (callback) => { callback(1); } } }, 1],
 		])('Regenerate Session', (desc, success, request, error) => {
-			test(`should ${success ? 'succeed if' : `fail with ${error}`} if ${desc}`, async () => {		
+			test(`should ${success ? 'succeed if' : `fail with ${error}`} if ${desc}`, async () => {
 				await Sessions.createSession(request, {});
 				if (success) {
 					checkResults(request);
 				} else {
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
 					expect(Responder.respond).toHaveBeenCalledWith(request, {}, 1);
-				}							
+				}
 			});
 		});
 
 		test('Should regenerate session with cookie.maxAge', async () => {
-			const initialMaxAge = config.cookie.maxAge;		
+			const initialMaxAge = config.cookie.maxAge;
 			config.cookie.maxAge = 100;
 			await Sessions.createSession(req, {});
 			checkResults(req);
@@ -115,7 +115,7 @@ const testCreateSession = () => {
 		});
 
 		test('Should regenerate session without cookie.maxAge', async () => {
-			const initialMaxAge = config.cookie.maxAge;	
+			const initialMaxAge = config.cookie.maxAge;
 			config.cookie.maxAge = undefined;
 			await Sessions.createSession(req, {});
 			checkResults(req);

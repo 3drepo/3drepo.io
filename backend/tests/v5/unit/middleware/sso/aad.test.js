@@ -72,8 +72,8 @@ const testVerifyNewUserDetails = () => {
 			await Aad.verifyNewUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, { 
-				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON'
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
+				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON',
 			});
 		});
 
@@ -83,7 +83,7 @@ const testVerifyNewUserDetails = () => {
 			await Aad.verifyNewUserDetails(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);			
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
 		});
 
 		test(`should respond with error code ${errorCodes.EMAIL_EXISTS} if the email already exists`, async () => {
@@ -251,8 +251,8 @@ const testHasAssociatedAccount = () => {
 			await Aad.hasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, { 
-				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON'
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
+				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON',
 			});
 		});
 
@@ -299,7 +299,6 @@ const testHasAssociatedAccount = () => {
 		});
 	});
 };
-
 
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
