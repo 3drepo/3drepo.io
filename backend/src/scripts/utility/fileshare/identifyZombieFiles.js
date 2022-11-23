@@ -75,6 +75,9 @@ const run = async (removeFiles = false) => {
 	await removeEntriesWithRef(fileList);
 	logger.logInfo(`${fileList.size} zombie file(s) found`);
 	if (fileList.size) {
+		fileList.forEach((file) => {
+			logger.logInfo(`\t${file}`);
+		});
 		if (removeFiles) {
 			await Promise.all(Array.from(fileList).map((name) => unlink(joinPath(fsPath, name))));
 			logger.logInfo(`${fileList.size} file(s) removed.`);
