@@ -180,9 +180,7 @@ const avatarStyles = css`
 	}
 `;
 
-export const Container = styled(Fab).attrs({
-	['aria-abel']: 'notifications',
-})`
+export const Container = styled(Fab)`
 	&:hover > button {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		color: ${({ theme }) => theme.palette.secondary.main};
