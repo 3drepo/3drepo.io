@@ -36,6 +36,7 @@ export default css`
 
 			.MuiSnackbarContent-message {
 				max-width: 270px;
+				word-break: break-all;
 			}
 
 			.MuiSnackbarContent-action {
