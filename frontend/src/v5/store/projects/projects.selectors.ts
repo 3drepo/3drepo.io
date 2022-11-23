@@ -18,6 +18,7 @@
 import { createSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IProjectsState } from './projects.redux';
+import { IProject } from './projects.types';
 
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
@@ -35,7 +36,7 @@ export const selectCurrentProject = createSelector(
 
 export const selectCurrentProjectDetails = createSelector(
 	selectCurrentProject, selectCurrentProjects,
-	(project, projects) => projects.find(({ _id }) => _id === project),
+	(project, projects) => projects.find(({ _id }) => _id === project) || {} as IProject,
 );
 export const selectCurrentProjectName = createSelector(
 	selectCurrentProjectDetails,
