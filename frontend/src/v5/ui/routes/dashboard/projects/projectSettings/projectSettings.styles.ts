@@ -15,16 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PostSubmitSuccessfulMessage, TickIcon } from './successMessage.styles';
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
+import { SuccessMessage as SuccessMessageBase } from '@controls/successMessage/successMessage.component';
+import styled from 'styled-components';
 
-type SuccessMessageProps = {
-	children: any;
-	className?: string;
-};
+export const SubmitButton = styled(SubmitButtonBase)`
+	width: fit-content;
+	margin: 0 0 0 8px;
+`;
 
-export const SuccessMessage = ({ children, className }: SuccessMessageProps) => (
-	<PostSubmitSuccessfulMessage className={className}>
-		<TickIcon />
-		{children}
-	</PostSubmitSuccessfulMessage>
-);
+export const Form = styled.form`
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	width: 470px;
+`;
+
+export const SuccessMessage = styled(SuccessMessageBase)`
+	width: 470px;
+`;

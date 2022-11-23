@@ -15,31 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { mimeTypes, respond } = require('../../../../utils/responder');
+const { getThumbnail: conGetThumbnail, getViewList: conGetViewList } = require('../../../../../processors/teamspaces/projects/models/containers');
+const { getThumbnail: fedGetThumbnail, getViewList: fedGetViewList } = require('../../../../../processors/teamspaces/projects/models/federations');
+const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions/permissions');
+const { mimeTypes, respond } = require('../../../../../utils/responder');
 const { Router } = require('express');
-const Views = require('../../../../processors/teamspaces/projects/models/federations');
-const { fileMimeFromBuffer } = require('../../../../utils/helper/typeCheck');
-const { hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
-const { serialiseViews } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
-const { templates } = require('../../../../utils/responseCodes');
+const { fileMimeFromBuffer } = require('../../../../../utils/helper/typeCheck');
+const { serialiseViews } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
+const { templates } = require('../../../../../utils/responseCodes');
 
-const getViewList = (req, res, next) => {
-	const { teamspace, federation } = req.params;
-	Views.getViewList(teamspace, federation)
-		.then((views) => {
-			req.outputData = views;
-			next();
-		}).catch(
-			// istanbul ignore next
-			(err) => respond(req, res, err),
-		);
+const getViewList = (isFed) => async (req, res, next) => {
+	const { teamspace, model } = req.params;
+	try {
+		const fn = isFed ? fedGetViewList : conGetViewList;
+		const views = await fn(teamspace, model);
+		req.outputData = views;
+		next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
-const getViewThumbnail = async (req, res) => {
-	const { teamspace, federation, view } = req.params;
+const getViewThumbnail = (isFed) => async (req, res) => {
+	const { teamspace, model, view } = req.params;
 
 	try {
-		const image = await Views.getThumbnail(teamspace, federation, view);
+		const fn = isFed ? fedGetThumbnail : conGetThumbnail;
+		const image = await fn(teamspace, model, view);
 		const mimeType = await fileMimeFromBuffer(image) || mimeTypes.png;
 		respond(req, res, templates.ok, image, { cache: true, mimeType });
 	} catch (err) {
@@ -48,15 +51,16 @@ const getViewThumbnail = async (req, res) => {
 	}
 };
 
-const establishRoutes = () => {
+const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
+	const hasReadAccess = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/views:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/views:
 	 *   get:
-	 *     description: Get the list of views available within the federation
-	 *     tags: [Federations]
-	 *     operationId: FederationViewsList
+	 *     description: Get the list of views available within the model
+	 *     tags: [Views]
+	 *     operationId: ViewsList
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -70,8 +74,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: federation
-	 *         description: Federation ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+ 	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -105,15 +116,15 @@ const establishRoutes = () => {
 	 *                         type: boolean
 	 *                         description: indicates whether a thumbnail is available for the view
 	 */
-	router.get('/:view/thumbnail', hasReadAccessToFederation, getViewThumbnail);
+	router.get('/', hasReadAccess, getViewList(isFed), serialiseViews);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/views/{view}/thumbnail:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/views/{view}/thumbnail:
 	 *   get:
 	 *     description: Get the thumbnail of the view specified
-	 *     tags: [Federations]
-	 *     operationId: FederationViewThumbnail
+	 *     tags: [Views]
+	 *     operationId: ViewThumbnail
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -128,13 +139,19 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - name: federation
-	 *         description: Federation ID
+	 *       - name: type
+ 	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           format: uuid
+	 *           enum: [containers, federations]
+	 *       - name: model
+ 	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
 	 *       - name: view
 	 *         description: View ID
 	 *         in: path
@@ -154,9 +171,9 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/', hasReadAccessToFederation, getViewList, serialiseViews);
+	router.get('/:view/thumbnail', hasReadAccess, getViewThumbnail(isFed));
 
 	return router;
 };
 
-module.exports = establishRoutes();
+module.exports = establishRoutes;
