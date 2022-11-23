@@ -19,10 +19,10 @@ import { PropertyProps } from './properties.types';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
 export const ImageProperty = ({
-	property: { name: title, readOnly, required },
-	name,
+	property: { name: label, readOnly, required },
 	defaultValue,
 	formError,
+	name,
 	...props
 }: PropertyProps) => (
 	<Controller
@@ -31,7 +31,7 @@ export const ImageProperty = ({
 		render={({ field: { ref, ...field } }) => (
 			<TicketImage
 				{...field}
-				title={title}
+				label={label}
 				disabled={readOnly}
 				required={required}
 				error={!!formError}

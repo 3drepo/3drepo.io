@@ -71,19 +71,19 @@ export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImagePr
 
 	const deleteImage = () => handleImageChange('');
 
-	const getImgSrc = () => {
-		if (!value) return '';
-		if (isResourceId(value)) {
+	const getImgSrc = (imgData) => {
+		if (!imgData) return '';
+		if (isResourceId(imgData)) {
 			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, value, isFederation);
 		}
-		return addBase64Prefix(value);
+		return addBase64Prefix(imgData);
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	return (
 		<BasicTicketImage
-			imgSrc={getImgSrc()}
+			imgSrc={getImgSrc(value)}
 			onEmptyImageClick={uploadImage}
 			{...props}
 		>

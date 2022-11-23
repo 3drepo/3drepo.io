@@ -22,6 +22,7 @@ type TicketImageActionProps = {
 	onImageChange?: any;
 	children: any;
 	disabled?: boolean;
+	onClick?: (...args) => void;
 };
 export const TicketImageAction = ({
 	onImageChange,
@@ -31,5 +32,5 @@ export const TicketImageAction = ({
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 	const disabled = isUndefined(disabledInput) ? disabledInput : !isAdmin;
 
-	return (<Action disabled={disabled} {...props} />);
+	return (<Action disabled={disabled} {...props} onClick={props.onClick} />);
 };
