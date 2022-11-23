@@ -107,7 +107,6 @@ const itemsBatch = css`
 	}
 `;
 
-
 const itemsStyles = css`
 	${NotificationsPanelItem} * { 
 		${({ theme }) => theme.typography.body1}
@@ -205,4 +204,3 @@ export const Container = styled(Fab)`
 	${itemsStyles}
 	${avatarStyles}
 `;
-

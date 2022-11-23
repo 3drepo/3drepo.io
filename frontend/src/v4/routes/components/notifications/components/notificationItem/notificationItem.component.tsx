@@ -230,7 +230,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			onClick: this.onClick
 		};
 
-		const v5Color = read ? COLOR.BASE_LIGHT: COLOR.SECONDARY_MAIN;
+		const v5Color = read ? COLOR.BASE_LIGHT : COLOR.SECONDARY_MAIN;
 
 		const v5StylingOverride = isV5() ? {
 			primaryColor: v5Color,
@@ -240,7 +240,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 					color: v5Color,
 				},
 			},
-		}: {};
+		} : {};
 
 		return (
 			<Container {...containerProps}>
