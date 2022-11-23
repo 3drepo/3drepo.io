@@ -1,22 +1,5 @@
 matrix:
   include:
-    #linter test
-    - language: node_js
-      dist: focal
-      name: Linter check
-      git:
-      submodules: false
-      depth: 1
-      node_js:
-        - "14.17.1"
-      script:
-        - cd backend
-        - yarn install
-        - yarn lint
-        - cd ../frontend
-        - yarn install
-        - yarn lint
-        - yarn build:test
     # tests (v4)
     - language: node_js
       dist: focal
@@ -71,53 +54,6 @@ matrix:
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
        #- unbuffer yarn test
-     #test (v5 be)
-    - language: node_js
-      dist: focal
-      name: Backend tests  (V5)
-      addons:
-        apt:
-         packages:
-            - rabbitmq-server
-      git:
-      submodules: false
-      depth: 1
-      node_js:
-        - "14.17.1"
-      before_install:
-        - wget $SSL_INSTALLER
-        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
-      script:
-        - cd backend
-        - yarn install
-        - yarn test:v5
-    #test (v5 fe)
-    - language: node_js
-      dist: focal
-      name: Frontend tests (V5)
-      git:
-      submodules: false
-      depth: 1
-      node_js:
-        - "14.17.1"
-      script:
-        - cd frontend
-        - yarn install
-        - yarn test
-    #make sure we're not merging DevOps changes
-    - language: node_js
-      dist: focal
-      name: DevOps Sanity Check
-      addons:
-      git:
-      submodules: false
-      depth: 1
-      node_js:
-        - "14.17.1"
-      before_install:
-        - sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.17.2/yq_linux_amd64 ; sudo chmod +x /usr/local/bin/yq
-      script:
-        - if ( $(yq eval '.variables.customHelmOverride | contains("rabbitmq")' .azure/build-and-deploy.yaml) === "true" ); then echo $(yq eval '.variables.customHelmOverride' .azure/build-and-deploy.yaml); travis_terminate 1;  fi
 
 notifications:
     email:
