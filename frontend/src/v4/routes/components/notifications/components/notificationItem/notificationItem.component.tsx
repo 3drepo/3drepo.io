@@ -217,7 +217,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		const summary = getSummary(this.props);
 
 		const containerProps: any = {
-			read: read.toString(),
+			read,
 			onClick: this.onClick
 		};
 
@@ -227,9 +227,6 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			primaryColor: v5Color,
 			fontWeight: undefined,
 			sx: {
-				'&:hover > span': {
-					textDecoration: read ? 'none' : 'underline',
-				},
 				'& p > span': {
 					color: v5Color,
 				},

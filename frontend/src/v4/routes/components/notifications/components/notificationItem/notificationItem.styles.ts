@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { ListItemButton } from '@mui/material';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
-import styled from 'styled-components';
-
-import { COLOR } from '../../../../../styles';
+import styled, { css } from 'styled-components';
 
 export const Item = styled(ListItemButton)`
 	&& {
@@ -29,8 +28,13 @@ export const Item = styled(ListItemButton)`
 `;
 
 export const Container = styled(Paper)`
-	background-color: ${(props: any) => props.read ? 'transparent' : COLOR.WHITE};
+	background-color: transparent;
 	margin: 3px;
+	${({ read }: any) => isV5() && !read && css`
+		.MuiButtonBase-root:hover .MuiListItemText-root > span {
+			text-decoration: underline;
+		}
+	`}
 `;
 
 export const ItemText = styled(ListItemText)`
