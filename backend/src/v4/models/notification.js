@@ -18,6 +18,7 @@
 "use strict";
 const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const { getModelsData } = require("./modelSetting");
+const { listProjects } = require("./project");
 const { findByJob, findUsersWithJobs } = require("./job");
 const utils = require("../utils");
 const db = require("../handler/db");
@@ -103,7 +104,24 @@ const extractTeamSpaceInfo = function(notifications) {
 	return _.mapValues(_.groupBy(notifications, "teamSpace"), (notification) => _.map(notification, v => v.modelId));
 };
 
-const fillModelData = function(fullNotifications) {
+const getModelToProject = async (teamspaces) => {
+	const modelToProject = {};
+	await Promise.all(teamspaces.map(async teamspace => {
+		modelToProject[teamspace] = {};
+		const projects = await listProjects(teamspace, {}, {models : 1});
+
+		projects.forEach(({_id, models}) => {
+			const projectId = utils.uuidToString(_id);
+			models.forEach((model) => {
+				modelToProject[teamspace][model] = projectId;
+			});
+		});
+
+	}));
+	return modelToProject;
+};
+
+const fillModelData = async function(fullNotifications) {
 	let notifications = [];
 
 	// this handles then  the fullNotifications areW
@@ -116,15 +134,17 @@ const fillModelData = function(fullNotifications) {
 	}
 
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
-		notifications.forEach (notification => {
-			const teamSpace = modelsData[notification.teamSpace] || {};
-			const {name, federate} = teamSpace[notification.modelId] || {};
-			Object.assign(notification, {modelName: name, federation: federate});
-		});
+	const modelsData = await getModelsData(teamSpaces);
+	const modelToProject = await getModelToProject(Object.keys(teamSpaces));
 
-		return fullNotifications;
+	notifications.forEach (notification => {
+		const teamSpace = modelsData[notification.teamSpace] || {};
+		const {name, federate} = teamSpace[notification.modelId] || {};
+		Object.assign(notification, {modelName: name, federation: federate, project: (modelToProject[notification.teamSpace] ?? {})[notification.modelId]});
 	});
+
+	return fullNotifications;
+
 };
 
 const getNotification = (username, type, criteria) =>

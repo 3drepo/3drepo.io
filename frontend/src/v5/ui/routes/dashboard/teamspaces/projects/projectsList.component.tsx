@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
@@ -22,13 +21,13 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
-import { CreateProjectForm } from '../../projects/projectsList/createProjectModal/createProjectModal.component';
+import { CreateProjectModal } from '../../projects/projectsList/createProjectModal/createProjectModal.component';
 
 export const ProjectsList = () => {
-	const [newProjectOpen, setNewProjectOpen] = useState(false);
-
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+	const openNewProjectModal = () => DialogsActionsDispatchers.open(CreateProjectModal);
 
 	return (
 		<SearchContextComponent items={projects} fieldsToFilter={['name']}>
@@ -43,7 +42,7 @@ export const ProjectsList = () => {
 						/>
 						<NewProjectButton
 							startIcon={<AddCircleIcon />}
-							onClick={() => setNewProjectOpen(true)}
+							onClick={openNewProjectModal}
 						>
 							<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
 						</NewProjectButton>
@@ -63,12 +62,8 @@ export const ProjectsList = () => {
 							</>
 						)}
 					</SearchContext.Consumer>
-					<AddProjectCard onClick={() => setNewProjectOpen(true)} />
+					<AddProjectCard onClick={openNewProjectModal} />
 				</ProjectCardsList>
-				<CreateProjectForm
-					open={newProjectOpen}
-					onClickClose={() => setNewProjectOpen(false)}
-				/>
 			</Container>
 		</SearchContextComponent>
 	);
