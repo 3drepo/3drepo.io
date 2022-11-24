@@ -1583,12 +1583,12 @@ export class UnityUtil {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
-	public static SetMaxFarPlane(value: number) {
-		UnityUtil.toUnity('SetMaxFarPlane', UnityUtil.LoadingState.VIEWER_READY, value);
+	public static setMaxFarPlane(value: number) {
+		UnityUtil.toUnity('SetMaxFarPlane', UnityUtil.LoadingState.VIEWER_READY, Number(value));
 	}
 
-	public static SetMaxNearPlane(value: number) {
-		UnityUtil.toUnity('SetMaxNearPlane', UnityUtil.LoadingState.VIEWER_READY, value);
+	public static setMaxNearPlane(value: number) {
+		UnityUtil.toUnity('SetMaxNearPlane', UnityUtil.LoadingState.VIEWER_READY, Number(value));
 	}
 
 	/**

@@ -41,6 +41,8 @@ const updateHandlers = {
 	memoryThreshold: Viewer.setStreamingMemoryThreshold,
 	memoryLimit: Viewer.setStreamingMemoryLimit,
 	phBundleColor: Viewer.setStreamingBundlesColor,
+	maxNearPlane: Viewer.setMaxNearPlane,
+	maxFarPlane: Viewer.setMaxFarPlane,
 	[BUNDLE_FADE_PREFIX]: Viewer.setStreamingBundlesFade,
 	phBundleFaceAlpha: Viewer.setStreamingBundlesFacesAlpha,
 	phBundleLineAlpha: Viewer.setStreamingBundlesLinesAlpha,

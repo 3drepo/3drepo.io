@@ -886,6 +886,20 @@ export class ViewerService {
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
+	public setMaxNearPlane = (nearplane: number) => {
+		if (nearplane === undefined) {
+ 			return;
+		}
+		UnityUtil.setMaxNearPlane(nearplane);
+	}
+
+	public setMaxFarPlane = (farplane: number) => {
+		if (farplane === undefined) {
+ 			return;
+		}
+		UnityUtil.setMaxFarPlane(farplane);
+	}
+
 	public setFarPlaneSamplingPoints = (farplaneSample: number) => {
 		if (farplaneSample === undefined) {
  			return;

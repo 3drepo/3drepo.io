@@ -111,6 +111,8 @@ export const DEFAULT_SETTINGS = {
 	clipPlaneBorderColor: [0.02, 0.16, 0.32],
 	memoryThreshold: 500,
 	memoryLimit: 2032,
+	maxNearPlane: -1,
+	maxFarPlane: -1,
 	phBundleColor: [0.1703951, 0.1897178, 0.786439],
 	phBundleFadeDistance: 1.75384,
 	phBundleFadeBias: 0,

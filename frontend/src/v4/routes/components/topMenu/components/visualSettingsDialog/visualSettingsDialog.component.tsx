@@ -31,6 +31,8 @@ import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
+	maxNearPlane: schema.number(-1, Number.POSITIVE_INFINITY),
+	maxFarPlane: schema.number(-1, Number.POSITIVE_INFINITY),
 	memory: schema.integer(16, 2032),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
@@ -156,6 +158,33 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
+			<FormListItem>
+				Maximum near plane
+				<Field name="maxNearPlane" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.maxNearPlane || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.maxNearPlane)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Maximum far plane
+				<Field name="maxFarPlane" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.maxFarPlane || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.maxFarPlane)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+
 			<FormListItem>
 				Far plane algorithm
 				<Field name="farPlaneAlgorithm" render={ ({ field }) => (
