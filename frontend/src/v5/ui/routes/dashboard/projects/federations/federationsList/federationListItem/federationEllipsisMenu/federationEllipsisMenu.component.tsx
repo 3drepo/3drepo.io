@@ -19,10 +19,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,

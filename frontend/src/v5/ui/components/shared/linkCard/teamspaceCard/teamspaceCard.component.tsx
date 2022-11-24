@@ -16,7 +16,7 @@
  */
 
 import { uriCombine } from '@/v5/services/routing/routing';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { CoverImage } from '@controls/coverImage/coverImage.component';

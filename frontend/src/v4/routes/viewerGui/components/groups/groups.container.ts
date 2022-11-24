@@ -33,8 +33,8 @@ import {
 	selectSearchEnabled,
 	selectSelectedFilters,
 	selectShowDetails,
-	GroupsActions
-} from '../../../../modules/groups';
+} from '../../../../modules/groups/groups.selectors';
+import { GroupsActions } from '../../../../modules/groups';
 import { selectSettings } from '../../../../modules/model';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { withViewer } from '../../../../services/viewer/viewer';
