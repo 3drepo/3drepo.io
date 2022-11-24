@@ -18,80 +18,46 @@
 import styled, { css } from 'styled-components';
 import { Fab } from '@mui/material';
 
-const SIZE_MAP = {
-	small: 22,
-	medium: 28,
-	large: 38,
-};
+const baseFabButtonStyle = css<{ disabled?: boolean }>`
+	height: 38px;
+	width: 38px;
+	flex-shrink: 0;
 
-const getButtonSize = (size) => {
-	const buttonSize = SIZE_MAP[size];
-
-	if (buttonSize) {
-		return css`
-			height: ${SIZE_MAP[size]}px;
-			width: ${SIZE_MAP[size]}px;
-			flex-shrink: 0;
-		`;
-	}
-
-	return null;
-};
-
-const mainFabStyles = css<{ disabled?: boolean }>`
-	&& {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: none;
-
-		${({ disabled }) => disabled && css`
-			&& {
-				path {
-					fill: ${({ theme }) => theme.palette.secondary.light};
-				}
-			}
-		`};
-
-		&:hover, &.Mui-focusVisible {
-			&& {
-				background-color: transparent;
-			}
+	${({ disabled }) => disabled && css`
+		path {
+			fill: ${({ theme }) => theme.palette.secondary.light};
 		}
+	`};
+`;
+
+export const MainFabButton = styled(Fab)`
+	${baseFabButtonStyle}
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border: none;
+
+	&:hover, &.Mui-focusVisible {
+		background-color: transparent;
 	}
 `;
 
-const contrastFabStyles = css<{ disabled?: boolean }>`
+export const ContrastFabButton = styled(Fab)`
+	${baseFabButtonStyle}
 	${({ disabled }) => disabled && css`
-		&& {
-			border-color: ${({ theme }) => theme.palette.secondary.light};
-			pointer-events: none;
-
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.light};
-			}
-		}
+		border-color: ${({ theme }) => theme.palette.secondary.light};
+		pointer-events: none;
 	`};
 
 	&:hover {
-		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		path {
+			fill: ${({ theme }) => theme.palette.secondary.main};
 		}
 	}
 
 	&.Mui-focusVisible {
-		&& {
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-			path {
-				fill: ${({ theme }) => theme.palette.primary.main};
-			}
+		border: 1px solid ${({ theme }) => theme.palette.primary.main};
+		path {
+			fill: ${({ theme }) => theme.palette.primary.main};
 		}
 	}
-`;
-
-export const StyledFab = styled(Fab)<{ size?: any, $variant?: any }>`
-	${({ size }) => getButtonSize(size)};
-	${({ $variant }) => $variant === 'main' && mainFabStyles}
-	${({ $variant }) => $variant === 'contrast' && contrastFabStyles}
 `;
