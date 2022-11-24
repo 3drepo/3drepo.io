@@ -24,7 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
