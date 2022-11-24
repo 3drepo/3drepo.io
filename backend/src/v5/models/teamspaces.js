@@ -80,7 +80,7 @@ const possibleAddOns = {
 Teamspace.getAddOns = async (teamspace) => {
 	const { customData } = await getTeamspace(teamspace, possibleAddOns);
 	const addOns = customData?.addOns || {};
-	return { ...addOns };
+	return addOns;
 };
 
 Teamspace.updateAddOns = async (teamspace, addOns) => {
