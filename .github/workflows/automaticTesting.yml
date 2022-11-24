@@ -1,0 +1,151 @@
+name: Automatic Testing
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  checks: write
+  contents: write
+
+jobs:
+  run-backend-tests:
+    name: Run Backend tests
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3.10.5-management
+        ports:
+          - "5672:5672"
+          - "15671:15671"
+          - "15672:15672"
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          # node-version: 14
+          node-version-file: backend/package.json
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
+
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('backend/yarn.lock') }}
+
+      - name: Install Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
+
+      - name: Run Backend test:v5
+        run: cd backend ; yarn test:v5
+
+  run-backend-lint:
+    name: Run Backend lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: backend/package.json
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
+
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('backend/yarn.lock') }}
+
+      - name: Install Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+
+      - name: Run Backend lint
+        run: cd backend ; yarn lint
+
+  run-frontend-tests:
+    name: Run Frontend tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: frontend/package.json
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('frontend/yarn.lock') }}
+
+      - name: Install Node.js dependencies
+        run: cd frontend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
+
+      - name: Run Frontend yarn test
+        run: cd frontend ; yarn test
+
+
+  run-frontend-lint:
+    name: Run Frontend lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: frontend/package.json
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('frontend/yarn.lock') }}
+
+      - name: Install Node.js dependencies
+        run: cd frontend ; yarn install --network-timeout 100000 --immutable --immutable-cache --check-cache
+
+      - name: Run Frontend lint
+        run: cd frontend ; yarn lint
+
+      - name: Run Frontend yarn build:test
+        run: cd frontend ; yarn build:test
+
+  # make sure we're not merging DevOps changes
+  devops-sanity-check:
+    name: Ensure that custom settings are not being merged
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout .azure/build-and-deploy.yaml
+        uses: Bhacaz/checkout-files@v2
+        with:
+          files: .azure/build-and-deploy.yaml
+          branch: ${{ github.head_ref || github.ref_name }}
+      - name: Check to see if customHelmOverride has any APP settings
+        id: customHelmOverride
+        uses: mikefarah/yq@master
+        with:
+          cmd: if ( $(yq eval '.variables.customHelmOverride | ( contains("APP_") )' .azure/build-and-deploy.yaml) === "true" ); then echo $(yq eval '.variables.customHelmOverride' .azure/build-and-deploy.yaml); exit 1;  fi
