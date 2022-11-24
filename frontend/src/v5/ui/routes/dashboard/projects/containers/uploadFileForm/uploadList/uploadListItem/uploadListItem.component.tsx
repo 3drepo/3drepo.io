@@ -24,8 +24,7 @@ import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.t
 import filesize from 'filesize';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { ListItemSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { RevisionsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';

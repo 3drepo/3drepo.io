@@ -26,8 +26,8 @@ import {
 	selectEditingGroupDetails,
 	selectExpandDetails,
 	selectFetchingDetailsIsPending,
-	GroupsActions,
-} from '../../../../../../modules/groups';
+} from '../../../../../../modules/groups/groups.selectors';
+import { GroupsActions } from '../../../../../../modules/groups';
 import { selectMetaKeys, selectSettings } from '../../../../../../modules/model';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';

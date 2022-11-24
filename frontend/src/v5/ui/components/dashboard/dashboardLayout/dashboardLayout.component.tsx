@@ -20,8 +20,7 @@ import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
 import { ProjectNavigation } from '@components/shared/navigationTabs';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
-import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Content } from './dashboardLayout.styles';
 
