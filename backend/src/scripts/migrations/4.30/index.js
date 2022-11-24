@@ -16,9 +16,11 @@
  */
 
 const moveTeamspacePermissions = require('./moveTeamspacePermissions');
+const moveTeamspaceFlags = require('./moveTeamspaceFlags');
 
 const scripts = [
-	{ script: moveTeamspacePermissions, desc: 'Move teamspace permissions to teamspace settings' },
+	// { script: moveTeamspacePermissions, desc: 'Move teamspace permissions to teamspace settings' },
+	{ script: moveTeamspaceFlags, desc: 'Move teamspace flags to addOns' },
 ];
 
 const argsDef = (yargs) => yargs.option('maxParallelSizeMB',
