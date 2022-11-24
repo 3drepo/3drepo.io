@@ -122,7 +122,7 @@ export const TicketView = ({
 	const getImgSrc = (imgData) => {
 		if (!imgData) return '';
 		if (isResourceId(imgData)) {
-			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, value, isFederation);
+			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
 		}
 		return addBase64Prefix(imgData);
 	};
