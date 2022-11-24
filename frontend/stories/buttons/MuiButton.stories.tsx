@@ -26,24 +26,28 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['contained', 'outlined', 'text'],
+			options: ['contained', 'outlined', 'text', 'label', 'label-outlined'],
 			control: { type: 'select' },
 		},
-
 		/**
 		 * The color of the component. It supports those theme colors that make sense for this component.
 		 */
 		color: {
-			options: ['inherit',
-				'primary', 'secondary',
+			options: [
+				'inherit',
+				'primary',
+				'secondary',
 				'success',
 				'error',
 				'info',
 				'warning',
-				'text'],
+			],
 			control: { type: 'select' },
 		},
 		disabled: {
+			type: 'boolean',
+		},
+		isPending: {
 			type: 'boolean',
 		},
 	},

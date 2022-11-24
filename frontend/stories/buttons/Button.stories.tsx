@@ -26,7 +26,7 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['contained', 'outlined', 'text', 'label', 'label-outlined'],
+			options: ['contained', 'outlined', 'text'],
 			control: { type: 'select' },
 		},
 
@@ -34,17 +34,15 @@ export default {
  * The color of the component. It supports those theme colors that make sense for this component.
  */
 		color: {
-			options: ['inherit',
-				'primary', 'secondary',
+			options: [
+				'inherit',
+				'primary',
+				'secondary',
 				'success',
 				'error',
 				'info',
 				'warning',
-				'text'],
-			control: { type: 'select' },
-		},
-		size: {
-			options: ['small', 'medium', 'large'],
+			],
 			control: { type: 'select' },
 		},
 		isPending: {
@@ -57,21 +55,9 @@ export default {
 } as ComponentMeta<typeof Button>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Material ui button</Button>;
+const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Controls Button</Button>;
 
-export const Primary = Template.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-Primary.args = {
-	variant: 'outlined',
-	color: 'primary',
-};
-
-export const Secondary = Template.bind({});
-Secondary.args = {
-	variant: 'outlined',
-	color: 'secondary',
-};
-
 export const Label = Template.bind({});
 Label.args = {
 	variant: 'label',
