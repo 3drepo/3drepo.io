@@ -291,22 +291,12 @@ const testGetAddOns = () => {
 			}, undefined);
 		});
 
-		test('should get all applicable addOns (without powerBI)', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				addOns: {
-					vrEnabled: true,
-					srcEnabled: true,
-					hereEnabled: true,
-				},
-			} });
+		test('should get all applicable addOns (no addOns)', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {} });
 
 			const teamspace = generateRandomString();
 
-			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-			});
+			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
 				'customData.addOns.vrEnabled': 1,
