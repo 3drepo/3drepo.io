@@ -17,8 +17,8 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const useContainersData = () => {

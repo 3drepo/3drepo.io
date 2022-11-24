@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
-import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
+import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks';
 import LightingIcon from '@assets/icons/lighting.svg';
 import { contrastColor } from 'contrast-color';
 import { FormattedMessage } from 'react-intl';
