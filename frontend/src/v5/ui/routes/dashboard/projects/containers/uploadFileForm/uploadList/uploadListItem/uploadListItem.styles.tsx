@@ -22,15 +22,12 @@ import { UploadListItemDestination } from './components/uploadListItemDestinatio
 
 export const Button = styled(CircleButton)<{ $selectedrow: boolean; }>`
 	margin: 0;
-	&&&&& {
-		:hover, &.Mui-focusVisible { 
-			box-shadow: none;
-			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.tertiary.lightest)}
-		}
-	}
-	&& {
-		background-color: transparent;
-		color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
+	background-color: transparent;
+	color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)};
+
+	&:hover, &.Mui-focusVisible { 
+		box-shadow: none;
+		background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.tertiary.lightest)}
 	}
 `;
 
