@@ -16,43 +16,60 @@
  */
 
 import * as Yup from 'yup';
+import { trimmedString } from '../shared/validators';
 import { formatMessage } from '../../services/intl';
+
+const project = trimmedString
+	.max(120, formatMessage({
+		id: 'projectForm.name.error.max',
+		defaultMessage: 'Project name is limited to 120 characters',
+	}))
+	.required(
+		formatMessage({
+			id: 'projectForm.name.error.required',
+			defaultMessage: 'Project name is required',
+		}),
+	)
+	.matches(
+		/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
+		formatMessage({
+			id: 'projectForm.name.error.illegalCharacters',
+			defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
+		}),
+	);
+
+export const EditProjectSchema = Yup.object().shape({
+	projectName: project
+		.test(
+			'alreadyExistingProject',
+			formatMessage({
+				id: 'projectForm.name.error.alreadyExisting',
+				defaultMessage: 'This name is already taken',
+			}),
+			(projectName, { options }) => {
+				const existingNames = options.context.existingNames || [];
+				return !existingNames.includes(projectName);
+			},
+		),
+});
 
 export const CreateProjectSchema = Yup.object().shape({
 	teamspace: Yup.string()
 		.required(
 			formatMessage({
-				id: 'createProject.teamspace.error.required',
+				id: 'projectForm.teamspace.error.required',
 				defaultMessage: 'Teamspace is required',
 			}),
 		),
-	projectName: Yup.string()
-		.transform((value) => value.trim())
-		.max(120, formatMessage({
-			id: 'createProject.name.error.max',
-			defaultMessage: 'Project name is limited to 120 characters',
-		}))
-		.required(
-			formatMessage({
-				id: 'createProject.name.error.required',
-				defaultMessage: 'Project name is required',
-			}),
-		)
-		.matches(
-			/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
-			formatMessage({
-				id: 'createProject.name.error.illegalCharacters',
-				defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
-			}),
-		)
+	projectName: project
 		.test(
 			'alreadyExistingProject',
 			formatMessage({
-				id: 'createProject.name.error.alreadyExisting',
+				id: 'projectForm.name.error.alreadyExisting',
 				defaultMessage: 'This name is already taken',
 			}),
 			(projectName, { options, parent }) => {
-				const existingNames = options.context.alreadyExistingProjectsByTeamspace[parent.teamspace] || [];
+				const existingNames = options.context.existingProjectsByTeamspace[parent.teamspace] || [];
 				return !existingNames.map((name) => name.trim()).includes(projectName);
 			},
 		),

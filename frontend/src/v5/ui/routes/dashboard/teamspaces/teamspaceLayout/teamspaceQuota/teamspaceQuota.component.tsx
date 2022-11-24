@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { isQuotaExpired, isQuotaUnitCapped } from '@/v5/store/teamspaces/teamspaces.helpers';

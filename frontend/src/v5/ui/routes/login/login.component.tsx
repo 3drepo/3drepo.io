@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Link } from 'react-router-dom';
 import LoginIcon from '@assets/icons/login.svg';
 import { useForm } from 'react-hook-form';
@@ -24,7 +24,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';

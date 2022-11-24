@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isV5 } from '@/v4/helpers/isV5';
-import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers/groupsActions.dispatchers';
-import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks/groupsSelectors.hooks';
+import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ChevronButton } from '@controls/chevronButton';
 import { SyntheticEvent } from 'react';
 import { getGroupNamePath } from '../groupsList.helpers';
