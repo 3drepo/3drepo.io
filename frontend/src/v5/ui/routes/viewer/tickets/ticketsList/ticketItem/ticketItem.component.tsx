@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';

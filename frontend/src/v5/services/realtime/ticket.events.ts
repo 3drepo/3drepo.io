@@ -18,7 +18,7 @@
 
 import { EditableTicket, ITicket } from '@/v5/store/tickets/tickets.types';
 import { subscribeToRoomEvent } from './realtime.service';
-import { TicketsActionsDispatchers } from '../actionsDispatchers/ticketsActions.dispatchers';
+import { TicketsActionsDispatchers } from '../actionsDispatchers';
 
 // Container ticket
 export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: string, containerId: string) => (

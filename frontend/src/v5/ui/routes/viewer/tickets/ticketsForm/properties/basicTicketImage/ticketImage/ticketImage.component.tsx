@@ -25,7 +25,7 @@ import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, st
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
 import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
