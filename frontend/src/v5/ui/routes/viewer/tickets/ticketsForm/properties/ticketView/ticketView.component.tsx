@@ -30,6 +30,8 @@ import { useParams } from 'react-router-dom';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.component';
 import { ActionMenu, MenuItemDelete } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
+import { TicketImageActionButton } from '../basicTicketImage/ticketImageActionButton.component';
+import { isEmpty } from 'lodash';
 
 type ICamera = {
 	type: 'perspective' | 'orthographic';
@@ -61,24 +63,6 @@ type ITicketView = {
 	onChange: (newValue) => void;
 };
 
-const TriggerButton = ({ hasImage }) => {
-	if (!hasImage) {
-		return (
-			<TicketImageAction>
-				<AddImageIcon />
-				<FormattedMessage id="viewer.card.ticketImage.action.addImage" defaultMessage="Add image" />
-			</TicketImageAction>
-		);
-	}
-
-	return (
-		<TicketImageAction>
-			<EditImageIcon />
-			<FormattedMessage id="viewer.card.ticketImage.action.editImage" defaultMessage="Edit image" />
-		</TicketImageAction>
-	);
-};
-
 export const TicketView = ({
 	value,
 	error,
@@ -91,7 +75,6 @@ export const TicketView = ({
 	const { teamspace, project, containerOrFederation } = useParams();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const hasImage = !!value;
 
 	const createViewpoint = async () => {
 		const currentViewpoint = await ViewerService.getViewpoint();
@@ -105,31 +88,27 @@ export const TicketView = ({
 		onChange?.(null);
 	};
 
-	const handleImageChange = (newValue) => onChange({ ...(value || {}), screenshot: stripBase64Prefix(newValue) });
+	const onImageChange = (newImg) => {
+		const { screenshot, ...viewpoint } = value || {};
+		if (!newImg && isEmpty(viewpoint)) onChange(null);
 
-	const uploadScreenshot = async () => handleImageChange(await ViewerService.getScreenshot());
-
-	const uploadImage = async () => {
-		const file = await uploadFile(getSupportedImageExtensions());
-		const imgSrc = await convertFileToImageSrc(file);
-		handleImageChange(imgSrc);
+		if (value) { onChange({ ...(value || {}), screenshot: stripBase64Prefix(newImg) }); }
 	};
-
-	const deleteImage = () => handleImageChange('');
 
 	useEffect(() => onBlur?.(), [value]);
 
 	const getImgSrc = (imgData) => {
 		if (!imgData) return '';
 		if (isResourceId(imgData)) {
-			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
+			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, value, isFederation);
 		}
 		return addBase64Prefix(imgData);
 	};
+
 	return (
 		<BasicTicketImage
 			imgSrc={getImgSrc(value?.screenshot)}
-			onEmptyImageClick={uploadImage}
+			onEmptyImageClick={() => {}}
 			{...props}
 		>
 			<TicketImageAction onClick={goToViewpoint} disabled={!(value?.camera)}>
@@ -158,21 +137,7 @@ export const TicketView = ({
 					<FormattedMessage id="viewer.card.ticketView.action.createViewpoint" defaultMessage="Create viewpoint" />
 				</TicketImageAction>
 			)}
-			<ActionMenu TriggerButton={<div><TriggerButton hasImage={hasImage} /></div>}>
-				<ActionMenuItem>
-					<MenuItem onClick={uploadScreenshot}>
-						<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />
-					</MenuItem>
-					<MenuItem onClick={uploadImage}>
-						<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />
-					</MenuItem>
-					{hasImage && (
-						<MenuItemDelete onClick={deleteImage}>
-							<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />
-						</MenuItemDelete>
-					)}
-				</ActionMenuItem>
-			</ActionMenu>
+			<TicketImageActionButton value={getImgSrc(value?.screenshot)} onChange={onImageChange} />
 		</BasicTicketImage>
 	);
 };

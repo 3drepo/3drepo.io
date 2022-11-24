@@ -32,5 +32,5 @@ export const TicketImageAction = ({
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 	const disabled = isUndefined(disabledInput) ? disabledInput : !isAdmin;
 
-	return (<Action disabled={disabled} {...props} onClick={props.onClick} />);
+	return (<Action disabled={disabled} {...props} />);
 };
