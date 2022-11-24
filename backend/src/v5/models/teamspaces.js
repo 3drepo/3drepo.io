@@ -71,21 +71,16 @@ Teamspace.removeSubscription = (ts, type) => {
 };
 
 const possibleAddOns = {
-	[`customData.${ADD_ONS.VR}`]: 1,
-	[`customData.${ADD_ONS.HERE}`]: 1,
-	[`customData.${ADD_ONS.SRC}`]: 1,
-	'customData.addOns': 1,
-
+	[`customData.addOns.${ADD_ONS.VR}`]: 1,
+	[`customData.addOns.${ADD_ONS.HERE}`]: 1,
+	[`customData.addOns.${ADD_ONS.SRC}`]: 1,
+	[`customData.addOns.${ADD_ONS.POWERBI}`]: 1,
 };
 
 Teamspace.getAddOns = async (teamspace) => {
 	const { customData } = await getTeamspace(teamspace, possibleAddOns);
 	const addOns = customData?.addOns || {};
-	return { ...addOns,
-		[ADD_ONS.VR]: customData[ADD_ONS.VR],
-		[ADD_ONS.HERE]: customData[ADD_ONS.HERE],
-		[ADD_ONS.SRC]: customData[ADD_ONS.SRC],
-	};
+	return { ...addOns };
 };
 
 Teamspace.updateAddOns = async (teamspace, addOns) => {
@@ -95,7 +90,7 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 	const addOnTypes = new Set(Object.values(ADD_ONS));
 	Object.keys(addOns).forEach((key) => {
 		if (addOnTypes.has(key)) {
-			const path = (key === ADD_ONS.POWERBI) ? `customData.addOns.${key}` : `customData.${key}`;
+			const path = `customData.addOns.${key}`;
 			if (addOns[key]) {
 				set[path] = true;
 			} else {

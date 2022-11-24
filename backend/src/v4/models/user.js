@@ -207,12 +207,7 @@ User.getProfileByUsername = async function (username) {
 };
 
 User.getAddOnsForTeamspace = async (user) => {
-	const { customData } = await db.findOne("admin", COLL_NAME, { user }, {
-		"customData.addOns" : 1,
-		"customData.vrEnabled": 1,
-		"customData.hereEnabled": 1,
-		"customData.srcEnabled": 1
-	});
+	const { customData } = await db.findOne("admin", COLL_NAME, { user }, { "customData.addOns" : 1 });
 
 	const embeddedObj = customData.addOns || {};
 	delete customData.addOns;
@@ -1051,8 +1046,8 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 };
 
 User.isHereEnabled = async function (username) {
-	const user = await User.findByUserName(username,  { _id: 0, "customData.hereEnabled": 1 });
-	return user.customData.hereEnabled;
+	const user = await User.findByUserName(username,  { _id: 0, "customData.addOns.hereEnabled": 1 });
+	return user.customData.addOns?.hereEnabled;
 };
 
 User.findByUserName = async function (username, projection) {

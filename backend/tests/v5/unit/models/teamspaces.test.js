@@ -249,11 +249,10 @@ const testRemoveAddOns = () => {
 			const teamspace = generateRandomString();
 
 			const unsetObj = {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
-
+				'customData.addOns.vrEnabled': 1,
+				'customData.addOns.srcEnabled': 1,
+				'customData.addOns.hereEnabled': 1,
+				'customData.addOns.powerBIEnabled': 1,
 			};
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
@@ -267,10 +266,10 @@ const testGetAddOns = () => {
 	describe('Get teamspace addOns', () => {
 		test('should get all applicable addOns', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
 				addOns: {
+					vrEnabled: true,
+					srcEnabled: true,
+					hereEnabled: true,
 					powerBIEnabled: true,
 				},
 			} });
@@ -285,19 +284,20 @@ const testGetAddOns = () => {
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
-
+				'customData.addOns.vrEnabled': 1,
+				'customData.addOns.srcEnabled': 1,
+				'customData.addOns.hereEnabled': 1,
+				'customData.addOns.powerBIEnabled': 1,
 			}, undefined);
 		});
 
 		test('should get all applicable addOns (without powerBI)', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
+				addOns: {
+					vrEnabled: true,
+					srcEnabled: true,
+					hereEnabled: true,
+				},
 			} });
 
 			const teamspace = generateRandomString();
@@ -309,11 +309,10 @@ const testGetAddOns = () => {
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
-
+				'customData.addOns.vrEnabled': 1,
+				'customData.addOns.srcEnabled': 1,
+				'customData.addOns.hereEnabled': 1,
+				'customData.addOns.powerBIEnabled': 1,
 			}, undefined);
 		});
 	});
@@ -326,7 +325,7 @@ const testUpdateAddOns = () => {
 			const unset = {};
 
 			Object.keys(obj).forEach((val) => {
-				const prefix = val === ADD_ONS.POWERBI ? 'customData.addOns' : 'customData';
+				const prefix = 'customData.addOns';
 				if (obj[val]) {
 					set[`${prefix}.${val}`] = true;
 				} else {
