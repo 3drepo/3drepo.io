@@ -44,7 +44,7 @@ const TriggerButton = ({ hasImage }) => {
 	);
 };
 
-export const TicketImageActionButton = ({ value, onChange }) => {
+export const TicketImageActionMenu = ({ value, onChange }) => {
 	const uploadScreenshot = async () => onChange(await ViewerService.getScreenshot());
 
 	const uploadImage = async () => {

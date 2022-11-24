@@ -16,22 +16,18 @@
  */
 
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
 import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { isResourceId, getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { ActionMenuItem } from '@controls/actionMenu';
-import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { uploadFile } from '@controls/fileUploader/uploadFile';
+import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { MenuItem } from '@mui/material';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { isEmpty } from 'lodash';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.component';
-import { ActionMenu, MenuItemDelete } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
-import { TicketImageActionButton } from '../basicTicketImage/ticketImageActionButton.component';
-import { isEmpty } from 'lodash';
+import { ActionMenu } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
+import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
 
 type ICamera = {
 	type: 'perspective' | 'orthographic';
@@ -72,14 +68,12 @@ export const TicketView = ({
 	onChange,
 	...props
 }: ITicketView) => {
-	const { teamspace, project, containerOrFederation } = useParams();
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const isFederation = modelIsFederation(containerOrFederation);
-
 	const createViewpoint = async () => {
 		const currentViewpoint = await ViewerService.getViewpoint();
+		currentViewpoint.clippingPlanes = currentViewpoint.clippingPlanes || null;
 		onChange?.(currentViewpoint);
 	};
+
 	const goToViewpoint = async () => {
 		if (!value) return;
 		await ViewerService.setViewpoint(value);
@@ -91,24 +85,16 @@ export const TicketView = ({
 	const onImageChange = (newImg) => {
 		const { screenshot, ...viewpoint } = value || {};
 		if (!newImg && isEmpty(viewpoint)) onChange(null);
-
-		if (value) { onChange({ ...(value || {}), screenshot: stripBase64Prefix(newImg) }); }
+		onChange({ ...viewpoint, screenshot: newImg ? stripBase64Prefix(newImg) : null });
 	};
 
 	useEffect(() => onBlur?.(), [value]);
 
-	const getImgSrc = (imgData) => {
-		if (!imgData) return '';
-		if (isResourceId(imgData)) {
-			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, value, isFederation);
-		}
-		return addBase64Prefix(imgData);
-	};
-
+	const imgSrc = getImgSrc(value?.screenshot);
 	return (
 		<BasicTicketImage
-			imgSrc={getImgSrc(value?.screenshot)}
-			onEmptyImageClick={() => {}}
+			value={imgSrc}
+			onChange={onImageChange}
 			{...props}
 		>
 			<TicketImageAction onClick={goToViewpoint} disabled={!(value?.camera)}>
@@ -137,7 +123,7 @@ export const TicketView = ({
 					<FormattedMessage id="viewer.card.ticketView.action.createViewpoint" defaultMessage="Create viewpoint" />
 				</TicketImageAction>
 			)}
-			<TicketImageActionButton value={getImgSrc(value?.screenshot)} onChange={onImageChange} />
+			<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />
 		</BasicTicketImage>
 	);
 };

@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
+import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormControl, FormHelperText } from '@mui/material';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
 export type BasicTicketImageProps = {
-	imgSrc: string,
+	value: string,
 	error?: any,
 	helperText?: string,
 	label: string,
@@ -28,20 +30,27 @@ export type BasicTicketImageProps = {
 	children: any,
 	required?: boolean,
 	disabled?: boolean,
-	onEmptyImageClick: () => void,
+	onChange?: (...args) => void,
 };
+
 export const BasicTicketImage = ({
 	children,
-	imgSrc,
+	value,
 	label,
 	className,
 	error,
 	helperText,
 	required,
 	disabled,
-	onEmptyImageClick,
+	onChange,
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
+
+	const uploadImage = async () => {
+		const file = await uploadFile(getSupportedImageExtensions());
+		const imgSrc = await convertFileToImageSrc(file);
+		onChange?.(imgSrc);
+	};
 
 	return (
 		<FormControl error={error} required={required}>
@@ -51,9 +60,9 @@ export const BasicTicketImage = ({
 					<ActionsList>{children}</ActionsList>
 				</ActionsSide>
 				<TicketImageDisplayer
-					imgSrc={imgSrc}
+					imgSrc={value}
 					disabled={disabled || !isAdmin}
-					onEmptyImageClick={onEmptyImageClick}
+					onEmptyImageClick={uploadImage}
 				/>
 			</Container>
 			<FormHelperText>{helperText}</FormHelperText>
