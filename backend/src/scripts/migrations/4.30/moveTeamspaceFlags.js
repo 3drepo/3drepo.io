@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 const { find, updateOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const flags = ['testEnabled']; // 'vrEnabled', 'srcEnabled', 'hereEnabled'];
+const flags = ['vrEnabled', 'srcEnabled', 'hereEnabled'];
 
 const run = async () => {
 	const oldFields = {};
