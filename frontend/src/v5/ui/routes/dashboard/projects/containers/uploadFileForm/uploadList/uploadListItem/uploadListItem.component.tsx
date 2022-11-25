@@ -133,10 +133,10 @@ export const UploadListItem = ({
 				? <UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />
 				: (
 					<>
-						<Button $selectedrow={isSelected} onClick={onClickEdit}>
+						<Button selected={isSelected} onClick={onClickEdit}>
 							<EditIcon />
 						</Button>
-						<Button $selectedrow={isSelected} onClick={onClickDelete}>
+						<Button selected={isSelected} onClick={onClickDelete}>
 							<DeleteIcon />
 						</Button>
 					</>
