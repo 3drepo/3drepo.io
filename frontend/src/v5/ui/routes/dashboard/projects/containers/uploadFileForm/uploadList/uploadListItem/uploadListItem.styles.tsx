@@ -21,7 +21,7 @@ import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTa
 import { UploadListItemDestination } from './components/uploadListItemDestination';
 
 export const Button = styled(CircleButton).attrs(({ selected }: { selected?: boolean }) => ({
-	variant: selected ? 'secondary' : 'main',
+	variant: selected ? 'secondary' : 'primary',
 }))`
 	margin: 0;
 
