@@ -27,8 +27,6 @@ import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
 import * as TicketsCardSelectors from '@/v5/store/tickets/card/ticketsCard.selectors';
 import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors';
 import * as UsersSelectors from '@/v5/store/users/users.selectors';
-import * as UsersSelectors from '@/v5/store/users/users.selectors';
-import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors';
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
