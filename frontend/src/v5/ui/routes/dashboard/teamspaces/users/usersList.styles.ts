@@ -92,9 +92,12 @@ export const Container = styled.div`
 		max-width: 27%;
 		padding: 0 10px 0 0;
 		${SelectStyles} {
-			.MuiGrid-item:first-of-type {
-				min-height: 10px;
-				min-width: 10px;
+			.MuiGrid-container {
+				flex-wrap: nowrap;
+				.MuiGrid-item:first-of-type {
+					min-height: 10px;
+					min-width: 10px;
+				}
 			}
 		}
 	}
