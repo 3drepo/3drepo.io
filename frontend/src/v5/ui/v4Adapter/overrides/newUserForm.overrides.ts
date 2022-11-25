@@ -36,7 +36,7 @@ export default css`
 				margin: 0;
 			}
 			>.MuiInputLabel-root {
-				font-size: 12px;
+				${({ theme }) => theme.typography.body1};
 				transform: none;
 				color: ${({ theme }) => theme.palette.base.main};
 				left: 0;
@@ -44,8 +44,9 @@ export default css`
 			}
 			/* Job selector */
 			.MuiSelect-select {
+				${({ theme }) => theme.typography.body1};
 				color: ${({ theme }) => theme.palette.base.main};
-				font-size: 12px;
+				line-height: 35px;
 			}
 		}
 		
@@ -61,8 +62,8 @@ export default css`
 		}
 
 		${UserNotExistsContainer} {
+			${({ theme }) => theme.typography.body1};
 			color: ${({ theme }) => theme.palette.error.main};
-			font-size: 12px;
 			padding-top: 10px;
 			font-weight: 500;
 			${UserNotExistsButton} {
@@ -84,8 +85,8 @@ export default css`
 
 		/* "Invite to 3D Repo" link */
 		${InvitationModeLink} {
+			${({ theme }) => theme.typography.body1};
 			margin: 10px 0;
-			font-size: 12px;
 			color: ${({ theme }) => theme.palette.primary.main};
 			cursor: pointer;
 			text-decoration: none;

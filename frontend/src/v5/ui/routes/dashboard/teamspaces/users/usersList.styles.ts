@@ -28,7 +28,7 @@ const AddUserButton = css`
 		${FloatingButton} {
 			::after {
 				content: 'Add user';
-				font-size: 12px;
+				${({ theme }) => theme.typography.body1};
 				margin-left: 8px;
 			}
 			border-radius: 5px;
@@ -62,7 +62,8 @@ const SelectStyles = css`
 			border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 			padding-left: 10px;
 			&, .MuiGrid-root {
-				font-size: 12px;
+				${({ theme }) => theme.typography.body1};
+				line-height: 35px;
 				color: ${({ theme }) => theme.palette.secondary.main};
 				width: auto;
 			}
@@ -124,8 +125,9 @@ export const Container = styled.div`
 	
 	${LicencesFooter} {
 		border: none;
-		font-size: 10px;
+		${({ theme }) => theme.typography.caption};
 		padding: 10px 0;
+		align-items: baseline;
 		color: ${({ theme }) => theme.palette.base.main};
 		${PendingInvites} {
 			cursor: pointer;
