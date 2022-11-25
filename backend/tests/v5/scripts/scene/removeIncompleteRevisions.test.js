@@ -39,9 +39,10 @@ const findRefs = async (teamspace, collection, ids) => {
 	return res.map(({ link }) => link);
 };
 
-const setupData = async (data) => {
+const setupData = async () => {
 	const teamspace = generateRandomString();
 	const model = generateRandomString();
+	const modelNoIncomplete = generateRandomString();
 
 	const adjustDate = (dateDiff) => {
 		const date = new Date();
@@ -50,41 +51,47 @@ const setupData = async (data) => {
 		return date;
 	};
 
-	const generateRevision = async (incomplete, timestamp) => {
-		const rev = { ...generateRevisionEntry(), timestamp };
+	const generateRevision = async (ts, modelName, incomplete, timestamp, { noRFile } = { }) => {
+		const rev = { ...generateRevisionEntry(false, !noRFile), timestamp };
 
 		if (incomplete) {
 			rev.incomplete = 2;
 		}
 
-		await createRevision(teamspace, model, rev);
-		const links = await findRefs(teamspace, `${model}.history`, rev.rFile);
-		return { revision: { rev: { ...rev, _id: stringToUUID(rev._id) }, links } };
+		await createRevision(ts, modelName, rev);
+		const links = noRFile ? [] : await findRefs(teamspace, `${model}.history`, rev.rFile);
+		return { teamspace: ts, model: modelName, revision: { rev: { ...rev, _id: stringToUUID(rev._id) }, links } };
 	};
 
 	const [
-		todayRev, oneDayOld, weekOld, thirteenDaysOld, twoWeeksOld, monthOld, ...completedRevs
+		todayRev, oneDayOld, weekOld, thirteenDaysOld, specialCase, twoWeeksOld, monthOld, ...completedRevs
 	] = await Promise.all([
-		generateRevision(true, new Date()),
-		generateRevision(true, adjustDate(1)),
-		generateRevision(true, adjustDate(7)),
-		generateRevision(true, adjustDate(13)),
-		generateRevision(true, adjustDate(14)),
-		generateRevision(true, adjustDate(30)),
-		generateRevision(false, new Date()),
-		generateRevision(false, adjustDate(1)),
-		generateRevision(false, adjustDate(7)),
-		generateRevision(false, adjustDate(13)),
-		generateRevision(false, adjustDate(14)),
-		generateRevision(false, adjustDate(30)),
+		generateRevision(teamspace, model, true, new Date()),
+		generateRevision(teamspace, model, true, adjustDate(1)),
+		generateRevision(teamspace, model, true, adjustDate(7)),
+		generateRevision(teamspace, model, true, adjustDate(13)),
+		generateRevision(teamspace, model, true, adjustDate(14), { noRFile: true }),
+		generateRevision(teamspace, model, true, adjustDate(14)),
+		generateRevision(teamspace, model, true, adjustDate(30)),
+		generateRevision(teamspace, model, false, new Date()),
+		generateRevision(teamspace, model, false, adjustDate(1)),
+		generateRevision(teamspace, model, false, adjustDate(7)),
+		generateRevision(teamspace, model, false, adjustDate(13)),
+		generateRevision(teamspace, model, false, adjustDate(14)),
+		generateRevision(teamspace, model, false, adjustDate(30)),
+		generateRevision(teamspace, modelNoIncomplete, false, new Date()),
+		generateRevision(teamspace, modelNoIncomplete, false, adjustDate(1)),
+		generateRevision(teamspace, modelNoIncomplete, false, adjustDate(7)),
+		generateRevision(teamspace, modelNoIncomplete, false, adjustDate(13)),
+		generateRevision(teamspace, modelNoIncomplete, false, adjustDate(14)),
+		generateRevision(teamspace, modelNoIncomplete, false, adjustDate(30)),
 	]);
 
-	/* eslint-disable no-param-reassign */
-	data.completedRevs = completedRevs;
-	data.failedRevs = { todayRev, oneDayOld, weekOld, thirteenDaysOld, twoWeeksOld, monthOld };
-	data.teamspace = teamspace;
-	data.model = model;
-	/* eslint-enable no-param-reassign */
+	return {
+		completedRevs,
+		failedRevs: { todayRev, oneDayOld, weekOld, thirteenDaysOld, twoWeeksOld, specialCase, monthOld },
+
+	};
 };
 
 const checkFileExists = (filePaths, shouldExist) => {
@@ -93,19 +100,24 @@ const checkFileExists = (filePaths, shouldExist) => {
 	}
 };
 
-const checkRevisionsExist = async (teamspace, model, revisions, shouldExist) => {
-	const checkRevision = async ({ revision: { rev, links } }) => {
+const checkRevisionsExist = async (revisions, shouldExist) => {
+	const checkRevision = async ({ teamspace, model, revision: { rev, links } }) => {
 		const revFound = await getRevisionByIdOrTag(teamspace, model, rev._id, { _id: 1 }).catch(() => false);
 		expect(!!revFound).toEqual(shouldExist);
-
-		checkFileExists(links, shouldExist);
+		if (links.length) checkFileExists(links, shouldExist);
 	};
 
 	await Promise.all(revisions.map(checkRevision));
 };
 
-const runTest = (data) => {
+const runTest = () => {
 	describe('Remove incomplete revisions', () => {
+		let data;
+		beforeEach(async () => {
+			resetFileshare();
+			await resetDB();
+			data = await setupData();
+		});
 		describe.each([
 			['Threshold is set to negative', [-1]],
 			['Threshold is not a number', [generateRandomString()]],
@@ -117,7 +129,7 @@ const runTest = (data) => {
 			test(desc, async () => {
 				const allRevs = [...data.completedRevs, ...Object.values(data.failedRevs)];
 				await expect(RemoveIncompleteRevisions.run(...params)).rejects.toEqual(negThresError);
-				await checkRevisionsExist(data.teamspace, data.model, allRevs, true);
+				await checkRevisionsExist(allRevs, true);
 			});
 		});
 
@@ -125,8 +137,8 @@ const runTest = (data) => {
 			await RemoveIncompleteRevisions.run(14);
 			const { todayRev, oneDayOld, weekOld, thirteenDaysOld, ...deletedRevs } = data.failedRevs;
 			const revsToExist = [...data.completedRevs, todayRev, oneDayOld, weekOld, thirteenDaysOld];
-			await checkRevisionsExist(data.teamspace, data.model, revsToExist, true);
-			await checkRevisionsExist(data.teamspace, data.model, Object.values(deletedRevs), false);
+			await checkRevisionsExist(revsToExist, true);
+			await checkRevisionsExist(Object.values(deletedRevs), false);
 		});
 
 		test('Should not remove any revisions if threshold is less than 2 days and stdIn returned no', async () => {
@@ -134,11 +146,9 @@ const runTest = (data) => {
 			jest.spyOn(readline, 'createInterface').mockReturnValueOnce(fakeLineRder);
 
 			await RemoveIncompleteRevisions.run(1);
+			const allRevs = [...data.completedRevs, ...Object.values(data.failedRevs)];
 
-			const { todayRev, oneDayOld, weekOld, thirteenDaysOld, ...deletedRevs } = data.failedRevs;
-			const revsToExist = [...data.completedRevs, todayRev, oneDayOld, weekOld, thirteenDaysOld];
-			await checkRevisionsExist(data.teamspace, data.model, revsToExist, true);
-			await checkRevisionsExist(data.teamspace, data.model, Object.values(deletedRevs), false);
+			await checkRevisionsExist(allRevs, true);
 		});
 
 		test('Should remove any revisions if threshold is less than 1 days and stdIn returned y', async () => {
@@ -149,8 +159,8 @@ const runTest = (data) => {
 
 			const { todayRev, ...deletedRevs } = data.failedRevs;
 			const revsToExist = [...data.completedRevs, todayRev];
-			await checkRevisionsExist(data.teamspace, data.model, revsToExist, true);
-			await checkRevisionsExist(data.teamspace, data.model, Object.values(deletedRevs), false);
+			await checkRevisionsExist(revsToExist, true);
+			await checkRevisionsExist(Object.values(deletedRevs), false);
 		});
 
 		test('Should remove any revisions if threshold is less than 0 days without prompt if force is flagged', async () => {
@@ -158,20 +168,13 @@ const runTest = (data) => {
 
 			await RemoveIncompleteRevisions.run(0, true);
 
-			await checkRevisionsExist(data.teamspace, data.model, data.completedRevs, true);
-			await checkRevisionsExist(data.teamspace, data.model, Object.values(data.failedRevs), false);
+			await checkRevisionsExist(data.completedRevs, true);
+			await checkRevisionsExist(Object.values(data.failedRevs), false);
 			expect(rlFn).not.toHaveBeenCalled();
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
-	// initialising data so we have a pointer to pass around
-	const data = {};
-	beforeAll(async () => {
-		resetFileshare();
-		await resetDB();
-		await setupData(data);
-	});
-	runTest(data);
+	runTest();
 });

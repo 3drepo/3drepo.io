@@ -220,7 +220,7 @@ const run = async (revisionAge, force) => {
 	}
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('revisionAge', {
 		describe: 'Days threshold for failed revisions',
