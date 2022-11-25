@@ -16,57 +16,44 @@
  */
 
 import { FormControl, FormHelperText, InputLabel, InputProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { Container, Input } from './formTextAreaFixedSize.styles';
 
-export type FormTextAreaFixedSizeProps = InputProps & {
-	control?: any,
-	formError?: any,
-	label?: any,
+export type FormTextAreaFixedSizeProps = FormInputProps & InputProps & {
 	height?: number,
 };
 
 export const FormTextAreaFixedSize = ({
-	formError,
-	control,
+	error,
+	helperText,
 	name,
 	required,
 	disabled,
 	label,
+	value = '', // this is to be certain that is a controlled field
 	height = 80,
 	...props
 }: FormTextAreaFixedSizeProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormControl required={required} disabled={disabled} error={!!formError}>
-				{label && (
-					<InputLabel
-						{...field}
-						id={`${name}-label`}
-					>
-						{label}
-					</InputLabel>
-				)}
-				<Container $error={!!formError} $height={height}>
-					<ScrollArea autoHeight autoHeightMin={height} autoHeightMax={height} autoHide>
-						<Input
-							inputRef={field.ref}
-							id={name}
-							multiline
-							minRows={4}
-							$height={height}
-							{...field}
-							{...props}
-							value={field.value || ''} // this is to be certain that is a controlled field
-							defaultValue={undefined} // this is to be certain that is a controlled field
-						/>
-					</ScrollArea>
-				</Container>
-				<FormHelperText>{formError?.message}</FormHelperText>
-			</FormControl>
+	<FormControl required={required} disabled={disabled} error={error}>
+		{label && (
+			<InputLabel id={`${name}-label`}>
+				{label}
+			</InputLabel>
 		)}
-	/>
+		<Container $error={error} $height={height}>
+			<ScrollArea autoHeight autoHeightMin={height} autoHeightMax={height} autoHide>
+				<Input
+					id={name}
+					multiline
+					minRows={4}
+					$height={height}
+					{...props}
+					value={value}
+					defaultValue={undefined} // this is to be certain that is a controlled field
+				/>
+			</ScrollArea>
+		</Container>
+		<FormHelperText>{helperText}</FormHelperText>
+	</FormControl>
 );
