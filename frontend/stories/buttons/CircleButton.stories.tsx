@@ -24,7 +24,7 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['main', 'contrast'],
+			options: ['primary', 'secondary'],
 			control: { type: 'select' },
 		},
 	},
@@ -41,10 +41,10 @@ const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
 
 export const NotificationsMain = TemplateNotifications.bind({});
 NotificationsMain.args = {
-	variant: 'main',
+	variant: 'primary',
 };
 
 export const NotificationsContrast = TemplateNotifications.bind({});
 NotificationsContrast.args = {
-	variant: 'contrast',
+	variant: 'secondary',
 };
