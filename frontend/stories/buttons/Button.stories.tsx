@@ -26,13 +26,12 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['contained', 'outlined', 'text'],
+			options: ['contained', 'outlined', 'text', 'label', 'label-outlined'],
 			control: { type: 'select' },
 		},
-
 		/**
- * The color of the component. It supports those theme colors that make sense for this component.
- */
+		 * The color of the component. It supports those theme colors that make sense for this component.
+		 */
 		color: {
 			options: [
 				'inherit',
@@ -51,6 +50,9 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		errorButton: {
+			type: 'boolean',
+		},
 	},
 } as ComponentMeta<typeof Button>;
 
@@ -58,14 +60,38 @@ export default {
 const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Controls Button</Button>;
 
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
+export const Contained = Template.bind({});
+Contained.args = {
+	variant: 'contained',
+	color: 'secondary',
+};
+
+export const Outlined = Template.bind({});
+Outlined.args = {
+	variant: 'outlined',
+	color: 'secondary',
+};
+
+export const Text = Template.bind({});
+Text.args = {
+	variant: 'text',
+	color: 'primary',
+};
+
+
 export const Label = Template.bind({});
 Label.args = {
 	variant: 'label',
 	color: 'primary',
 };
 
-export const LabelOutined = Template.bind({});
-LabelOutined.args = {
+export const LabelOutlined = Template.bind({});
+LabelOutlined.args = {
 	variant: 'label-outlined',
 	color: 'primary',
+};
+
+export const Error = Template.bind({});
+Error.args = {
+	errorButton: true,
 };

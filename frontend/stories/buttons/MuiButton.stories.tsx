@@ -26,7 +26,7 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['contained', 'outlined', 'text', 'label', 'label-outlined'],
+			options: ['contained', 'outlined', 'text'],
 			control: { type: 'select' },
 		},
 		/**
