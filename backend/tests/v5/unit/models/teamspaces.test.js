@@ -47,12 +47,22 @@ const testHasAccessToTeamspace = () => {
 const testTeamspaceAdmins = () => {
 	describe('Get teamspace admins', () => {
 		test('should return list of admins if teamspace exists', async () => {
+			/* TODO
 			const expectedData = {
 				permissions: [
 					{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
 					{ user: 'personB', permissions: ['someOtherPerm'] },
 					{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
 				],
+			}; */
+			const expectedData = {
+				customData: {
+					permissions: [
+						{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
+						{ user: 'personB', permissions: ['someOtherPerm'] },
+						{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
+					],
+				},
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
 
@@ -68,6 +78,7 @@ const testTeamspaceAdmins = () => {
 	});
 };
 
+/* TODO
 const testGrantTeamspacePermissionToUser = () => {
 	describe('Grant teamspace permission to user', () => {
 		test('Should grant teamspace permission to user', async () => {
@@ -80,7 +91,7 @@ const testGrantTeamspacePermissionToUser = () => {
 				{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
-};
+}; */
 
 const testGetMembersInfo = () => {
 	describe('Get teamspace admins', () => {
@@ -262,11 +273,19 @@ const testRemoveAddOns = () => {
 
 			const teamspace = generateRandomString();
 
+			/* TODO
 			const unsetObj = {
 				'customData.addOns.vrEnabled': 1,
 				'customData.addOns.srcEnabled': 1,
 				'customData.addOns.hereEnabled': 1,
 				'customData.addOns.powerBIEnabled': 1,
+			}; */
+
+			const unsetObj = {
+				'customData.vrEnabled': 1,
+				'customData.srcEnabled': 1,
+				'customData.hereEnabled': 1,
+				'customData.addOns': 1,
 			};
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
@@ -279,11 +298,20 @@ const testRemoveAddOns = () => {
 const testGetAddOns = () => {
 	describe('Get teamspace addOns', () => {
 		test('should get all applicable addOns', async () => {
+			/*
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
 				addOns: {
 					vrEnabled: true,
 					srcEnabled: true,
 					hereEnabled: true,
+					powerBIEnabled: true,
+				},
+			} }); */
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+				addOns: {
 					powerBIEnabled: true,
 				},
 			} });
@@ -297,26 +325,50 @@ const testGetAddOns = () => {
 				powerBIEnabled: true,
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
+			/* TODO
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
 				'customData.addOns.vrEnabled': 1,
 				'customData.addOns.srcEnabled': 1,
 				'customData.addOns.hereEnabled': 1,
 				'customData.addOns.powerBIEnabled': 1,
+			}, undefined); */
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
+				'customData.vrEnabled': 1,
+				'customData.srcEnabled': 1,
+				'customData.hereEnabled': 1,
+				'customData.addOns': 1,
 			}, undefined);
 		});
 
 		test('should get all applicable addOns (no addOns)', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {} });
+			// TODO const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {} });
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+			} });
 
 			const teamspace = generateRandomString();
 
-			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
+			// TODO await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
+			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+			});
 			expect(fn).toHaveBeenCalledTimes(1);
+			/* TODO
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
 				'customData.addOns.vrEnabled': 1,
 				'customData.addOns.srcEnabled': 1,
 				'customData.addOns.hereEnabled': 1,
 				'customData.addOns.powerBIEnabled': 1,
+			}, undefined); */
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
+				'customData.vrEnabled': 1,
+				'customData.srcEnabled': 1,
+				'customData.hereEnabled': 1,
+				'customData.addOns': 1,
 			}, undefined);
 		});
 	});
@@ -329,7 +381,8 @@ const testUpdateAddOns = () => {
 			const unset = {};
 
 			Object.keys(obj).forEach((val) => {
-				const prefix = 'customData.addOns';
+				// TODO const prefix = 'customData.addOns';
+				const prefix = val === ADD_ONS.POWERBI ? 'customData.addOns' : 'customData';
 				if (obj[val]) {
 					set[`${prefix}.${val}`] = true;
 				} else {
@@ -397,9 +450,10 @@ const testCreateTeamspaceSettings = () => {
 				_id: teamspace,
 				topicTypes: DEFAULT_TOPIC_TYPES,
 				riskCategories: DEFAULT_RISK_CATEGORIES,
+				/* TODO
 				permissions: [
 					{ user: teamspace, permissions: [TEAMSPACE_ADMIN] },
-				],
+				], */
 			};
 
 			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
@@ -436,8 +490,11 @@ const testRemoveUserFromAdminPrivileges = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
 			await expect(Teamspace.removeUserFromAdminPrivilege(teamspace, user)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
+			/* TODO
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
 				{ _id: teamspace }, { $pull: { permissions: { user } } });
+				*/
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
 		});
 	});
 };
@@ -482,5 +539,5 @@ describe('models/teamspaces', () => {
 	testRemoveUserFromAdminPrivileges();
 	testGetAllTeamspacesWithActiveLicenses();
 	testGetRiskCategories();
-	testGrantTeamspacePermissionToUser();
+	// TODO testGrantTeamspacePermissionToUser();
 });
