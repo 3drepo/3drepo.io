@@ -27,33 +27,14 @@ import { FormattedMessage } from 'react-intl';
 import { isEmpty, isEqual } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
+import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.component';
 import { ActionMenu } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
 
-type ICamera = {
-	type: 'perspective' | 'orthographic';
-	position: number[];
-	forward: number[];
-	up: number[];
-	size?: number;
-};
-
-type ClippingPlane = {
-	normal: number[];
-	distance: number[];
-	clipDirection: 1 | -1;
-};
-
-type IViewpoint = {
-	screenshot?: any;
-	camera: ICamera;
-	clippingPlanes?: ClippingPlane[];
-};
-
 type ITicketView = {
-	value: IViewpoint | undefined;
+	value: Viewpoint | undefined;
 	label: string;
 	error: boolean;
 	helperText: string;

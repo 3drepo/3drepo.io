@@ -26,6 +26,7 @@ type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSr
 	onBlur?: () => void;
 	value?: string,
 };
+
 export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImageProps) => {
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
