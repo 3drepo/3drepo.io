@@ -50,7 +50,7 @@ export const EllipsisMenu = ({ selected, children, className }: IEllipsisMenu): 
 	return (
 		<>
 			<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
-				<div onClick={handleClickDropdown}>
+				<div onClick={handleClickDropdown} aria-hidden>
 					<EllipsisButton
 						aria-controls="ellipsis-menu-list"
 						aria-haspopup="true"
