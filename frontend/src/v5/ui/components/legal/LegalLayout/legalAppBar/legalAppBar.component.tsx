@@ -21,8 +21,8 @@ import PrintIcon from '@assets/icons/print.svg';
 import { FormattedMessage } from 'react-intl';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { NavLink, NavLinks } from './legalAppBar.styles';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
+import { NavLink, NavLinks } from './legalAppBar.styles';
 
 type ILegalAppBar = {
 	activePage: string;
