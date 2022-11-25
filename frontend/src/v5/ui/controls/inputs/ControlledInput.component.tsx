@@ -25,9 +25,10 @@ export type FormInputProps = Omit<ControllerRenderProps, 'ref'> & {
 	error?: any,
 	helperText?: string,
 	inputRef?: any,
+	name?: string,
 };
 
-type ControlledInputProps = Pick<FormInputProps, 'required' | 'label' | 'defaultValue' | 'disabled' | 'className'> & {
+type ControlledInputProps = Pick<FormInputProps, 'onBlur' | 'required' | 'label' | 'defaultValue' | 'disabled' | 'className'> & {
 	Input: (props: FormInputProps) => any,
 	name: string,
 	control?: any,
@@ -42,6 +43,7 @@ export const ControlledInput = ({ Input, name, control, defaultValue, formError,
 			<Input
 				{...field}
 				{...props}
+				name={name}
 				inputRef={ref}
 				error={!!formError}
 				helperText={formError?.message}
