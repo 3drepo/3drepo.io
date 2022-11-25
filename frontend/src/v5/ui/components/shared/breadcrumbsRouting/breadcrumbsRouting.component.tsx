@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useParams, generatePath, matchPath } from 'react-router-dom';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE, VIEWER_ROUTE, TEAMSPACE_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
@@ -26,8 +25,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();

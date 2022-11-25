@@ -16,7 +16,7 @@
  */
 
 import { FederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SettingsForm } from '../../settingsForm/settingsForm.component';
 

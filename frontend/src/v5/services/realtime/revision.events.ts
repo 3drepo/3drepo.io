@@ -17,8 +17,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { IRevision, IRevisionUpdate } from '@/v5/store/revisions/revisions.types';
-import { ContainersActionsDispatchers } from '../actionsDispatchers/containersActions.dispatchers';
-import { RevisionsActionsDispatchers } from '../actionsDispatchers/revisionsActions.dispatchers';
+import { ContainersActionsDispatchers, RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeContainerRevisionUpdate = (teamspace: string, project: string, containerId: string) =>

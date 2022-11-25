@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { LoginLink, Background, Container, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
