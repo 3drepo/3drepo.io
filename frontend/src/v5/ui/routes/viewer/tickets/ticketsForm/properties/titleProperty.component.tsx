@@ -16,6 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { TitlePropertyBase } from './titleProperty.styles';
 
 export const TitleProperty = (props) => {
@@ -24,7 +25,8 @@ export const TitleProperty = (props) => {
 	};
 
 	return (
-		<TitlePropertyBase
+		<ControlledInput
+			Input={TitlePropertyBase}
 			onKeyDown={handleKeyDown}
 			placeholder={formatMessage({
 				id: 'customTicket.newTicket.titlePlaceholder',

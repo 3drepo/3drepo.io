@@ -16,8 +16,9 @@
  */
 
 import { FormTextField, FormTextFieldProps } from '@controls/formTextField/formTextField.component';
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
 
-export type FormTextAreaProps = Omit<FormTextFieldProps, 'variant'> & {
+export type FormTextAreaProps = FormInputProps & Omit<FormTextFieldProps, 'variant'> & {
 	minRows?: number,
 };
 
