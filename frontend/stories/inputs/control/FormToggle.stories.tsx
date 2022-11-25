@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormToggle } from '@controls/formToggle/formToggle.component';
+import { FormToggle } from '@controls/inputs/formToggle/formToggle.component';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 
@@ -34,8 +34,6 @@ export default {
 	},
 	component: FormToggle,
 	parameters: { controls: { exclude: [
-		'control',
-		'ref',
 		'action',
 		'touchRippleRef',
 		'TouchRippleProps',
@@ -55,7 +53,6 @@ const Controlled: ComponentStory<typeof FormToggle> = (args) => {
 		<FormContainer>
 			<FormToggle
 				name="toggle"
-				control={control}
 				{...args}
 			/>
 		</FormContainer>
