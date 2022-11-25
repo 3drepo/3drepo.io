@@ -77,36 +77,56 @@ const testAuthenticate = () => {
 const testAuthenticatePost = () => {
 	describe('Authenticate Post', () => {
 		test(`should redirect with ${errorCodes.USER_NOT_FOUND} if user does not exist`, async () => {
-			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
+			const userDataFromAad = {
+				email: generateRandomString(),
+				id: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+			};
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test(`should redirect with ${errorCodes.NON_SSO_USER} if user is a non SSO user`, async () => {
-			const userDataFromAad = { mail: userEmail, id: generateRandomString() };
+			const userDataFromAad = {
+				email: userEmail,
+				id: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+			};
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.NON_SSO_USER}`);
 		});
 
 		test('should retain a query param in the redirectUri if it redirects with error', async () => {
-			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
+			const userDataFromAad = {
+				email: generateRandomString(),
+				id: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+			};
 			const state = { redirectUri: `${generateRandomURL()}?queryParam=someValue` };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test('should fail if the user is already logged in', async () => {
-			const userDataFromAad = { mail: userEmailSso, id: ssoUserId };
+			const userDataFromAad = {
+				email: userEmailSso,
+				id: ssoUserId,
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+			};
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 
 			await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
@@ -117,9 +137,14 @@ const testAuthenticatePost = () => {
 		});
 
 		test('should redirect the user to the redirectUri provided', async () => {
-			const userDataFromAad = { mail: userEmailSso, id: ssoUserId };
+			const userDataFromAad = {
+				email: userEmailSso,
+				id: ssoUserId,
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+			};
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			expect(res.headers.location).toEqual(state.redirectUri);
@@ -190,15 +215,15 @@ const signupPost = () => {
 		};
 
 		const newUserDataFromAad = {
-			mail: newUserEmail,
-			givenName: generateRandomString(),
-			surname: generateRandomString(),
+			email: newUserEmail,
+			firstName: generateRandomString(),
+			lastName: generateRandomString(),
 			id: generateRandomString(),
 		};
 
 		test('should redirect and add error to the query if email already exists', async () => {
 			const state = { ...newUserData };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmail } });
+			Aad.getUserDetails.mockResolvedValueOnce({ ...newUserDataFromAad, email: userEmail });
 			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			const resUri = new URL(res.headers.location);
@@ -208,7 +233,7 @@ const signupPost = () => {
 
 		test('should redirect and add error to the query if email already exists (SSO user)', async () => {
 			const state = { ...newUserData };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: { ...newUserDataFromAad, mail: userEmailSso } });
+			Aad.getUserDetails.mockResolvedValueOnce({ ...newUserDataFromAad, email: userEmailSso });
 			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 			const resUri = new URL(res.headers.location);
@@ -218,7 +243,7 @@ const signupPost = () => {
 
 		test('should sign a new user up and set them to active', async () => {
 			const state = { ...newUserData };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: newUserDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(newUserDataFromAad);
 			await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 

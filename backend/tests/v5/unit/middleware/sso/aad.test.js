@@ -47,12 +47,10 @@ const addPkceCodes = (req) => {
 const testVerifyNewUserDetails = () => {
 	describe('Get user details and check email availability', () => {
 		const aadUserDetails = {
-			data: {
-				mail: 'example@email.com',
-				givenName: generateRandomString(),
-				surname: generateRandomString(),
-				id: generateRandomString(),
-			},
+			email: 'example@email.com',
+			firstName: generateRandomString(),
+			lastName: generateRandomString(),
+			id: generateRandomString(),
 		};
 
 		const redirectUri = generateRandomURL();
@@ -119,10 +117,10 @@ const testVerifyNewUserDetails = () => {
 				{
 					...reqStateJson,
 					redirectUri: undefined,
-					email: aadUserDetails.data.mail,
-					firstName: aadUserDetails.data.givenName,
-					lastName: aadUserDetails.data.surname,
-					sso: { type: providers.AAD, id: aadUserDetails.data.id },
+					email: aadUserDetails.email,
+					firstName: aadUserDetails.firstName,
+					lastName: aadUserDetails.lastName,
+					sso: { type: providers.AAD, id: aadUserDetails.id },
 				},
 			);
 			expect(req.state).toEqual(reqStateJson);
@@ -223,12 +221,10 @@ const testRedirectToStateURL = () => {
 const testHasAssociatedAccount = () => {
 	describe('Check if Microsoft account is linked to 3D repo', () => {
 		const aadUserDetails = {
-			data: {
-				mail: 'example@email.com',
-				givenName: generateRandomString(),
-				surname: generateRandomString(),
-				id: generateRandomString(),
-			},
+			email: 'example@email.com',
+			firstName: generateRandomString(),
+			lastName: generateRandomString(),
+			id: generateRandomString(),
 		};
 
 		const redirectUri = generateRandomURL();
@@ -288,7 +284,7 @@ const testHasAssociatedAccount = () => {
 		test('should set req session and call next if MS user is linked to 3D repo ', async () => {
 			const user = generateRandomString();
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
-			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.data.id } },
+			UsersModel.getUserByEmail.mockResolvedValueOnce({ customData: { sso: { id: aadUserDetails.id } },
 				user });
 			const req = getRequest();
 			await Aad.hasAssociatedAccount(req, res, mockCB);

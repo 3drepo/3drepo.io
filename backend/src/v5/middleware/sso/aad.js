@@ -68,18 +68,18 @@ const authenticate = (redirectUri) => async (req, res) => {
 
 const verifyNewUserDetails = async (req, res, next) => {
 	try {
-		const { data: { mail, givenName, surname, id } } = await getUserDetails(req.query.code,
+		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
 
-		const user = await getUserByEmail(mail, { 'customData.sso': 1 }).catch(() => undefined);
+		const user = await getUserByEmail(email, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
 			throw user.customData.sso ? errorCodes.EMAIL_EXISTS_WITH_SSO : errorCodes.EMAIL_EXISTS;
 		} else {
 			req.body = {
 				...req.state,
-				email: mail,
-				firstName: givenName,
-				lastName: surname,
+				email,
+				firstName,
+				lastName,
 				sso: { type: providers.AAD, id },
 			};
 
@@ -106,10 +106,10 @@ Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticat
 
 const hasAssociatedAccount = async (req, res, next) => {
 	try {
-		const { data: { id, mail } } = await getUserDetails(req.query.code, authenticateRedirectUri,
+		const { id, email } = await getUserDetails(req.query.code, authenticateRedirectUri,
 			req.session.pkceCodes?.verifier);
 
-		const { user, customData: { sso } } = await getUserByEmail(mail, { _id: 0, user: 1, 'customData.sso': 1 });
+		const { user, customData: { sso } } = await getUserByEmail(email, { _id: 0, user: 1, 'customData.sso': 1 });
 
 		if (sso?.id !== id) {
 			throw errorCodes.NON_SSO_USER;
