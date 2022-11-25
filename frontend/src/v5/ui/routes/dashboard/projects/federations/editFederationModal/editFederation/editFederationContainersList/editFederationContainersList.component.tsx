@@ -32,7 +32,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { ButtonProps } from '@mui/material/Button';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { isEmpty } from 'lodash';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { EditFederationContainersListItem, IconButtonProps } from './editFederationContainersListItem/editFederationContainersListItem.component';
