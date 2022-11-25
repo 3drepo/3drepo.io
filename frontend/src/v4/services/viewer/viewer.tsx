@@ -19,6 +19,7 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isString } from 'lodash';
+import { de } from 'make-plural';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -963,7 +964,12 @@ export class ViewerService {
 	public async getViewpoint() {
 		await this.isViewerReady();
 		const { position, up, view_dir: forward, type, orthographicSize: size , clippingPlanes} = await this.getCurrentViewpointInfo();
-		const camera = { position, up, forward, type, size };
+		const camera: any = { position, up, forward, type };
+
+		if (type !== 'perspective') {
+			camera.size = size;
+		}
+
 		return {camera, clippingPlanes};
 	}
 

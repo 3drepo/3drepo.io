@@ -16,14 +16,17 @@
  */
 
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
-import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
+import EditViewpointIcon from '@assets/icons/outlined/rotate_arrow-outlined.svg';
+import CreateViewpointIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import GotoViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
+
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { MenuItem } from '@mui/material';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
+import { ActionMenuItem } from '@controls/actionMenu';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.component';
 import { ActionMenu } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
@@ -46,7 +49,7 @@ type ClippingPlane = {
 type IViewpoint = {
 	screenshot?: any;
 	camera: ICamera;
-	clippingPlanes: ClippingPlane[];
+	clippingPlanes?: ClippingPlane[];
 };
 
 type ITicketView = {
@@ -68,9 +71,9 @@ export const TicketView = ({
 	onChange,
 	...props
 }: ITicketView) => {
-	const createViewpoint = async () => {
+	const updateViewpoint = async () => {
 		const currentViewpoint = await ViewerService.getViewpoint();
-		currentViewpoint.clippingPlanes = currentViewpoint.clippingPlanes || null;
+		if (isEqual(currentViewpoint, value)) return;
 		onChange?.(currentViewpoint);
 	};
 
@@ -79,7 +82,9 @@ export const TicketView = ({
 		await ViewerService.setViewpoint(value);
 	};
 	const deleteViewpoint = async () => {
-		onChange?.(null);
+		const { screenshot } = value || {};
+		const view = screenshot ? { camera: null, clippingPlanes: null } : null;
+		onChange?.(view);
 	};
 
 	const onImageChange = (newImg) => {
@@ -98,28 +103,30 @@ export const TicketView = ({
 			{...props}
 		>
 			<TicketImageAction onClick={goToViewpoint} disabled={!(value?.camera)}>
-				<AddImageIcon />
+				<GotoViewpointIcon />
 				<FormattedMessage id="viewer.card.ticketView.action.gotToViewpoint" defaultMessage="Go to viewpoint" />
 			</TicketImageAction>
 			{ !!(value?.camera) && (
 				<ActionMenu TriggerButton={(
 					<TicketImageAction>
-						<EditImageIcon />
+						<EditViewpointIcon />
 						<FormattedMessage id="viewer.card.ticketView.action.editViewpoint" defaultMessage="Edit viewpoint" />
 					</TicketImageAction>
 				)}
 				>
-					<MenuItem onClick={createViewpoint}>
-						<FormattedMessage id="viewer.card.ticketView.action.editMenu.editViewpoint" defaultMessage="Edit viewpoint" />
-					</MenuItem>
-					<MenuItem onClick={deleteViewpoint}>
-						<FormattedMessage id="viewer.card.ticketImage.action.editMenu.deleteViewpoint" defaultMessage="Delete viewpoint" />
-					</MenuItem>
+					<ActionMenuItem>
+						<MenuItem onClick={updateViewpoint}>
+							<FormattedMessage id="viewer.card.ticketView.action.editMenu.updateViewpoint" defaultMessage="Update viewpoint" />
+						</MenuItem>
+						<MenuItem onClick={deleteViewpoint}>
+							<FormattedMessage id="viewer.card.ticketImage.action.editMenu.deleteViewpoint" defaultMessage="Delete viewpoint" />
+						</MenuItem>
+					</ActionMenuItem>
 				</ActionMenu>
 			)}
 			{ !(value?.camera) && (
-				<TicketImageAction onClick={createViewpoint}>
-					<AddImageIcon />
+				<TicketImageAction onClick={updateViewpoint}>
+					<CreateViewpointIcon />
 					<FormattedMessage id="viewer.card.ticketView.action.createViewpoint" defaultMessage="Create viewpoint" />
 				</TicketImageAction>
 			)}

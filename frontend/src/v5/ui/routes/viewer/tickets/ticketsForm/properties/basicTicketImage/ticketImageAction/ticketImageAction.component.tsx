@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isUndefined } from 'lodash';
 import { Action } from './ticketImageAction.styles';
 
 type TicketImageActionProps = {
@@ -30,7 +29,7 @@ export const TicketImageAction = ({
 	...props
 }: TicketImageActionProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const disabled = isUndefined(disabledInput) ? disabledInput : !isAdmin;
+	const disabled = disabledInput || !isAdmin;
 
 	return (<Action disabled={disabled} {...props} />);
 };
