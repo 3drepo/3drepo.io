@@ -273,19 +273,11 @@ const testRemoveAddOns = () => {
 
 			const teamspace = generateRandomString();
 
-			/* TODO
 			const unsetObj = {
 				'customData.addOns.vrEnabled': 1,
 				'customData.addOns.srcEnabled': 1,
 				'customData.addOns.hereEnabled': 1,
 				'customData.addOns.powerBIEnabled': 1,
-			}; */
-
-			const unsetObj = {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
 			};
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
@@ -298,20 +290,11 @@ const testRemoveAddOns = () => {
 const testGetAddOns = () => {
 	describe('Get teamspace addOns', () => {
 		test('should get all applicable addOns', async () => {
-			/*
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
 				addOns: {
 					vrEnabled: true,
 					srcEnabled: true,
 					hereEnabled: true,
-					powerBIEnabled: true,
-				},
-			} }); */
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-				addOns: {
 					powerBIEnabled: true,
 				},
 			} });
@@ -325,50 +308,26 @@ const testGetAddOns = () => {
 				powerBIEnabled: true,
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
-			/* TODO
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
 				'customData.addOns.vrEnabled': 1,
 				'customData.addOns.srcEnabled': 1,
 				'customData.addOns.hereEnabled': 1,
 				'customData.addOns.powerBIEnabled': 1,
-			}, undefined); */
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
 			}, undefined);
 		});
 
 		test('should get all applicable addOns (no addOns)', async () => {
-			// TODO const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {} });
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-			} });
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {} });
 
 			const teamspace = generateRandomString();
 
-			// TODO await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
-			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-			});
+			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
 			expect(fn).toHaveBeenCalledTimes(1);
-			/* TODO
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
 				'customData.addOns.vrEnabled': 1,
 				'customData.addOns.srcEnabled': 1,
 				'customData.addOns.hereEnabled': 1,
 				'customData.addOns.powerBIEnabled': 1,
-			}, undefined); */
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
 			}, undefined);
 		});
 	});
@@ -381,8 +340,7 @@ const testUpdateAddOns = () => {
 			const unset = {};
 
 			Object.keys(obj).forEach((val) => {
-				// TODO const prefix = 'customData.addOns';
-				const prefix = val === ADD_ONS.POWERBI ? 'customData.addOns' : 'customData';
+				const prefix = 'customData.addOns';
 				if (obj[val]) {
 					set[`${prefix}.${val}`] = true;
 				} else {
