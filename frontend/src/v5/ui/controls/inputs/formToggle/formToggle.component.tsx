@@ -15,45 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
 import { Switch, SwitchProps } from '@mui/material';
-import { Controller } from 'react-hook-form';
 import { FormControlLabel } from './formToggle.styles';
 
-export type FormToggleProps = SwitchProps & {
-	control?: any;
-	name: string;
-	children: any;
-	defaultValue?: boolean,
-	formError?: any;
-};
-
-export const FormToggle = ({
-	control,
-	name,
-	children,
-	required,
-	disabled,
-	defaultValue,
-	formError,
-	...props
-}: FormToggleProps) => (
+export type FormToggleProps = FormInputProps & SwitchProps;
+export const FormToggle = ({ name, label, disabled, value, ...props}: FormToggleProps) => (
 	<FormControlLabel
 		disabled={disabled}
-		label={children}
+		label={label}
 		control={(
-			<Controller
-				control={control}
-				name={name}
-				render={({ field }) => (
-					<Switch
-						{...field}
-						inputRef={field.ref}
-						id={name}
-						disabled={disabled}
-						checked={field.value || false} // This is to fix uncontrolled to controlled change. It always has a value.
-						{...props}
-					/>
-				)}
+			<Switch
+				id={name}
+				checked={value || false} // This is to fix uncontrolled to controlled change. It always has a value.
+				{...props}
 			/>
 		)}
 	/>
