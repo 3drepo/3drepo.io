@@ -17,7 +17,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { FederationRevision, FederationSettings, NewFederationRealtime } from '@/v5/store/federations/federations.types';
-import { FederationsActionsDispatchers } from '../actionsDispatchers/federationsActions.dispatchers';
+import { FederationsActionsDispatchers } from '../actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeFederationUpdateSettings = (teamspace:string, project:string, federationId:string) =>
