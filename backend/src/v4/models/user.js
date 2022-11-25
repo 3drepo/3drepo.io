@@ -439,10 +439,12 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
 	// default permission
+	/* TODO
 	cleanedCustomData.permissions = [{
 		user: username,
 		permissions: [C.PERM_TEAMSPACE_ADMIN]
 	}];
+	*/
 
 	cleanedCustomData.emailVerifyToken = {
 		token: utils.generateHashString(),
@@ -979,6 +981,7 @@ User.getMembers = async function (teamspace) {
 	});
 	const getJobInfo = usersWithJob(teamspace);
 
+	// TODO
 	const getTeamspacePermissions = User.findByUserName(teamspace).then(user => user.customData.permissions);
 
 	promises.push(
@@ -1087,7 +1090,7 @@ User.updateAvatar = async function(username, avatarBuffer) {
 };
 
 User.updatePermissions = async function(username, updatedPermissions) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
+	await db.updateOne(username, "teamspace", {_id: username}, {$set: {permissions: updatedPermissions}});
 };
 
 User.updateSubscriptions = async function(username, subscriptions) {
