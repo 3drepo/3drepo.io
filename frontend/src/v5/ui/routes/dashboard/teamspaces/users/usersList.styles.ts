@@ -17,7 +17,9 @@
 
 import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
+import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as UserTable, Footer as LicencesFooter } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
+import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
 import { PendingInvites } from '@/v4/routes/users/users.styles';
 import styled, { css } from 'styled-components';
 
@@ -81,6 +83,13 @@ export const Container = styled.div`
 	position: relative;
 	margin: 0 75px;
 	${AddUserButton}
+	${LoaderContainer} {
+		background-color: transparent;
+    	margin-top: 80px;
+		${LoadingText} {
+			color: ${({ theme }) => theme.palette.secondary.light}
+		}
+	}
 	${UserTable}{
 		background-color: transparent;
 	}
