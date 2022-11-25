@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MainFabButton, ContrastFabButton } from './circleButton.styles';
+import { PrimaryButton, SecondaryButton } from './circleButton.styles';
 
 interface ICircleButton {
-	variant?: 'main' | 'contrast';
+	variant?: 'primary' | 'secondary';
 	disabled?: boolean;
-	onClick?: () => void;
+	onClick?: (e) => void;
 	children: any;
 }
 
-export const CircleButton = ({ variant = 'main', ...props }: ICircleButton) => {
-	if (variant === 'main') return (<MainFabButton {...props} />);
+export const CircleButton = ({ variant = 'secondary', ...props }: ICircleButton) => {
+	if (variant === 'secondary') return (<SecondaryButton {...props} />);
 
-	return (<ContrastFabButton {...props} />);
+	return (<PrimaryButton {...props} />);
 };

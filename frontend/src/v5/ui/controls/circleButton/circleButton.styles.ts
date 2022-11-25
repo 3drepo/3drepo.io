@@ -16,48 +16,44 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Fab } from '@mui/material';
+import { Button } from '@mui/material';
 
-const baseFabButtonStyle = css<{ disabled?: boolean }>`
+export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
 	height: 38px;
+	min-width: 38px;
 	width: 38px;
-	flex-shrink: 0;
+	border-radius: 100%;
+	border: none;
+	margin: 8px 7px;
+	background-color: transparent;
+	padding: 0;
+	display: flex;
+	place-items: center;
+
+	svg {
+		height: 17px;
+		width: auto;
+	}
 
 	${({ disabled }) => disabled && css`
+		pointer-events: none;
 		path {
 			fill: ${({ theme }) => theme.palette.secondary.light};
 		}
 	`};
 `;
 
-export const MainFabButton = styled(Fab)`
-	${baseFabButtonStyle}
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: none;
-
+export const PrimaryButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.secondary.main};
 	&:hover, &.Mui-focusVisible {
-		background-color: transparent;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
 `;
 
-export const ContrastFabButton = styled(Fab)`
-	${baseFabButtonStyle}
-	${({ disabled }) => disabled && css`
-		border-color: ${({ theme }) => theme.palette.secondary.light};
-		pointer-events: none;
-	`};
+export const SecondaryButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
 
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		path {
-			fill: ${({ theme }) => theme.palette.secondary.main};
-		}
-	}
-
-	&.Mui-focusVisible {
-		border: 1px solid ${({ theme }) => theme.palette.primary.main};
-		path {
-			fill: ${({ theme }) => theme.palette.primary.main};
-		}
+	&:hover, &.Mui-focusVisible { 
+		background-color: ${({ theme }) => theme.palette.secondary.light};
 	}
 `;
