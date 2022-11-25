@@ -17,8 +17,8 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const useFederationsData = () => {

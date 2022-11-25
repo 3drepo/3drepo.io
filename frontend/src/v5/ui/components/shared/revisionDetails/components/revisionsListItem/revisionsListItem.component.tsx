@@ -23,7 +23,7 @@ import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/comp
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatDate } from '@/v5/services/intl';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';

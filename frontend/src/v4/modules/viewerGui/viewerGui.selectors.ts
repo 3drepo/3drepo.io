@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
-	selectTransparencies as selectGroupsTransparencies } from '../groups';
+	selectTransparencies as selectGroupsTransparencies } from '../groups/groups.selectors';
 import { selectIsPresentationActive } from '../presentation';
 import { selectSelectedFrameColors, selectSelectedFrameTransformations,
 	selectSelectedFrameTransparencies } from '../sequences';
