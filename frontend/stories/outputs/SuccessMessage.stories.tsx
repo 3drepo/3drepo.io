@@ -22,7 +22,7 @@ export default {
 	component: SuccessMessage,
 	argTypes: {
 		children: {
-			description: 'The text or component to display',
+			description: 'The text to display',
 			defaultValue: 'Success message\'s content',
 			type: 'string',
 		},
