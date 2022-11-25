@@ -16,7 +16,7 @@
  */
 
 import { Panel } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
-import { InvitationModeLink, SaveButton, Title } from '@/v4/routes/components/newUserForm/newUserForm.styles';
+import { InvitationModeLink, SaveButton, Title, UserNotExistsButton, UserNotExistsContainer } from '@/v4/routes/components/newUserForm/newUserForm.styles';
 import { css } from 'styled-components';
 
 export default css`
@@ -58,6 +58,17 @@ export default css`
 				margin: 0 10px 0 0;
 				color: ${({ theme }) => theme.palette.primary.main};
 			};
+		}
+
+		${UserNotExistsContainer} {
+			color: ${({ theme }) => theme.palette.error.main};
+			font-size: 12px;
+			padding-top: 10px;
+			font-weight: 500;
+			${UserNotExistsButton} {
+				cursor: pointer;
+				color: ${({ theme }) => theme.palette.primary.main};
+			}
 		}
 
 		/* "Add user" button */
