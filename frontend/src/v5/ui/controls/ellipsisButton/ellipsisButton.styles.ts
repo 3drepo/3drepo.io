@@ -15,50 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton } from '@mui/material';
-import styled, { css } from 'styled-components';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import styled from 'styled-components';
+import { CircleButton as CircleButtonBase } from '@controls/circleButton';
 
-const PrimaryStyles = ($isOn: boolean) => css`
-	background-color: transparent;
-	svg circle {
-		fill: ${({ theme }) => theme.palette.tertiary.darkest};
-	}
-	${$isOn && css`
-		background-color: ${({ theme }) => hexToOpacity(theme.palette.base.main, 5)};
-	`}
-	&:hover, &.Mui-focusVisible {
-		background-color: ${({ theme }) => hexToOpacity(theme.palette.base.main, 5)};
-	}
-	:disabled {
-		svg circle {
-			fill: ${({ theme }) => theme.palette.secondary.lightest};
-		}
-	}
-`;
+export const CircleButton = styled(CircleButtonBase)`
+	margin: 0;
 
-const SecondaryStyles = ($isOn: boolean) => css`
-	background-color: transparent;
-	svg circle {
-		fill: ${({ theme }) => theme.palette.primary.contrast};
+	svg {
+		height: 13px;
 	}
-	${$isOn && css`
-		background-color: ${({ theme }) => theme.palette.secondary.light};
-	`}
-	&:hover, &.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.secondary.light};
-	}
-	:disabled {
-		svg circle {
-			fill: ${({ theme }) => theme.palette.secondary.light};
-		}
-	}
-`;
-
-export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean; variant?: 'primary' | 'secondary' }>`
-	height: 36px;
-	width: 36px;
-	display: flex;
-	align-items: center;
-	${({ variant, $isOn }) => (variant === 'primary' ? PrimaryStyles($isOn) : SecondaryStyles($isOn))};
 `;
