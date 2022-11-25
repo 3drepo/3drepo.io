@@ -78,7 +78,6 @@ Text.args = {
 	color: 'primary',
 };
 
-
 export const Label = Template.bind({});
 Label.args = {
 	variant: 'label',
