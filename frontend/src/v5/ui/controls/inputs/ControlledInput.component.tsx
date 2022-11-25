@@ -16,17 +16,17 @@
  */
 import { Controller, ControllerRenderProps } from 'react-hook-form';
 
-export type FormInputProps = Omit<ControllerRenderProps, 'ref'> & {
-	required?: boolean,
-	label?: string | JSX.Element,
-	defaultValue?: any,
-	disabled?: boolean,
-	className?: string,
-	error?: any,
-	helperText?: string,
-	inputRef?: any,
-	name?: string,
-};
+export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
+	required: boolean,
+	label: string | JSX.Element,
+	defaultValue: any,
+	disabled: boolean,
+	className: string,
+	error: any,
+	helperText: string,
+	inputRef: any,
+	name: string,
+}>;
 
 type ControlledInputProps = Pick<FormInputProps, 'onBlur' | 'required' | 'label' | 'defaultValue' | 'disabled' | 'className'> & {
 	Input: (props: FormInputProps) => any,
