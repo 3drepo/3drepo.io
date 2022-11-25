@@ -20,9 +20,7 @@ import { CircleButton } from '@controls/circleButton';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
 import { UploadListItemDestination } from './components/uploadListItemDestination';
 
-export const Button = styled(CircleButton).attrs(({ selected }: { selected?: boolean }) => ({
-	variant: selected ? 'secondary' : 'primary',
-}))`
+export const Button = styled(CircleButton)`
 	margin: 0;
 
 	&:hover, &.Mui-focusVisible { 
