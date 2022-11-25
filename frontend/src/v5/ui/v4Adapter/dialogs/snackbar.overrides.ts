@@ -23,7 +23,7 @@ export default css`
 		bottom: 21px;
 		
 		& > .MuiPaper-root {
-			padding: 6px 20px;
+			padding: 6px 14px 6px 20px;
 			border-radius: 10px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 			color: ${({ theme }) => theme.palette.secondary.main};
