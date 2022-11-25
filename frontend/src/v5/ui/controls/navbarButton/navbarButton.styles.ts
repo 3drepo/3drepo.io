@@ -15,21 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { BaseCircleButton } from '../circleButton/circleButton.styles';
 
 export const NavbarButton = styled(BaseCircleButton)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px ${({ theme }) => theme.palette.primary.contrast};
 
-	${({ disabled }) => disabled && css`
-		border-color: ${({ theme }) => theme.palette.secondary.light};
-	`};
-
 	&:hover, &.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		path {
-			fill: ${({ theme }) => theme.palette.secondary.main};
-		}
+		color: ${({ theme }) => theme.palette.secondary.main};
 	}
 `;

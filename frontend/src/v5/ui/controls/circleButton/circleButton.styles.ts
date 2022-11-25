@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Button } from '@mui/material';
 
 export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
@@ -34,17 +34,11 @@ export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
 		height: 17px;
 		width: auto;
 	}
-
-	${({ disabled }) => disabled && css`
-		pointer-events: none;
-		path {
-			fill: ${({ theme }) => theme.palette.secondary.light};
-		}
-	`};
 `;
 
 export const PrimaryButton = styled(BaseCircleButton)`
 	color: ${({ theme }) => theme.palette.secondary.main};
+
 	&:hover, &.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
