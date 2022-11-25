@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
 import { Modal } from '@/v5/ui/controls/modal';

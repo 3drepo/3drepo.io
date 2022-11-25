@@ -17,7 +17,7 @@
 import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { UserMenu } from '../userMenu';

@@ -20,7 +20,7 @@ import { useParams } from 'react-router';
 import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IUser } from '@/v5/store/users/users.redux';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Text } from './revisionsListItemAuthor.styles';

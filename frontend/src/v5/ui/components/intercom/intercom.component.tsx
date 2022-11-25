@@ -17,8 +17,7 @@
 import { useEffect } from 'react';
 import { useIntercom, IntercomProvider } from 'react-use-intercom';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
+import { CurrentUserHooksSelectors, AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 
 // Must be a separate component used as IntercomProvider child
 const IntercomButton = () => {

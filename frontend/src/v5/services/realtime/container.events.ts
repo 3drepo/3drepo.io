@@ -17,7 +17,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { ContainerSettings, NewContainer } from '@/v5/store/containers/containers.types';
-import { ContainersActionsDispatchers } from '../actionsDispatchers/containersActions.dispatchers';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:string, containerId:string) =>
