@@ -130,6 +130,10 @@ const itemsStyles = css`
 				font-size: 24px;
 			}
 
+			&:first-child svg {
+				font-size: 20px;
+			}
+
 			&:hover {
 				background-color: transparent;
 			}
