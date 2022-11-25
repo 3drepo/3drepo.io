@@ -78,7 +78,8 @@ db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
-			{ ...customData }),
+			{ permissions: breaking ? undefined : permissions, ...customData }),
+		// TODO { ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
 		createTeamspaceSettings(teamspace),
 	]);
