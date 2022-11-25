@@ -157,8 +157,14 @@ Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
 };
 
 Teamspace.createTeamspaceSettings = async (teamspace) => {
-	const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES };
+	const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES,
+		permissions: [{ user: teamspace, permissions: [TEAMSPACE_ADMIN] }] };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
+};
+
+Teamspace.grantAdminToUser = async (teamspace, username) => {
+	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+		{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
 };
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
