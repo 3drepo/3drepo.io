@@ -24,8 +24,8 @@ interface ICircleButton {
 	children: any;
 }
 
-export const CircleButton = ({ variant = 'secondary', ...props }: ICircleButton) => {
-	if (variant === 'secondary') return (<SecondaryButton {...props} />);
+export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
+	if (variant === 'primary') return (<PrimaryButton {...props} />);
 
-	return (<PrimaryButton {...props} />);
+	return (<SecondaryButton {...props} />);
 };
