@@ -19,10 +19,10 @@ import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
 import PrintIcon from '@assets/icons/print.svg';
 import { FormattedMessage } from 'react-intl';
-import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavLink, NavLinks } from './legalAppBar.styles';
+import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 
 type ILegalAppBar = {
 	activePage: string;
@@ -47,9 +47,9 @@ export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
 			</NavLinks>
 		</Items>
 		<Items>
-			<CircleButton onClick={window.print} variant="contrast" aria-label="print">
+			<NavbarButton onClick={window.print} aria-label="print">
 				<PrintIcon />
-			</CircleButton>
+			</NavbarButton>
 		</Items>
 	</AppBarContainer>
 );
