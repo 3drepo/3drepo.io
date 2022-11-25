@@ -192,6 +192,10 @@ const processTeamspace = async (teamspace, revisionAge) => {
 };
 
 const run = async (revisionAge, force) => {
+	if (revisionAge < 0 || Number.isNaN(Number(revisionAge))) {
+		throw new Error('Revision age must be a positive number');
+	}
+
 	if (revisionAge < 2) {
 		logger.logWarning(`Revision Age is ${revisionAge}; currently processing jobs will be removed when revision age is set to 0.`);
 
