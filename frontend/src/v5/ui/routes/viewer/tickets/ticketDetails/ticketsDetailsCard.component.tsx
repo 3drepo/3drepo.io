@@ -29,7 +29,8 @@ import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsCardViews } from '../tickets.constants';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { IssueProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
 export const TicketDetailsCard = () => {
@@ -84,6 +85,12 @@ export const TicketDetailsCard = () => {
 		// eslint-disable-next-line max-len
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
 	};
+
+	useEffect(() => {
+		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
+		if (!view) return;
+		ViewerService.setViewpoint(view);
+	}, [ticket?.properties?.[IssueProperties.DEFAULT_VIEW]]);
 
 	return (
 		<CardContainer>
