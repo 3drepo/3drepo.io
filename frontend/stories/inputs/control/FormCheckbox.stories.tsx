@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
+import { FormCheckbox } from '@controls/inputs/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 

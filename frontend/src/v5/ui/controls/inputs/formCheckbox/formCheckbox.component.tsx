@@ -14,31 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ import { FormInputProps } from '@controls/inputs/ControlledInput.component';
 import { FormControlLabel, FormControlLabelProps, Checkbox } from '@mui/material';
-import { Controller } from 'react-hook-form';
 
-export type FormCheckboxProps = FormControlLabelProps & {
-	name: string;
-	label: string | JSX.Element;
-	control: any;
-	onClick?: (event) => any
+export type FormCheckboxProps = FormInputProps & FormControlLabelProps & {
+	onClick?: (event) => any,
 };
 
-export const FormCheckbox = ({
-	name,
-	control,
-	onClick,
-	...otherProps
-}: FormCheckboxProps) => (
-	<Controller
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormControlLabel
-				{...field}
-				control={<Checkbox checked={field.value} onClick={onClick} />}
-				{...otherProps}
-			/>
-		)}
+export const FormCheckbox = ({ value, onClick, ...props }: FormCheckboxProps) => (
+	<FormControlLabel
+		control={<Checkbox checked={value} onClick={onClick} />}
+		{...props}
 	/>
 );

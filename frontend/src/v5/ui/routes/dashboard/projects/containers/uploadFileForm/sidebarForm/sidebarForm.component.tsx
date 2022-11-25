@@ -28,6 +28,7 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 
 type ISidebarForm = {
 	value: UploadItemFields,
@@ -155,7 +156,8 @@ export const SidebarForm = ({
 
 			{ isSpm && (
 				<>
-					<AnimationsCheckbox
+					<ControlledInput
+						Input={AnimationsCheckbox}
 						control={control}
 						name="importAnimations"
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
