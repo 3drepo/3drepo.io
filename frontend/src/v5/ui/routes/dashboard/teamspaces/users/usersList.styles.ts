@@ -15,8 +15,127 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Users } from '@/v4/routes/users';
-import styled from 'styled-components';
+import { Row } from '@/v4/routes/components/customTable/customTable.styles';
+import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
+import { Container as UserTable, Footer as LicencesFooter } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
+import { PendingInvites } from '@/v4/routes/users/users.styles';
+import styled, { css } from 'styled-components';
 
-export const V4UsersList = styled(Users)`
+const AddUserButton = css`
+	${FloatingButtonContainer} {
+		top: 25px;
+		right: 0;
+		${FloatingButton} {
+			::after {
+				content: 'Add user';
+				font-size: 12px;
+				margin-left: 8px;
+			}
+			border-radius: 5px;
+			width: auto;
+			text-transform: none;
+			padding: 10px 15px;
+			margin: 0;
+			background-color: ${({ theme }) => theme.palette.primary.main};
+			color: ${({ theme }) => theme.palette.primary.contrast};
+			border: none;
+			&:hover {
+				background-color: ${({ theme }) => theme.palette.primary.dark};
+			}
+			svg {
+				border-radius: 50%;
+				color: ${({ theme }) => theme.palette.primary.main};
+				background-color: ${({ theme }) => theme.palette.primary.contrast};
+				height: 9px;
+				padding: 2px;
+			}
+		}
+	}
+`;
+
+const SelectStyles = css`
+	.MuiInputBase-root {
+		svg { /* Chevron icon */
+			top: 15px;
+		}
+		.MuiSelect-select {
+			border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+			padding-left: 10px;
+			&, .MuiGrid-root {
+				font-size: 12px;
+				color: ${({ theme }) => theme.palette.secondary.main};
+				width: auto;
+			}
+		}
+	}
+`;
+
+const UserCell = `${Row}>:nth-child(1)`;
+const JobCell = `${Row}>:nth-child(2)`;
+const PermissionsCell = `${Row}>:nth-child(3)`;
+const BlankCell = `${Row}>:nth-child(4)`;
+const RemoveUserCell = `${Row}>:nth-child(5)`;
+
+export const Container = styled.div`
+	position: relative;
+	margin: 0 75px;
+	${AddUserButton}
+	${UserTable}{
+		background-color: transparent;
+	}
+	${UserCell} {
+		padding-left: 20px;
+		max-width: calc(46% - 60px);
+	}
+	${JobCell} {
+		max-width: 27%;
+		padding: 0 10px 0 0;
+		${SelectStyles} {
+			.MuiGrid-item:first-of-type {
+				min-height: 10px;
+				min-width: 10px;
+			}
+		}
+	}
+	${PermissionsCell} {
+		padding: 0 0 0 10px;
+		max-width: 27%;
+		${SelectStyles}
+	}
+	${BlankCell} {
+		display: none;
+	}
+	${RemoveUserCell} {
+		max-width: 60px;
+		padding: 0;
+		justify-content: center;
+
+		.MuiIconButton-root {
+			padding: 0;
+			&:not(.Mui-disabled) {
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
+	}
+
+	${Row}:last-of-type {
+		border: none;
+	}
+	
+	${LicencesFooter} {
+		border: none;
+		font-size: 10px;
+		padding: 10px 0;
+		color: ${({ theme }) => theme.palette.base.main};
+		${PendingInvites} {
+			cursor: pointer;
+			margin: 0;
+			text-decoration: none;
+			color: ${({ theme }) => theme.palette.primary.main};
+			&:hover {
+				text-decoration: underline;
+				color: ${({ theme }) => theme.palette.primary.dark};
+			}
+		}
+	}
 `;

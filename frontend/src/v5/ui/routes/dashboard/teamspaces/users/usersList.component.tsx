@@ -19,7 +19,8 @@ import { UserManagementActions } from '@/v4/modules/userManagement';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { V4UsersList } from './usersList.styles';
+import { Users as V4UsersList } from '@/v4/routes/users';
+import { Container } from './usersList.styles';
 
 export const UsersList = () => {
 	const dispatch = useDispatch();
@@ -31,6 +32,8 @@ export const UsersList = () => {
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
 	}, [teamspace]);
 	return (
-		<V4UsersList />
+		<Container>
+			<V4UsersList />
+		</Container>
 	);
 };

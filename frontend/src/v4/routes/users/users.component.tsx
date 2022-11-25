@@ -100,6 +100,7 @@ interface IProps {
 	showDialog: (config: any) => void;
 	fetchQuotaAndInvitations: (teamspace) => void;
 	isPending: boolean;
+	className?: string;
 }
 
 interface IState {
@@ -348,7 +349,7 @@ export class Users extends PureComponent<IProps, IState> {
 
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel(true)}>
+				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
 					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
