@@ -31,7 +31,7 @@ export default css`
 
 		/* Username and Job inputs */
 		.MuiFormControl-root {
-			margin: 32px 0 0;
+			margin: 12px 0 0;
 			.MuiFormControl-root { /* Remove styles from duplicate formControl in username/email input */
 				margin: 0;
 			}
