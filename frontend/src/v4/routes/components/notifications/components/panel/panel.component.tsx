@@ -18,7 +18,7 @@ import { PureComponent, SyntheticEvent } from 'react';
 import { NotificationsPanelItem } from '../../notifications.styles';
 import { INotification, NotificationItem } from '../notificationItem/notificationItem.component';
 import { NotificationsPanelHeader } from '../panelHeader/panelHeader.component';
-import { List } from './panel.styles';
+import { List, Container } from './panel.styles';
 
 interface IProps {
 	labelLeft?: string;
@@ -45,14 +45,14 @@ export class NotificationsPanel extends PureComponent<IProps, any> {
 		}
 
 		return (
-			<>
+			<Container>
 				<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight} />
 				<NotificationsPanelItem>
 					<List style={{paddingBottom: 0, paddingTop: 0}}>
 						{this.renderNotifications(notifications)}
 					</List>
 				</NotificationsPanelItem>
-			</>
+			</Container>
 		);
 	}
 }
