@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { Select } from '@controls/inputs/Select/Select.component';
-import { Checkbox } from '@controls/inputs/Checkbox/Checkbox.component';
+import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { MenuItem } from '@mui/material';
 
 export const Title = styled(Typography).attrs({

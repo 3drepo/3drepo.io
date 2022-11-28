@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { Checkbox as CheckboxBase } from '@controls/inputs/Checkbox/Checkbox.component';
+import { Checkbox as CheckboxBase } from '@controls/inputs/checkbox/checkbox.component';
 
 export const CreateAccountButton = styled(SubmitButton)`
 	margin: 20px 0 0;
