@@ -33,7 +33,7 @@ import {
 	CheckboxContainer,
 	CheckboxMessage,
 	TermsContainer,
-	FormCheckbox,
+	Checkbox,
 	Link,
 } from './userSignupFormStepTermsAndSubmit.styles';
 
@@ -133,7 +133,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			<TermsContainer>
 				<CheckboxContainer>
 					<ControlledInput
-						Input={FormCheckbox}
+						Input={Checkbox}
 						name="termsAgreed"
 						control={control}
 						label={(
@@ -157,7 +157,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CheckboxContainer>
 				<CheckboxContainer>
 					<ControlledInput
-						Input={FormCheckbox}
+						Input={Checkbox}
 						name="mailListAgreed"
 						control={control}
 						label={(

@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { FormCheckbox as FormCheckboxBase } from '@controls/inputs/formCheckbox/formCheckbox.component';
+import { Checkbox as CheckboxBase } from '@controls/inputs/Checkbox/Checkbox.component';
 
 export const CreateAccountButton = styled(SubmitButton)`
 	margin: 20px 0 0;
@@ -70,7 +70,7 @@ export const CircularProgressContainer = styled.div`
 	align-items: center;
 `;
 
-export const FormCheckbox = styled(FormCheckboxBase)`
+export const Checkbox = styled(CheckboxBase)`
 	span {
 		margin: 0;
 	}

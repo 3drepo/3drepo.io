@@ -14,16 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- import { FormInputProps } from '@controls/inputs/ControlledInput.component';
-import { FormControlLabel, FormControlLabelProps, Checkbox } from '@mui/material';
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
+import { FormControlLabel, FormControlLabelProps, Checkbox as MuiCheckbox } from '@mui/material';
 
-export type FormCheckboxProps = FormInputProps & FormControlLabelProps & {
+export type CheckboxProps = FormInputProps & FormControlLabelProps & {
 	onClick?: (event) => any,
 };
 
-export const FormCheckbox = ({ value, onClick, ...props }: FormCheckboxProps) => (
+export const Checkbox = ({ value, onClick, ...props }: CheckboxProps) => (
 	<FormControlLabel
-		control={<Checkbox checked={value} onClick={onClick} />}
+		control={<MuiCheckbox checked={value} onClick={onClick} />}
 		{...props}
 	/>
 );
