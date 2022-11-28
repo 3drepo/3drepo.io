@@ -88,7 +88,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
-		if (!view) return;
+		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
 	}, [ticket?.properties?.[IssueProperties.DEFAULT_VIEW]]);
 
