@@ -17,6 +17,7 @@
 import { css } from 'styled-components';
 import { DialogTitle } from '@/v4/routes/components/dialogContainer/components/dialog/dialog.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { Footer as InvitationsListFooter } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 
 const titleStyling = css`
 	${DialogTitle} {
@@ -60,7 +61,7 @@ const contentStyling = css`
 `;
 
 const buttonContainerStyling = css`
-	.MuiDialogActions-root {
+	.MuiDialogActions-root, ${InvitationsListFooter} {
 		box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 
 		.MuiButtonBase-root.MuiButtonBase-root:last-child {
