@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormNumberField } from '@controls/inputs/formNumberField/formNumberField.component';
+import { NumberField } from '@controls/inputs/formNumberField/formNumberField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
@@ -35,24 +34,15 @@ export default {
 			type: 'boolean',
 		},
 	},
-	component: FormNumberField,
-	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof FormNumberField>;
+	component: NumberField,
+	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+} as ComponentMeta<typeof NumberField>;
 
-const Controlled: ComponentStory<typeof FormNumberField> = ({ formError, ...args }) => {
-	const { control } = useForm({ mode: 'onChange' });
-
-	return (
-		<FormContainer>
-			<FormNumberField
-				name="numberfield"
-				control={control}
-				{...args}
-				formError={formError ? { message: formError } : null}
-			/>
-		</FormContainer>
+const Controlled: ComponentStory<typeof NumberField> = (args) => (
+	<FormContainer>
+		<NumberField {...args}/>
+	</FormContainer>
 	);
-};
 
 export const ControlledFormNumberField = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
