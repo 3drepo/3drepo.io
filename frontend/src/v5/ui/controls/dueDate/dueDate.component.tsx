@@ -17,7 +17,7 @@
 
 import { DatePicker } from '@mui/x-date-pickers';
 import { useState } from 'react';
-import { formatDayOfWeek } from '@controls/formDatePicker/dateFormatHelper';
+import { formatDayOfWeek } from '@controls/inputs/formDatePicker/dateFormatHelper';
 import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
 import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
 import { StopBackgroundInteraction } from './dueDate.styles';

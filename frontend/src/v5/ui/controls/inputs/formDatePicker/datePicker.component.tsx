@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DateTimePicker, DateTimePickerProps } from '@mui/x-date-pickers';
-import { FormBaseCalendarPicker, FormBaseCalendarPickerProps } from './formBaseCalendarPicker/formBaseCalendarPicker.component';
-import { formatTime, getDateTimeMask } from './dateFormatHelper';
+import { DatePicker as MuiDatePicker, DatePickerProps as MuiDatePickerProps } from '@mui/x-date-pickers';
+import { BaseCalendarPicker, BaseCalendarPickerProps } from './baseCalendarPicker/baseCalendarPicker.component';
+import { getDateMask } from './dateFormatHelper';
 
-type FormDateTimePickerProps = FormBaseCalendarPickerProps & Partial<DateTimePickerProps<any, any>>;
-export const FormDateTimePicker = (props: FormDateTimePickerProps) => (
-	<FormBaseCalendarPicker
-		PickerComponent={DateTimePicker}
-		inputFormat={getDateTimeMask()}
-		rifmFormatter={formatTime}
+type DatePickerProps = BaseCalendarPickerProps & Partial<MuiDatePickerProps<any, any>>;
+export const DatePicker = (props: DatePickerProps) => (
+	<BaseCalendarPicker
+		PickerComponent={MuiDatePicker}
+		inputFormat={getDateMask()}
 		{...props}
 	/>
 );

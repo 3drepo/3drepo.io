@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { useForm } from 'react-hook-form';
-import { FormDatePicker } from '@controls/formDatePicker/formDatePicker.component';
+import { DateTimePicker } from '@controls/inputs/formDatePicker/formDateTimePicker.component';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/Calendar/FormDatePicker',
+	title: 'Inputs/Calendar/DateTimePicker',
 	argTypes: {
 		disablePast: {
 			type: 'boolean',
@@ -34,34 +33,25 @@ export default {
 			type: 'string',
 		},
 	},
-	component: FormDatePicker,
-	parameters: { controls: { exclude: ['control', 'name'] } },
-} as ComponentMeta<typeof FormDatePicker>;
+	component: DateTimePicker,
+	parameters: { controls: { exclude: ['name'] } },
+} as ComponentMeta<typeof DateTimePicker>;
 
-const Controlled: ComponentStory<typeof FormDatePicker> = ({ formError, ...args }: any) => {
-	const { control } = useForm({ mode: 'onChange' });
+const Controlled: ComponentStory<typeof DateTimePicker> = (args) => (
+	<LocalizationProvider dateAdapter={AdapterDayjs}>
+		<FormContainer>
+			<DateTimePicker {...args} />
+		</FormContainer>
+	</LocalizationProvider>
+);
 
-	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			<FormContainer>
-				<FormDatePicker
-					name="date-picker"
-					control={control}
-					{...args}
-					formError={formError ? { message: formError } : null}
-				/>
-			</FormContainer>
-		</LocalizationProvider>
-	);
+export const ControlledFormDateTimePicker = Controlled.bind({});
+ControlledFormDateTimePicker.args = {
+	label: 'Controlled DateTime',
 };
 
-export const ControlledFormDatePicker = Controlled.bind({});
-ControlledFormDatePicker.args = {
-	label: 'Controlled Date',
-};
-
-export const ControlledFormDatePickerDefaultDate = Controlled.bind({});
-ControlledFormDatePickerDefaultDate.args = {
-	label: 'Controlled Date with today as default date',
-	defaultValue: new Date('2020-01-30'),
+export const ControlledFormDateTimePickerDefaultDate = Controlled.bind({});
+ControlledFormDateTimePickerDefaultDate.args = {
+	label: 'Controlled DateTime with now as default date',
+	defaultValue: new Date('2020-01-30 16:30'),
 };

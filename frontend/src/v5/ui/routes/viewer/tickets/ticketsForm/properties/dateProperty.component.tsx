@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormDatePicker } from '@controls/formDatePicker/formDatePicker.component';
+import { DatePicker } from '@controls/inputs/formDatePicker/datePicker.component';
 import { PropertyProps } from './properties.types';
 
 export const DateProperty = ({ property: { name, readOnly, required }, ...props }: PropertyProps) => (
-	<FormDatePicker label={name} disabled={readOnly} required={required} {...props} />
+	<DatePicker label={name} disabled={readOnly} required={required} {...props} />
 );
