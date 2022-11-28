@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
@@ -43,7 +43,6 @@ export const UsernameField = styled(AuthField).attrs({
 	InputProps: {
 		startAdornment: <UserIcon />,
 	},
-	name: 'username',
 	label: formatMessage({
 		id: 'auth.login.usernameLabel',
 		defaultMessage: 'Username or email',

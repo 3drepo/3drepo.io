@@ -23,12 +23,13 @@ import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface ICreateContainer {
@@ -94,7 +95,8 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 			isValid={formState.isValid}
 			maxWidth="sm"
 		>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				control={control}
 				name="name"
 				label={formatMessage({ id: 'containers.creation.form.name', defaultMessage: 'Name' })}
@@ -131,13 +133,15 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					}
 				</FormSelect>
 			</FlexContainer>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				control={control}
 				name="desc"
 				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
 				formError={errors.desc}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				control={control}
 				name="code"
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}

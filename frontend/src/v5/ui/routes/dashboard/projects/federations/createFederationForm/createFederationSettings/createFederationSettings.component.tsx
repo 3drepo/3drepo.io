@@ -18,7 +18,8 @@
 import { formatMessage } from '@/v5/services/intl';
 import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -35,14 +36,16 @@ export const CreateFederationFormSettings = () => {
 					defaultMessage="Federation information"
 				/>
 			</SectionTitle>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="name"
 				control={control}
 				label={formatMessage({ id: 'createFederation.form.name', defaultMessage: 'Name' })}
 				required
 				formError={errors.name}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'createFederation.form.desc', defaultMessage: 'Description' })}
@@ -65,7 +68,8 @@ export const CreateFederationFormSettings = () => {
 					))}
 				</FormSelect>
 			</HalfWidth>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="code"
 				control={control}
 				label={formatMessage({ id: 'createFederation.form.code', defaultMessage: 'Code' })}

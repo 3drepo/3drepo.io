@@ -15,14 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField, FormTextFieldProps } from '@controls/inputs/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import styled from 'styled-components';
 
-export const FormNumberField = (props: FormTextFieldProps) => {
-	const handleKeyDown = (event) => {
-		if (event.key === 'e') {
-			event.preventDefault();
-		}
-	};
-
-	return (<FormTextField type="number" onKeyDown={handleKeyDown} {...props} />);
-};
+export const FormPasswordField = styled(FormTextField).attrs({
+	type: 'password',
+})``;

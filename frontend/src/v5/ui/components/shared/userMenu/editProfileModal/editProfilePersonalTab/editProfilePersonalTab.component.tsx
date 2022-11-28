@@ -20,7 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
@@ -127,7 +128,8 @@ export const EditProfilePersonalTab = ({
 	return (
 		<ScrollArea>
 			<EditProfileAvatar user={user} />
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="firstName"
 				control={control}
 				label={formatMessage({
@@ -137,7 +139,8 @@ export const EditProfilePersonalTab = ({
 				required
 				formError={formErrors.firstName}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="lastName"
 				control={control}
 				label={formatMessage({
@@ -147,7 +150,8 @@ export const EditProfilePersonalTab = ({
 				required
 				formError={formErrors.lastName}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="email"
 				control={control}
 				label={formatMessage({
@@ -157,7 +161,8 @@ export const EditProfilePersonalTab = ({
 				required
 				formError={formErrors.email}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="company"
 				control={control}
 				label={formatMessage({

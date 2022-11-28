@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 
 export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 	margin: 0 12px;

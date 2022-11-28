@@ -20,11 +20,12 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { defaults, isEqual, pick } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
@@ -83,7 +84,8 @@ export const UserSignupFormStepPersonal = ({
 
 	return (
 		<>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="firstName"
 				control={control}
 				label={formatMessage({
@@ -93,7 +95,8 @@ export const UserSignupFormStepPersonal = ({
 				required
 				formError={errors.firstName}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="lastName"
 				control={control}
 				label={formatMessage({
@@ -103,7 +106,8 @@ export const UserSignupFormStepPersonal = ({
 				required
 				formError={errors.lastName}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				name="company"
 				control={control}
 				label={formatMessage({

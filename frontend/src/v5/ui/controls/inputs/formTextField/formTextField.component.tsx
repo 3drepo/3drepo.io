@@ -15,14 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField, FormTextFieldProps } from '@controls/inputs/formTextField/formTextField.component';
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
+import { TextField, TextFieldProps } from '@mui/material';
 
-export const FormNumberField = (props: FormTextFieldProps) => {
-	const handleKeyDown = (event) => {
-		if (event.key === 'e') {
-			event.preventDefault();
-		}
-	};
-
-	return (<FormTextField type="number" onKeyDown={handleKeyDown} {...props} />);
-};
+export type FormTextFieldProps = FormInputProps & Omit<TextFieldProps, 'variant'>
+export const FormTextField = ({ defaultValue = '', ...props }: FormTextFieldProps) => (
+	<TextField defaultValue={defaultValue} {...props} />
+);

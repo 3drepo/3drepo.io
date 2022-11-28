@@ -23,12 +23,12 @@ import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
-import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	value: UploadItemFields,
@@ -128,14 +128,16 @@ export const SidebarForm = ({
 					</HiddenMenuItem>
 				</FormSelect>
 			</FlexContainer>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				control={control}
 				name="containerCode"
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
 				formError={errors.containerCode}
 				disabled={!isNewContainer}
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				control={control}
 				name="containerDesc"
 				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
@@ -147,7 +149,8 @@ export const SidebarForm = ({
 				<FormattedMessage id="uploads.sidebar.revisionDetails" defaultMessage="Revision details" />
 			</Heading>
 
-			<FormTextField
+			<ControlledInput
+				Input={FormTextField}
 				control={control}
 				name="revisionDesc"
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}

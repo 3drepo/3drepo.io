@@ -16,23 +16,26 @@
  */
 import { Controller, ControllerRenderProps } from 'react-hook-form';
 
-export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
+type ForwardableProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
+	name: string,
 	required: boolean,
 	label: string | JSX.Element,
-	defaultValue: any,
 	disabled: boolean,
 	className: string,
+}>;
+
+export type FormInputProps = ForwardableProps & Partial<{
 	error: any,
 	helperText: string,
 	inputRef: any,
-	name: string,
 }>;
 
-type ControlledInputProps = Pick<FormInputProps, 'onBlur' | 'required' | 'label' | 'defaultValue' | 'disabled' | 'className'> & {
-	Input: (props: FormInputProps) => any,
+type ControlledInputProps = ForwardableProps & {
+	Input: ({ ...props }: FormInputProps) => JSX.Element,
 	name: string,
 	control?: any,
 	formError?: any,
+	defaultValue?: any,
 };
 export const ControlledInput = ({ Input, name, control, defaultValue, formError, ...props }: ControlledInputProps) => (
 	<Controller
@@ -40,6 +43,7 @@ export const ControlledInput = ({ Input, name, control, defaultValue, formError,
 		control={control}
 		defaultValue={defaultValue}
 		render={({ field: { ref, ...field} }) => (
+			// @ts-ignore
 			<Input
 				{...field}
 				{...props}

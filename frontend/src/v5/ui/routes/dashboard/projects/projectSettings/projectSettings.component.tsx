@@ -21,7 +21,8 @@ import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { EditProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
@@ -93,7 +94,8 @@ export const ProjectSettings = () => {
 	return (
 		<>
 			<Form onSubmit={handleSubmit(onSubmit)}>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					required
 					name="projectName"
 					label={formatMessage({ id: 'project.settings.form.name', defaultMessage: 'Project name' })}

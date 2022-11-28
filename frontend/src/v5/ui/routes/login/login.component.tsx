@@ -25,6 +25,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
@@ -70,8 +71,13 @@ export const Login = () => {
 				<AuthHeading>
 					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
 				</AuthHeading>
-				<UsernameField control={control} />
-				<PasswordField
+				<ControlledInput
+					Input={UsernameField}
+					control={control}
+					name="username"
+				/>
+				<ControlledInput
+					Input={PasswordField}
 					control={control}
 					name="password"
 					label={formatMessage({

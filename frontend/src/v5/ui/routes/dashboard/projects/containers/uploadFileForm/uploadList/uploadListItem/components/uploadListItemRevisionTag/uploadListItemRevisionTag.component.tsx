@@ -18,6 +18,7 @@
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Control } from 'react-hook-form/dist/types';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { TextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
@@ -36,21 +37,26 @@ export const UploadListItemRevisionTag = ({
 	defaultValue,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
-	<TextField
+	<ControlledInput
+		Input={(inputProps) => (
+			<TextField
+				$selectedrow={isSelected}
+				InputProps={{
+					startAdornment: !!errorMessage && (
+						<ErrorTooltip>
+							{errorMessage}
+						</ErrorTooltip>
+					),
+				}}
+				{...inputProps}
+			/>
+		)}
 		control={control}
 		disabled={disabled}
-		$selectedrow={isSelected}
 		name="revisionTag"
 		formError={errorMessage}
 		defaultValue={defaultValue}
 		required
-		InputProps={{
-			startAdornment: !!errorMessage && (
-				<ErrorTooltip>
-					{errorMessage}
-				</ErrorTooltip>
-			),
-		}}
 		{...props}
 	/>
 );

@@ -16,7 +16,6 @@
  */
 
 import { useFormContext } from 'react-hook-form';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -25,6 +24,8 @@ import { SuccessMessage } from '@controls/successMessage/successMessage.componen
 import * as API from '@/v5/services/api';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { FormPasswordField } from './editProfilePasswordTab.styles';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -106,36 +107,37 @@ export const EditProfilePasswordTab = ({
 
 	return (
 		<>
-			<FormTextField
+			<ControlledInput
+				Input={FormPasswordField}
 				control={control}
 				name="oldPassword"
 				label={formatMessage({
 					id: 'editProfile.form.oldPassword',
 					defaultMessage: 'Current Password',
 				})}
-				type="password"
 				formError={errors.oldPassword}
 				required
+				
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormPasswordField}
 				control={control}
 				name="newPassword"
 				label={formatMessage({
 					id: 'editProfile.form.newPassword',
 					defaultMessage: 'New Password',
 				})}
-				type="password"
 				formError={errors.newPassword}
 				required
 			/>
-			<FormTextField
+			<ControlledInput
+				Input={FormPasswordField}
 				control={control}
 				name="confirmPassword"
 				label={formatMessage({
 					id: 'editProfile.form.confirmPassword',
 					defaultMessage: 'Confirm Password',
 				})}
-				type="password"
 				formError={errors.confirmPassword}
 				required
 			/>

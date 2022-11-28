@@ -25,7 +25,7 @@ import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
@@ -33,6 +33,7 @@ import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -232,14 +233,16 @@ export const SettingsForm = ({
 				label="ID"
 				value={containerOrFederation._id}
 			/>
-			<FormTextField
+			<ControlledInput
+					Input={FormTextField}
 				name="name"
 				control={control}
 				label={formatMessage({ id: 'settings.form.name', defaultMessage: 'Name' })}
 				required
 				formError={errors.name}
 			/>
-			<FormTextField
+			<ControlledInput
+					Input={FormTextField}
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'settings.form.desc', defaultMessage: 'Description' })}
@@ -261,7 +264,8 @@ export const SettingsForm = ({
 						</MenuItem>
 					))}
 				</FormSelect>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					name="code"
 					control={control}
 					label={formatMessage({ id: 'settings.form.code', defaultMessage: 'Code' })}
@@ -305,14 +309,16 @@ export const SettingsForm = ({
 				/>
 			</SectionTitle>
 			<FlexContainer>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					name="latitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude (decimal)' })}
 					formError={errors.latitude}
 					required
 				/>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					name="longitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude (decimal)' })}
@@ -320,28 +326,32 @@ export const SettingsForm = ({
 					required
 				/>
 			</FlexContainer>
-			<FormTextField
+			<ControlledInput
+					Input={FormTextField}
 				name="angleFromNorth"
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
 			/>
 			<FlexContainer>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					name="x"
 					control={control}
 					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
 				/>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					name="y"
 					control={control}
 					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
 				/>
-				<FormTextField
+				<ControlledInput
+					Input={FormTextField}
 					name="z"
 					control={control}
 					label={`z (${currentUnit})`}

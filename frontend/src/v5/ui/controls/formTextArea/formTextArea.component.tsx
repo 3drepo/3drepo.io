@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField, FormTextFieldProps } from '@controls/formTextField/formTextField.component';
-import { FormInputProps } from '@controls/inputs/ControlledInput.component';
+import { FormTextField, FormTextFieldProps } from '@controls/inputs/formTextField/formTextField.component';
 
-export type FormTextAreaProps = FormInputProps & Omit<FormTextFieldProps, 'variant'> & {
+export type FormTextAreaProps = FormTextFieldProps & {
 	minRows?: number,
 };
 

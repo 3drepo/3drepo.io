@@ -21,6 +21,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/servic
 import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { formatMessage } from '@/v5/services/intl';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
@@ -184,17 +185,22 @@ export const UploadListItemDestination = ({
 			renderOption={getRenderOption}
 			value={value}
 			renderInput={({ InputProps, ...params }) => (
-				<DestinationInput
+				<ControlledInput
+					Input={(inputProps) => (
+						<DestinationInput
+							neworexisting={newOrExisting}
+							InputProps={{
+								...InputProps,
+								startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
+							}}
+							{...inputProps}
+						/>
+					)}
 					{...params}
 					{...props}
-					neworexisting={newOrExisting}
 					control={control}
 					formError={errors.containerName}
 					name="containerName"
-					InputProps={{
-						...InputProps,
-						startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
-					}}
 				/>
 			)}
 		/>

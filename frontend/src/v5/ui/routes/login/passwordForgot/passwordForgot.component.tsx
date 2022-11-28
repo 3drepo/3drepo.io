@@ -24,6 +24,7 @@ import { Gap } from '@controls/gap';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
 
@@ -58,7 +59,11 @@ export const PasswordForgot = (): JSX.Element => {
 						</AuthParagraph>
 					) : (
 						<>
-							<UsernameField control={control} />
+							<ControlledInput
+								Input={UsernameField}
+								control={control}
+								name="username"
+							/>
 							<SubmitButton disabled={!isValid} startIcon={<EmailIcon />}>
 								<FormattedMessage id="auth.forgotPassword.buttonText" defaultMessage="Send request" />
 							</SubmitButton>

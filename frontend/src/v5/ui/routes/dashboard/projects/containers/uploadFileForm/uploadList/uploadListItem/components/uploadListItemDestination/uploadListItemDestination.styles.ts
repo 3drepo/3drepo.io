@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import AutocompleteBase from '@mui/material/Autocomplete';
 
 export const Autocomplete = styled(AutocompleteBase)`
