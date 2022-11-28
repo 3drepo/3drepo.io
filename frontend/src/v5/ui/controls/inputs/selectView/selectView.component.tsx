@@ -21,8 +21,8 @@ import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
-import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, FormSelect } from './formSelectView.styles';
+import { SelectProps } from '@controls/inputs/select/select.component';
+import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, Select } from './selectView.styles';
 
 const getThumbnailBasicPath = (
 	teamspace: string,
@@ -37,18 +37,18 @@ const getThumbnailBasicPath = (
 	);
 };
 
-type FormSelectViewProps = Omit<SelectWithLabelProps, 'children'> & {
+type SelectViewProps = Omit<SelectProps, 'children'> & {
 	views: View[];
 	containerOrFederationId: string;
 	isContainer?: boolean;
 };
 
-export const FormSelectView = ({ views, containerOrFederationId, isContainer, ...formProps }: FormSelectViewProps) => {
+export const SelectView = ({ views, containerOrFederationId, isContainer, ...props }: SelectViewProps) => {
 	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 	const getThumbnail = getThumbnailBasicPath(teamspace, project, containerOrFederationId, isContainer);
 
 	return (
-		<FormSelect {...formProps}>
+		<Select {...props}>
 			{[EMPTY_VIEW].concat(views || []).map((view) => (
 				<MenuItemView
 					key={view._id}
@@ -67,6 +67,6 @@ export const FormSelectView = ({ views, containerOrFederationId, isContainer, ..
 					</ViewLabel>
 				</MenuItemView>
 			))}
-		</FormSelect>
+		</Select>
 	);
 };

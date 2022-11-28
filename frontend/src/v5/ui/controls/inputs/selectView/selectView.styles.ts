@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { MenuItem } from '@mui/material';
-import { Select as FormSelectBase } from '@controls/inputs/select/select.component';
+import { Select as SelectBase } from '@controls/inputs/select/select.component';
 
 const ThumbnailStyles = css`
 	width: 43px;
@@ -41,7 +41,7 @@ export const ViewLabel = styled.div`
 	flex-direction: column;
 `;
 
-export const FormSelect = styled(FormSelectBase)`
+export const Select = styled(SelectBase)`
 	.MuiSelect-selectMenu {
 		display: flex;
 		padding-left: 0;

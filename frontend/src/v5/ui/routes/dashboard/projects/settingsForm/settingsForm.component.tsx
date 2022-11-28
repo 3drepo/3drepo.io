@@ -26,7 +26,7 @@ import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { TextField } from '@controls/inputs/textField/textField.component';
-import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
+import { SelectView } from '@controls/inputs/selectView/selectView.component';
 import { ShareTextField } from '@controls/shareTextField';
 import { Select } from '@controls/inputs/select/select.component';
 import { FormattedMessage } from 'react-intl';
@@ -300,11 +300,16 @@ export const SettingsForm = ({
 					<Placeholder />
 				</FlexContainer>
 			)}
-			<FormSelectView
+			<ControlledInput
+				Input={(inputProps) => (
+					<SelectView
+						views={containerOrFederation.views}
+						containerOrFederationId={containerOrFederation._id}
+						isContainer={isContainer}
+						{...inputProps}
+					/>
+				)}
 				control={control}
-				views={containerOrFederation.views}
-				containerOrFederationId={containerOrFederation._id}
-				isContainer={isContainer}
 				name="defaultView"
 				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
