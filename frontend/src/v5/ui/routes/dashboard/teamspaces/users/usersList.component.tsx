@@ -20,17 +20,22 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Users as V4UsersList } from '@/v4/routes/users';
+import { TeamspacesActions } from '@/v4/modules/teamspaces';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { Container } from './usersList.styles';
 
 export const UsersList = () => {
 	const dispatch = useDispatch();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const username = CurrentUserHooksSelectors.selectUsername();
 
 	useEffect(() => {
 		if (!teamspace) return;
 
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
-	}, [teamspace]);
+		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
+	}, [teamspace, username]);
+
 	return (
 		<Container>
 			<V4UsersList />
