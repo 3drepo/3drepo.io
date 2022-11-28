@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormToggle } from '@controls/inputs/formToggle/formToggle.component';
+import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { PropertyProps } from './properties.types';
 
 export const BooleanProperty = ({
@@ -22,5 +22,5 @@ export const BooleanProperty = ({
 	defaultValue = false,
 	...props
 }: PropertyProps) => (
-	<FormToggle disabled={readOnly} required={required} defaultValue={defaultValue} label={name} {...props} />
+	<Toggle disabled={readOnly} required={required} defaultValue={defaultValue} label={name} {...props} />
 );

@@ -17,10 +17,10 @@
 
 import { FormInputProps } from '@controls/inputs/ControlledInput.component';
 import { Switch, SwitchProps } from '@mui/material';
-import { FormControlLabel } from './formToggle.styles';
+import { FormControlLabel } from './toggle.styles';
 
-export type FormToggleProps = FormInputProps & SwitchProps;
-export const FormToggle = ({ name, label, disabled, value, ...props}: FormToggleProps) => (
+export type ToggleProps = FormInputProps & SwitchProps;
+export const Toggle = ({ name, label, disabled, value, ...props}: ToggleProps) => (
 	<FormControlLabel
 		disabled={disabled}
 		label={label}
