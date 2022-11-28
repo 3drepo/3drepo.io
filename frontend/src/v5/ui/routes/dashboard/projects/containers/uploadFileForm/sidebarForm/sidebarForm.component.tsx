@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { Select } from '@controls/inputs/Select/Select.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
@@ -135,7 +135,7 @@ export const SidebarForm = ({
 				/>
 			</FlexContainer>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				control={control}
 				name="containerCode"
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
@@ -143,7 +143,7 @@ export const SidebarForm = ({
 				disabled={!isNewContainer}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				control={control}
 				name="containerDesc"
 				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
@@ -156,7 +156,7 @@ export const SidebarForm = ({
 			</Heading>
 
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				control={control}
 				name="revisionDesc"
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}

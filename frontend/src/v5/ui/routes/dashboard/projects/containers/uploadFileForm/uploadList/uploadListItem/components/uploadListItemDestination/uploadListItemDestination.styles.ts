@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import AutocompleteBase from '@mui/material/Autocomplete';
 
 export const Autocomplete = styled(AutocompleteBase)`
@@ -26,7 +26,7 @@ export const Autocomplete = styled(AutocompleteBase)`
 `;
 
 export type NewOrExisting = '' | 'new' | 'existing';
-export const DestinationInput = styled(FormTextField)<{ neworexisting: NewOrExisting }>`
+export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting }>`
 	margin: 0;
 	border: none;
 	border-radius: 6px;

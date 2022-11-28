@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import styled from 'styled-components';
 
-export const FormPasswordField = styled(FormTextField).attrs({
+export const PasswordField = styled(TextField).attrs({
 	type: 'password',
 })``;

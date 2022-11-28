@@ -25,7 +25,7 @@ import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { ShareTextField } from '@controls/shareTextField';
 import { Select } from '@controls/inputs/Select/Select.component';
@@ -234,7 +234,7 @@ export const SettingsForm = ({
 				value={containerOrFederation._id}
 			/>
 			<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 				name="name"
 				control={control}
 				label={formatMessage({ id: 'settings.form.name', defaultMessage: 'Name' })}
@@ -242,7 +242,7 @@ export const SettingsForm = ({
 				formError={errors.name}
 			/>
 			<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'settings.form.desc', defaultMessage: 'Description' })}
@@ -268,7 +268,7 @@ export const SettingsForm = ({
 					control={control}
 				/>
 				<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 					name="code"
 					control={control}
 					label={formatMessage({ id: 'settings.form.code', defaultMessage: 'Code' })}
@@ -316,7 +316,7 @@ export const SettingsForm = ({
 			</SectionTitle>
 			<FlexContainer>
 				<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 					name="latitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude (decimal)' })}
@@ -324,7 +324,7 @@ export const SettingsForm = ({
 					required
 				/>
 				<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 					name="longitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude (decimal)' })}
@@ -333,7 +333,7 @@ export const SettingsForm = ({
 				/>
 			</FlexContainer>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="angleFromNorth"
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
@@ -341,7 +341,7 @@ export const SettingsForm = ({
 			/>
 			<FlexContainer>
 				<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 					name="x"
 					control={control}
 					label={`x (${currentUnit})`}
@@ -349,7 +349,7 @@ export const SettingsForm = ({
 					required
 				/>
 				<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 					name="y"
 					control={control}
 					label={`y (${currentUnit})`}
@@ -357,7 +357,7 @@ export const SettingsForm = ({
 					required
 				/>
 				<ControlledInput
-					Input={FormTextField}
+					Input={TextField}
 					name="z"
 					control={control}
 					label={`z (${currentUnit})`}

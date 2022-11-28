@@ -21,7 +21,7 @@ import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -121,7 +121,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 				control={control}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				required
 				name="projectName"
 				label={formatMessage({ id: 'project.creation.form.name', defaultMessage: 'Project name' })}

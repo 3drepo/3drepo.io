@@ -20,7 +20,7 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { Select } from '@controls/inputs/Select/Select.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
@@ -85,7 +85,7 @@ export const UserSignupFormStepPersonal = ({
 	return (
 		<>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="firstName"
 				control={control}
 				label={formatMessage({
@@ -96,7 +96,7 @@ export const UserSignupFormStepPersonal = ({
 				formError={errors.firstName}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="lastName"
 				control={control}
 				label={formatMessage({
@@ -107,7 +107,7 @@ export const UserSignupFormStepPersonal = ({
 				formError={errors.lastName}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="company"
 				control={control}
 				label={formatMessage({

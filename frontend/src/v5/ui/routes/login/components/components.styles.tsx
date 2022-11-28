@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { Typography } from '@controls/typography';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
@@ -31,7 +31,7 @@ export const AuthHeading = styled(Typography).attrs({
 	margin-bottom: 22px;
 `;
 
-export const AuthField = styled(FormTextField).attrs({
+export const AuthField = styled(TextField).attrs({
 	required: true,
 })`
 	margin-top: 8px;

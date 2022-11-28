@@ -23,7 +23,7 @@ import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -96,7 +96,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 			maxWidth="sm"
 		>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				control={control}
 				name="name"
 				label={formatMessage({ id: 'containers.creation.form.name', defaultMessage: 'Name' })}
@@ -140,14 +140,14 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 				/>
 			</FlexContainer>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				control={control}
 				name="desc"
 				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
 				formError={errors.desc}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				control={control}
 				name="code"
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}

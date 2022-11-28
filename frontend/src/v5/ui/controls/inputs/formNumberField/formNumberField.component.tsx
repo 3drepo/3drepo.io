@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField, FormTextFieldProps } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField, TextFieldProps } from '@controls/inputs/TextField/TextField.component';
 
-export const FormNumberField = (props: FormTextFieldProps) => {
+export const NumberField = (props: TextFieldProps) => {
 	const handleKeyDown = (event) => {
 		if (event.key === 'e') {
 			event.preventDefault();
 		}
 	};
 
-	return (<FormTextField type="number" onKeyDown={handleKeyDown} {...props} />);
+	return (<TextField type="number" onKeyDown={handleKeyDown} {...props} />);
 };

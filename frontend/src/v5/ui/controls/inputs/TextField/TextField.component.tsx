@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField, FormTextFieldProps } from '@controls/inputs/formTextField/formTextField.component';
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
+import { TextField as MuiTextField, TextFieldProps as MuiTextFieldProps } from '@mui/material';
 
-export type FormTextAreaProps = FormTextFieldProps & {
-	minRows?: number,
-};
-
-export const FormTextArea = ({ minRows = 3, ...props }: FormTextAreaProps) => (
-	<FormTextField multiline minRows={minRows} {...props} />
+export type TextFieldProps = FormInputProps & Omit<MuiTextFieldProps, 'variant'>
+export const TextField = ({ defaultValue = '', ...props }: TextFieldProps) => (
+	<MuiTextField defaultValue={defaultValue} {...props} />
 );

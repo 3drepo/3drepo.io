@@ -25,7 +25,7 @@ import * as API from '@/v5/services/api';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
-import { FormPasswordField } from './editProfilePasswordTab.styles';
+import { PasswordField } from './editProfilePasswordTab.styles';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -108,7 +108,7 @@ export const EditProfilePasswordTab = ({
 	return (
 		<>
 			<ControlledInput
-				Input={FormPasswordField}
+				Input={PasswordField}
 				control={control}
 				name="oldPassword"
 				label={formatMessage({
@@ -120,7 +120,7 @@ export const EditProfilePasswordTab = ({
 				
 			/>
 			<ControlledInput
-				Input={FormPasswordField}
+				Input={PasswordField}
 				control={control}
 				name="newPassword"
 				label={formatMessage({
@@ -131,7 +131,7 @@ export const EditProfilePasswordTab = ({
 				required
 			/>
 			<ControlledInput
-				Input={FormPasswordField}
+				Input={PasswordField}
 				control={control}
 				name="confirmPassword"
 				label={formatMessage({

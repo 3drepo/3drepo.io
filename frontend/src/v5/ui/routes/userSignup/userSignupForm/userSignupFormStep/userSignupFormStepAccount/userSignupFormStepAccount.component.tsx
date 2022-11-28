@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
@@ -111,7 +111,7 @@ export const UserSignupFormStepAccount = ({
 		<>
 			<ControlledInput
 				Input={(inputProps) => (
-					<FormTextField
+					<TextField
 						{...inputProps}
 						InputProps={{
 							startAdornment: (
@@ -133,7 +133,7 @@ export const UserSignupFormStepAccount = ({
 			/>
 			<ControlledInput
 				Input={(inputProps) => (
-					<FormTextField
+					<TextField
 						{...inputProps}
 						InputProps={{
 							startAdornment: (
@@ -155,7 +155,7 @@ export const UserSignupFormStepAccount = ({
 			/>
 			<ControlledInput
 				Input={(inputProps) => (
-					<FormTextField
+					<TextField
 						{...inputProps}
 						type="password"
 						InputProps={{
@@ -178,7 +178,7 @@ export const UserSignupFormStepAccount = ({
 			/>
 			<ControlledInput
 				Input={(inputProps) => (
-					<FormTextField
+					<TextField
 						{...inputProps}
 						type="password"
 						InputProps={{

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { PropertyProps } from './properties.types';
 
 export const TextProperty = ({ property: { name, readOnly, required }, ...props }: PropertyProps) => (
-	<FormTextField label={name} disabled={readOnly} required={required} {...props} />
+	<TextField label={name} disabled={readOnly} required={required} {...props} />
 );

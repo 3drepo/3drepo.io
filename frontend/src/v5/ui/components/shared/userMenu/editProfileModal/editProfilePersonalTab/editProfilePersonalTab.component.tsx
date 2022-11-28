@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
@@ -129,7 +129,7 @@ export const EditProfilePersonalTab = ({
 		<ScrollArea>
 			<EditProfileAvatar user={user} />
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="firstName"
 				control={control}
 				label={formatMessage({
@@ -140,7 +140,7 @@ export const EditProfilePersonalTab = ({
 				formError={formErrors.firstName}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="lastName"
 				control={control}
 				label={formatMessage({
@@ -151,7 +151,7 @@ export const EditProfilePersonalTab = ({
 				formError={formErrors.lastName}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="email"
 				control={control}
 				label={formatMessage({
@@ -162,7 +162,7 @@ export const EditProfilePersonalTab = ({
 				formError={formErrors.email}
 			/>
 			<ControlledInput
-				Input={FormTextField}
+				Input={TextField}
 				name="company"
 				control={control}
 				label={formatMessage({
