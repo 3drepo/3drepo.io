@@ -28,7 +28,7 @@ import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { ShareTextField } from '@controls/shareTextField';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
@@ -249,7 +249,16 @@ export const SettingsForm = ({
 				formError={errors.desc}
 			/>
 			<FlexContainer>
-				<FormSelect
+				<ControlledInput
+					Input={(inputProps) => (
+						<Select {...inputProps}>
+							{UNITS.map(({ name, abbreviation }) => (
+								<MenuItem key={abbreviation} value={abbreviation}>
+									{name}
+								</MenuItem>
+							))}
+						</Select>
+					)}
 					required
 					name="unit"
 					label={formatMessage({
@@ -257,13 +266,7 @@ export const SettingsForm = ({
 						defaultMessage: 'Units',
 					})}
 					control={control}
-				>
-					{UNITS.map(({ name, abbreviation }) => (
-						<MenuItem key={abbreviation} value={abbreviation}>
-							{name}
-						</MenuItem>
-					))}
-				</FormSelect>
+				/>
 				<ControlledInput
 					Input={FormTextField}
 					name="code"
@@ -274,23 +277,26 @@ export const SettingsForm = ({
 			</FlexContainer>
 			{isContainer && (
 				<FlexContainer>
-					<FormSelect
+					<ControlledInput
+						Input={(inputProps) => (
+							<Select {...inputProps}>
+								{CONTAINER_TYPES.map((type) => (
+									<MenuItem key={type} value={type}>
+										{type}
+									</MenuItem>
+								))}
+								<HiddenMenuItem key="sample" value="sample">
+									<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
+								</HiddenMenuItem>
+							</Select>
+						)}
 						name="type"
 						label={formatMessage({
 							id: 'settings.form.category',
 							defaultMessage: 'Category',
 						})}
 						control={control}
-					>
-						{CONTAINER_TYPES.map((type) => (
-							<MenuItem key={type} value={type}>
-								{type}
-							</MenuItem>
-						))}
-						<HiddenMenuItem key="sample" value="sample">
-							<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
-						</HiddenMenuItem>
-					</FormSelect>
+					/>
 					<Placeholder />
 				</FlexContainer>
 			)}
@@ -327,7 +333,7 @@ export const SettingsForm = ({
 				/>
 			</FlexContainer>
 			<ControlledInput
-					Input={FormTextField}
+				Input={FormTextField}
 				name="angleFromNorth"
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}

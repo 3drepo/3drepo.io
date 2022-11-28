@@ -24,7 +24,7 @@ import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/c
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
@@ -80,7 +80,18 @@ export const SidebarForm = ({
 				{value.containerName}
 			</Title>
 			<FlexContainer>
-				<FormSelect
+				<ControlledInput
+					Input={(inputProps) => (
+						<Select {...inputProps}>
+							{
+								CONTAINER_UNITS.map((unit) => (
+									<MenuItem key={unit.value} value={unit.value}>
+										{unit.name}
+									</MenuItem>
+								))
+							}
+						</Select>
+					)}
 					required
 					control={control}
 					disabled={!isNewContainer}
@@ -93,16 +104,22 @@ export const SidebarForm = ({
 							updateValue('containerUnit');
 						}
 					}
-				>
-					{
-						CONTAINER_UNITS.map((unit) => (
-							<MenuItem key={unit.value} value={unit.value}>
-								{unit.name}
-							</MenuItem>
-						))
-					}
-				</FormSelect>
-				<FormSelect
+				/>
+				<ControlledInput
+					Input={(inputProps) => (
+						<Select {...inputProps}>
+							{
+								CONTAINER_TYPES.map((type) => (
+									<MenuItem key={type.value} value={type.value}>
+										{type.name}
+									</MenuItem>
+								))
+							}
+							<HiddenMenuItem key="sample" value="sample">
+								<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
+							</HiddenMenuItem>
+						</Select>
+					)}
 					required
 					control={control}
 					disabled={!isNewContainer}
@@ -115,18 +132,7 @@ export const SidebarForm = ({
 							updateValue('containerType');
 						}
 					}
-				>
-					{
-						CONTAINER_TYPES.map((type) => (
-							<MenuItem key={type.value} value={type.value}>
-								{type.name}
-							</MenuItem>
-						))
-					}
-					<HiddenMenuItem key="sample" value="sample">
-						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
-					</HiddenMenuItem>
-				</FormSelect>
+				/>
 			</FlexContainer>
 			<ControlledInput
 				Input={FormTextField}
@@ -165,7 +171,18 @@ export const SidebarForm = ({
 						name="importAnimations"
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
-					<TimezoneSelect
+					<ControlledInput
+						Input={(inputProps) => (
+							<TimezoneSelect {...inputProps}>
+								{
+									TimezoneOptions.map((opt) => (
+										<MenuItem key={opt.name} value={opt.name}>
+											{opt.label}
+										</MenuItem>
+									))
+								}
+							</TimezoneSelect>
+						)}
 						control={control}
 						name="timezone"
 						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
@@ -175,15 +192,7 @@ export const SidebarForm = ({
 								updateValue('timezone');
 							}
 						}
-					>
-						{
-							TimezoneOptions.map((opt) => (
-								<MenuItem key={opt.name} value={opt.name}>
-									{opt.label}
-								</MenuItem>
-							))
-						}
-					</TimezoneSelect>
+					/>
 				</>
 			)}
 		</div>

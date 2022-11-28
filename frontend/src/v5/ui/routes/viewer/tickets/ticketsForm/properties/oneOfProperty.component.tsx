@@ -16,7 +16,7 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
 import { PropertyProps } from './properties.types';
 
@@ -24,12 +24,12 @@ export const OneOfProperty = ({ property: { name, readOnly, required, values }, 
 	const riskCategories: string[] = TicketsHooksSelectors.selectRiskCategories() || [];
 	const valuesArray = (values === 'riskCategories') ? riskCategories : values;
 	return (
-		<FormSelect label={name} disabled={readOnly} required={required} {...props}>
+		<Select label={name} disabled={readOnly} required={required} {...props}>
 			{(valuesArray as string[]).map((propValue) => (
 				<MenuItem key={propValue} value={propValue}>
 					{propValue}
 				</MenuItem>
 			))}
-		</FormSelect>
+		</Select>
 	);
 };

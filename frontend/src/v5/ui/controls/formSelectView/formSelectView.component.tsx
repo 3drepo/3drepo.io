@@ -21,7 +21,7 @@ import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
 import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, FormSelect } from './formSelectView.styles';
 
 const getThumbnailBasicPath = (
@@ -37,7 +37,7 @@ const getThumbnailBasicPath = (
 	);
 };
 
-type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
+type FormSelectViewProps = Omit<SelectWithLabelProps, 'children'> & {
 	views: View[];
 	containerOrFederationId: string;
 	isContainer?: boolean;

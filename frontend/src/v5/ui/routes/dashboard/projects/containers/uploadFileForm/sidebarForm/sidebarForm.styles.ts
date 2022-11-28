@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FormCheckbox } from '@controls/inputs/formCheckbox/formCheckbox.component';
+import { Select } from '@controls/inputs/Select/Select.component';
+import { Checkbox } from '@controls/inputs/Checkbox/Checkbox.component';
 import { MenuItem } from '@mui/material';
 
 export const Title = styled(Typography).attrs({
@@ -37,7 +37,7 @@ export const HiddenMenuItem = styled(MenuItem)`
 	display: none;
 `;
 
-export const TimezoneSelect = styled(FormSelect)`
+export const TimezoneSelect = styled(Select)`
 	width: 340px;
 `;
 
@@ -47,7 +47,7 @@ export const Heading = styled(Typography).attrs({
 	margin-top: 29px;
 `;
 
-export const AnimationsCheckbox = styled(FormCheckbox)`
+export const AnimationsCheckbox = styled(Checkbox)`
 	padding: 15px 0 0;
 	height: 24px;
 `;

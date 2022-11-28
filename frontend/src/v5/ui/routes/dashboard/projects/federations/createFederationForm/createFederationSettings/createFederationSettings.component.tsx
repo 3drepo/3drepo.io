@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { MenuItem } from '@mui/material';
@@ -52,7 +52,16 @@ export const CreateFederationFormSettings = () => {
 				formError={errors.desc}
 			/>
 			<HalfWidth>
-				<FormSelect
+				<ControlledInput
+					Input={(inputProps) => (
+						<Select {...inputProps}>
+							{CONTAINER_UNITS.map(({ name, value }) => (
+								<MenuItem key={value} value={value}>
+									{name}
+								</MenuItem>
+							))}
+						</Select>
+					)}
 					required
 					name="unit"
 					label={formatMessage({
@@ -60,13 +69,7 @@ export const CreateFederationFormSettings = () => {
 						defaultMessage: 'Units',
 					})}
 					control={control}
-				>
-					{CONTAINER_UNITS.map(({ name, value }) => (
-						<MenuItem key={value} value={value}>
-							{name}
-						</MenuItem>
-					))}
-				</FormSelect>
+				/>
 			</HalfWidth>
 			<ControlledInput
 				Input={FormTextField}

@@ -14,24 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import {
+	SelectProps as MuiSelectProps,
+	Select as MuiSelect,
+	FormControl,
+	InputLabel,
+	FormHelperText,
+} from '@mui/material';
+import { FormInputProps } from '@controls/inputs/ControlledInput.component';
 
-import { SelectProps, FormControl, InputLabel, Select, FormHelperText } from '@mui/material';
+export type SelectProps = MuiSelectProps & FormInputProps;
 
-export interface SelectWithLabelProps extends SelectProps {
-	required?: boolean;
-	helperText?: string;
-}
-
-export const SelectWithLabel = ({
+export const Select = ({
 	required = false,
 	helperText,
 	label,
 	className,
 	...props
-}: SelectWithLabelProps) => (
+}: SelectProps) => (
 	<FormControl required={required} disabled={props.disabled} error={props.error} className={className}>
 		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
-		<Select {...props} />
+		<MuiSelect {...props} />
 		<FormHelperText>{helperText}</FormHelperText>
 	</FormControl>
 );

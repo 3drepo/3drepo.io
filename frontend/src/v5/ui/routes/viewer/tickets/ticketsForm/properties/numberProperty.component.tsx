@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormNumberField } from '@controls/formNumberField/formNumberField.component';
+import { FormNumberField } from '@controls/inputs/formNumberField/formNumberField.component';
 import { PropertyProps } from './properties.types';
 
 export const NumberProperty = ({ property: { name, readOnly, required }, ...props }: PropertyProps) => (

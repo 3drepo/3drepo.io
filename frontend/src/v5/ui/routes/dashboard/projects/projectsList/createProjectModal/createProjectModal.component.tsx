@@ -22,7 +22,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
@@ -105,18 +105,21 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
-			<FormSelect
+			<ControlledInput
+				Input={(inputProps) => (
+					<Select {...inputProps}>
+						{teamspaces.map((ts) => (
+							<MenuItem key={ts.name} value={ts.name}>
+								{ts.name}
+							</MenuItem>
+						))}
+					</Select>
+				)}
 				required
 				name="teamspace"
 				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
 				control={control}
-			>
-				{teamspaces.map((ts) => (
-					<MenuItem key={ts.name} value={ts.name}>
-						{ts.name}
-					</MenuItem>
-				))}
-			</FormSelect>
+			/>
 			<ControlledInput
 				Input={FormTextField}
 				required

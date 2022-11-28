@@ -22,7 +22,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
@@ -116,21 +116,24 @@ export const UserSignupFormStepPersonal = ({
 				})}
 				formError={errors.company}
 			/>
-			<FormSelect
+			<ControlledInput
 				name="countryCode"
+				Input={(inputProps) => (
+					<Select {...inputProps}>
+						{clientConfigService.countries.map((country) => (
+							<MenuItem key={country.code} value={country.code}>
+								{country.name}
+							</MenuItem>
+						))}
+					</Select>
+				)}
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.countryCode',
 					defaultMessage: 'Country',
 				})}
 				required
-			>
-				{clientConfigService.countries.map((country) => (
-					<MenuItem key={country.code} value={country.code}>
-						{country.name}
-					</MenuItem>
-				))}
-			</FormSelect>
+			/>
 			<NextStepButton
 				disabled={!formIsValid}
 				onClick={onSubmitStep}

@@ -22,7 +22,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
@@ -171,7 +171,8 @@ export const EditProfilePersonalTab = ({
 				})}
 				formError={formErrors.company}
 			/>
-			<FormSelect
+			<ControlledInput
+				Input={(inputProps) => <Select {...inputProps}>{CountriesMenuItems}</Select>}
 				name="countryCode"
 				control={control}
 				label={formatMessage({
@@ -179,9 +180,7 @@ export const EditProfilePersonalTab = ({
 					defaultMessage: 'Country',
 				})}
 				required
-			>
-				{CountriesMenuItems}
-			</FormSelect>
+			/>
 			{submitWasSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage

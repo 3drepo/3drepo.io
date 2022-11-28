@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextArea } from '@controls/formTextArea/formTextArea.component';
+import { FormTextArea } from '@controls/inputs/formTextArea/formTextArea.component';
 import styled from 'styled-components';
 
 export const TitlePropertyBase = styled(FormTextArea).attrs({

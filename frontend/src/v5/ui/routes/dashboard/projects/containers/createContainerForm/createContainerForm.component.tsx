@@ -24,7 +24,7 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormTextField } from '@controls/inputs/formTextField/formTextField.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Select } from '@controls/inputs/Select/Select.component';
 import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
@@ -104,34 +104,40 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 				required
 			/>
 			<FlexContainer>
-				<FormSelect
+				<ControlledInput
 					required
 					control={control}
 					name="unit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
-				>
-					{
-						CONTAINER_UNITS.map((unit) => (
-							<MenuItem key={unit.value} value={unit.value}>
-								{unit.name}
-							</MenuItem>
-						))
-					}
-				</FormSelect>
-				<FormSelect
+					Input={(inputProps) => (
+						<Select {...inputProps}>
+							{
+								CONTAINER_UNITS.map((unit) => (
+									<MenuItem key={unit.value} value={unit.value}>
+										{unit.name}
+									</MenuItem>
+								))
+							}
+						</Select>
+					)}
+				/>
+				<ControlledInput
 					required
 					control={control}
 					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
 					name="type"
-				>
-					{
-						CONTAINER_TYPES.map((unit) => (
-							<MenuItem key={unit.value} value={unit.value}>
-								{unit.value}
-							</MenuItem>
-						))
-					}
-				</FormSelect>
+					Input={(inputProps) => (
+						<Select {...inputProps}>
+							{
+								CONTAINER_TYPES.map((unit) => (
+									<MenuItem key={unit.value} value={unit.value}>
+										{unit.value}
+									</MenuItem>
+								))
+							}
+						</Select>
+					)}
+				/>
 			</FlexContainer>
 			<ControlledInput
 				Input={FormTextField}
