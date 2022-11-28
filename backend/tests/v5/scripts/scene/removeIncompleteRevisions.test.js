@@ -238,7 +238,7 @@ const runTest = () => {
 			await checkRevisionsExist(revsToExist, true);
 		});
 
-		test('Should remove any revisions if threshold is less than 1 days and stdIn returned y', async () => {
+		test('Should remove incomplete revisions older than 1 day if threshold is less than 1 days and stdIn returned y', async () => {
 			const fakeLineRder = { question: (str, cb) => cb('y'), close: jest.fn() };
 			jest.spyOn(readline, 'createInterface').mockReturnValueOnce(fakeLineRder);
 
@@ -248,7 +248,7 @@ const runTest = () => {
 			await checkRevisionsExist(Object.values(deletedRevs), false);
 		});
 
-		test('Should remove any revisions if threshold is less than 0 days without prompt if force is flagged', async () => {
+		test('Should remove all incomplete revisions if threshold is less than 0 days without prompt if force is flagged', async () => {
 			const rlFn = jest.spyOn(readline, 'createInterface');
 
 			await RemoveIncompleteRevisions.run(0, true);
