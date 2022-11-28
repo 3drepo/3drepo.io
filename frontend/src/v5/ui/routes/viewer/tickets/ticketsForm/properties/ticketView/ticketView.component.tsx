@@ -59,10 +59,9 @@ export const TicketView = ({
 	};
 
 	const goToViewpoint = async () => {
-		if (!value) return;
 		await ViewerService.setViewpoint(value);
 	};
-	const deleteViewpoint = async () => {
+	const deleteViewpoint = () => {
 		const { screenshot } = value || {};
 		const view = screenshot ? { camera: null, clippingPlanes: null } : null;
 		onChange?.(view);
