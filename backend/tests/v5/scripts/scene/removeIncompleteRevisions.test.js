@@ -25,13 +25,15 @@ const {
 	generateRandomString,
 } = require('../../helper/services');
 const readline = require('readline');
+const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 
 const { getRefsByQuery } = require(`${src}/models/fileRefs`);
+const { storeFile } = require(`${src}/services/filesManager`);
 const { fs: { path: fileShareRoot } } = require(`${src}/utils/config`);
 const { getRevisionByIdOrTag } = require(`${src}/models/revisions`);
-const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
-const { count, findOne } = require(`${src}/handler/db`);
+const { stringToUUID, UUIDToString, generateUUID } = require(`${src}/utils/helper/uuids`);
+const { count, findOne, insertMany } = require(`${src}/handler/db`);
 const Path = require('path');
 
 const RemoveIncompleteRevisions = require(`${utilScripts}/scene/removeIncompleteRevisions`);
@@ -54,7 +56,39 @@ const generateSequence = async (teamspace, model, rId) => {
 	};
 };
 
-const generateRevision = async (teamspace, model, incomplete, timestamp, { noRFile, hasSequence } = { }) => {
+const generateStashData = async (teamspace, model, rId) => {
+	const createObject = (type = 'mesh') => ({
+		_id: generateUUID(),
+		rev_id: rId,
+		type,
+		_extRef: type === 'mesh' ? {
+			[generateRandomString()]: generateRandomString(),
+			[generateRandomString()]: generateRandomString(),
+		} : generateRandomString(),
+	});
+
+	const superMeshes = times(5, () => createObject());
+	const otherObjs = times(4, () => createObject(generateRandomString()));
+
+	const allObjs = [...superMeshes, ...otherObjs];
+
+	const refs = [
+		...superMeshes.flatMap(({ _extRef }) => Object.values(_extRef)),
+		...otherObjs.map(({ _extRef }) => _extRef),
+	];
+
+	const stashCol = `${model}.stash.3drepo`;
+	await insertMany(teamspace, stashCol, allObjs);
+
+	await Promise.all(refs.map((ref) => {
+		const buffer = Buffer.from(generateRandomString(), 'utf-8');
+		return storeFile(teamspace, stashCol, ref, buffer);
+	}));
+
+	return { objCount: allObjs.length, links: await findRefs(teamspace, stashCol, refs) };
+};
+
+const generateRevision = async (teamspace, model, incomplete, timestamp, { noRFile, hasSequence, stash } = { }) => {
 	const rev = { ...generateRevisionEntry(false, !noRFile), timestamp };
 	const rid = stringToUUID(rev._id);
 
@@ -67,6 +101,10 @@ const generateRevision = async (teamspace, model, incomplete, timestamp, { noRFi
 
 	if (hasSequence) {
 		retVal.sequence = await generateSequence(teamspace, model, rid);
+	}
+
+	if (stash) {
+		retVal.stash = await generateStashData(teamspace, model, rid);
 	}
 
 	retVal.revision.links = noRFile ? [] : await findRefs(teamspace, `${model}.history`, rev.rFile);
@@ -97,7 +135,7 @@ const setupData = async () => {
 			const date = adjustDate(dateDiff);
 			const [badRev1, badRev2, badRev3, ...goodRevs] = await Promise.all([
 				generateRevision(teamspace, model, true, date),
-				generateRevision(teamspace, model, true, date, { noRFile: true, hasSequence: true }),
+				generateRevision(teamspace, model, true, date, { noRFile: true, hasSequence: true, stash: true }),
 				generateRevision(teamspace, modelNoSpecialCase, true, date),
 				generateRevision(teamspace, model, false, date),
 				generateRevision(teamspace, modelNoIncomplete, false, date),
@@ -121,13 +159,19 @@ const checkFileExists = (filePaths, shouldExist) => {
 };
 
 const checkRevisionsExist = async (revisions, shouldExist) => {
-	const checkRevision = async ({ teamspace, model, revision: { rev, links }, sequence }) => {
+	const checkRevision = async ({ teamspace, model, revision: { rev, links }, stash, sequence }) => {
 		const revFound = await getRevisionByIdOrTag(teamspace, model, rev._id, { _id: 1 }).catch(() => false);
 		expect(!!revFound).toEqual(shouldExist);
 		if (links.length) checkFileExists(links, shouldExist);
 
+		if (stash) {
+			const stashObjCount = await count(teamspace, `${model}.stash.3drepo`, { rev_id: rev._id });
+			expect(stashObjCount).toBe(shouldExist ? stash.objCount : 0);
+			checkFileExists(stash.links, shouldExist);
+		}
+
 		if (sequence) {
-			const seqObj = await findOne(teamspace, `${model}.sequences`, { _id: sequence.id }, { id: 1 });
+			const seqObj = await findOne(teamspace, `${model}.sequences`, { _id: sequence.id });
 			expect(!!seqObj).toEqual(shouldExist);
 
 			const actCount = await count(teamspace, `${model}.activities`, { _id: { $in: sequence.activities } }, { id: 1 });

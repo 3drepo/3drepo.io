@@ -39,7 +39,7 @@ const entriesLimit = 500;
 const removeFilesHelper = async (ts, col, query) => {
 	try {
 		await removeFilesWithMeta(ts, col, query);
-	} catch (err) {
+	} catch (err) /* istanbul ignore next */{
 		logger.logError(`Failed to remove files from ${ts}.${col} with query: ${JSON.stringify(query)}`);
 		throw err;
 	}
@@ -52,47 +52,46 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 
 		const objsWithRefs = await count(teamspace, collection, filesFilter);
 		const batch = entriesLimit;
-		for (let j = 0; j < objsWithRefs?.length; j += batch) {
+		for (let j = 0; j < objsWithRefs; j += batch) {
 			// eslint-disable-next-line no-await-in-loop
 			const results = await find(teamspace, collection, filesFilter, projection, undefined, batch);
-			if (results?.length) {
-				const filenames = results.flatMap((record) => {
-					const fileRefs = record[refAttribute];
-					if (fileRefs) {
-						// handle different ref formats
-						// record refs currently stored in the following formats:
-						// 1) { ref: 'refString' }
-						// 2) { ref: {
-						//        key1: 'key1RefString',
-						//        key2: 'key2RefString',
-						//    }
-						if (isString(fileRefs)) {
-							return fileRefs;
-						} if (isObject(fileRefs)) {
-							return Object.values(fileRefs);
-						}
-						logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
-					}
-					return [];
-				});
-
-				for (let i = 0; i <= filenames.length; i += entriesLimit) {
-					logger.logInfo(`removing ${i} - ${i + entriesLimit > filenames.length ? filenames.length : i + entriesLimit} files`);
-					const group = filenames.slice(i, i + entriesLimit);
-					const fileRemoveProms = [];
-					fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
-					// eslint-disable-next-line no-await-in-loop
-					await Promise.all(fileRemoveProms);
+			const filenames = results.flatMap((record) => {
+				const fileRefs = record[refAttribute];
+				// handle different ref formats
+				// record refs currently stored in the following formats:
+				// 1) { ref: 'refString' }
+				// 2) { ref: {
+				//        key1: 'key1RefString',
+				//        key2: 'key2RefString',
+				//    }
+				if (isString(fileRefs)) {
+					return fileRefs;
 				}
+				/* istanbul ignore else */
+				if (isObject(fileRefs)) {
+					return Object.values(fileRefs);
+				}
+				/* istanbul ignore next */
+				logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
+				/* istanbul ignore next */
+				return [];
+			});
 
+			for (let i = 0; i <= filenames.length; i += entriesLimit) {
+				const group = filenames.slice(i, i + entriesLimit);
+				const fileRemoveProms = [];
+				fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
 				// eslint-disable-next-line no-await-in-loop
-				await deleteMany(teamspace, collection, { _id: { $in: results.map(({ _id }) => _id) } });
+				await Promise.all(fileRemoveProms);
 			}
+
+			// eslint-disable-next-line no-await-in-loop
+			await deleteMany(teamspace, collection, { _id: { $in: results.map(({ _id }) => _id) } });
 		}
 	}
 	try {
 		await deleteMany(teamspace, collection, filter);
-	} catch (err) {
+	} catch (err) /* istanbul ignore next */{
 		logger.logError(`Failed to remove records from ${teamspace}.${collection} with query: ${JSON.stringify(filter)}`);
 		throw err;
 	}
