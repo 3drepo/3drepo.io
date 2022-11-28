@@ -15,28 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextArea } from '@controls/inputs/textArea/textArea.component';
-import styled from 'styled-components';
+import { TextField, TextFieldProps } from '@controls/inputs/textField/textField.component';
 
-export const TitlePropertyBase = styled(TextArea).attrs({
-	minRows: 1,
-})`
-	& > .MuiInputBase-root {
-		textarea {
-			${({ theme }) => theme.typography.h3}
-		}
+export type TextAreaProps = TextFieldProps & {
+	minRows?: number,
+};
 
-		&:not(.Mui-focused):not(.Mui-error) {
-			&:hover fieldset {
-				border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-			}
-			fieldset {
-				border: none;
-			}
-		}
-	}
-	 
-	.MuiFormHelperText-root.Mui-error {
-		display: none;
-	}
-`;
+export const TextArea = ({ minRows = 3, ...props }: TextAreaProps) => (
+	<TextField multiline minRows={minRows} {...props} />
+);
