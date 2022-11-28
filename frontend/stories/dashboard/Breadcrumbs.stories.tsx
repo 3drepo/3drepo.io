@@ -23,11 +23,7 @@ import { BrowserRouter } from 'react-router-dom';
 export default {
 	title: 'Dashboard/BreadCrumbs',
 	component: Breadcrumbs,
-	argTypes: {
-		borderRadius: {
-			type: 'number',
-		},
-	},
+	parameters: { controls: { exclude: ['breadcrumbs'] } },
 } as ComponentMeta<typeof Breadcrumbs>;
 
 const Template: ComponentStory<typeof Breadcrumbs> = (args) => (

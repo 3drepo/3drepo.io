@@ -22,23 +22,30 @@ export default {
 	component: ErrorMessage,
 	argTypes: {
 		children: {
-			description: 'The text or component to display',
+			description: 'The text to display',
 			defaultValue: 'Error message\'s content',
+			type: 'string',
 		},
 	},
+	parameters: { controls: { exclude: ['className'] } },
 } as ComponentMeta<typeof ErrorMessage>;
 
 const Template: ComponentStory<typeof ErrorMessage> = ({ children, ...args }) => (
 	<ErrorMessage {...args}>{children}</ErrorMessage>
 );
 
-export const BreakLineError = Template.bind({});
-BreakLineError.args = {
+export const SingleLineError = Template.bind({});
+SingleLineError.args = {
+	children: 'Error',
+};
+
+export const MultiLineError = Template.bind({});
+MultiLineError.args = {
 	children: (
-		<div>
+		<>
 			This is the error message.
 			<br />
 			Note that, when I break, the icon stays aligned with the top line.
-		</div>
+		</>
 	),
 };
