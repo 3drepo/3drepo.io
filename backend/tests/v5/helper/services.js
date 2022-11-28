@@ -19,6 +19,7 @@ const Crypto = require('crypto');
 const amqp = require('amqplib');
 const http = require('http');
 const fs = require('fs');
+const { times } = require('lodash');
 
 const { src, srcV4 } = require('./path');
 
@@ -132,6 +133,18 @@ db.createRevision = async (teamspace, modelId, revision) => {
 	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 };
 
+db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
+	const seqCol = `${model}.sequences`;
+	const actCol = `${model}.activities`;
+
+	await Promise.all([
+		DbHandler.insertOne(teamspace, seqCol, sequence),
+		DbHandler.insertMany(teamspace, actCol, activities),
+		states.map(({ id, buffer }) => FilesManager.storeFile(teamspace, seqCol, id, buffer)),
+		FilesManager.storeFile(teamspace, actCol, UUIDToString(sequence._id), activityTree),
+	]);
+};
+
 db.createGroups = (teamspace, modelId, groups = []) => {
 	const toInsert = groups.map((entry) => {
 		const converted = {
@@ -234,6 +247,53 @@ ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
+
+ServiceHelper.generateSequenceEntry = (rid) => {
+	const startDate = ServiceHelper.generateRandomDate();
+	const endDate = ServiceHelper.generateRandomDate(startDate);
+
+	const sequence = {
+		_id: generateUUID(),
+		rev_id: rid,
+		name: ServiceHelper.generateRandomString(),
+		startDate,
+		endDate,
+		frames: [
+			{
+				dateTime: startDate,
+				state: ServiceHelper.generateUUIDString(),
+			},
+			{
+				dateTime: startDate,
+				state: ServiceHelper.generateUUIDString(),
+			},
+		],
+	};
+
+	const generateDate = () => ServiceHelper.generateRandomDate(startDate, endDate);
+	const states = sequence.frames.map(({ state }) => ({
+		id: state,
+		buffer: Buffer.from(ServiceHelper.generateRandomString(), 'utf-8'),
+	}));
+
+	const activities = times(5, () => ({
+		_id: generateUUID(),
+		name: ServiceHelper.generateRandomString(),
+		startDate: generateDate(),
+		endDate: generateDate(),
+		sequenceId: sequence._id,
+		data: times(3, () => ({
+
+			key: ServiceHelper.generateRandomString(),
+			value: ServiceHelper.generateRandomString(),
+		})),
+
+	}));
+
+	const activityTree = Buffer.from(ServiceHelper.generateRandomString(), 'utf-8');
+
+	return { sequence, states, activities, activityTree };
+};
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
