@@ -43,7 +43,6 @@ export const ControlledInput = ({ Input, name, control, defaultValue, formError,
 		control={control}
 		defaultValue={defaultValue}
 		render={({ field: { ref, ...field} }) => (
-			// @ts-ignore
 			<Input
 				{...field}
 				{...props}
