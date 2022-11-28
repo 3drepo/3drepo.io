@@ -21,7 +21,7 @@ import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { TextField } from '@controls/inputs/textField/textField.component';
-import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';

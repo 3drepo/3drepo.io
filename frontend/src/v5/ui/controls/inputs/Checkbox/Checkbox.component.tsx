@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormInputProps } from '@controls/inputs/ControlledInput.component';
+import { FormInputProps } from '@controls/inputs/controlledInput.component';
 import { FormControlLabel, FormControlLabelProps, Checkbox as MuiCheckbox } from '@mui/material';
 
 export type CheckboxProps = FormInputProps & FormControlLabelProps & {

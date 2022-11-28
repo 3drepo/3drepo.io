@@ -23,7 +23,7 @@ import { TextField } from '@controls/inputs/textField/textField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { isEqual, pick, defaults } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';

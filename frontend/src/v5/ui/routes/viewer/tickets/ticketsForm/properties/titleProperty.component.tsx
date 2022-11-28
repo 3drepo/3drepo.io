@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { TitlePropertyBase } from './titleProperty.styles';
 
 export const TitleProperty = (props) => {

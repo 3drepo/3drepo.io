@@ -18,7 +18,7 @@
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Control } from 'react-hook-form/dist/types';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { TextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {

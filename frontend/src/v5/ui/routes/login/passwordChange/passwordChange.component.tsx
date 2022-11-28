@@ -27,7 +27,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
 import ErrorIcon from '@assets/icons/warning_small.svg';
-import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { AuthHeading, AuthParagraph, ErrorMessage, PasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';

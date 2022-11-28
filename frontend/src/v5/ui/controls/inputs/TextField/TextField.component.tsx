@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormInputProps } from '@controls/inputs/ControlledInput.component';
+import { FormInputProps } from '@controls/inputs/controlledInput.component';
 import { TextField as MuiTextField, TextFieldProps as MuiTextFieldProps } from '@mui/material';
 
 export type TextFieldProps = FormInputProps & Omit<MuiTextFieldProps, 'variant'>

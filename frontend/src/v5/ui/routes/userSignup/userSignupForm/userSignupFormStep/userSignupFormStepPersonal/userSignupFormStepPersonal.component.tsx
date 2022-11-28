@@ -25,7 +25,7 @@ import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignup
 import { Select } from '@controls/inputs/select/select.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
-import { ControlledInput } from '@controls/inputs/ControlledInput.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { defaults, isEqual, pick } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
