@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { TextField } from '@controls/inputs/TextField/TextField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/TextField/FormTextField',
+	title: 'Inputs/TextField/TextField',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -28,31 +27,19 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
-		formError: {
-			type: 'string',
-		},
 		disabled: {
 			type: 'boolean',
 		},
 	},
-	component: FormTextField,
-	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof FormTextField>;
+	component: TextField,
+	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+} as ComponentMeta<typeof TextField>;
 
-const Controlled: ComponentStory<typeof FormTextField> = ({ formError, ...args }) => {
-	const { control } = useForm({ mode: 'onChange' });
-
-	return (
-		<FormContainer>
-			<FormTextField
-				name="textfield"
-				control={control}
-				{...args}
-				formError={formError ? { message: formError } : null}
-			/>
-		</FormContainer>
-	);
-};
+const Controlled: ComponentStory<typeof TextField> = (args) => (
+	<FormContainer>
+		<TextField {...args} />
+	</FormContainer>
+);
 
 export const ControlledFormTextField = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args

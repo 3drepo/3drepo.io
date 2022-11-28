@@ -16,11 +16,10 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/Control/FormCheckbox',
+	title: 'Inputs/Control/Checkbox',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -30,22 +29,14 @@ export default {
 		},
 	},
 	component: Checkbox,
-	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
+	parameters: { controls: { exclude: ['formError', 'ref'] } },
 } as ComponentMeta<typeof Checkbox>;
 
-const Controlled: ComponentStory<typeof Checkbox> = (args) => {
-	const { control } = useForm({ mode: 'onChange' });
-
-	return (
-		<FormContainer>
-			<Checkbox
-				name="checkbox"
-				control={control}
-				{...args}
-			/>
-		</FormContainer>
-	);
-};
+const Controlled: ComponentStory<typeof Checkbox> = (args) => (
+	<FormContainer>
+		<Checkbox {...args}/>
+	</FormContainer>
+);
 
 export const ControlledFormCheckbox = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args

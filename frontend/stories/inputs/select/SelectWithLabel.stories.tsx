@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SelectWithLabel } from '@controls/selectWithLabel/selectWithLabel.component';
+import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem, SelectChangeEvent } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/Select/SelectWithLabel',
+	title: 'Inputs/Select/Select',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -45,33 +45,30 @@ export default {
 			control: 'array',
 		},
 	},
-	component: SelectWithLabel,
-	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof SelectWithLabel>;
+	component: Select,
+	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+} as ComponentMeta<typeof Select>;
 
-const SelectWithLabelStory: ComponentStory<typeof SelectWithLabel> = ({ values, ...args }: any) => (
+const SelectStory: ComponentStory<typeof Select> = ({ values, ...args }: any) => (
 	<FormContainer>
-		<SelectWithLabel
-			name="select"
-			{...args}
-		>
+		<Select {...args}>
 			{values.map((value) => (
 				<MenuItem value={value} key={value} style={{ padding: '8px 14px' }}>
 					{value}
 				</MenuItem>
 			))}
-		</SelectWithLabel>
+		</Select>
 	</FormContainer>
 );
 
-export const SelectWithLabelExample = SelectWithLabelStory.bind({});
+export const SelectExample = SelectStory.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-SelectWithLabelExample.args = {
+SelectExample.args = {
 	label: 'Just a select with a label and error',
 	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 };
 
-const SelectWithLabelControlledStory: ComponentStory<typeof SelectWithLabel> = ({ values, ...args }: any) => {
+const SelectControlledStory: ComponentStory<typeof Select> = ({ values, ...args }: any) => {
 	const [value, setValue] = useState([]);
 
 	const handleChange = (event: SelectChangeEvent<any[]>) => {
@@ -80,8 +77,7 @@ const SelectWithLabelControlledStory: ComponentStory<typeof SelectWithLabel> = (
 
 	return (
 		<FormContainer>
-			<SelectWithLabel
-				name="select"
+			<Select
 				{...args}
 				value={value}
 				onChange={handleChange}
@@ -91,14 +87,14 @@ const SelectWithLabelControlledStory: ComponentStory<typeof SelectWithLabel> = (
 						{valueItem}
 					</MenuItem>
 				))}
-			</SelectWithLabel>
+			</Select>
 		</FormContainer>
 	);
 };
 
-export const SelectWithLabelMultipleExample = SelectWithLabelControlledStory.bind({});
+export const SelectMultipleExample = SelectControlledStory.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-SelectWithLabelMultipleExample.args = {
+SelectMultipleExample.args = {
 	label: 'Just a select with a label and error',
 	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
 	multiple: true,

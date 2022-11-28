@@ -16,11 +16,10 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormToggle } from '@controls/inputs/formToggle/formToggle.component';
-import { useForm } from 'react-hook-form';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/Control/FormToggle',
+	title: 'Inputs/Control/Toggle',
 	argTypes: {
 		defaultChecked: {
 			type: 'boolean',
@@ -46,18 +45,14 @@ export default {
 	] } },
 } as ComponentMeta<typeof FormToggle>;
 
-const Controlled: ComponentStory<typeof FormToggle> = (args) => {
-	const { control } = useForm({ mode: 'onChange' });
-
-	return (
-		<FormContainer>
-			<FormToggle
-				name="toggle"
-				{...args}
-			/>
-		</FormContainer>
-	);
-};
+const Controlled: ComponentStory<typeof FormToggle> = (args) => (
+	<FormContainer>
+		<FormToggle
+			name="toggle"
+			{...args}
+		/>
+	</FormContainer>
+);
 
 export const ControlledFormToggle = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args

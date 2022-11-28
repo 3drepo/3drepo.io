@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { NumberField } from '@controls/inputs/formNumberField/formNumberField.component';
+import { NumberField } from '@controls/inputs/NumberField/NumberField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/TextField/FormNumberField',
+	title: 'Inputs/TextField/NumberField',
 	argTypes: {
 		label: {
 			type: 'string',

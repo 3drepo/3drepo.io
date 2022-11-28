@@ -47,15 +47,12 @@ export default {
 		},
 	},
 	component: SearchSelect,
-	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
+	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
 } as ComponentMeta<typeof SearchSelect>;
 
 const Controlled: ComponentStory<typeof SearchSelect> = ({ values, ...args }: any) => (
 	<FormContainer>
-		<SearchSelect
-			name="select"
-			{...args}
-		>
+		<SearchSelect {...args}>
 			{values.map((value) => (
 				<MenuItem value={value} key={value} style={{ padding: '8px 14px' }}>
 					{value}
@@ -82,7 +79,6 @@ const SearchSelectMultipleControlledStory: ComponentStory<typeof SearchSelect> =
 	return (
 		<FormContainer>
 			<SearchSelect
-				name="select"
 				{...args}
 				value={value}
 				onChange={handleChange}
