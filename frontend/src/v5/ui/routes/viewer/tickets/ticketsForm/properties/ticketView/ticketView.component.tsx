@@ -29,8 +29,7 @@ import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
-import { TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.component';
-import { ActionMenu } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
+import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
 
 type ITicketView = {

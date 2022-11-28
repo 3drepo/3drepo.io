@@ -23,8 +23,7 @@ import { MenuItem } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { TicketImageAction } from './ticketImageAction/ticketImageAction.component';
-import { ActionMenu, MenuItemDelete } from './ticketImageAction/ticketImageAction.styles';
+import { ActionMenu, MenuItemDelete, TicketImageAction } from './ticketImageAction/ticketImageAction.styles';
 
 const TriggerButton = ({ hasImage }) => {
 	if (!hasImage) {
