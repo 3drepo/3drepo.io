@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { MenuItem, SelectChangeEvent } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';

@@ -16,8 +16,8 @@
  */
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
 import { PropertyProps } from './properties.types';
 
 export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
@@ -31,7 +31,7 @@ export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
 	}
 
 	return (
-		<FormMultiSelect
+		<MultiSelect
 			label={name}
 			disabled={readOnly}
 			required={required}
@@ -40,6 +40,6 @@ export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
 			{(items).map(({ value, label }) => (
 				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
 			))}
-		</FormMultiSelect>
+		</MultiSelect>
 	);
 };

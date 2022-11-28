@@ -16,23 +16,13 @@
  */
 
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { Controller } from 'react-hook-form';
+import { SelectProps } from '../select/select.component';
 
-export const FormMultiSelect = ({ formError = null, name, ...props }) => (
-	<Controller
-		name={name}
-		defaultValue={[]}
-		render={({ field: { ref, value, ...field } }) => (
-			<SearchSelect
-				inputRef={ref}
-				value={value || []}
-				error={!!formError}
-				renderValue={(val) => (val as any[]).join(',')}
-				helperText={formError?.message}
-				{...field}
-				{...props}
-				multiple
-			/>
-		)}
+export const MultiSelect = ({ defaultValue = [], ...props }: SelectProps) => (
+	<SearchSelect
+		defaultValue={defaultValue}
+		renderValue={(val) => (val as any[]).join(',')}
+		{...props}
+		multiple
 	/>
 );
