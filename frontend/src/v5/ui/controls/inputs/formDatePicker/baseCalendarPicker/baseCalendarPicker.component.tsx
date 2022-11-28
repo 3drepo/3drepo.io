@@ -49,6 +49,7 @@ export const BaseCalendarPicker = ({
 				props.onBlur?.();
 				setOpen(false);
 			}}
+			disabled={disabled}
 			open={open}
 			dayOfWeekFormatter={formatDayOfWeek}
 			defaultValue={defaultValue ? dayjs(defaultValue) : null}

@@ -14,24 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CoordsProperty } from './coordsProperty.component';
-import { DateProperty } from './dateProperty.component';
-import { ImageProperty } from './imageProperty.component';
-import { LongTextProperty } from './longTextProperty.component';
 import { ManyOfProperty } from './manyOfProperty.component';
-import { NumberProperty } from './numberProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
-import { TextProperty } from './textProperty.component';
-import { BooleanProperty } from './booleanProperty.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
+import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
+import { DatePicker } from '@controls/inputs/formDatePicker/datePicker.component';
+import { Toggle } from '@controls/inputs/toggle/toggle.component';
+import { NumberField } from '@controls/inputs/numberField/numberField.component';
+import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
+import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
 export const TicketProperty = {
-	text: TextProperty,
-	longText: LongTextProperty,
-	date: DateProperty,
+	text: TextField,
+	longText: TextAreaFixedSize,
+	date: DatePicker,
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
-	boolean: BooleanProperty,
-	coords: CoordsProperty,
-	number: NumberProperty,
-	image: ImageProperty,
+	boolean: Toggle,
+	coords: PinDetails,
+	number: NumberField,
+	image: TicketImage,
 };

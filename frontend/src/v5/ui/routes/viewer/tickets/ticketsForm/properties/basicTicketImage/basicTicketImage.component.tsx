@@ -23,7 +23,7 @@ export type BasicTicketImageProps = {
 	imgSrc: string,
 	error?: any,
 	helperText?: string,
-	title: string,
+	label: string,
 	className?: string,
 	children: any,
 	required?: boolean,
@@ -33,7 +33,7 @@ export type BasicTicketImageProps = {
 export const BasicTicketImage = ({
 	children,
 	imgSrc,
-	title,
+	label,
 	className,
 	error,
 	helperText,
@@ -47,7 +47,7 @@ export const BasicTicketImage = ({
 		<FormControl error={error} required={required}>
 			<Container className={className} error={error}>
 				<ActionsSide>
-					<Label>{title}</Label>
+					<Label>{label}</Label>
 					<ActionsList>{children}</ActionsList>
 				</ActionsSide>
 				<TicketImageDisplayer

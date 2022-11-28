@@ -26,6 +26,7 @@ import { UnsupportedProperty } from './properties/unsupportedProperty.component'
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -38,18 +39,30 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 	const { formState } = useFormContext();
 	return (
 		<>
-			{properties.map((property) => {
-				const { name, type } = property;
+			{properties.map(({
+				name,
+				type,
+				default: defaultValue,
+				readOnly: disabled,
+				required,
+				values, 
+			}) => {
+				console.log(name, defaultValue)
 				const inputName = `${module}.${name}`;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				return (
-					<PropertyComponent
-						property={property}
+					<ControlledInput
+						Input={PropertyComponent}
+						label={name}
+						disabled={disabled}
+						required={required}
 						name={inputName}
 						formError={get(formState.errors, inputName)}
-						defaultValue={propertiesValues[name] ?? property.default}
+						defaultValue={propertiesValues[name] ?? defaultValue}
 						key={name}
 						onBlur={onPropertyBlur}
+						// @ts-ignore
+						values={values}
 					/>
 				);
 			})}
