@@ -16,7 +16,7 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Select } from '@controls/inputs/Select/Select.component';
+import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { PropertyProps } from './properties.types';
 

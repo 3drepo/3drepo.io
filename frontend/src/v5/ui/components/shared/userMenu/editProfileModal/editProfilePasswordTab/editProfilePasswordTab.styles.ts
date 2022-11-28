@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField } from '@controls/inputs/TextField/TextField.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import styled from 'styled-components';
 
 export const PasswordField = styled(TextField).attrs({

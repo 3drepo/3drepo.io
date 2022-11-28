@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField, TextFieldProps } from '@controls/inputs/TextField/TextField.component';
+import { TextField, TextFieldProps } from '@controls/inputs/textField/textField.component';
 
 export const NumberField = (props: TextFieldProps) => {
 	const handleKeyDown = (event) => {

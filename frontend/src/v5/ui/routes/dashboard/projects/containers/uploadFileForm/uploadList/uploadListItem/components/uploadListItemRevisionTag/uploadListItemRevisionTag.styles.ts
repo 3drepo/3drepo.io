@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { TextField as TextFieldBase } from '@controls/inputs/TextField/TextField.component';
+import { TextField as TextFieldBase } from '@controls/inputs/textField/textField.component';
 
 export const TextField = styled(TextFieldBase)<{ $selectedrow: boolean }>`
 	margin: 0 12px;

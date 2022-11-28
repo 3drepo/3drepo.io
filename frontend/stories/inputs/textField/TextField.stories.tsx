@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TextField } from '@controls/inputs/TextField/TextField.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormContainer } from '../FormInput.styles';
 

@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { Select } from '@controls/inputs/Select/Select.component';
+import { Select } from '@controls/inputs/select/select.component';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { MenuItem } from '@mui/material';
 

@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TextField } from '@controls/inputs/TextField/TextField.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import { Typography } from '@controls/typography';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';

@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { TextField } from '@controls/inputs/TextField/TextField.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';

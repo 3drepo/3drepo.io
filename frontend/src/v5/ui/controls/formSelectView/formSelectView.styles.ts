@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { MenuItem } from '@mui/material';
-import { Select as FormSelectBase } from '@controls/inputs/Select/Select.component';
+import { Select as FormSelectBase } from '@controls/inputs/select/select.component';
 
 const ThumbnailStyles = css`
 	width: 43px;

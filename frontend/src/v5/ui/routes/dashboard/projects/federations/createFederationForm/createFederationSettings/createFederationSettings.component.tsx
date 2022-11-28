@@ -17,8 +17,8 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
-import { Select } from '@controls/inputs/Select/Select.component';
-import { TextField } from '@controls/inputs/TextField/TextField.component';
+import { Select } from '@controls/inputs/select/select.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';

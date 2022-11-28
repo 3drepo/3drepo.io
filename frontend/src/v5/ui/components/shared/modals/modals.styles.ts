@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
-import { TextField } from '@controls/inputs/TextField/TextField.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 
