@@ -36,7 +36,7 @@ const teamspaces = [teamspace, noTemplatesTS];
 
 const setupData = async () => {
 	await Promise.all(teamspaces.map(
-		({ name }) => ServiceHelper.db.createTeamspace(name, [tsAdmin.user], false),
+		({ name }) => ServiceHelper.db.createTeamspace(name, [tsAdmin.user], undefined, false),
 	));
 
 	await Promise.all([

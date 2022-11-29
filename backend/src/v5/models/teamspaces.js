@@ -114,21 +114,14 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 Teamspace.removeAddOns = (teamspace) => teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
 
 Teamspace.getTeamspaceAdmins = async (teamspace) => {
-	console.log('============== V TWO ====================');
 	const tsSettings = await db.findOne(
 		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { permissions: 1 },
 	);
-	console.log('============== TS SETTINGS ==============');
-	console.log(tsSettings);
 
 	if (!tsSettings) {
 		throw templates.teamspaceNotFound;
 	}
 
-	console.log(tsSettings.permissions.flatMap(
-		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
-	));
-	console.log('============== END =====================');
 	return tsSettings.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
@@ -195,9 +188,17 @@ Teamspace.createTeamspaceSettings = async (teamspace) => {
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
-Teamspace.grantAdminToUser = async (teamspace, username) => {
+Teamspace.grantPermissionToUser = async (teamspace, username, permission = TEAM_MEMBER) => {
 	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-		{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
+		{ $push: { permissions: { user: username, permissions: [permission] } } });
+};
+
+Teamspace.grantAdminToUser = (teamspace, username) => {
+	return Teamspace.grantPermissionToUser(teamspace, username, TEAMSPACE_ADMIN);
+};
+
+Teamspace.grantMemberToUser = (teamspace, username) => {
+	return Teamspace.grantPermissionToUser(teamspace, username, TEAM_MEMBER);
 };
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
