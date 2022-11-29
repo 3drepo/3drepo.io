@@ -98,7 +98,7 @@ export const removeEmptyObjects = (tree) => {
 	return Object.keys(tree).reduce((accum, key) => {
 		const value = tree[key];
 
-		if (_.isEmpty(value) && !_.isNull(value) && !_.isBoolean(value)) {
+		if (_.isEmpty(value) && value !== null) {
 			return accum;
 		}
 
