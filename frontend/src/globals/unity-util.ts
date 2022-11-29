@@ -1587,6 +1587,14 @@ export class UnityUtil {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
+	public static SetMaxFarPlane(value: number) {
+		UnityUtil.toUnity('SetMaxFarPlane', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
+	public static SetMaxNearPlane(value: number) {
+		UnityUtil.toUnity('SetMaxNearPlane', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
 	/**
 	* Set the maximum rending distance for shadows. Smaller value may increase shadow quality.
 	* @category Configurations
