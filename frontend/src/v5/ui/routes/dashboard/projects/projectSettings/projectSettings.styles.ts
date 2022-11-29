@@ -15,7 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
-import { IUsersActions, UsersActions } from '@/v5/store/users/users.redux';
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
+import { SuccessMessage as SuccessMessageBase } from '@controls/successMessage/successMessage.component';
+import styled from 'styled-components';
 
-export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
+export const SubmitButton = styled(SubmitButtonBase)`
+	width: fit-content;
+	margin: 0 0 0 8px;
+`;
+
+export const Form = styled.form`
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	width: 470px;
+`;
+
+export const SuccessMessage = styled(SuccessMessageBase)`
+	width: 470px;
+`;

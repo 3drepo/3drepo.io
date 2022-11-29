@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IProject } from '@/v5/store/projects/projects.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
 
@@ -24,6 +25,14 @@ export const createProject = async (teamspace: string, projectName: string): Pro
 	const { data } = await api.post(`teamspaces/${teamspace}/projects`, { name: projectName });
 	return data._id;
 };
+
+export const updateProject = (
+	teamspace: string,
+	projectId: string,
+	project: Partial<IProject>,
+): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}`, project)
+);
 
 export const deleteProject = (teamspace: string, projectId: string): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}`)

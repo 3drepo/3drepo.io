@@ -16,8 +16,7 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
-import styled from 'styled-components';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { Button as ControlsButton } from '@controls/button';
 
 export default {
 	title: 'Containers/DashedContainer',
@@ -47,30 +46,28 @@ export default {
 		children: {
 			description: 'The text, button, or component to contain inside the container',
 			defaultValue: 'Dashed container\'s content',
+			type: 'string',
 		},
 	},
+	parameters: { controls: { exclude: ['className'] } },
 } as ComponentMeta<typeof DashedContainer>;
 
 const Template: ComponentStory<typeof DashedContainer> = ({ children, ...args }) => (
 	<DashedContainer {...args}>{children}</DashedContainer>
 );
 
-const TextContainer = styled.div`
-	padding: 20px;
-`;
-
 export const NoRadius = Template.bind({});
 NoRadius.args = {
 	borderRadius: 0,
 	strokeColor: '#000000',
-	children: <TextContainer>this is an example of a dashed container with 0 border radius</TextContainer>,
+	children: 'this is an example of a dashed container with 0 border radius',
 };
 
 export const BigRadius = Template.bind({});
 BigRadius.args = {
 	borderRadius: 20,
 	strokeColor: '#fe27d8',
-	children: <TextContainer>this is an example of a dashed container with big border radius</TextContainer>,
+	children: 'this is an example of a dashed container with big border radius',
 };
 
 export const Gapped = Template.bind({});
@@ -88,5 +85,5 @@ Button.args = {
 	strokeColor: '#09c1d4',
 	strokeWidth: 6,
 	zeroPadding: true,
-	children: <DashboardListButton>This is an example with a button</DashboardListButton>,
+	children: <ControlsButton variant="text">This is an example with a button</ControlsButton>,
 };
