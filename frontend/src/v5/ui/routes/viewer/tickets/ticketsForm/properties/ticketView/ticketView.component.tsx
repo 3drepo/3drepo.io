@@ -44,8 +44,6 @@ type ITicketView = {
 
 export const TicketView = ({
 	value,
-	error,
-	helperText,
 	onBlur,
 	onChange,
 	...props
@@ -71,7 +69,7 @@ export const TicketView = ({
 		onChange({ ...viewpoint, screenshot: newImg ? stripBase64Prefix(newImg) : null });
 	};
 
-	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	const imgSrc = getImgSrc(value?.screenshot);
 	return (
