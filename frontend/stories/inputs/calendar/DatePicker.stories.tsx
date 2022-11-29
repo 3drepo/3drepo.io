@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { DatePicker } from '@controls/inputs/formDatePicker/datePicker.component';
+import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { FormContainer } from '../FormInput.styles';
