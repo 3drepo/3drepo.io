@@ -46,7 +46,6 @@ export const TicketView = ({
 	value,
 	error,
 	helperText,
-	required,
 	onBlur,
 	onChange,
 	...props
