@@ -53,10 +53,7 @@ export default {
 
 const Controlled: ComponentStory<typeof Toggle> = (args) => (
 	<FormContainer>
-		<Toggle
-			name="toggle"
-			{...args}
-		/>
+		<Toggle {...args} />
 	</FormContainer>
 );
 
