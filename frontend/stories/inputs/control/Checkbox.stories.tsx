@@ -34,7 +34,7 @@ export default {
 
 const Controlled: ComponentStory<typeof Checkbox> = (args) => (
 	<FormContainer>
-		<Checkbox {...args}/>
+		<Checkbox {...args} />
 	</FormContainer>
 );
 

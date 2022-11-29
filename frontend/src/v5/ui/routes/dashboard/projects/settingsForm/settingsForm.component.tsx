@@ -234,7 +234,7 @@ export const SettingsForm = ({
 				value={containerOrFederation._id}
 			/>
 			<ControlledInput
-					Input={TextField}
+				Input={TextField}
 				name="name"
 				control={control}
 				label={formatMessage({ id: 'settings.form.name', defaultMessage: 'Name' })}
@@ -242,7 +242,7 @@ export const SettingsForm = ({
 				formError={errors.name}
 			/>
 			<ControlledInput
-					Input={TextField}
+				Input={TextField}
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'settings.form.desc', defaultMessage: 'Description' })}

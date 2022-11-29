@@ -45,7 +45,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 				default: defaultValue,
 				readOnly: disabled,
 				required,
-				values, 
+				values,
 			}) => {
 				console.log(name, defaultValue)
 				const inputName = `${module}.${name}`;

@@ -40,9 +40,9 @@ export default {
 
 const Controlled: ComponentStory<typeof NumberField> = (args) => (
 	<FormContainer>
-		<NumberField {...args}/>
+		<NumberField {...args} />
 	</FormContainer>
-	);
+);
 
 export const ControlledFormNumberField = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args

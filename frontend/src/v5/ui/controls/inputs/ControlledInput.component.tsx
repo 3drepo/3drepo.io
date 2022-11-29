@@ -42,7 +42,7 @@ export const ControlledInput = ({ Input, name, control, defaultValue, formError,
 		name={name}
 		control={control}
 		defaultValue={defaultValue}
-		render={({ field: { ref, ...field} }) => (
+		render={({ field: { ref, ...field } }) => (
 			<Input
 				{...field}
 				{...props}

@@ -117,7 +117,6 @@ export const EditProfilePasswordTab = ({
 				})}
 				formError={errors.oldPassword}
 				required
-				
 			/>
 			<ControlledInput
 				Input={PasswordField}
