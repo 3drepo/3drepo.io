@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ManyOfProperty } from './manyOfProperty.component';
-import { OneOfProperty } from './oneOfProperty.component';
 import { TextField } from '@controls/inputs/textField/textField.component';
 import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
 import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
+import { ManyOfProperty } from './manyOfProperty.component';
+import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
 
 export const TicketProperty = {

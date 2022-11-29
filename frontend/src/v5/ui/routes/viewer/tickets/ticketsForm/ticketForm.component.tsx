@@ -20,13 +20,13 @@ import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
+import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
