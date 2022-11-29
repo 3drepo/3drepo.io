@@ -47,7 +47,6 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 				required,
 				values,
 			}) => {
-				console.log(name, defaultValue)
 				const inputName = `${module}.${name}`;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				return (

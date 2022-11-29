@@ -18,7 +18,7 @@
 import { FormInputProps } from '@controls/inputs/controlledInput.component';
 import { TextField as MuiTextField, TextFieldProps as MuiTextFieldProps } from '@mui/material';
 
-export type TextFieldProps = FormInputProps & Omit<MuiTextFieldProps, 'variant'>
+export type TextFieldProps = FormInputProps & Omit<MuiTextFieldProps, 'variant'>;
 export const TextField = ({ defaultValue = '', ...props }: TextFieldProps) => (
 	<MuiTextField defaultValue={defaultValue} {...props} />
 );
