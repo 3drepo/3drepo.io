@@ -22,6 +22,7 @@ import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetai
 export default {
 	title: 'Inputs/PinDetails',
 	component: PinDetails,
+	parameters: { controls: { exclude: [ 'onChange', 'onBlur' ] } }
 } as ComponentMeta<typeof PinDetails>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args

@@ -29,12 +29,15 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
-		formError: {
-			type: 'string',
-		},
 	},
 	component: DatePicker,
-	parameters: { controls: { exclude: ['name'] } },
+	parameters: { controls: { exclude: [
+		'onBlur',
+		'onChange',
+		'className',
+		'inputRef',
+		'PickerComponent'
+	] } },
 } as ComponentMeta<typeof DatePicker>;
 
 const Controlled: ComponentStory<typeof DatePicker> = (args) => (

@@ -29,7 +29,14 @@ export default {
 		},
 	},
 	component: Checkbox,
-	parameters: { controls: { exclude: ['formError', 'ref'] } },
+	parameters: { controls: { exclude: [
+		'onBlur',
+		'onChange',
+		'name',
+		'className',
+		'inputRef',
+		'ref',
+	] } },
 } as ComponentMeta<typeof Checkbox>;
 
 const Controlled: ComponentStory<typeof Checkbox> = (args) => (

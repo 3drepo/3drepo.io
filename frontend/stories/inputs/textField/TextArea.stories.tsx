@@ -27,7 +27,13 @@ export default {
 		defaultValue: {
 			type: 'string',
 		},
-		formError: {
+		value: {
+			type: 'string',
+		},
+		error: {
+			type: 'boolean',
+		},
+		helperText: {
 			type: 'string',
 		},
 		minRows: {
@@ -38,7 +44,16 @@ export default {
 		},
 	},
 	component: TextArea,
-	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+	parameters: { controls: { exclude: [
+		'margin',
+		'ref',
+		'hiddenLabel',
+		'onBlur',
+		'onChange',
+		'name',
+		'className',
+		'inputRef',
+	] } },
 } as ComponentMeta<typeof TextArea>;
 
 const Controlled: ComponentStory<typeof TextArea> = (args) => (

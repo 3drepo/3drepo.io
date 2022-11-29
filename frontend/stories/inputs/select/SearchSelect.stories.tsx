@@ -30,9 +30,6 @@ export default {
 		error: {
 			type: 'boolean',
 		},
-		helperText: {
-			type: 'string',
-		},
 		required: {
 			type: 'boolean',
 		},

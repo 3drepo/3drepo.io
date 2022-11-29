@@ -27,8 +27,8 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
-		children: {
-			type: 'string',
+		error: {
+			type: 'boolean',
 		},
 	},
 	component: Toggle,
@@ -42,6 +42,12 @@ export default {
 		'focusRipple',
 		'disableTouchRipple',
 		'centerRipple',
+		'onBlur',
+		'onChange',
+		'name',
+		'className',
+		'inputRef',
+		'ref',
 	] } },
 } as ComponentMeta<typeof Toggle>;
 
@@ -57,5 +63,5 @@ const Controlled: ComponentStory<typeof Toggle> = (args) => (
 export const ControlledFormToggle = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 ControlledFormToggle.args = {
-	children: 'Controlled Toggle input',
+	label: 'Controlled Toggle input',
 };

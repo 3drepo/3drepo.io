@@ -27,15 +27,24 @@ export default {
 		defaultValue: {
 			type: 'number',
 		},
-		formError: {
-			type: 'string',
-		},
 		disabled: {
 			type: 'boolean',
 		},
+		value: {
+			type: 'number',
+		},
 	},
 	component: NumberField,
-	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+	parameters: { controls: { exclude: [
+		'margin',
+		'ref',
+		'hiddenLabel',
+		'onBlur',
+		'onChange',
+		'name',
+		'className',
+		'inputRef',
+	] } },
 } as ComponentMeta<typeof NumberField>;
 
 const Controlled: ComponentStory<typeof NumberField> = (args) => (

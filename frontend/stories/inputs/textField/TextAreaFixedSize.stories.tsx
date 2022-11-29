@@ -24,10 +24,10 @@ export default {
 		label: {
 			type: 'string',
 		},
-		defaultValue: {
+		value: {
 			type: 'string',
 		},
-		formError: {
+		defaultValue: {
 			type: 'string',
 		},
 		disabled: {
@@ -38,7 +38,16 @@ export default {
 		},
 	},
 	component: TextAreaFixedSize,
-	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+	parameters: { controls: { exclude: [
+		'margin',
+		'ref',
+		'hiddenLabel',
+		'onBlur',
+		'onChange',
+		'name',
+		'className',
+		'inputRef',
+	] } },
 } as ComponentMeta<typeof TextAreaFixedSize>;
 
 const Controlled: ComponentStory<typeof TextAreaFixedSize> = (args) => (

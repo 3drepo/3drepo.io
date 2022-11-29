@@ -30,9 +30,21 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		value: {
+			type: 'string',
+		},
 	},
 	component: TextField,
-	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
+	parameters: { controls: { exclude: [
+		'margin',
+		'ref',
+		'hiddenLabel',
+		'onBlur',
+		'onChange',
+		'name',
+		'className',
+		'inputRef',
+	] } },
 } as ComponentMeta<typeof TextField>;
 
 const Controlled: ComponentStory<typeof TextField> = (args) => (
