@@ -15,31 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FormInputProps } from '@controls/inputs/controlledInput.component';
 import { FormControl, FormHelperText } from '@mui/material';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
-export type BasicTicketImageProps = {
-	imgSrc: string,
-	error?: any,
-	helperText?: string,
-	label: string,
-	className?: string,
+type BasicTicketImageProps = Omit<FormInputProps, 'inputRef' | 'onBlur'> & {
 	children: any,
-	required?: boolean,
-	disabled?: boolean,
-	onEmptyImageClick: () => void,
 };
 export const BasicTicketImage = ({
 	children,
-	imgSrc,
+	value,
 	label,
 	className,
 	error,
 	helperText,
 	required,
 	disabled,
-	onEmptyImageClick,
+	onChange,
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
@@ -51,9 +44,9 @@ export const BasicTicketImage = ({
 					<ActionsList>{children}</ActionsList>
 				</ActionsSide>
 				<TicketImageDisplayer
-					imgSrc={imgSrc}
+					imgSrc={value}
 					disabled={disabled || !isAdmin}
-					onEmptyImageClick={onEmptyImageClick}
+					onEmptyImageClick={onChange}
 				/>
 			</Container>
 			<FormHelperText>{helperText}</FormHelperText>

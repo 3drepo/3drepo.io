@@ -28,7 +28,8 @@ import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/stor
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
-import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
+import { BasicTicketImage } from '../basicTicketImage.component';
+import { FormInputProps } from '@controls/inputs/controlledInput.component';
 
 const TriggerButton = ({ hasImage }) => {
 	if (!hasImage) {
@@ -48,11 +49,8 @@ const TriggerButton = ({ hasImage }) => {
 	);
 };
 
-type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSrc' | 'children'> & {
-	onChange?: (imgSrc) => void,
-	onBlur?: () => void;
-	value?: string,
-};
+type TicketImageProps = Omit<FormInputProps, 'inputRef'>;
+
 export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImageProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -83,8 +81,8 @@ export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImagePr
 
 	return (
 		<BasicTicketImage
-			imgSrc={getImgSrc()}
-			onEmptyImageClick={uploadImage}
+			value={getImgSrc()}
+			onChange={uploadImage}
 			{...props}
 		>
 			<ActionMenu TriggerButton={<div><TriggerButton hasImage={hasImage} /></div>}>
