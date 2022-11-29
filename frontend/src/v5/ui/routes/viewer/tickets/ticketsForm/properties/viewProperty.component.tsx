@@ -20,7 +20,7 @@ import { PropertyProps } from './properties.types';
 import { TicketView } from './ticketView/ticketView.component';
 
 export const ViewProperty = ({
-	property: { name, required },
+	property: { name: label, readOnly, required },
 	formError,
 	defaultValue,
 	...props
@@ -29,12 +29,13 @@ export const ViewProperty = ({
 		name={props.name}
 		render={({ field: { ref, ...field } }) => (
 			<TicketView
-				label={name}
-				required={required}
 				{...field}
-				{...props}
+				label={label}
+				disabled={readOnly}
+				required={required}
 				error={!!formError}
 				helperText={formError?.message}
+				{...props}
 			/>
 		)}
 	/>

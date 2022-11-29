@@ -40,6 +40,7 @@ type ITicketView = {
 	required: boolean;
 	onBlur: () => void;
 	onChange: (newValue) => void;
+	disabled?: boolean;
 };
 
 export const TicketView = ({
