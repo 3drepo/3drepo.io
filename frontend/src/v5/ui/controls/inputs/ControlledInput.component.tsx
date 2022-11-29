@@ -25,23 +25,22 @@ type ForwardableProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 }>;
 
 export type FormInputProps = ForwardableProps & Partial<{
-	error: any,
+	error: boolean,
 	helperText: string,
 	inputRef: any,
 }>;
 
 type ControlledInputProps = ForwardableProps & {
-	Input: ({ ...props }: FormInputProps) => JSX.Element,
+	Input: (props: FormInputProps) => JSX.Element,
 	name: string,
 	control?: any,
 	formError?: any,
 	defaultValue?: any,
 };
-export const ControlledInput = ({ Input, name, control, defaultValue, formError, ...props }: ControlledInputProps) => (
+export const ControlledInput = ({ Input, name, control, formError, ...props }: ControlledInputProps) => (
 	<Controller
 		name={name}
 		control={control}
-		defaultValue={defaultValue}
 		render={({ field: { ref, ...field } }) => (
 			<Input
 				{...field}
