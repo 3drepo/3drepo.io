@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { NumberField } from '@controls/inputs/NumberField/NumberField.component';
+import { NumberField } from '@controls/inputs/numberField/numberField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormContainer } from '../FormInput.styles';
 
