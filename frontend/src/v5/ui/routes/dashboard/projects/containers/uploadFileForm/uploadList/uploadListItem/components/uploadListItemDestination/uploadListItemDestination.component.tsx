@@ -88,7 +88,7 @@ export const UploadListItemDestination = ({
 		setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 	};
 
-	const handleChange = (_, newValue: IContainer) => {
+	const onChange = (_, newValue: IContainer) => {
 		setDisableClearable(!newValue);
 		if (!newValue) {
 			setNewOrExisting('');
@@ -178,7 +178,7 @@ export const UploadListItemDestination = ({
 			ListboxComponent={OptionsBox}
 			noOptionsText={NO_OPTIONS_TEXT}
 			onBlur={onBlur}
-			onChange={handleChange}
+			onChange={onChange}
 			onFocus={onFocus}
 			options={containers}
 			renderOption={getRenderOption}
