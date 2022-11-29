@@ -85,7 +85,7 @@ export const Container = styled.div`
 	${AddUserButton}
 	${LoaderContainer} {
 		background-color: transparent;
-    	margin-top: 80px;
+		margin-top: 80px;
 		${LoadingText} {
 			color: ${({ theme }) => theme.palette.secondary.light}
 		}
@@ -131,8 +131,10 @@ export const Container = styled.div`
 		}
 	}
 
-	${Row}:last-of-type {
-		border: none;
+	${Row} {
+		&:last-of-type {
+			border: none;
+		}
 	}
 	
 	${LicencesFooter} {
