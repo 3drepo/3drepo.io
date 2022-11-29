@@ -36,7 +36,7 @@ export default {
 		'onChange',
 		'className',
 		'inputRef',
-		'PickerComponent'
+		'PickerComponent',
 	] } },
 } as ComponentMeta<typeof DateTimePicker>;
 
