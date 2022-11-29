@@ -21,7 +21,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/servic
 import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { formatMessage } from '@/v5/services/intl';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { ControlledInput } from '@controls/inputs/ControlledInput.component';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
@@ -62,7 +62,6 @@ export const UploadListItemDestination = ({
 	defaultValue,
 	containersNamesInUse,
 	setContainersNamesInUse,
-	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!value.name);
@@ -89,7 +88,7 @@ export const UploadListItemDestination = ({
 		setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 	};
 
-	const onChange = (_, newValue: IContainer) => {
+	const handleChange = (_, newValue: IContainer) => {
 		setDisableClearable(!newValue);
 		if (!newValue) {
 			setNewOrExisting('');
@@ -170,37 +169,34 @@ export const UploadListItemDestination = ({
 
 	return (
 		<Autocomplete
+			value={value}
 			className={className}
 			disableClearable={disableClearable}
-			disabled={disabled}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={optionIsUsed}
 			getOptionLabel={({ name }: IContainer) => name}
 			ListboxComponent={OptionsBox}
 			noOptionsText={NO_OPTIONS_TEXT}
 			onBlur={onBlur}
-			onChange={onChange}
+			onChange={handleChange}
 			onFocus={onFocus}
 			options={containers}
 			renderOption={getRenderOption}
-			value={value}
 			renderInput={({ InputProps, ...params }) => (
 				<ControlledInput
-					Input={(inputProps) => (
-						<DestinationInput
-							neworexisting={newOrExisting}
-							InputProps={{
-								...InputProps,
-								startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
-							}}
-							{...inputProps}
-						/>
-					)}
-					{...params}
-					{...props}
+					Input={DestinationInput}
 					control={control}
 					formError={errors.containerName}
 					name="containerName"
+					disabled={disabled}
+					value={value}
+					{...params}
+					// @ts-ignore
+					neworexisting={newOrExisting}
+					InputProps={{
+						...InputProps,
+						startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
+					}}
 				/>
 			)}
 		/>
