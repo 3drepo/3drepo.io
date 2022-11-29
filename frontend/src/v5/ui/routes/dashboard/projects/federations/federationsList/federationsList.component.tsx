@@ -31,7 +31,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SearchInput } from '@controls/search/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';

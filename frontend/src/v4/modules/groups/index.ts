@@ -19,5 +19,3 @@ export {
 	GroupsTypes,
 	GroupsActions
 } from './groups.redux';
-
-export * from './groups.selectors';

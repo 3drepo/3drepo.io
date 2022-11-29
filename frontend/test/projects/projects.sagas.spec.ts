@@ -25,6 +25,7 @@ import { alertAction } from '../test.helpers';
 describe('Teamspaces: sagas', () => {
 	const teamspace = 'teamspaceName';
 	const projectId = 'projectId';
+
 	describe('fetch', () => {
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
 			const projects = [];
@@ -51,6 +52,7 @@ describe('Teamspaces: sagas', () => {
 				.silentRun();
 		});
 	});
+
 	describe('delete Project', () => {
 		const onSuccess = jest.fn();
 		const onError = jest.fn();
@@ -69,7 +71,7 @@ describe('Teamspaces: sagas', () => {
 		it('should call deleteProject endpoint with 404 and open alert modal', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
-				.reply(400)
+				.reply(404)
 
 			await expectSaga(ProjectsSaga.default)
 				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
@@ -112,6 +114,36 @@ describe('Teamspaces: sagas', () => {
 					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
 					.silentRun();
 			
+			expect(onError).toBeCalled();
+		});
+	});
+
+	describe('updateProject', () => {
+		const onSuccess = jest.fn();
+		const onError = jest.fn();
+		const project = { name: 'newName' };
+
+		it('should call updateProject endpoint', async () => {
+			mockServer
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
+				.reply(200)
+
+			await expectSaga(ProjectsSaga.default)
+				.dispatch(ProjectsActions.updateProject(teamspace, projectId, project, onSuccess, onError))
+				.put(ProjectsActions.updateProjectSuccess(teamspace, projectId, project))
+				.silentRun();
+
+			expect(onSuccess).toBeCalled();
+		});
+		it('should call updateProject endpoint with 404 and open alert modal', async () => {
+			mockServer
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
+				.reply(404)
+
+			await expectSaga(ProjectsSaga.default)
+				.dispatch(ProjectsActions.updateProject(teamspace, projectId, project, onSuccess, onError))
+				.silentRun();
+
 			expect(onError).toBeCalled();
 		});
 	});

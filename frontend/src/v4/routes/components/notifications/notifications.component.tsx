@@ -23,6 +23,8 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
+import V5NotificationsIcon from '@assets/icons/notifications.svg';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
@@ -71,7 +73,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
 		>
-			<NotificationsIcon fontSize="small" />
+			{isV5() ? <V5NotificationsIcon /> : <NotificationsIcon fontSize="small" />}
 		</Badge>
 	</IconButton>
 );

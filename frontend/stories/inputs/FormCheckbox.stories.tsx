@@ -33,7 +33,7 @@ export default {
 		},
 	},
 	component: FormCheckbox,
-	parameters: { controls: { exclude: ['control', 'formError'] } },
+	parameters: { controls: { exclude: ['control', 'formError', 'ref'] } },
 } as ComponentMeta<typeof FormCheckbox>;
 
 const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
