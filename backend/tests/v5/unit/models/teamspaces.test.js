@@ -47,22 +47,12 @@ const testHasAccessToTeamspace = () => {
 const testTeamspaceAdmins = () => {
 	describe('Get teamspace admins', () => {
 		test('should return list of admins if teamspace exists', async () => {
-			/* TODO
 			const expectedData = {
 				permissions: [
 					{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
 					{ user: 'personB', permissions: ['someOtherPerm'] },
 					{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
 				],
-			}; */
-			const expectedData = {
-				customData: {
-					permissions: [
-						{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
-						{ user: 'personB', permissions: ['someOtherPerm'] },
-						{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
-					],
-				},
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
 
@@ -78,7 +68,6 @@ const testTeamspaceAdmins = () => {
 	});
 };
 
-/* TODO
 const testGrantTeamspacePermissionToUser = () => {
 	describe('Grant teamspace permission to user', () => {
 		test('Should grant teamspace permission to user', async () => {
@@ -91,7 +80,7 @@ const testGrantTeamspacePermissionToUser = () => {
 				{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
-}; */
+};
 
 const testGetMembersInfo = () => {
 	describe('Get teamspace admins', () => {
@@ -408,7 +397,8 @@ const testCreateTeamspaceSettings = () => {
 				_id: teamspace,
 				topicTypes: DEFAULT_TOPIC_TYPES,
 				riskCategories: DEFAULT_RISK_CATEGORIES,
-				/* TODO
+				permissions: [],
+				/*
 				permissions: [
 					{ user: teamspace, permissions: [TEAMSPACE_ADMIN] },
 				], */
@@ -448,11 +438,9 @@ const testRemoveUserFromAdminPrivileges = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
 			await expect(Teamspace.removeUserFromAdminPrivilege(teamspace, user)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			/* TODO
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
 				{ _id: teamspace }, { $pull: { permissions: { user } } });
-				*/
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+			// expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
 		});
 	});
 };
@@ -497,5 +485,5 @@ describe('models/teamspaces', () => {
 	testRemoveUserFromAdminPrivileges();
 	testGetAllTeamspacesWithActiveLicenses();
 	testGetRiskCategories();
-	// TODO testGrantTeamspacePermissionToUser();
+	testGrantTeamspacePermissionToUser();
 });

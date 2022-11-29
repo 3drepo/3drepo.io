@@ -31,7 +31,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { createTeamspaceSettings, grantAdminToUser } = require(`${src}/models/teamspaces`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -82,6 +82,7 @@ db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
 		// TODO { ...customData }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
 		createTeamspaceSettings(teamspace),
+		...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
 	]);
 };
 

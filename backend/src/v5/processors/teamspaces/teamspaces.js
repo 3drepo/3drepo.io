@@ -18,8 +18,8 @@
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
-const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
+const { createTeamspaceSettings, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
+const { getAccessibleTeamspaces } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');

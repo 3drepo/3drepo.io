@@ -113,27 +113,43 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 
 Teamspace.removeAddOns = (teamspace) => teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
 
-/* TODO
 Teamspace.getTeamspaceAdmins = async (teamspace) => {
+	console.log('============== V TWO ====================');
 	const tsSettings = await db.findOne(
 		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { permissions: 1 },
 	);
+	console.log('============== TS SETTINGS ==============');
+	console.log(tsSettings);
 
 	if (!tsSettings) {
 		throw templates.teamspaceNotFound;
 	}
 
+	console.log(tsSettings.permissions.flatMap(
+		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
+	));
+	console.log('============== END =====================');
 	return tsSettings.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
-}; */
+};
 
+/*
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
+	console.log("============== DATA =====================");
+	console.log(data);
+	console.log("============== FLAT MAP =====================");
+	console.log(data.customData.permissions.flatMap(
+		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
+	));
+	console.log("============== END =====================");
+	return Teamspace.getTeamspaceAdmins2(ts);
 	return data.customData.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
 };
+	*/
 
 Teamspace.hasAccessToTeamspace = async (teamspace, username) => {
 	const query = { user: username, 'roles.db': teamspace };
@@ -165,21 +181,24 @@ Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
 };
 
 Teamspace.createTeamspaceSettings = async (teamspace) => {
-	/* TODO
+	/*
 	const settings = { _id: teamspace,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
 		permissions: [{ user: teamspace, permissions: [TEAMSPACE_ADMIN] }] };
 		*/
-	const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES };
+	const settings = { _id: teamspace,
+		topicTypes: DEFAULT_TOPIC_TYPES,
+		riskCategories: DEFAULT_RISK_CATEGORIES,
+		permissions: [] };
+	// const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
-/* TODO
 Teamspace.grantAdminToUser = async (teamspace, username) => {
 	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
 		{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
-}; */
+};
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
@@ -189,8 +208,8 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 };
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
-	// TODO await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $pull: { permissions: { user } } });
-	await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $pull: { permissions: { user } } });
+	// await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
 };
 
 Teamspace.getRiskCategories = async (teamspace) => {
