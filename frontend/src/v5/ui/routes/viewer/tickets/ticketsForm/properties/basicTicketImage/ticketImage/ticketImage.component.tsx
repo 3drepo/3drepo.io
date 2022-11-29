@@ -23,13 +23,13 @@ import { ActionMenuItem } from '@controls/actionMenu/actionMenuItem/actionMenuIt
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { addBase64Prefix, convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
+import { FormInputProps } from '@controls/inputs/controlledInput.component';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ActionMenu, MenuItem, MenuItemDelete } from '../ticketImageAction/ticketImageAction.styles';
 import { TicketImageAction } from '../ticketImageAction/ticketImageAction.component';
 import { BasicTicketImage } from '../basicTicketImage.component';
-import { FormInputProps } from '@controls/inputs/controlledInput.component';
 
 const TriggerButton = ({ hasImage }) => {
 	if (!hasImage) {
