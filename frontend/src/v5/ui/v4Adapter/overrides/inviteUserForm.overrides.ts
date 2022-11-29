@@ -15,46 +15,137 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AddButton, Container as Modal, Content } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
+import { AddButton, Container as Modal, Content, IconButton, PermissionsTable, ProjectCheckboxContainer, ProjectConfig } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
+import { Container as TableCell, Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
 import { css } from 'styled-components';
+
+const EmailAndJobInputStyles = css`
+	.MuiFormControl-root {
+		margin-bottom: 13px;
+		max-width: 470px;
+		position: relative;
+		.MuiInputLabel-root {
+			${({ theme }) => theme.typography.body1};
+		}
+		.MuiInputBase-input {
+			height: 36px;
+			line-height: 36px;
+			.MuiGrid-item {
+				${({ theme }) => theme.typography.body1};
+				line-height: 36px;
+			}
+		}
+		svg {
+			margin-top: 0%;
+			right: 15px;
+		}
+	}
+`;
+
+const TeamspaceAdminCheckboxStyles = css`
+	.MuiFormControlLabel-root {
+		height: auto;
+		margin: 10px 0;
+		.MuiCheckbox-root {
+			color: ${({ theme }) => theme.palette.primary.main};
+			margin: 0 8px 0 0;
+			padding: 0;
+		}
+	}
+`;
+
+const ProjectSelectorStyles = css`
+	${ProjectConfig} {
+		padding: 20px 0 10px;
+		margin-top: 20px;
+		border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
+
+		.MuiFormControl-root {
+			margin-bottom: 0;
+			max-width: unset;
+			max-width: 378px
+		}
+		${IconButton} {
+			border: 1px solid ${({ theme }) => theme.palette.secondary.main};
+			border-radius: 5px;
+			padding: 8px 15px;
+			color: ${({ theme }) => theme.palette.secondary.main};
+			${({ theme }) => theme.typography.body1};
+			font-weight: 600;
+			margin: 0 14px 0 0;
+			::before {
+				content: 'Remove';
+			}
+			svg {
+				display: none;
+			}
+			&:hover {
+				background: ${({ theme }) => theme.palette.secondary.main};
+				color: ${({ theme }) => theme.palette.primary.contrast};
+			}
+		}
+		${ProjectCheckboxContainer} {
+			margin-left: 10px;
+			width: 190px;
+			margin-bottom: 9px;
+		}
+	}
+`;
+
+const PermissionsTableStyles = css`
+	${PermissionsTable} {
+		border: none;
+		height: auto;
+		
+		.MuiFormControl-root {
+			margin-bottom: 0;
+			.MuiFormLabel-root {
+				${({ theme }) => theme.typography.kicker};
+				top: -66px;
+				font-weight: 500;
+			}
+			.MuiInputBase-input {
+				height: 20px;
+				line-height: 20px;
+				padding: 0 !important;
+			}
+		}
+		${TableCell} {
+			${Name} {
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+			${Detail} {
+				color: ${({ theme }) => theme.palette.secondary.light};
+			}
+		}
+	}
+`;
+
+const AddPermissionsButton = css`
+	${AddButton} {
+		padding: 8px 0;
+		margin: 0;
+		color: ${({ theme }) => theme.palette.primary.main};
+		svg {
+			color: ${({ theme }) => theme.palette.primary.main};
+			height: 15px;
+			width: 15px;
+			margin: 0 8px 0 0;
+		}
+	}
+`;
 
 export default css`
 	${Modal} {
 		min-width: 520px;
 		${Content} {
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			.MuiFormControl-root {
-				.MuiInputLabel-root {
-					font-size: 12px;
-				}
-				.MuiInputBase-input {
-					height: 36px;
-					line-height: 36px;
-				}
-				svg {
-					margin-top: 0%;
-				}
-			}
-			.MuiFormControlLabel-root {
-				height: 30px;
-				margin: 16px 0 8px;
-				.MuiCheckbox-root {
-					color: ${({ theme }) => theme.palette.primary.main};
-					margin: 0 8px 0 0;
-					padding: 0;
-				}
-			}
+			padding-bottom: 20px;
+			${EmailAndJobInputStyles}
+			${TeamspaceAdminCheckboxStyles}
+			${ProjectSelectorStyles}
+			${PermissionsTableStyles}
 		}
-		${AddButton} {
-			padding: 8px 0;
-			margin: 0;
-			color: ${({ theme }) => theme.palette.primary.main};
-			svg {
-				color: ${({ theme }) => theme.palette.primary.main};
-				height: 15px;
-				width: 15px;
-				margin: 0 8px 0 0;
-			}
-		}
+		${AddPermissionsButton}
 	}
 `;
