@@ -54,7 +54,7 @@ export class IndexedDbCache {
 	// When messages are passed, a deep copy is created.
 
 	createWorker() {
-		this.worker = new Worker(new URL('https://3drepo.local/dist/unityworker.js'));
+		this.worker = new Worker(new URL('dist/indexeddbworker.js', window.location.origin));
 		this.worker.onmessage = (ev) => {
 			// The state of the IndexedDb has changed, so we may need to pause
 			// requests.
