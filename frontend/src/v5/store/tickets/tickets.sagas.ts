@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
+import { diffObjects } from '@/v5/helpers/form.helper';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -31,6 +32,7 @@ import {
 	FetchRiskCategoriesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
+import { selectTicketById } from './tickets.selectors';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -137,7 +139,10 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 		const updateModelTicket = isFederation
 			? API.Tickets.updateFederationTicket
 			: API.Tickets.updateContainerTicket;
-		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
+
+		const savedTicket = yield select(selectTicketById, modelId, ticketId);
+
+		yield updateModelTicket(teamspace, projectId, modelId, ticketId, diffObjects(ticket, savedTicket));
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateTicket.updated', defaultMessage: 'Ticket updated' })));
 	} catch (error) {

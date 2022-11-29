@@ -51,22 +51,21 @@ export const TicketView = ({
 	const updateViewpoint = async () => {
 		const currentViewpoint = await ViewerService.getViewpoint();
 		if (isEqual(currentViewpoint, omit(value, 'screenshot'))) return;
-		onChange?.(currentViewpoint);
+		onChange?.({ ...(value || {}), ...currentViewpoint });
 	};
 
 	const goToViewpoint = async () => {
 		await ViewerService.setViewpoint(value);
 	};
 	const deleteViewpoint = () => {
-		const { screenshot } = value || {};
-		const view = screenshot ? { camera: null, clippingPlanes: null } : null;
+		const view = value?.screenshot ? { ...value, camera: null, clippingPlanes: null } : null;
 		onChange?.(view);
 	};
 
 	const onImageChange = (newImg) => {
 		const { screenshot, ...viewpoint } = value || {};
 		if (!newImg && isEmpty(viewpoint)) onChange(null);
-		onChange({ ...viewpoint, screenshot: newImg ? stripBase64Prefix(newImg) : null });
+		onChange({ ...value, screenshot: newImg ? stripBase64Prefix(newImg) : null });
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);

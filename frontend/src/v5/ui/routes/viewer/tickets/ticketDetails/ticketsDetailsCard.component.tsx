@@ -90,7 +90,7 @@ export const TicketDetailsCard = () => {
 		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
 		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
-	}, [ticket?.properties?.[IssueProperties.DEFAULT_VIEW]]);
+	}, [ticket._id]);
 
 	return (
 		<CardContainer>
