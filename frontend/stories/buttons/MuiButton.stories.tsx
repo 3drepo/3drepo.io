@@ -29,21 +29,25 @@ export default {
 			options: ['contained', 'outlined', 'text'],
 			control: { type: 'select' },
 		},
-
 		/**
 		 * The color of the component. It supports those theme colors that make sense for this component.
 		 */
 		color: {
-			options: ['inherit',
-				'primary', 'secondary',
+			options: [
+				'inherit',
+				'primary',
+				'secondary',
 				'success',
 				'error',
 				'info',
 				'warning',
-				'text'],
+			],
 			control: { type: 'select' },
 		},
 		disabled: {
+			type: 'boolean',
+		},
+		isPending: {
 			type: 'boolean',
 		},
 	},

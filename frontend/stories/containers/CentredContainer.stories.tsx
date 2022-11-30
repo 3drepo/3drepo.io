@@ -46,6 +46,7 @@ export default {
 			defaultValue: 'Centred container\'s content',
 		},
 	},
+	parameters: { controls: { exclude: ['className'] } },
 } as ComponentMeta<typeof CentredContainer>;
 
 const ParentComponent = styled.div<{parentHeight: string, parentWidth: string}>`
@@ -62,17 +63,6 @@ type ICentredContainerStory = ICentredContainer & {
 	parentWidth: string;
 };
 
-const Template: ComponentStory<typeof CentredContainer> = ({
-	children,
-	parentHeight,
-	parentWidth,
-	...args
-}: ICentredContainerStory) => (
-	<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
-		<CentredContainer {...args}>{children}</CentredContainer>
-	</ParentComponent>
-);
-
 const TextContainer = styled.div`
 	padding: 20px;
 	border-radius: 5px;
@@ -81,34 +71,43 @@ const TextContainer = styled.div`
 	${({ theme }) => theme.typography.h3}
 `;
 
+const Template: ComponentStory<typeof CentredContainer> = ({
+	children,
+	parentHeight,
+	parentWidth,
+	...args
+}: ICentredContainerStory) => (
+	<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
+		<CentredContainer {...args}>
+			<TextContainer>{children}</TextContainer>
+		</CentredContainer>
+	</ParentComponent>
+);
+
 export const VerticalCentre = Template.bind({});
 VerticalCentre.args = {
 	vertical: true,
 	horizontal: false,
-	children: <TextContainer>This is an example of a vertically centred container</TextContainer>,
+	children: 'This is an example of a vertically centred container',
 };
 
 export const HorizontalCentre = Template.bind({});
 HorizontalCentre.args = {
 	vertical: false,
 	horizontal: true,
-	children: <TextContainer>This is an example of a horizontally centred container</TextContainer>,
+	children: 'This is an example of a horizontally centred container',
 };
 
 export const AllCentre = Template.bind({});
 AllCentre.args = {
 	vertical: true,
 	horizontal: true,
-	children: <TextContainer>This is an example of a vertically and horizontally centred container</TextContainer>,
+	children: 'This is an example of a vertically and horizontally centred container',
 };
 
 export const NoCentre = Template.bind({});
 NoCentre.args = {
 	vertical: false,
 	horizontal: false,
-	children: (
-		<TextContainer>
-			This is an example of no centering. Why would you want this? Do not use this.
-		</TextContainer>
-	),
+	children: 'This is an example of no centering. Why would you want this? Do not use this.',
 };
