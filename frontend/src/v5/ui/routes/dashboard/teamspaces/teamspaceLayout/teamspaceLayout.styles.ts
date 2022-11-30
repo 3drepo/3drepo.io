@@ -28,7 +28,6 @@ export const Container = styled.div`
 
 export const Content = styled.section`
 	min-height: 100%;
-	display: block;
 	height: auto;
 	display: flex;
 	flex-direction: column;
