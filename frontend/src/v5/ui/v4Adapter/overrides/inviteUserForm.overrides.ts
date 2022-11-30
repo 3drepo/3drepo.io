@@ -62,8 +62,6 @@ const ProjectSelectorStyles = css`
 
 		.MuiFormControl-root {
 			margin-bottom: 0;
-			max-width: unset;
-			max-width: 378px
 		}
 		${IconButton} {
 			border: 1px solid ${({ theme }) => theme.palette.secondary.main};
@@ -72,7 +70,7 @@ const ProjectSelectorStyles = css`
 			color: ${({ theme }) => theme.palette.secondary.main};
 			${({ theme }) => theme.typography.body1};
 			font-weight: 600;
-			margin: 0 14px 0 0;
+			margin: 0 14px;
 			::before {
 				content: 'Remove';
 			}
@@ -85,9 +83,7 @@ const ProjectSelectorStyles = css`
 			}
 		}
 		${ProjectCheckboxContainer} {
-			margin-left: 10px;
 			width: 190px;
-			margin-bottom: 9px;
 		}
 	}
 `;
