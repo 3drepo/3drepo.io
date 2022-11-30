@@ -16,12 +16,11 @@
  */
 
 import { UserManagementActions } from '@/v4/modules/userManagement';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Users as V4UsersList } from '@/v4/routes/users';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container } from './usersList.styles';
 
 export const UsersList = () => {
