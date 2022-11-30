@@ -42,7 +42,7 @@ const runTest = (testData) => {
 			await AllActiveLicenses.run(outFile);
 			expect(fileExists(outFile)).toBeTruthy();
 
-			// first line are titles
+			// first line is csv titles, last line is always empty
 			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
 			expect(content.length).toBe(testData.validLicenses.length);
 			const result = content.map((str) => {
