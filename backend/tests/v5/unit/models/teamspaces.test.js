@@ -68,9 +68,9 @@ const testTeamspaceAdmins = () => {
 	});
 };
 
-const testGrantTeamspacePermissionToUser = () => {
-	describe('Grant teamspace permission to user', () => {
-		test('Should grant teamspace permission to user', async () => {
+const testGrantAdminPermissionToUser = () => {
+	describe('Grant teamspace admin permission to user', () => {
+		test('Should grant teamspace admin permission to user', async () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
@@ -78,6 +78,20 @@ const testGrantTeamspacePermissionToUser = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
 				{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
+		});
+	});
+};
+
+const testGrantTeamspacePermissionToUser = () => {
+	describe('Grant teamspace member permission to user', () => {
+		test('Should grant teamspace member permission to user', async () => {
+			const teamspace = generateRandomString();
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await Teamspace.grantMemberToUser(teamspace, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				{ $push: { permissions: { user: username, permissions: [TEAM_MEMBER] } } });
 		});
 	});
 };
@@ -485,5 +499,6 @@ describe('models/teamspaces', () => {
 	testRemoveUserFromAdminPrivileges();
 	testGetAllTeamspacesWithActiveLicenses();
 	testGetRiskCategories();
+	testGrantAdminPermissionToUser();
 	testGrantTeamspacePermissionToUser();
 });

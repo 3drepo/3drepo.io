@@ -188,17 +188,17 @@ Teamspace.createTeamspaceSettings = async (teamspace) => {
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
-Teamspace.grantPermissionToUser = async (teamspace, username, permission = TEAM_MEMBER) => {
+const grantPermissionToUser = async (teamspace, username, permission) => {
 	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
 		{ $push: { permissions: { user: username, permissions: [permission] } } });
 };
 
 Teamspace.grantAdminToUser = (teamspace, username) => {
-	return Teamspace.grantPermissionToUser(teamspace, username, TEAMSPACE_ADMIN);
+	return grantPermissionToUser(teamspace, username, TEAMSPACE_ADMIN);
 };
 
 Teamspace.grantMemberToUser = (teamspace, username) => {
-	return Teamspace.grantPermissionToUser(teamspace, username, TEAM_MEMBER);
+	return grantPermissionToUser(teamspace, username, TEAM_MEMBER);
 };
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {

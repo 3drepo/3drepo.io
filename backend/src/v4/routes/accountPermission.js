@@ -25,6 +25,10 @@
 	const User = require("../models/user");
 	const utils = require("../utils");
 	const _ = require("lodash");
+	const {v5Path} = require("../../interop");
+	const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
+	const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
+	const { TEAM_MEMBER } = require(`${v5Path}/models/roles.constants`);
 
 	/**
 	 * @api {get} /:teamspace/permissions List all permissions
@@ -142,14 +146,25 @@
 	function listPermissions(req, res, next) {
 		User.findByUserName(req.params.account)
 			.then(user => {
-				const permissions = user.customData.permissions;
+				// const permissions = user.customData.permissions;
+				const permissions = [];
 
 				return User.getAllUsersInTeamspace(req.params.account).then(
 					users => {
-						users.forEach(_user => {
-							if (
-								!_.find(permissions, { user: _user })
-							) {
+						users.forEach(async _user => {
+							if (await hasAccessToTeamspace(req.params.account, _user)) {
+								if (await isTeamspaceAdmin(req.params.account, _user)) {
+									permissions.push({
+										user: _user,
+										permissions: [TEAMSPACE_ADMIN]
+									});
+								} else {
+									permissions.push({
+										user: _user,
+										permissions: [TEAM_MEMBER]
+									});
+								}
+							} else {
 								permissions.push({
 									user: _user,
 									permissions: []
