@@ -20,15 +20,18 @@ import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 
 export const Container = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 `;
 
 export const Content = styled.section`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
-	flex-grow: 1;
+	min-height: 100%;
+	display: block;
+	height: auto;
+	display: flex;
+	flex-direction: column;
 `;
 
 export const TopBar = styled.div`
