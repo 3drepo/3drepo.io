@@ -15,7 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AddButton, Container as Modal, Content, IconButton, PermissionsTable, ProjectCheckboxContainer, ProjectConfig } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
+import { Row, Cell, BodyWrapper as CustomTableBody } from '@/v4/routes/components/customTable/customTable.styles';
+import {
+	AddButton,
+	Container as Modal,
+	Content,
+	IconButton,
+	PermissionsTable,
+	ProjectCheckboxContainer,
+	ProjectConfig,
+} from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
 import { Container as TableCell, Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
 import { css } from 'styled-components';
 
@@ -92,6 +101,11 @@ const PermissionsTableStyles = css`
 	${PermissionsTable} {
 		border: none;
 		height: auto;
+		${CustomTableBody} ${Row} {
+			${Cell}:first-child {
+				border-right: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			}
+		}
 		
 		.MuiFormControl-root {
 			margin-bottom: 0;
