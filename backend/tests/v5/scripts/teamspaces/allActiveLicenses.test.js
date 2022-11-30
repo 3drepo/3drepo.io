@@ -17,44 +17,135 @@
 
 const {
 	determineTestGroup,
+	fileExists,
 	resetFileshare,
-	db: { reset: resetDB },
+	db: { reset: resetDB, createTeamspace },
 	generateRandomString,
 	generateRandomDate,
 	generateRandomNumber,
 } = require('../../helper/services');
 
+const { readFileSync } = require('fs');
+const DayJS = require('dayjs');
+
+const { src, utilScripts, tmpDir } = require('../../helper/path');
+
 const AllActiveLicenses = require(`${utilScripts}/teamspaces/allActiveLicenses`);
 
-const runTest = () => {};
+const { editSubscriptions } = require(`${src}/models/teamspaces`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+
+const runTest = (testData) => {
+	describe('Get all active license', () => {
+		test('should provide all teamspaces with active license', async () => {
+			const outFile = `${tmpDir}/${generateRandomString()}.csv`;
+			await AllActiveLicenses.run(outFile);
+			expect(fileExists(outFile)).toBeTruthy();
+
+			// first line are titles
+			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
+			expect(content.length).toBe(testData.validLicenses.length);
+			const result = content.map((str) => {
+				const [name, type, data, collaborators, expiryDate] = str.split(',');
+				return deleteIfUndefined({ name, type, data, collaborators, expiryDate });
+			});
+
+			const goldenData = testData.validLicenses.map(
+				({ expiryDate, collaborators, data, ...others }) => deleteIfUndefined({
+					...others,
+					collaborators: String(collaborators),
+					data: String(data),
+					expiryDate: expiryDate ? DayJS(expiryDate).format('DD/MM/YYYY') : '',
+
+				}),
+			);
+
+			expect(result).toEqual(expect.arrayContaining(goldenData));
+		});
+	});
+};
 
 const randomDateInFuture = () => generateRandomDate(new Date(), new Date(Date.now() + 1000000));
 
-const createData = () => {
-	/*	entExpired,
-		dis,
-		disExpired,
-		noLicense, */
-	const teamspaces = {
-		validLicenses: [{
+const createData = () => ({
+	validLicenses: [{
+		name: generateRandomString(),
+		expiryDate: randomDateInFuture(),
+		type: 'enterprise',
+		collaborators: 'unlimited',
+		data: Math.round(generateRandomNumber(0)),
+	},
+	{
+		name: generateRandomString(),
+		expiryDate: randomDateInFuture(),
+		type: 'discretionary',
+		collaborators: 3,
+		data: Math.round(generateRandomNumber(0)),
+	},
+	{
+		name: generateRandomString(),
+		expiryDate: randomDateInFuture(),
+		type: 'enterprise',
+		data: Math.round(generateRandomNumber(0)),
+	}, {
+		name: generateRandomString(),
+		expiryDate: randomDateInFuture(),
+		type: 'enterprise',
+		collaborators: 'unlimited',
+	},
+	{
+		name: generateRandomString(),
+		type: 'enterprise',
+		collaborators: 'unlimited',
+		data: Math.round(generateRandomNumber(0)),
+	},
+	],
+	invalidLicenses: [
+		{
 			name: generateRandomString(),
-			expiryDate: randomDateInFuture(),
+			expiryDate: generateRandomDate(),
 			type: 'enterprise',
 			collaborators: 'unlimited',
-			data: generateRandomNumber(0),
+			data: Math.round(generateRandomNumber(0)),
 		},
-		],
-		invalidLicenses: [],
+		{
+			name: generateRandomString(),
+			expiryDate: generateRandomDate(),
+			type: 'discretionary',
+			collaborators: 'unlimited',
+			data: Math.round(generateRandomNumber(0)),
+		},
+		{
+			name: generateRandomString(),
+			expiryDate: generateRandomDate(),
+			type: generateRandomString(),
+			collaborators: 'unlimited',
+			data: Math.round(generateRandomNumber(0)),
+		},
+		{
+			// no license
+			name: generateRandomString(),
+		},
+	],
 
-	};
+});
+
+const setupData = async ({ validLicenses, invalidLicenses }) => {
+	const allTeamspaces = [...validLicenses, ...invalidLicenses];
+	await Promise.all(allTeamspaces.map(async ({ name, type, ...subData }) => {
+		await createTeamspace(name);
+		if (type) {
+			await editSubscriptions(name, type, subData);
+		}
+	}));
 };
 
 describe(determineTestGroup(__filename), () => {
 	const data = createData();
 	beforeAll(async () => {
-		resetFileShare();
+		resetFileshare();
 		await resetDB();
-		setupData(data);
+		await setupData(data);
 	});
 	runTest(data);
 });
