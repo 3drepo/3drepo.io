@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { UploadFileForm } from './uploadFileForm.component';
 

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isUndefined } from 'lodash';
 import { Action } from './ticketImageAction.styles';
 

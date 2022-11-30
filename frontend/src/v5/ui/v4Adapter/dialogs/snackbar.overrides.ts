@@ -15,7 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
-import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
+import { css } from 'styled-components';
 
-export const TicketsHooksSelectors = createHooksSelectors(TicketsSelectors);
+export default css`
+	.MuiSnackbar-root {
+		right: 138px;
+		bottom: 21px;
+		
+		& > .MuiPaper-root {
+			padding: 6px 14px 6px 20px;
+			border-radius: 10px;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			color: ${({ theme }) => theme.palette.secondary.main};
+			text-transform: unset;
+			line-height: 21px;
+			letter-spacing: 0;
+			font-size: 14px;
+			font-weight: 500;
+			width: 310px;
+
+			.MuiSnackbarContent-message {
+				max-width: 270px;
+				word-break: break-all;
+			}
+
+			.MuiSnackbarContent-action {
+				padding: 0;
+
+				button {
+					margin: 0;
+					background-color: transparent;
+				}
+			}
+		}
+	}
+`;

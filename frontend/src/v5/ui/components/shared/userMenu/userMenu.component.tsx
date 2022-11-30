@@ -18,12 +18,9 @@
 import { FormattedMessage } from 'react-intl';
 import { useState } from 'react';
 
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
-import ContactUsIcon from '@assets/icons/email.svg';
-import InviteAFriendIcon from '@assets/icons/add_user.svg';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
-import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { Avatar } from '@controls/avatar';
@@ -91,32 +88,6 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 							<FormattedMessage
 								id="userMenu.visualSettings"
 								defaultMessage="Visual settings"
-							/>
-						</ActionMenuItemLink>
-					</ActionMenuSection>
-					<ActionMenuSection>
-						<ActionMenuItemLink
-							Icon={SupportCentreIcon}
-						>
-							<FormattedMessage
-								id="userMenu.supportCentre"
-								defaultMessage="Support centre"
-							/>
-						</ActionMenuItemLink>
-						<ActionMenuItemLink
-							Icon={ContactUsIcon}
-						>
-							<FormattedMessage
-								id="userMenu.contactUs"
-								defaultMessage="Contact us"
-							/>
-						</ActionMenuItemLink>
-						<ActionMenuItemLink
-							Icon={InviteAFriendIcon}
-						>
-							<FormattedMessage
-								id="userMenu.inviteAFriend"
-								defaultMessage="Invite a friend"
 							/>
 						</ActionMenuItemLink>
 					</ActionMenuSection>

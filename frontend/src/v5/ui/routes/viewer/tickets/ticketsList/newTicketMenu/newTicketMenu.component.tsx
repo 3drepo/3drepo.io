@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import AddIcon from '@assets/icons/add_circle.svg';
 import { sortBy } from 'lodash';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
 import { ActionMenu, MenuItem, NewTicketButton } from '../ticketsList.styles';
 import { TicketsCardViews } from '../../tickets.constants';
 import { ViewerParams } from '../../../../routes.constants';

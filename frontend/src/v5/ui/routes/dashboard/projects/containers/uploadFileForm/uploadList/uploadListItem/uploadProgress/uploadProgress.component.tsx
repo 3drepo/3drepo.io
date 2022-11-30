@@ -19,7 +19,7 @@ import TickIcon from '@assets/icons/tick.svg';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { formatMessage } from '@/v5/services/intl';
-import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CompletionMark, Container, Progress, StatusText } from './uploadProgress.styles';
 
 type IUploadProgress = {

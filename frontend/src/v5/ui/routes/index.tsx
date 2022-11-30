@@ -21,9 +21,8 @@ import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { Intercom } from '@components/intercom/intercom.component';

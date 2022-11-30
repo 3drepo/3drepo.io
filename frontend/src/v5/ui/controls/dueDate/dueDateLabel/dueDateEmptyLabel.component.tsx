@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IProjectsActions, ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { FormattedMessage } from 'react-intl';
+import { EmptyDateContainer } from './dueDateLabel.styles';
 
-export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActions>(ProjectsActions);
+export type IDueDateEmptyLabel = {
+	disabled: boolean;
+	onClick: (event) => void;
+};
+
+export const DueDateEmptyLabel = ({ disabled, onClick }: IDueDateEmptyLabel): JSX.Element => (
+	<EmptyDateContainer disabled={disabled} onClick={onClick}>
+		{disabled ? (
+			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
+		) : (
+			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
+		)}
+	</EmptyDateContainer>
+);

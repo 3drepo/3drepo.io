@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AppBar } from '@components/shared/appBar';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { ModalsDispatcher } from '@components/shared/modals';

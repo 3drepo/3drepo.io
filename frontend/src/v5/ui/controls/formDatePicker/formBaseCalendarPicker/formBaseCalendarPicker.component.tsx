@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import dayjs from 'dayjs';
 import { TextField } from './formBaseCalendarPicker.styles';
+import { formatDayOfWeek } from '../dateFormatHelper';
 
 export type FormBaseCalendarPickerProps = any & {
 	name: string;
@@ -62,7 +63,7 @@ export const FormBaseCalendarPicker = ({
 					}}
 					open={open}
 					disabled={disabled}
-					dayOfWeekFormatter={(day) => day[0].toUpperCase() + day[1]}
+					dayOfWeekFormatter={formatDayOfWeek}
 					disableHighlightToday
 					renderInput={({ ref, inputRef, ...textFieldProps }) => (
 						<TextField

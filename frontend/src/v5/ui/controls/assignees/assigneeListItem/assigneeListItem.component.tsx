@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';

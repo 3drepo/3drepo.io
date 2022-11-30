@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsActions.dispatchers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { TicketsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
 import { useEffect } from 'react';
@@ -24,7 +24,6 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';

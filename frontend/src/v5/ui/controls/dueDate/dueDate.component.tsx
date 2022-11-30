@@ -15,32 +15,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
-import { DateContainer, EmptyDateContainer } from './dueDate.styles';
+import { DatePicker } from '@mui/x-date-pickers';
+import { useState } from 'react';
+import { formatDayOfWeek } from '@controls/formDatePicker/dateFormatHelper';
+import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
+import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
+import { StopBackgroundInteraction } from './dueDate.styles';
 
-type IDueDate = {
-	date: number;
-	onClick?: () => void;
+type DueDateProps = {
+	value: number;
+	disabled?: boolean;
+	onBlur?: (val) => void;
 };
 
-export const DueDate = ({ date, onClick }: IDueDate) => {
-	if (!date) {
-		return (
-			<EmptyDateContainer onClick={onClick}>
-				<FormattedMessage id="dueDate.emptyText" defaultMessage="Set Due Date" />
-			</EmptyDateContainer>
-		);
-	}
-	const isOverdue = date < Date.now();
-	const formattedDate = formatDate(date);
+export const DueDate = ({ value: initialValue, disabled, onBlur }: DueDateProps) => {
+	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState<number>(initialValue);
+
+	const preventPropagation = (e) => { if (e.key !== 'Escape') e.stopPropagation(); };
+	const handleClose = () => setOpen(false);
+	const onClickDueDate = () => setOpen(!disabled);
+	const onDateChange = (newValue) => {
+		setValue(new Date(newValue).getTime());
+		onBlur?.(newValue);
+	};
+
 	return (
-		<DateContainer isOverdue={isOverdue}>
-			{isOverdue ? (
-				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
-			) : (
-				<FormattedMessage id="dueDate.due" defaultMessage="Due {date}" values={{ date: formattedDate }} />
-			)}
-		</DateContainer>
+		<div onClick={preventPropagation} aria-hidden="true">
+			<StopBackgroundInteraction open={open} onClick={handleClose} />
+			<DatePicker
+				value={value}
+				open={open}
+				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
+				// (onChange triggers when changing year, onAccept only when a date is finally chosen)
+				onChange={() => true}
+				onAccept={onDateChange}
+				onClose={handleClose}
+				dayOfWeekFormatter={formatDayOfWeek}
+				disableHighlightToday
+				renderInput={({ ref, inputRef, ...props }) => (
+					<div ref={inputRef}>
+						{ value ? (
+							<DueDateFilledLabel onClick={onClickDueDate} {...props} value={value} disabled={disabled} />
+						) : (
+							<DueDateEmptyLabel onClick={onClickDueDate} {...props} disabled={disabled} />
+						)}
+					</div>
+				)}
+			/>
+		</div>
 	);
 };

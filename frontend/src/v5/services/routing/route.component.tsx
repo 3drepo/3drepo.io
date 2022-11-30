@@ -19,9 +19,7 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Route as BaseRoute } from 'react-router-dom';
 import { selectCurrentRevision } from '@/v4/modules/model/model.selectors';
-import { ProjectsHooksSelectors } from '../selectorsHooks/projectsSelectors.hooks';
-import { ContainersHooksSelectors } from '../selectorsHooks/containersSelectors.hooks';
-import { FederationsHooksSelectors } from '../selectorsHooks/federationsSelectors.hooks';
+import { ProjectsHooksSelectors, ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '../intl';
 
 export interface RouteProps {

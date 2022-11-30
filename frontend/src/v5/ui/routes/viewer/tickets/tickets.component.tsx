@@ -25,7 +25,7 @@ import {
 	enableRealtimeFederationNewTicket,
 	enableRealtimeFederationUpdateTicket,
 } from '@/v5/services/realtime/ticket.events';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks/ticketsCardSelectors.hooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';

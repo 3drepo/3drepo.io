@@ -16,6 +16,7 @@
  */
 import { createSelector } from 'reselect';
 import { sortBy } from 'lodash';
+import { selectJobs } from '@/v4/modules/jobs';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IUser, IUsersState } from './users.redux';
 
@@ -41,4 +42,13 @@ export const selectCurrentTeamspaceUsers = createSelector(
 		const users = (state.usersByTeamspace || {})[teamspace] || [];
 		return sortBy(users, 'firstName');
 	},
+);
+
+export const selectAssigneesListItems = createSelector(
+	selectCurrentTeamspaceUsers,
+	selectJobs,
+	(users, jobs) => [
+		...users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` })),
+		...jobs.map(({ _id }) => ({ value: _id, label: _id })),
+	],
 );

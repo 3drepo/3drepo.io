@@ -15,15 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers/ticketsCardAction.dispatchers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks/ticketsSelectors.hooks';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
+import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
-import { TicketsCardViews } from '../../tickets.constants';
-import { Ticket, Id, Title, ChipList, Assignees, IssueProperties, PriorityLevelChip } from './ticketItem.styles';
+import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
+import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow, PriorityLevelChip } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -32,20 +34,29 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
 	const hasIssueProperties = template?.config?.issueProperties;
 	const {
 		number,
 		properties: {
-			Status: status,
-			Priority: priority,
-			Assignees: assignees,
-			'Due Date': dueDate,
+			[IssueProperties.STATUS]: status,
+			[IssueProperties.PRIORITY]: priority,
+			[IssueProperties.ASSIGNEES]: assignees,
+			[IssueProperties.DUE_DATE]: dueDate,
 		},
 	} = ticket;
-	const riskLevel = ticket.modules?.safetibase?.['Level of Risk'];
-	const treatmentStatus = ticket.modules?.safetibase?.['Treatment Status'];
+	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
+	const treatmentStatus = ticket.modules?.safetibase?.[SafetibaseProperties.TREATMENT_STATUS];
+	const updateTicketProperty = (value) => TicketsActionsDispatchers
+		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
+	const onBlurAssignees = (newVals) => {
+		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
+	};
+	const onBlurDueDate = (newVal) => {
+		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
+	};
 
 	const expandTicket = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
@@ -66,11 +77,11 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				{treatmentStatus && <TreatmentLevelChip state={treatmentStatus} />}
 			</ChipList>
 			{hasIssueProperties && (
-				<IssueProperties>
-					<DueDate date={dueDate ?? null} onClick={() => { /* Edit Due Date */ }} />
+				<IssuePropertiesRow>
+					<DueDate value={dueDate ?? null} onBlur={onBlurDueDate} />
 					<PriorityLevelChip state={priority} />
-					<Assignees assignees={assignees ?? []} max={7} />
-				</IssueProperties>
+					<Assignees values={assignees ?? []} onBlur={onBlurAssignees} />
+				</IssuePropertiesRow>
 			)}
 		</Ticket>
 	);

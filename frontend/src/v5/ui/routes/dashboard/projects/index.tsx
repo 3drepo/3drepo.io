@@ -21,7 +21,7 @@ import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
-import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
