@@ -1,6 +1,5 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
@@ -31,7 +30,6 @@ module.exports = (options) => ({
 		],
 	},
 	plugins: [
-		new ForkTsCheckerWebpackPlugin(),
 		new CopyWebpackPlugin({
 			patterns:[
 				{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
