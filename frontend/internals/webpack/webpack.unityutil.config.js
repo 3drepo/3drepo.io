@@ -15,13 +15,10 @@ module.exports = {
 	module: {
 		rules: [
 		  loaders.TSLoader({}),
-		  loaders.LodashTSLoader,
 		  loaders.CSSLoader,
-		  loaders.CSSExternalLoader,
 		  loaders.FontLoader,
 		  loaders.ImageLoader,
 		  loaders.HTMLLoader,
-		  loaders.PugLoader
 		],
 	  },
 };
