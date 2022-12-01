@@ -1921,6 +1921,18 @@ export class UnityUtil {
 		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/** How many non-trivial jobs the viewer can complete per frame when the
+	 * camera isnt moving */
+	public static setJobsPerFrameStatic(numJobs: number) {
+		UnityUtil.toUnity('SetNumStaticJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
+	}
+
+	/** How many non-trivial jobs the viewer can complete per frame when the
+	 * camera is moving */
+	public static setJobsPerFrameDynamic(numJobs: number) {
+		UnityUtil.toUnity('SetNumDynamicJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
+	}
+
 	/**
 	 * Move mesh/meshes by a given transformation matrix.
 	 * NOTE: this currently only works as desired in Synchro Scenarios
