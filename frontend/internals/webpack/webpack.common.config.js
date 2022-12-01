@@ -4,11 +4,10 @@ const webpack = require('webpack');
 const path = require('path');
 
 const PATHS = require('./tools/paths');
-const MODES = require('./tools/modes');
 const loaders = require('./tools/loaders');
 
 module.exports = (env, options) => ({
-	mode: options.mode || MODES.DEVELOPMENT,
+	mode: options.mode,
 	context: PATHS.APP_DIR,
 	entry: {
 		maintenance: './src/maintenance.ts',
@@ -24,9 +23,7 @@ module.exports = (env, options) => ({
 	module: {
 		rules: [
 			loaders.TSLoader({ transpileOnly: env.noTypeChecking }),
-			loaders.LodashTSLoader,
 			loaders.CSSLoader,
-			loaders.CSSExternalLoader,
 			loaders.FontLoader,
 			loaders.ImageLoader,
 			loaders.HTMLLoader
