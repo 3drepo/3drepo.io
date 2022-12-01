@@ -161,3 +161,21 @@ export const getImgSrc = (imgData) => {
 	}
 	return addBase64Prefix(imgData);
 };
+
+export const sanitizeViewVals = (vals, template) => {
+	if (vals.properties) {
+		const props = vals.properties;
+		const propsDefs: any[] = template.properties;
+
+		Object.keys(props).forEach((key) => {
+			const definition = propsDefs.find((def) => def.name === key);
+			if (definition?.type === 'view') {
+				if (isResourceId(props[key].screenshot)) {
+					delete props[key].screenshot;
+				}
+			}
+		});
+	}
+
+	return vals;
+};
