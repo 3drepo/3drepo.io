@@ -126,7 +126,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 				</Container>
 				<StyledPopover
 					{...popoverProps}
-					PaperProps={...PaperProps}
+					PaperProps={PaperProps}
 					open={activeMenu}
 					anchorEl={this.ref.current}
 					onClose={this.toggleMenu(false)}
