@@ -27,7 +27,7 @@ import { FormattedMessage } from 'react-intl';
 import { Typography } from '@mui/material';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { ScrollArea } from '@controls/scrollArea';
-import { Container, Content, TopBar, TeamspaceImage, TeamspaceInfo } from './teamspaceLayout.styles';
+import { Container, Section, TopBar, TeamspaceImage, TeamspaceInfo, Content } from './teamspaceLayout.styles';
 import { TeamspaceQuota } from './teamspaceQuota/teamspaceQuota.component';
 
 interface ITeamspaceLayout {
@@ -71,10 +71,12 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 			</TopBar>
 			<TeamspaceNavigation />
 			<ScrollArea variant="base" autoHide>
-				<Content>
-					{children}
+				<Section>
+					<Content>
+						{children}
+					</Content>
 					<DashboardFooter variant="light" />
-				</Content>
+				</Section>
 			</ScrollArea>
 		</Container>
 	);

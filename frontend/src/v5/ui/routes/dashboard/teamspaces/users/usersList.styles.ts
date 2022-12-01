@@ -25,7 +25,7 @@ import styled, { css } from 'styled-components';
 
 const AddUserButton = css`
 	${FloatingButtonContainer} {
-		top: 25px;
+		top: 30px;
 		right: 0;
 		${FloatingButton} {
 			::after {
@@ -81,7 +81,7 @@ const RemoveUserCell = `${Row}>:nth-child(5)`;
 
 export const Container = styled.div`
 	position: relative;
-	margin: 0 75px;
+	margin: -25px 0;
 	${AddUserButton}
 	${LoaderContainer} {
 		background-color: transparent;

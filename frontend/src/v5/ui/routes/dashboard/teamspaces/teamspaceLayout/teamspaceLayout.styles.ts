@@ -26,7 +26,19 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const Content = styled.section`
+export const Content = styled.div`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	width: calc(100% - 150px);
+	flex-direction: column;
+	display: flex;
+	justify-content: flex-start;
+	padding: 9px 30px 41px;
+	margin: 32px 75px;
+	border-radius: 10px;
+	box-sizing: border-box;
+`;
+
+export const Section = styled.section`
 	min-height: 100%;
 	height: auto;
 	display: flex;

@@ -20,18 +20,6 @@ import { CardListItem } from '@components/shared/linkCard/linkCard.styles';
 import { Button } from '@controls/button';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 
-export const Container = styled.div`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	width: calc(100% - 150px);
-	flex-direction: column;
-	display: flex;
-	justify-content: flex-start;
-	padding: 9px 30px 41px;
-	margin: 32px 75px;
-	border-radius: 10px;
-	box-sizing: border-box;
-`;
-
 export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
