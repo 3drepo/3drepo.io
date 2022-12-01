@@ -7,7 +7,7 @@ const path = require('path');
 const PATHS = require('./tools/paths');
 const loaders = require('./tools/loaders');
 
-module.exports = (env, options) => ({
+module.exports = (options) => ({
 	mode: options.mode,
 	context: PATHS.APP_DIR,
 	entry: {
@@ -31,7 +31,7 @@ module.exports = (env, options) => ({
 		],
 	},
 	plugins: [
-		...(!env.noTypeChecking ? [new ForkTsCheckerWebpackPlugin()] : []),
+		new ForkTsCheckerWebpackPlugin(),
 		new CopyWebpackPlugin({
 			patterns:[
 				{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
@@ -49,9 +49,6 @@ module.exports = (env, options) => ({
 			template: './index.html',
 			filename: '../index.html',
 			minify: true,
-			minifyJS: true,
-			minifyCSS: true,
-			minifyURLs: true,
 		}),
 		new webpack.ProvidePlugin({
 			process: 'process/browser',

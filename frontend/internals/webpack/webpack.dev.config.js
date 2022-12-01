@@ -15,7 +15,7 @@ const statsOptions = {
   errorDetails: true,
 };
 
-module.exports = (env) => getWebpackConfig(env, {
+module.exports = getWebpackConfig({
   mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
   output: {

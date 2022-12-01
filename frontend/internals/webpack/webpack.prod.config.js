@@ -14,7 +14,7 @@ const outputNames = {
 
 const customFolderExists = fs.existsSync(resolve(PROJECT_DIR, 'custom'));
 
-module.exports = (env) => getWebpackConfig(env, {
+module.exports = getWebpackConfig({
   mode: MODES.PRODUCTION,
   entry: {
     unity: './src/globals/unity-util-external.ts'
