@@ -3,23 +3,16 @@ const getWebpackConfig = require('./webpack.common.config');
 const MODES = require('./tools/modes');
 
 const statsOptions = {
-  assets: true,
   hash: false,
-  timings: true,
   chunks: false,
   chunkModules: false,
   modules: false,
-  depth: false,
   children: false,
-  version: true,
   warnings: false,
-  cached: false,
+  cachedModules: false,
   cachedAssets: false,
   reasons: false,
-  source: false,
   errorDetails: true,
-  moduleTrace: true,
-  performance: true
 };
 
 module.exports = (env) => getWebpackConfig(env, {
