@@ -14,7 +14,7 @@ module.exports = {
 	},
 	module: {
 		rules: [
-		  loaders.TSLoader({}),
+		  loaders.TSLoader,
 		  loaders.CSSLoader,
 		  loaders.FontLoader,
 		  loaders.ImageLoader,

@@ -1,5 +1,6 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
@@ -22,7 +23,7 @@ module.exports = (env, options) => ({
 	},
 	module: {
 		rules: [
-			loaders.TSLoader({ transpileOnly: env.noTypeChecking }),
+			loaders.TSLoader,
 			loaders.CSSLoader,
 			loaders.FontLoader,
 			loaders.ImageLoader,
@@ -30,6 +31,7 @@ module.exports = (env, options) => ({
 		],
 	},
 	plugins: [
+		...(!env.noTypeChecking ? [new ForkTsCheckerWebpackPlugin()] : []),
 		new CopyWebpackPlugin({
 			patterns:[
 				{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },

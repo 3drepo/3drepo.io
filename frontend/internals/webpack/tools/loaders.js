@@ -1,16 +1,18 @@
-const TSLoader = ({ transpileOnly }) => ({
-  test: /\.(ts|tsx)$/,
-  loader: 'ts-loader',
-  exclude: /node_modules/,
-  options: {
-    transpileOnly
-  }
-})
+const TSLoader = {
+	test: /\.(ts|tsx)$/,
+	loader: 'esbuild-loader',
+	exclude: /node_modules/,
+	options: {
+		loader: 'tsx',
+		target: 'es2015',
+		tsconfigRaw: require('../../../tsconfig.json')
+	}
+};
 
 const CSSLoader = {
   test: /\.css$/,
   use: ['style-loader', 'css-loader']
-}
+};
 
 const FontLoader = {
   test: /\.(woff(2)?|ttf|otf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
