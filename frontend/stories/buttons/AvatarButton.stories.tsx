@@ -21,6 +21,7 @@ import { ComponentProps } from 'react';
 export default {
 	title: 'Buttons/AvatarButton',
 	component: Button,
+	parameters: { controls: { exclude: ['onClick', 'className'] } },
 } as ComponentMeta<typeof Button>;
 
 type Props = ComponentProps<typeof Button>;
