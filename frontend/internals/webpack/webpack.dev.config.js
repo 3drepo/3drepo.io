@@ -25,8 +25,6 @@ module.exports = getWebpackConfig({
     new LiveReloadPlugin({
       hostname: 'localhost',
       port: 35729,
-      start: true,
-      quiet: false
     })
   ],
   stats: statsOptions
