@@ -25,7 +25,7 @@ import * as API from '@/v5/services/api';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 import { ControlledInput } from '@controls/inputs/controlledInput.component';
-import { PasswordField } from './editProfilePasswordTab.styles';
+import { PasswordField } from '@controls/inputs/passwordField/passwordField.component';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
