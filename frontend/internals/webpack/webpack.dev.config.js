@@ -29,8 +29,5 @@ module.exports = getWebpackConfig({
       quiet: false
     })
   ],
-  performance: {
-    hints: 'warnings'
-  },
   stats: statsOptions
 });
