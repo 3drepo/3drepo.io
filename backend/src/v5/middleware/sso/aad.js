@@ -24,6 +24,7 @@ const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
+const { getURLDomain } = require('../../utils/helper/strings');
 
 const Aad = {};
 
@@ -102,7 +103,15 @@ Aad.redirectToStateURL = (req, res) => {
 	}
 };
 
-Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, authenticate(redirectUri)]);
+const setSessionReferer = async (req, res, next) => {
+	if (req.headers.referer) {
+		req.session.referer = getURLDomain(req.headers.referer);
+	}
+	
+	await next();
+};
+
+Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionReferer, authenticate(redirectUri)]);
 
 const hasAssociatedAccount = async (req, res, next) => {
 	try {
