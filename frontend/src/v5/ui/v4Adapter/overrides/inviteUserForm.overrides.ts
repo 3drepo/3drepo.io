@@ -25,8 +25,22 @@ import {
 	ProjectCheckboxContainer,
 	ProjectConfig,
 } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
+import { Color as JobColorDot, Name as JobTitle } from '@/v4/routes/components/jobItem/jobItem.styles';
 import { Container as TableCell, Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
+import { EmptySelectValue } from '@/v4/routes/components/newUserForm/newUserForm.styles';
 import { css } from 'styled-components';
+
+const JobSelectStyles = css`
+	${JobColorDot} {
+		width: 10px;
+		height: 10px;
+	}
+	${JobTitle}, ${EmptySelectValue} {
+		width: auto;
+		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) => theme.typography.body1}
+	}
+`;
 
 const EmailAndJobInputStyles = css`
 	.MuiFormControl-root {
@@ -146,6 +160,7 @@ const AddPermissionsButton = css`
 `;
 
 export default css`
+	${JobSelectStyles}
 	${Modal} {
 		min-width: 520px;
 		${Content} {

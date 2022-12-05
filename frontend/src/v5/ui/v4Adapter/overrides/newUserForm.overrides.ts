@@ -47,6 +47,7 @@ export default css`
 				${({ theme }) => theme.typography.body1};
 				color: ${({ theme }) => theme.palette.base.main};
 				line-height: 35px;
+				display: flex;
 			}
 		}
 		
