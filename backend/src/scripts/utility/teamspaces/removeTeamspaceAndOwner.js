@@ -42,6 +42,7 @@ const removeUser = async (user) => {
 };
 
 const run = async (teamspaces, removeOwners) => {
+	if (!teamspaces?.length) throw new Error('A list of teamspaces must be provided');
 	const teamspaceArr = teamspaces.split(',');
 	const tsList = await getTeamspaceList();
 	for (const teamspace of teamspaceArr) {
@@ -57,7 +58,7 @@ const run = async (teamspaces, removeOwners) => {
 	}
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('accounts',
 		{

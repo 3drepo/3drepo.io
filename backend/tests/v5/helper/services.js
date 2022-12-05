@@ -81,6 +81,7 @@ db.reset = async () => {
 	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
 
 	await Promise.all([...dbProms, ...colProms]);
+	DbHandler.reset();
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
@@ -93,12 +94,12 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
+db.createTeamspace = async (teamspace, admins = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
+	await ServiceHelper.db.createTeamspaceRole(teamspace);
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
 			{ permissions: breaking ? undefined : permissions, ...customData }),
-		ServiceHelper.db.createTeamspaceRole(teamspace),
 		createTeamspaceSettings(teamspace),
 	]);
 };

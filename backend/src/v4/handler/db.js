@@ -394,6 +394,9 @@
 		return defaultRoleProm;
 	};
 
+	Handler.reset = () => {
+		defaultRoleProm = null;
+	};
 	Handler.dropDatabase = async (database) => {
 		if(!["config", "admin"].includes(database)) {
 			try {
