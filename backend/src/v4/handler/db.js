@@ -382,7 +382,6 @@
 
 				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_ROLE_OBJ.role}` });
 
-				// istanbul ignore next
 				if (!roleFound) {
 					const createRoleCmd = { createRole: C.DEFAULT_ROLE_OBJ.role, privileges: [], roles: [] };
 					await Handler.runCommand("admin", createRoleCmd);
