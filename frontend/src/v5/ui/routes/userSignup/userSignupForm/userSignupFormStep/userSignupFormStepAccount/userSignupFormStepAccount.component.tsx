@@ -111,18 +111,14 @@ export const UserSignupFormStepAccount = ({
 	return (
 		<>
 			<ControlledInput
-				Input={(inputProps) => (
-					<TextField
-						{...inputProps}
-						InputProps={{
-							startAdornment: (
-								<IconContainer>
-									<UserIcon />
-								</IconContainer>
-							),
-						}}
-					/>
-				)}
+				Input={TextField}
+				InputProps={{
+					startAdornment: (
+						<IconContainer>
+							<UserIcon />
+						</IconContainer>
+					),
+				}}
 				name="username"
 				control={control}
 				label={formatMessage({
@@ -133,18 +129,14 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.username}
 			/>
 			<ControlledInput
-				Input={(inputProps) => (
-					<TextField
-						{...inputProps}
-						InputProps={{
-							startAdornment: (
-								<IconContainer>
-									<EmailIcon />
-								</IconContainer>
-							),
-						}}
-					/>
-				)}
+				Input={TextField}
+				InputProps={{
+					startAdornment: (
+						<IconContainer>
+							<EmailIcon />
+						</IconContainer>
+					),
+				}}
 				name="email"
 				control={control}
 				label={formatMessage({
@@ -153,20 +145,17 @@ export const UserSignupFormStepAccount = ({
 				})}
 				required
 				formError={errors.email}
+
 			/>
 			<ControlledInput
-				Input={(inputProps) => (
-					<PasswordField
-						{...inputProps}
-						InputProps={{
-							startAdornment: (
-								<IconContainer>
-									<PasswordIcon />
-								</IconContainer>
-							),
-						}}
-					/>
-				)}
+				Input={PasswordField}
+				InputProps={{
+					startAdornment: (
+						<IconContainer>
+							<PasswordIcon />
+						</IconContainer>
+					),
+				}}
 				name="password"
 				control={control}
 				label={formatMessage({
@@ -177,18 +166,14 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.password}
 			/>
 			<ControlledInput
-				Input={(inputProps) => (
-					<PasswordField
-						{...inputProps}
-						InputProps={{
-							startAdornment: (
-								<IconContainer>
-									<PasswordIcon />
-								</IconContainer>
-							),
-						}}
-					/>
-				)}
+				Input={PasswordField}
+				InputProps={{
+					startAdornment: (
+						<IconContainer>
+							<PasswordIcon />
+						</IconContainer>
+					),
+				}}
 				name="confirmPassword"
 				control={control}
 				label={formatMessage({

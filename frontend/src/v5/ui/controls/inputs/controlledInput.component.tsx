@@ -16,32 +16,40 @@
  */
 import { Controller, ControllerRenderProps } from 'react-hook-form';
 
-type ForwardableProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
+export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	name: string,
 	required: boolean,
 	label: string | JSX.Element,
 	disabled: boolean,
 	className: string,
-}>;
-
-export type FormInputProps = ForwardableProps & Partial<{
 	error: boolean,
 	helperText: string,
 	inputRef: any,
 }>;
 
-type ControlledInputProps = ForwardableProps & {
-	Input: (props: FormInputProps) => JSX.Element,
+export type ControlledInputProps<T extends FormInputProps> = T & {
+	Input: (props: T) => JSX.Element,
 	name: string,
 	control?: any,
 	formError?: any,
 	defaultValue?: any,
 };
-export const ControlledInput = ({ Input, name, control, formError, ...props }: ControlledInputProps) => (
+
+// eslint-disable-next-line
+export const ControlledInput = <T,>({
+	Input,
+	name,
+	control,
+	formError,
+	defaultValue,
+	...props
+}: ControlledInputProps<T>) => (
 	<Controller
 		name={name}
 		control={control}
+		defaultValue={defaultValue}
 		render={({ field: { ref, ...field } }) => (
+			// @ts-ignore
 			<Input
 				{...field}
 				{...props}

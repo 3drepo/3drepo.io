@@ -81,58 +81,46 @@ export const SidebarForm = ({
 			</Title>
 			<FlexContainer>
 				<ControlledInput
-					Input={(inputProps) => (
-						<Select {...inputProps}>
-							{
-								CONTAINER_UNITS.map((unit) => (
-									<MenuItem key={unit.value} value={unit.value}>
-										{unit.name}
-									</MenuItem>
-								))
-							}
-						</Select>
-					)}
+					Input={Select}
 					required
 					control={control}
 					disabled={!isNewContainer}
 					name="containerUnit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
-					onChange={
-						(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('containerUnit', e.target.value);
-							updateValue('containerUnit');
-						}
-					}
-				/>
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('containerUnit', e.target.value);
+						updateValue('containerUnit');
+					}}
+				>
+					{CONTAINER_UNITS.map((unit) => (
+						<MenuItem key={unit.value} value={unit.value}>
+							{unit.name}
+						</MenuItem>
+					))}
+				</ControlledInput>
 				<ControlledInput
-					Input={(inputProps) => (
-						<Select {...inputProps}>
-							{
-								CONTAINER_TYPES.map((type) => (
-									<MenuItem key={type.value} value={type.value}>
-										{type.name}
-									</MenuItem>
-								))
-							}
-							<HiddenMenuItem key="sample" value="sample">
-								<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
-							</HiddenMenuItem>
-						</Select>
-					)}
+					Input={Select}
 					required
 					control={control}
 					disabled={!isNewContainer}
 					name="containerType"
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
 					defaultValue="Uncategorised"
-					onChange={
-						(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('containerType', e.target.value);
-							updateValue('containerType');
-						}
-					}
-				/>
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('containerType', e.target.value);
+						updateValue('containerType');
+					}}
+				>
+					{CONTAINER_TYPES.map((type) => (
+						<MenuItem key={type.value} value={type.value}>
+							{type.name}
+						</MenuItem>
+					))}
+					<HiddenMenuItem key="sample" value="sample">
+						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
+					</HiddenMenuItem>
+				</ControlledInput>
 			</FlexContainer>
 			<ControlledInput
 				Input={TextField}
@@ -163,7 +151,7 @@ export const SidebarForm = ({
 				formError={errors.revisionDesc}
 			/>
 
-			{ isSpm && (
+			{isSpm && (
 				<>
 					<ControlledInput
 						Input={AnimationsCheckbox}
@@ -172,27 +160,21 @@ export const SidebarForm = ({
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
 					<ControlledInput
-						Input={(inputProps) => (
-							<TimezoneSelect {...inputProps}>
-								{
-									TimezoneOptions.map((opt) => (
-										<MenuItem key={opt.name} value={opt.name}>
-											{opt.label}
-										</MenuItem>
-									))
-								}
-							</TimezoneSelect>
-						)}
+						Input={TimezoneSelect}
 						control={control}
 						name="timezone"
 						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
-						onChange={
-							(e: React.ChangeEvent<HTMLInputElement>) => {
-								setValue('timezone', e.target.value);
-								updateValue('timezone');
-							}
-						}
-					/>
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							setValue('timezone', e.target.value);
+							updateValue('timezone');
+						}}
+					>
+						{TimezoneOptions.map((opt) => (
+							<MenuItem key={opt.name} value={opt.name}>
+								{opt.label}
+							</MenuItem>
+						))}
+					</ControlledInput>
 				</>
 			)}
 		</div>

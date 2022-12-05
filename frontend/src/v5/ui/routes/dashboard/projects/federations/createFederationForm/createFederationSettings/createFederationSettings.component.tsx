@@ -53,15 +53,7 @@ export const CreateFederationFormSettings = () => {
 			/>
 			<HalfWidth>
 				<ControlledInput
-					Input={(inputProps) => (
-						<Select {...inputProps}>
-							{CONTAINER_UNITS.map(({ name, value }) => (
-								<MenuItem key={value} value={value}>
-									{name}
-								</MenuItem>
-							))}
-						</Select>
-					)}
+					Input={Select}
 					required
 					name="unit"
 					label={formatMessage({
@@ -69,7 +61,13 @@ export const CreateFederationFormSettings = () => {
 						defaultMessage: 'Units',
 					})}
 					control={control}
-				/>
+				>
+					{CONTAINER_UNITS.map(({ name, value }) => (
+						<MenuItem key={value} value={value}>
+							{name}
+						</MenuItem>
+					))}
+				</ControlledInput>
 			</HalfWidth>
 			<ControlledInput
 				Input={TextField}

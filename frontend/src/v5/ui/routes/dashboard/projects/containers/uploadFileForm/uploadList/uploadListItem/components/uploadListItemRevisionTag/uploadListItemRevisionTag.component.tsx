@@ -38,25 +38,21 @@ export const UploadListItemRevisionTag = ({
 	...props
 }: IUploadListItemRevision): JSX.Element => (
 	<ControlledInput
-		Input={(inputProps) => (
-			<TextField
-				$selectedrow={isSelected}
-				InputProps={{
-					startAdornment: !!errorMessage && (
-						<ErrorTooltip>
-							{errorMessage}
-						</ErrorTooltip>
-					),
-				}}
-				{...inputProps}
-			/>
-		)}
+		Input={TextField}
 		control={control}
 		disabled={disabled}
 		name="revisionTag"
 		formError={errorMessage}
 		defaultValue={defaultValue}
 		required
+		$selectedrow={isSelected}
+		InputProps={{
+			startAdornment: !!errorMessage && (
+				<ErrorTooltip>
+					{errorMessage}
+				</ErrorTooltip>
+			),
+		}}
 		{...props}
 	/>
 );

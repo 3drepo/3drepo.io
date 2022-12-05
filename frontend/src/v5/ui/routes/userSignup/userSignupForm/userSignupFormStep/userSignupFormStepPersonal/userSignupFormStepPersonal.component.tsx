@@ -118,22 +118,20 @@ export const UserSignupFormStepPersonal = ({
 			/>
 			<ControlledInput
 				name="countryCode"
-				Input={(inputProps) => (
-					<Select {...inputProps}>
-						{clientConfigService.countries.map((country) => (
-							<MenuItem key={country.code} value={country.code}>
-								{country.name}
-							</MenuItem>
-						))}
-					</Select>
-				)}
+				Input={Select}
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.countryCode',
 					defaultMessage: 'Country',
 				})}
 				required
-			/>
+			>
+				{clientConfigService.countries.map((country) => (
+					<MenuItem key={country.code} value={country.code}>
+						{country.name}
+					</MenuItem>
+				))}
+			</ControlledInput>
 			<NextStepButton
 				disabled={!formIsValid}
 				onClick={onSubmitStep}

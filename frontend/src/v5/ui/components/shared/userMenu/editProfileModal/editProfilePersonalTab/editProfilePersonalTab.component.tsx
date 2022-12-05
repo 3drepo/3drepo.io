@@ -25,7 +25,7 @@ import { ControlledInput } from '@controls/inputs/controlledInput.component';
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
@@ -109,12 +109,6 @@ export const EditProfilePersonalTab = ({
 		);
 	};
 
-	const CountriesMenuItems = useMemo(() => clientConfigService.countries.map((country) => (
-		<MenuItem key={country.code} value={country.code}>
-			{country.name}
-		</MenuItem>
-	)), []);
-
 	const fieldsAreDirty = !isMatch(user, getTrimmedNonEmptyValues());
 
 	// enable submission only if form is valid and fields are dirty
@@ -172,7 +166,7 @@ export const EditProfilePersonalTab = ({
 				formError={formErrors.company}
 			/>
 			<ControlledInput
-				Input={(inputProps) => <Select {...inputProps}>{CountriesMenuItems}</Select>}
+				Input={Select}
 				name="countryCode"
 				control={control}
 				label={formatMessage({
@@ -180,7 +174,13 @@ export const EditProfilePersonalTab = ({
 					defaultMessage: 'Country',
 				})}
 				required
-			/>
+			>
+				{clientConfigService.countries.map((country) => (
+					<MenuItem key={country.code} value={country.code}>
+						{country.name}
+					</MenuItem>
+				))}
+			</ControlledInput>
 			{submitWasSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage

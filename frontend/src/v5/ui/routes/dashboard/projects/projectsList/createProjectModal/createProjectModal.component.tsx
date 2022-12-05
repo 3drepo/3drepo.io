@@ -106,20 +106,18 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 			maxWidth="sm"
 		>
 			<ControlledInput
-				Input={(inputProps) => (
-					<Select {...inputProps}>
-						{teamspaces.map((ts) => (
-							<MenuItem key={ts.name} value={ts.name}>
-								{ts.name}
-							</MenuItem>
-						))}
-					</Select>
-				)}
+				Input={Select}
 				required
 				name="teamspace"
 				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
 				control={control}
-			/>
+			>
+				{teamspaces.map((ts) => (
+					<MenuItem key={ts.name} value={ts.name}>
+						{ts.name}
+					</MenuItem>
+				))}
+			</ControlledInput>
 			<ControlledInput
 				Input={TextField}
 				required

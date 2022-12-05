@@ -250,15 +250,7 @@ export const SettingsForm = ({
 			/>
 			<FlexContainer>
 				<ControlledInput
-					Input={(inputProps) => (
-						<Select {...inputProps}>
-							{UNITS.map(({ name, abbreviation }) => (
-								<MenuItem key={abbreviation} value={abbreviation}>
-									{name}
-								</MenuItem>
-							))}
-						</Select>
-					)}
+					Input={Select}
 					required
 					name="unit"
 					label={formatMessage({
@@ -266,7 +258,13 @@ export const SettingsForm = ({
 						defaultMessage: 'Units',
 					})}
 					control={control}
-				/>
+				>
+					{UNITS.map(({ name, abbreviation }) => (
+						<MenuItem key={abbreviation} value={abbreviation}>
+							{name}
+						</MenuItem>
+					))}
+				</ControlledInput>
 				<ControlledInput
 					Input={TextField}
 					name="code"
@@ -278,40 +276,34 @@ export const SettingsForm = ({
 			{isContainer && (
 				<FlexContainer>
 					<ControlledInput
-						Input={(inputProps) => (
-							<Select {...inputProps}>
-								{CONTAINER_TYPES.map((type) => (
-									<MenuItem key={type} value={type}>
-										{type}
-									</MenuItem>
-								))}
-								<HiddenMenuItem key="sample" value="sample">
-									<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
-								</HiddenMenuItem>
-							</Select>
-						)}
+						Input={Select}
 						name="type"
 						label={formatMessage({
 							id: 'settings.form.category',
 							defaultMessage: 'Category',
 						})}
 						control={control}
-					/>
+					>
+						{CONTAINER_TYPES.map((type) => (
+							<MenuItem key={type} value={type}>
+								{type}
+							</MenuItem>
+						))}
+						<HiddenMenuItem key="sample" value="sample">
+							<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
+						</HiddenMenuItem>
+					</ControlledInput>
 					<Placeholder />
 				</FlexContainer>
 			)}
 			<ControlledInput
-				Input={(inputProps) => (
-					<SelectView
-						views={containerOrFederation.views}
-						containerOrFederationId={containerOrFederation._id}
-						isContainer={isContainer}
-						{...inputProps}
-					/>
-				)}
+				Input={SelectView}
 				control={control}
 				name="defaultView"
 				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
+				views={containerOrFederation.views}
+				containerOrFederationId={containerOrFederation._id}
+				isContainer={isContainer}
 			/>
 			<SectionTitle>
 				<FormattedMessage

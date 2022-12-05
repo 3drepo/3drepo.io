@@ -170,7 +170,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 						)}
 					/>
 				</CheckboxContainer>
-				{ clientConfigService.captcha_client_key && (
+				{clientConfigService.captcha_client_key && (
 					<ReCAPTCHA
 						ref={captchaRef}
 						size="invisible"

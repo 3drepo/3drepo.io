@@ -109,35 +109,27 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					control={control}
 					name="unit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
-					Input={(inputProps) => (
-						<Select {...inputProps}>
-							{
-								CONTAINER_UNITS.map((unit) => (
-									<MenuItem key={unit.value} value={unit.value}>
-										{unit.name}
-									</MenuItem>
-								))
-							}
-						</Select>
-					)}
-				/>
+					Input={Select}
+				>
+					{CONTAINER_UNITS.map((unit) => (
+						<MenuItem key={unit.value} value={unit.value}>
+							{unit.name}
+						</MenuItem>
+					))}
+				</ControlledInput>
 				<ControlledInput
 					required
 					control={control}
 					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
 					name="type"
-					Input={(inputProps) => (
-						<Select {...inputProps}>
-							{
-								CONTAINER_TYPES.map((unit) => (
-									<MenuItem key={unit.value} value={unit.value}>
-										{unit.value}
-									</MenuItem>
-								))
-							}
-						</Select>
-					)}
-				/>
+					Input={Select}
+				>
+					{CONTAINER_TYPES.map((unit) => (
+						<MenuItem key={unit.value} value={unit.value}>
+							{unit.value}
+						</MenuItem>
+					))}
+				</ControlledInput>
 			</FlexContainer>
 			<ControlledInput
 				Input={TextField}

@@ -191,7 +191,6 @@ export const UploadListItemDestination = ({
 					disabled={disabled}
 					value={value}
 					{...params}
-					// @ts-ignore
 					neworexisting={newOrExisting}
 					InputProps={{
 						...InputProps,
