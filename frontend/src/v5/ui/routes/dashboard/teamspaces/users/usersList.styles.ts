@@ -147,11 +147,11 @@ export const Container = styled.div`
 	}
 	
 	${LicencesFooter} {
+		${({ theme }) => theme.typography.body1};
+		color: ${({ theme }) => theme.palette.base.main};
 		border: none;
-		${({ theme }) => theme.typography.caption};
 		padding: 10px 0;
 		align-items: baseline;
-		color: ${({ theme }) => theme.palette.base.main};
 		${PendingInvites} {
 			cursor: pointer;
 			margin: 0;
