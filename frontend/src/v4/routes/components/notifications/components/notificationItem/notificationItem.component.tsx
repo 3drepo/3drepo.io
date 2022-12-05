@@ -24,6 +24,10 @@ import Clear from '@mui/icons-material/Clear';
 import Lens from '@mui/icons-material/Lens';
 import PanoramaFishEye from '@mui/icons-material/PanoramaFishEye';
 
+import { isV5 } from '@/v4/helpers/isV5';
+import { COLOR } from '@/v5/ui/themes/theme';
+import { viewerRoute } from '@/v5/services/routing/routing';
+
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
 import notificationsContainer from '../../notifications.container';
@@ -34,6 +38,7 @@ export interface INotification {
 	type: string;
 	read: boolean;
 	modelId: string;
+	project?: string;
 	teamSpace: string;
 	modelName: string;
 	issuesId?: string[];
@@ -90,6 +95,7 @@ const NotificationItemText = (props) => {
 			secondaryTypographyProps={{style: secondaryStyle}}
 			primary={props.primary}
 			secondary={<LabelWithTooltip {...props} />}
+			sx={props.sx}
 		/>
 	);
 };
@@ -157,8 +163,10 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			return;
 		}
 
-		const {teamSpace, modelId, history, issuesId} = this.props;
-		let pathname = `/viewer/${teamSpace}/${modelId}`;
+		const {teamSpace, project, modelId, history, issuesId} = this.props;
+		let pathname = isV5()
+			? viewerRoute(teamSpace, project, modelId)
+			: `/viewer/${teamSpace}/${modelId}`;
 		let search = '';
 
 		if (this.props.type === TYPES.ISSUE_CLOSED) {
@@ -178,7 +186,11 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
-			pathname += `/${this.props.revision}`;
+			if (isV5()) {
+				pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
+			} else {
+				pathname += `/${this.props.revision}`;
+			}
 		}
 
 		history.push({pathname, search});
@@ -214,14 +226,26 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		const summary = getSummary(this.props);
 
 		const containerProps: any = {
-			read: read.toString(),
+			read,
 			onClick: this.onClick
 		};
+
+		const v5Color = read ? COLOR.BASE_LIGHT : COLOR.SECONDARY_MAIN;
+
+		const v5StylingOverride = isV5() ? {
+			primaryColor: v5Color,
+			fontWeight: undefined,
+			sx: {
+				'& p > span': {
+					color: v5Color,
+				},
+			},
+		} : {};
 
 		return (
 			<Container {...containerProps}>
 				<Item>
-					<Avatar>
+					<Avatar sx={isV5() && { color: v5Color }}>
 						{icon}
 					</Avatar>
 
@@ -231,6 +255,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 						fontWeight={read ? FONT_WEIGHT.NORMAL : FONT_WEIGHT.BOLD}
 						primary={details}
 						secondary={summary}
+						{...v5StylingOverride}
 					/>
 
 					<ItemSecondaryAction>
