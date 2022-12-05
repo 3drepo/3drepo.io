@@ -992,9 +992,11 @@ export class ViewerService {
 		switch (mode) {
 			case VIEWER_PROJECTION_MODES.ORTHOGRAPHIC:
 				UnityUtil.useOrthographicProjection();
+				this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, mode);
 				break;
 			default:
 				UnityUtil.usePerspectiveProjection();
+				this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, VIEWER_PROJECTION_MODES.PERSPECTIVE);
 		}
 	}
 
@@ -1010,6 +1012,8 @@ export class ViewerService {
 			account,
 			model
 		);
+
+		this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, type);
 	}
 
 	/**

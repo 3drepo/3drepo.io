@@ -191,6 +191,9 @@ function* stopListenOnClickPin() {
 	}
 }
 
+
+/****/
+
 const updateClipStateCallback = (clipNumber) => {
 	dispatch(ViewerGuiActions.updateClipState(clipNumber));
 };
@@ -248,7 +251,6 @@ function* goToExtent() {
 function* setProjectionMode({mode}) {
 	try {
 		yield Viewer.setProjectionMode(mode);
-		yield put(ViewerGuiActions.setProjectionModeSuccess(mode));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'projection mode', error));
 	}
