@@ -23,6 +23,7 @@ import { NumberProperty } from './numberProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TextProperty } from './textProperty.component';
 import { BooleanProperty } from './booleanProperty.component';
+import { ViewProperty } from './viewProperty.component';
 
 export const TicketProperty = {
 	text: TextProperty,
@@ -34,4 +35,5 @@ export const TicketProperty = {
 	coords: CoordsProperty,
 	number: NumberProperty,
 	image: ImageProperty,
+	view: ViewProperty,
 };

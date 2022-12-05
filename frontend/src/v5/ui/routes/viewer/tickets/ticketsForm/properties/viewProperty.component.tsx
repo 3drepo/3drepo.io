@@ -14,22 +14,29 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isUndefined } from 'lodash';
-import { Action } from './ticketImageAction.styles';
 
-type TicketImageActionProps = {
-	onImageChange?: any;
-	children: any;
-	disabled?: boolean;
-};
-export const TicketImageAction = ({
-	onImageChange,
-	disabled: disabledInput,
+import { Controller } from 'react-hook-form';
+import { PropertyProps } from './properties.types';
+import { TicketView } from './ticketView/ticketView.component';
+
+export const ViewProperty = ({
+	property: { name: label, readOnly, required },
+	formError,
+	defaultValue,
 	...props
-}: TicketImageActionProps) => {
-	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-	const disabled = isUndefined(disabledInput) ? disabledInput : !isAdmin;
-
-	return (<Action disabled={disabled} {...props} />);
-};
+}: PropertyProps) => (
+	<Controller
+		name={props.name}
+		render={({ field: { ref, ...field } }) => (
+			<TicketView
+				{...field}
+				label={label}
+				disabled={readOnly}
+				required={required}
+				error={!!formError}
+				helperText={formError?.message}
+				{...props}
+			/>
+		)}
+	/>
+);

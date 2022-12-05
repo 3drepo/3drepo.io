@@ -22,14 +22,15 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation, sanitizeViewVals } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsCardViews } from '../tickets.constants';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { IssueProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 
 export const TicketDetailsCard = () => {
@@ -77,13 +78,20 @@ export const TicketDetailsCard = () => {
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		const validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
+		let validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
+		validVals = sanitizeViewVals(validVals, template);
 
 		if (isEmpty(validVals)) return;
 
 		// eslint-disable-next-line max-len
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
 	};
+
+	useEffect(() => {
+		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
+		if (!(view?.camera)) return;
+		ViewerService.setViewpoint(view);
+	}, [ticket._id]);
 
 	return (
 		<CardContainer>

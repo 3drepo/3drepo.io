@@ -137,6 +137,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 		const updateModelTicket = isFederation
 			? API.Tickets.updateFederationTicket
 			: API.Tickets.updateContainerTicket;
+
 		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateTicket.updated', defaultMessage: 'Ticket updated' })));

@@ -68,10 +68,7 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 	try {
 		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
 
-		const viewpoint = yield Viewer.getCurrentViewpoint({
-			teamspace,
-			model: modelId
-		});
+		const viewpoint = yield Viewer.getCurrentViewpoint();
 
 		const generatedObject = {
 			name,

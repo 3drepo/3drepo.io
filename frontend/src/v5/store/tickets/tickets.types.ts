@@ -57,3 +57,23 @@ export interface ITemplate {
 
 export type NewTicket = Omit<ITicket, '_id'>;
 export type EditableTicket = Omit<NewTicket, 'number'>;
+
+export type Camera = {
+	type: 'perspective' | 'orthographic';
+	position: number[];
+	forward: number[];
+	up: number[];
+	size?: number;
+};
+
+export type ClippingPlane = {
+	normal: number[];
+	distance: number[];
+	clipDirection: 1 | -1;
+};
+
+export type Viewpoint = {
+	screenshot?: any;
+	camera: Camera;
+	clippingPlanes?: ClippingPlane[];
+};

@@ -19,16 +19,17 @@ import { Controller } from 'react-hook-form';
 import { PropertyProps } from './properties.types';
 
 export const CoordsProperty = ({
-	property: { required, name },
+	property: { required, name: label },
 	formError,
 	defaultValue,
+	name,
 	...props
 }: PropertyProps) => (
 	<Controller
-		name={props.name}
+		name={name}
 		render={({ field: { ref, ...field } }) => (
 			<PinDetails
-				label={name}
+				label={label}
 				required={required}
 				{...field}
 				{...props}

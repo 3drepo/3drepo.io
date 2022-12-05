@@ -19,6 +19,7 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isString } from 'lodash';
+import { de } from 'make-plural';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -285,8 +286,8 @@ export class ViewerService {
 		return UnityUtil.requestScreenShot();
 	}
 
-	public getCurrentViewpointInfo(account, model) {
-		return UnityUtil.requestViewpoint(account, model);
+	public getCurrentViewpointInfo() {
+		return UnityUtil.requestViewpoint('', '');
 	}
 
 	public hideHiddenByDefaultObjects() {
@@ -954,9 +955,31 @@ export class ViewerService {
 		return await this.getUnityObjectsStatus(teamspace, model);
 	}
 
-	public async getCurrentViewpoint({ teamspace, model }) {
+	public async getCurrentViewpoint() {
 		await this.isViewerReady();
-		return await this.getCurrentViewpointInfo(teamspace, model);
+		return await this.getCurrentViewpointInfo();
+	}
+
+	// This is for v5, matching the view schema
+	public async getViewpoint() {
+		await this.isViewerReady();
+		const { position, up, view_dir: forward, type, orthographicSize: size , clippingPlanes} = await this.getCurrentViewpointInfo();
+		const camera: any = { position, up, forward, type };
+
+		if (type !== 'perspective') {
+			camera.size = size;
+		}
+
+		return {camera, clippingPlanes};
+	}
+
+	// This is for v5, matching the view schema
+	public async setViewpoint(viewpoint) {
+		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
+		const camera =  { position, up, view_dir, type, orthographicSize, look_at: null,  account: null, model: null };
+
+		this.updateClippingPlanes(viewpoint.clippingPlanes, '', '');
+		await this.setCamera(camera);
 	}
 
 	public async goToDefaultViewpoint() {
@@ -969,9 +992,11 @@ export class ViewerService {
 		switch (mode) {
 			case VIEWER_PROJECTION_MODES.ORTHOGRAPHIC:
 				UnityUtil.useOrthographicProjection();
+				this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, mode);
 				break;
 			default:
 				UnityUtil.usePerspectiveProjection();
+				this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, VIEWER_PROJECTION_MODES.PERSPECTIVE);
 		}
 	}
 
@@ -987,6 +1012,8 @@ export class ViewerService {
 			account,
 			model
 		);
+
+		this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, type);
 	}
 
 	/**
