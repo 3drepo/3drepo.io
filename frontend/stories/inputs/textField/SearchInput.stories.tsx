@@ -22,7 +22,7 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 export default {
 	title: 'Inputs/Textfield/SearchInput',
 	component: SearchInput,
-	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear', 'value'] } },
+	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
 } as ComponentMeta<typeof SearchInput>;
 
 const Template: ComponentStory<typeof SearchInput> = (args) => (
