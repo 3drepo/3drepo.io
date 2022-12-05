@@ -30,6 +30,9 @@ export default {
 		error: {
 			type: 'boolean',
 		},
+		value: {
+			type: 'boolean',
+		},
 	},
 	component: Toggle,
 	parameters: { controls: { exclude: [

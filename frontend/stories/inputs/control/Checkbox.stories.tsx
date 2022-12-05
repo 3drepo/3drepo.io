@@ -27,6 +27,9 @@ export default {
 		defaultValue: {
 			type: 'boolean',
 		},
+		value: {
+			type: 'boolean',
+		},
 	},
 	component: Checkbox,
 	parameters: { controls: { exclude: [
