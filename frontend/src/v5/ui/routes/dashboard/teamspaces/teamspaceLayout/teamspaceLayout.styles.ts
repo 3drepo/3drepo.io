@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
+import { Content as DashboardContent } from '../../projects/projects.styles';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -26,15 +27,14 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const Content = styled.div`
+export const Content = styled(DashboardContent)`
+	margin-top: 32px;
+	padding: 9px 30px 41px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	width: calc(100% - 150px);
+	border-radius: 10px;
 	flex-direction: column;
 	display: flex;
 	justify-content: flex-start;
-	padding: 9px 30px 41px;
-	margin: 32px 75px;
-	border-radius: 10px;
 	box-sizing: border-box;
 `;
 

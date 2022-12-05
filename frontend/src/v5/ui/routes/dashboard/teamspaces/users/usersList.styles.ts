@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Row } from '@/v4/routes/components/customTable/customTable.styles';
+import { Cell, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
 import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
 import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as UserTable, Footer as LicencesFooter } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
@@ -25,7 +25,7 @@ import styled, { css } from 'styled-components';
 
 const AddUserButton = css`
 	${FloatingButtonContainer} {
-		top: 30px;
+		top: 45px;
 		right: 0;
 		${FloatingButton} {
 			::after {
@@ -81,7 +81,7 @@ const RemoveUserCell = `${Row}>:nth-child(5)`;
 
 export const Container = styled.div`
 	position: relative;
-	margin: -25px 0;
+	margin: 0;
 	${AddUserButton}
 	${LoaderContainer} {
 		background-color: transparent;
@@ -92,48 +92,57 @@ export const Container = styled.div`
 	}
 	${UserTable}{
 		background-color: transparent;
-	}
-	${UserCell} {
-		padding-left: 20px;
-		max-width: calc(46% - 60px);
-	}
-	${JobCell} {
-		max-width: 27%;
-		padding: 0 10px 0 0;
-		${SelectStyles} {
-			.MuiGrid-container {
-				flex-wrap: nowrap;
-				.MuiGrid-item:first-of-type {
-					min-height: 10px;
-					min-width: 10px;
+		${Head} {
+			min-height: 30px;
+			height: 30px;
+			${Cell} {
+				height: 20px;
+				padding-top: 0;
+			}
+		}
+
+		${UserCell} {
+			padding-left: 20px;
+			max-width: calc(46% - 60px);
+		}
+		${JobCell} {
+			max-width: 27%;
+			padding: 0 10px 0 0;
+			${SelectStyles} {
+				.MuiGrid-container {
+					flex-wrap: nowrap;
+					.MuiGrid-item:first-of-type {
+						min-height: 10px;
+						min-width: 10px;
+					}
 				}
 			}
 		}
-	}
-	${PermissionsCell} {
-		padding: 0 0 0 10px;
-		max-width: 27%;
-		${SelectStyles}
-	}
-	${BlankCell} {
-		display: none;
-	}
-	${RemoveUserCell} {
-		max-width: 60px;
-		padding: 0;
-		justify-content: center;
-
-		.MuiIconButton-root {
+		${PermissionsCell} {
+			padding: 0 0 0 10px;
+			max-width: 27%;
+			${SelectStyles}
+		}
+		${BlankCell} {
+			display: none;
+		}
+		${RemoveUserCell} {
+			max-width: 60px;
 			padding: 0;
-			&:not(.Mui-disabled) {
-				color: ${({ theme }) => theme.palette.secondary.main};
+			justify-content: center;
+
+			.MuiIconButton-root {
+				padding: 0;
+				&:not(.Mui-disabled) {
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
-	}
 
-	${Row} {
-		&:last-of-type {
-			border: none;
+		${Row} {
+			&:last-of-type {
+				border: none;
+			}
 		}
 	}
 	

@@ -21,7 +21,9 @@ import { useDispatch } from 'react-redux';
 import { Users as V4UsersList } from '@/v4/routes/users';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FormattedMessage } from 'react-intl';
 import { Container } from './usersList.styles';
+import { Header, Title } from '../projects/projectsList.styles';
 
 export const UsersList = () => {
 	const dispatch = useDispatch();
@@ -37,6 +39,11 @@ export const UsersList = () => {
 
 	return (
 		<Container>
+			<Header>
+				<Title>
+					<FormattedMessage id="usersList.title" defaultMessage="Users" />
+				</Title>
+			</Header>
 			<V4UsersList />
 		</Container>
 	);
