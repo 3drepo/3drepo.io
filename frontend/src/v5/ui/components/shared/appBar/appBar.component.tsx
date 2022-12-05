@@ -16,13 +16,12 @@
  */
 import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
-import NotificationsIcon from '@assets/icons/notifications.svg';
-import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UserMenu } from '../userMenu';
 import { AppBarContainer, Items } from './appBar.styles';
 import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
+import { Notifications } from './notifications/notifications.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
@@ -36,9 +35,7 @@ export const AppBar = (): JSX.Element => {
 				<BreadcrumbsRouting />
 			</Items>
 			<Items>
-				<CircleButton variant="contrast" aria-label="notifications">
-					<NotificationsIcon />
-				</CircleButton>
+				<Notifications />
 				<UserMenu user={user} />
 			</Items>
 		</AppBarContainer>

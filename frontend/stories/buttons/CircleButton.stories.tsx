@@ -32,6 +32,7 @@ export default {
 		docs: {
 			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
 		},
+		controls: { exclude: ['onClick'] },
 	},
 } as ComponentMeta<typeof Button>;
 

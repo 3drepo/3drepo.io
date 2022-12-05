@@ -22,21 +22,30 @@ export default {
 	component: SuccessMessage,
 	argTypes: {
 		children: {
-			description: 'The text or component to display',
+			description: 'The text to display',
 			defaultValue: 'Success message\'s content',
+			type: 'string',
 		},
 	},
+	parameters: { controls: { exclude: ['className'] } },
 } as ComponentMeta<typeof SuccessMessage>;
 
 const Template: ComponentStory<typeof SuccessMessage> = ({ children, ...args }) => (
 	<SuccessMessage {...args}>{children}</SuccessMessage>
 );
 
-export const Default = Template.bind({});
-Default.args = {
+export const SingleLineMessage = Template.bind({});
+SingleLineMessage.args = {
+	children: 'This is the success message',
+};
+
+export const MultiLineMessage = Template.bind({});
+MultiLineMessage.args = {
 	children: (
 		<div>
-			This is the success message.
+			This is the success message
+			<br />
+			over 2 lines
 		</div>
 	),
 };
