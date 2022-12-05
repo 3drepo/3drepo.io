@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
-const { generateRandomString } = require('../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -26,9 +26,7 @@ let server;
 let agent;
 
 // These are the users being used for tests
-const tsAdmin = ServiceHelper.generateUserCredentials();
-const nonAdminUser = ServiceHelper.generateUserCredentials();
-const unlicencedUser = ServiceHelper.generateUserCredentials();
+const [tsAdmin, nonAdminUser, unlicencedUser, modelPermUser] = times(4, () => ServiceHelper.generateUserCredentials());
 
 const testProject = {
 	_id: ServiceHelper.generateUUIDString(),
@@ -37,14 +35,20 @@ const testProject = {
 
 const teamspace = 'teamspace';
 const brokenTS = 'teamspace2';
+const model = ServiceHelper.generateRandomModel({ viewers: [modelPermUser.user] });
 
 const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
-	await ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true);
-	await ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]);
-	await ServiceHelper.db.createUser(nonAdminUser, [teamspace]);
-	await ServiceHelper.db.createUser(unlicencedUser);
-	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name);
+	await Promise.all([
+		ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]),
+		ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true),
+		ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]),
+		ServiceHelper.db.createUser(nonAdminUser, [teamspace]),
+		ServiceHelper.db.createUser(unlicencedUser),
+		ServiceHelper.db.createUser(modelPermUser, [teamspace]),
+	]);
+
+	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name, [model._id]);
+	await ServiceHelper.db.createModel(teamspace, model._id, model.name, model.properties);
 };
 
 const testGetProjectList = () => {
@@ -65,6 +69,11 @@ const testGetProjectList = () => {
 		test('should return a project list if the user has a valid session and is admin of teamspace', async () => {
 			const res = await agent.get(`${route}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: true }] });
+		});
+
+		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
+			const res = await agent.get(`${route}?key=${modelPermUser.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: false }] });
 		});
 
 		test('should fail if an unknown error happened', async () => {
@@ -150,7 +159,7 @@ const testUpdateProject = () => {
 		});
 
 		test('should fail if the project name is taken by another project', async () => {
-			const name = generateRandomString();
+			const name = ServiceHelper.generateRandomString();
 			// create test project
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${tsAdmin.apiKey}`)
 				.send({ name }).expect(templates.ok.status);
