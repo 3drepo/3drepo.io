@@ -75,6 +75,7 @@ export const Login = () => {
 					Input={UsernameField}
 					control={control}
 					name="username"
+					required
 				/>
 				<ControlledInput
 					Input={PasswordField}
@@ -84,6 +85,7 @@ export const Login = () => {
 						id: 'auth.login.password',
 						defaultMessage: 'Password',
 					})}
+					required
 				/>
 				<UnhandledErrorInterceptor expectedErrorValidators={[isExpectedError]} />
 				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}

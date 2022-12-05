@@ -20,8 +20,9 @@ import { TextField } from '@controls/inputs/textField/textField.component';
 import { Typography } from '@controls/typography';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
+import { PasswordField as PasswordFieldBase } from '@controls/inputs/passwordField/passwordField.component';
 
 export const AuthHeading = styled(Typography).attrs({
 	variant: 'h1',
@@ -31,15 +32,13 @@ export const AuthHeading = styled(Typography).attrs({
 	margin-bottom: 22px;
 `;
 
-export const AuthField = styled(TextField).attrs({
-	required: true,
-})`
+const authFieldStyles = css`
 	margin-top: 8px;
 	margin-bottom: 14px;
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;
 
-export const UsernameField = styled(AuthField).attrs({
+export const UsernameField = styled(TextField).attrs({
 	InputProps: {
 		startAdornment: <UserIcon />,
 	},
@@ -48,15 +47,18 @@ export const UsernameField = styled(AuthField).attrs({
 		defaultMessage: 'Username or email',
 	}),
 	autoComplete: 'login',
-})``;
+})`
+	${authFieldStyles}
+`;
 
-export const PasswordField = styled(AuthField).attrs({
+export const PasswordField = styled(PasswordFieldBase).attrs({
 	InputProps: {
 		startAdornment: <PasswordIcon />,
 	},
 	autoComplete: 'current-password',
-	type: 'password',
-})``;
+})`
+	${authFieldStyles}
+`;
 
 export const ErrorMessage = styled(ErrorMessageBase)`
 	margin-top: 5px;

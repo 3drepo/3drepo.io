@@ -63,6 +63,7 @@ export const PasswordForgot = (): JSX.Element => {
 								Input={UsernameField}
 								control={control}
 								name="username"
+								required
 							/>
 							<SubmitButton disabled={!isValid} startIcon={<EmailIcon />}>
 								<FormattedMessage id="auth.forgotPassword.buttonText" defaultMessage="Send request" />

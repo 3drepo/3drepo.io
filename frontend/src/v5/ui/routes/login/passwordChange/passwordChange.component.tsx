@@ -71,6 +71,7 @@ export const PasswordChange = () => {
 								defaultMessage: 'New password',
 							})}
 							formError={errors.newPassword}
+							required
 						/>
 						<ControlledInput
 							Input={PasswordField}
@@ -81,6 +82,7 @@ export const PasswordChange = () => {
 								defaultMessage: 'Confirm new password',
 							})}
 							formError={errors.newPasswordConfirm}
+							required
 						/>
 						<SubmitButton disabled={!isValid}>
 							<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
