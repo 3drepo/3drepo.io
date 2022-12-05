@@ -20,7 +20,7 @@ import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { NotificationsPanelItem } from '@/v4/routes/components/notifications/notifications.styles';
 import { Container as NotificationTeamspace } from '@/v4/routes/components/notifications/components/panel/panel.styles';
 import { Item, ItemSecondaryAction } from '@/v4/routes/components/notifications/components/notificationItem/notificationItem.styles';
-import { Fab } from '@mui/material';
+import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 
 const navbarButtonStyles = css`
 	& > button {
@@ -176,12 +176,7 @@ const avatarStyles = css`
 	}
 `;
 
-export const Container = styled(Fab)`
-	&:hover > button {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-	
+export const Container = styled(NavbarButton)`
 	* {
 		text-transform: none;
 	}
