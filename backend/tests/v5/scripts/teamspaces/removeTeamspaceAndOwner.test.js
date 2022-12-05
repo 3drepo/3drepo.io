@@ -27,6 +27,11 @@ const { src, utilScripts } = require('../../helper/path');
 
 const RemoveTeamspace = require(`${utilScripts}/teamspaces/removeTeamspaceAndOwner`);
 
+const { getMembersInfo, getRiskCategories } = require(`${src}/models/teamspaces`);
+const { getUserByUsername } = require(`${src}/models/users`);
+const { grantTeamspaceRoleToUser } = require(`${src}/models/roles`);
+const { templates } = require(`${src}/utils/responseCodes`);
+
 const { times } = require('lodash');
 
 const generateData = () => ({
@@ -45,11 +50,13 @@ const generateData = () => ({
 });
 
 const setupTeamspaces = async ({ normal, partial }) => {
-	await createUser(generateUserCredentials());
+	const randomTS = generateRandomString();
+	await createTeamspace(randomTS);
 	await Promise.all(
 		[...normal, ...partial].map(async ({ name, hasTS, hasUsers }) => {
 			if (hasTS) {
 				await createTeamspace(name);
+				await grantTeamspaceRoleToUser(name, name);
 
 				if (hasUsers) {
 					await Promise.all(times(2, async () => {
@@ -60,13 +67,35 @@ const setupTeamspaces = async ({ normal, partial }) => {
 				await createTeamspaceRole(name);
 				await createUser({ ...generateUserCredentials(), user: name }, [name]);
 			}
+			await grantTeamspaceRoleToUser(randomTS, name);
 		}),
 	);
+};
+
+const checkTeamspaces = async (teamspaces, shouldExist, userDeleted) => {
+	await Promise.all(teamspaces.map(async ({ name, hasTS }) => {
+		if (hasTS) {
+			const membersList = await getMembersInfo(name);
+			if (shouldExist) {
+				await expect(getRiskCategories(name)).resolves.not.toBeUndefined();
+				expect(membersList.length).not.toBe(0);
+			} else {
+				await expect(getRiskCategories(name)).rejects.not.toBeUndefined();
+				expect(membersList.length).toBe(0);
+			}
+		}
+		if (shouldExist || !userDeleted) await expect(getUserByUsername(name)).resolves.not.toBeUndefined();
+		else await expect(getUserByUsername(name)).rejects.toEqual(templates.userNotFound);
+	}));
 };
 
 const runTest = () => {
 	describe('Remove teamspace and owner', () => {
 		const data = generateData();
+		const tsList = [
+			...data.normal,
+			...data.partial,
+		];
 		beforeEach(async () => {
 			resetFileshare();
 			await resetDB();
@@ -76,10 +105,30 @@ const runTest = () => {
 
 		test('should throw error if teamspaces is undefined', async () => {
 			await expect(RemoveTeamspace.run()).rejects.toEqual(expectedError);
+			await checkTeamspaces(tsList, true);
 		});
 
 		test('should throw error if teamspaces list is empty', async () => {
 			await expect(RemoveTeamspace.run('')).rejects.toEqual(expectedError);
+			await checkTeamspaces(tsList, true);
+		});
+
+		test('should do nothing if all the teamspaces listed does not exist', async () => {
+			await RemoveTeamspace.run(data.missing.join(','), true);
+			await checkTeamspaces(tsList, true);
+		});
+
+		test('should remove teamspace data without removing the user if flag is not set', async () => {
+			const [toRemove1, toRemove2, ...toKeep] = tsList;
+			await RemoveTeamspace.run([toRemove1.name, toRemove2.name].join(','));
+			await checkTeamspaces(toKeep, true);
+			await checkTeamspaces([toRemove1, toRemove2], false);
+		});
+		test('should remove teamspace data and the user if flag is set', async () => {
+			const [toRemove1, toKeep1, toRemove2, ...toKeep] = tsList;
+			await RemoveTeamspace.run([toRemove1.name, toRemove2.name].join(','), true);
+			await checkTeamspaces([...toKeep, toKeep1], true);
+			await checkTeamspaces([toRemove1, toRemove2], false, true);
 		});
 	});
 };

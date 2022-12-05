@@ -28,7 +28,7 @@ const { remove: deleteUser, getUserByUsername } = require(`${v5Path}/processors/
 const removeUserFromAllTeamspaces = async (user) => {
 	const teamspaces = await getTeamspaceListByUser(user);
 	await Promise.all(teamspaces.map(
-		({ name: teamspace }) => (teamspace === user ? Promise.resolve() : removeTeamspaceMember(teamspace, user)),
+		({ name: teamspace }) => removeTeamspaceMember(teamspace, user),
 	));
 };
 
