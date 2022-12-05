@@ -48,9 +48,9 @@ const updateSessionDetails = (req) => {
 		updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
 	}
 
-	if (req.session.referer) {
-		req.session.user.referer = req.session.referer;
-		delete req.session.referer;
+	if (session.referer) {
+		updatedUser.referer = session.referer;
+		delete session.referer;
 	} else if (req.headers.referer) {
 		updatedUser.referer = getURLDomain(req.headers.referer);
 	}
