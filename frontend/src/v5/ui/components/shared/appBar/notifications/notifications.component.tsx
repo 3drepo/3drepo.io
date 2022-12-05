@@ -14,19 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import generalDialogStyles from './generalDialogStyling.overrides';
-import attachResourcesDialog from './attachResourcesDialog.overrides';
-import screenshotDialog from './screenshotDialog.overrides';
-import suggestedTreatmentsDialog from './suggestedTreatmentsDialog.overrides';
-import snackbarStyles from './snackbar.overrides';
 
-export const V4DialogsOverridesContainer = styled.div`
-	display: contents;
-	
-	${generalDialogStyles}
-	${attachResourcesDialog}
-	${screenshotDialog}
-	${suggestedTreatmentsDialog}
-	${snackbarStyles}
-`;
+import V4Notifications from '@/v4/routes/components/notifications/notifications.container';
+import { Container } from './notifications.styles';
+
+export const Notifications = () => (
+	<Container>
+		<V4Notifications />
+	</Container>
+);

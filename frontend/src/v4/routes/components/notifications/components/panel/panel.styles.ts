@@ -24,3 +24,5 @@ export const List = styled(MaterialList)`
 		padding-top: 0;
 	}
 `;
+
+export const Container = styled.div``;
