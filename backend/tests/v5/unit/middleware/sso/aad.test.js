@@ -129,12 +129,12 @@ const testVerifyNewUserDetails = () => {
 };
 
 const testAuthenticate = () => {
-	describe('Add PKCE codes and redirect to MS authentication page', () => {
+	describe('Add PKCE codes, set session referrer and redirect to MS authentication page', () => {
 		const redirectUri = generateRandomString();
 		const res = { redirect: () => { } };
 
 		test(`should respond with ${templates.invalidArguments.code} if req.query has no redirectUri`, async () => {
-			const req = { query: {} };
+			const req = { query: {}, headers: {} };
 			addPkceCodes(req);
 
 			await Aad.authenticate(redirectUri)(req, res);
@@ -145,7 +145,7 @@ const testAuthenticate = () => {
 		});
 
 		test(`should respond with ${templates.ssoNotAvailable.code} if getAuthenticationCodeUrl throws ${templates.ssoNotAvailable.code}`, async () => {
-			const req = { query: { redirectUri: generateRandomString() } };
+			const req = { query: { redirectUri: generateRandomString() }, headers: {} };
 			addPkceCodes(req);
 			AadServices.getAuthenticationCodeUrl.mockRejectedValueOnce(templates.ssoNotAvailable);
 
@@ -157,7 +157,7 @@ const testAuthenticate = () => {
 		});
 
 		test('should set authParams and reqirect to ms authentication page if req has no body', async () => {
-			const req = { query: { redirectUri: generateRandomString() } };
+			const req = { query: { redirectUri: generateRandomString() }, headers: {} };
 			addPkceCodes(req);
 
 			await Aad.authenticate(redirectUri)(req, res);
@@ -175,6 +175,7 @@ const testAuthenticate = () => {
 			const req = {
 				query: { redirectUri: generateRandomString() },
 				body: { username: generateRandomString() },
+				headers: {},
 			};
 			addPkceCodes(req);
 
@@ -187,6 +188,27 @@ const testAuthenticate = () => {
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 			});
+		});
+
+		test('should set authParams, set session referre and reqirect to ms authentication page if req headers have referer', async () => {
+			const referer = generateRandomString();
+			const req = {
+				query: { redirectUri: generateRandomString() },
+				body: { username: generateRandomString() },
+				headers: { referer },
+			};
+			addPkceCodes(req);
+
+			await Aad.authenticate(redirectUri)(req, res);
+			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(req.authParams).toEqual({
+				redirectUri,
+				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
+				codeChallenge: req.session.pkceCodes.challenge,
+				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+			});
+			expect(req.session.referer).toEqual(referer);
 		});
 	});
 };

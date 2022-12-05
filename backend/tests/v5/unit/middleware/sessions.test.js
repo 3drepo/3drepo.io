@@ -207,6 +207,7 @@ const testUpdateSession = () => {
 
 	describe.each([
 		['the request has a referer', { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } }],
+		['the session has a referer', { ...req, session: { ...req.session, referer: 'http://abc.com/' } }],
 		['the request has socket id', { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
 		['the request has user agent', { ...req, headers: { ...req.headers, 'user-agent': 'some user agent' } }],
 		['the request has web user agent', { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } }],
