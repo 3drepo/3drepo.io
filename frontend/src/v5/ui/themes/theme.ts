@@ -664,6 +664,13 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiBadge: {
+			styleOverrides: {
+				root: {
+					placeItems: 'center',
+				},
+			},
+		},
 		MuiAvatar: {
 			styleOverrides: {
 				root: {
@@ -803,10 +810,6 @@ export const theme = createTheme({
 					boxShadow: 'none',
 					border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 					transition: 'none',
-					'& > *:first-child': {
-						height: 17,
-						width: 'auto',
-					},
 					'&:active': {
 						boxShadow: 'none',
 					},

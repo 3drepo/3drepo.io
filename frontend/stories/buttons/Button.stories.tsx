@@ -29,22 +29,19 @@ export default {
 			options: ['contained', 'outlined', 'text', 'label', 'label-outlined'],
 			control: { type: 'select' },
 		},
-
 		/**
- * The color of the component. It supports those theme colors that make sense for this component.
- */
+		 * The color of the component. It supports those theme colors that make sense for this component.
+		 */
 		color: {
-			options: ['inherit',
-				'primary', 'secondary',
+			options: [
+				'inherit',
+				'primary',
+				'secondary',
 				'success',
 				'error',
 				'info',
 				'warning',
-				'text'],
-			control: { type: 'select' },
-		},
-		size: {
-			options: ['small', 'medium', 'large'],
+			],
 			control: { type: 'select' },
 		},
 		isPending: {
@@ -53,23 +50,32 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		errorButton: {
+			type: 'boolean',
+		},
 	},
 } as ComponentMeta<typeof Button>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Material ui button</Button>;
+const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Controls Button</Button>;
 
-export const Primary = Template.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-Primary.args = {
-	variant: 'outlined',
-	color: 'primary',
+export const Contained = Template.bind({});
+Contained.args = {
+	variant: 'contained',
+	color: 'secondary',
 };
 
-export const Secondary = Template.bind({});
-Secondary.args = {
+export const Outlined = Template.bind({});
+Outlined.args = {
 	variant: 'outlined',
 	color: 'secondary',
+};
+
+export const Text = Template.bind({});
+Text.args = {
+	variant: 'text',
+	color: 'primary',
 };
 
 export const Label = Template.bind({});
@@ -78,8 +84,13 @@ Label.args = {
 	color: 'primary',
 };
 
-export const LabelOutined = Template.bind({});
-LabelOutined.args = {
+export const LabelOutlined = Template.bind({});
+LabelOutlined.args = {
 	variant: 'label-outlined',
 	color: 'primary',
+};
+
+export const Error = Template.bind({});
+Error.args = {
+	errorButton: true,
 };

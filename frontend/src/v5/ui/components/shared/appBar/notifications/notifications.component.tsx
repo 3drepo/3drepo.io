@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MaterialList from '@mui/material/List';
-import styled from 'styled-components';
+import V4Notifications from '@/v4/routes/components/notifications/notifications.container';
+import { Container } from './notifications.styles';
 
-export const List = styled(MaterialList)`
-	&& {
-		padding-bottom: 0;
-		padding-top: 0;
-	}
-`;
-
-export const Container = styled.div``;
+export const Notifications = () => (
+	<Container>
+		<V4Notifications />
+	</Container>
+);

@@ -54,7 +54,6 @@ export default {
 				'error',
 				'info',
 				'warning',
-				'text',
 			],
 			control: { type: 'select' },
 		},
