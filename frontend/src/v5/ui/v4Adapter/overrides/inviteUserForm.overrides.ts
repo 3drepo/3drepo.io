@@ -36,7 +36,7 @@ const JobSelectStyles = css`
 		height: 10px;
 	}
 	${JobTitle}, ${EmptySelectValue} {
-		width: auto;
+		width: calc(100% - 22px);
 		color: ${({ theme }) => theme.palette.secondary.main};
 		${({ theme }) => theme.typography.body1}
 	}

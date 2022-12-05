@@ -49,6 +49,7 @@ const AddUserButton = css`
 				color: ${({ theme }) => theme.palette.primary.main};
 				background-color: ${({ theme }) => theme.palette.primary.contrast};
 				height: 9px;
+				width: 9px;
 				padding: 2px;
 			}
 		}
