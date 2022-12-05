@@ -191,9 +191,6 @@ function* stopListenOnClickPin() {
 	}
 }
 
-
-/****/
-
 const updateClipStateCallback = (clipNumber) => {
 	dispatch(ViewerGuiActions.updateClipState(clipNumber));
 };
