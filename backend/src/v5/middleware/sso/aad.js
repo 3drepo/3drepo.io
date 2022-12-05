@@ -20,11 +20,11 @@ const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
+const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
-const { getURLDomain } = require('../../utils/helper/strings');
 
 const Aad = {};
 
@@ -107,7 +107,7 @@ const setSessionReferer = async (req, res, next) => {
 	if (req.headers.referer) {
 		req.session.referer = getURLDomain(req.headers.referer);
 	}
-	
+
 	await next();
 };
 

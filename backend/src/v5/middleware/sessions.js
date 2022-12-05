@@ -73,7 +73,7 @@ const updateSessionDetails = (req) => {
 };
 
 Sessions.updateSession = async (req, res, next) => {
-	updateSessionDetails(req);	
+	updateSessionDetails(req);
 	await next();
 };
 
