@@ -20,7 +20,7 @@ import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 
-export const Action = styled.li<{ disabled?: boolean }>`
+export const TicketImageAction = styled.li<{ disabled?: boolean }>`
 	line-height: 20px;
 	font-weight: 500;
 	font-size: 10px;

@@ -23,6 +23,7 @@ import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetai
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
+import { ViewProperty } from './viewProperty.component';
 
 export const TicketProperty = {
 	text: TextField,
@@ -34,4 +35,5 @@ export const TicketProperty = {
 	coords: PinDetails,
 	number: NumberField,
 	image: TicketImage,
+	view: ViewProperty,
 };

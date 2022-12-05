@@ -16,12 +16,14 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
+import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
+import { useParams } from 'react-router-dom';
 import { EditableTicket, ITemplate } from './tickets.types';
 
 export const TITLE_INPUT_NAME = 'title';
@@ -146,4 +148,34 @@ export const getTicketResourceUrl = (
 export const isResourceId = (str) => {
 	const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 	return regexExp.test(str);
+};
+
+export const getImgSrc = (imgData) => {
+	const { teamspace, project, containerOrFederation } = useParams();
+	const isFederation = modelIsFederation(containerOrFederation);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+
+	if (!imgData) return '';
+	if (isResourceId(imgData)) {
+		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
+	}
+	return addBase64Prefix(imgData);
+};
+
+export const sanitizeViewVals = (vals, template) => {
+	if (vals.properties) {
+		const props = vals.properties;
+		const propsDefs: any[] = template.properties;
+
+		Object.keys(props).forEach((key) => {
+			const definition = propsDefs.find((def) => def.name === key);
+			if (definition?.type === 'view') {
+				if (isResourceId(props[key].screenshot)) {
+					delete props[key].screenshot;
+				}
+			}
+		});
+	}
+
+	return vals;
 };

@@ -16,6 +16,8 @@
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormInputProps } from '@controls/inputs/controlledInput.component';
+import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
+import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormControl, FormHelperText } from '@mui/material';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
@@ -23,6 +25,7 @@ import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplaye
 type BasicTicketImageProps = Omit<FormInputProps, 'inputRef' | 'onBlur'> & {
 	children: any,
 };
+
 export const BasicTicketImage = ({
 	children,
 	value,
@@ -36,6 +39,12 @@ export const BasicTicketImage = ({
 }: BasicTicketImageProps) => {
 	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
+	const uploadImage = async () => {
+		const file = await uploadFile(getSupportedImageExtensions());
+		const imgSrc = await convertFileToImageSrc(file);
+		onChange?.(imgSrc);
+	};
+
 	return (
 		<FormControl error={error} required={required}>
 			<Container className={className} error={error}>
@@ -46,7 +55,7 @@ export const BasicTicketImage = ({
 				<TicketImageDisplayer
 					imgSrc={value}
 					disabled={disabled || !isAdmin}
-					onEmptyImageClick={onChange}
+					onEmptyImageClick={uploadImage}
 				/>
 			</Container>
 			<FormHelperText>{helperText}</FormHelperText>
