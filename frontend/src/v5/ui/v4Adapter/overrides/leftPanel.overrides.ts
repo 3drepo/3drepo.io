@@ -116,6 +116,7 @@ export default css`
 
 	${ViewerPanelBody}, ${ViewerPanelEmptySpace} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		border-radius: 10px;
 	}
 
 	${ViewerPanelFooter} {

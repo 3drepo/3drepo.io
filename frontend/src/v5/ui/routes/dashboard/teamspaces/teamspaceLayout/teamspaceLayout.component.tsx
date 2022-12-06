@@ -18,12 +18,11 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
-import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@mui/material';
 import { Container, Content, TopBar, TeamspaceImage, TeamspaceInfo } from './teamspaceLayout.styles';
@@ -37,6 +36,7 @@ interface ITeamspaceLayout {
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
 	const currentUserIsUpating = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
+	const { isAdmin } = TeamspacesHooksSelectors.selectCurrentTeamspaceDetails() || {};
 
 	const [imgSrc, setImgSrc] = useState(null);
 
@@ -65,7 +65,7 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 							values={{ teamspace }}
 						/>
 					</Typography>
-					<TeamspaceQuota />
+					{isAdmin && <TeamspaceQuota />}
 				</TeamspaceInfo>
 			</TopBar>
 			<TeamspaceNavigation />

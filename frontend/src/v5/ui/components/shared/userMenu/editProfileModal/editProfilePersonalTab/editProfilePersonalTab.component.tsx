@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
@@ -24,7 +24,7 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
@@ -108,6 +108,12 @@ export const EditProfilePersonalTab = ({
 		);
 	};
 
+	const CountriesMenuItems = useMemo(() => clientConfigService.countries.map((country) => (
+		<MenuItem key={country.code} value={country.code}>
+			{country.name}
+		</MenuItem>
+	)), []);
+
 	const fieldsAreDirty = !isMatch(user, getTrimmedNonEmptyValues());
 
 	// enable submission only if form is valid and fields are dirty
@@ -169,11 +175,7 @@ export const EditProfilePersonalTab = ({
 				})}
 				required
 			>
-				{clientConfigService.countries.map((country) => (
-					<MenuItem key={country.code} value={country.code}>
-						{country.name}
-					</MenuItem>
-				))}
+				{CountriesMenuItems}
 			</FormSelect>
 			{submitWasSuccessful && (
 				<SuccessMessage>
