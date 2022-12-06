@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.27.1",
+	"version": "4.27.2",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
         "node": "14.x.x"
@@ -47,6 +47,7 @@
 		"@mui/lab": "5.0.0-alpha.71",
 		"@mui/material": "5.4.4",
 		"@mui/styles": "5.4.4",
+		"@mui/x-date-pickers": "5.0.3",
 		"@popperjs/core": "2.6.0",
 		"@webscopeio/react-textarea-autocomplete": "4.6.3",
 		"axios": "0.26.1",
@@ -77,7 +78,7 @@
 		"query-string": "6.2.0",
 		"react": "17.0.0",
 		"react-autosuggest": "9.4.3",
-		"react-children-utilities": "2.6.3",
+		"react-children-utilities": "2.8.0",
 		"react-copy-to-clipboard": "5.0.4",
 		"react-custom-scrollbars": "4.2.1",
 		"react-dom": "17.0.0",

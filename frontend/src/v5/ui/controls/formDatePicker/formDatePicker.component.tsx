@@ -14,14 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Select as SelectBase } from '@mui/material';
-import styled from 'styled-components';
+import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
+import { FormBaseCalendarPicker, FormBaseCalendarPickerProps } from './formBaseCalendarPicker/formBaseCalendarPicker.component';
+import { getDateMask } from './dateFormatHelper';
 
-export const Select = styled(SelectBase)`
-	&& {
-		background: transparent;
-		width: 100%;
-		cursor: initial;
-		pointer-events: none;
-	}
-`;
+type FormDatePickerProps = FormBaseCalendarPickerProps & Partial<DatePickerProps<any, any>>;
+export const FormDatePicker = (props: FormDatePickerProps) => (
+	<FormBaseCalendarPicker
+		PickerComponent={DatePicker}
+		inputFormat={getDateMask()}
+		{...props}
+	/>
+);

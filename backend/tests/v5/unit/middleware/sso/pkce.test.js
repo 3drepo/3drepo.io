@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const config = require('../../../../../src/v5/utils/config');
 const { src } = require('../../../helper/path');
 
 const Sso = require(`${src}/middleware/sso/pkce`);
@@ -23,12 +24,13 @@ const testAddPkceProtection = () => {
 	describe('Add pkce protection', () => {
 		test('should generate pkce codes and assign them to req', async () => {
 			const mockCB = jest.fn();
-			const req = { session: {} };
+			const req = { session: { cookie: {} } };
 			await Sso.addPkceProtection(req, {}, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(req.session.pkceCodes.challengeMethod).toEqual('S256');
 			expect(req.session.pkceCodes).toHaveProperty('verifier');
 			expect(req.session.pkceCodes).toHaveProperty('challenge');
+			expect(req.session.cookie.domain).toEqual(config.cookie_domain);
 		});
 	});
 };

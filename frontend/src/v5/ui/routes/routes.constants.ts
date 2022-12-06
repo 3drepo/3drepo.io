@@ -50,8 +50,7 @@ export interface DashboardParams {
 	project?: string;
 }
 
-export interface ViewerParams {
-	teamspace?: string;
+export interface ViewerParams extends DashboardParams {
 	containerOrFederation?: string;
 	revision?: string;
 }

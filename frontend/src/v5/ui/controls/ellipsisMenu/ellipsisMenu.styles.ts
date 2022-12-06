@@ -16,35 +16,7 @@
  */
 
 import styled from 'styled-components';
-import {
-	MenuList as MenuListComponent,
-	MenuItem as MenuItemComponent,
-	Popover as PopoverComponent,
-} from '@mui/material';
-
-export const MenuList = styled(MenuListComponent)`
-	padding: 10px 0;
-`;
-
-export const MenuItem = styled(MenuItemComponent)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	margin: 0;
-	height: 40px;
-	padding-right: 14px;
-	justify-content: space-between;
-
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
-
-	&:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.base.light};
-	}
-`;
+import { Popover as PopoverComponent } from '@mui/material';
 
 export const Popover = styled(PopoverComponent)`
 	margin-left: 19px;

@@ -19,7 +19,7 @@ import { StyledFab } from './circleButton.styles';
 
 interface ICircleButton {
 	size?: 'large' | 'medium' | 'small';
-	variant?: 'main' | 'contrast';
+	variant?: 'main' | 'contrast' | 'viewer';
 	disabled?: boolean;
 	onClick?: () => void;
 	children: any;

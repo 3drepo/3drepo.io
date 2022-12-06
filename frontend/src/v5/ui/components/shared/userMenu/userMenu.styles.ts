@@ -19,6 +19,14 @@ import styled from 'styled-components';
 import { Button } from '@controls/button';
 import { Link } from '@mui/material';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
+import { Menu } from '@controls/actionMenu/actionMenu.styles';
+
+export const ActionMenu = styled(ActionMenuBase)`
+	${Menu} {
+		width: 230px;
+	}
+`;
 
 export const AvatarContainer = styled.div`
 	&& {
