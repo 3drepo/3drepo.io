@@ -710,7 +710,7 @@ async function _createAccounts(roles, userName) {
 
 			if (permission) {
 				// Check for admin Privileges first
-				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+				// const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
 				const hasAvatar = await fileExists("admin", "avatars.ref" , user.user);
 				const account = {
@@ -721,14 +721,14 @@ async function _createAccounts(roles, userName) {
 					projects: [],
 					models: [],
 					fedModels: [],
-					isAdmin: isTeamspaceAdmin,
+					isAdmin: isTeamspaceAdmin(user, userName),
 					permissions: permission.permissions || []
 				};
 
 				// show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
 				accounts.push(account);
-				if (isTeamspaceAdmin || canViewProjects) {
+				if (accounts.isAdmin || canViewProjects) {
 					// show all implied and inherted permissions
 					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
 

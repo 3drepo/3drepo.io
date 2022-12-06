@@ -24,7 +24,6 @@
 	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
 	const utils = require("../utils");
-	const _ = require("lodash");
 	const {v5Path} = require("../../interop");
 	const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
 	const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);

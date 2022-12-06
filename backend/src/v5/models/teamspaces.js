@@ -193,13 +193,9 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 		{ $push: { permissions: { user: username, permissions: [permission] } } });
 };
 
-Teamspace.grantAdminToUser = (teamspace, username) => {
-	return grantPermissionToUser(teamspace, username, TEAMSPACE_ADMIN);
-};
+Teamspace.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAMSPACE_ADMIN);
 
-Teamspace.grantMemberToUser = (teamspace, username) => {
-	return grantPermissionToUser(teamspace, username, TEAM_MEMBER);
-};
+Teamspace.grantMemberToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAM_MEMBER);
 
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
