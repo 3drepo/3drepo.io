@@ -14,35 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { SearchInput } from '@controls/search/searchInput';
-import { useState } from 'react';
+import { Accordion } from '@controls/accordion/accordion.component';
+import Icon from '@assets/icons/stepper_error.svg';
 
 export default {
-	title: 'Inputs/SearchInput',
-	component: SearchInput,
-	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
-} as ComponentMeta<typeof SearchInput>;
+	title: 'Containers/Accordion',
+	component: Accordion,
+	argTypes: {
+		title: {
+			type: 'string',
+		},
+		defaultExpanded: {
+			type: 'boolean',
+		},
+	},
+	parameters: { controls: { exclude: ['ref', 'elevation', 'square', 'variant', 'Icon'] } },
+} as ComponentMeta<typeof Accordion>;
 
-const Template: ComponentStory<typeof SearchInput> = (args) => <SearchInput {...args} />;
+const Controlled: ComponentStory<typeof Accordion> = (args) => (<Accordion {...args} />);
 
-export const Default = Template.bind({});
-Default.args = {
-	label: 'Search input',
-};
-
-const Controlled: ComponentStory<typeof SearchInput> = (args) => {
-	const [val, setVal] = useState('');
-
-	const onChange = (event) => {
-		setVal(event.target.value);
-	};
-
-	return (<SearchInput {...args} onChange={onChange} value={val} />);
-};
-
-export const ControlledSearchInput = Controlled.bind({});
+export const ControlledFormSelect = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledSearchInput.args = {
-	label: 'Controlled Search input',
+ControlledFormSelect.args = {
+	title: 'Accordion container',
+	children: <div>This is some content only visible once expanded</div>,
+	Icon,
 };

@@ -183,7 +183,7 @@ const setPinData = (state = INITIAL_STATE, { pinData }) => {
 };
 
 const resetPanels = (state = INITIAL_STATE) => {
-	return { ...state, leftPanels: INITIAL_STATE.leftPanels, lockedPanels: INITIAL_STATE.lockedPanels };
+	return { ...state, leftPanels: INITIAL_STATE.leftPanels, rightPanels: INITIAL_STATE.rightPanels, lockedPanels: INITIAL_STATE.lockedPanels };
 };
 
 const setCoordViewSuccess = (state = INITIAL_STATE, { coordViewActive }) => {

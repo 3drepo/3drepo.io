@@ -24,6 +24,7 @@ import currentUser2Saga from '@/v5/store/currentUser/currentUser.sagas';
 import auth2Saga from '@/v5/store/auth/auth.sagas';
 import usersSaga from '@/v5/store/users/users.sagas';
 import revisionsSaga from '@/v5/store/revisions/revisions.sagas';
+import ticketsSaga from '@/v5/store/tickets/tickets.sagas';
 import activitiesSaga from './activities/activities.sagas';
 import authSaga from './auth/auth.sagas';
 import billingSaga from './billing/billing.sagas';
@@ -94,6 +95,7 @@ export default function* rootSaga() {
 		fork(containersSaga),
 		fork(federationsSaga),
 		fork(revisionsSaga),
+		fork(ticketsSaga),
 		fork(usersSaga),
 		// <-- INJECT MODULE SAGA -->
 	]);

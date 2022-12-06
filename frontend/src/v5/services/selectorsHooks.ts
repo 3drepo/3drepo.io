@@ -23,8 +23,10 @@ import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
 import * as RevisionsSelectors from '@/v5/store/revisions/revisions.selectors';
-import * as UsersSelectors from '@/v5/store/users/users.selectors';
+import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
+import * as TicketsCardSelectors from '@/v5/store/tickets/card/ticketsCard.selectors';
 import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors';
+import * as UsersSelectors from '@/v5/store/users/users.selectors';
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
@@ -33,5 +35,7 @@ export const FederationsHooksSelectors = createHooksSelectors(FederationsSelecto
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
 export const RevisionsHooksSelectors = createHooksSelectors(RevisionsSelectors);
+export const TicketsHooksSelectors = createHooksSelectors(TicketsSelectors);
+export const TicketsCardHooksSelectors = createHooksSelectors(TicketsCardSelectors);
 export const TeamspacesHooksSelectors = createHooksSelectors(TeamspacesSelectors);
 export const UsersHooksSelectors = createHooksSelectors(UsersSelectors);
