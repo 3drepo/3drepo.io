@@ -19,11 +19,11 @@ const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { getURLDomain } = require('../utils/helper/strings');
+const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
-const { session } = require('../services/sessions');
 const { templates } = require('../utils/responseCodes');
 
 const Sessions = {};
@@ -35,9 +35,46 @@ Sessions.manageSessions = async (req, res, next) => {
 		return;
 	}
 
-	const { middleware } = await session;
+	const { middleware } = await initSession;
 
 	middleware(req, res, next);
+};
+
+const updateSessionDetails = (req) => {
+	const updatedUser = { ...req.loginData, webSession: false };
+	const { session } = req;
+
+	if (req.headers['user-agent']) {
+		updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
+	}
+
+	if (session.referer) {
+		updatedUser.referer = session.referer;
+		delete session.referer;
+	} else if (req.headers.referer) {
+		updatedUser.referer = getURLDomain(req.headers.referer);
+	}
+
+	session.user = updatedUser;
+	session.cookie.domain = config.cookie_domain;
+
+	if (config.cookie.maxAge) {
+		session.cookie.maxAge = config.cookie.maxAge;
+	}
+
+	publish(events.SESSION_CREATED, { username: updatedUser.username,
+		sessionID: req.sessionID,
+		ipAddress: req.ips[0] || req.ip,
+		userAgent: req.headers['user-agent'],
+		socketId: req.headers[SOCKET_HEADER],
+		referer: updatedUser.referer });
+
+	return session;
+};
+
+Sessions.updateSession = async (req, res, next) => {
+	updateSessionDetails(req);
+	await next();
 };
 
 Sessions.createSession = (req, res) => {
@@ -46,31 +83,8 @@ Sessions.createSession = (req, res) => {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
 			respond(req, res, err);
 		} else {
-			const updatedUser = { ...req.loginData, webSession: false };
-
-			if (req.headers['user-agent']) {
-				updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
-			}
-
-			if (req.headers.referer) {
-				updatedUser.referer = getURLDomain(req.headers.referer);
-			}
-
-			req.session.user = updatedUser;
-			req.session.cookie.domain = config.cookie_domain;
-
-			if (config.cookie.maxAge) {
-				req.session.cookie.maxAge = config.cookie.maxAge;
-			}
-
-			publish(events.SESSION_CREATED, { username: req.body.user,
-				sessionID: req.sessionID,
-				ipAddress: req.ips[0] || req.ip,
-				userAgent: req.headers['user-agent'],
-				socketId: req.headers[SOCKET_HEADER],
-				referer: updatedUser.referer });
-
-			respond(req, res, templates.ok, req.v4 ? updatedUser : undefined);
+			const session = updateSessionDetails(req);
+			respond(req, res, templates.ok, req.v4 ? session.user : undefined);
 		}
 	});
 };
