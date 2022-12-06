@@ -187,5 +187,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testViewList();
-	testViewThumbnail();
+	// testViewThumbnail();
 });

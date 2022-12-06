@@ -113,10 +113,17 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 
 Teamspace.removeAddOns = (teamspace) => teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
 
+Teamspace.breakTeamspaceForTests = async (teamspace) => {
+	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+		{ $unset: { permissions: "" } });
+};
+
 Teamspace.getTeamspaceAdmins = async (teamspace) => {
 	const tsSettings = await db.findOne(
 		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { permissions: 1 },
 	);
+	console.log("tsSettings");
+	console.log(tsSettings);
 
 	if (!tsSettings) {
 		throw templates.teamspaceNotFound;

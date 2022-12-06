@@ -77,7 +77,9 @@ const testGetProjectList = () => {
 		});
 
 		test('should fail if an unknown error happened', async () => {
-			const res = await agent.get(`/v5/teamspaces/${brokenTS}/projects?key=${tsAdmin.apiKey}`).expect(templates.unknown.status);
+			const res = await agent.get(`/v5/teamspaces/${brokenTS}/projects?key=${tsAdmin.apiKey}`); //.expect(templates.unknown.status);
+			console.log("===================++");
+			console.log(res.body);
 			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 	});
