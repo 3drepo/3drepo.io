@@ -28,6 +28,12 @@ export const selectCurrentTeamspace = createSelector(
 	selectTeamspacesDomain, (state) => state.currentTeamspace,
 );
 
+export const selectCurrentTeamspaceDetails = createSelector(
+	selectTeamspacesDomain,
+	selectCurrentTeamspace,
+	(state, currentTeamspace) => state.teamspaces.find(({ name }) => name === currentTeamspace),
+);
+
 export const selectCurrentQuota = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.quota[teamspace],
 );
