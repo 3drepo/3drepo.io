@@ -719,13 +719,13 @@ function toggleMeasurementListeners(enabled) {
 
 export function* setMeasureMode({ measureMode }) {
 	try {
+		if (!measureMode) {
+			yield Viewer.clearMeasureMode();
+			return
+		}
 		toggleMeasurementListeners(false);
 		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
 		yield Viewer.setMeasureMode(measureMode, false);
-
-		if (measureMode === '') {
-			return;
-		}
 
 		toggleMeasurementListeners(true);
 		disableConflictingMeasurementActions();

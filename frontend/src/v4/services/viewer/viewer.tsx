@@ -454,11 +454,8 @@ export class ViewerService {
 		await this.isViewerReady();
 		this.measureModeLabels = labels;
 
-		if (this.measureMode) {
-			this.clearMeasureMode();
-			if (!mode) {
-				return;
-			}
+		if (!mode) {
+			return;
 		}
 
 		this.measureMode = mode;
