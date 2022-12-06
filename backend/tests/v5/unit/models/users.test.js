@@ -410,7 +410,6 @@ const testGetUserByEmail = () => {
 const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
 		createdAt,
-		inactive: true,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
@@ -423,14 +422,17 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 				company: newUserData.company,
 			},
 		},
-		emailVerifyToken: {
-			token: newUserData.token,
-			expiredAt: emailExpiredAt,
-		},
 	};
 
 	if (newUserData.sso) {
 		formattedData.sso = newUserData.sso;
+	} else {
+		formattedData.emailVerifyToken = {
+			token: newUserData.token,
+			expiredAt: emailExpiredAt,
+		};
+
+		formattedData.inactive = true;
 	}
 
 	return formattedData;
@@ -482,9 +484,8 @@ const testAddUser = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			const userCustomData = fn.mock.calls[0][2];
 			expect(userCustomData).toHaveProperty('createdAt');
-			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
-			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
-				userCustomData.emailVerifyToken.expiredAt);
+			expect(userCustomData).not.toHaveProperty('emailVerifyToken.expiredAt');
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt);
 			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
 	});
