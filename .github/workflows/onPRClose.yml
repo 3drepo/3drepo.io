@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
-      content-id: ${{ steps.commitMsgParser.outputs.content-id }}
+      issue-content-id: ${{ steps.commitMsgParser.outputs.issue-content-id }}
       merged: ${{ steps.commitMsgParser.outputs.merged }}
     steps:
       - name: Extract Issue Number from PR
-        uses: 3drepo/extract-issue-number-from-PR@v1
+        uses: 3drepo/extract-pr-information@v1
         with:
           pr: ${{ needs.get-pr-number.outputs.pr-number }}
           base: staging
@@ -59,7 +59,7 @@ jobs:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
           project_number: 22
-          content_id: ${{ needs.get-issue-number.outputs.content-id }}
+          content_id: ${{ needs.get-issue-number.outputs.issue-content-id }}
           field: Status
           value: 'Done'
 
