@@ -874,6 +874,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ modelNamespace, priority }));
 	}
 
+	public static setStreamingFovWeight(weight: number) {
+		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, weight);
+	}
+
 	/**
 	 * The amount of space the geometry streaming should leave in the
 	 * unmanaged heap.
