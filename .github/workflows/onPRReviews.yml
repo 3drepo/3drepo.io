@@ -57,7 +57,7 @@ jobs:
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:
     name: Update Project Issue Status
-    if: ${{ always() && needs.check-merge-ready.outputs.approved = '' }} # if not reviewer approved let's modify the status.
+    if: ${{ always() && needs.check-merge-ready.outputs.approved == '' }} # if not reviewer approved let's modify the status.
     runs-on: ubuntu-latest
     outputs: 
       issue-content-id: ${{ needs.get-issue-number.outputs.issue-content-id }}
