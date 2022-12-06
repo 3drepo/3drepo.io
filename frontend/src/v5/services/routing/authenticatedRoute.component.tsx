@@ -18,8 +18,8 @@
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
-import { AuthHooksSelectors } from '../selectorsHooks/authSelectors.hooks';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Route, RouteProps } from './route.component';
 
 const WrapAuthenticationRedirect = ({ children }) => {

@@ -17,8 +17,8 @@
 
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';

@@ -21,6 +21,8 @@ import { PureComponent } from 'react';
 import IconButton from '@mui/material/IconButton';
 import SnackbarContent from '@mui/material/SnackbarContent';
 import Close from '@mui/icons-material/Close';
+import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
 interface IProps {
 	snack: any;
@@ -89,31 +91,33 @@ export class SnackbarContainer extends PureComponent<IProps, IState> {
 		const {isOpen, snack} = this.state;
 		const {message, ref, ...snackProps} = snack as any;
 		return (
-            <Snackbar
-                autoHideDuration={5000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                onClose={this.handleClose}
-                open={isOpen}
-                {...snackProps}
-                TransitionProps={{
-                    onExited: this.handleExited
-                }}
-			>
-				<SnackbarContent
-					message={message}
-					action={[
-						<IconButton
-							key="close"
-							aria-label="Close"
-							color="inherit"
-							size="large"
-							onClick={() => this.handleClose(null, '')}
-						>
-							<Close />
-						</IconButton>
-					]}
-				/>
-			</Snackbar>
+			<ConditionalV5Wrapper v5Wrapper={V4DialogsAdapter}>
+				<Snackbar
+					autoHideDuration={5000}
+					anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+					onClose={this.handleClose}
+					open={isOpen}
+					{...snackProps}
+					TransitionProps={{
+						onExited: this.handleExited
+					}}
+				>
+					<SnackbarContent
+						message={message}
+						action={[
+							<IconButton
+								key="close"
+								aria-label="Close"
+								color="inherit"
+								size="large"
+								onClick={() => this.handleClose(null, '')}
+							>
+								<Close />
+							</IconButton>
+						]}
+					/>
+				</Snackbar>
+			</ConditionalV5Wrapper>
         );
 	}
 }

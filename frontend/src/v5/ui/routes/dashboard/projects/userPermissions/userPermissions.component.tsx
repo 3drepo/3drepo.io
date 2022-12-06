@@ -18,9 +18,8 @@ import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { useDispatch } from 'react-redux';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { Container, V4ModelsPermissions } from './userPermissions.styles';
 
 export const UserPermissions = () => {

@@ -17,8 +17,7 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { ViewerParams } from '../routes.constants';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';

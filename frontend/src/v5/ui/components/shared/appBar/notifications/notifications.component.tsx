@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IProjectsActions, ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import V4Notifications from '@/v4/routes/components/notifications/notifications.container';
+import { Container } from './notifications.styles';
 
-export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActions>(ProjectsActions);
+export const Notifications = () => (
+	<Container>
+		<V4Notifications />
+	</Container>
+);
