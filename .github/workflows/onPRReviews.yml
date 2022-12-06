@@ -87,7 +87,7 @@ jobs:
           
       - name: Update status on the Issue
         if: ${{ steps.setStatusOutputIssue.outputs.status }}
-        id: update_status
+        id: update_status_issue
         uses: 3drepo/update-project-action@v1.1
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
@@ -116,7 +116,7 @@ jobs:
           ACTION: ${{ github.event.action }}
       - name: Update status on the PR
         if: ${{ steps.setStatusOutputPR.outputs.status }}
-        id: update_status
+        id: update_status_pr
         uses: 3drepo/update-project-action@v1.1
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
