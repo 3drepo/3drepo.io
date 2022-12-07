@@ -22,7 +22,6 @@ const { getUserByEmail, getUserByQuery, getUserByUsername } = require('../../mod
 const { URL } = require('url');
 const { addPkceProtection } = require('./pkce');
 const { getURLDomain } = require('../../utils/helper/strings');
-const { getUserByEmail } = require('../../models/users');
 const { getUserFromSession } = require('../../utils/sessions');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');

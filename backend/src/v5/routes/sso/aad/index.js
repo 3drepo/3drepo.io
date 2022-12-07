@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, checkStateIsValid, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
-const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticate, checkStateIsValid, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
 const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
 const { Router } = require('express');

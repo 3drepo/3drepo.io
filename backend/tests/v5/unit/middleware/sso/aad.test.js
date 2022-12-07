@@ -367,7 +367,6 @@ const testHasAssociatedAccount = () => {
 	});
 };
 
-
 const testCheckStateIsValid = () => {
 	describe('Check state is valid JSON', () => {
 		test('should call next if state is valid JSON', () => {
