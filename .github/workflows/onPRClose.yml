@@ -53,6 +53,7 @@ jobs:
     needs: get-issue-number
     steps:
       - name: Update status in the Project
+        if: needs.get-issue-number.outputs.merged
         id: update_status
         uses: 3drepo/update-project-action@1.1
         with:
