@@ -19,7 +19,7 @@
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const { intersection } = require("lodash");
-const { removeUserFromProjects } = require("./project");
+const { removeUserFromProjects, removePermissionsFromAllProjects } = require("./project");
 
 const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");
@@ -60,7 +60,12 @@ AccountPermissions.updateOrCreate = async function(teamspace, username, permissi
 	const updatedPermissions = this.get(teamspace).filter(perm => perm.user !== username)
 		.concat({user: username, permissions});
 
-	return await updatePermissions(teamspace, updatedPermissions);
+	const permissionsToReturn = await updatePermissions(teamspace, updatedPermissions);
+	if(permissions.includes(C.PERM_TEAMSPACE_ADMIN)){
+		await removePermissionsFromAllProjects(teamspace.user, username);
+	}
+	
+	return permissionsToReturn;
 };
 
 AccountPermissions.update = async function(teamspace, username, permissions) {

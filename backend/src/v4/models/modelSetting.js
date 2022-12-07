@@ -565,4 +565,10 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	return ModelSetting.prepareDefaultView(account, model, setting);
 };
 
+ModelSetting.removePermissionsFromModels = async (account, models, userToRemove) => {
+	await Promise.all(models.map((model)=> {
+		ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ''}])
+	}));		
+};	
+
 module.exports = ModelSetting;
