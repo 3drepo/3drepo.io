@@ -22,24 +22,32 @@ const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const Aad = require(`${src}/services/sso/aad`);
 
-jest.mock('../../../../../../src/v5/utils/webRequests');
-const WebRequests = require(`${src}/utils/webRequests`);
-
 jest.mock('@azure/msal-node');
 const msal = require('@azure/msal-node');
 const { errorCodes } = require('../../../../../../src/v5/services/sso/sso.constants');
 
-const { msGraphUserDetailsUri } = require(`${src}/services/sso/aad/aad.constants`);
-
 const authCodeUrl = generateRandomString();
-const accessToken = generateRandomString();
+const invalidAuthCode = generateRandomString();
+const accessToken = {
+	idTokenClaims: {
+		id: generateRandomString(),
+		email: generateRandomString(),
+		given_name: generateRandomString(),
+		family_name: generateRandomString(),
+	},
+};
 
 msal.ConfidentialClientApplication.mockImplementation((clientAppConfig) => ({
 	getAuthCodeUrl: () => {
 		clientAppConfig.system?.loggerOptions?.loggerCallback();
 		return authCodeUrl;
 	},
-	acquireTokenByCode: () => ({ accessToken }),
+	acquireTokenByCode: (tokenRequest) => {
+		if (tokenRequest.code === invalidAuthCode) {
+			throw templates.unknown;
+		}
+		return accessToken;
+	},
 }));
 
 const testGetAuthenticationCodeUrl = () => {
@@ -114,19 +122,19 @@ const testGetUserDetails = () => {
 				},
 			};
 
-			const userDetails = { mail: generateRandomString() };
-			const fn = jest.spyOn(WebRequests, 'get').mockResolvedValueOnce(userDetails);
-
-			const res = await Aad.getUserDetails(generateRandomString(),
-				generateRandomString(), generateRandomString());
-			expect(res).toEqual(userDetails);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(msGraphUserDetailsUri, { Authorization: `Bearer ${accessToken}` });
+			const res = await Aad.getUserDetails(generateRandomString(), generateRandomString(),
+				generateRandomString());
+			expect(res).toEqual({
+				firstName: accessToken.idTokenClaims.given_name,
+				lastName: accessToken.idTokenClaims.family_name,
+				id: accessToken.idTokenClaims.oid,
+				email: accessToken.idTokenClaims.email,
+			});
 
 			config.sso = initialConfig;
 		});
 
-		test(`should throw ${errorCodes.failedToFetchDetails} if it fails to fetch user details`, async () => {
+		test(`should throw ${errorCodes.UNKNOWN} if it fails to fetch user details`, async () => {
 			const initialConfig = config.sso;
 			config.sso = {
 				aad: {
@@ -134,9 +142,9 @@ const testGetUserDetails = () => {
 					clientSecret: generateRandomString(),
 				},
 			};
-			jest.spyOn(WebRequests, 'get').mockRejectedValueOnce(new Error());
-			await expect(Aad.getUserDetails(generateRandomString(),
-				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.failedToFetchDetails);
+
+			await expect(Aad.getUserDetails(invalidAuthCode,
+				generateRandomString(), generateRandomString())).rejects.toEqual(errorCodes.UNKNOWN);
 
 			config.sso = initialConfig;
 		});

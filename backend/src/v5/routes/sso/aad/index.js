@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, checkStateIsValid, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
-const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticate, checkStateIsValid, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
 const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
@@ -82,14 +82,14 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, notLoggedIn, checkStateIsValid, hasAssociatedAccount,
+	router.get(authenticateRedirectEndpoint, notLoggedIn, hasAssociatedAccount,
 		updateSession, redirectToStateURL);
 
 	/**
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email 2 there is a SSO account witht he same email
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 the user is already logged in, 6 unknown
 	 *     tags: [Aad]
 	 *     operationId: aadSignup
 	 *     parameters:
@@ -136,7 +136,7 @@ const establishRoutes = () => {
 	 */
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(signupRedirectEndpoint, checkStateIsValid, verifyNewUserDetails, signUpPost, redirectToStateURL);
+	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
 	/**
 	 * @openapi

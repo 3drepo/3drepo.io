@@ -18,9 +18,7 @@
 const aadLabel = require('../../../utils/logger').labels.aad;
 const config = require('../../../utils/config');
 const { errorCodes } = require('../sso.constants');
-const { get } = require('../../../utils/webRequests');
 const logger = require('../../../utils/logger').logWithLabel(aadLabel);
-const { msGraphUserDetailsUri } = require('./aad.constants');
 const msal = require('@azure/msal-node');
 const { templates } = require('../../../utils/responseCodes');
 
@@ -60,11 +58,16 @@ Aad.getUserDetails = async (code, redirectUri, codeVerifier) => {
 	const tokenRequest = { code, redirectUri, codeVerifier };
 	const clientApp = getClientApplication();
 	try {
-		const token = await clientApp.acquireTokenByCode(tokenRequest);
-		const response = await get(msGraphUserDetailsUri, { Authorization: `Bearer ${token.accessToken}` });
-		return response;
-	} catch {
-		throw errorCodes.failedToFetchDetails;
+		const { idTokenClaims: userInfo } = await clientApp.acquireTokenByCode(tokenRequest);
+		return {
+			firstName: userInfo.given_name,
+			lastName: userInfo.family_name,
+			id: userInfo.oid,
+			email: userInfo.email,
+		};
+	} catch (err) {
+		logger.logError(`Failed to fetch MS user details: ${err.message}`);
+		throw errorCodes.UNKNOWN;
 	}
 };
 

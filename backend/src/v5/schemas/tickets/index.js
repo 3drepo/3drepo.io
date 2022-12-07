@@ -232,6 +232,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.number().transform((_, val) => val.getTime());
 			} else if (type === propTypes.VIEW) {
 				res[name] = Yup.object({
+					screenshot: uuidString,
 					state: Yup.object({
 						highlightedGroups: Yup.array().of(uuidString),
 						colorOverrideGroups: Yup.array().of(uuidString),

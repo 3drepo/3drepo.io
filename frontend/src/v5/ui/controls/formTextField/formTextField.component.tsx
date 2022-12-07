@@ -18,20 +18,23 @@
 import { TextField, TextFieldProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
-export type FormTextFieldProps = TextFieldProps & {
-	control: any,
+export type FormTextFieldProps = Omit<TextFieldProps, 'variant'> & {
+	control?: any,
 	formError?: any,
+	name: string,
 };
 
 export const FormTextField = ({
 	name,
 	control,
 	formError,
+	defaultValue = '',
 	...otherProps
 }: FormTextFieldProps) => (
 	<Controller
 		name={name}
 		control={control}
+		defaultValue={defaultValue}
 		render={({ field }) => (
 			<TextField
 				inputRef={field.ref}

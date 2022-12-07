@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers/dialogsActions.dispatchers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { useEffect } from 'react';
 import { useHistory, generatePath, useParams } from 'react-router-dom';
@@ -30,7 +29,7 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 	const isContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
 
-	const CheckContainerReadiness = (container) => {
+	const checkContainerReadiness = (container) => {
 		if ((!canUploadToBackend(container.status))
 			&& container.revisionsCount
 		) {
@@ -55,11 +54,11 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 
 	useEffect(() => {
 		if (isContainer) {
-			CheckContainerReadiness(isContainer);
+			checkContainerReadiness(isContainer);
 		}
 		if (isFederation) {
 			isFederation.forEach(
-				(container) => CheckContainerReadiness(container),
+				(container) => checkContainerReadiness(container),
 			);
 		}
 	}, [containerOrFederation]);

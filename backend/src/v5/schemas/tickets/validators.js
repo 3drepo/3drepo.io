@@ -45,10 +45,10 @@ Validators.propTypesToValidator = (propType, isNullable = false) => {
 	case propTypes.MANY_OF:
 		return imposeNullableRule(Yup.array().of(types.strings.title));
 	case propTypes.IMAGE:
-		return imposeNullableRule(types.embeddedImage);
+		return types.embeddedImage(isNullable);
 	case propTypes.VIEW:
 	{ const validator = Yup.object().shape({
-		screenshot: types.embeddedImage,
+		screenshot: types.embeddedImage(isNullable),
 		state: imposeNullableRule(Yup.object({
 			showHiddenObjects: Yup.boolean().default(false),
 			highlightedGroups: Yup.array().of(groupIdOrData),

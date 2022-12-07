@@ -34,6 +34,7 @@ export default {
 			options: ['primary', 'secondary'],
 		},
 	},
+	parameters: { controls: { exclude: ['to', 'className', 'children'] } },
 } as ComponentMeta<typeof LinkCard>;
 
 const SecondaryTemplate: ComponentStory<typeof LinkCard> = (args) => (

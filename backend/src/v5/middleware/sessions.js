@@ -48,7 +48,10 @@ const updateSessionDetails = (req) => {
 		updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
 	}
 
-	if (req.headers.referer) {
+	if (session.referer) {
+		updatedUser.referer = session.referer;
+		delete session.referer;
+	} else if (req.headers.referer) {
 		updatedUser.referer = getURLDomain(req.headers.referer);
 	}
 
@@ -59,7 +62,7 @@ const updateSessionDetails = (req) => {
 		session.cookie.maxAge = config.cookie.maxAge;
 	}
 
-	publish(events.SESSION_CREATED, { username: req.body.user,
+	publish(events.SESSION_CREATED, { username: updatedUser.username,
 		sessionID: req.sessionID,
 		ipAddress: req.ips[0] || req.ip,
 		userAgent: req.headers['user-agent'],

@@ -20,7 +20,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { IFormModal } from '@controls/modal/formModal/formDialog.component';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
