@@ -21,7 +21,7 @@ import { useState } from 'react';
 export default {
 	title: 'Inputs/SearchInput',
 	component: SearchInput,
-	parameters: { controls: { exclude: ['ref', 'hiddenLabel'] } },
+	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
 } as ComponentMeta<typeof SearchInput>;
 
 const Template: ComponentStory<typeof SearchInput> = (args) => <SearchInput {...args} />;
