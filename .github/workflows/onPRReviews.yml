@@ -25,7 +25,7 @@ jobs:
           if_false: ${{ github.event.pull_request.number }}
 
   get-details:
-    name: Get Current Issue Number
+    name: Get PR and Issue Details
     needs: [ get-pr-number ]
     runs-on: ubuntu-latest
     outputs: 
