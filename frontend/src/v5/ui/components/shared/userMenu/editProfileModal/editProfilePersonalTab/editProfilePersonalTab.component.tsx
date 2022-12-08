@@ -26,10 +26,10 @@ import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollArea } from './editProfilePersonalTab.styles';
-import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;

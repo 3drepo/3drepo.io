@@ -18,8 +18,8 @@
 import { useEffect } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { BasicTicketImage } from '../basicTicketImage.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
+import { BasicTicketImage } from '../basicTicketImage.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 
 type TicketImageProps = Omit<FormInputProps, 'inputRef'>;

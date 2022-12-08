@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
-import { TextField } from '@controls/inputs/textField/textField.component';
+import { FormTextField } from '@controls/inputs/formInputs.component';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 
@@ -77,7 +77,7 @@ export const Instruction = styled.div`
 	max-width: 450px;
 `;
 
-export const RetypeCheckField = styled(TextField)`
+export const RetypeCheckField = styled(FormTextField)`
 	margin-top: 10px;
 	width: 296px;
 `;

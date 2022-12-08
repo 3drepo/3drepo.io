@@ -24,7 +24,6 @@ import { Gap } from '@controls/gap';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
-import { InputController } from '@controls/inputs/inputController.component';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, AuthParagraph, FormUsernameField } from '../components/components.styles';
 

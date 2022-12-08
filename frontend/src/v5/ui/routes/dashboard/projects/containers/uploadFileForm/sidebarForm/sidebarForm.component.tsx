@@ -23,11 +23,10 @@ import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { InputController } from '@controls/inputs/inputController.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
-import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	value: UploadItemFields,
@@ -147,14 +146,12 @@ export const SidebarForm = ({
 
 			{isSpm && (
 				<>
-					<InputController
-						Input={AnimationsCheckbox}
+					<AnimationsCheckbox
 						control={control}
 						name="importAnimations"
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
-					<InputController
-						Input={TimezoneSelect}
+					<TimezoneSelect
 						control={control}
 						name="timezone"
 						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
@@ -168,7 +165,7 @@ export const SidebarForm = ({
 								{opt.label}
 							</MenuItem>
 						))}
-					</InputController>
+					</TimezoneSelect>
 				</>
 			)}
 		</div>
