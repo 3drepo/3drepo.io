@@ -24,6 +24,7 @@ const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
+const C = require("../../../src/v4/constants");
 
 describe("Projects", function () {
 
@@ -386,6 +387,45 @@ describe("Projects", function () {
 							return entry.permissions.length > 0;
 						}));
 						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should remove all model permissions if a user gets project admin permission", function(done) {
+		const project = {
+			permissions: [{
+				user: "testing",
+				permissions: [C.PERM_PROJECT_ADMIN]
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${projectName}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${projectName}`)
+					.expect(200, function(err, res) {
+						const entriesFiltered = res.body.permissions.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${projectName}/models`)
+					.expect(200, function(err, res) {
+						const entriesFiltered = res.body.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal([]);
 						callback(err);
 					});
 			}

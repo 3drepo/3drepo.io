@@ -32,8 +32,8 @@ describe("Account permission::", function () {
 	let agentAdmin;
 	const username = "accountPerm";
 	const password = "accountPerm";
-	const projectId = '4106e5fb-4623-4f9a-a35f-a426e129f16a';
-	const modelId = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
+	const project = 'Sample_Project';
+	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 
 	before(function(done) {
 		server = app.listen(8080, function () {
@@ -108,11 +108,11 @@ describe("Account permission::", function () {
 
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 
-		const projectRes = await agent.get(`/${username}/projects/${projectId}`)
+		const projectRes = await agent.get(`/${username}/projects/${project}`)
 			.expect(200);
 		expect(projectRes.body.permissions).to.deep.equal([]);
 
-		const modelPermissionsRes = await agent.get(`/${username}/${modelId}/permissions`)
+		const modelPermissionsRes = await agent.get(`/${username}/${model}/permissions`)
 			.expect(200);
 		expect(modelPermissionsRes.body).to.deep.equal([]);
 	});
