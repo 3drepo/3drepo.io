@@ -453,7 +453,9 @@ export class ViewerService {
 	public async setMeasureMode(mode: string, labels: boolean = true) {
 		await this.isViewerReady();
 		this.measureModeLabels = labels;
-
+		if (this.measureMode) {
+			this.clearMeasureMode();
+		}
 		if (!mode) {
 			return;
 		}
