@@ -17,7 +17,7 @@
 
 import { useEffect, useState } from 'react';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import EditIcon from '@assets/icons/edit.svg';
+import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
