@@ -17,7 +17,7 @@
 
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Link } from 'react-router-dom';
-import LoginIcon from '@assets/icons/login.svg';
+import LoginIcon from '@assets/icons/outlined/login-outlined.svg';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
