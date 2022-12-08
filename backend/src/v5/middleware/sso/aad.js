@@ -95,18 +95,18 @@ const verifyNewUserDetails = async (req, res, next) => {
 
 Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails]);
 
-Aad.verifyNewEmail = async (req, res, next) => {
+const verifyNewEmail = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const { data: { mail, id } } = await getUserDetails(req.query.code,
+		const { email, id } = await getUserDetails(req.query.code,
 			linkRedirectUri, req.session.pkceCodes?.verifier);
 
-		const user = await getUserByQuery({ 'customData.email': mail, user: { $ne: username } },
+		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } },
 			{ 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
-			throw errorCodes.emailExists;
+			throw errorCodes.EMAIL_EXISTS;
 		} else {
-			req.body = { email: mail, sso: { type: providers.AAD, id } };
+			req.body = { email, sso: { type: providers.AAD, id } };
 			await next();
 		}
 	} catch (errorCode) {
@@ -114,6 +114,8 @@ Aad.verifyNewEmail = async (req, res, next) => {
 		redirectWithError(res, state.redirectUri, errorCode);
 	}
 };
+
+Aad.verifyNewEmail = validateMany([checkStateIsValid, verifyNewEmail]);
 
 Aad.redirectToStateURL = (req, res) => {
 	try {

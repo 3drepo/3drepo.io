@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, checkStateIsValid, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticate, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
 const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
@@ -89,7 +89,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 the user is already logged in, 6 unknown
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 unknown
 	 *     tags: [Aad]
 	 *     operationId: aadSignup
 	 *     parameters:
@@ -142,7 +142,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/link:
 	 *   get:
-	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email 2 there is a SSO account witht he same email
+	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 unknown
 	 *     tags: [Aad]
 	 *     operationId: aadLink
 	 *     parameters:
@@ -159,7 +159,7 @@ const establishRoutes = () => {
 	 */
 	router.get('/link', isLoggedIn, authenticate(linkRedirectUri));
 
-	router.get(linkRedirectEndpoint, checkStateIsValid, verifyNewEmail, linkPost, redirectToStateURL);
+	router.get(linkRedirectEndpoint, verifyNewEmail, linkPost, redirectToStateURL);
 
 	/**
 	 * @openapi

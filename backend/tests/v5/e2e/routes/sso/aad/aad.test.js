@@ -271,6 +271,13 @@ const testLink = () => {
 				await testSession.post('/v5/logout/');
 			});
 
+			test('should fail without a valid state', async () => {
+				const state = generateRandomString();
+				const res = await testSession.get(`/v5/sso/aad/link-post?state=${state}`)
+					.expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+
 			test('should fail if redirectUri is not provided', async () => {
 				await testSession.get('/v5/sso/aad/link')
 					.expect(templates.invalidArguments.status);
@@ -311,24 +318,24 @@ const testLinkPost = () => {
 
 		test('should fail without a valid state', async () => {
 			const state = generateRandomString();
-			const res = await testSession.get(`/v5/sso/aad/link-post?state=${state}`)
-				.expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
+			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test(`should redirect with ${errorCodes.emailExists} if email is taken by another user`, async () => {
-			const userDataFromAad = { mail: userEmailSso, id: generateRandomString() };
+		test(`should redirect with ${errorCodes.EMAIL_EXISTS} if email is taken by another user`, async () => {
+			const userDataFromAad = { email: userEmailSso, id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.emailExists}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
 		});
 
 		test('should link user if email is taken by the logged in user', async () => {
-			const userDataFromAad = { mail: userEmail, id: generateRandomString() };
+			const userDataFromAad = { email: userEmail, id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 
 			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
@@ -339,15 +346,15 @@ const testLinkPost = () => {
 		});
 
 		test('should link user and change email if email is available', async () => {
-			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
+			const userDataFromAad = { email: generateRandomString(), id: generateRandomString() };
 			const state = { redirectUri: generateRandomURL() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.email).toEqual(userDataFromAad.mail);
+			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
 			await resetTestUser();
 		});
 
@@ -359,14 +366,14 @@ const testLinkPost = () => {
 			});
 			await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`);
 
-			const userDataFromAad = { mail: generateRandomString(), id: generateRandomString() };
-			Aad.getUserDetails.mockResolvedValueOnce({ data: userDataFromAad });
+			const userDataFromAad = { email: generateRandomString(), id: generateRandomString() };
+			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
 
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.email).toEqual(userDataFromAad.mail);
+			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
 			await resetTestUser();
 		});
 	});
@@ -390,13 +397,13 @@ const testUnlink = () => {
 
 		describe('With valid authentication', () => {
 			beforeAll(async () => {
-				Aad.getUserDetails.mockResolvedValueOnce({ data: { mail: userEmailSso, id: ssoUserId } });
+				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
 				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
 			});
 
 			afterAll(async () => {
 				// link user back to SSO
-				Aad.getUserDetails.mockResolvedValueOnce({ data: { mail: userEmailSso, id: generateRandomString() } });
+				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: generateRandomString() });
 				await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`)
 					.expect(302);
 				await testSession.post('/v5/logout/');
