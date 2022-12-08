@@ -17,7 +17,8 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { ViewerParams } from '../routes.constants';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
@@ -26,6 +27,7 @@ import { useFederationsData } from '../dashboard/projects/federations/federation
 
 export const Viewer = () => {
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+	TicketsCardActionsDispatchers.resetState();
 
 	useContainersData();
 	useFederationsData();
