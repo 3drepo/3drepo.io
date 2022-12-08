@@ -30,21 +30,21 @@ import { TextField } from './textField/textField.component';
 import { Toggle } from './toggle/toggle.component';
 
 // text inputs
-export const FormNumberField = (props) => <InputController Input={NumberField} {...props} />
-export const FormPasswordField = (props) => <InputController Input={PasswordField} {...props} />
-export const FormTextArea = (props) => <InputController Input={TextArea} {...props} />
-export const FormTextAreaFixedSize = (props) => <InputController Input={TextAreaFixedSize} {...props} />
-export const FormTextField = (props) => <InputController Input={TextField} {...props} />
+export const FormNumberField = (props) => (<InputController Input={NumberField} {...props} />);
+export const FormPasswordField = (props) => (<InputController Input={PasswordField} {...props} />);
+export const FormTextArea = (props) => (<InputController Input={TextArea} {...props} />);
+export const FormTextAreaFixedSize = (props) => (<InputController Input={TextAreaFixedSize} {...props} />);
+export const FormTextField = (props) => (<InputController Input={TextField} {...props} />);
 
 // calendar inputs
-export const FormDatePicker = (props) => <InputController Input={DatePicker} {...props} />
-export const FormDateTimePicker = (props) => <InputController Input={DateTimePicker} {...props} />
+export const FormDatePicker = (props) => (<InputController Input={DatePicker} {...props} />);
+export const FormDateTimePicker = (props) => (<InputController Input={DateTimePicker} {...props} />);
 
 // select inputs
-export const FormMultiSelect = (props) => <InputController Input={MultiSelect} {...props} />
-export const FormSelectView = (props) => <InputController Input={SelectView} {...props} />
-export const FormSelect = (props) => <InputController Input={Select} {...props} />
+export const FormMultiSelect = (props) => (<InputController Input={MultiSelect} {...props} />);
+export const FormSelectView = (props) => (<InputController Input={SelectView} {...props} />);
+export const FormSelect = (props) => (<InputController Input={Select} {...props} />);
 
 // control inputs
-export const FormCheckbox = (props) => <InputController Input={Checkbox} {...props} />
-export const FormToggle = (props) => <InputController Input={Toggle} {...props} />
+export const FormCheckbox = (props) => (<InputController Input={Checkbox} {...props} />);
+export const FormToggle = (props) => (<InputController Input={Toggle} {...props} />);
