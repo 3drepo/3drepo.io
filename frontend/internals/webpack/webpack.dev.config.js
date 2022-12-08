@@ -1,6 +1,8 @@
 const LiveReloadPlugin = require('webpack-livereload-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const getWebpackConfig = require('./webpack.common.config');
 const MODES = require('./tools/modes');
+const PATHS = require('./tools/paths');
 
 const statsOptions = {
   assets: true,
@@ -25,10 +27,11 @@ const statsOptions = {
 module.exports = (env) => getWebpackConfig(env, {
   mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
-  output: {
-	clean: true,
-  },
   plugins: [
+    new CleanWebpackPlugin({
+      root: PATHS.PROJECT_DIR,
+      beforeEmit: true
+    }),
     new LiveReloadPlugin({
       hostname: 'localhost',
       port: 35729,
