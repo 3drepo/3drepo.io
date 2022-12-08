@@ -32,7 +32,6 @@ const hasSomeModelAccess = async (teamspace, project, models, user) => {
 };
 
 Projects.getProjectList = async (teamspace, user) => {
-	console.log("Proj.getProjList");
 	const projects = await getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 });
 	const tsAdmin = await isTeamspaceAdmin(teamspace, user);
 	return (await Promise.all(projects.map(async ({ _id, name, permissions, models }) => {

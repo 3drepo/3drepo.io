@@ -104,22 +104,28 @@ const setupData = async () => {
 				},
 			},
 		}),
-		ServiceHelper.db.createTeamspace(tsWithMultipleLicenses.name, [userWithMultipleLicenses.user], undefined, false, {
-			billing: {
-				subscriptions: {
-					discretionary: {
-						collaborators: userCollabs,
-						data: licenseData,
-						expiryDate: validExpiryDate,
-					},
-					enterprise: {
-						collaborators: userCollabs,
-						data: licenseData,
-						expiryDate: validExpiryDate - 10,
+		ServiceHelper.db.createTeamspace(
+			tsWithMultipleLicenses.name,
+			[userWithMultipleLicenses.user],
+			undefined,
+			false,
+			{
+				billing: {
+					subscriptions: {
+						discretionary: {
+							collaborators: userCollabs,
+							data: licenseData,
+							expiryDate: validExpiryDate,
+						},
+						enterprise: {
+							collaborators: userCollabs,
+							data: licenseData,
+							expiryDate: validExpiryDate - 10,
+						},
 					},
 				},
 			},
-		}),
+		),
 		ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
 			[userWithLicenseUnlimitedCollabs.user], undefined, false, {
 				billing: {

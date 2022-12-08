@@ -27,7 +27,6 @@ const { validateProjectData } = require('../../../middleware/dataConverter/input
 const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
 
 const getProjectList = (req, res) => {
-	console.log("getProjectList");
 	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
 	Projects.getProjectList(teamspace, user).then((projects) => {

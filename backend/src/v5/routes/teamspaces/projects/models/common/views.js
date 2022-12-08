@@ -38,7 +38,6 @@ const getViewList = (isFed) => async (req, res, next) => {
 };
 
 const getViewThumbnail = (isFed) => async (req, res) => {
-	console.log("getViewThumbnail");
 	const { teamspace, model, view } = req.params;
 
 	try {
