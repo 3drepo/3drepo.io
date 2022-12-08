@@ -18,7 +18,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { SubmitButton as Button } from '@controls/submitButton';
 
 import LoginIcon from '@assets/icons/outlined/login-outlined.svg';
-import EmailIcon from '@assets/icons/email.svg';
+import EmailIcon from '@assets/icons/filled/email-filled.svg';
 import LockIcon from '@assets/icons/outlined/lock-outlined.svg';
 import AddIcon from '@assets/icons/filled/add_circle-filled.svg';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
