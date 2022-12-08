@@ -189,6 +189,11 @@ export const Container = styled(NavbarButton)`
 		padding: 0;
 	}
 
+	.MuiBadge-root > svg {
+		height: 17px;
+		width: 17px;
+	}
+
 	${navbarButtonStyles}
 	${containerStyles}
 	${headerStyles}

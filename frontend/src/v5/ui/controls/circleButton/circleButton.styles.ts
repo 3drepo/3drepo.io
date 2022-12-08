@@ -30,7 +30,7 @@ export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
 	display: flex;
 	place-items: center;
 
-	svg {
+	& > svg {
 		height: 17px;
 		width: auto;
 	}
