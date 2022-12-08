@@ -361,9 +361,7 @@ const testLinkPost = () => {
 		test('should link user and change email if email is available even if user is already SSO', async () => {
 			const state = { redirectUri: generateRandomURL() };
 
-			Aad.getUserDetails.mockResolvedValueOnce({
-				data: { mail: generateRandomString(), id: generateRandomString() },
-			});
+			Aad.getUserDetails.mockResolvedValueOnce( { email: generateRandomString(), id: generateRandomString() });
 			await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`);
 
 			const userDataFromAad = { email: generateRandomString(), id: generateRandomString() };
