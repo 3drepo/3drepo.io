@@ -193,6 +193,28 @@ const testGetTemplateList = () => {
 	});
 };
 
+const testGetRiskCategories = () => {
+	const route = (key, ts = teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/riskCategories${key ? `?key=${key}` : ''}`;
+	describe('Risk Categories', () => {
+		describe.each([
+			['user does not have a valid session', undefined, undefined, false, templates.notLoggedIn],
+			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, false, templates.teamspaceNotFound],
+			['user is a member of teamspace', normalUser.apiKey, undefined, true],
+		])('', (desc, key, ts, success, expectedRes) => {
+			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedRes.status;
+				const res = await agent.get(route(key, ts)).expect(expectedStatus);
+				if (success) {
+					expect(res.body.riskCategories).toEqual(expect.arrayContaining(['Commercial Issue', 'Environmental Issue', 'Health - Material effect', 'Health - Mechanical effect', 'Safety Issue - Fall', 'Safety Issue - Trapped', 'Safety Issue - Event', 'Safety Issue - Handling', 'Safety Issue - Struck', 'Safety Issue - Public', 'Social Issue', 'Other Issue', 'Unknown']));
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/settings', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -204,4 +226,5 @@ describe('E2E routes/teamspaces/settings', () => {
 	testUpdateTemplate();
 	testGetTemplate();
 	testGetTemplateList();
+	testGetRiskCategories();
 });

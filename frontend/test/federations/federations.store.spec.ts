@@ -25,8 +25,7 @@ import { createTestStore } from '../test.helpers';
 import { containerMockFactory, prepareMockViews } from '../containers/containers.fixtures';
 
 describe('Federations: store', () => {
-	let dispatch; let
-		getState;
+	let dispatch, getState;
 	const projectId = 'projectId';
 
 	beforeEach(() => {

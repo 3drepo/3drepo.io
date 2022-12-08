@@ -47,11 +47,6 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
-export interface IFrame {
-	dateTime: Date;
-	state: string;
-}
-
 export interface ISequance {
 	_id: string;
 	rev_id: string;

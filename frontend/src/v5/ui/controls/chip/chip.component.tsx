@@ -15,33 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Paper as PaperBase } from '@mui/material';
+import { ChipProps } from '@mui/material';
+import { forwardRef } from 'react';
+import { COLOR } from '../../themes/theme';
+import { ChipBase } from './chip.styles';
 
-export const ActionMenuSection = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 11px;
+type IChip = Omit<ChipProps, 'color' | 'variant'> & {
+	color?: string;
+	variant?: 'text' | 'outlined' | 'filled';
+};
 
-	&:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
-
-export const ActionMenuTriggerButton = styled.div.attrs({
-	isActionMenuTriggerButton: true,
-})``;
-
-export const Paper = styled(PaperBase)`
-	border-radius: 5px;
-	box-shadow: 
-		0 6px 10px rgb(0 0 0 / 14%),
-		0 1px 18px rgb(0 0 0 / 12%),
-		0 3px 5px rgb(0 0 0 / 20%);
-`;
-
-export const Menu = styled.div`
-	display: flex;
-	flex-direction: column;
-	width: 230px;
-`;
+export const Chip = forwardRef(({ color = COLOR.PRIMARY_MAIN, variant, ...props }: IChip, ref: any) => (
+	<ChipBase $coloroverride={color} $variant={variant} {...props} ref={ref} />
+));

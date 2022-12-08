@@ -33,7 +33,15 @@ const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
-const generatePropData = (buffer, isView) => (isView ? { screenshot: buffer } : buffer);
+const generatePropData = (buffer, isView) => (isView
+	? {
+		screenshot: buffer,
+		camera: {
+			position: [0, 0, 0],
+			up: [0, 0, 1],
+			forward: [1, 1, 0],
+		},
+	} : buffer);
 
 const generateImageTestData = (isView) => {
 	const propName = generateRandomString();

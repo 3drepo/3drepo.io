@@ -578,6 +578,7 @@ const testUpdateTicket = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const requiredPropName = ServiceHelper.generateRandomString();
 		const imagePropName = ServiceHelper.generateRandomString();
+		const requiredImagePropName = ServiceHelper.generateRandomString();
 		const templateWithRequiredProp = {
 			...ServiceHelper.generateTemplate(),
 			properties: [
@@ -590,14 +591,21 @@ const testUpdateTicket = () => {
 					name: imagePropName,
 					type: propTypes.IMAGE,
 				},
+				{
+					name: requiredImagePropName,
+					type: propTypes.IMAGE,
+					required: true,
+				},
 			],
 		};
 
 		const deprecatedTemplate = ServiceHelper.generateTemplate();
 		con.ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
+		con.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 
 		fed.ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
+		fed.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 
 		beforeAll(async () => {
@@ -653,9 +661,10 @@ const testUpdateTicket = () => {
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticketId provided does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound, { title: ServiceHelper.generateRandomString() }],
-				['the update data does not conforms to the template', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: null } }],
+				['the update data does not conforms to the template (trying to unset required prop)', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: null } }],
+				['the update data does not conforms to the template (trying to unset required img prop)', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredImagePropName]: null } }],
 				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, { }],
-				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: model.ticket.properties }],
+				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
@@ -696,6 +705,7 @@ const testUpdateTicket = () => {
 						[basePropertyLabels.OWNER]: updatedTicket.properties[basePropertyLabels.OWNER],
 						...(payloadChanges?.properties ?? {}),
 						[imagePropName]: updatedTicket.properties[imagePropName],
+						[requiredImagePropName]: updatedTicket.properties[requiredImagePropName],
 					};
 
 					expect(updatedTicket).toEqual(expectedUpdatedTicket);

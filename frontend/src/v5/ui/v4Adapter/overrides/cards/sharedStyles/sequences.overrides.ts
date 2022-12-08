@@ -23,10 +23,6 @@ import { css } from 'styled-components';
 export default css`
 	${SequenceContent} {
 		margin-top: 5px;
-
-		${StyledFormControl} {
-			padding-top: 22px;
-		}
 	}
 
 	${StyledFormControl} {
@@ -55,7 +51,7 @@ export default css`
 			}
 			
 			${SequenceDateActions} {
-				bottom: -22px;
+				bottom: -3px;
 				left: -9px;
 				top: unset;
 				right: unset;
