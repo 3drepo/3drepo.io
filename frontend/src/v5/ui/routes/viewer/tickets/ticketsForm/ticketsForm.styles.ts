@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Gap } from '@controls/gap';
 import styled from 'styled-components';
+
+export const ErrorTextGap = styled(Gap)``;
 
 export const PanelsContainer = styled.div`
 	.MuiAccordion-root {
@@ -33,7 +36,7 @@ export const PanelsContainer = styled.div`
 			border-bottom-right-radius: 6px;
 		}
 
-		.MuiAccordionDetails-root > :not(:first-child) {
+		.MuiAccordionDetails-root > :not(:first-child):not(${ErrorTextGap}) {
 			margin-top: 10px;
 		}
 	}
