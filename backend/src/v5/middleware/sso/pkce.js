@@ -16,6 +16,7 @@
  */
 
 const { CryptoProvider } = require('@azure/msal-node');
+const config = require('../../utils/config');
 
 const Sso = {};
 
@@ -24,6 +25,7 @@ Sso.addPkceProtection = async (req, res, next) => {
 	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
 
 	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
+	req.session.cookie.domain = config.cookie_domain;
 
 	await next();
 };
