@@ -20,7 +20,7 @@ import { SubmitButton as Button } from '@controls/submitButton';
 import LoginIcon from '@assets/icons/login.svg';
 import EmailIcon from '@assets/icons/email.svg';
 import LockIcon from '@assets/icons/lock.svg';
-import AddIcon from '@assets/icons/add_circle.svg';
+import AddIcon from '@assets/icons/filled/add_circle-filled.svg';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 
 const Icons = {
