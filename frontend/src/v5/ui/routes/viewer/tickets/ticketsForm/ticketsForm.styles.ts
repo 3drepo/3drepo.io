@@ -36,8 +36,11 @@ export const PanelsContainer = styled.div`
 			border-bottom-right-radius: 6px;
 		}
 
-		.MuiAccordionDetails-root > :not(:first-child):not(${ErrorTextGap}) {
+		.MuiAccordionDetails-root > :not(:first-child) {
 			margin-top: 10px;
+			&${ErrorTextGap} {
+				margin: 0;
+			}
 		}
 	}
 `;
