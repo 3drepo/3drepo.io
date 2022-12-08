@@ -51,3 +51,15 @@ export const SecondaryButton = styled(BaseCircleButton)`
 		background-color: ${({ theme }) => theme.palette.secondary.light};
 	}
 `;
+
+export const ViewerButton = styled(BaseCircleButton)`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 0;
+	height: 32px;
+	width: 32px;
+	min-width: 32px;
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	}
+`;

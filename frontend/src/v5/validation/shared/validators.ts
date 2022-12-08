@@ -14,6 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { formatMessage } from '@/v5/services/intl';
+import { isNull } from 'lodash';
 import * as Yup from 'yup';
 
 export const trimmedString = Yup.string().transform((value) => value.trim());
+
+export const nullableNumber = Yup.number().transform(
+	(_, val) => ((val || val === 0) ? Number(val) : null),
+).nullable(true);
+export const requiredNumber = (requiredError?) => nullableNumber.test(
+	'requiredNumber',
+	requiredError || formatMessage({
+		id: 'validation.number.required',
+		defaultMessage: 'This is required',
+	}),
+	(number) => !isNull(number),
+);

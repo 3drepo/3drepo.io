@@ -17,9 +17,9 @@
 
 import { useState, cloneElement, MouseEvent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClickAwayListener, Tooltip } from '@mui/material';
+import { ClickAwayListener, Tooltip, MenuList } from '@mui/material';
 import { EllipsisButton } from '@controls/ellipsisButton';
-import { MenuList, Popover } from './ellipsisMenu.styles';
+import { Popover } from './ellipsisMenu.styles';
 
 export interface IEllipsisMenu {
 	selected?: boolean;

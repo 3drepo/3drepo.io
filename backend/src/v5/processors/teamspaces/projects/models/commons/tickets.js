@@ -49,7 +49,8 @@ const processBinaryProperties = (template, oldTicket, updatedTicket) => {
 			if (newProp) {
 				const ref = generateUUID();
 				// eslint-disable-next-line no-param-reassign
-				updatedProperties[name] = type === propTypes.IMAGE ? ref : { screenshot: ref };
+				updatedProperties[name] = type === propTypes.IMAGE
+					? ref : { ...updatedProperties[name], screenshot: ref };
 				toAdd.push({ ref, data: newProp });
 			}
 		});

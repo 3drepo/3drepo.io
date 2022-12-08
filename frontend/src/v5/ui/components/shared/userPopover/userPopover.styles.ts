@@ -23,28 +23,31 @@ export const AvatarWrapper = styled.div`
 	align-items: flex-start;
 `;
 
-export const Container = styled.div`
+export const PopoverContainer = styled.div`
 	padding: 6px 11px 6px 7px;
 	display: flex;
 `;
 
-export const UserData = styled.div`
+export const Data = styled.div`
 	padding: 7px 3px;
+	height: auto;
+	align-self: center;
 	overflow: hidden;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const Name = styled(Typography)`
+export const Heading = styled(Typography)`
 	${({ theme }) => theme.typography.h5};
 	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: auto 0;
 `;
 
-export const Company = styled(Typography)`
+export const Username = styled(Typography)`
 	${({ theme }) => theme.typography.body1};
 	margin-top: 2px;
 `;
 
-export const Job = styled(Typography)`
+export const Employment = styled(Typography)`
 	${({ theme }) => theme.typography.caption};
 	margin-top: 2px;
 `;
