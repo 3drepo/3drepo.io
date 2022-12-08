@@ -389,7 +389,7 @@ const testUpdateProfile = () => {
 
 		describe('With valid authentication (SSO user)', () => {
 			beforeAll(async () => {
-				Aad.getUserDetails.mockResolvedValueOnce({ mail: userEmailSso, id: ssoUserId } );
+				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId } );
 				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
 			});
 			afterAll(async () => {
