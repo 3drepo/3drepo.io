@@ -511,11 +511,9 @@ describe('E2E routes/teamspaces', () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetTeamspaceList();
-	/*
 	testGetTeamspaceMembers();
 	testGetAvatar();
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();
-	*/
 	testGetMemberAvatar();
 });
