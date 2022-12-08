@@ -41,6 +41,7 @@ TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
 };
 
 TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
+	console.log("isTeamspaceMember");
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace } = params;

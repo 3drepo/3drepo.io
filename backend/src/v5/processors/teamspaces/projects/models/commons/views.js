@@ -20,6 +20,7 @@ const { getViewById, getViews } = require('../../../../../models/views');
 const { templates } = require('../../../../../utils/responseCodes');
 
 Views.getViewList = (teamspace, model) => {
+	console.log("======= getViewList -=========");
 	const projection = {
 		_id: 1,
 		name: 1,

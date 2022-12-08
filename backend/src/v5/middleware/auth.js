@@ -25,6 +25,7 @@ const { validateMany } = require('./common');
 const AuthMiddleware = {};
 
 AuthMiddleware.validSession = async (req, res, next) => {
+	console.log("validSession");
 	const { headers, session } = req;
 	if (isSessionValid(session, headers.referer)) {
 		await next();

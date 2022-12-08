@@ -80,7 +80,7 @@ const model = generateRandomModel({ collaborators: [userToRemoveFromTs.user] });
 const validExpiryDate = Date.now() + 100000;
 
 // This is the list of teamspaces the user has access to
-// const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
+const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
 
 const setupData = async () => {
 	await Promise.all(teamspaces.map(
@@ -90,7 +90,7 @@ const setupData = async () => {
 		},
 	));
 	await Promise.all([
-		// ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], undefined, true),
+		ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], undefined, true),
 		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], undefined, false),
 		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], undefined, false),
 		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], undefined, false, {

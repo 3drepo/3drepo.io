@@ -32,10 +32,14 @@ const { templates } = require('../../../utils/responseCodes');
 const ModelPerms = {};
 
 const permissionsCheckTemplate = (callback, isFed = false) => async (req, res, next) => {
+	console.log("========= permissionsCheckTemplate");
 	const { session, params } = req;
 	const user = getUserFromSession(session);
+	console.log("========= user");
+	console.log(user);
 	const { teamspace, project } = params;
 	const model = isFed ? params.federation : params.container;
+	console.log(model);
 
 	try {
 		if (await callback(teamspace, project, model, user)) {

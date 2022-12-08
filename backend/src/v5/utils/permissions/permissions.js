@@ -60,6 +60,7 @@ const modelType = {
 };
 
 const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, username, adminCheck = true) => {
+	console.log("modelPermCheck============== ");
 	let getModelFn = getModelById;
 
 	if (mode === modelType.CONTAINERS) {
@@ -69,6 +70,7 @@ const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, 
 	}
 
 	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
+	console.log(model);
 
 	const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
 	if (!modelExists) {
@@ -82,7 +84,10 @@ const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, 
 		}
 	}
 
+	console.log("======= CHECKKKKKKKKKKKKKKKKKKKKK");
 	const { permissions } = model;
+	console.log(permissions);
+	console.log(permissions && permissions.some((perm) => perm.user === username && permCheck(perm)));
 	return permissions && permissions.some((perm) => perm.user === username && permCheck(perm));
 };
 
