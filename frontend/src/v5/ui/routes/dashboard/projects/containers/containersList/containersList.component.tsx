@@ -27,7 +27,7 @@ import {
 	DashboardListHeaderLabel,
 } from '@components/dashboard/dashboardList';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
-import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
