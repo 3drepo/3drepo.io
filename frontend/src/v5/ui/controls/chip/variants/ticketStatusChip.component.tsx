@@ -16,7 +16,7 @@
  */
 
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
-import ClockIcon from '@assets/icons/clock.svg';
+import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
 import CrossIcon from '@assets/icons/close.svg';
 import BellIcon from '@assets/icons/notifications.svg';
 import TickIcon from '@assets/icons/tick.svg';
