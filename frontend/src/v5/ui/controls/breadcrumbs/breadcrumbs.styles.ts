@@ -60,6 +60,10 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 		${({ $secondary }) => $secondary && css`
 		font-weight: ${FONT_WEIGHT.SLIM}
 		`};
+
+		.MuiButton-endIcon {
+			margin-top: 1px;
+		}
 	}
 `;
 
