@@ -720,12 +720,13 @@ function toggleMeasurementListeners(enabled) {
 export function* setMeasureMode({ measureMode }) {
 	try {
 		toggleMeasurementListeners(false);
+		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
+		yield Viewer.setMeasureMode(measureMode, false);
+
 		if (!measureMode) {
 			yield Viewer.clearMeasureMode();
 			return
 		}
-		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
-		yield Viewer.setMeasureMode(measureMode, false);
 
 		toggleMeasurementListeners(true);
 		disableConflictingMeasurementActions();
