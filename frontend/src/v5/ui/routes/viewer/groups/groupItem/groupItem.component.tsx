@@ -16,7 +16,7 @@
  */
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks';
-import LightingIcon from '@assets/icons/lighting.svg';
+import LightingIcon from '@assets/icons/filled/lighting-filled.svg';
 import { contrastColor } from 'contrast-color';
 import { FormattedMessage } from 'react-intl';
 import { getGroupNamePath } from '../groupsList.helpers';
