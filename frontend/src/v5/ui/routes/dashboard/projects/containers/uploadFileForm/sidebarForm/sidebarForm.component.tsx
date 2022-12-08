@@ -23,12 +23,11 @@ import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { TextField } from '@controls/inputs/textField/textField.component';
-import { Select } from '@controls/inputs/select/select.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
-import { InputController } from '@controls/inputs/inputController.component';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 
 type ISidebarForm = {
 	value: UploadItemFields,
@@ -80,8 +79,7 @@ export const SidebarForm = ({
 				{value.containerName}
 			</Title>
 			<FlexContainer>
-				<InputController
-					Input={Select}
+				<FormSelect
 					required
 					control={control}
 					disabled={!isNewContainer}
@@ -98,9 +96,8 @@ export const SidebarForm = ({
 							{unit.name}
 						</MenuItem>
 					))}
-				</InputController>
-				<InputController
-					Input={Select}
+				</FormSelect>
+				<FormSelect
 					required
 					control={control}
 					disabled={!isNewContainer}
@@ -120,18 +117,16 @@ export const SidebarForm = ({
 					<HiddenMenuItem key="sample" value="sample">
 						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
 					</HiddenMenuItem>
-				</InputController>
+				</FormSelect>
 			</FlexContainer>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				control={control}
 				name="containerCode"
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
 				formError={errors.containerCode}
 				disabled={!isNewContainer}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				control={control}
 				name="containerDesc"
 				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
@@ -143,8 +138,7 @@ export const SidebarForm = ({
 				<FormattedMessage id="uploads.sidebar.revisionDetails" defaultMessage="Revision details" />
 			</Heading>
 
-			<InputController
-				Input={TextField}
+			<FormTextField
 				control={control}
 				name="revisionDesc"
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}

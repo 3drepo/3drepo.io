@@ -25,15 +25,12 @@ import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { TextField } from '@controls/inputs/textField/textField.component';
-import { SelectView } from '@controls/inputs/selectView/selectView.component';
 import { ShareTextField } from '@controls/shareTextField';
-import { Select } from '@controls/inputs/select/select.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { InputController } from '@controls/inputs/inputController.component';
+import { FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -233,24 +230,21 @@ export const SettingsForm = ({
 				label="ID"
 				value={containerOrFederation._id}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="name"
 				control={control}
 				label={formatMessage({ id: 'settings.form.name', defaultMessage: 'Name' })}
 				required
 				formError={errors.name}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'settings.form.desc', defaultMessage: 'Description' })}
 				formError={errors.desc}
 			/>
 			<FlexContainer>
-				<InputController
-					Input={Select}
+				<FormSelect
 					required
 					name="unit"
 					label={formatMessage({
@@ -264,9 +258,8 @@ export const SettingsForm = ({
 							{name}
 						</MenuItem>
 					))}
-				</InputController>
-				<InputController
-					Input={TextField}
+				</FormSelect>
+				<FormTextField
 					name="code"
 					control={control}
 					label={formatMessage({ id: 'settings.form.code', defaultMessage: 'Code' })}
@@ -275,8 +268,7 @@ export const SettingsForm = ({
 			</FlexContainer>
 			{isContainer && (
 				<FlexContainer>
-					<InputController
-						Input={Select}
+					<FormSelect
 						name="type"
 						label={formatMessage({
 							id: 'settings.form.category',
@@ -292,12 +284,11 @@ export const SettingsForm = ({
 						<HiddenMenuItem key="sample" value="sample">
 							<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
 						</HiddenMenuItem>
-					</InputController>
+					</FormSelect>
 					<Placeholder />
 				</FlexContainer>
 			)}
-			<InputController
-				Input={SelectView}
+			<FormSelectView
 				control={control}
 				name="defaultView"
 				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
@@ -312,16 +303,14 @@ export const SettingsForm = ({
 				/>
 			</SectionTitle>
 			<FlexContainer>
-				<InputController
-					Input={TextField}
+				<FormTextField
 					name="latitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude (decimal)' })}
 					formError={errors.latitude}
 					required
 				/>
-				<InputController
-					Input={TextField}
+				<FormTextField
 					name="longitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude (decimal)' })}
@@ -329,32 +318,28 @@ export const SettingsForm = ({
 					required
 				/>
 			</FlexContainer>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="angleFromNorth"
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
 			/>
 			<FlexContainer>
-				<InputController
-					Input={TextField}
+				<FormTextField
 					name="x"
 					control={control}
 					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
 				/>
-				<InputController
-					Input={TextField}
+				<FormTextField
 					name="y"
 					control={control}
 					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
 				/>
-				<InputController
-					Input={TextField}
+				<FormTextField
 					name="z"
 					control={control}
 					label={`z (${currentUnit})`}

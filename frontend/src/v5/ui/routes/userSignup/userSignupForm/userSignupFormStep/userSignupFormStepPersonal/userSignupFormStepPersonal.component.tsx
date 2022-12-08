@@ -20,13 +20,11 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { TextField } from '@controls/inputs/textField/textField.component';
 import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
-import { Select } from '@controls/inputs/select/select.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
-import { InputController } from '@controls/inputs/inputController.component';
 import { defaults, isEqual, pick } from 'lodash';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
 export interface IPersonalFormInput {
@@ -84,8 +82,7 @@ export const UserSignupFormStepPersonal = ({
 
 	return (
 		<>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="firstName"
 				control={control}
 				label={formatMessage({
@@ -95,8 +92,7 @@ export const UserSignupFormStepPersonal = ({
 				required
 				formError={errors.firstName}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="lastName"
 				control={control}
 				label={formatMessage({
@@ -106,8 +102,7 @@ export const UserSignupFormStepPersonal = ({
 				required
 				formError={errors.lastName}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="company"
 				control={control}
 				label={formatMessage({
@@ -116,9 +111,8 @@ export const UserSignupFormStepPersonal = ({
 				})}
 				formError={errors.company}
 			/>
-			<InputController
+			<FormSelect
 				name="countryCode"
-				Input={Select}
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.countryCode',
@@ -131,7 +125,7 @@ export const UserSignupFormStepPersonal = ({
 						{country.name}
 					</MenuItem>
 				))}
-			</InputController>
+			</FormSelect>
 			<NextStepButton
 				disabled={!formIsValid}
 				onClick={onSubmitStep}

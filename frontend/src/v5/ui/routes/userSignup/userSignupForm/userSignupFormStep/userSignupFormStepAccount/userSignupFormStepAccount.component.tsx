@@ -19,14 +19,12 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { TextField } from '@controls/inputs/textField/textField.component';
-import { PasswordField } from '@controls/inputs/passwordField/passwordField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { InputController } from '@controls/inputs/inputController.component';
 import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { isEqual, pick, defaults } from 'lodash';
+import { FormPasswordField, FormTextField } from '@controls/inputs/formInputs.component';
 import { NextStepButton } from '../userSignupFormStep.styles';
 import { IconContainer } from './userSignupFormStepAccount.styles';
 
@@ -110,8 +108,7 @@ export const UserSignupFormStepAccount = ({
 
 	return (
 		<>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>
@@ -128,8 +125,7 @@ export const UserSignupFormStepAccount = ({
 				required
 				formError={errors.username}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>
@@ -147,8 +143,7 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.email}
 
 			/>
-			<InputController
-				Input={PasswordField}
+			<FormPasswordField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>
@@ -165,8 +160,7 @@ export const UserSignupFormStepAccount = ({
 				required
 				formError={errors.password}
 			/>
-			<InputController
-				Input={PasswordField}
+			<FormPasswordField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>

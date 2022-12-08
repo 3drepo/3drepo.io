@@ -21,13 +21,11 @@ import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
-import { TextField } from '@controls/inputs/textField/textField.component';
-import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { InputController } from '@controls/inputs/inputController.component';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 
 interface CreateProjectModalProps {
 	open: boolean;
@@ -105,8 +103,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
-			<InputController
-				Input={Select}
+			<FormSelect
 				required
 				name="teamspace"
 				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
@@ -117,9 +114,8 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 						{ts.name}
 					</MenuItem>
 				))}
-			</InputController>
-			<InputController
-				Input={TextField}
+			</FormSelect>
+			<FormTextField
 				required
 				name="projectName"
 				label={formatMessage({ id: 'project.creation.form.name', defaultMessage: 'Project name' })}

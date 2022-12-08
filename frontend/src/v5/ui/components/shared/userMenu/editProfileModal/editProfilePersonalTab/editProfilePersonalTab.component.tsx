@@ -20,9 +20,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-import { TextField } from '@controls/inputs/textField/textField.component';
-import { InputController } from '@controls/inputs/inputController.component';
-import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
@@ -32,6 +29,7 @@ import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledE
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollArea } from './editProfilePersonalTab.styles';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -122,8 +120,7 @@ export const EditProfilePersonalTab = ({
 	return (
 		<ScrollArea>
 			<EditProfileAvatar user={user} />
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="firstName"
 				control={control}
 				label={formatMessage({
@@ -133,8 +130,7 @@ export const EditProfilePersonalTab = ({
 				required
 				formError={formErrors.firstName}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="lastName"
 				control={control}
 				label={formatMessage({
@@ -144,8 +140,7 @@ export const EditProfilePersonalTab = ({
 				required
 				formError={formErrors.lastName}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="email"
 				control={control}
 				label={formatMessage({
@@ -155,8 +150,7 @@ export const EditProfilePersonalTab = ({
 				required
 				formError={formErrors.email}
 			/>
-			<InputController
-				Input={TextField}
+			<FormTextField
 				name="company"
 				control={control}
 				label={formatMessage({
@@ -165,8 +159,7 @@ export const EditProfilePersonalTab = ({
 				})}
 				formError={formErrors.company}
 			/>
-			<InputController
-				Input={Select}
+			<FormSelect
 				name="countryCode"
 				control={control}
 				label={formatMessage({
@@ -180,7 +173,7 @@ export const EditProfilePersonalTab = ({
 						{country.name}
 					</MenuItem>
 				))}
-			</InputController>
+			</FormSelect>
 			{submitWasSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage

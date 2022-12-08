@@ -16,13 +16,12 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TextField } from '@controls/inputs/textField/textField.component';
 import { Typography } from '@controls/typography';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
 import styled, { css } from 'styled-components';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
-import { PasswordField as PasswordFieldBase } from '@controls/inputs/passwordField/passwordField.component';
+import { FormTextField, FormPasswordField as FormPasswordFieldBase } from '@controls/inputs/formInputs.component';
 
 export const AuthHeading = styled(Typography).attrs({
 	variant: 'h1',
@@ -38,7 +37,7 @@ const authFieldStyles = css`
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;
 
-export const UsernameField = styled(TextField).attrs({
+export const FormUsernameField = styled(FormTextField).attrs({
 	InputProps: {
 		startAdornment: <UserIcon />,
 	},
@@ -51,7 +50,7 @@ export const UsernameField = styled(TextField).attrs({
 	${authFieldStyles}
 `;
 
-export const PasswordField = styled(PasswordFieldBase).attrs({
+export const FormPasswordField = styled(FormPasswordFieldBase).attrs({
 	InputProps: {
 		startAdornment: <PasswordIcon />,
 	},

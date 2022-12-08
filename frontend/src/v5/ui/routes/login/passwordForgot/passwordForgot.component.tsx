@@ -26,7 +26,7 @@ import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { ReturnLink } from '../components/returnLink.component';
-import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
+import { AuthHeading, AuthParagraph, FormUsernameField } from '../components/components.styles';
 
 export const PasswordForgot = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
@@ -59,8 +59,7 @@ export const PasswordForgot = (): JSX.Element => {
 						</AuthParagraph>
 					) : (
 						<>
-							<InputController
-								Input={UsernameField}
+							<FormUsernameField
 								control={control}
 								name="username"
 								required

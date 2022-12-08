@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextArea } from '@controls/inputs/textArea/textArea.component';
+import { FormTextArea } from '@controls/inputs/formInputs.component';
 import styled from 'styled-components';
 
-export const TitlePropertyBase = styled(TextArea).attrs({
+export const TitlePropertyBase = styled(FormTextArea).attrs({
 	minRows: 1,
 })`
 	& > .MuiInputBase-root {
