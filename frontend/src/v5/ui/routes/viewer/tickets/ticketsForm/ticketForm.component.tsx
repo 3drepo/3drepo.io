@@ -20,7 +20,7 @@ import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
@@ -50,7 +50,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 				const inputName = `${module}.${name}`;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				return (
-					<ControlledInput
+					<InputController
 						Input={PropertyComponent}
 						label={name}
 						disabled={disabled}

@@ -33,7 +33,7 @@ import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -233,7 +233,7 @@ export const SettingsForm = ({
 				label="ID"
 				value={containerOrFederation._id}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				name="name"
 				control={control}
@@ -241,7 +241,7 @@ export const SettingsForm = ({
 				required
 				formError={errors.name}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				name="desc"
 				control={control}
@@ -249,7 +249,7 @@ export const SettingsForm = ({
 				formError={errors.desc}
 			/>
 			<FlexContainer>
-				<ControlledInput
+				<InputController
 					Input={Select}
 					required
 					name="unit"
@@ -264,8 +264,8 @@ export const SettingsForm = ({
 							{name}
 						</MenuItem>
 					))}
-				</ControlledInput>
-				<ControlledInput
+				</InputController>
+				<InputController
 					Input={TextField}
 					name="code"
 					control={control}
@@ -275,7 +275,7 @@ export const SettingsForm = ({
 			</FlexContainer>
 			{isContainer && (
 				<FlexContainer>
-					<ControlledInput
+					<InputController
 						Input={Select}
 						name="type"
 						label={formatMessage({
@@ -292,11 +292,11 @@ export const SettingsForm = ({
 						<HiddenMenuItem key="sample" value="sample">
 							<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
 						</HiddenMenuItem>
-					</ControlledInput>
+					</InputController>
 					<Placeholder />
 				</FlexContainer>
 			)}
-			<ControlledInput
+			<InputController
 				Input={SelectView}
 				control={control}
 				name="defaultView"
@@ -312,7 +312,7 @@ export const SettingsForm = ({
 				/>
 			</SectionTitle>
 			<FlexContainer>
-				<ControlledInput
+				<InputController
 					Input={TextField}
 					name="latitude"
 					control={control}
@@ -320,7 +320,7 @@ export const SettingsForm = ({
 					formError={errors.latitude}
 					required
 				/>
-				<ControlledInput
+				<InputController
 					Input={TextField}
 					name="longitude"
 					control={control}
@@ -329,7 +329,7 @@ export const SettingsForm = ({
 					required
 				/>
 			</FlexContainer>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				name="angleFromNorth"
 				control={control}
@@ -337,7 +337,7 @@ export const SettingsForm = ({
 				formError={errors.angleFromNorth}
 			/>
 			<FlexContainer>
-				<ControlledInput
+				<InputController
 					Input={TextField}
 					name="x"
 					control={control}
@@ -345,7 +345,7 @@ export const SettingsForm = ({
 					formError={errors.x}
 					required
 				/>
-				<ControlledInput
+				<InputController
 					Input={TextField}
 					name="y"
 					control={control}
@@ -353,7 +353,7 @@ export const SettingsForm = ({
 					formError={errors.y}
 					required
 				/>
-				<ControlledInput
+				<InputController
 					Input={TextField}
 					name="z"
 					control={control}

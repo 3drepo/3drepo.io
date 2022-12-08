@@ -18,7 +18,7 @@
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
-import { FormInputProps } from '@controls/inputs/controlledInput.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 type ManyOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };

@@ -21,7 +21,7 @@ import {
 	InputLabel,
 	FormHelperText,
 } from '@mui/material';
-import { FormInputProps } from '@controls/inputs/controlledInput.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 
 export type SelectProps = MuiSelectProps & FormInputProps;
 

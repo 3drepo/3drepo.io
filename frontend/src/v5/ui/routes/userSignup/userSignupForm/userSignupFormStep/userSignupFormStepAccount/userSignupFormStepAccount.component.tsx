@@ -24,7 +24,7 @@ import { PasswordField } from '@controls/inputs/passwordField/passwordField.comp
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { isEqual, pick, defaults } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
@@ -110,7 +110,7 @@ export const UserSignupFormStepAccount = ({
 
 	return (
 		<>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				InputProps={{
 					startAdornment: (
@@ -128,7 +128,7 @@ export const UserSignupFormStepAccount = ({
 				required
 				formError={errors.username}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				InputProps={{
 					startAdornment: (
@@ -147,7 +147,7 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.email}
 
 			/>
-			<ControlledInput
+			<InputController
 				Input={PasswordField}
 				InputProps={{
 					startAdornment: (
@@ -165,7 +165,7 @@ export const UserSignupFormStepAccount = ({
 				required
 				formError={errors.password}
 			/>
-			<ControlledInput
+			<InputController
 				Input={PasswordField}
 				InputProps={{
 					startAdornment: (

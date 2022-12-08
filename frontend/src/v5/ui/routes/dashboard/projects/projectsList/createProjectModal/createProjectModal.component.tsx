@@ -27,7 +27,7 @@ import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 
 interface CreateProjectModalProps {
 	open: boolean;
@@ -105,7 +105,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
-			<ControlledInput
+			<InputController
 				Input={Select}
 				required
 				name="teamspace"
@@ -117,8 +117,8 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 						{ts.name}
 					</MenuItem>
 				))}
-			</ControlledInput>
-			<ControlledInput
+			</InputController>
+			<InputController
 				Input={TextField}
 				required
 				name="projectName"

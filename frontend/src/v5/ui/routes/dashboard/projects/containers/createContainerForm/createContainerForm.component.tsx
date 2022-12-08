@@ -29,7 +29,7 @@ import { MenuItem } from '@mui/material';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface ICreateContainer {
@@ -95,7 +95,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 			isValid={formState.isValid}
 			maxWidth="sm"
 		>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				control={control}
 				name="name"
@@ -104,7 +104,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 				required
 			/>
 			<FlexContainer>
-				<ControlledInput
+				<InputController
 					required
 					control={control}
 					name="unit"
@@ -116,8 +116,8 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 							{unit.name}
 						</MenuItem>
 					))}
-				</ControlledInput>
-				<ControlledInput
+				</InputController>
+				<InputController
 					required
 					control={control}
 					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
@@ -129,16 +129,16 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 							{unit.value}
 						</MenuItem>
 					))}
-				</ControlledInput>
+				</InputController>
 			</FlexContainer>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				control={control}
 				name="desc"
 				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
 				formError={errors.desc}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				control={control}
 				name="code"

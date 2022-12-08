@@ -29,7 +29,7 @@ import {
 } from '@/v5/ui/components/shared/modals/modals.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { UnhandledErrorInterceptor } from './deleteModal.styles';
 
 interface IDeleteModal {
@@ -85,7 +85,7 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 								}}
 							/>
 						</Instruction>
-						<ControlledInput
+						<InputController
 							Input={RetypeCheckField}
 							control={control}
 							name="retypedName"

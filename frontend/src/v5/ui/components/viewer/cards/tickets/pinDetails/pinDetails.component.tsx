@@ -25,7 +25,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormControl, FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
-import { FormInputProps } from '@controls/inputs/controlledInput.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
 type PinDetailsProps = Omit<FormInputProps, 'inputRef'>;

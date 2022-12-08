@@ -22,7 +22,7 @@ import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { EditProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { TextField } from '@controls/inputs/textField/textField.component';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
@@ -94,7 +94,7 @@ export const ProjectSettings = () => {
 	return (
 		<>
 			<Form onSubmit={handleSubmit(onSubmit)}>
-				<ControlledInput
+				<InputController
 					Input={TextField}
 					required
 					name="projectName"

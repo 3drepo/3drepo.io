@@ -27,7 +27,7 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	inputRef: any,
 }>;
 
-export type ControlledInputProps<T extends FormInputProps> = T & {
+export type InputControllerProps<T extends FormInputProps> = T & {
 	Input: (props: T) => JSX.Element,
 	name: string,
 	control?: any,
@@ -36,14 +36,14 @@ export type ControlledInputProps<T extends FormInputProps> = T & {
 };
 
 // eslint-disable-next-line
-export const ControlledInput = <T,>({
+export const InputController = <T,>({
 	Input,
 	name,
 	control,
 	formError,
 	defaultValue,
 	...props
-}: ControlledInputProps<T>) => (
+}: InputControllerProps<T>) => (
 	<Controller
 		name={name}
 		control={control}

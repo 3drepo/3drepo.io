@@ -16,7 +16,7 @@
  */
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { FormInputProps } from '@controls/inputs/controlledInput.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { TextField } from './baseCalendarPicker.styles';
 import { formatDayOfWeek } from '../dateFormatHelper';
 

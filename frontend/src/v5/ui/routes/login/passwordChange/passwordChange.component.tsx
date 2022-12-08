@@ -27,7 +27,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
 import ErrorIcon from '@assets/icons/warning_small.svg';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { AuthHeading, AuthParagraph, ErrorMessage, PasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';
@@ -62,7 +62,7 @@ export const PasswordChange = () => {
 				</AuthHeading>
 				{ username && token ? (
 					<>
-						<ControlledInput
+						<InputController
 							Input={PasswordField}
 							control={control}
 							name="newPassword"
@@ -73,7 +73,7 @@ export const PasswordChange = () => {
 							formError={errors.newPassword}
 							required
 						/>
-						<ControlledInput
+						<InputController
 							Input={PasswordField}
 							control={control}
 							name="newPasswordConfirm"

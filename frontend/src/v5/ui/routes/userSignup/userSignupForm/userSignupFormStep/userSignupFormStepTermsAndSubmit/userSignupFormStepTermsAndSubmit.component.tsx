@@ -27,7 +27,7 @@ import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { TERMS_ROUTE, PRIVACY_ROUTE, COOKIES_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { emailAlreadyExists, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -132,7 +132,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		<>
 			<TermsContainer>
 				<CheckboxContainer>
-					<ControlledInput
+					<InputController
 						Input={Checkbox}
 						name="termsAgreed"
 						control={control}
@@ -156,7 +156,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					/>
 				</CheckboxContainer>
 				<CheckboxContainer>
-					<ControlledInput
+					<InputController
 						Input={Checkbox}
 						name="mailListAgreed"
 						control={control}

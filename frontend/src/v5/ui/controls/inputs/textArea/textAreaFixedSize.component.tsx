@@ -16,7 +16,7 @@
  */
 
 import { FormControl, FormHelperText, InputLabel, InputProps } from '@mui/material';
-import { FormInputProps } from '@controls/inputs/controlledInput.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { ScrollArea } from '@controls/scrollArea';
 import { Container, Input } from './textAreaFixedSize.styles';
 

@@ -27,7 +27,7 @@ import { TextField } from '@controls/inputs/textField/textField.component';
 import { Select } from '@controls/inputs/select/select.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -80,7 +80,7 @@ export const SidebarForm = ({
 				{value.containerName}
 			</Title>
 			<FlexContainer>
-				<ControlledInput
+				<InputController
 					Input={Select}
 					required
 					control={control}
@@ -98,8 +98,8 @@ export const SidebarForm = ({
 							{unit.name}
 						</MenuItem>
 					))}
-				</ControlledInput>
-				<ControlledInput
+				</InputController>
+				<InputController
 					Input={Select}
 					required
 					control={control}
@@ -120,9 +120,9 @@ export const SidebarForm = ({
 					<HiddenMenuItem key="sample" value="sample">
 						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
 					</HiddenMenuItem>
-				</ControlledInput>
+				</InputController>
 			</FlexContainer>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				control={control}
 				name="containerCode"
@@ -130,7 +130,7 @@ export const SidebarForm = ({
 				formError={errors.containerCode}
 				disabled={!isNewContainer}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				control={control}
 				name="containerDesc"
@@ -143,7 +143,7 @@ export const SidebarForm = ({
 				<FormattedMessage id="uploads.sidebar.revisionDetails" defaultMessage="Revision details" />
 			</Heading>
 
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				control={control}
 				name="revisionDesc"
@@ -153,13 +153,13 @@ export const SidebarForm = ({
 
 			{isSpm && (
 				<>
-					<ControlledInput
+					<InputController
 						Input={AnimationsCheckbox}
 						control={control}
 						name="importAnimations"
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
-					<ControlledInput
+					<InputController
 						Input={TimezoneSelect}
 						control={control}
 						name="timezone"
@@ -174,7 +174,7 @@ export const SidebarForm = ({
 								{opt.label}
 							</MenuItem>
 						))}
-					</ControlledInput>
+					</InputController>
 				</>
 			)}
 		</div>

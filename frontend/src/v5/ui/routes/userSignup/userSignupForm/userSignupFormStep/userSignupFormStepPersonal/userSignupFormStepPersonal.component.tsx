@@ -25,7 +25,7 @@ import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignup
 import { Select } from '@controls/inputs/select/select.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
-import { ControlledInput } from '@controls/inputs/controlledInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { defaults, isEqual, pick } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
@@ -84,7 +84,7 @@ export const UserSignupFormStepPersonal = ({
 
 	return (
 		<>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				name="firstName"
 				control={control}
@@ -95,7 +95,7 @@ export const UserSignupFormStepPersonal = ({
 				required
 				formError={errors.firstName}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				name="lastName"
 				control={control}
@@ -106,7 +106,7 @@ export const UserSignupFormStepPersonal = ({
 				required
 				formError={errors.lastName}
 			/>
-			<ControlledInput
+			<InputController
 				Input={TextField}
 				name="company"
 				control={control}
@@ -116,7 +116,7 @@ export const UserSignupFormStepPersonal = ({
 				})}
 				formError={errors.company}
 			/>
-			<ControlledInput
+			<InputController
 				name="countryCode"
 				Input={Select}
 				control={control}
@@ -131,7 +131,7 @@ export const UserSignupFormStepPersonal = ({
 						{country.name}
 					</MenuItem>
 				))}
-			</ControlledInput>
+			</InputController>
 			<NextStepButton
 				disabled={!formIsValid}
 				onClick={onSubmitStep}
