@@ -193,8 +193,8 @@ const testVerifyNewEmail = () => {
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(req.body).toEqual(
 				{
-					email: aadUserDetails.data.mail,
-					sso: { type: providers.AAD, id: aadUserDetails.data.id },
+					email: aadUserDetails.email,
+					sso: { type: providers.AAD, id: aadUserDetails.id },
 				},
 			);
 		});
