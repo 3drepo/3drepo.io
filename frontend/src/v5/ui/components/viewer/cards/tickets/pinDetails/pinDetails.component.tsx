@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import CircledPlusIcon from '@assets/icons/filled/add_circle-filled.svg';
+import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
 import CrossIcon from '@assets/icons/close.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';

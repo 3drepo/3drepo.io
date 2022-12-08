@@ -17,7 +17,7 @@
 
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import EditViewpointIcon from '@assets/icons/outlined/rotate_arrow-outlined.svg';
-import CreateViewpointIcon from '@assets/icons/filled/add_circle-filled.svg';
+import CreateViewpointIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import GotoViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
