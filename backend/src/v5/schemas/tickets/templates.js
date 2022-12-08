@@ -88,11 +88,10 @@ const propertyArray = Yup.array().of(propSchema).default([]).test('Property name
 	const propNames = new Set();
 	let res = true;
 	arr.forEach(({ name }) => {
-		const id = name.toUpperCase();
-		if (propNames.has(id)) {
+		if (propNames.has(name)) {
 			res = false;
 		} else {
-			propNames.add(id);
+			propNames.add(name);
 		}
 	});
 
