@@ -17,7 +17,7 @@
 
 import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/logo.svg';
-import PrintIcon from '@assets/icons/print.svg';
+import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
