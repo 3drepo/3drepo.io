@@ -24,17 +24,32 @@ import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
-import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
-		ShortInput, VisualSettingsButtonsContainer,
-		VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
+import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
+	NegativeActionButton, NeutralActionButton,
+	ShortInput, VisualSettingsButtonsContainer,
+	VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
+	maxNearPlane: schema.number(-1, Number.POSITIVE_INFINITY),
+	maxFarPlane: schema.number(-1, Number.POSITIVE_INFINITY),
 	memory: schema.integer(16, 2032),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
-	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY)
+	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
+	memoryThreshold: schema.number(0, 2032),
+	memoryLimit: schema.number(0, 2032),
+	fovWeight: schema.number(0, 10),
+	phBundleFadeDistance: schema.number(0, Number.POSITIVE_INFINITY),
+	phBundleFadeBias: schema.number(0, Number.POSITIVE_INFINITY),
+	phBundleFadePower: schema.number(0, Number.POSITIVE_INFINITY),
+	phBundleFaceAlpha: schema.number(0, 1),
+	phBundleLineAlpha: schema.number(0, 1),
+	phElementRenderingRadius: schema.number(0, 1),
+	phElementFaceAlpha: schema.number(0, 1),
+	phElementLineAlpha: schema.number(0, 1),
+
 });
 
 const BasicSettings = (props) => {
@@ -145,6 +160,33 @@ const AdvancedSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
+				Maximum near plane
+				<Field name="maxNearPlane" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.maxNearPlane || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.maxNearPlane)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Maximum far plane
+				<Field name="maxFarPlane" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.maxFarPlane || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.maxFarPlane)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+
+			<FormListItem>
 				Far plane algorithm
 				<Field name="farPlaneAlgorithm" render={ ({ field }) => (
 					<SelectField {...field}>
@@ -182,6 +224,178 @@ const AdvancedSettings = (props) => {
 			</FormListItem>
 		</List>
 	);
+};
+const StreamingSettings = (props) => {
+	return (
+		<List>
+			<Headline color="primary" variant="subtitle1">Memory</Headline>
+			<FormListItem>
+				Reserved
+				<Field name="memoryThreshold" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.memoryThreshold || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.memoryThreshold)}
+						{...field}
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Limit
+				<Field name="memoryLimit" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.memoryLimit)}
+						{...field}
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				FoV Weight
+				<Field name="fovWeight" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.fovWeight || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.fovWeight)}
+						{...field}
+					/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<Headline color="primary" variant="subtitle1">Placeholder Bundles</Headline>
+			<FormListItem>
+				 Fade distance
+				<Field name="phBundleFadeDistance" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFadeDistance || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFadeDistance)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				 Fade bias
+				<Field name="phBundleFadeBias" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFadeBias || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFadeBias)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				 Fade power
+				<Field name="phBundleFadePower" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFadePower || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFadePower)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Color
+				<Field name="phBundleColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
+			</FormListItem>
+			<FormListItem>
+				 Face alpha
+				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleFaceAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				 Line alpha
+				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phBundleLineAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+		<Headline color="primary" variant="subtitle1">Placeholder Elements</Headline>
+		<FormListItem>
+				 Rendering radius
+				<Field name="phElementRenderingRadius" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phElementRenderingRadius || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phElementRenderingRadius)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+
+			<FormListItem>
+				Color
+				<Field name="phElementColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
+				</FormListItem>
+					<FormListItem>
+				 Face alpha
+				<Field name="phElementFaceAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phElementFaceAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phElementFaceAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+		<FormListItem>
+				 Line alpha
+				<Field name="phElementLineAlpha" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.phElementLineAlpha || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.phElementLineAlpha)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+
+		</List>
+	)
 };
 
 const CacheWarning = (props) => {
@@ -299,6 +513,7 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 				>
 					<DialogTab label="Basic" />
 					<DialogTab label="Advanced" />
+					<DialogTab label="Streaming" />
 				</DialogTabs>
 				<Formik
 					validationSchema={SettingsSchema}
@@ -309,6 +524,7 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 					<Form>
 						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
 						{selectedTab === 1 && <AdvancedSettings />}
+						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
 						<Buttons onClickCancel={handleClose} />
 					</Form>
