@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import CheckIcon from '@assets/icons/check.svg';
+import TickIcon from '@assets/icons/tick.svg';
 import ErrorIcon from '@assets/icons/stepper_error.svg';
 
 const stepIconStyle = css`
@@ -43,7 +43,7 @@ export const StepIconContainer = styled.div`
 	}
 `;
 
-export const CompletedStepIcon = styled(CheckIcon)`
+export const CompletedStepIcon = styled(TickIcon)`
 	width: 14px;
 `;
 
