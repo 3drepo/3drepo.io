@@ -170,12 +170,10 @@ const setupData = async () => {
 			userWithExpiredLicense,
 			[tsWithExpiredLicense.name],
 		),
-		/*
 		ServiceHelper.db.createUser(
 			testUser2,
 			[breakingTSAccess.name, tsWithUsersToRemove.name],
 		),
-		*/
 		ServiceHelper.db.createUser(
 			userToRemoveFromTs,
 			[tsWithUsersToRemove.name],
