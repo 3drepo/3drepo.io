@@ -32,6 +32,8 @@ describe("Account permission::", function () {
 	let agentAdmin;
 	const username = "accountPerm";
 	const password = "accountPerm";
+	const projectId = '4106e5fb-4623-4f9a-a35f-a426e129f16a';
+	const modelId = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 
 	before(function(done) {
 		server = app.listen(8080, function () {
@@ -80,7 +82,7 @@ describe("Account permission::", function () {
 		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
 	});
 
-	it("should able to assign permissions to a user", async function() {
+	it("should be able to assign permissions to a user", async function() {
 
 		const permission = { user: "testing", permissions: ["create_project"]};
 
@@ -92,6 +94,27 @@ describe("Account permission::", function () {
 					.expect(200);
 
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+	});
+
+	it("should remove model and project permissions if a user becomes teamspace admin", async function() {
+		const permission = { user: "testing", permissions: ["teamspace_admin"]};
+
+		await agent.post(`/${username}/permissions`)
+					.send(permission)
+					.expect(200);
+
+		const {body} = await agent.get(`/${username}/permissions`)
+					.expect(200);
+
+		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+
+		const projectRes = await agent.get(`/${username}/projects/${projectId}`)
+			.expect(200);
+		expect(projectRes.body.permissions).to.deep.equal([]);
+
+		const modelPermissionsRes = await agent.get(`/${username}/${modelId}/permissions`)
+			.expect(200);
+		expect(modelPermissionsRes.body).to.deep.equal([]);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
