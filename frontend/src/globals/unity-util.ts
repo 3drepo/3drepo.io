@@ -871,7 +871,7 @@ export class UnityUtil {
 	}
 
 	public static setStreamingFovWeight(weight: number) {
-		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, weight);
+		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, Number(weight));
 	}
 
 	/**

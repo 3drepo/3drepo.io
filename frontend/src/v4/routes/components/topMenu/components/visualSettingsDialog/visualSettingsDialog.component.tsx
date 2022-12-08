@@ -40,6 +40,7 @@ const SettingsSchema = Yup.object().shape({
 	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
 	memoryThreshold: schema.number(0, 2032),
 	memoryLimit: schema.number(0, 2032),
+	fovWeight: schema.number(0, 10),
 	phBundleFadeDistance: schema.number(0, Number.POSITIVE_INFINITY),
 	phBundleFadeBias: schema.number(0, Number.POSITIVE_INFINITY),
 	phBundleFadePower: schema.number(0, Number.POSITIVE_INFINITY),
@@ -250,6 +251,19 @@ const StreamingSettings = (props) => {
 						error={Boolean(form.errors.memoryLimit)}
 						{...field}
 						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				FoV Weight
+				<Field name="fovWeight" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.fovWeight || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.fovWeight)}
+						{...field}
+					/>
 					</ErrorTooltip>
 					);
 				}} />

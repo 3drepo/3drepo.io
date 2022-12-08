@@ -942,6 +942,13 @@ export class ViewerService {
 		UnityUtil.setStreamingMemoryLimit(limitMB);
 	}
 
+	public setStreamingFovWeight = (weight: number) => {
+		if (weight === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingFovWeight(weight);
+	}
+
 	public setStreamingBundlesFade = (distance: number, bias: number, power: number) => {
 		if (distance === undefined || bias === undefined || power === undefined) {
  			return;

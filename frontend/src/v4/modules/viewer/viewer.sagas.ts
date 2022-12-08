@@ -43,6 +43,7 @@ const updateHandlers = {
 	phBundleColor: Viewer.setStreamingBundlesColor,
 	maxNearPlane: Viewer.setMaxNearPlane,
 	maxFarPlane: Viewer.setMaxFarPlane,
+	fovWeight: Viewer.setStreamingFovWeight,
 	[BUNDLE_FADE_PREFIX]: Viewer.setStreamingBundlesFade,
 	phBundleFaceAlpha: Viewer.setStreamingBundlesFacesAlpha,
 	phBundleLineAlpha: Viewer.setStreamingBundlesLinesAlpha,

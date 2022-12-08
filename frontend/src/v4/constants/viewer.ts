@@ -113,6 +113,7 @@ export const DEFAULT_SETTINGS = {
 	memoryLimit: 2032,
 	maxNearPlane: -1,
 	maxFarPlane: -1,
+	fovWeight: 2,
 	phBundleColor: [0.1703951, 0.1897178, 0.786439],
 	phBundleFadeDistance: 1.75384,
 	phBundleFadeBias: 0,
