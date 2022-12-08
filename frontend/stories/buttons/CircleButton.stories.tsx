@@ -16,7 +16,7 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { CircleButton as Button } from '@controls/circleButton';
-import NotificationsIcon from '@assets/icons/notifications.svg';
+import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
 export default {
 	title: 'Buttons/CircleButton',
