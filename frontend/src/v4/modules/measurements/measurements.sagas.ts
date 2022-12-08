@@ -56,11 +56,11 @@ const onMeasurementChanged = () => {
 
 export function* setMeasureMode({ mode }) {
 	try {
+		toggleMeasurementListeners(false);
 		if (!mode) {
 			yield Viewer.clearMeasureMode();
 			return
 		}
-		toggleMeasurementListeners(false);
 		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 		yield Viewer.setMeasureMode(mode);
 

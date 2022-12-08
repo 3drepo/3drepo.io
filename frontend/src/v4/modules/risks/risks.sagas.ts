@@ -633,11 +633,11 @@ function toggleMeasurementListeners(enabled) {
 
 export function* setMeasureMode({ measureMode }) {
 	try {
+		toggleMeasurementListeners(false);
 		if (!measureMode) {
 			yield Viewer.clearMeasureMode();
 			return
 		}
-		toggleMeasurementListeners(false);
 		yield put(RisksActions.setMeasureModeSuccess(measureMode));
 		yield Viewer.setMeasureMode(measureMode, false);
 
