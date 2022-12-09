@@ -31,7 +31,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamspaceSettings, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaces`);
+const { breakTeamspacePermissions, createTeamspaceSettings, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaces`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -75,12 +75,13 @@ db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
 db.createTeamspace = async (teamspace, admins = [], members = [], breaking = false, customData) => {
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	await ServiceHelper.db.createTeamspaceRole(teamspace);
 	await createTeamspaceSettings(teamspace);
 	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace], customData);
 
-	if (!breaking) {
+	if (breaking) {
+		await breakTeamspacePermissions(teamspace);
+	} else {
 		await Promise.all([
 			...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
 			...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
