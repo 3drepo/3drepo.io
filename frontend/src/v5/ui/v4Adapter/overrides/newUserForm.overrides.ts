@@ -16,7 +16,7 @@
  */
 
 import { Panel } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
-import { InvitationModeLink, SaveButton, Title, UserNotExistsButton, UserNotExistsContainer } from '@/v4/routes/components/newUserForm/newUserForm.styles';
+import { InvitationModeLink, SaveButton as AddUserButton, Title, UserNotExistsButton, UserNotExistsContainer } from '@/v4/routes/components/newUserForm/newUserForm.styles';
 import { css } from 'styled-components';
 
 export default css`
@@ -73,8 +73,7 @@ export default css`
 			}
 		}
 
-		/* "Add user" button */
-		${SaveButton} {
+		${AddUserButton} {
 			margin: 12px 0;
 			&:not(.Mui-disabled) {
 				&, &:hover {

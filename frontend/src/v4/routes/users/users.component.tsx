@@ -275,7 +275,10 @@ export class Users extends PureComponent<IProps, IState> {
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
-			onInvitationOpen: this.handleInvitationOpen
+			onInvitationOpen: (email, job, isAdmin) => {
+				this.handleInvitationOpen(email, job, isAdmin);
+				closePanel();
+			}
 		};
 		return <NewUserForm {...formProps} onCancel={closePanel} />;
 	}
