@@ -31,7 +31,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { breakTeamspaceForTests, createTeamspaceSettings, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaces`);
+const { createTeamspaceSettings, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaces`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -78,15 +78,13 @@ db.createTeamspace = async (teamspace, admins = [], members = [], breaking = fal
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	await ServiceHelper.db.createTeamspaceRole(teamspace);
 	await createTeamspaceSettings(teamspace);
-	await Promise.all([
-		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
-			{ permissions: breaking ? undefined : permissions, ...customData }),
-		...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
-		...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
-	]);
+	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace], customData);
 
-	if (breaking) {
-		await breakTeamspaceForTests(teamspace);
+	if (!breaking) {
+		await Promise.all([
+			...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
+			...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
+		]);
 	}
 };
 
