@@ -16,7 +16,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import LogoIcon from '@assets/icons/logo.svg';
+import LogoIcon from '@assets/icons/filled/logo-filled.svg';
 import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { CircleButton } from '@/v5/ui/controls/circleButton';

@@ -27,11 +27,8 @@ const statsOptions = {
 module.exports = (env) => getWebpackConfig(env, {
   mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
+	output:{clean:true},
   plugins: [
-    new CleanWebpackPlugin({
-      root: PATHS.PROJECT_DIR,
-      beforeEmit: true
-    }),
     new LiveReloadPlugin({
       hostname: 'localhost',
       port: 35729,
