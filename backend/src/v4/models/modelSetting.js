@@ -567,8 +567,8 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 
 ModelSetting.removePermissionsFromModels = async (account, models, userToRemove) => {
 	await Promise.all(models.map((model)=> {
-		ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ''}])
-	}));		
-};	
+		ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}]);
+	}));
+};
 
 module.exports = ModelSetting;

@@ -480,7 +480,7 @@
 					}
 				} else if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
 					project.permissions.push(permissionUpdate);
-					await removePermissionsFromModels(account, project.models, permissionUpdate.user);	
+					await removePermissionsFromModels(account, project.models, permissionUpdate.user);
 				}
 			});
 		}
@@ -489,13 +489,13 @@
 	};
 
 	Project.removePermissionsFromAllProjects = async (account, userToRemove) => {
-		const projects = await Project.listProjects(account, {}, { name:1, models: 1 });		
-		
+		const projects = await Project.listProjects(account, {}, { name:1, models: 1 });
+
 		await Promise.all(projects.map((project) => {
-			Project.updateProject(account, project.name, { permissions: [ { user: userToRemove, permissions: [] } ] });
+			Project.updateProject(account, project.name, { permissions: [{ user: userToRemove, permissions: [] }] });
 			removePermissionsFromModels(account, project.models, userToRemove);
-		}));		
-	}
+		}));
+	};
 
 	module.exports = Project;
 })();

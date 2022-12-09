@@ -61,10 +61,10 @@ AccountPermissions.updateOrCreate = async function(teamspace, username, permissi
 		.concat({user: username, permissions});
 
 	const permissionsToReturn = await updatePermissions(teamspace, updatedPermissions);
-	if(permissions.includes(C.PERM_TEAMSPACE_ADMIN)){
+	if(permissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
 		await removePermissionsFromAllProjects(teamspace.user, username);
 	}
-	
+
 	return permissionsToReturn;
 };
 
