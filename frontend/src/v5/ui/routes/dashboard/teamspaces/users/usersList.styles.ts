@@ -155,6 +155,7 @@ export const Container = styled.div`
 		border: none;
 		padding: 10px 0;
 		align-items: baseline;
+		height: 26px;
 		${PendingInvites} {
 			cursor: pointer;
 			margin: 0;
