@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,13 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-type IProps = {
-	className?: any;
-};
 
-export default ({ className }: IProps) => (
-	<svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-		<path d="M1 8.5L9 0.5" stroke="#172B4D" strokeLinecap="round" />
-		<path d="M1 0.5L9 8.5" stroke="#172B4D" strokeLinecap="round" />
-	</svg>
-);
+import { ComponentMeta } from '@storybook/react';
+import { IconsTemplate } from '../icons.component';
+import { getIcons } from '../icons.helper';
+
+export default {
+	title: 'Icons/\\v4',
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+			defaultValue: 10,
+		},
+	},
+} as ComponentMeta<any>;
+
+export const Icons = IconsTemplate.bind({});
+Icons.args = {
+	icons: getIcons(require.context('@assets/icons/v4/', false, /\.*(svg)/), 'v4'),
+};
