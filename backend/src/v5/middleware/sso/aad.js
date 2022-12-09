@@ -18,32 +18,14 @@ const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require(
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
-const { getUserByEmail, getUserByQuery, getUserByUsername } = require('../../models/users');
-const { URL } = require('url');
+const { getUserByEmail, getUserByQuery } = require('../../models/users');
 const { addPkceProtection } = require('./pkce');
-const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserFromSession } = require('../../utils/sessions');
-const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
+const { redirectWithError, checkStateIsValid, setSessionReferer } = require('.');
 
 const Aad = {};
-
-const checkStateIsValid = async (req, res, next) => {
-	try {
-		req.state = JSON.parse(req.query.state);
-		await next();
-	} catch (err) {
-		logger.logError('Failed to parse req.query.state');
-		respond(req, res, createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON'));
-	}
-};
-
-const redirectWithError = (res, url, errorCode) => {
-	const urlRedirect = new URL(url);
-	urlRedirect.searchParams.set('error', errorCode);
-	res.redirect(urlRedirect.href);
-};
 
 const authenticate = (redirectUri) => async (req, res) => {
 	try {
@@ -117,23 +99,6 @@ const verifyNewEmail = async (req, res, next) => {
 
 Aad.verifyNewEmail = validateMany([checkStateIsValid, verifyNewEmail]);
 
-Aad.redirectToStateURL = (req, res) => {
-	try {
-		res.redirect(req.state.redirectUri);
-	} catch (err) {
-		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
-		respond(req, res, templates.unknown);
-	}
-};
-
-const setSessionReferer = async (req, res, next) => {
-	if (req.headers.referer) {
-		req.session.referer = getURLDomain(req.headers.referer);
-	}
-
-	await next();
-};
-
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionReferer, authenticate(redirectUri)]);
 
 const hasAssociatedAccount = async (req, res, next) => {
@@ -159,35 +124,5 @@ const hasAssociatedAccount = async (req, res, next) => {
 };
 
 Aad.hasAssociatedAccount = validateMany([checkStateIsValid, hasAssociatedAccount]);
-
-const isSsoUser = async (req) => {
-	const username = getUserFromSession(req.session);
-	const { customData: { sso } } = await getUserByUsername(username);
-	return !!sso;
-};
-
-Aad.isSsoUser = async (req, res, next) => {
-	try {
-		if (!await isSsoUser(req)) {
-			throw templates.nonSsoUser;
-		}
-
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-Aad.isNonSsoUser = async (req, res, next) => {
-	try {
-		if (await isSsoUser(req)) {
-			throw templates.ssoUser;
-		}
-
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
 
 module.exports = Aad;

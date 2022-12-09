@@ -26,7 +26,7 @@ ResponseCodes.templates = {
 	// Auth
 	notLoggedIn: { message: 'You are not logged in.', status: 401 },
 	alreadyLoggedIn: { message: 'You are already logged in.', status: 401 },
-	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
+	notAuthorized: { message: 'You do not have sufficient access rights for this action.', status: 401 },
 	licenceExpired: { message: 'Licence expired.', status: 401 },
 	tooManyLoginAttempts: { message: 'Too many unsuccessful login attempts! Account locked.', status: 400 },
 	userNotVerified: { message: 'Account not yet verified. Please check your email.', status: 400 },
@@ -62,11 +62,11 @@ ResponseCodes.templates = {
 	metadataNotFound: { message: 'Metadata not found.', status: 404 },
 
 	// Custom ticket related error
-	templateNotFound: { message: 'Template not found', status: 404 },
-	ticketNotFound: { message: 'Ticket not found', status: 404 },
+	templateNotFound: { message: 'Template not found.', status: 404 },
+	ticketNotFound: { message: 'Ticket not found.', status: 404 },
 
 	// File upload related error
-	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },
+	unsupportedFileFormat: { message: 'The file format is not supported.', status: 400 },
 	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed.', status: 400 },
 	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },
 

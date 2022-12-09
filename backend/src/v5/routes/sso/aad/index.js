@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, hasAssociatedAccount, isSsoUser, redirectToStateURL, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticate, hasAssociatedAccount, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
-const { validateSsoSignUpData, validateUnlinkData } = require('../../../middleware/dataConverter/inputs/users');
+const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { updateSession } = require('../../../middleware/sessions');
+const { isSsoUser, isNonSsoUser, validateUnlinkData, redirectToStateURL } = require('../../../middleware/sso');
 
 const signUpPost = async (req, res, next) => {
 	try {
@@ -157,7 +158,7 @@ const establishRoutes = () => {
 	 *       302:
 	 *         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
 	 */
-	router.get('/link', isLoggedIn, authenticate(linkRedirectUri));
+	router.get('/link', isLoggedIn, isNonSsoUser, authenticate(linkRedirectUri));
 
 	router.get(linkRedirectEndpoint, verifyNewEmail, linkPost, redirectToStateURL);
 
