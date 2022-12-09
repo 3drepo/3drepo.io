@@ -158,8 +158,8 @@ const testViewThumbnail = () => {
 				[`the model is not a ${modelType}`, getRoute({ modelId: modelWrongType._id }), false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the view has a thumbnail', getRoute(), true],
-				// ['the view does not exist', getRoute({ viewId: ServiceHelper.generateRandomString() }), false, templates.viewNotFound],
-				// ['the view does not have a thumbnail', getRoute({ viewId: model.viewNoThumbnail._id }), false, templates.thumbnailNotFound],
+				['the view does not exist', getRoute({ viewId: ServiceHelper.generateRandomString() }), false, templates.viewNotFound],
+				['the view does not have a thumbnail', getRoute({ viewId: model.viewNoThumbnail._id }), false, templates.thumbnailNotFound],
 			];
 		};
 
@@ -170,13 +170,12 @@ const testViewThumbnail = () => {
 				if (success) {
 					expect(res.headers['content-type']).toEqual('image/png');
 				} else {
-					console.log(res.body);
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
 		};
 
-		// describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData(true))('Federations', runTest);
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };

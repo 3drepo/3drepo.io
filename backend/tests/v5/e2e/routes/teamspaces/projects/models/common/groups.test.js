@@ -211,5 +211,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testExportGroups();
-	// testImportGroups();
+	testImportGroups();
 });

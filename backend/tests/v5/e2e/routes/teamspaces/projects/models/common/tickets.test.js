@@ -728,12 +728,10 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetAllTemplates();
-	/*
 	testGetTemplateDetails();
 	testAddTicket();
 	testGetTicketResource();
 	testGetTicket();
 	testGetTicketList();
 	testUpdateTicket();
-	*/
 });
