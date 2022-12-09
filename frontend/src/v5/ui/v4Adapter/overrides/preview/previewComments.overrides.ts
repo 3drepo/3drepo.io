@@ -30,6 +30,11 @@ export default css`
 	${Collapsable} {
 		border-radius: 0 !important;
 		padding: 0;
+		border: 0;
+
+		.MuiAccordionDetails-root {
+			border: 0;
+		}
 
 		${Tabs} {
 			width: unset;

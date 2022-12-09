@@ -33,9 +33,8 @@ export const AuthHeading = styled(Typography).attrs({
 
 export const AuthField = styled(FormTextField).attrs({
 	required: true,
-
 })`
-	margin-top: 26px;
+	margin-top: 8px;
 	margin-bottom: 14px;
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;

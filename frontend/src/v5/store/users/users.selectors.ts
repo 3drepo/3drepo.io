@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
+import { sortBy } from 'lodash';
+import { selectJobs } from '@/v4/modules/jobs';
+import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IUser, IUsersState } from './users.redux';
 
 const selectUsersDomain = (state): IUsersState => state?.users || {};
@@ -30,4 +33,22 @@ export const selectUser = createSelector(
 	(_, teamspace, userName) => userName,
 	(usersInTeamspace, userName): IUser | null => usersInTeamspace
 		.find((teamspaceUser) => teamspaceUser.user === userName),
+);
+
+export const selectCurrentTeamspaceUsers = createSelector(
+	selectUsersDomain,
+	selectCurrentTeamspace,
+	(state, teamspace) => {
+		const users = (state.usersByTeamspace || {})[teamspace] || [];
+		return sortBy(users, 'firstName');
+	},
+);
+
+export const selectAssigneesListItems = createSelector(
+	selectCurrentTeamspaceUsers,
+	selectJobs,
+	(users, jobs) => [
+		...users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` })),
+		...jobs.map(({ _id }) => ({ value: _id, label: _id })),
+	],
 );

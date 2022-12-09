@@ -22,7 +22,6 @@ export const LegalContent = styled.div`
 	width: 90%;
 	max-width: 800px;
 	margin: 70px auto;
-	${({ theme }) => theme.typography.fontFamily};
 	color: ${({ theme }) => theme.palette.base.main};
 
 	/* Typography */
@@ -120,7 +119,6 @@ export const ClauseNo = styled.span`
 `;
 
 export const PaperTitle = styled.div`
-	${({ theme }) => theme.typography.fontStyle}
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-size: 32px;
 	font-weight: ${FONT_WEIGHT.MEDIUM};

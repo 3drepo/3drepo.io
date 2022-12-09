@@ -25,10 +25,10 @@ import {
 	FullName,
 	UserIcon,
 	TruncatableName,
-	Avatar,
-	AvatarButton,
 	AvatarLabel,
 	AvatarInput,
+	Avatar,
+	AvatarButton,
 	ErrorMessage,
 } from './editProfileAvatar.styles';
 

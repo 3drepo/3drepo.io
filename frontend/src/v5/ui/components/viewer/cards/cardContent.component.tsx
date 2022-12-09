@@ -23,6 +23,5 @@ export const CardContent: typeof ScrollArea = ({ children, ...props }) => (
 		<CardContentContainer>
 			{children}
 		</CardContentContainer>
-
 	</ScrollArea>
 );

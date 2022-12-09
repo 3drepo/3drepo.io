@@ -70,11 +70,6 @@ export default css`
 	${RightPanels} {
 		margin-top: 8px;
 		box-sizing: border-box;
-		
-		& .MuiPaper-root {
-			border-radius: 10px;
-		}
-
 		@media (min-width: 1520px) {
 			height: calc(100% - 38px);
 		}

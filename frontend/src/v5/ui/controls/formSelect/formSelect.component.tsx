@@ -14,53 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormControl, SelectProps, InputLabel } from '@mui/material';
+
+import { SelectWithLabel, SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
 import { Controller } from 'react-hook-form';
-import { Select } from './formSelect.styles';
 
-export type FormSelectProps = SelectProps & {
-	control: any;
-	name: string;
-};
+export interface FormSelectProps extends SelectWithLabelProps {
+	control?: any;
+	formError?: any;
+}
 
-export const FormSelect = ({
-	name,
-	required,
-	label,
-	children,
-	control,
-	disabled,
-	hidden,
-	defaultValue = '',
-	...otherProps
-}: FormSelectProps) => (
-	<FormControl>
-		<InputLabel
-			id={`${name}-label`}
-			required={required}
-			disabled={disabled}
-			hidden={hidden}
-		>
-			{label}
-		</InputLabel>
-		<Controller
-			control={control}
-			name={name}
-			defaultValue={defaultValue}
-			render={({ field }) => (
-				<Select
-					{...field}
-					inputRef={field.ref}
-					labelId={`${name}-label`}
-					id={name}
-					label={label}
-					disabled={disabled}
-					hidden={hidden}
-					{...otherProps}
-				>
-					{children}
-				</Select>
-			)}
-		/>
-	</FormControl>
+export const FormSelect = ({ name, control, formError, ...props }:FormSelectProps) => (
+	<Controller
+		name={name}
+		control={control}
+		render={({ field: { ref, value, ...field } }) => (
+			<SelectWithLabel
+				{...field}
+				{...props}
+				inputRef={ref}
+				value={value || ''}
+				error={!!formError}
+				helperText={formError?.message}
+			/>
+		)}
+	/>
 );
