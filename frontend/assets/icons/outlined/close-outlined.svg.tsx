@@ -14,11 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-type IProps = {
-	className?: any;
-};
-
-export default ({ className }: IProps) => (
+export default () => (
 	<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path d="M1.19043 1L14.8096 14.6192" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 		<path d="M1.19043 15L14.8096 1.38083" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
