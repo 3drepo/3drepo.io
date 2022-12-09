@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
-import UserIcon from '@assets/icons/user.svg';
+import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
 import styled from 'styled-components';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
@@ -49,7 +49,12 @@ export const UsernameField = styled(AuthField).attrs({
 		defaultMessage: 'Username or email',
 	}),
 	autoComplete: 'login',
-})``;
+})`
+	svg {
+		width: 16px;
+		height: 15px;
+	}
+`;
 
 export const PasswordField = styled(AuthField).attrs({
 	InputProps: {

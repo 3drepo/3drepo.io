@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ExpandIcon from '@assets/icons/expand_panel.svg';
+import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
 
 interface ISidebar {

@@ -16,7 +16,7 @@
  */
 import { useState, MouseEvent } from 'react';
 import HomeIcon from '@assets/icons/outlined/home-outlined.svg';
-import DownArrowIcon from '@assets/icons/chevron.svg';
+import DownArrowIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 import { BreadcrumbDropdown, BreadcrumbItem } from './breadcrumbDropdown/breadcrumbDropdown.component';

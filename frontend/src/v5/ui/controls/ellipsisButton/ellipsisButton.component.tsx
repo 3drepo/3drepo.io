@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { forwardRef, Ref } from 'react';
-import EllipsisIcon from '@assets/icons/ellipsis.svg';
+import EllipsisIcon from '@assets/icons/outlined/ellipsis-outlined.svg';
 import { IconButtonProps } from '@mui/material/IconButton';
 import { StyledIconButton } from './ellipsisButton.styles';
 

@@ -16,7 +16,7 @@
  */
 
 import { forwardRef, Ref } from 'react';
-import ChevronIcon from '@assets/icons/chevron.svg';
+import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import { IconButtonProps } from '@mui/material';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { ChevronStyledIconButton } from './chevronButton.styles';
