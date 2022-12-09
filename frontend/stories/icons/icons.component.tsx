@@ -60,7 +60,7 @@ const TemplateContainer = styled.div`
 	align-items: baseline;
     justify-content: space-evenly;
     max-height: 100vh;
-    overflow: scroll;
+    overflow-y: scroll;
 `;
 
 export const IconsTemplate = ({ backgroundColor = '#6d9ded', icons, iconSize }) => (
