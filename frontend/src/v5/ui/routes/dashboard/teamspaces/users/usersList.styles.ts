@@ -25,7 +25,8 @@ import styled, { css } from 'styled-components';
 
 const AddUserButton = css`
 	${FloatingButtonContainer} {
-		top: 45px;
+		top: 8px;
+		height: 35px;
 		right: 0;
 		${FloatingButton} {
 			::after {
