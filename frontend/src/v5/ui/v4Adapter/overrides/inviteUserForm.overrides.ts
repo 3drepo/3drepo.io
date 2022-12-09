@@ -16,6 +16,8 @@
  */
 
 import { Item as SelectListItem } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
+import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
+import { RadioContainer } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
 import { Row, Cell, BodyWrapper as CustomTableBody } from '@/v4/routes/components/customTable/customTable.styles';
 import {
 	AddButton,
@@ -121,9 +123,22 @@ const PermissionsTableStyles = css`
 	${PermissionsTable} {
 		border: none;
 		height: auto;
+		${RadioContainer} {
+			align-items: center;
+			position: relative;
+			${SortLabel} svg {
+				position: absolute;
+				right: -15px;
+			}
+		}
+
 		${CustomTableBody} ${Row} {
 			${Cell}:first-child {
 				border-right: 1px solid ${({ theme }) => theme.palette.base.lightest};
+				justify-content: left;
+			}
+			${Cell} >* {
+				justify-content: center;
 			}
 		}
 		
