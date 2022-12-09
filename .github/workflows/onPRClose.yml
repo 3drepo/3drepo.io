@@ -3,23 +3,8 @@ on:
   pull_request:
     types: [closed]
 jobs:
-
-  get-pr-number:
-    name: Get Current PR Number
-    runs-on: ubuntu-latest
-    outputs: 
-      pr-number: ${{ steps.condval.outputs.value }}
-    steps:
-      - uses: 3drepo/action-cond@v1
-        id: condval
-        with:
-          cond: ${{ github.event_name == 'pull_request' }}
-          if_true: ${{ github.event.number }}
-          if_false: ${{ github.event.pull_request.number }}
-
   get-details:
-    name: Get Current Issue Number
-    needs: [ get-pr-number ]
+    name: Get Current Issue Details
     runs-on: ubuntu-latest
     outputs: 
       issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
@@ -29,7 +14,7 @@ jobs:
       - name: Extract Issue Number from PR
         uses: 3drepo/extract-pr-information@v1
         with:
-          pr: ${{ needs.get-pr-number.outputs.pr-number }}
+          pr: ${{ github.event.number }}
           base: staging
           github-token: ${{ secrets.GITHUB_TOKEN }}
         id: commitMsgParser
