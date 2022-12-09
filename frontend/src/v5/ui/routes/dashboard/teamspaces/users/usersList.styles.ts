@@ -142,6 +142,7 @@ export const Container = styled.div`
 		}
 
 		${Row} {
+			border-color: ${({ theme }) => theme.palette.secondary.lightest};
 			&:last-of-type {
 				border: none;
 			}
