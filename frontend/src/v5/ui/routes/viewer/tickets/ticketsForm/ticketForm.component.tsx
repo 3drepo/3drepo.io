@@ -107,7 +107,7 @@ export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
-								key={module.name}
+								key={module.name || module.type}
 								module={module}
 								moduleValues={ticket.modules[module.name]}
 								{...rest}
