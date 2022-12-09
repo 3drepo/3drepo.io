@@ -33,9 +33,7 @@ export const Container = styled(Card)`
 	border: none;
 `;
 
-export const AddProjectIcon = styled(AddCircleIcon).attrs(({ theme }) => ({
-	fillColour: theme.palette.primary.contrast,
-}))`
+export const AddProjectIcon = styled(AddCircleIcon)`
 	width: 37px;
 	height: 37px;
 `;

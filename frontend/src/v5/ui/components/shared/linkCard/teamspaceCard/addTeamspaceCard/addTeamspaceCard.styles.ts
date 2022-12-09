@@ -32,9 +32,7 @@ export const Container = styled(Card)`
 	cursor: pointer;
 `;
 
-export const AddTeamspaceIcon = styled(AddCircleIcon).attrs(({ theme }) => ({
-	fillColour: theme.palette.primary.contrast,
-}))`
+export const AddTeamspaceIcon = styled(AddCircleIcon)`
 	width: 37px;
 	height: 37px;
 `;
