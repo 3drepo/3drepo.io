@@ -75,7 +75,10 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 };
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
+	console.log("_+_+_+_+ getTeamspaceListByUser {}{}{}{");
 	const tsList = await getAccessibleTeamspaces(user);
+	console.log("tsList");
+	console.log(tsList);
 	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
 };
 
