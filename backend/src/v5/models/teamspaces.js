@@ -127,23 +127,6 @@ Teamspace.getTeamspaceAdmins = async (teamspace) => {
 	);
 };
 
-/*
-Teamspace.getTeamspaceAdmins = async (ts) => {
-	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
-	console.log("============== DATA =====================");
-	console.log(data);
-	console.log("============== FLAT MAP =====================");
-	console.log(data.customData.permissions.flatMap(
-		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
-	));
-	console.log("============== END =====================");
-	return Teamspace.getTeamspaceAdmins2(ts);
-	return data.customData.permissions.flatMap(
-		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
-	);
-};
-	*/
-
 Teamspace.hasAccessToTeamspace = async (teamspace, username) => {
 	const query = { user: username, 'roles.db': teamspace };
 	const userDoc = await teamspaceQuery(query, { _id: 1 });

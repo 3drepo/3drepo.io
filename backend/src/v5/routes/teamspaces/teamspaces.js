@@ -26,8 +26,13 @@ const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
 
 const getTeamspaceList = (req, res) => {
+	console.log("___+_+_+_+_+_+_+ getTeamspaceList _+___+_++_");
 	const user = req.session.user.username;
+	console.log("user");
+	console.log(user);
 	Teamspaces.getTeamspaceListByUser(user).then((teamspaces) => {
+		console.log("teamspaces");
+		console.log(teamspaces);
 		respond(req, res, templates.ok, { teamspaces });
 	}).catch((err) => respond(req, res, err));
 };
