@@ -100,6 +100,9 @@ export const Container = styled.div`
 			${Cell} {
 				height: 20px;
 				padding-top: 0;
+				:first-child {
+					padding-left: 0;
+				}
 			}
 		}
 
