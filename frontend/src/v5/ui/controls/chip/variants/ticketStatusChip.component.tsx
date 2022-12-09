@@ -17,7 +17,7 @@
 
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
 import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
-import CrossIcon from '@assets/icons/close.svg';
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import BellIcon from '@assets/icons/outlined/bell-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { COLOR } from '@/v5/ui/themes/theme';

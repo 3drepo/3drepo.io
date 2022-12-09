@@ -18,7 +18,7 @@
 import { useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
-import CrossIcon from '@assets/icons/close.svg';
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
