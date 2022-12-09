@@ -432,7 +432,13 @@ export const theme = createTheme({
 					color: null,
 				},
 				colorPrimary: {
-					color: COLOR.PRIMARY_MAIN,
+					color: COLOR.BASE_LIGHT,
+					'&.Mui-checked': {
+						color: COLOR.PRIMARY_MAIN,
+					},
+					'&.Mui-disabled': {
+						color: COLOR.BASE_LIGHTEST,
+					},
 				},
 			},
 		},
