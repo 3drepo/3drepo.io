@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Item as SelectListItem } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import { Row, Cell, BodyWrapper as CustomTableBody } from '@/v4/routes/components/customTable/customTable.styles';
 import {
 	AddButton,
@@ -31,14 +32,19 @@ import { EmptySelectValue } from '@/v4/routes/components/newUserForm/newUserForm
 import { css } from 'styled-components';
 
 const JobSelectStyles = css`
-	${JobColorDot} {
-		width: 10px;
-		height: 10px;
-	}
-	${JobTitle}, ${EmptySelectValue} {
-		width: calc(100% - 22px);
-		color: ${({ theme }) => theme.palette.secondary.main};
+	${SelectListItem} {
 		${({ theme }) => theme.typography.body1}
+		color: ${({ theme }) => theme.palette.secondary.main};
+		
+		${JobColorDot} {
+			width: 10px;
+			height: 10px;
+		}
+		${JobTitle}, ${EmptySelectValue} {
+			width: calc(100% - 22px);
+			${({ theme }) => theme.typography.body1}
+			color: ${({ theme }) => theme.palette.secondary.main};
+		}
 	}
 `;
 
