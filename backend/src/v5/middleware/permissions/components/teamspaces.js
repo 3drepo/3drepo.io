@@ -33,6 +33,7 @@ TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
 		if (isAdmin) {
 			next();
 		} else {
+			console.log("+++++++++++ WE ARE IN src/v5/middleware/permissions/components/teamspaces.js +++++++++++++++");
 			throw templates.notAuthorized;
 		}
 	} catch (err) {

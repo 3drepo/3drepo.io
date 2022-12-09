@@ -35,6 +35,7 @@ ProjectPerms.isProjectAdmin = async (req, res, next) => {
 		if (isAdmin) {
 			next();
 		} else {
+			console.log("_____________ WE ARE IN src/v5/middleware/permissions/components/projects.js _________________");
 			throw templates.notAuthorized;
 		}
 	} catch (err) {

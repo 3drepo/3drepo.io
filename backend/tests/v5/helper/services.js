@@ -77,10 +77,10 @@ db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 db.createTeamspace = async (teamspace, admins = [], members = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	await ServiceHelper.db.createTeamspaceRole(teamspace);
+	await createTeamspaceSettings(teamspace);
 	await Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
 			{ permissions: breaking ? undefined : permissions, ...customData }),
-		createTeamspaceSettings(teamspace),
 		...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
 		...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
 	]);

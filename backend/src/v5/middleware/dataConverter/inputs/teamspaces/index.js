@@ -28,11 +28,13 @@ Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
 	const { teamspace, username } = req.params;
 
 	if (username === teamspace) {
+		console.log("111111111111111 WE ARE IN src/v5/middleware/dataConverter/inputs/teamspaces/index.js 11111111111111111111!!");
 		respond(req, res, createResponseCode(templates.notAuthorized, 'A user cannot be removed from their own teamspace.'));
 		return;
 	}
 
 	if (username !== user && !await isTeamspaceAdmin(teamspace, user)) {
+		console.log("222222222222222 WE ARE IN src/v5/middleware/dataConverter/inputs/teamspaces/index.js 2222222222222222222222");
 		respond(req, res, createResponseCode(templates.notAuthorized,
 			'Admin permissions are required to remove another user from a teamspace.'));
 		return;
@@ -41,6 +43,7 @@ Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
 	// ensure the user to be removed has access to teamspace
 	const userIsTsMember = await hasAccessToTeamspace(teamspace, username);
 	if (!userIsTsMember) {
+		console.log("333333333333333 WE ARE IN src/v5/middleware/dataConverter/inputs/teamspaces/index.js 3333333333333333333333");
 		respond(req, res, createResponseCode(templates.notAuthorized,
 			'The user to be removed is not a member of the teamspace.'));
 		return;

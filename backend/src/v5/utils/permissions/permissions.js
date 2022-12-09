@@ -28,7 +28,10 @@ const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teams
 const Permissions = {};
 
 Permissions.isTeamspaceAdmin = async (teamspace, username) => {
+	console.log("()()()()() isTeamspaceAdmin ()()()()()()");
 	const admins = await getTeamspaceAdmins(teamspace);
+	console.log("admins");
+	console.log(admins);
 	return admins.includes(username);
 };
 
@@ -38,10 +41,19 @@ Permissions.isProjectAdmin = async (teamspace, project, username) => {
 };
 
 const hasAdminPermissions = async (teamspace, project, username) => {
+	console.log("_+_+_+_+_ hasAdminPermissions +_+_+_+_+");
+	console.log("teamspace");
+	console.log(teamspace);
+	console.log("project");
+	console.log(project);
+	console.log("username");
+	console.log(username);
 	const isAdminArr = (await Promise.all([
 		Permissions.isTeamspaceAdmin(teamspace, username),
 		Permissions.isProjectAdmin(teamspace, project, username),
 	]));
+	console.log("isAdminArr");
+	console.log(isAdminArr);
 
 	return isAdminArr.filter((bool) => bool).length;
 };
@@ -59,6 +71,11 @@ const modelType = {
 };
 
 const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, username, adminCheck = true) => {
+	console.log("_+_+_+_+_+ modelPermCheck _+_+_+_");
+	console.log("permCheck");
+	console.log(permCheck);
+	console.log("mode");
+	console.log(mode);
 	let getModelFn = getModelById;
 
 	if (mode === modelType.CONTAINERS) {
@@ -68,14 +85,20 @@ const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, 
 	}
 
 	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
+	console.log("model");
+	console.log(model);
 
 	const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
+	console.log("modelExists");
+	console.log(modelExists);
 	if (!modelExists) {
 		return false;
 	}
 
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+		console.log("hasAdminPerms");
+		console.log(hasAdminPerms);
 		if (hasAdminPerms) {
 			return true;
 		}
