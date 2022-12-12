@@ -38,7 +38,6 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
-		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -97,7 +96,6 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
 		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
-		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

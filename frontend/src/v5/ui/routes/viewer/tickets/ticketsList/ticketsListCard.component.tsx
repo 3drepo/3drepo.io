@@ -47,6 +47,7 @@ export const TicketsListCard = () => {
 			containerOrFederation,
 			isFederation,
 		);
+		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 		UsersActionsDispatchers.fetchUsers(teamspace);
 	}, [containerOrFederation]);
 
