@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Checkbox } from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
+import { Checkbox } from './checkbox/checkbox.component';
 import { DatePicker } from './datePicker/datePicker.component';
 import { DateTimePicker } from './datePicker/dateTimePicker.component';
 import { InputController } from './inputController.component';
