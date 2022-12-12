@@ -33,6 +33,8 @@ export type InputControllerProps<T extends FormInputProps> = T & {
 	control?: any,
 	formError?: any,
 	defaultValue?: any,
+	onChange: (event) => void,
+	onBlur: () => void,
 };
 
 // eslint-disable-next-line
@@ -42,6 +44,8 @@ export const InputController = <T,>({
 	control,
 	formError,
 	defaultValue,
+	onChange,
+	onBlur,
 	...props
 }: InputControllerProps<T>) => (
 	<Controller
@@ -54,6 +58,14 @@ export const InputController = <T,>({
 				{...field}
 				{...props}
 				name={name}
+				onChange={(event) => {
+					field.onChange(event);
+					onChange?.(event);
+				}}
+				onBlur={() => {
+					field.onBlur();
+					onBlur?.();
+				}}
 				inputRef={ref}
 				error={!!formError}
 				helperText={formError?.message}
