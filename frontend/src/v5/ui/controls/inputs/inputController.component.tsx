@@ -33,8 +33,8 @@ export type InputControllerProps<T extends FormInputProps> = T & {
 	control?: any,
 	formError?: any,
 	defaultValue?: any,
-	onChange: (event) => void,
-	onBlur: () => void,
+	onChange?: (event) => void,
+	onBlur?: () => void,
 };
 
 // eslint-disable-next-line
