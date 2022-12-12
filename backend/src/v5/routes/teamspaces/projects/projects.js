@@ -31,7 +31,10 @@ const getProjectList = (req, res) => {
 	const { teamspace } = req.params;
 	Projects.getProjectList(teamspace, user).then((projects) => {
 		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) => {
+		// istanbul ignore next
+		respond(req, res, err);
+	});
 };
 
 const createProject = async (req, res) => {
