@@ -77,21 +77,17 @@ const project = generateRandomProject();
 const model = generateRandomModel({ collaborators: [userToRemoveFromTs.user] });
 const validExpiryDate = Date.now() + 100000;
 
-// This is the list of teamspaces the user has access to
-const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
-
 const setupData = async () => {
 	await Promise.all(teamspaces.map(
 		({ name, isAdmin }) => {
 			const perms = isAdmin ? [testUser.user] : [];
-			return ServiceHelper.db.createTeamspace(name, perms, undefined, false);
+			return ServiceHelper.db.createTeamspace(name, perms);
 		},
 	));
 	await Promise.all([
-		ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], undefined, true),
-		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user], undefined, false),
-		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user], undefined, false),
-		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], undefined, false, {
+		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user]),
+		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user]),
+		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], undefined, {
 			billing: {
 				subscriptions: {
 					discretionary: {
@@ -106,7 +102,6 @@ const setupData = async () => {
 			tsWithMultipleLicenses.name,
 			[userWithMultipleLicenses.user],
 			undefined,
-			false,
 			{
 				billing: {
 					subscriptions: {
@@ -125,7 +120,7 @@ const setupData = async () => {
 			},
 		),
 		ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
-			[userWithLicenseUnlimitedCollabs.user], undefined, false, {
+			[userWithLicenseUnlimitedCollabs.user], undefined, {
 				billing: {
 					subscriptions: {
 						discretionary: {
@@ -136,7 +131,7 @@ const setupData = async () => {
 					},
 				},
 			}),
-		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], undefined, false, {
+		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], undefined, {
 			billing: {
 				subscriptions: {
 					discretionary: {
@@ -151,7 +146,7 @@ const setupData = async () => {
 		ServiceHelper.db.createTeamspace(tsWithUsersToRemove.name, [
 			userToRemoveFromTs.user,
 			testUser.user,
-		], [testUser2.user], false)]);
+		], [testUser2.user])]);
 
 	await Promise.all([
 		ServiceHelper.db.createUser(
@@ -176,7 +171,7 @@ const setupData = async () => {
 		),
 		ServiceHelper.db.createUser(
 			testUser2,
-			[breakingTSAccess.name, tsWithUsersToRemove.name],
+			[tsWithUsersToRemove.name],
 		),
 		ServiceHelper.db.createUser(
 			userToRemoveFromTs,
@@ -219,11 +214,6 @@ const testGetTeamspaceList = () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
 			expect(res.body.teamspaces.length).toBe(teamspaces.concat([tsWithUsersToRemove]).length);
 			expect(res.body.teamspaces).toEqual(expect.arrayContaining(teamspaces));
-		});
-
-		test('should safely catch error if there is an internal error', async () => {
-			const res = await agent.get(`/v5/teamspaces/?key=${testUser2.apiKey}`).expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 	});
 };

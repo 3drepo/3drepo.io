@@ -180,11 +180,6 @@ Teamspace.grantAdminToUser = (teamspace, username) => grantPermissionToUser(team
 
 Teamspace.grantMemberToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAM_MEMBER);
 
-Teamspace.breakTeamspacePermissions = async (teamspace) => {
-	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-		{ $unset: { permissions: '' } });
-};
-
 Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
 	const users = await findMany(query, { user: 1 });
