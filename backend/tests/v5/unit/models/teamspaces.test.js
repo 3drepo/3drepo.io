@@ -411,11 +411,9 @@ const testCreateTeamspaceSettings = () => {
 				_id: teamspace,
 				topicTypes: DEFAULT_TOPIC_TYPES,
 				riskCategories: DEFAULT_RISK_CATEGORIES,
-				permissions: [],
-				/*
 				permissions: [
 					{ user: teamspace, permissions: [TEAMSPACE_ADMIN] },
-				], */
+				],
 			};
 
 			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
