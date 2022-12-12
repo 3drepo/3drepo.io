@@ -28,7 +28,9 @@ const TeamspaceModelV5 = require(`${v5Path}/models/teamspaces`);
 const colName = "teamspace";
 
 class TeamspaceSettings {
-	createTeamspaceSettings = (teamspace) => TeamspaceModelV5.createTeamspaceSettings(teamspace);
+	createTeamspaceSettings(teamspace) {
+		return TeamspaceModelV5.createTeamspaceSettings(teamspace);
+	}
 
 	getTeamspaceSettingsCollection(account) {
 		return db.getCollection(account, colName);
@@ -44,7 +46,9 @@ class TeamspaceSettings {
 		return foundSettings;
 	}
 
-	getRiskCategories = async (teamspace) => (await TeamspaceModelV5.getRiskCategories(teamspace)) || [];
+	async getRiskCategories(teamspace) {
+		return (await TeamspaceModelV5.getRiskCategories(teamspace)) || [];
+	}
 
 	async processMitigationsFile(account, username, sessionId, filename, file) {
 		const User = require("./user"); // Circular dependencies, have to import here.
