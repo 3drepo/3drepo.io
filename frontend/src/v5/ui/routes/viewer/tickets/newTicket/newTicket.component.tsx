@@ -24,7 +24,7 @@ import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.
 import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getTicketValidator } from '@/v5/store/tickets/tickets.validators';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -73,6 +73,7 @@ export const NewTicketCard = () => {
 	};
 
 	useEffect(() => {
+		if (templateAlreadyFetched(template)) return;
 		TicketsActionsDispatchers.fetchTemplate(
 			teamspace,
 			project,

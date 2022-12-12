@@ -22,7 +22,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation, sanitizeViewVals } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
@@ -83,13 +83,15 @@ export const TicketDetailsCard = () => {
 			ticket._id,
 			isFederation,
 		);
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			template._id,
-			isFederation,
-		);
+		if (!templateAlreadyFetched(template)) {
+			TicketsActionsDispatchers.fetchTemplate(
+				teamspace,
+				project,
+				containerOrFederation,
+				template._id,
+				isFederation,
+			);
+		}
 		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
 		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
