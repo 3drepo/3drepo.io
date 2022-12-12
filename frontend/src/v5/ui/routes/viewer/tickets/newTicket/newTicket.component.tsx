@@ -29,6 +29,7 @@ import { getTicketValidator } from '@/v5/store/tickets/tickets.validators';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useEffect } from 'react';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { TicketsCardViews } from '../tickets.constants';
@@ -70,6 +71,16 @@ export const NewTicketCard = () => {
 			goToTicketDetails,
 		);
 	};
+
+	useEffect(() => {
+		TicketsActionsDispatchers.fetchTemplate(
+			teamspace,
+			project,
+			containerOrFederation,
+			template._id,
+			isFederation,
+		);
+	}, []);
 
 	return (
 		<CardContainer>

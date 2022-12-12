@@ -54,18 +54,6 @@ export const TicketDetailsCard = () => {
 	const goPrev = () => changeTicketIndex(-1);
 	const goNext = () => changeTicketIndex(1);
 
-	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket._id,
-			isFederation,
-		);
-	}, [ticket._id]);
-
-	if (!ticket) return (<></>);
-
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
 		mode: 'onChange',
@@ -88,10 +76,26 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
+		TicketsActionsDispatchers.fetchTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticket._id,
+			isFederation,
+		);
+		TicketsActionsDispatchers.fetchTemplate(
+			teamspace,
+			project,
+			containerOrFederation,
+			template._id,
+			isFederation,
+		);
 		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
 		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
 	}, [ticket._id]);
+
+	if (!ticket) return (<></>);
 
 	return (
 		<CardContainer>
