@@ -54,6 +54,7 @@ const {v5Path} = require("../../interop");
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
 const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
 const { TEAM_MEMBER } = require(`${v5Path}/models/roles.constants`);
+const { getAddOns } = require(`${v5Path}/models/teamspaces`);
 
 const COLL_NAME = "system.users";
 
@@ -210,12 +211,13 @@ User.getProfileByUsername = async function (username) {
 	};
 };
 
-User.getAddOnsForTeamspace = async (user) => {
-	const { customData } = await db.findOne("admin", COLL_NAME, { user }, { "customData.addOns" : 1 });
+User.getAddOnsForTeamspace = (user) => {
+	return getAddOns(user);
+};
 
-	const embeddedObj = customData.addOns || {};
-	delete customData.addOns;
-	return { ...customData, ...embeddedObj};
+User.isHereEnabled = async function (username) {
+	const { hereEnabled } = await User.getAddOnsForTeamspace(username);
+	return !!hereEnabled;
 };
 
 User.getStarredMetadataTags = async function (username) {
@@ -1071,11 +1073,6 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 		}
 		return result;
 	}
-};
-
-User.isHereEnabled = async function (username) {
-	const user = await User.findByUserName(username,  { _id: 0, "customData.addOns.hereEnabled": 1 });
-	return user.customData.addOns?.hereEnabled;
 };
 
 User.findByUserName = async function (username, projection) {
