@@ -445,11 +445,23 @@ const testRemoveTeamspaceMember = () => {
 		});
 
 		test('should remove another user from the teamspace', async () => {
+			console.log("____+_+_+_+_+_+_+_+_+_+_+");
+			console.log(`tsWithUsersToRemove: ${tsWithUsersToRemove.name}`);
+			console.log(`testUser: ${testUser.user}`);
+			console.log(`testUser2: ${testUser2.user}`);
+			const tsMembersResA = await agent.get(`/v5/teamspaces/${tsWithUsersToRemove.name}/members?key=${testUser.apiKey}`);
+			console.log("tsMembersResA.body");
+			console.log(tsMembersResA.body)
+			console.log(route());
 			await agent.delete(`${route()}/?key=${testUser.apiKey}`).expect(templates.ok.status);
 			const tsMembersRes = await agent.get(`/v5/teamspaces/${tsWithUsersToRemove.name}/members?key=${testUser.apiKey}`);
+			console.log("tsMembersRes.body");
+			console.log(tsMembersRes.body)
 			const removedUser = tsMembersRes.body.members.find((m) => m.user === userToRemoveFromTs.user);
 			expect(removedUser).toEqual(undefined);
+			console.log(testUser.user);
 			const projectDataRes = await agent.get(`/${tsWithUsersToRemove.name}/projects?key=${testUser.apiKey}`);
+			console.log(projectDataRes.body);
 			const projectPermissions = projectDataRes.body.find((p) => p._id === project.id).permissions;
 			const removedProjectPermission = projectPermissions.find((p) => p.user === userToRemoveFromTs.user);
 			expect(removedProjectPermission).toEqual(undefined);

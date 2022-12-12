@@ -22,6 +22,7 @@ const PathParams = {};
 const paramsToIgnore = ['container', 'federation', 'model'];
 
 PathParams.convertAllUUIDs = (req, res, next) => {
+	console.log("+++++++++++++++ convertAlLUUIDs ++++++++++++++");
 	if (req.params) {
 		Object.keys(req.params).forEach((key) => {
 			if (!paramsToIgnore.includes(key)) {

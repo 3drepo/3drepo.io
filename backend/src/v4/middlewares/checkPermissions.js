@@ -83,6 +83,7 @@ function validatePermissions(next, result) {
 	if (isGranted) {
 		next();
 	} else {
+		console.log("v4 validatePerms NOT AUTH");
 		return Promise.reject(responseCodes.NOT_AUTHORIZED);
 	}
 }
@@ -92,15 +93,18 @@ function checkPermissions(permsRequest) {
 
 	return function(req, res, next) {
 		validateUserSession(req, res).then(() => {
+			console.log("VALIDDDDATE USER SESSION (single)");
 			const username = req.session.user.username;
 			const account = req.params.account;
 			const model = req.params.model;
 			const project = req.params.project;
 
 			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter).then((data) => {
+			console.log("VALIDDDDATE USER SESSION (single)");
 				if (data.userPermissions) {
 					req.session.user.permissions = data.userPermissions;
 				}
+				console.log(data);
 				return data;
 			});
 		}).then(validatePermissions.bind(null, next))
@@ -125,6 +129,7 @@ function checkMultiplePermissions(permsRequest) {
 		}
 
 		validateUserSession(req, res).then(() => {
+			console.log("VALIDDDDATE USER SESSION (multi)");
 			const username = req.session.user.username;
 			const account = req.params.account;
 

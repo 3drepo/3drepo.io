@@ -82,6 +82,7 @@ db.createTeamspace = async (teamspace, admins = [], members = [], breaking = fal
 	if (breaking) {
 		await breakTeamspacePermissions(teamspace);
 	} else {
+		// admins.push(teamspace);
 		await Promise.all([
 			...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
 			...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
