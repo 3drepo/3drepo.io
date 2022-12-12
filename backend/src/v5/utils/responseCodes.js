@@ -33,8 +33,8 @@ ResponseCodes.templates = {
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password.', status: 400 },
 	incorrectPassword: { message: 'Incorrect password.', status: 400 },
 	ssoNotAvailable: { message: 'SSO provider not available.', status: 500 },
-	nonSsoUser: { message: 'Non SSO user.', status: 400 },
-	ssoUser: { message: 'Already an SSO user.', status: 400 },
+	nonSsoUser: { message: 'Single sign on is not enabled for this user.', status: 400 },
+	ssoUser: { message: 'Single sign on is already enabled for this user.', status: 400 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },

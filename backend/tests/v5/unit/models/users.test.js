@@ -585,13 +585,16 @@ const testLinkToSso = () => {
 	describe('Link user to SSO', () => {
 		test('Should link user to SSO', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
 			const username = generateRandomString();
 			const email = generateRandomString();
 			const ssoData = { type: generateRandomString(), id: generateRandomString() };
-			await User.linkToSso(username, email, ssoData);
+			await User.linkToSso(username, email, firstName, lastName, ssoData);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { $set: { 'customData.email': email, 'customData.sso': ssoData } });
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, 
+				{ $set: { 'customData.email': email, 'customData.firstName': firstName, 'customData.lastName': lastName, 'customData.sso': ssoData } });
 		});
 	});
 };

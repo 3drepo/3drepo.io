@@ -40,8 +40,8 @@ const signUpPost = async (req, res, next) => {
 const linkPost = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const { email, sso } = req.body;
-		await Users.linkToSso(username, email, sso);
+		const { email, sso, firstName, lastName } = req.body;
+		await Users.linkToSso(username, email, firstName, lastName, sso);
 		await next();
 	} catch (err) {
 		/* istanbul ignore next */

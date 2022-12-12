@@ -396,18 +396,17 @@ const testUpdateProfile = () => {
 				await testSession.post('/v5/logout/');
 			});
 
-			test('should fail if the user tries to update non sso fields', async () => {
+			test('should fail if the user tries to update sso fields', async () => {
 				const data = { firstName: generateRandomString(), lastName: generateRandomString() };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 
-			test('should succeed if the user tries to update sso fields', async () => {
+			test('should succeed if the user tries to update non sso fields', async () => {
 				const data = { company: generateRandomString(), countryCode: 'GB' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
-				expect(updatedProfileRes.body.company).toEqual(data.company);
-				expect(updatedProfileRes.body.countryCode).toEqual(data.countryCode);
+				expect(updatedProfileRes.body).toEqual(expect.objectContaining(data));
 			});
 		});
 	});
@@ -569,7 +568,7 @@ const testForgotPassword = () => {
 		});
 
 		test('should not send email but return ok if user is an SSO user', async () => {
-			await User.linkToSso(ssoTestUser.user, userEmailSso, {
+			await User.linkToSso(ssoTestUser.user, ssoTestUser.basicData.firstName, ssoTestUser.basicData.lastName, userEmailSso, {
 				type: generateRandomString(), id: generateRandomString(),
 			});
 			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })

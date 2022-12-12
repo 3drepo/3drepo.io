@@ -65,8 +65,9 @@ User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.e
 
 User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
 	$or: [{ user: usernameOrEmail },
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }] }, projection);
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }]
+}, projection);
 
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
@@ -213,7 +214,15 @@ User.unlinkFromSso = async (username, newPassword) => {
 	await User.updatePassword(username, newPassword);
 };
 
-User.linkToSso = (username, email, ssoData) => updateUser(username, { $set: { 'customData.email': email, 'customData.sso': ssoData } });
+User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(username,
+	{
+		$set: {
+			'customData.email': email,
+			'customData.firstName': firstName,
+			'customData.lastName': lastName,
+			'customData.sso': ssoData
+		}
+	});
 
 User.isSso = async (username) => {
 	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });

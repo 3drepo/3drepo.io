@@ -64,12 +64,12 @@ const testAuthenticate = () => {
 			const resUri = new URL(res.headers.location);
 			expect(resUri.hostname).toEqual('login.microsoftonline.com');
 			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
-			expect(resUri.searchParams.get('redirect_uri')).toEqual(authenticateRedirectUri);
-			expect(resUri.searchParams.has('client_id')).toEqual(true);
-			expect(resUri.searchParams.has('code_challenge')).toEqual(true);
-			expect(resUri.searchParams.get('code_challenge_method')).toEqual('S256');
-			const state = JSON.parse(resUri.searchParams.get('state'));
-			expect(state).toEqual({ redirectUri });
+			const searchParams = resUri.searchParams;
+			expect(searchParams.get('redirect_uri')).toEqual(authenticateRedirectUri);
+			expect(searchParams.has('client_id')).toEqual(true);
+			expect(searchParams.has('code_challenge')).toEqual(true);
+			expect(searchParams.get('code_challenge_method')).toEqual('S256');
+			expect(JSON.parse(searchParams.get('state'))).toEqual({ redirectUri });
 		});
 	});
 };
@@ -128,12 +128,14 @@ const testAuthenticatePost = () => {
 			const state = { redirectUri: generateRandomURL() };
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 
-			await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res1 = await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
+			expect(res1.headers.location).toEqual(state.redirectUri);
 
-			const res = await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res2 = await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(templates.alreadyLoggedIn.status);
-			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+			expect(res2.body.code).toEqual(templates.alreadyLoggedIn.code);
+			await testSession.post('/v5/logout/');
 		});
 
 		test('should redirect the user to the redirectUri provided', async () => {
@@ -289,12 +291,12 @@ const testLink = () => {
 				const resUri = new URL(res.headers.location);
 				expect(resUri.hostname).toEqual('login.microsoftonline.com');
 				expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
-				expect(resUri.searchParams.get('redirect_uri')).toEqual(linkRedirectUri);
-				expect(resUri.searchParams.has('client_id')).toEqual(true);
-				expect(resUri.searchParams.has('code_challenge')).toEqual(true);
-				expect(resUri.searchParams.get('code_challenge_method')).toEqual('S256');
-				const state = JSON.parse(resUri.searchParams.get('state'));
-				expect(state).toEqual({ redirectUri });
+				const searchParams = resUri.searchParams;
+				expect(searchParams.get('redirect_uri')).toEqual(linkRedirectUri);
+				expect(searchParams.has('client_id')).toEqual(true);
+				expect(searchParams.has('code_challenge')).toEqual(true);
+				expect(searchParams.get('code_challenge_method')).toEqual('S256');
+				expect(JSON.parse(searchParams.get('state'))).toEqual({ redirectUri });
 			});
 		});
 	});
@@ -312,8 +314,13 @@ const testLinkPost = () => {
 		beforeAll(async () => {
 			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 		});
+		
 		afterAll(async () => {
 			await testSession.post('/v5/logout/');
+		});
+
+		afterEach(async () => {
+			await resetTestUser();
 		});
 
 		test('should fail without a valid state', async () => {
@@ -341,8 +348,7 @@ const testLinkPost = () => {
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.isSso).toEqual(true);
-			await resetTestUser();
+			expect(newProfileRes.body.isSso).toEqual(true);			
 		});
 
 		test('should link user and change email if email is available', async () => {
@@ -354,8 +360,7 @@ const testLinkPost = () => {
 
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
-			await resetTestUser();
+			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);			
 		});
 
 		test('should link user and change email if email is available even if user is already SSO', async () => {
@@ -371,8 +376,7 @@ const testLinkPost = () => {
 
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
-			await resetTestUser();
+			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);			
 		});
 	});
 };

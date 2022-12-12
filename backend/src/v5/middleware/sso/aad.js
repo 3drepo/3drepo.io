@@ -80,7 +80,7 @@ Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails
 const verifyNewEmail = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const { email, id } = await getUserDetails(req.query.code,
+		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
 			linkRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } },
@@ -88,7 +88,8 @@ const verifyNewEmail = async (req, res, next) => {
 		if (user) {
 			throw errorCodes.EMAIL_EXISTS;
 		} else {
-			req.body = { email, sso: { type: providers.AAD, id } };
+			req.body = { email, firstName, lastName, sso: { type: providers.AAD, id } };
+
 			await next();
 		}
 	} catch (errorCode) {
