@@ -44,17 +44,17 @@ const {
 	getProjectsForAccountsList,
 	removeUserFromProjects
 } = require("./project");
-const UserProcessorV5 = require("../../v5/processors/users");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
-const { assignUserToJob } = require("../../v5/models/jobs.js");
 const { fileExists } = require("./fileRef");
-const { getSpaceUsed } = require("../../v5/utils/quota.js");
 const {v5Path} = require("../../interop");
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
 const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
 const { TEAM_MEMBER } = require(`${v5Path}/models/roles.constants`);
+const { assignUserToJob } = require(`${v5Path}/models/jobs.js`);
 const { getAddOns } = require(`${v5Path}/models/teamspaces`);
+const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
+const UserProcessorV5 = require(`${v5Path}/processors/users`);
 
 const COLL_NAME = "system.users";
 

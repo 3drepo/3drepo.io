@@ -22,44 +22,13 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 const utils = require("../utils");
 const Mitigation = require("./mitigation");
+const {v5Path} = require("../../interop");
+const TeamspaceModelV5 = require(`${v5Path}/models/teamspaces`);
+
 const colName = "teamspace";
 
 class TeamspaceSettings {
-	async createTeamspaceSettings(account) {
-		const settings = {
-			"_id" : account,
-			"topicTypes" : [
-				"Clash",
-				"Diff",
-				"RFI",
-				"Risk",
-				"H&S",
-				"Design",
-				"Constructibility",
-				"GIS",
-				"For information",
-				"VR"
-			],
-			"riskCategories" : [
-				"Commercial Issue",
-				"Environmental Issue",
-				"Health - Material effect",
-				"Health - Mechanical effect",
-				"Safety Issue - Fall",
-				"Safety Issue - Trapped",
-				"Safety Issue - Event",
-				"Safety Issue - Handling",
-				"Safety Issue - Struck",
-				"Safety Issue - Public",
-				"Social Issue",
-				"Other Issue",
-				"Unknown"
-			]
-		};
-		const settingsColl = await this.getTeamspaceSettingsCollection(account);
-
-		return await settingsColl.insertOne(settings);
-	}
+	createTeamspaceSettings = (teamspace) => TeamspaceModelV5.createTeamspaceSettings(teamspace);
 
 	getTeamspaceSettingsCollection(account) {
 		return db.getCollection(account, colName);
@@ -75,17 +44,7 @@ class TeamspaceSettings {
 		return foundSettings;
 	}
 
-	async getRiskCategories(account) {
-		const settings = await this.getTeamspaceSettings(account, { riskCategories: 1 });
-
-		return settings.riskCategories || [];
-	}
-
-	async getTopicTypes(account) {
-		const settings = await this.getTeamspaceSettings(account, { topicTypes: 1 });
-
-		return settings.topicTypes || [];
-	}
+	getRiskCategories = async (teamspace) => (await TeamspaceModelV5.getRiskCategories(teamspace)) || [];
 
 	async processMitigationsFile(account, username, sessionId, filename, file) {
 		const User = require("./user"); // Circular dependencies, have to import here.
