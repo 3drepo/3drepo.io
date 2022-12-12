@@ -19,12 +19,12 @@ const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constant
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
+const { getAccessibleTeamspaces } = require('../../models/users');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
@@ -75,10 +75,7 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 };
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
-	console.log("_+_+_+_+ getTeamspaceListByUser {}{}{}{");
 	const tsList = await getAccessibleTeamspaces(user);
-	console.log("tsList");
-	console.log(tsList);
 	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
 };
 

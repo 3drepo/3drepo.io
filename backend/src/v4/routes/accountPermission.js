@@ -143,47 +143,42 @@
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
 	function listPermissions(req, res, next) {
-		User.findByUserName(req.params.account)
-			.then(user => {
-				// const permissions = user.customData.permissions;
-				const permissions = [];
+		const permissions = [];
 
-				return User.getAllUsersInTeamspace(req.params.account).then(
-					users => {
-						users.forEach(async _user => {
-							if (await hasAccessToTeamspace(req.params.account, _user)) {
-								if (await isTeamspaceAdmin(req.params.account, _user)) {
-									permissions.push({
-										user: _user,
-										permissions: [TEAMSPACE_ADMIN]
-									});
-								} else {
-									permissions.push({
-										user: _user,
-										permissions: [TEAM_MEMBER]
-									});
-								}
-							} else {
-								permissions.push({
-									user: _user,
-									permissions: []
-								});
-							}
+		return User.getAllUsersInTeamspace(req.params.account).then(
+			users => {
+				users.forEach(async _user => {
+					if (await hasAccessToTeamspace(req.params.account, _user)) {
+						if (await isTeamspaceAdmin(req.params.account, _user)) {
+							permissions.push({
+								user: _user,
+								permissions: [TEAMSPACE_ADMIN]
+							});
+						} else {
+							permissions.push({
+								user: _user,
+								permissions: [TEAM_MEMBER]
+							});
+						}
+					} else {
+						permissions.push({
+							user: _user,
+							permissions: []
 						});
-						responseCodes.respond(
-							utils.APIInfo(req),
-							req,
-							res,
-							next,
-							responseCodes.OK,
-							permissions
-						);
 					}
+				});
+				responseCodes.respond(
+					utils.APIInfo(req),
+					req,
+					res,
+					next,
+					responseCodes.OK,
+					permissions
 				);
-			})
-			.catch(err => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-			});
+			}
+		).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	function createPermission(req, res, next) {

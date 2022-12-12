@@ -41,7 +41,6 @@ const permissionsCheckTemplate = (callback, isFed = false) => async (req, res, n
 		if (await callback(teamspace, project, model, user)) {
 			next();
 		} else {
-			console.log("modelPerms notAuth");
 			respond(req, res, templates.notAuthorized);
 		}
 	} catch (err) {

@@ -20,8 +20,6 @@ const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 const config = require('../../../../../src/v5/utils/config');
-const { TEAM_MEMBER } = require('../../../../../src/v5/models/roles.constants');
-const { TEAMSPACE_ADMIN } = require('../../../../../src/v5/utils/permissions/permissions.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -445,7 +443,6 @@ const testRemoveTeamspaceMember = () => {
 		});
 
 		test('should remove another user from the teamspace', async () => {
-			const tsMembersResA = await agent.get(`/v5/teamspaces/${tsWithUsersToRemove.name}/members?key=${testUser.apiKey}`);
 			await agent.delete(`${route()}/?key=${testUser.apiKey}`).expect(templates.ok.status);
 			const tsMembersRes = await agent.get(`/v5/teamspaces/${tsWithUsersToRemove.name}/members?key=${testUser.apiKey}`);
 			const removedUser = tsMembersRes.body.members.find((m) => m.user === userToRemoveFromTs.user);

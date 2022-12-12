@@ -24,7 +24,6 @@ const { templates } = require('../../../utils/responseCodes');
 const ProjectPerms = {};
 
 ProjectPerms.isProjectAdmin = async (req, res, next) => {
-	console.log("_--------- ProjectPerms.isProjectAdmin -------------");
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace, project } = params;
@@ -36,7 +35,6 @@ ProjectPerms.isProjectAdmin = async (req, res, next) => {
 		if (isAdmin) {
 			next();
 		} else {
-			console.log("PROJECTS NOT AUTHORIZED");
 			throw templates.notAuthorized;
 		}
 	} catch (err) {

@@ -25,10 +25,8 @@ const { validateMany } = require('./common');
 const AuthMiddleware = {};
 
 AuthMiddleware.validSession = async (req, res, next) => {
-	console.log("______________ validSession __________");
 	const { headers, session } = req;
 	if (isSessionValid(session, headers.referer)) {
-		console.log("sesh is valid!!!!!!!!!!!");
 		await next();
 	} else {
 		respond(req, res, templates.notLoggedIn);

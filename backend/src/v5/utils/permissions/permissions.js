@@ -28,11 +28,7 @@ const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teams
 const Permissions = {};
 
 Permissions.isTeamspaceAdmin = async (teamspace, username) => {
-	console.log("$%^&$%^ isTeamspaceAdmin %^&%^&*");
 	const admins = await getTeamspaceAdmins(teamspace);
-	console.log("admins");
-	console.log(admins);
-	console.log(admins.includes(username));
 	return admins.includes(username);
 };
 

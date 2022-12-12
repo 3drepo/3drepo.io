@@ -33,7 +33,6 @@ TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
 		if (isAdmin) {
 			next();
 		} else {
-			console.log("TeamspacePerms.isTeamspaceAdmin");
 			throw templates.notAuthorized;
 		}
 	} catch (err) {
@@ -42,13 +41,11 @@ TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
 };
 
 TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
-	console.log("???????????? isTeamspaceMember ????????????");
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace } = params;
 
 	const hasAccess = await hasAccessToTeamspace(teamspace, user);
-	console.log(`-------- hasAccess? ${hasAccess} --------`);
 	if (teamspace && user && hasAccess) {
 		next();
 	} else {

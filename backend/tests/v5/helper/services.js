@@ -34,7 +34,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { breakTeamspacePermissions, createTeamspaceSettings, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaces`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
@@ -82,7 +82,6 @@ db.createTeamspace = async (teamspace, admins = [], members = [], breaking = fal
 	if (breaking) {
 		await breakTeamspacePermissions(teamspace);
 	} else {
-		// admins.push(teamspace);
 		await Promise.all([
 			...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
 			...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
