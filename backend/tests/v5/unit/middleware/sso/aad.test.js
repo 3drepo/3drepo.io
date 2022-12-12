@@ -286,33 +286,6 @@ const testAuthenticate = () => {
 	});
 };
 
-const testRedirectToStateURL = () => {
-	describe('Redirect to state url', () => {
-		test('should call res.redirect with the redirect url', () => {
-			const redirectUri = generateRandomURL();
-			const req = { state: { redirectUri } };
-			const res = { redirect: jest.fn() };
-
-			Aad.redirectToStateURL(req, res);
-
-			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(redirectUri);
-
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-
-		test(`should respond with ${templates.unknown.code} if something went wrong in redirection`, () => {
-			const req = { state: { redirectUri: generateRandomURL() } };
-			const res = { redirect: () => { throw templates.unknown; } };
-
-			Aad.redirectToStateURL(req, res);
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.unknown);
-		});
-	});
-};
-
 const testHasAssociatedAccount = () => {
 	describe('Check if Microsoft account is linked to 3D repo', () => {
 		const aadUserDetails = {
@@ -391,72 +364,10 @@ const testHasAssociatedAccount = () => {
 	});
 };
 
-const testIsSsoUser = () => {
-	describe('Check if a user is an SSO user', () => {
-		test(`should respond with ${templates.userNotFound.code} if user is not found`, async () => {
-			UsersModel.getUserByUsername.mockRejectedValueOnce(templates.userNotFound);
-			const mockCB = jest.fn();
-			await Aad.isSsoUser({}, {}, mockCB);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.userNotFound);
-		});
-
-		test(`should respond with ${templates.nonSsoUser.code} if user is not an SSO user`, async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: {} });
-			const mockCB = jest.fn();
-			await Aad.isSsoUser({}, {}, mockCB);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.nonSsoUser);
-		});
-
-		test('should call next if user is an SSO user', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { sso: {} } });
-			const mockCB = jest.fn();
-			await Aad.isSsoUser({}, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-	});
-};
-
-const testIsNonSsoUser = () => {
-	describe('Check if a user is a non SSO user', () => {
-		test(`should respond with ${templates.userNotFound.code} if user is not found`, async () => {
-			UsersModel.getUserByUsername.mockRejectedValueOnce(templates.userNotFound);
-			const mockCB = jest.fn();
-			await Aad.isNonSsoUser({}, {}, mockCB);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.userNotFound);
-		});
-
-		test(`should respond with ${templates.ssoUser.code} if user is not SSO user`, async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { sso: {} } });
-			const mockCB = jest.fn();
-			await Aad.isNonSsoUser({}, {}, mockCB);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith({}, {}, templates.ssoUser);
-		});
-
-		test('should call next if user is a non SSO user', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: {} });
-			const mockCB = jest.fn();
-			await Aad.isNonSsoUser({}, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-	});
-};
 
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
 	testVerifyNewEmail();
 	testAuthenticate();
-	testRedirectToStateURL();
 	testHasAssociatedAccount();
-	testIsSsoUser();
-	testIsNonSsoUser();
 });

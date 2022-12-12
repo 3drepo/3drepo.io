@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const { getUserByUsername } = require('../../models/users');
+const { isSso } = require('../../models/users');
 const { URL } = require('url');
 const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserFromSession } = require('../../utils/sessions');
@@ -60,15 +60,10 @@ Sso.setSessionReferer = async (req, res, next) => {
 	await next();
 };
 
-const isSsoUser = async (req) => {
-	const username = getUserFromSession(req.session);
-	const { customData: { sso } } = await getUserByUsername(username);
-	return !!sso;
-};
-
 Sso.isSsoUser = async (req, res, next) => {
 	try {
-		if (!await isSsoUser(req)) {
+		const username = getUserFromSession(req.session);
+		if (!await isSso(username)) {
 			throw templates.nonSsoUser;
 		}
 
@@ -80,7 +75,8 @@ Sso.isSsoUser = async (req, res, next) => {
 
 Sso.isNonSsoUser = async (req, res, next) => {
 	try {
-		if (await isSsoUser(req)) {
+		const username = getUserFromSession(req.session);
+		if (await isSso(username)) {
 			throw templates.ssoUser;
 		}
 

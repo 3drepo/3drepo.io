@@ -215,4 +215,9 @@ User.unlinkFromSso = async (username, newPassword) => {
 
 User.linkToSso = (username, email, ssoData) => updateUser(username, { $set: { 'customData.email': email, 'customData.sso': ssoData } });
 
+User.isSso = async (username) => {
+	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });
+	return !!sso;
+}
+
 module.exports = User;

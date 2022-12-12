@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
+const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail, isSso } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
@@ -111,8 +111,8 @@ const generateUpdateSchema = (isSSO, username) => {
 Users.validateUpdateData = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const { customData: { sso } } = await getUserByUsername(username, { 'customData.sso': 1 });
-		const schema = generateUpdateSchema(!!sso, username);
+		const isSsoUser = await isSso(username);
+		const schema = generateUpdateSchema(isSsoUser, username);
 		await schema.validate(req.body);
 
 		if (req.body.oldPassword) {

@@ -596,6 +596,30 @@ const testLinkToSso = () => {
 	});
 };
 
+const testIsSso = () => {
+	describe('Check if user is SSO', () => {
+		test('Should return true if user is SSO', async () => {
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
+			
+			await User.isSso(username);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
+		});
+
+		test('Should return false if user is non SSO', async () => {
+			const username = generateRandomString();			
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { } });
+			
+			await User.isSso(username);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -616,4 +640,5 @@ describe('models/users', () => {
 	testIsAccountActive();
 	testUnlinkFromSso();
 	testLinkToSso();
+	testIsSso();
 });

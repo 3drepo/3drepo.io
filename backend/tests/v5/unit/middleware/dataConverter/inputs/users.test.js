@@ -126,9 +126,9 @@ const testValidateLoginData = () => {
 
 const testValidateUpdateData = () => {
 	describe.each([
-		[{ body: { firstName: 'this is a very very large string that should fail' } }, false, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { firstName: generateRandomString(100) } }, false, false, 'with too large firstName', templates.invalidArguments],
 		[{ body: { firstName: generateRandomString() } }, true, false, 'with firstName (SSO user)', templates.invalidArguments],
-		[{ body: { lastName: 'this is a very very large string that should fail' } }, false, false, 'with too large lastName', templates.invalidArguments],
+		[{ body: { lastName: generateRandomString(100) } }, false, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { lastName: generateRandomString() } }, true, false, 'with lastName (SSO user)', templates.invalidArguments],
 		[{ body: { email: 'invalid email' } }, false, false, 'with invalid email', templates.invalidArguments],
 		[{ body: { email: existingEmail } }, false, false, 'with email that already exists', templates.invalidArguments],
@@ -152,13 +152,11 @@ const testValidateUpdateData = () => {
 		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, false, true, 'with password (SSO user)', templates.invalidArguments],
 		[{ body: {} }, false, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, false, 'with undefined body', templates.invalidArguments],
-	])('Check if req arguments for updating profile are valid', (data, ssoUser, shouldPass, desc, expectedError) => {
+	])('Check if req arguments for updating profile are valid', (data, isSso, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
-			UsersModel.getUserByUsername.mockResolvedValueOnce({
-				customData: ssoUser ? { sso: { id: generateRandomString() } } : {},
-			});
+			UsersModel.isSso.mockResolvedValueOnce(isSso);
 
 			await Users.validateUpdateData(req, {}, mockCB);
 
@@ -170,8 +168,8 @@ const testValidateUpdateData = () => {
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
 
-			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
-			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(existingUsername, { 'customData.sso': 1 });
+			expect(UsersModel.isSso).toHaveBeenCalledTimes(1);
+			expect(UsersModel.isSso).toHaveBeenCalledWith(existingUsername);
 		});
 	});
 };
@@ -438,28 +436,6 @@ const testVerifyData = () => {
 	});
 };
 
-const testUnlinkData = () => {
-	describe.each([
-		[{ body: { password: generateRandomString() } }, true, 'with valid password'],
-		[{ body: { password: generateRandomString(1) } }, false, 'with weak password'],
-		[{ body: { password: generateRandomString(), [generateRandomString()]: generateRandomString() } }, false, 'with extra properties'],
-		[{ body: {} }, false, 'with empty body'],
-		[{ body: undefined }, false, 'with undefined body'],
-	])('Check if req arguments for verifying user are valid', (req, shouldPass, desc) => {
-		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${templates.invalidArguments.code}`}`, async () => {
-			const mockCB = jest.fn();
-			await Users.validateUnlinkData(req, {}, mockCB);
-			if (shouldPass) {
-				expect(mockCB).toHaveBeenCalledTimes(1);
-			} else {
-				expect(mockCB).toHaveBeenCalledTimes(0);
-				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			}
-		});
-	});
-};
-
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 	testValidateUpdateData();
@@ -469,5 +445,4 @@ describe('middleware/dataConverter/inputs/users', () => {
 	testValidateSignUpData();
 	testValidateSsoSignUpData();
 	testVerifyData();
-	testUnlinkData();
 });
