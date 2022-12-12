@@ -167,7 +167,6 @@ Teamspace.createTeamspaceSettings = async (teamspace) => {
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
 		permissions: [] };
-	// const settings = { _id: teamspace, topicTypes: DEFAULT_TOPIC_TYPES, riskCategories: DEFAULT_RISK_CATEGORIES };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
@@ -189,7 +188,6 @@ Teamspace.getAllUsersInTeamspace = async (teamspace) => {
 
 Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $pull: { permissions: { user } } });
-	// await teamspaceUpdate({ user: teamspace }, { $pull: { 'customData.permissions': { user } } });
 };
 
 Teamspace.getRiskCategories = async (teamspace) => {

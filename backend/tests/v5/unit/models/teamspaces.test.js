@@ -454,7 +454,6 @@ const testRemoveUserFromAdminPrivileges = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
 				{ _id: teamspace }, { $pull: { permissions: { user } } });
-			// expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
 		});
 	});
 };
