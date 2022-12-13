@@ -407,6 +407,9 @@
 			usersToRemove = _.difference(project.permissions.map(p => p.user), data.permissions.map(p => p.user));
 
 			check = User.findByUserName(account).then(teamspace => {
+				console.log("====== Project.updateAttrs");
+				console.log(teamspace.user);
+				console.log("====== Project.updateAttrs:end");
 				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
 					const someUserNotAssignedWithLicence = data.permissions.some(
 						perm => {
