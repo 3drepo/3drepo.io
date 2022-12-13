@@ -14,12 +14,15 @@ module.exports = (env, options) => ({
 		maintenance: './src/maintenance.ts',
 		support: './src/support.ts',
 		main: './src/main.tsx',
-		indexeddbworker: './src/globals/unity-indexeddb-worker.ts',
+		indexeddbworker: {
+			import: './src/globals/unity-indexeddb-worker.ts',
+			filename: '../unity/indexeddbworker.js' // This particular entry should be in the unity folder, which is a sibling of dist
+		},
 		...options.entry
 	},
 	output: {
 		path: PATHS.DIST_DIR,
-		filename: '[name].js', // removed .[chunkhash] for now to get webpack to write indexeddbworker to a known uri for unity-indexedbcache to pick up
+		filename: '[name].[chunkhash].js',
 		...options.output
 	},
 	module: {

@@ -16,7 +16,6 @@
  */
 
 /* eslint-disable no-underscore-dangle */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 /* eslint-enable no-var */
 
 import { IndexedDbCache } from './unity-indexedbcache';
@@ -67,6 +66,11 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static unityInstance;
+
+	/** A URL pointing to the Unity folder of a distribution. E.g. www.3drepo.io/unity/.
+	 * This is where the Unity Build and the IndexedDb worker can be found. */
+	/** @hidden */
+	public static unityUrl: URL;
 
 	/** @hidden */
 	public static readyPromise: Promise<void>;
@@ -168,7 +172,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static _loadUnity(canvas: any, unityURL): Promise<void> {
+	public static _loadUnity(canvas: any, domainURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -184,7 +188,9 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const buildUrl = `${unityURL ? `${unityURL}/` : ''}unity/Build`;
+		UnityUtil.unityUrl = new URL(domainURL || window.location.origin);
+
+		const buildUrl = new URL('/unity/Build', UnityUtil.unityUrl);
 
 		const config = {
 			dataUrl: `${buildUrl}/unity.data.unityweb`,
@@ -1980,6 +1986,6 @@ export class UnityUtil {
 	 * @param unityInstance
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
-		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName);
+		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
 	}
 }
