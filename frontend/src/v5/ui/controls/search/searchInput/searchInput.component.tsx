@@ -17,7 +17,7 @@
 
 import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
-import CloseIcon from '@assets/icons/outlined/close_thin-outlined.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChangeEvent, useContext } from 'react';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 import { SearchContext } from '../searchContext';

@@ -23,6 +23,11 @@ import {
 
 export const IconButton = styled(IconButtonComponent)`
 	padding: 6px;
+	width: 22px;
+
+	svg {
+		height: 9px;
+	}
 `;
 
 export const TextField = styled(TextFieldComponent)`
