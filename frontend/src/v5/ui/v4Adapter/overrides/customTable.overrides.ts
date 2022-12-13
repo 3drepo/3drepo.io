@@ -70,7 +70,6 @@ export default css`
 	${SortLabel} {
 		margin: 0;
 		padding: 0;
-    	margin-left: 0;
 		${({ theme }) => theme.typography.kicker};
 		flex-direction: row;
 		svg {
@@ -122,7 +121,7 @@ export default css`
 		.search-field__label {
 			position: absolute;
 			margin-top: 3px;
-			transform: translate(13px, 40px) scale(1);
+			transform: translate(13px, 12px) scale(1);
 
 			&[data-shrink='true'] {
 				transform: translate(13px, 18px) scale(1) !important;

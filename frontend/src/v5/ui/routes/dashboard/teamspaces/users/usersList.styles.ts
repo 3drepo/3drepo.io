@@ -95,13 +95,17 @@ export const Container = styled.div`
 	${UserTable}{
 		background-color: transparent;
 		${Head} {
-			min-height: 30px;
-			height: 30px;
+			min-height: unset;
+			height: 40px;
+			align-items: flex-end;
 			${Cell} {
-				height: 20px;
+				height: 100%;
 				padding-top: 0;
 				:first-child {
 					padding-left: 0;
+				}
+				.search-field__label {
+					margin-top: 15px;
 				}
 			}
 		}

@@ -146,7 +146,6 @@ const PermissionsTableStyles = css`
 			margin-bottom: 0;
 			.MuiFormLabel-root {
 				${({ theme }) => theme.typography.kicker};
-				top: -66px;
 				font-weight: 500;
 			}
 			.MuiInputBase-input {
