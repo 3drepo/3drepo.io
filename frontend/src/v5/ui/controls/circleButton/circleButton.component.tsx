@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledFab } from './circleButton.styles';
+import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
 
 interface ICircleButton {
-	size?: 'large' | 'medium' | 'small';
-	variant?: 'main' | 'contrast';
+	variant?: 'primary' | 'secondary' | 'viewer';
 	disabled?: boolean;
-	onClick?: () => void;
+	onClick?: (e) => void;
 	children: any;
 }
 
-export const CircleButton = ({ size = 'large', variant = 'main', onClick, children, ...props }: ICircleButton) => (
-	<StyledFab onClick={onClick} size={size} $variant={variant} {...props}>
-		{children}
-	</StyledFab>
-);
+export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
+	if (variant === 'primary') return (<PrimaryButton {...props} />);
+	if (variant === 'viewer') return (<ViewerButton {...props} />);
+	return (<SecondaryButton {...props} />);
+};

@@ -51,6 +51,8 @@ export const setSocketIdHeader = (socketId) => {
 	axios.defaults.headers['x-socket-id'] = socketId;
 };
 
+export const getUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
+
 export default {
 	get: getRequest,
 	post: postRequest,

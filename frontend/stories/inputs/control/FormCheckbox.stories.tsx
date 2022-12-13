@@ -17,13 +17,10 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 import { useForm } from 'react-hook-form';
-
-interface IFormCheckboxInput {
-	checkbox: boolean;
-}
+import { FormContainer } from '../FormInput.styles';
 
 export default {
-	title: 'Inputs/FormCheckbox',
+	title: 'Inputs/Control/FormCheckbox',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -37,18 +34,16 @@ export default {
 } as ComponentMeta<typeof FormCheckbox>;
 
 const Controlled: ComponentStory<typeof FormCheckbox> = (args) => {
-	const {
-		control,
-	} = useForm<IFormCheckboxInput>({
-		mode: 'onChange',
-	});
+	const { control } = useForm({ mode: 'onChange' });
 
 	return (
-		<FormCheckbox
-			name="checkbox"
-			control={control}
-			{...args}
-		/>
+		<FormContainer>
+			<FormCheckbox
+				name="checkbox"
+				control={control}
+				{...args}
+			/>
+		</FormContainer>
 	);
 };
 

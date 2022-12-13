@@ -17,6 +17,8 @@
 import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import { isV5 } from '@/v4/helpers/isV5';
+import { dispatch } from '@/v4/modules/store';
+import { DialogActions } from '@/v4/modules/dialog';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -58,10 +60,31 @@ interface IProps {
 	risksShapes: any[];
 	issuesHighlightedShapes: any[];
 	risksHighlightedShapes: any[];
+	ticketPins: any;
 }
 
 export class ViewerCanvas extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
+
+	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
+		let errorType = '3D Repo Error';
+
+		if (isUnity) {
+			errorType = 'Unity Error';
+		}
+
+		dispatch(DialogActions.showDialog({
+			title: errorType,
+			content: message,
+			onCancel: () => {
+				if (reload) {
+					location.reload();
+				}
+			}
+		}));
+
+		console.error('Unity errored and user canceled reload', message);
+	}
 
 	constructor(props) {
 		super(props);
@@ -74,7 +97,7 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		const { viewer } = this.props;
-		viewer.setupInstance(this.containerRef.current);
+		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
 		if (isV5()) {
 			viewer.setBackgroundColor([0.949, 0.965, 0.988, 1])
 		}
@@ -159,8 +182,10 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations: transformation,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
-			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes
+			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
+			ticketPins
 		} = this.props;
+
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -184,6 +209,10 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 
 		if (!isEqual(measurementPins, prevProps.measurementPins)) {
 			this.renderPins(prevProps.measurementPins, measurementPins);
+		}
+
+		if (!isEqual(ticketPins, prevProps.ticketPins)) {
+			this.renderPins(prevProps.ticketPins, ticketPins);
 		}
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisCoordinates, gisCoordinates)) {

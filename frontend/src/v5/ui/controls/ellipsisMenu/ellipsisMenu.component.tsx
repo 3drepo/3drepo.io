@@ -17,20 +17,22 @@
 
 import { useState, cloneElement, MouseEvent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClickAwayListener, Tooltip } from '@mui/material';
+import { ClickAwayListener, Tooltip, MenuList } from '@mui/material';
 import { EllipsisButton } from '@controls/ellipsisButton';
-import { MenuList, Popover } from './ellipsisMenu.styles';
+import { Popover } from './ellipsisMenu.styles';
 
 export interface IEllipsisMenu {
 	selected?: boolean;
 	children: JSX.Element[];
+	className?: string;
 }
 
-export const EllipsisMenu = ({ selected, children }: IEllipsisMenu): JSX.Element => {
+export const EllipsisMenu = ({ selected, children, className }: IEllipsisMenu): JSX.Element => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-	const handleClickDropdown = (event: MouseEvent<HTMLButtonElement>) => {
+	const handleClickDropdown = (event: MouseEvent<HTMLDivElement>) => {
 		event.stopPropagation();
+		event.preventDefault();
 		setAnchorEl(event.currentTarget);
 	};
 
@@ -47,20 +49,15 @@ export const EllipsisMenu = ({ selected, children }: IEllipsisMenu): JSX.Element
 
 	return (
 		<>
-			<Tooltip
-				title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}
-			>
-				<EllipsisButton
-					aria-controls="ellipsis-menu-list"
-					aria-haspopup="true"
-					onClick={(event) => {
-						event.stopPropagation();
-						event.preventDefault();
-						handleClickDropdown(event);
-					}}
-					isOn={Boolean(anchorEl)}
-					variant={selected ? 'secondary' : 'primary'}
-				/>
+			<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
+				<div onClick={handleClickDropdown} aria-hidden>
+					<EllipsisButton
+						aria-controls="ellipsis-menu-list"
+						aria-haspopup="true"
+						variant={selected ? 'secondary' : 'primary'}
+						className={className}
+					/>
+				</div>
 			</Tooltip>
 			<Popover
 				open={Boolean(anchorEl)}

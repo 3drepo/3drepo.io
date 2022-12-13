@@ -110,8 +110,7 @@ export class ClientConfigService {
 			const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
 
 			this.apiUrlCounter[type] += 1;
-
-			return this.apiUrls[type][functionIndex] + '/' + path;
+			return this.apiUrls[type][functionIndex] + '/' + path.replace(/^\//, '');
 		};
 
 		for (const k in this.apiUrls) {

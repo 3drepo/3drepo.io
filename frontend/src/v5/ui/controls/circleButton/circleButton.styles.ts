@@ -15,83 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { Fab } from '@mui/material';
+import styled from 'styled-components';
+import { Button } from '@mui/material';
 
-const SIZE_MAP = {
-	small: 22,
-	medium: 28,
-	large: 38,
-};
+export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
+	height: 38px;
+	min-width: 38px;
+	width: 38px;
+	border-radius: 100%;
+	border: none;
+	margin: 8px 7px;
+	background-color: transparent;
+	padding: 0;
+	display: flex;
+	place-items: center;
 
-const getButtonSize = (size) => {
-	const buttonSize = SIZE_MAP[size];
-
-	if (buttonSize) {
-		return css`
-			height: ${SIZE_MAP[size]}px;
-			width: ${SIZE_MAP[size]}px;
-			flex-shrink: 0;
-		`;
-	}
-
-	return null;
-};
-
-const mainFabStyles = css<{ disabled?: boolean }>`
-	&& {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: none;
-
-		${({ disabled }) => disabled && css`
-			&& {
-				path {
-					fill: ${({ theme }) => theme.palette.secondary.light};
-				}
-			}
-		`};
-
-		&:hover, &.Mui-focusVisible {
-			&& {
-				background-color: transparent;
-			}
-		}
+	& > svg {
+		height: 17px;
+		width: auto;
 	}
 `;
 
-const contrastFabStyles = css<{ disabled?: boolean }>`
-	${({ disabled }) => disabled && css`
-		&& {
-			border-color: ${({ theme }) => theme.palette.secondary.light};
-			pointer-events: none;
+export const PrimaryButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.secondary.main};
 
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.light};
-			}
-		}
-	`};
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
+`;
 
+export const SecondaryButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+
+	&:hover, &.Mui-focusVisible { 
+		background-color: ${({ theme }) => theme.palette.secondary.light};
+	}
+`;
+
+export const ViewerButton = styled(BaseCircleButton)`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 0;
+	height: 32px;
+	width: 32px;
+	min-width: 32px;
 	&:hover {
-		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
-		}
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	}
-
-	&.Mui-focusVisible {
-		&& {
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-			path {
-				fill: ${({ theme }) => theme.palette.primary.main};
-			}
-		}
-	}
-`;
-
-export const StyledFab = styled(Fab)<{ size?: any, $variant?: any }>`
-	${({ size }) => getButtonSize(size)};
-	${({ $variant }) => $variant === 'main' && mainFabStyles}
-	${({ $variant }) => $variant === 'contrast' && contrastFabStyles}
 `;

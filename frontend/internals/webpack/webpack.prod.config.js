@@ -1,4 +1,5 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const getWebpackConfig = require('./webpack.common.config');
 const fs = require('fs');
 const { resolve } = require('path');
@@ -14,7 +15,7 @@ const outputNames = {
 
 const customFolderExists = fs.existsSync(resolve(PROJECT_DIR, 'custom'));
 
-module.exports = (env) => getWebpackConfig(env, {
+module.exports = getWebpackConfig({
   mode: MODES.PRODUCTION,
   entry: {
     unity: './src/globals/unity-util-external.ts'
@@ -22,14 +23,15 @@ module.exports = (env) => getWebpackConfig(env, {
   output: {
     filename: ({ chunk: { name }}) => outputNames[name] || '[name].js'
   },
-  ...(customFolderExists && {
-	  plugins: [
+  plugins: [
+	new ForkTsCheckerWebpackPlugin(),
+	...(customFolderExists ? [
 		new CopyWebpackPlugin({
 			patterns: [
 				{ context: './', from: 'custom/**', to: '../' }
 			],
 		})
-	  ],	
-  }),
+    ] : []),
+  ],
   stats: 'errors-only'
 });

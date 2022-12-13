@@ -1545,7 +1545,7 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @return returns a promises which will resolve with the viewpoint information
 	 */
-	public static requestViewpoint(account: string, model: string): Promise<object> {
+	public static requestViewpoint(account: string, model: string): Promise<any> {
 		const newViewpointPromise = new Promise((resolve, reject) => {
 			this.viewpointsPromises.push({ resolve, reject });
 		});

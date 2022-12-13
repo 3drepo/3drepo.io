@@ -29,7 +29,6 @@ import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { IFrame } from '../../../../../../modules/sequences';
 import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
 import {
@@ -43,6 +42,11 @@ import {
 	StepInput,
 	StyledLoader,
 } from '../../sequences.styles';
+
+interface IFrame {
+	dateTime: Date;
+	state: string;
+}
 
 interface IProps {
 	max: Date;

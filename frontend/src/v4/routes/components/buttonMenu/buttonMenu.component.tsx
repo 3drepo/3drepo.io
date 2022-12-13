@@ -102,10 +102,10 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 			renderContent,
 			ButtonProps,
 			PopoverProps,
-			PaperProps,
 			IconProps,
 			ripple,
 			className,
+			...props
 		} = this.props;
 		const { activeMenu } = this.state;
 
@@ -126,7 +126,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 				</Container>
 				<StyledPopover
 					{...popoverProps}
-					PaperProps={...PaperProps}
+					{...props}
 					open={activeMenu}
 					anchorEl={this.ref.current}
 					onClose={this.toggleMenu(false)}
