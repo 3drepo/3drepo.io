@@ -14,6 +14,10 @@ module.exports = (env, options) => ({
 		maintenance: './src/maintenance.ts',
 		support: './src/support.ts',
 		main: './src/main.tsx',
+		indexeddbworker: {
+			import: './src/globals/unity-indexeddb-worker.ts',
+			filename: '../unity/indexeddbworker.js' // This particular entry should be in the unity folder, which is a sibling of dist
+		},
 		...options.entry
 	},
 	output: {
