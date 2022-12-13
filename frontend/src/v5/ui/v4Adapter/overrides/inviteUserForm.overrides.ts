@@ -123,6 +123,7 @@ const PermissionsTableStyles = css`
 	${PermissionsTable} {
 		border: none;
 		height: auto;
+		margin: 0;
 		${RadioContainer} {
 			align-items: center;
 			position: relative;
@@ -167,11 +168,17 @@ const PermissionsTableStyles = css`
 
 const AddPermissionsButton = css`
 	${AddButton} {
-		padding: 8px 0;
-		margin: 0;
-		color: ${({ theme }) => theme.palette.primary.main};
+		border-radius: 5px;
+		background-color: ${({ theme }) => theme.palette.primary.main};
+		padding: 10px 15px;
+		margin: 4px 0;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		user-select: none;
+		:hover {
+			text-decoration: none;
+		}
 		svg {
-			color: ${({ theme }) => theme.palette.primary.main};
+			color: ${({ theme }) => theme.palette.primary.contrast};
 			height: 15px;
 			width: 15px;
 			margin: 0 8px 0 0;
