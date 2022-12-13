@@ -31,7 +31,7 @@ module.exports = (env) => getWebpackConfig(env, {
     new CleanWebpackPlugin({
       root: PATHS.PROJECT_DIR,
       beforeEmit: true
-  }),
+    }),
     new LiveReloadPlugin({
       hostname: 'localhost',
       port: 35729,
