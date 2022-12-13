@@ -691,7 +691,8 @@ async function _createAccounts(roles, userName) {
 			}
 
 			const tsPromises = [];
-			const permission = AccountPermissions.findByUser(user, userName);
+			const settings = await TeamspaceSettings.getTeamspaceSettings(role.db);
+			const permission = AccountPermissions.findByUser(settings, userName);
 
 			if (permission) {
 				// Check for admin Privileges first
