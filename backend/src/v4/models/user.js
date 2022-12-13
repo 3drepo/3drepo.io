@@ -48,11 +48,8 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
-const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
-const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require(`${v5Path}/models/roles.constants`);
 const { assignUserToJob } = require(`${v5Path}/models/jobs.js`);
-const { getAddOns, getTeamspaceSettings } = require(`${v5Path}/models/teamspaces`);
+const { getAddOns } = require(`${v5Path}/models/teamspaces`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 
@@ -439,12 +436,10 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
 	// default permission
-	/* TODO
 	cleanedCustomData.permissions = [{
 		user: username,
 		permissions: [C.PERM_TEAMSPACE_ADMIN]
 	}];
-	*/
 
 	cleanedCustomData.emailVerifyToken = {
 		token: utils.generateHashString(),
@@ -706,7 +701,7 @@ async function _createAccounts(roles, userName) {
 
 			if (permission) {
 				// Check for admin Privileges first
-				// const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
 				const hasAvatar = await fileExists("admin", "avatars.ref" , user.user);
 				const account = {
@@ -717,14 +712,14 @@ async function _createAccounts(roles, userName) {
 					projects: [],
 					models: [],
 					fedModels: [],
-					isAdmin: isTeamspaceAdmin(user, userName),
+					isAdmin: isTeamspaceAdmin,
 					permissions: permission.permissions || []
 				};
 
 				// show all implied and inherted permissions
 				account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
 				accounts.push(account);
-				if (accounts.isAdmin || canViewProjects) {
+				if (isTeamspaceAdmin || canViewProjects) {
 					// show all implied and inherted permissions
 					const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
 
@@ -981,30 +976,7 @@ User.getMembers = async function (teamspace) {
 	});
 	const getJobInfo = usersWithJob(teamspace);
 
-	// TODO
-	const getTeamspacePermissions = getTeamspaceSettings(teamspace).then(async user => {
-		console.log(user);
-		const permissions = [];
-		if (await hasAccessToTeamspace(teamspace, user)) {
-			if (await isTeamspaceAdmin(teamspace, user)) {
-				permissions.push({
-					user: user,
-					permissions: [TEAMSPACE_ADMIN]
-				});
-			} else {
-				permissions.push({
-					user: user,
-					permissions: [TEAM_MEMBER]
-				});
-			}
-		} else {
-			permissions.push({
-				user: user,
-				permissions: []
-			});
-		}
-		return permissions;
-	});
+	const getTeamspacePermissions = User.findByUserName(teamspace).then(user => user.customData.permissions);
 
 	promises.push(
 		getTeamspaceMembers,
@@ -1107,7 +1079,7 @@ User.updateAvatar = async function(username, avatarBuffer) {
 };
 
 User.updatePermissions = async function(username, updatedPermissions) {
-	await db.updateOne(username, "teamspace", {_id: username}, {$set: {permissions: updatedPermissions}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
 };
 
 User.updateSubscriptions = async function(username, subscriptions) {

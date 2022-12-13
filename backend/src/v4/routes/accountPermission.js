@@ -24,11 +24,7 @@
 	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
 	const utils = require("../utils");
-	const { getTeamspaceSettings } = require("../models/teamspaceSetting");
-	const {v5Path} = require("../../interop");
-	const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
-	const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
-	const { TEAM_MEMBER } = require(`${v5Path}/models/roles.constants`);
+	const _ = require("lodash");
 
 	/**
 	 * @api {get} /:teamspace/permissions List all permissions
@@ -144,42 +140,36 @@
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
 	function listPermissions(req, res, next) {
-		const permissions = [];
+		User.findByUserName(req.params.account)
+			.then(user => {
+				const permissions = user.customData.permissions;
 
-		return User.getAllUsersInTeamspace(req.params.account).then(
-			users => {
-				users.forEach(async _user => {
-					if (await hasAccessToTeamspace(req.params.account, _user)) {
-						if (await isTeamspaceAdmin(req.params.account, _user)) {
-							permissions.push({
-								user: _user,
-								permissions: [TEAMSPACE_ADMIN]
-							});
-						} else {
-							permissions.push({
-								user: _user,
-								permissions: [TEAM_MEMBER]
-							});
-						}
-					} else {
-						permissions.push({
-							user: _user,
-							permissions: []
+				return User.getAllUsersInTeamspace(req.params.account).then(
+					users => {
+						users.forEach(async _user => {
+							if (
+								!_.find(permissions, { user: _user })
+							) {
+								permissions.push({
+									user: _user,
+									permissions: []
+								});
+							}
 						});
+						responseCodes.respond(
+							utils.APIInfo(req),
+							req,
+							res,
+							next,
+							responseCodes.OK,
+							permissions
+						);
 					}
-				});
-				responseCodes.respond(
-					utils.APIInfo(req),
-					req,
-					res,
-					next,
-					responseCodes.OK,
-					permissions
 				);
-			}
-		).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
+			})
+			.catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
 	}
 
 	function createPermission(req, res, next) {
@@ -187,7 +177,7 @@
 			if(req.params.account === req.body.user) {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
-				getTeamspaceSettings(req.params.account)
+				User.findByUserName(req.params.account)
 					.then(teamspace => {
 						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
 					})
