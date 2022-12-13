@@ -126,12 +126,12 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 				</Container>
 				<StyledPopover
 					{...popoverProps}
+					{...props}
 					open={activeMenu}
 					anchorEl={this.ref.current}
 					onClose={this.toggleMenu(false)}
 					TransitionProps={{onEntering: this.handleOnOpen}}
 					disableRestoreFocus
-					{...props}
 				>
 					{renderContent({ close: this.toggleMenu(false) })}
 				</StyledPopover>
