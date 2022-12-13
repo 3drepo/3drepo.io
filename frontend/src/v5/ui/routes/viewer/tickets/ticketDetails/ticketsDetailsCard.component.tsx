@@ -105,8 +105,8 @@ export const TicketDetailsCard = () => {
 				<ArrowBack onClick={goBack} />
 				{template.code}:{ticket.number}
 				<HeaderButtons>
-					<CircleButton size="medium" variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-					<CircleButton size="medium" variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+					<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+					<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...formData}>

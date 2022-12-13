@@ -47,42 +47,6 @@ function toArrayBuffer(binaryBuffer) {
 
 const VECTOR3D_SIZE = 4 * 3;  // 12 = 4 * 3 means four bytes (a float) and 3 floats per item
 
-const binToArrayVector3d = (buffer, isLittleEndian = false) => {
-	const bufferLength = buffer.length;
-	const result = new Array(bufferLength / VECTOR3D_SIZE);
-	const getFloat32 =  (!isLittleEndian ? buffer.readFloatBE : buffer.readFloatLE).bind(buffer);
-
-	for (let i = 0; i < bufferLength ; i = i + VECTOR3D_SIZE) {
-		const vect3 = new Array(3);
-		vect3[0] = getFloat32(i);
-		vect3[1] = getFloat32(i + 4);
-		vect3[2] = getFloat32(i + 8);
-		result[i / VECTOR3D_SIZE] = vect3;
-	}
-
-	return result;
-};
-
-const binToJSONArrayVector3d = (buffer, isLittleEndian = false) => {
-	const bufferLength = buffer.length;
-	let result = "";
-	const getFloat32 =  (!isLittleEndian ? buffer.readFloatBE : buffer.readFloatLE).bind(buffer);
-	const vect3 = new Array(3);
-
-	for (let i = 0; i < bufferLength ; i = i + VECTOR3D_SIZE) {
-		if(i !== 0) {
-			result += ",";
-		}
-
-		vect3[0] = getFloat32(i);
-		vect3[1] = getFloat32(i + 4);
-		vect3[2] = getFloat32(i + 8);
-		result += JSON.stringify(vect3);
-	}
-
-	return result;
-};
-
 class BinToVector3dStringStream extends Transform {
 	constructor(opts = {}) {
 		super(opts);
@@ -90,14 +54,37 @@ class BinToVector3dStringStream extends Transform {
 		this.isLittleEndian = opts.isLittleEndian;
 	}
 
+	binToJSONArrayVector3d (buffer, isLittleEndian = false) {
+		const vertexLength = 3; // (x, y, z)
+		this.currentVertex = this.currentVertex ?? [];
+
+		const getFloat32 =  (!isLittleEndian ? buffer.readFloatBE : buffer.readFloatLE).bind(buffer);
+
+		let result = "";
+
+		for (let i = 0; i < buffer.length; i += 4) {
+			if(i !== 0 && this.currentVertex.length === 0) {
+				result += ",";
+			}
+
+			this.currentVertex.push(getFloat32(i));
+			if(this.currentVertex.length === vertexLength) {
+				result += JSON.stringify(this.currentVertex);
+				this.currentVertex = [];
+			}
+		}
+
+		return result;
+	}
+
 	_transform(chunk, encoding, callback) {
-		if (this.started) {
+		if (this.started && this.currentVertex.length === 0) {
 			this.push(",");
 		}
 
 		this.started = true;
 
-		this.push(binToJSONArrayVector3d(chunk, this.isLittleEndian));
+		this.push(this.binToJSONArrayVector3d(chunk, this.isLittleEndian));
 		callback();
 	}
 }
@@ -150,9 +137,7 @@ class BinToFaceStringStream extends Transform {
 }
 
 module.exports = {
-	binToArrayVector3d,
 	toFloat32Array,
-	binToFacesString,
 	BinToFaceStringStream,
 	BinToVector3dStringStream,
 	VECTOR3D_SIZE
