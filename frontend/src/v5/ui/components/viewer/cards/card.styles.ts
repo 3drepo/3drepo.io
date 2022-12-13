@@ -32,6 +32,12 @@ export const CardContainer = styled.div`
 	margin-bottom: 20px;
 	overflow: hidden;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_2};
+
+	/* The property labels for Custom Tickets should be case sensitive
+	as it can be important to distinguish between an acronym and normal text. */
+	.MuiInputLabel-root {
+		text-transform: none;
+	}
 `;
 
 export const CardHeader = styled.div`

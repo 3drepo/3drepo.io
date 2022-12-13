@@ -21,9 +21,9 @@ import { UploadFileForm } from './uploadFileForm.component';
 
 export const uploadToContainer = async (presetContainerId: string) => {
 	const accept = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
-	const onUpload = (file) => {
+	const onUpload = (presetFile) => {
 		DialogsActionsDispatchers.open(UploadFileForm, {
-			file,
+			presetFile,
 			presetContainerId,
 		});
 	};

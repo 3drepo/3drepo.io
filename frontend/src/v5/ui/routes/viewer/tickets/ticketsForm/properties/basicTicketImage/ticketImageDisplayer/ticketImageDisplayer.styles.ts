@@ -35,7 +35,8 @@ export const Container = styled.div`
 	border-radius: 5px;
 	overflow: hidden;
 	height: 101px;
-	width: 171px;
+	width: 60%;
+	min-width: 60%;
 
 	& > * {
 		height: 100%;
