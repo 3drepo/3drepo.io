@@ -24,6 +24,7 @@ const utils = require("../utils");
 const Mitigation = require("./mitigation");
 const {v5Path} = require("../../interop");
 const TeamspaceModelV5 = require(`${v5Path}/models/teamspaces`);
+const SettingProcessorV5 = require(`${v5Path}/processors/teamspaces/settings`);
 
 const colName = "teamspace";
 
@@ -47,7 +48,7 @@ class TeamspaceSettings {
 	}
 
 	async getRiskCategories(teamspace) {
-		return (await TeamspaceModelV5.getRiskCategories(teamspace)) || [];
+		return (await SettingProcessorV5.getRiskCategories(teamspace)) || [];
 	}
 
 	async processMitigationsFile(account, username, sessionId, filename, file) {

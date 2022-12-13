@@ -20,6 +20,8 @@ const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const { intersection } = require("lodash");
 const { removeUserFromProjects } = require("./project");
+const {v5Path} = require("../../interop");
+const SettingProcessorV5 = require(`${v5Path}/processors/teamspaces/settings`);
 
 const updatePermissions = async function(teamspace, updatedPermissions) {
 	const User = require("./user");
@@ -46,7 +48,7 @@ AccountPermissions.findByUser = function(user, username) {
 };
 
 AccountPermissions.get = function(teamspace) {
-	return  ((teamspace && teamspace.customData) || {}).permissions || [];
+	return  (teamspace || {}).permissions || [];
 };
 
 AccountPermissions.updateOrCreate = async function(teamspace, username, permissions) {

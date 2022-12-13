@@ -24,6 +24,7 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
+	const { getTeamspaceSettings } = require("./teamspaceSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
@@ -304,7 +305,7 @@
 		const ModelHelper = require("./helper/model");
 
 		const [dbUser, projectObj] = await Promise.all([
-			await User.findByUserName(account),
+			getTeamspaceSettings(account),
 			Project.findOneProject(account, {name: project})
 		]);
 

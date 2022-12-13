@@ -25,6 +25,7 @@ const { findJobByUser } = require("./job");
 const History = require("./history");
 
 const { findModelSettingById } = require("./modelSetting");
+const { getTeamspaceSettings } = require("./teamspaceSetting");
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
@@ -171,7 +172,7 @@ class Ticket extends View {
 			// 1. Get old ticket
 			this.findByUID(account, model, id, {}, true),
 			// 2. Get user permissions
-			User.findByUserName(account),
+			getTeamspaceSettings(account),
 			findJobByUser(account, user),
 			isProjectAdmin(
 				account,

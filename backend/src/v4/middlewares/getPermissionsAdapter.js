@@ -43,14 +43,12 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			accountLevel: function(username) {
 
-				// return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
-				return this.getUser().then(user => {
-					// if (!settings.permissions) {
-					if(!user) {
+				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
+					if (!settings.permissions) {
 						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
-					const permission = AccountPermissions.findByUser(user, username);
+					const permission = AccountPermissions.findByUser(settings, username);
 					// const permission = settings.permissions.find(perm => perm.user === username);
 
 					if(!permission) {

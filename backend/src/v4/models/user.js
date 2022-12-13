@@ -435,12 +435,6 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 	const expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
-	// default permission
-	cleanedCustomData.permissions = [{
-		user: username,
-		permissions: [C.PERM_TEAMSPACE_ADMIN]
-	}];
-
 	cleanedCustomData.emailVerifyToken = {
 		token: utils.generateHashString(),
 		expiredAt: expiryAt
@@ -976,7 +970,7 @@ User.getMembers = async function (teamspace) {
 	});
 	const getJobInfo = usersWithJob(teamspace);
 
-	const getTeamspacePermissions = User.findByUserName(teamspace).then(user => user.customData.permissions);
+	const getTeamspacePermissions = TeamspaceSetting.getTeamspaceSettings(teamspace).then(user => user.permissions);
 
 	promises.push(
 		getTeamspaceMembers,
