@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import IncludeIconBase from '@assets/icons/twoToned/include_element-two_toned.svg';
+import IncludeIconBase from '@assets/icons/twoToned/add_circle-two_toned.svg';
 import RemoveIconBase from '@assets/icons/twoToned/remove_element-two_toned.svg';
 
 export const IconContainer = styled.div`
