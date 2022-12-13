@@ -301,7 +301,6 @@
 
 	Project.listModels = async function(account, project, username, filters) {
 		const AccountPermissions = require("./accountPermissions");
-		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
 		const [dbUser, projectObj] = await Promise.all([

@@ -30,7 +30,6 @@ const {
 	setModelStatus,
 	createCorrelationId
 } = require("../modelSetting");
-const User = require("../user");
 const responseCodes = require("../../response_codes");
 const importQueue = require("../../services/queue");
 const C = require("../../constants");

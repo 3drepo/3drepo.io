@@ -51,7 +51,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 					}
 
 					return permission.permissions;
-				}).catch((err) => {
+				}).catch(() => {
 					throw ResponseCodes.RESOURCE_NOT_FOUND;
 				});
 			},
