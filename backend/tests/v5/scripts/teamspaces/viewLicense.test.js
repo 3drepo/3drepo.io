@@ -25,9 +25,9 @@ const {
 
 const { src, utilScripts } = require('../../helper/path');
 
-const UpdateLicense = require(`${utilScripts}/teamspaces/updateLicense`);
+const ViewLicense = require(`${utilScripts}/teamspaces/viewLicense`);
 
-const { editSubscriptions, getSubscriptions } = require(`${src}/models/teamspaces`);
+const { editSubscriptions } = require(`${src}/models/teamspaces`);
 const { SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -51,60 +51,39 @@ const setupData = async (data) => {
 };
 
 const runTest = (testData) => {
-	const determineExpectedResults = ({ sub = {}, sub2 = {} }, { remove, ...changes }) => {
-		if (changes.removeAll) return {};
-
-		const { type: typeChanged, ...changedData } = changes;
-		const res = remove ? {} : {
-			[typeChanged]: changedData,
-		};
+	const determineExpectedResults = ({ sub = {}, sub2 = {} }) => {
+		const res = {};
 
 		if (!isEmpty(sub)) {
 			const { type, ...subData } = sub;
-			if (!remove || type !== typeChanged) {
-				res[type] = typeChanged === type ? { ...subData, ...changedData } : subData;
-			}
+			res[type] = subData;
 		}
 		if (!isEmpty(sub2)) {
 			const { type, ...subData } = sub2;
-			if (!remove || type !== typeChanged) {
-				res[type] = typeChanged === type ? { ...subData, ...changedData } : subData;
-			}
+			res[type] = subData;
 		}
 
 		return res;
 	};
-	const badType = generateRandomString();
 	describe.each([
-		['teamspace does not exist', false, templates.teamspaceNotFound, { name: generateRandomString() }, {}],
-		['removing sub of an unrecognised type', false, new Error(`Unrecognised license type: ${badType}`), testData.noSub, { remove: true, type: badType }],
-		['removing a non existing sub', true, undefined, testData.noSub, { remove: true, type: ENTERPRISE }],
-		['removing an existing sub (multiple subs)', true, undefined, testData.multipleSubs, { remove: true, type: ENTERPRISE }],
-		['removing an existing sub (single sub)', true, undefined, testData.enterprise, { remove: true, type: ENTERPRISE }],
-		['removing all subs', true, undefined, testData.multipleSubs, { removeAll: true }],
-		['updating a non existing sub', true, undefined, testData.noSub, { type: ENTERPRISE, data: 1 }],
-		['updating an existing sub', true, undefined, testData.enterprise, { type: ENTERPRISE, data: 100 }],
-		['updating an existing sub with invalid data', false, undefined, testData.enterprise, { type: ENTERPRISE, data: 'abc' }],
+		['teamspace does not exist', false, templates.teamspaceNotFound, { name: generateRandomString() }],
+		['teamspace has no sub', true, undefined, testData.noSub],
+		['teamspace has 1 sub', true, undefined, testData.enterprise],
+		['teamspace has multiple subs', true, undefined, testData.multipleSubs],
 
-	])('Update License', (desc, success, expectedOutput, teamspace, params) => {
-		beforeEach(async () => {
+	])('View license', (desc, success, expectedOutput, teamspace) => {
+		beforeAll(async () => {
 			resetFileshare();
 			await resetDB();
 			await setupData(testData);
 		});
 
 		test(`Should ${success ? 'succeed' : 'with an error'} if ${desc}`, async () => {
-			const { remove, removeAll, type, collaborators, data, expiryDate } = params;
-			const exe = UpdateLicense.run(teamspace.name, remove, removeAll, type, collaborators, data, expiryDate);
+			const exe = ViewLicense.run(teamspace.name);
 			if (success) {
-				await exe;
-				await expect(getSubscriptions(teamspace.name)).resolves
-					.toEqual(determineExpectedResults(teamspace, params));
-			} else if (expectedOutput) {
-				await expect(exe).rejects.toEqual(expectedOutput);
+				await expect(exe).resolves.toEqual(determineExpectedResults(teamspace));
 			} else {
-				// not checking for specific response, just making sure it rejects
-				await expect(exe).rejects.not.toBeUndefined();
+				await expect(exe).rejects.toEqual(expectedOutput);
 			}
 		});
 	});
