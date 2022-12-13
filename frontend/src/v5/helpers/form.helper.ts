@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _ from 'lodash';
+import _, { isEqual } from 'lodash';
 
 export const dirtyValues = (
 	allValues: object,
@@ -35,7 +35,7 @@ export const dirtyValues = (
 };
 
 // eslint-disable-next-line max-len
-const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);
+export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);
 // value.toDate assumes that is a wrapped date type.
 
 /**
@@ -98,10 +98,28 @@ export const removeEmptyObjects = (tree) => {
 	return Object.keys(tree).reduce((accum, key) => {
 		const value = tree[key];
 
-		if (_.isEmpty(value) && value !== null) {
+		if (_.isEqual(value, {})) {
 			return accum;
 		}
 
 		return ({ ...accum, [key]: removeEmptyObjects(value) });
+	}, {});
+};
+
+export const diffObjects = (objec1, object2) => {
+	const keyObjc2 = Object.keys(object2);
+
+	return Object.keys(objec1).reduce((accum, key) => {
+		if (keyObjc2.includes(key)) {
+			if (isEqual(objec1[key], object2[key])) {
+				return accum;
+			} if (isBasicValue(objec1[key])) {
+				return { ...accum, [key]: objec1[key] };
+			}
+
+			return { ...accum, [key]: diffObjects(objec1[key], object2[key]) };
+		}
+
+		return { ...accum, [key]: objec1[key] };
 	}, {});
 };

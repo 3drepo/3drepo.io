@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('../../../utils/config');
-const { get } = require('../../../utils/webRequests');
 const aadLabel = require('../../../utils/logger').labels.aad;
+const config = require('../../../utils/config');
+const { errorCodes } = require('../sso.constants');
 const logger = require('../../../utils/logger').logWithLabel(aadLabel);
-const { msGraphUserDetailsUri } = require('./aad.constants');
 const msal = require('@azure/msal-node');
 const { templates } = require('../../../utils/responseCodes');
 
@@ -58,11 +57,18 @@ Aad.getAuthenticationCodeUrl = (params) => {
 Aad.getUserDetails = async (code, redirectUri, codeVerifier) => {
 	const tokenRequest = { code, redirectUri, codeVerifier };
 	const clientApp = getClientApplication();
-	const response = await clientApp.acquireTokenByCode(tokenRequest);
-
-	return get(msGraphUserDetailsUri, {
-		Authorization: `Bearer ${response.accessToken}`,
-	});
+	try {
+		const { idTokenClaims: userInfo } = await clientApp.acquireTokenByCode(tokenRequest);
+		return {
+			firstName: userInfo.given_name,
+			lastName: userInfo.family_name,
+			id: userInfo.oid,
+			email: userInfo.email,
+		};
+	} catch (err) {
+		logger.logError(`Failed to fetch MS user details: ${err.message}`);
+		throw errorCodes.UNKNOWN;
+	}
 };
 
 module.exports = Aad;
