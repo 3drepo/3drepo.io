@@ -20,21 +20,49 @@
 
 	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const C	= require("../constants");
+	const {v5Path} = require("../../interop");
+	const {
+		hasAccessToTeamspace,
+		isAdminToProject,
+		isTeamspaceAdmin,
+	} = require(`${v5Path}/middleware/permissions/permissions`);
 
 	function canUpdate(req, res, next) {
-		if(req.body.permissions) {
-			checkPermissions([C.PERM_PROJECT_ADMIN])(req, res, next);
-		} else {
-			checkPermissions([C.PERM_EDIT_PROJECT])(req, res, next);
-		}
+		console.log("canUpdate");
+		console.log(req.params);
+		console.log(req.body);
+		req.params.project = req.body._id;
+		isAdminToProject(req, res, next);
+	}
+
+	function canCreate(req, res, next) {
+		isTeamspaceAdmin(req, res, next);
+	}
+
+	function canView(req, res, next) {
+		console.log("canView");
+		console.log(req.params);
+		hasAccessToTeamspace(req, res, next);
+	}
+
+	function canList(req, res, next) {
+		console.log("canList");
+		console.log(req.params);
+		hasAccessToTeamspace(req, res, next);
+	}
+
+	function canDelete(req, res, next) {
+		console.log("canDelete");
+		console.log(req.params);
+		isTeamspaceAdmin(req, res, next);
 	}
 
 	module.exports = {
-		canCreate: checkPermissions([C.PERM_CREATE_PROJECT]),
+		canCreate: canCreate,
 		canUpdate: canUpdate,
-		canView: checkPermissions([C.PERM_PROJECT_ADMIN]),
-		canList: checkPermissions([C.PERM_VIEW_PROJECTS]),
-		canDelete: checkPermissions([C.PERM_DELETE_PROJECT])
+		canView: canView,
+		canList: canList,
+		canDelete: canDelete
 	};
 
 })();

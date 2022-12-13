@@ -25,6 +25,8 @@
 	const _ = require("lodash");
 	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
 	const PermissionTemplates = require("./permissionTemplates");
+	const {v5Path} = require("../../interop");
+	const ProjectsModelV5 = require(`${v5Path}/models/projectSettings`);
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
@@ -105,29 +107,15 @@
 		return db.updateOne(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
 	};
 
-	Project.createProject = async function(teamspace, name, username, userPermissions) {
-		checkProjectNameValid(name);
+	Project.createProject = async (teamspace, name) => {
+		const projectId = await ProjectsModelV5.createProject(teamspace, name);
 
 		const project = {
-			_id: utils.generateUUID(),
+			_id: utils.uuidToString(projectId),
 			name,
 			models: [],
-			permissions: []
+			permissions: C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project
 		};
-
-		if (!userPermissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
-			project.permissions = [{
-				user: username,
-				permissions: [C.PERM_PROJECT_ADMIN]
-			}];
-		}
-
-		await checkDupName(teamspace, project);
-
-		await db.insertOne(teamspace, PROJECTS_COLLECTION_NAME, project);
-
-		project._id = utils.uuidToString(project._id);
-		project.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
 
 		return project;
 	};
@@ -151,7 +139,7 @@
 	Project.listProjects = async function(teamspace, query = {}, projection) {
 		const User = require("./user");
 		const userList = await User.getAllUsersInTeamspace(teamspace);
-		let projects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
+		let projects = await ProjectsModelV5.getProjectList(teamspace, projection);
 
 		if (projects) {
 			projects = projects.map(p => populateUsers(userList, prepareProject(p)));

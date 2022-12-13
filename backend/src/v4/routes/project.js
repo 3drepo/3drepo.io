@@ -25,6 +25,8 @@
 	const Project = require("../models/project");
 	const utils = require("../utils");
 	const _ = require("lodash");
+	const {v5Path} = require("../../interop");
+	const { validateProjectData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects`);
 
 	/**
 	 * @api {post} /:teamspace/projects Create project
@@ -64,7 +66,7 @@
 	 * }
 	 *
 	 */
-	router.post("/projects", middlewares.project.canCreate, createProject);
+	router.post("/projects", middlewares.formatV5NewModelRevisionsData, middlewares.project.canCreate, validateProjectData, createProject);
 
 	/**
 	 * @api {put} /:teamspace/projects/:project Update project
@@ -144,7 +146,7 @@
 	 * }
 	 *
 	 */
-	router.put("/projects/:project", middlewares.project.canUpdate, changeProject);
+	router.put("/projects/:project", middlewares.formatV5NewModelRevisionsData, middlewares.project.canUpdate, validateProjectData, changeProject);
 
 	/**
 	 * @api {patch} /:teamspace/projects/:project Update project
@@ -204,7 +206,7 @@
 	 *    status: "ok"
 	 * }
 	 */
-	router.patch("/projects/:project", middlewares.project.canUpdate, updateProject);
+	router.patch("/projects/:project", middlewares.formatV5NewModelRevisionsData, middlewares.project.canUpdate, validateProjectData, updateProject);
 
 	/**
 	 * @api {get} /:teamspace/projects/:project/models List models of the project
@@ -331,7 +333,7 @@
 	 *   }
 	 * ]	 *
 	 */
-	router.get("/projects/:project/models",  middlewares.project.canList, listModels);
+	router.get("/projects/:project/models", middlewares.formatV5NewModelRevisionsData, middlewares.project.canList, listModels);
 
 	/**
 	 * @api {get} /:teamspace/projects List projects
@@ -446,7 +448,7 @@
 	 * ]
 	 *
 	 */
-	router.get("/projects", middlewares.project.canList, listProjects);
+	router.get("/projects", middlewares.formatV5NewModelRevisionsData, middlewares.project.canList, listProjects);
 
 	/**
 	 * @api {get} /:teamspace/projects/:project Get project
@@ -491,7 +493,7 @@
 	 * }
 	 */
 
-	router.get("/projects/:project", middlewares.project.canView, listProject);
+	router.get("/projects/:project", middlewares.formatV5NewModelRevisionsData, middlewares.project.canView, listProject);
 
 	/**
 	 * @api {delete} /:teamspace/projects/:project Delete project
@@ -524,7 +526,7 @@
 	 * }
 	 *
 	 */
-	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
+	router.delete("/projects/:project", middlewares.formatV5NewModelRevisionsData, middlewares.project.canDelete, deleteProject);
 
 	function createProject(req, res, next) {
 		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {
@@ -535,6 +537,7 @@
 	}
 
 	function changeProject(req, res, next) {
+		console.log("changeProject");
 		Project.updateAttrs(req.params.account, req.params.project, req.body).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
@@ -543,6 +546,7 @@
 	}
 
 	function updateProject(req, res, next) {
+		console.log("updateProject");
 		Project.updateProject(req.params.account, req.params.project, req.body).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
