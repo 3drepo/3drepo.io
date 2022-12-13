@@ -127,6 +127,10 @@ class TeamspaceSettings {
 
 		return updatedSettings;
 	}
+
+	async updatePermissions(teamspace, updatedPermissions) {
+		await db.updateOne(teamspace, colName, {_id: teamspace}, {$set: {permissions: updatedPermissions}});
+	}
 }
 
 module.exports = new TeamspaceSettings();

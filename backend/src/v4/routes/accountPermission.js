@@ -23,6 +23,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
+	const { getTeamspaceSettings } = require("../models/teamspaceSetting");
 	const utils = require("../utils");
 	const _ = require("lodash");
 
@@ -140,9 +141,9 @@
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
 	function listPermissions(req, res, next) {
-		User.findByUserName(req.params.account)
-			.then(user => {
-				const permissions = user.customData.permissions;
+		getTeamspaceSettings(req.params.account)
+			.then(settings => {
+				const permissions = settings.permissions;
 
 				return User.getAllUsersInTeamspace(req.params.account).then(
 					users => {

@@ -1072,9 +1072,7 @@ User.updateAvatar = async function(username, avatarBuffer) {
 	await UserProcessorV5.uploadAvatar(username, avatarBuffer);
 };
 
-User.updatePermissions = async function(username, updatedPermissions) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
-};
+User.updatePermissions = TeamspaceSettings.updatePermissions;
 
 User.updateSubscriptions = async function(username, subscriptions) {
 	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.billing.subscriptions": subscriptions}});
