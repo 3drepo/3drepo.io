@@ -86,9 +86,10 @@ interface Props {
 	template: Partial<ITemplate>;
 	ticket: Partial<ITicket>;
 	onPropertyBlur?: (...args) => void;
+	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, ...rest }: Props) => {
+export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -101,7 +102,7 @@ export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 						id: 'customTicket.newTicket.titlePlaceholder',
 						defaultMessage: 'Ticket name',
 					})}
-					inputProps={{ autoFocus: true }}
+					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>

@@ -95,6 +95,7 @@ export const NewTicketCard = () => {
 							template={getEditableProperties(template)}
 							// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
 							ticket={defaultTicket}
+							focusOnTitle
 						/>
 						<BottomArea>
 							<SaveButton disabled={!formData.formState.isValid}>
