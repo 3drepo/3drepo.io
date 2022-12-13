@@ -42,6 +42,12 @@ Schemas.schemas.roles = {
 	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
 };
 
+const errorCodes = 'Error codes: <br/><br/>* `1` - there is a non SSO account with the same email<br/><br/>* `2` - there is an SSO account witht he same email<br/><br/>* `3` - the user is non SSO<br/><br/>* `4` - the user was not found<br/><br/>* `5` - unknown';
+
+Schemas.schemas.signupDescription = `Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. <br/><br/>${errorCodes}`;
+
+Schemas.schemas.linkDescription = `Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. <br/><br/>${errorCodes}`;
+
 const ticketTemplatePropSchema = {
 	description: 'Properties within a ticket or module',
 	type: 'array',

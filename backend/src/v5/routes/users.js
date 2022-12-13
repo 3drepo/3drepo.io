@@ -286,7 +286,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /user:
 	*   put:
-	*     description: Updates the profile of the logged in user. SSO users cannot update their email, password, firstname and lastname
+	*     description: Updates the profile of the logged in user
 	*     tags: [User]
 	*     operationId: updateProfile
 	*     requestBody:
@@ -297,15 +297,15 @@ const establishRoutes = () => {
 	*             properties:
 	*               firstName:
 	*                 type: string
-	*                 description: The first name of the user
+	*                 description: The first name of the user (applies only to non SSO users)
 	*                 example: Jason
 	*               lastName:
 	*                 type: string
-	*                 description: The last name of the user
+	*                 description: The last name of the user (applies only to non SSO users)
 	*                 example: Voorhees
 	*               email:
 	*                 type: string
-	*                 description: The email of the user
+	*                 description: The email of the user (applies only to non SSO users)
 	*                 example: jason@vorhees.com
 	*                 format: email
 	*               company:
@@ -318,12 +318,12 @@ const establishRoutes = () => {
 	*                 example: GB
 	*               oldPassword:
 	*                 type: string
-	*                 description: The old password of the user
+	*                 description: The old password of the user (applies only to non SSO users)
 	*                 example: password12345
     *                 format: password
 	*               newPassword:
 	*                 type: string
-	*                 description: The new password of the user
+	*                 description: The new password of the user (applies only to non SSO users)
 	*                 example: password12345
     *                 format: password
 	*     responses:

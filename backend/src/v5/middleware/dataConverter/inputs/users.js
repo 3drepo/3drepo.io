@@ -59,7 +59,7 @@ Users.validateLoginData = async (req, res, next) => {
 };
 
 const generateUpdateSchema = (isSSO, username) => {
-	const nonSSOFields = {
+	const schema = Yup.object().shape({
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
 			async (value) => {
 				if (value) {
@@ -71,11 +71,19 @@ const generateUpdateSchema = (isSSO, username) => {
 					}
 				}
 				return true;
-			}),
+			}).test(
+			'non-sso-field',
+			'Email can only be updated for non SSO users',
+			(value) => !isSSO || value === undefined,
+		),
 		oldPassword: Yup.string().optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
 			then: Yup.string().required(),
-		}),
+		}).test(
+			'non-sso-field',
+			'Passowrd can only be updated for non SSO users',
+			(value) => !isSSO || value === undefined,
+		),
 		newPassword: types.strings.password.optional().when('oldPassword', {
 			is: (oldPass) => oldPass?.length > 0,
 			then: types.strings.password.required(),
@@ -88,15 +96,24 @@ const generateUpdateSchema = (isSSO, username) => {
 				const { oldPassword } = this.parent;
 				return !oldPassword || (value !== oldPassword);
 			},
-		}),
-		firstName: types.strings.name,
-		lastName: types.strings.name,
-	};
+		}).test(
+			'non-sso-field',
+			'Passowrd can only be updated for non SSO users',
+			(value) => !isSSO || value === undefined,
+		),
+		firstName: types.strings.name.test(
+			'non-sso-field',
+			'Firstname can only be updated for non SSO users',
+			(value) => !isSSO || value === undefined,
+		),
+		lastName: types.strings.name.test(
+			'non-sso-field',
+			'Lastname can only be updated for non SSO users',
+			(value) => !isSSO || value === undefined,
+		),
 
-	const schema = Yup.object().shape({
 		company: types.strings.title,
 		countryCode: types.strings.countryCode.optional(),
-		...(isSSO ? {} : nonSSOFields),
 	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
 		.test(
 			'at-least-one-property',

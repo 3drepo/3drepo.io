@@ -66,7 +66,7 @@ User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.e
 User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
 	$or: [{ user: usernameOrEmail },
 	// eslint-disable-next-line security/detect-non-literal-regexp
-	{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }]
+		{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }],
 }, projection);
 
 User.getFavourites = async (user, teamspace) => {
@@ -220,13 +220,13 @@ User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(u
 			'customData.email': email,
 			'customData.firstName': firstName,
 			'customData.lastName': lastName,
-			'customData.sso': ssoData
-		}
+			'customData.sso': ssoData,
+		},
 	});
 
 User.isSso = async (username) => {
 	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });
 	return !!sso;
-}
+};
 
 module.exports = User;

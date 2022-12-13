@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const { isSso } = require('../../models/users');
 const { URL } = require('url');
+const Yup = require('yup');
 const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserFromSession } = require('../../utils/sessions');
+const { isSso } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
-const Yup = require('yup');
 const { types } = require('../../utils/helper/yup');
 
 const Sso = {};
@@ -41,7 +41,6 @@ Sso.redirectWithError = (res, url, errorCode) => {
 	urlRedirect.searchParams.set('error', errorCode);
 	res.redirect(urlRedirect.href);
 };
-
 
 Sso.redirectToStateURL = (req, res) => {
 	try {

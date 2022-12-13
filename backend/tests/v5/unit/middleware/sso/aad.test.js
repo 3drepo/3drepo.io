@@ -130,11 +130,11 @@ const testVerifyNewUserDetails = () => {
 
 const testVerifyNewEmail = () => {
 	describe('Get user MS email, check email availability and assign email and SSO id to body', () => {
-		const aadUserDetails = { 
-			email: 'example@email.com', 
-			id: generateRandomString(), 
-			firstName: generateRandomString(), 
-			lastName: generateRandomString() 
+		const aadUserDetails = {
+			email: 'example@email.com',
+			id: generateRandomString(),
+			firstName: generateRandomString(),
+			lastName: generateRandomString(),
 		};
 		const redirectUri = generateRandomURL();
 		const res = { redirect: jest.fn() };
@@ -370,7 +370,6 @@ const testHasAssociatedAccount = () => {
 		});
 	});
 };
-
 
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();

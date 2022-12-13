@@ -18,14 +18,14 @@
 const { authenticate, hasAssociatedAccount, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
-const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
+const { isNonSsoUser, isSsoUser, redirectToStateURL, validateUnlinkData } = require('../../../middleware/sso');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { updateSession } = require('../../../middleware/sessions');
-const { isSsoUser, isNonSsoUser, validateUnlinkData, redirectToStateURL } = require('../../../middleware/sso');
+const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 
 const signUpPost = async (req, res, next) => {
 	try {
@@ -90,7 +90,8 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 unknown
+	 *     description:
+	 *       $ref: "#/components/schemas/signupDescription"
 	 *     tags: [Aad]
 	 *     operationId: aadSignup
 	 *     parameters:
@@ -143,7 +144,8 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/link:
 	 *   get:
-	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 unknown
+	 *     description:
+	 *       $ref: "#/components/schemas/linkDescription"
 	 *     tags: [Aad]
 	 *     operationId: aadLink
 	 *     parameters:

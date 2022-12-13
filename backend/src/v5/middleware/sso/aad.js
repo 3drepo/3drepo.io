@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
+const { checkStateIsValid, redirectWithError, setSessionReferer } = require('.');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
@@ -23,7 +24,6 @@ const { addPkceProtection } = require('./pkce');
 const { getUserFromSession } = require('../../utils/sessions');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
-const { redirectWithError, checkStateIsValid, setSessionReferer } = require('.');
 
 const Aad = {};
 

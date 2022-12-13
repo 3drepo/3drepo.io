@@ -593,7 +593,7 @@ const testLinkToSso = () => {
 			await User.linkToSso(username, email, firstName, lastName, ssoData);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, 
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
 				{ $set: { 'customData.email': email, 'customData.firstName': firstName, 'customData.lastName': lastName, 'customData.sso': ssoData } });
 		});
 	});
@@ -604,7 +604,7 @@ const testIsSso = () => {
 		test('Should return true if user is SSO', async () => {
 			const username = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
-			
+
 			await User.isSso(username);
 
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -612,9 +612,9 @@ const testIsSso = () => {
 		});
 
 		test('Should return false if user is non SSO', async () => {
-			const username = generateRandomString();			
+			const username = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { } });
-			
+
 			await User.isSso(username);
 
 			expect(fn).toHaveBeenCalledTimes(1);

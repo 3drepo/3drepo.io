@@ -568,9 +568,8 @@ const testForgotPassword = () => {
 		});
 
 		test('should not send email but return ok if user is an SSO user', async () => {
-			await User.linkToSso(ssoTestUser.user, ssoTestUser.basicData.firstName, ssoTestUser.basicData.lastName, userEmailSso, {
-				type: generateRandomString(), id: generateRandomString(),
-			});
+			await User.linkToSso(ssoTestUser.user, ssoTestUser.basicData.firstName, ssoTestUser.basicData.lastName,
+				userEmailSso, { type: generateRandomString(), id: generateRandomString() });
 			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })
 				.expect(templates.ok.status);
 			await User.unlinkFromSso(ssoTestUser.user, ssoTestUser.password);

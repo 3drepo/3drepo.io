@@ -64,7 +64,7 @@ const testAuthenticate = () => {
 			const resUri = new URL(res.headers.location);
 			expect(resUri.hostname).toEqual('login.microsoftonline.com');
 			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
-			const searchParams = resUri.searchParams;
+			const { searchParams } = resUri;
 			expect(searchParams.get('redirect_uri')).toEqual(authenticateRedirectUri);
 			expect(searchParams.has('client_id')).toEqual(true);
 			expect(searchParams.has('code_challenge')).toEqual(true);
@@ -260,7 +260,12 @@ const testLink = () => {
 	describe('Link', () => {
 		const redirectUri = generateRandomURL();
 
-		test('should fail without a valid session', async () => {
+		test('should fail without a valid session or API key', async () => {
+			await agent.get(`/v5/sso/aad/link?redirectUri=${redirectUri}`)
+				.expect(templates.notAuthorized.status);
+		});
+
+		test('should fail without a valid session but with an API key', async () => {
 			await agent.get(`/v5/sso/aad/link?redirectUri=${redirectUri}&key=${testUser.apiKey}`)
 				.expect(templates.notAuthorized.status);
 		});
@@ -291,7 +296,7 @@ const testLink = () => {
 				const resUri = new URL(res.headers.location);
 				expect(resUri.hostname).toEqual('login.microsoftonline.com');
 				expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
-				const searchParams = resUri.searchParams;
+				const { searchParams } = resUri;
 				expect(searchParams.get('redirect_uri')).toEqual(linkRedirectUri);
 				expect(searchParams.has('client_id')).toEqual(true);
 				expect(searchParams.has('code_challenge')).toEqual(true);
@@ -314,7 +319,7 @@ const testLinkPost = () => {
 		beforeAll(async () => {
 			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 		});
-		
+
 		afterAll(async () => {
 			await testSession.post('/v5/logout/');
 		});
@@ -348,7 +353,7 @@ const testLinkPost = () => {
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.isSso).toEqual(true);			
+			expect(newProfileRes.body.isSso).toEqual(true);
 		});
 
 		test('should link user and change email if email is available', async () => {
@@ -360,7 +365,7 @@ const testLinkPost = () => {
 
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);			
+			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
 		});
 
 		test('should link user and change email if email is available even if user is already SSO', async () => {
@@ -376,7 +381,7 @@ const testLinkPost = () => {
 
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);			
+			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
 		});
 	});
 };
@@ -385,7 +390,12 @@ const testUnlink = () => {
 	describe('Unlink', () => {
 		const redirectUri = generateRandomURL();
 
-		test('should fail without a valid session', async () => {
+		test('should fail without a valid session or an API key', async () => {
+			await agent.post(`/v5/sso/aad/unlink?redirectUri=${redirectUri}`)
+				.expect(templates.notAuthorized.status);
+		});
+
+		test('should fail without a valid session with an API key', async () => {
 			await agent.post(`/v5/sso/aad/unlink?redirectUri=${redirectUri}&key=${testUserSso.apiKey}`)
 				.expect(templates.notAuthorized.status);
 		});
