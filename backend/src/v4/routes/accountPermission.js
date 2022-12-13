@@ -24,6 +24,7 @@
 	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
 	const utils = require("../utils");
+	const { getTeamspaceSettings } = require("../models/teamspaceSetting");
 	const {v5Path} = require("../../interop");
 	const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware/permissions/permissions`);
 	const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
@@ -186,7 +187,7 @@
 			if(req.params.account === req.body.user) {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
-				User.findByUserName(req.params.account)
+				getTeamspaceSettings(req.params.account)
 					.then(teamspace => {
 						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
 					})

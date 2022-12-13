@@ -52,7 +52,7 @@ const { hasAccessToTeamspace, isTeamspaceAdmin } = require(`${v5Path}/middleware
 const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
 const { TEAM_MEMBER } = require(`${v5Path}/models/roles.constants`);
 const { assignUserToJob } = require(`${v5Path}/models/jobs.js`);
-const { getAddOns } = require(`${v5Path}/models/teamspaces`);
+const { getAddOns, getTeamspaceSettings } = require(`${v5Path}/models/teamspaces`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 
@@ -295,15 +295,9 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 	return {};
 };
 
-User.generateApiKey = async function (username) {
-	const apiKey = utils.generateHashString();
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
-	return apiKey;
-};
+User.generateApiKey = (username) => UserProcessorV5.generateApiKey(username);
 
-User.deleteApiKey = async function (username) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$unset: {"customData.apiKey" : 1}});
-};
+User.deleteApiKey = (username) => UserProcessorV5.deleteApiKey(username);
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const regex = new RegExp(`^${searchString}$`, "i");
@@ -988,7 +982,8 @@ User.getMembers = async function (teamspace) {
 	const getJobInfo = usersWithJob(teamspace);
 
 	// TODO
-	const getTeamspacePermissions = User.findByUserName(teamspace).then(async user => {
+	const getTeamspacePermissions = getTeamspaceSettings(teamspace).then(async user => {
+		console.log(user);
 		const permissions = [];
 		if (await hasAccessToTeamspace(teamspace, user)) {
 			if (await isTeamspaceAdmin(teamspace, user)) {
