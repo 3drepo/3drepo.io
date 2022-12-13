@@ -230,7 +230,7 @@ const testGetUsername = () => {
 	});
 };
 
-const formatUserProfile = (user, email, hasAvatar = false, isSso = false) => ({
+const formatUserProfile = (user, email, hasAvatar = false, sso) => ({
 	username: user.user,
 	firstName: user.basicData.firstName,
 	lastName: user.basicData.lastName,
@@ -238,7 +238,7 @@ const formatUserProfile = (user, email, hasAvatar = false, isSso = false) => ({
 	hasAvatar,
 	countryCode: user.basicData.billing.billingInfo.countryCode,
 	company: user.basicData.billing.billingInfo.company,
-	...(isSso ? { isSso: true } : {}),
+	...(sso ? { sso } : {}),
 	...(email ? { email } : {}),
 });
 
@@ -284,7 +284,7 @@ const testGetProfile = () => {
 
 			test('should return the user profile if the user is logged in', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(ssoTestUser, userEmailSso, false, true));
+				expect(res.body).toEqual(formatUserProfile(ssoTestUser, userEmailSso, false, providers.AAD));
 			});
 		});
 	});

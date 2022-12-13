@@ -386,63 +386,6 @@ const testLinkPost = () => {
 	});
 };
 
-const testUnlink = () => {
-	describe('Unlink', () => {
-		const redirectUri = generateRandomURL();
-
-		test('should fail without a valid session or an API key', async () => {
-			await agent.post(`/v5/sso/aad/unlink?redirectUri=${redirectUri}`)
-				.expect(templates.notAuthorized.status);
-		});
-
-		test('should fail without a valid session with an API key', async () => {
-			await agent.post(`/v5/sso/aad/unlink?redirectUri=${redirectUri}&key=${testUserSso.apiKey}`)
-				.expect(templates.notAuthorized.status);
-		});
-
-		test('should fail if user is not SSO', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			await testSession.post('/v5/sso/aad/unlink')
-				.expect(templates.invalidArguments.status);
-			await testSession.post('/v5/logout/');
-		});
-
-		describe('With valid authentication', () => {
-			beforeAll(async () => {
-				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
-				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
-			});
-
-			afterAll(async () => {
-				// link user back to SSO
-				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: generateRandomString() });
-				await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`)
-					.expect(302);
-				await testSession.post('/v5/logout/');
-			});
-
-			test('should fail if a new password is not provided', async () => {
-				const res = await testSession.post('/v5/sso/aad/unlink')
-					.expect(templates.invalidArguments.status);
-				expect(res.body.code).toEqual(templates.invalidArguments.code);
-			});
-
-			test('should fail if a weak new password is provided', async () => {
-				const res = await testSession.post('/v5/sso/aad/unlink').send({ password: generateRandomString(1) })
-					.expect(templates.invalidArguments.status);
-				expect(res.body.code).toEqual(templates.invalidArguments.code);
-			});
-
-			test('should unlink the user', async () => {
-				await testSession.post('/v5/sso/aad/unlink').send({ password: generateRandomString() })
-					.expect(templates.ok.status);
-				const newProfileRes = await testSession.get('/v5/user');
-				expect(newProfileRes.body).not.toHaveProperty('isSso');
-			});
-		});
-	});
-};
-
 const app = ServiceHelper.app();
 
 describe('E2E routes/sso/aad', () => {
@@ -461,5 +404,4 @@ describe('E2E routes/sso/aad', () => {
 	signupPost();
 	testLink();
 	testLinkPost();
-	testUnlink();
 });

@@ -102,7 +102,7 @@ const testLogin = () => {
 	});
 };
 
-const formatUser = (userProfile, hasAvatar, hash, isSso = false) => ({
+const formatUser = (userProfile, hasAvatar, hash, sso) => ({
 	username: userProfile.user,
 	firstName: userProfile.customData.firstName,
 	lastName: userProfile.customData.lastName,
@@ -112,7 +112,7 @@ const formatUser = (userProfile, hasAvatar, hash, isSso = false) => ({
 	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
 	...(hash ? { intercomRef: hash } : {}),
-	...(isSso ? { isSso } : {}),
+	...(sso ? { sso } : {}),
 });
 
 const tesGetProfileByUsername = () => {
@@ -161,13 +161,14 @@ const tesGetProfileByUsername = () => {
 		});
 
 		test('should return user profile with SSO user', async () => {
+			const ssoType = generateRandomString();
 			UsersModel.getUserByUsername.mockResolvedValueOnce({
-				...user, customData: { ...user.customData, sso: { id: generateRandomString() } },
+				...user, customData: { ...user.customData, sso: { id: generateRandomString(), type: ssoType } },
 			});
 			FilesManager.fileExists.mockResolvedValueOnce(true);
 
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, true, undefined, true));
+			expect(res).toEqual(formatUser(user, true, undefined, ssoType));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
 		});

@@ -112,7 +112,7 @@ Users.getProfileByUsername = async (username) => {
 		company: customData.billing?.billingInfo?.company,
 		countryCode: customData.billing?.billingInfo?.countryCode,
 		...(intercomRef ? { intercomRef } : {}),
-		...(customData.sso ? { isSso: true } : {}),
+		...(customData.sso ? { sso: customData.sso.type } : {}),
 	};
 };
 

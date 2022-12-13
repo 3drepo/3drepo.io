@@ -18,12 +18,11 @@
 const { authenticate, hasAssociatedAccount, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
-const { isNonSsoUser, isSsoUser, redirectToStateURL, validateUnlinkData } = require('../../../middleware/sso');
+const { isNonSsoUser, redirectToStateURL } = require('../../../middleware/sso');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
-const { templates } = require('../../../utils/responseCodes');
 const { updateSession } = require('../../../middleware/sessions');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
 
@@ -43,18 +42,6 @@ const linkPost = async (req, res, next) => {
 		const { email, sso, firstName, lastName } = req.body;
 		await Users.linkToSso(username, email, firstName, lastName, sso);
 		await next();
-	} catch (err) {
-		/* istanbul ignore next */
-		respond(req, res, err);
-	}
-};
-
-const unlink = async (req, res) => {
-	try {
-		const username = getUserFromSession(req.session);
-		const { password } = req.body;
-		await Users.unlinkFromSso(username, password);
-		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -163,33 +150,6 @@ const establishRoutes = () => {
 	router.get('/link', isLoggedIn, isNonSsoUser, authenticate(linkRedirectUri));
 
 	router.get(linkRedirectEndpoint, verifyNewEmail, linkPost, redirectToStateURL);
-
-	/**
-	 * @openapi
-	 * /sso/aad/unlink:
-	 *   post:
-	 *     description: Unlinks an SSO user's account from SSO
-	 *     tags: [Aad]
-	 *     operationId: aadUnlink
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             required:
-	 *               - password
-	 *             properties:
-	 *               password:
-	 *                 type: string
-	 *                 description: The new password of the user
-	 *                 example: password123
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/invalidArguments"
-	 *       200:
-	 *         description: Unlinks the users account from SSO
-	 */
-	router.post('/unlink', isLoggedIn, isSsoUser, validateUnlinkData, unlink);
 
 	return router;
 };
