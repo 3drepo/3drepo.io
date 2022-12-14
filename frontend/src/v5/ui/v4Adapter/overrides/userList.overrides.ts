@@ -81,7 +81,7 @@ const PermissionsCell = `${Row}>:nth-child(3)`;
 const BlankCell = `${Row}>:nth-child(4)`;
 const RemoveUserCell = `${Row}>:nth-child(5)`;
 
-export const Container = styled.div`
+export const V5UserListOverrides = styled.div`
 	position: relative;
 	margin: 0;
 	${AddUserButton}
