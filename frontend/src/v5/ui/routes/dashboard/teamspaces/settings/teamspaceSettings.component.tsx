@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,29 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRouteMatch } from 'react-router-dom';
-import { discardTab } from '@/v5/services/routing/routing';
+
+import { TeamspaceSettings as V4TeamspaceSettings } from '@/v4/routes/teamspaceSettings';
 import { FormattedMessage } from 'react-intl';
-import { Container, Link } from '../navigationTabs.styles';
+import {
+	useLocation,
+	useRouteMatch,
+	useHistory,
+} from 'react-router-dom';
+import { Header, Title } from '../projects/projectsList.styles';
+import { Container } from './teamspaceSettings.styles';
 
-export const TeamspaceNavigation = (): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardTab(url);
-
+export const TeamspaceSettings = () => {
+	const history = useHistory();
+	const location = useLocation();
+	const match = useRouteMatch();
 	return (
 		<Container>
-			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
-			<Link to={`${url}/settings`}><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
+			<Header>
+				<Title>
+					<FormattedMessage id="teamspaceSettings.title" defaultMessage="Teamspace Settings" />
+				</Title>
+			</Header>
+			<V4TeamspaceSettings match={match} location={location} history={history} />
 		</Container>
 	);
 };
