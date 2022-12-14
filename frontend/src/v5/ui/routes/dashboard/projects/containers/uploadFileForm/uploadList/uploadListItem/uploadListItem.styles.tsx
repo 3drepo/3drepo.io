@@ -20,18 +20,12 @@ import { CircleButton } from '@controls/circleButton';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
 import { UploadListItemDestination } from './components/uploadListItemDestination';
 
-export const Button = styled(CircleButton)<{ $selectedrow: boolean; }>`
+export const Button = styled(CircleButton)`
 	margin: 0;
-	&&&&& {
-		:hover, &.Mui-focusVisible { 
-			box-shadow: none;
-			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.tertiary.lightest)}
-		}
-	}
-	&& {
-		background-color: transparent;
-		color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
-	}
+
+	&:hover, &.Mui-focusVisible { 
+		box-shadow: none;
+  	}
 `;
 
 const DestinationAndTagDimensions = css`
