@@ -170,7 +170,7 @@ export const sanitizeViewVals = (vals, template) => {
 		Object.keys(props).forEach((key) => {
 			const definition = propsDefs.find((def) => def.name === key);
 			if (definition?.type === 'view') {
-				if (isResourceId(props[key].screenshot)) {
+				if (props[key] && isResourceId(props[key].screenshot)) {
 					delete props[key].screenshot;
 				}
 			}

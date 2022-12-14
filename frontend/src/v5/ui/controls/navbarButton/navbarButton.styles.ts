@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+import styled from 'styled-components';
+import { BaseCircleButton } from '../circleButton/circleButton.styles';
 
-interface ICircleButton {
-	variant?: 'primary' | 'secondary' | 'viewer';
-	disabled?: boolean;
-	onClick?: (e) => void;
-	children: any;
-}
+export const NavbarButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	border: solid 1px ${({ theme }) => theme.palette.primary.contrast};
 
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
-	if (variant === 'primary') return (<PrimaryButton {...props} />);
-	if (variant === 'viewer') return (<ViewerButton {...props} />);
-	return (<SecondaryButton {...props} />);
-};
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
+`;

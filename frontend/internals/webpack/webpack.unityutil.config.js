@@ -14,13 +14,11 @@ module.exports = {
 	},
 	module: {
 		rules: [
-			loaders.TSLoader({}),
-			loaders.LodashTSLoader,
+			loaders.TSLoader,
 			loaders.CSSLoader,
-			loaders.CSSExternalLoader,
 			loaders.FontLoader,
 			loaders.ImageLoader,
-			loaders.HTMLLoader
-		]
-	}
+			loaders.HTMLLoader,
+		],
+	},
 };
