@@ -66,6 +66,7 @@ const buttonContainerStyling = css`
 		box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 		z-index: 0;
 		padding: 8px;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
 		.MuiButtonBase-root.MuiButtonBase-root:last-child {
 			${labelButtonPrimaryStyles}
