@@ -25,7 +25,7 @@ export const Button = styled(CircleButton)`
 
 	&:hover, &.Mui-focusVisible { 
 		box-shadow: none;
-  	}
+	}
 `;
 
 const DestinationAndTagDimensions = css`
