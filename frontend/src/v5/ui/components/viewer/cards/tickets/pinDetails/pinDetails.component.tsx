@@ -112,8 +112,8 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 						</PinAction>
 					)}
 				</PinActions>
-				<FormHelperText>{helperText}</FormHelperText>
 			</PinContainer>
+			<FormHelperText>{helperText}</FormHelperText>
 		</FormControl>
 	);
 };

@@ -52,7 +52,7 @@ const removeRecords = async (teamspace, collection, filter, refAttribute) => {
 
 		const objsWithRefs = await count(teamspace, collection, filesFilter);
 		const batch = entriesLimit;
-		for (let j = 0; j < objsWithRefs?.length; j += batch) {
+		for (let j = 0; j < objsWithRefs; j += batch) {
 			// eslint-disable-next-line no-await-in-loop
 			const results = await find(teamspace, collection, filesFilter, projection, undefined, batch);
 			if (results?.length) {
