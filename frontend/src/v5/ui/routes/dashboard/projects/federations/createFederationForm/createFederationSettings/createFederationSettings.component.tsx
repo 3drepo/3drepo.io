@@ -17,8 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
