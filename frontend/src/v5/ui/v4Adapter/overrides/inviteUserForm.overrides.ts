@@ -23,6 +23,7 @@ import {
 	AddButton,
 	Container as Modal,
 	Content,
+	Footer,
 	IconButton,
 	PermissionsTable,
 	ProjectCheckboxContainer,
@@ -32,6 +33,7 @@ import { Color as JobColorDot, Name as JobTitle } from '@/v4/routes/components/j
 import { Container as TableCell, Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
 import { EmptySelectValue } from '@/v4/routes/components/newUserForm/newUserForm.styles';
 import { css } from 'styled-components';
+import { secondaryButtonStyling } from '../dialogs/generalDialogStyling.overrides';
 
 const JobSelectStyles = css`
 	${SelectListItem} {
@@ -198,7 +200,12 @@ export default css`
 			${TeamspaceAdminCheckboxStyles}
 			${ProjectSelectorStyles}
 			${PermissionsTableStyles}
+			${AddPermissionsButton}
 		}
-		${AddPermissionsButton}
+		${Footer} {
+			.MuiButtonBase-root.MuiButtonBase-root:first-child {
+				${secondaryButtonStyling}
+			}
+		}
 	}
 `;

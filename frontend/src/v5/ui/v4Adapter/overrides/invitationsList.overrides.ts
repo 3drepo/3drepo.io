@@ -18,6 +18,7 @@
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { Actions, Footer, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
+import { secondaryButtonStyling } from '../dialogs/generalDialogStyling.overrides';
 
 export default css`
 	${EmptyStateInfo} {
@@ -38,6 +39,11 @@ export default css`
 					width: 20px;
 				}
 			}
+		}
+	}
+	${Footer} {
+		.MuiButtonBase-root.MuiButtonBase-root:first-child {
+			${secondaryButtonStyling}
 		}
 	}
 `;
