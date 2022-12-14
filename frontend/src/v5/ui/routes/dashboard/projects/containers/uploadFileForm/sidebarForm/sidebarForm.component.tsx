@@ -23,10 +23,9 @@ import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -86,20 +85,16 @@ export const SidebarForm = ({
 					name="containerUnit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
-					onChange={
-						(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('containerUnit', e.target.value);
-							updateValue('containerUnit');
-						}
-					}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('containerUnit', e.target.value);
+						updateValue('containerUnit');
+					}}
 				>
-					{
-						CONTAINER_UNITS.map((unit) => (
-							<MenuItem key={unit.value} value={unit.value}>
-								{unit.name}
-							</MenuItem>
-						))
-					}
+					{CONTAINER_UNITS.map((unit) => (
+						<MenuItem key={unit.value} value={unit.value}>
+							{unit.name}
+						</MenuItem>
+					))}
 				</FormSelect>
 				<FormSelect
 					required
@@ -108,20 +103,16 @@ export const SidebarForm = ({
 					name="containerType"
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
 					defaultValue="Uncategorised"
-					onChange={
-						(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('containerType', e.target.value);
-							updateValue('containerType');
-						}
-					}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('containerType', e.target.value);
+						updateValue('containerType');
+					}}
 				>
-					{
-						CONTAINER_TYPES.map((type) => (
-							<MenuItem key={type.value} value={type.value}>
-								{type.name}
-							</MenuItem>
-						))
-					}
+					{CONTAINER_TYPES.map((type) => (
+						<MenuItem key={type.value} value={type.value}>
+							{type.name}
+						</MenuItem>
+					))}
 					<HiddenMenuItem key="sample" value="sample">
 						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
 					</HiddenMenuItem>
@@ -153,7 +144,7 @@ export const SidebarForm = ({
 				formError={errors.revisionDesc}
 			/>
 
-			{ isSpm && (
+			{isSpm && (
 				<>
 					<AnimationsCheckbox
 						control={control}
@@ -164,20 +155,16 @@ export const SidebarForm = ({
 						control={control}
 						name="timezone"
 						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
-						onChange={
-							(e: React.ChangeEvent<HTMLInputElement>) => {
-								setValue('timezone', e.target.value);
-								updateValue('timezone');
-							}
-						}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							setValue('timezone', e.target.value);
+							updateValue('timezone');
+						}}
 					>
-						{
-							TimezoneOptions.map((opt) => (
-								<MenuItem key={opt.name} value={opt.name}>
-									{opt.label}
-								</MenuItem>
-							))
-						}
+						{TimezoneOptions.map((opt) => (
+							<MenuItem key={opt.name} value={opt.name}>
+								{opt.label}
+							</MenuItem>
+						))}
 					</TimezoneSelect>
 				</>
 			)}
