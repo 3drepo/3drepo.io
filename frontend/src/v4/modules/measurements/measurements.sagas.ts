@@ -60,8 +60,9 @@ export function* setMeasureMode({ mode }) {
 		yield put(MeasurementsActions.setMeasureModeSuccess(mode));
 		yield Viewer.setMeasureMode(mode);
 
-		if (mode === '') {
-			return;
+		if (!mode) {
+			yield Viewer.clearMeasureMode();
+			return
 		}
 
 		yield Viewer.setVisibilityOfMeasurementsLabels(true);

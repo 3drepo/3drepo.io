@@ -174,9 +174,20 @@ const testValidate = () => {
 				name: 'A',
 				type: propTypes.TEXT,
 			}, {
-				name: 'a',
+				name: 'A',
 				type: propTypes.NUMBER,
 			}] }, false],
+
+		['more than one property has the same name but different case', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: 'A',
+				type: propTypes.TEXT,
+			}, {
+				name: 'a',
+				type: propTypes.NUMBER,
+			}] }, true],
 		['property default value type matches', {
 			name: generateRandomString(),
 			code: generateRandomString(3),

@@ -19,14 +19,17 @@ import { DialogContainer } from '@/v4/routes/components/dialogContainer';
 import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
 import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import { V4DialogsOverridesContainer } from './dialogs/v4DialogsOverrides.styles';
 import { V4OverridesContainer } from './v4Overrides.styles';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer id="v4Overrides">
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			{children}
-			<DialogContainer />
-			<SnackbarContainer />
-		</LocalizationProvider>
+		<V4DialogsOverridesContainer id="v4DialogsOverrides">
+			<LocalizationProvider dateAdapter={AdapterDayjs}>
+				{children}
+				<DialogContainer />
+				<SnackbarContainer />
+			</LocalizationProvider>
+		</V4DialogsOverridesContainer>
 	</V4OverridesContainer>
 );

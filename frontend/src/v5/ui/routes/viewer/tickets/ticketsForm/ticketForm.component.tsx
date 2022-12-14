@@ -24,7 +24,7 @@ import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
-import { TitleContainer, PanelsContainer } from './ticketsForm.styles';
+import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
 
 interface PropertiesListProps {
@@ -42,15 +42,19 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 				const { name, type } = property;
 				const inputName = `${module}.${name}`;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
+				const formError = get(formState.errors, inputName);
 				return (
-					<PropertyComponent
-						property={property}
-						name={inputName}
-						formError={get(formState.errors, inputName)}
-						defaultValue={propertiesValues[name] ?? property.default}
-						key={name}
-						onBlur={onPropertyBlur}
-					/>
+					<>
+						<PropertyComponent
+							property={property}
+							name={inputName}
+							formError={formError}
+							defaultValue={propertiesValues[name] ?? property.default}
+							key={name}
+							onBlur={onPropertyBlur}
+						/>
+						{formError && <ErrorTextGap />}
+					</>
 				);
 			})}
 		</>
@@ -82,9 +86,10 @@ interface Props {
 	template: Partial<ITemplate>;
 	ticket: Partial<ITicket>;
 	onPropertyBlur?: (...args) => void;
+	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, ...rest }: Props) => {
+export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -97,7 +102,7 @@ export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 						id: 'customTicket.newTicket.titlePlaceholder',
 						defaultMessage: 'Ticket name',
 					})}
-					inputProps={{ autoFocus: true }}
+					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>
