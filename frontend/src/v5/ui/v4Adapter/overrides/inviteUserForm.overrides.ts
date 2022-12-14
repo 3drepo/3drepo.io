@@ -174,6 +174,7 @@ const AddPermissionsButton = css`
 		margin: 4px 0;
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		user-select: none;
+		width: fit-content;
 		:hover {
 			text-decoration: none;
 		}
