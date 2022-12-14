@@ -42,6 +42,9 @@ const FileType = require("file-type");
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
+const { validateUpdateData } = require("../../v5/middleware/dataConverter/inputs/users");
+const { templates } = require("../../v5/utils/responseCodes");
+const { getUserByUsernameOrEmail } = require("../../v5/models/users");
 
 /**
  * @api {post} /login Login
@@ -506,7 +509,7 @@ router.post("/:account/verify", verify);
  * 	"account":"alice"
  * }
  */
-router.put("/:account", middlewares.isAccountAdmin, updateUser);
+router.put("/:account", middlewares.isAccountAdmin, validateUpdateData, updateUser);
 
 /**
  * @api {put} /:user/password Reset password
@@ -691,8 +694,13 @@ function verify(req, res, next) {
 	});
 }
 
-function forgotPassword(req, res, next) {
+async function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
+	const { customData: { sso } } = await getUserByUsernameOrEmail(req.body.userNameOrEmail, { "customData.sso": 1 });
+	if (sso) {
+		responseCodes.respond(responsePlace, req, res, next, templates.unknown, templates.unknown);
+	}
+
 	if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
 		User.getForgotPasswordToken(req.body.userNameOrEmail).then(data => {
 			if (data.email && data.token && data.username) {
