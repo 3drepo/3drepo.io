@@ -114,7 +114,8 @@ describe("Account permission::", function () {
 
 		const modelPermissionsRes = await agent.get(`/${username}/${model}/permissions`)
 			.expect(200);
-		expect(modelPermissionsRes.body).to.deep.equal([]);
+		const userPermissions = modelPermissionsRes.body.find(perm => perm.user === 'testing');
+		expect(userPermissions).to.deep.equal([]);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
