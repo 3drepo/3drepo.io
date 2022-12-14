@@ -22,7 +22,6 @@ import { UploadListItemDestination } from './components/uploadListItemDestinatio
 
 export const Button = styled(CircleButton)`
 	margin: 0;
-
 	&:hover, &.Mui-focusVisible { 
 		box-shadow: none;
 	}
