@@ -24,7 +24,7 @@ import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { MenuItem } from '@mui/material';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty, isEqual, omit } from 'lodash';
+import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
@@ -51,8 +51,8 @@ export const TicketView = ({
 }: ITicketView) => {
 	const updateViewpoint = async () => {
 		const currentViewpoint = await ViewerService.getViewpoint();
-		if (isEqual(currentViewpoint, omit(value, 'screenshot'))) return;
-		onChange?.({ ...(value || {}), ...currentViewpoint });
+		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
+		onChange?.({ screenshot, ...currentViewpoint });
 	};
 
 	const goToViewpoint = async () => {

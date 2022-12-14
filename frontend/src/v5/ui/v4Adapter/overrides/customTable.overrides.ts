@@ -120,8 +120,9 @@ export default css`
 		}
 
 		.search-field__label {
+			position: absolute;
 			margin-top: 3px;
-			transform: translate(13px,39px) scale(1);
+			transform: translate(13px, 12px) scale(1);
 
 			&[data-shrink='true'] {
 				transform: translate(13px, 20px) scale(1) !important;

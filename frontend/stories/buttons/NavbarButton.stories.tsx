@@ -15,41 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { CircleButton as Button } from '@controls/circleButton';
+import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
+import { AppBar as MuiAppBar } from '@mui/material';
 import NotificationsIcon from '@assets/icons/notifications.svg';
 
 export default {
-	title: 'Buttons/CircleButton',
-	component: Button,
-	argTypes: {
-		variant: {
-			description: 'Variant of the button',
-			options: ['primary', 'secondary', 'viewer'],
-			control: { type: 'select' },
-		},
-	},
+	title: 'Buttons/NavbarButton',
+	component: NavbarButton,
 	parameters: {
 		docs: {
 			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
 		},
-		controls: { exclude: ['onClick'] },
+		controls: { exclude: ['onClick', 'formError'] },
 	},
-} as ComponentMeta<typeof Button>;
+} as ComponentMeta<typeof NavbarButton>;
 
-const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
-	<Button {...args}><NotificationsIcon /></Button>);
+const TemplateNotifications: ComponentStory<typeof NavbarButton> = (args) => (
+	<MuiAppBar>
+		<NavbarButton {...args}>
+			<NotificationsIcon />
+		</NavbarButton>
+	</MuiAppBar>
+);
 
-export const NotificationsPrimary = TemplateNotifications.bind({});
-NotificationsPrimary.args = {
-	variant: 'primary',
-};
-
-export const NotificationsSecondary = TemplateNotifications.bind({});
-NotificationsSecondary.args = {
-	variant: 'secondary',
-};
-
-export const NotificationsViewer = TemplateNotifications.bind({});
-NotificationsViewer.args = {
-	variant: 'viewer',
-};
+export const Default = TemplateNotifications.bind({});

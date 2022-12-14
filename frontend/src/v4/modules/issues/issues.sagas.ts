@@ -723,8 +723,9 @@ export function* setMeasureMode({ measureMode }) {
 		yield put(IssuesActions.setMeasureModeSuccess(measureMode));
 		yield Viewer.setMeasureMode(measureMode, false);
 
-		if (measureMode === '') {
-			return;
+		if (!measureMode) {
+			yield Viewer.clearMeasureMode();
+			return
 		}
 
 		toggleMeasurementListeners(true);
