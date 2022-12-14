@@ -32,7 +32,7 @@ ResponseCodes.templates = {
 	userNotVerified: { message: 'Account not yet verified. Please check your email.', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password.', status: 400 },
 	incorrectPassword: { message: 'Incorrect password.', status: 400 },
-	ssoNotAvailable: { message: 'SSO provider not available.', status: 500 },
+	ssoNotAvailable: { message: 'Single sign on provider not available.', status: 500 },
 	nonSsoUser: { message: 'Single sign on is not enabled for this user.', status: 400 },
 	ssoUser: { message: 'Single sign on is already enabled for this user.', status: 400 },
 

@@ -371,9 +371,38 @@ const testHasAssociatedAccount = () => {
 	});
 };
 
+
+const testRedirectToStateURL = () => {
+	describe('Redirect to state url', () => {
+		test('should call res.redirect with the redirect url', () => {
+			const redirectUri = generateRandomURL();
+			const req = { state: { redirectUri } };
+			const res = { redirect: jest.fn() };
+
+			Aad.redirectToStateURL(req, res);
+
+			expect(res.redirect).toHaveBeenCalledTimes(1);
+			expect(res.redirect).toHaveBeenCalledWith(redirectUri);
+
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test(`should respond with ${templates.unknown.code} if something went wrong in redirection`, () => {
+			const req = { state: { redirectUri: generateRandomURL() } };
+			const res = { redirect: () => { throw templates.unknown; } };
+
+			Aad.redirectToStateURL(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.unknown);
+		});
+	});
+};
+
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
 	testVerifyNewEmail();
 	testAuthenticate();
 	testHasAssociatedAccount();
+	testRedirectToStateURL();
 });

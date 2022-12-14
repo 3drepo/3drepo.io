@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, hasAssociatedAccount, verifyNewEmail, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticate, hasAssociatedAccount, verifyNewEmail, verifyNewUserDetails, redirectToStateURL } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
-const { isNonSsoUser, redirectToStateURL } = require('../../../middleware/sso');
+const { isNonSsoUser } = require('../../../middleware/sso');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getUserFromSession } = require('../../../utils/sessions');

@@ -156,7 +156,7 @@ const testValidateUpdateData = () => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
-			UsersModel.isSso.mockResolvedValueOnce(isSso);
+			UsersModel.isSsoUser.mockResolvedValueOnce(isSso);
 
 			await Users.validateUpdateData(req, {}, mockCB);
 
@@ -168,8 +168,8 @@ const testValidateUpdateData = () => {
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
 
-			expect(UsersModel.isSso).toHaveBeenCalledTimes(1);
-			expect(UsersModel.isSso).toHaveBeenCalledWith(existingUsername);
+			expect(UsersModel.isSsoUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.isSsoUser).toHaveBeenCalledWith(existingUsername);
 		});
 	});
 };

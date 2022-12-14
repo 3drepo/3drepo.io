@@ -31,37 +31,10 @@ const { templates } = require(`${src}/utils/responseCodes`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const testRedirectToStateURL = () => {
-	describe('Redirect to state url', () => {
-		test('should call res.redirect with the redirect url', () => {
-			const redirectUri = generateRandomURL();
-			const req = { state: { redirectUri } };
-			const res = { redirect: jest.fn() };
-
-			Sso.redirectToStateURL(req, res);
-
-			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(redirectUri);
-
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-
-		test(`should respond with ${templates.unknown.code} if something went wrong in redirection`, () => {
-			const req = { state: { redirectUri: generateRandomURL() } };
-			const res = { redirect: () => { throw templates.unknown; } };
-
-			Sso.redirectToStateURL(req, res);
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.unknown);
-		});
-	});
-};
-
 const testIsSsoUser = () => {
 	describe('Check if a user is an SSO user', () => {
 		test(`should respond with ${templates.userNotFound.code} if user is not found`, async () => {
-			UsersModel.isSso.mockRejectedValueOnce(templates.userNotFound);
+			UsersModel.isSsoUser.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
 			await Sso.isSsoUser({}, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -70,7 +43,7 @@ const testIsSsoUser = () => {
 		});
 
 		test(`should respond with ${templates.nonSsoUser.code} if user is not an SSO user`, async () => {
-			UsersModel.isSso.mockResolvedValueOnce(false);
+			UsersModel.isSsoUser.mockResolvedValueOnce(false);
 			const mockCB = jest.fn();
 			await Sso.isSsoUser({}, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -79,7 +52,7 @@ const testIsSsoUser = () => {
 		});
 
 		test('should call next if user is an SSO user', async () => {
-			UsersModel.isSso.mockResolvedValueOnce(true);
+			UsersModel.isSsoUser.mockResolvedValueOnce(true);
 			const mockCB = jest.fn();
 			await Sso.isSsoUser({}, {}, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
@@ -91,7 +64,7 @@ const testIsSsoUser = () => {
 const testIsNonSsoUser = () => {
 	describe('Check if a user is a non SSO user', () => {
 		test(`should respond with ${templates.userNotFound.code} if user is not found`, async () => {
-			UsersModel.isSso.mockRejectedValueOnce(templates.userNotFound);
+			UsersModel.isSsoUser.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
 			await Sso.isNonSsoUser({}, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -100,7 +73,7 @@ const testIsNonSsoUser = () => {
 		});
 
 		test(`should respond with ${templates.ssoUser.code} if user is an SSO user`, async () => {
-			UsersModel.isSso.mockResolvedValueOnce(true);
+			UsersModel.isSsoUser.mockResolvedValueOnce(true);
 			const mockCB = jest.fn();
 			await Sso.isNonSsoUser({}, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -109,7 +82,7 @@ const testIsNonSsoUser = () => {
 		});
 
 		test('should call next if user is a non SSO user', async () => {
-			UsersModel.isSso.mockResolvedValueOnce(false);
+			UsersModel.isSsoUser.mockResolvedValueOnce(false);
 			const mockCB = jest.fn();
 			await Sso.isNonSsoUser({}, {}, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
@@ -141,7 +114,6 @@ const testUnlinkData = () => {
 };
 
 describe('middleware/sso', () => {
-	testRedirectToStateURL();
 	testIsSsoUser();
 	testIsNonSsoUser();
 	testUnlinkData();

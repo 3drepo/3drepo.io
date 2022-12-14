@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
-const { checkStateIsValid, redirectWithError, setSessionReferer } = require('.');
+const { redirectWithError, setSessionReferer } = require('.');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
@@ -24,8 +24,28 @@ const { addPkceProtection } = require('./pkce');
 const { getUserFromSession } = require('../../utils/sessions');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
+const { logger } = require('../../utils/logger');
 
 const Aad = {};
+
+const checkStateIsValid = async (req, res, next) => {
+	try {
+		req.state = JSON.parse(req.query.state);
+		await next();
+	} catch (err) {
+		logger.logError('Failed to parse req.query.state');
+		respond(req, res, createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON'));
+	}
+};
+
+Aad.redirectToStateURL = (req, res) => {
+	try {
+		res.redirect(req.state.redirectUri);
+	} catch (err) {
+		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
+		respond(req, res, templates.unknown);
+	}
+};
 
 const authenticate = (redirectUri) => async (req, res) => {
 	try {

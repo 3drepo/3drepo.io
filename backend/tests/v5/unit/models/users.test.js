@@ -605,7 +605,7 @@ const testIsSso = () => {
 			const username = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
 
-			await User.isSso(username);
+			await User.isSsoUser(username);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
@@ -615,7 +615,7 @@ const testIsSso = () => {
 			const username = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { } });
 
-			await User.isSso(username);
+			await User.isSsoUser(username);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);

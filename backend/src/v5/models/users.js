@@ -224,7 +224,7 @@ User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(u
 		},
 	});
 
-User.isSso = async (username) => {
+User.isSsoUser = async (username) => {
 	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });
 	return !!sso;
 };

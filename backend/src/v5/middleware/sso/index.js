@@ -19,36 +19,17 @@ const { URL } = require('url');
 const Yup = require('yup');
 const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserFromSession } = require('../../utils/sessions');
-const { isSso } = require('../../models/users');
+const { isSsoUser } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { types } = require('../../utils/helper/yup');
 
 const Sso = {};
 
-Sso.checkStateIsValid = async (req, res, next) => {
-	try {
-		req.state = JSON.parse(req.query.state);
-		await next();
-	} catch (err) {
-		logger.logError('Failed to parse req.query.state');
-		respond(req, res, createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON'));
-	}
-};
-
 Sso.redirectWithError = (res, url, errorCode) => {
 	const urlRedirect = new URL(url);
 	urlRedirect.searchParams.set('error', errorCode);
 	res.redirect(urlRedirect.href);
-};
-
-Sso.redirectToStateURL = (req, res) => {
-	try {
-		res.redirect(req.state.redirectUri);
-	} catch (err) {
-		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
-		respond(req, res, templates.unknown);
-	}
 };
 
 Sso.setSessionReferer = async (req, res, next) => {
@@ -62,7 +43,7 @@ Sso.setSessionReferer = async (req, res, next) => {
 Sso.isSsoUser = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		if (!await isSso(username)) {
+		if (!await isSsoUser(username)) {
 			throw templates.nonSsoUser;
 		}
 
@@ -75,7 +56,7 @@ Sso.isSsoUser = async (req, res, next) => {
 Sso.isNonSsoUser = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		if (await isSso(username)) {
+		if (await isSsoUser(username)) {
 			throw templates.ssoUser;
 		}
 

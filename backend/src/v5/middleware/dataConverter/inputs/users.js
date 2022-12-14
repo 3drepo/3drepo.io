@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail, isSso } = require('../../../models/users');
+const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail, isSsoUser } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
@@ -75,7 +75,7 @@ const generateUpdateSchema = (isSSO, username) => {
 				return true;
 			}).test(
 			'non-sso-field',
-			'Email can only be updated for non SSO users',
+			'Email can only be updated for non Single sign on users',
 			ssoFieldUpdateCheck,
 		),
 		oldPassword: Yup.string().optional().when('newPassword', {
@@ -83,7 +83,7 @@ const generateUpdateSchema = (isSSO, username) => {
 			then: Yup.string().required(),
 		}).test(
 			'non-sso-field',
-			'Passowrd can only be updated for non SSO users',
+			'Password can only be updated for non Single sign on users',
 			ssoFieldUpdateCheck,
 		),
 		newPassword: types.strings.password.optional().when('oldPassword', {
@@ -100,17 +100,17 @@ const generateUpdateSchema = (isSSO, username) => {
 			},
 		}).test(
 			'non-sso-field',
-			'Passowrd can only be updated for non SSO users',
+			'Password can only be updated for non Single sign on users',
 			ssoFieldUpdateCheck,
 		),
 		firstName: types.strings.name.test(
 			'non-sso-field',
-			'Firstname can only be updated for non SSO users',
+			'First name can only be updated for non Single sign on users',
 			ssoFieldUpdateCheck,
 		),
 		lastName: types.strings.name.test(
 			'non-sso-field',
-			'Lastname can only be updated for non SSO users',
+			'Last name can only be updated for non Single sign on users',
 			ssoFieldUpdateCheck,
 		),
 
@@ -130,8 +130,8 @@ const generateUpdateSchema = (isSSO, username) => {
 Users.validateUpdateData = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const isSsoUser = await isSso(username);
-		const schema = generateUpdateSchema(isSsoUser, username);
+		const isSso = await isSsoUser(username);
+		const schema = generateUpdateSchema(isSso, username);
 		await schema.validate(req.body);
 
 		if (req.body.oldPassword) {
