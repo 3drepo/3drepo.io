@@ -36,19 +36,18 @@ import { css } from 'styled-components';
 import { secondaryButtonStyling } from '../dialogs/generalDialogStyling.overrides';
 
 const JobSelectStyles = css`
+	${JobColorDot} {
+		width: 10px;
+		height: 10px;
+	}
+	${JobTitle}, ${EmptySelectValue} {
+		width: calc(100% - 22px);
+		${({ theme }) => theme.typography.body1}
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 	${SelectListItem} {
 		${({ theme }) => theme.typography.body1}
 		color: ${({ theme }) => theme.palette.secondary.main};
-		
-		${JobColorDot} {
-			width: 10px;
-			height: 10px;
-		}
-		${JobTitle}, ${EmptySelectValue} {
-			width: calc(100% - 22px);
-			${({ theme }) => theme.typography.body1}
-			color: ${({ theme }) => theme.palette.secondary.main};
-		}
 	}
 `;
 
@@ -69,7 +68,7 @@ const EmailAndJobInputStyles = css`
 			}
 		}
 		svg {
-			margin-top: 0%;
+			margin-top: 0;
 			right: 15px;
 		}
 	}
