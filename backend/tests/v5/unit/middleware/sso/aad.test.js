@@ -128,7 +128,7 @@ const testVerifyNewUserDetails = () => {
 	});
 };
 
-const testVerifyNewEmail = () => {
+const testEmailNotUsed = () => {
 	describe('Get user MS email, check email availability and assign email and SSO id to body', () => {
 		const aadUserDetails = {
 			email: 'example@email.com',
@@ -152,7 +152,7 @@ const testVerifyNewEmail = () => {
 			const req = getRequest();
 			req.query.state = generateRandomString();
 
-			await Aad.verifyNewEmail(req, res, mockCB);
+			await Aad.emailNotUsed(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
@@ -163,7 +163,7 @@ const testVerifyNewEmail = () => {
 		test(`should respond with error code ${errorCodes.UNKNOWN} if the user details cannot be fetched`, async () => {
 			AadServices.getUserDetails.mockRejectedValueOnce(errorCodes.UNKNOWN);
 			const mockCB = jest.fn();
-			await Aad.verifyNewEmail(getRequest(), res, mockCB);
+			await Aad.emailNotUsed(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
@@ -172,7 +172,7 @@ const testVerifyNewEmail = () => {
 		test(`should respond with error code ${errorCodes.UNKNOWN} if the user details cannot be fetched`, async () => {
 			AadServices.getUserDetails.mockRejectedValueOnce(errorCodes.UNKNOWN);
 			const mockCB = jest.fn();
-			await Aad.verifyNewEmail(getRequest(), res, mockCB);
+			await Aad.emailNotUsed(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
@@ -182,7 +182,7 @@ const testVerifyNewEmail = () => {
 			AadServices.getUserDetails.mockResolvedValueOnce(aadUserDetails);
 			UsersModel.getUserByQuery.mockResolvedValueOnce({ customData: {} });
 			const mockCB = jest.fn();
-			await Aad.verifyNewEmail(getRequest(), res, mockCB);
+			await Aad.emailNotUsed(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
 			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
@@ -193,7 +193,7 @@ const testVerifyNewEmail = () => {
 			UsersModel.getUserByQuery.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
 			const req = getRequest();
-			await Aad.verifyNewEmail(req, res, mockCB);
+			await Aad.emailNotUsed(req, res, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(req.body).toEqual(
@@ -371,7 +371,6 @@ const testHasAssociatedAccount = () => {
 	});
 };
 
-
 const testRedirectToStateURL = () => {
 	describe('Redirect to state url', () => {
 		test('should call res.redirect with the redirect url', () => {
@@ -401,7 +400,7 @@ const testRedirectToStateURL = () => {
 
 describe('middleware/sso/aad', () => {
 	testVerifyNewUserDetails();
-	testVerifyNewEmail();
+	testEmailNotUsed();
 	testAuthenticate();
 	testHasAssociatedAccount();
 	testRedirectToStateURL();

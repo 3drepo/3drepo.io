@@ -20,7 +20,6 @@ const Yup = require('yup');
 const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserFromSession } = require('../../utils/sessions');
 const { isSsoUser } = require('../../models/users');
-const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { types } = require('../../utils/helper/yup');
 

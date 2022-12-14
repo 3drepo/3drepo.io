@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
-const { redirectWithError, setSessionReferer } = require('.');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { getUserByEmail, getUserByQuery } = require('../../models/users');
+const { redirectWithError, setSessionReferer } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { getUserFromSession } = require('../../utils/sessions');
+const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
-const { logger } = require('../../utils/logger');
 
 const Aad = {};
 
@@ -97,14 +97,14 @@ const verifyNewUserDetails = async (req, res, next) => {
 
 Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails]);
 
-const verifyNewEmail = async (req, res, next) => {
+const emailNotUsed = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
 		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
 			linkRedirectUri, req.session.pkceCodes?.verifier);
 
-		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } },
-			{ 'customData.sso': 1 }).catch(() => undefined);
+		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } })
+			.catch(() => undefined);
 		if (user) {
 			throw errorCodes.EMAIL_EXISTS;
 		} else {
@@ -118,7 +118,7 @@ const verifyNewEmail = async (req, res, next) => {
 	}
 };
 
-Aad.verifyNewEmail = validateMany([checkStateIsValid, verifyNewEmail]);
+Aad.emailNotUsed = validateMany([checkStateIsValid, emailNotUsed]);
 
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionReferer, authenticate(redirectUri)]);
 

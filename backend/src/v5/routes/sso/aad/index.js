@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, hasAssociatedAccount, verifyNewEmail, verifyNewUserDetails, redirectToStateURL } = require('../../../middleware/sso/aad');
+const { authenticate, emailNotUsed, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
 const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
 const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
-const { isNonSsoUser } = require('../../../middleware/sso');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { isNonSsoUser } = require('../../../middleware/sso');
 const { respond } = require('../../../utils/responder');
 const { updateSession } = require('../../../middleware/sessions');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
@@ -77,8 +77,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description:
-	 *       $ref: "#/components/schemas/signupDescription"
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. See schemas/errorCodes for more details.
 	 *     tags: [Aad]
 	 *     operationId: aadSignup
 	 *     parameters:
@@ -131,8 +130,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/link:
 	 *   get:
-	 *     description:
-	 *       $ref: "#/components/schemas/linkDescription"
+	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. See schemas/errorCodes for more details.
 	 *     tags: [Aad]
 	 *     operationId: aadLink
 	 *     parameters:
@@ -149,7 +147,7 @@ const establishRoutes = () => {
 	 */
 	router.get('/link', isLoggedIn, isNonSsoUser, authenticate(linkRedirectUri));
 
-	router.get(linkRedirectEndpoint, verifyNewEmail, linkPost, redirectToStateURL);
+	router.get(linkRedirectEndpoint, emailNotUsed, linkPost, redirectToStateURL);
 
 	return router;
 };

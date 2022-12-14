@@ -353,7 +353,7 @@ const testLinkPost = () => {
 				.expect(302);
 			expect(res.headers.location).toEqual(`${state.redirectUri}`);
 			const newProfileRes = await testSession.get('/v5/user');
-			expect(newProfileRes.body.isSso).toEqual(true);
+			expect(newProfileRes.body.sso).toEqual('aad');
 		});
 
 		test('should link user and change email if email is available', async () => {

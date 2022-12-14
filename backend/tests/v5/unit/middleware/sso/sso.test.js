@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateRandomURL, generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
 jest.mock('../../../../../src/v5/utils/responder');
