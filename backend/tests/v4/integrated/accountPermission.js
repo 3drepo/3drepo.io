@@ -172,7 +172,7 @@ describe("Account permission::", function () {
 		async.series([
 			callback => {
 				agent.put(`/${username}/permissions/user2`)
-					.send({ "permissions": []})
+					.send({ "permissions": ["teamspace_admin"]})
 					.expect(200, function(err, res) {
 						callback(err);
 					});
@@ -181,7 +181,7 @@ describe("Account permission::", function () {
 			callback => {
 				agent.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
-						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
+						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:["teamspace_admin"]});
 						callback(err);
 					});
 			}
