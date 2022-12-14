@@ -32,7 +32,7 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	}
 
 	return (
-		<MultiSelect {...props}>
+		<MultiSelect {...props} value={props.value ?? []}>
 			{(items).map(({ value, label }) => (
 				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
 			))}

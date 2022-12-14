@@ -22,11 +22,11 @@ import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 
 type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };
-export const OneOfProperty = ({ values, ...props }: OneOfPropertyProps) => {
+export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
 	const riskCategories: string[] = TicketsHooksSelectors.selectRiskCategories() || [];
 	const valuesArray = (values === 'riskCategories') ? riskCategories : values;
 	return (
-		<Select {...props}>
+		<Select {...props} value={value ?? ''}>
 			{(valuesArray as string[]).map((propValue) => (
 				<MenuItem key={propValue} value={propValue}>
 					{propValue}
