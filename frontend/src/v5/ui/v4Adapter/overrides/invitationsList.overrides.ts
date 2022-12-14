@@ -15,13 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Actions, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
+import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
+import { Actions, Footer, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
 
 export default css`
+	${EmptyStateInfo} {
+		margin: 30px;
+	}
 	${List} {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		padding: 30px;
 		${Invitation} {
+			padding: 0;
 			&:last-of-type {
 				border-bottom: none;
 			}

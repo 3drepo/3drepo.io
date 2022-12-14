@@ -192,7 +192,7 @@ export default css`
 		min-width: 520px;
 		${Content} {
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			padding-bottom: 20px;
+			padding: 30px;
 			${EmailAndJobInputStyles}
 			${TeamspaceAdminCheckboxStyles}
 			${ProjectSelectorStyles}
