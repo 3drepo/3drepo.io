@@ -571,12 +571,12 @@ function checkLogin(req, res, next) {
 	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
 }
 
-function updateUser(req, res, next) {
+async function updateUser(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	// if(await isSsoUser(req.params.account)) {
-	// 	return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	// }
+	if(await isSsoUser(req.params.account)) {
+		return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 
 	if(req.body.oldPassword) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
