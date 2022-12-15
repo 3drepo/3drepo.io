@@ -42,9 +42,7 @@ const FileType = require("file-type");
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
-const { validateUpdateData } = require("../../v5/middleware/dataConverter/inputs/users");
-const { templates } = require("../../v5/utils/responseCodes");
-const { getUserByUsernameOrEmail } = require("../../v5/models/users");
+const { getUserByUsernameOrEmail, isSsoUser } = require("../../v5/models/users");
 
 /**
  * @api {post} /login Login
@@ -509,7 +507,7 @@ router.post("/:account/verify", verify);
  * 	"account":"alice"
  * }
  */
-router.put("/:account", middlewares.isAccountAdmin, validateUpdateData, updateUser);
+router.put("/:account", middlewares.isAccountAdmin, updateUser);
 
 /**
  * @api {put} /:user/password Reset password
@@ -573,8 +571,12 @@ function checkLogin(req, res, next) {
 	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
 }
 
-function updateUser(req, res, next) {
+async function updateUser(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
+
+	if(await isSsoUser(req.params.account)){
+		return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 
 	if(req.body.oldPassword) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
@@ -698,7 +700,7 @@ async function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const { customData: { sso } } = await getUserByUsernameOrEmail(req.body.userNameOrEmail, { "customData.sso": 1 });
 	if (sso) {
-		responseCodes.respond(responsePlace, req, res, next, templates.unknown, templates.unknown);
+		return responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 	}
 
 	if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
