@@ -24,7 +24,7 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['main', 'contrast'],
+			options: ['primary', 'secondary', 'viewer'],
 			control: { type: 'select' },
 		},
 	},
@@ -39,12 +39,17 @@ export default {
 const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
 	<Button {...args}><NotificationsIcon /></Button>);
 
-export const NotificationsMain = TemplateNotifications.bind({});
-NotificationsMain.args = {
-	variant: 'main',
+export const NotificationsPrimary = TemplateNotifications.bind({});
+NotificationsPrimary.args = {
+	variant: 'primary',
 };
 
-export const NotificationsContrast = TemplateNotifications.bind({});
-NotificationsContrast.args = {
-	variant: 'contrast',
+export const NotificationsSecondary = TemplateNotifications.bind({});
+NotificationsSecondary.args = {
+	variant: 'secondary',
+};
+
+export const NotificationsViewer = TemplateNotifications.bind({});
+NotificationsViewer.args = {
+	variant: 'viewer',
 };

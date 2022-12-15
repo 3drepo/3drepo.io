@@ -18,7 +18,7 @@
 import { InputLabel } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ error?: string }>`
+export const Container = styled.div<{ error?: boolean }>`
 	padding: 13px;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -37,12 +37,15 @@ export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5}
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 2px;
-	max-width: unset;
+	max-width: 100%;
+	word-wrap: break-word;
+	text-overflow: ellipsis;
 `;
 
 export const ActionsSide = styled.div`
 	display: flex;
 	flex-direction: column;
+	max-width: 40%;
 `;
 
 export const ActionsList = styled.ul`

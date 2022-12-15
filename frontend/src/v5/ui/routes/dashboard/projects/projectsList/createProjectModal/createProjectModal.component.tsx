@@ -21,12 +21,11 @@ import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 
 interface CreateProjectModalProps {
 	open: boolean;

@@ -20,14 +20,13 @@ import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { ScrollArea } from './editProfilePersonalTab.styles';
@@ -108,12 +107,6 @@ export const EditProfilePersonalTab = ({
 		);
 	};
 
-	const CountriesMenuItems = useMemo(() => clientConfigService.countries.map((country) => (
-		<MenuItem key={country.code} value={country.code}>
-			{country.name}
-		</MenuItem>
-	)), []);
-
 	const fieldsAreDirty = !isMatch(user, getTrimmedNonEmptyValues());
 
 	// enable submission only if form is valid and fields are dirty
@@ -175,7 +168,11 @@ export const EditProfilePersonalTab = ({
 				})}
 				required
 			>
-				{CountriesMenuItems}
+				{clientConfigService.countries.map((country) => (
+					<MenuItem key={country.code} value={country.code}>
+						{country.name}
+					</MenuItem>
+				))}
 			</FormSelect>
 			{submitWasSuccessful && (
 				<SuccessMessage>

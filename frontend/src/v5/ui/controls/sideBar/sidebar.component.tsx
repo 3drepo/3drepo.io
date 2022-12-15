@@ -34,7 +34,7 @@ export const Sidebar = ({
 	children,
 }: ISidebar): JSX.Element => (
 	<SidebarContainer className={className} open={open} hidden={hidden}>
-		<ExpandButton onClick={onClick} variant="main">
+		<ExpandButton onClick={onClick}>
 			<ExpandIcon />
 		</ExpandButton>
 		<SidebarContent>
