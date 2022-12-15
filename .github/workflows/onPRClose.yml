@@ -6,16 +6,14 @@ jobs:
   get-details:
     name: Get Current Issue Details
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
       issue-content-id: ${{ steps.commitMsgParser.outputs.issue-content-id }}
-      merged: ${{ steps.commitMsgParser.outputs.merged }}
     steps:
       - name: Extract Issue Number from PR
         uses: 3drepo/extract-pr-information@v1
         with:
           pr: ${{ github.event.number }}
-          base: staging
           github-token: ${{ secrets.GITHUB_TOKEN }}
         id: commitMsgParser
 
@@ -25,7 +23,7 @@ jobs:
     needs: get-details
     steps:
       - name: Apply in staging label
-        if: needs.get-details.outputs.merged
+        if: ${{github.event.pull_request.merged && github.event.pull_request.base.ref == 'staging'}}
         uses: carmenfan/any-issue-labeller@v1.1
         with:
           issue-number: ${{ needs.get-details.outputs.issue-number }}
@@ -38,16 +36,16 @@ jobs:
     needs: get-details
     steps:
       - name: Update status in the Project
-        if: needs.get-details.outputs.merged
+        if: ${{github.event.pull_request.merged}}
         id: update_status
-        uses: 3drepo/update-project-action@1.1
+        uses: 3drepo/update-project-action@v1.1
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
           project_number: 22
           content_id: ${{ needs.get-details.outputs.issue-content-id }}
           field: Status
-          value: 'Done'
+          value: Merged
 
   destroy-deployed-branch:
     name: Call Azure Destroy Pipeline

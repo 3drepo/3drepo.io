@@ -11,32 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  get-pr-number:
-    name: Get Current PR Number
-    runs-on: ubuntu-latest
-    outputs: 
-      pr-number: ${{ steps.condval.outputs.value }}
-    steps:
-      - uses: 3drepo/action-cond@v1
-        id: condval
-        with:
-          cond: ${{ github.event_name == 'pull_request' }}
-          if_true: ${{ github.event.number }}
-          if_false: ${{ github.event.pull_request.number }}
-
   get-details:
     name: Get PR and Issue Details
-    needs: [ get-pr-number ]
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
       issue-content-id: ${{ steps.commitMsgParser.outputs.issue-content-id }}
-      pr-content-id: ${{ steps.commitMsgParser.outputs.pr-content-id }}
     steps:
       - name: Extract Issue Number from PR
         uses: 3drepo/extract-pr-information@v1
         with:
-          pr: ${{ needs.get-pr-number.outputs.pr-number }}
+          pr: ${{ github.event.pull_request.number }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
         id: commitMsgParser
 
@@ -44,7 +29,7 @@ jobs:
     name: Ensure all reviewers have approved the PR
     runs-on: ubuntu-latest
     needs: [ get-details ]
-    outputs: 
+    outputs:
       approved: ${{ steps.checkReviews.outputs.approved }}
     steps:
       - name: Check reviews
@@ -59,23 +44,23 @@ jobs:
     name: Update Project Issue Status
     if: ${{ always() && needs.check-merge-ready.outputs.approved == '' }} # if not reviewer approved let's modify the status.
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       issue-content-id: ${{ needs.get-details.outputs.issue-content-id }}
       status: ${{ steps.setStatusOutputIssue.outputs.status }}
-    needs: [ get-pr-number, get-details, check-merge-ready ]
+    needs: [ get-details, check-merge-ready ]
     steps:
       - name: Set status message for issue
-        id: setStatusOutputIssue   
+        id: setStatusOutputIssue
         run: |
-          set -ex 
+          set -ex
           case $ACTION in
-            submitted ) 
+            submitted )
               echo "status=Address Feedback" >> $GITHUB_OUTPUT
               ;;
-            review_requested ) 
+            review_requested )
               echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
               ;;
-            ready_for_review ) 
+            ready_for_review )
               echo "status=Awaiting Approval" >> $GITHUB_OUTPUT
               ;;
             * )
@@ -84,7 +69,7 @@ jobs:
           esac
         env:
           ACTION: ${{ github.event.action }}
-          
+
       - name: Update status on the Issue
         if: ${{ steps.setStatusOutputIssue.outputs.status }}
         id: update_status_issue
@@ -98,14 +83,14 @@ jobs:
           value: ${{ steps.setStatusOutputIssue.outputs.status }}
 
       - name: Set status message for PR
-        id: setStatusOutputPR   
+        id: setStatusOutputPR
         run: |
-          set -ex 
+          set -ex
           case $ACTION in
-            review_requested ) 
+            review_requested )
               echo "status=To Review" >> $GITHUB_OUTPUT
               ;;
-            ready_for_review ) 
+            ready_for_review )
               echo "status=To Review" >> $GITHUB_OUTPUT
               ;;
             * )
@@ -117,24 +102,12 @@ jobs:
       - name: Update status on the PR
         if: ${{ steps.setStatusOutputPR.outputs.status }}
         id: update_status_pr
-        uses: 3drepo/update-project-action@v1.1
+        uses: 3drepo/update-project-action@update-PR
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
           project_number: 22
-          content_id: ${{ needs.get-details.outputs.pr-content-id  }}
+          content_id: ${{github.event.pull_request.node_id }}
           field: Status
           value: ${{ steps.setStatusOutputPR.outputs.status }}
 
-  #Ensure the issue number is in the pull request title.
-  ensure-well-formatted-issue-title:
-    runs-on: ubuntu-latest
-    name: Ensure a well formatted Issue Title
-    steps:
-    - uses: 3drepo/pr-update-action@v1
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        base-branch-regex: '[a-z\d-_.\\/]+'
-        head-branch-regex: 'ISSUE_\d+'
-        lowercase-branch: false
-        title-template: '%headbranch% - '
