@@ -46,6 +46,9 @@ export const StartAdornment = styled(InputAdornmentComponent).attrs({
 	position: 'start',
 })`
 	margin-right: 0;
+	svg {
+		color: ${({ theme }) => theme.palette.base.main};
+	}
 `;
 
 export const EndAdornment = styled(InputAdornmentComponent).attrs({
