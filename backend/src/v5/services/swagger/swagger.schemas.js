@@ -42,6 +42,12 @@ Schemas.schemas.roles = {
 	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
 };
 
+Schemas.schemas.errorCodes = {
+	type: 'string',
+	enum: [1, 2, 3, 4, 5],
+	description: 'Error codes: <br/><br/>* `1` - There is a non SSO account with the same email<br/><br/>* `2` - There is an SSO account witht he same email<br/><br/>* `3` - The user is non SSO<br/><br/>* `4` - The user was not found<br/><br/>* `5` - Unknown',
+};
+
 const ticketTemplatePropSchema = {
 	description: 'Properties within a ticket or module',
 	type: 'array',
