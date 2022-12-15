@@ -52,6 +52,16 @@ jobs:
           content_id: ${{ steps.issue-details.outputs.issue-content-id}}
           field: Sprint
           operation: read
+      - name: Set issue to QA
+        id: issue-sprint
+        uses: 3drepo/update-project-action@v1.1
+        with:
+          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          organization: 3drepo
+          project_number: 22
+          content_id: ${{ steps.issue-details.outputs.issue-content-id}}
+          field: 'Feature Progress'
+          value: 'QA'
       - name: Apply issue sprint to PR
         uses: 3drepo/update-project-action@update-PR
         if: ${{steps.issue-sprint.outputs.field_read_value}}
