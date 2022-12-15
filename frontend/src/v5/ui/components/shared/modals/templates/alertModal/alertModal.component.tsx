@@ -16,11 +16,11 @@
  */
 import { FC } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { DialogContainer, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
 import { AxiosError } from 'axios';
 import { getErrorCode, getErrorMessage, getErrorStatus } from '@/v5/validation/errors.helpers';
+import { WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 
 interface IAlertModal {
 	onClickClose?: () => void,
