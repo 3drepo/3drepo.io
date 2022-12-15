@@ -574,7 +574,7 @@ function checkLogin(req, res, next) {
 async function updateUser(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	if(await isSsoUser(req.params.account)){
+	if(await isSsoUser(req.params.account)) {
 		return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 
