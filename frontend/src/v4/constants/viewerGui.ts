@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ComponentType } from 'react';
 import CompareIcon from '@mui/icons-material/Compare';
 import TreeIcon from '@mui/icons-material/DeviceHub';
 import GroupsIcon from '@mui/icons-material/GroupWork';
@@ -23,7 +24,7 @@ import SequencesIcon from '@mui/icons-material/Movie';
 import ViewsIcon from '@mui/icons-material/PhotoCamera';
 import IssuesIcon from '@mui/icons-material/Place';
 import MeasureIcon from '@mui/icons-material/Straighten';
-import TicketsIcon from '@mui/icons-material/FormatListBulleted';
+import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 
@@ -49,7 +50,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
 	[VIEWER_PANELS.RISKS]: RisksIcon,
-	[VIEWER_PANELS.TICKETS]: TicketsIcon,
+	[VIEWER_PANELS.TICKETS]: TicketsIcon as ComponentType,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,

@@ -14,7 +14,7 @@ permissions:
 jobs:
   run-backend-tests:
     name: Run Backend tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     services:
       rabbitmq:
         image: rabbitmq:3.10.5-management
@@ -52,7 +52,7 @@ jobs:
 
   run-backend-lint:
     name: Run Backend lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -78,7 +78,7 @@ jobs:
 
   run-frontend-tests:
     name: Run Frontend tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out Git repository
@@ -106,7 +106,7 @@ jobs:
 
   run-frontend-lint:
     name: Run Frontend lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out Git repository
@@ -137,7 +137,7 @@ jobs:
   # make sure we're not merging DevOps changes
   devops-sanity-check:
     name: Ensure that custom settings are not being merged
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout .azure/build-and-deploy.yaml
         uses: Bhacaz/checkout-files@v2

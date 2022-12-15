@@ -27,6 +27,6 @@ export default ({ className }: IProps) => (
 		xmlns="http://www.w3.org/2000/svg"
 		className={className}
 	>
-		<path d="M1 6L7 11L15 1" stroke="#00C1D4" strokeWidth="1.33333" />
+		<path d="M1 6L7 11L15 1" stroke="currentColor" strokeWidth="1.33333" />
 	</svg>
 );

@@ -24,7 +24,7 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['main', 'contrast'],
+			options: ['primary', 'secondary', 'viewer'],
 			control: { type: 'select' },
 		},
 	},
@@ -32,18 +32,24 @@ export default {
 		docs: {
 			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
 		},
+		controls: { exclude: ['onClick'] },
 	},
 } as ComponentMeta<typeof Button>;
 
 const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
 	<Button {...args}><NotificationsIcon /></Button>);
 
-export const NotificationsMain = TemplateNotifications.bind({});
-NotificationsMain.args = {
-	variant: 'main',
+export const NotificationsPrimary = TemplateNotifications.bind({});
+NotificationsPrimary.args = {
+	variant: 'primary',
 };
 
-export const NotificationsContrast = TemplateNotifications.bind({});
-NotificationsContrast.args = {
-	variant: 'contrast',
+export const NotificationsSecondary = TemplateNotifications.bind({});
+NotificationsSecondary.args = {
+	variant: 'secondary',
+};
+
+export const NotificationsViewer = TemplateNotifications.bind({});
+NotificationsViewer.args = {
+	variant: 'viewer',
 };

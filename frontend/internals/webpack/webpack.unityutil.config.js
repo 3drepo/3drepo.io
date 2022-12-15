@@ -1,10 +1,10 @@
-const {resolve} = require('path');
+const { resolve } = require('path');
 const loaders = require('./tools/loaders');
 const MODES = require('./tools/modes');
 
 module.exports = {
 	mode: MODES.PRODUCTION,
-	entry: './globals/unity-util-external.ts',
+	entry: { main: './src/globals/unity-util-external.ts' },
 	output: {
 		path: resolve(__dirname, '../../../public/unity/'),
 		filename: 'unity-util.js'
@@ -14,14 +14,11 @@ module.exports = {
 	},
 	module: {
 		rules: [
-		  loaders.TSLoader({}),
-		  loaders.LodashTSLoader,
-		  loaders.CSSLoader,
-		  loaders.CSSExternalLoader,
-		  loaders.FontLoader,
-		  loaders.ImageLoader,
-		  loaders.HTMLLoader,
-		  loaders.PugLoader
+			loaders.TSLoader,
+			loaders.CSSLoader,
+			loaders.FontLoader,
+			loaders.ImageLoader,
+			loaders.HTMLLoader,
 		],
-	  },
+	},
 };

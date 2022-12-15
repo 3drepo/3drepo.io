@@ -40,27 +40,28 @@ const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
 type ActionMenuProps = {
 	className?: string;
 	children: ReactNode;
+	TriggerButton: any;
+	PopoverProps?: any;
 };
 
-export const ActionMenu = ({ className, children }: ActionMenuProps) => {
+export const ActionMenu = ({
+	className,
+	TriggerButton: TriggerButtonInput,
+	children,
+	PopoverProps,
+}: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
 	const handleClose = () => setAnchorEl(null);
 
-	if (Children.count(children) < 2) {
-		throw new Error('ActionMenu must have at least 2 children: a trigger button and the menu list');
-	}
-	const [triggerButton, ...menuChildren] = Children.toArray(children);
-
-	if ((triggerButton as any)?.type?.ActionMenuTriggerButton) {
-		throw new Error('ActionMenu\'s first child must be of type ActionMenuTriggerButton');
-	}
-
-	const TriggerButton = cloneElement(triggerButton as ReactElement, {
-		onClick: handleClick,
+	const TriggerButton = cloneElement(TriggerButtonInput as ReactElement, {
+		onClick: (e) => {
+			TriggerButtonInput.props.onClick?.(e);
+			handleClick(e);
+		},
 	});
 
-	const MenuChildren = menuChildren.map((child) => applyCloseMenuToActionMenuItems(child, handleClose));
+	const MenuChildren = Children.toArray(children).map((child) => applyCloseMenuToActionMenuItems(child, handleClose));
 
 	return (
 		<>
@@ -77,6 +78,7 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 					vertical: 'top',
 					horizontal: 'center',
 				}}
+				{...PopoverProps}
 			>
 				<ClickAwayListener onClickAway={handleClose}>
 					<Menu>
