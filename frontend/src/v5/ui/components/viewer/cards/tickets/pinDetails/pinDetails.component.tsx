@@ -25,19 +25,12 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormControl, FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
-interface PinDetailsProps {
-	value?: any;
-	error?: boolean;
-	helperText?: string;
-	label?: string;
-	onChange?: (...args) => void;
-	onBlur?: (...args) => void;
-	required?: boolean;
-}
+type PinDetailsProps = Omit<FormInputProps, 'inputRef'>;
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }:PinDetailsProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }: PinDetailsProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = `new-${label}`;
@@ -119,8 +112,8 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 						</PinAction>
 					)}
 				</PinActions>
-				<FormHelperText>{helperText}</FormHelperText>
 			</PinContainer>
+			<FormHelperText>{helperText}</FormHelperText>
 		</FormControl>
 	);
 };

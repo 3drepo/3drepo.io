@@ -1,45 +1,16 @@
-const TSLoader = ({ transpileOnly }) => ({
-  test: /\.(ts|tsx)$/,
-  loader: 'ts-loader',
-  exclude: /node_modules/,
-  options: {
-    transpileOnly
-  }
-})
-
-const LodashTSLoader = {
-  test: /\.(ts|tsx)$/,
-  loader: 'lodash-ts-imports-loader',
-  exclude: /node_modules/,
-  enforce: 'pre'
+const TSLoader = {
+	test: /\.(ts|tsx)$/,
+	loader: 'esbuild-loader',
+	exclude: /node_modules/,
+	options: {
+		loader: 'tsx',
+		target: 'es2015',
+		tsconfigRaw: require('../../../tsconfig.json')
+	}
 };
 
 const CSSLoader = {
   test: /\.css$/,
-  exclude: /node_modules/,
-  use:[
-    'style-loader', 
-    { 
-      loader: 'css-loader',
-      options: {
-        importLoaders: 1,
-        import: false
-      }
-    },
-    {
-      loader: 'postcss-loader',
-      options: {
-        config: {
-          path: './internals/webpack/tools'
-        }
-      }
-    }
-  ]
-};
-
-const CSSExternalLoader = {
-  test: /\.css$/,
-  include: /node_modules/,
   use: ['style-loader', 'css-loader']
 };
 
@@ -98,9 +69,7 @@ const WorkerLoader = {
 
 module.exports = {
   TSLoader,
-  LodashTSLoader,
   CSSLoader,
-  CSSExternalLoader,
   FontLoader,
   ImageLoader,
   HTMLLoader,

@@ -127,7 +127,7 @@ const AttachResourcesFile = css`
 	}
 
 	// style the icon 
-	${FieldsRow} {
+	${Content} ${FieldsRow} {
 		flex-direction: row;
 
 		${StyledFormControl} {

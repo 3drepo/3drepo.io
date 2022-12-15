@@ -19,9 +19,10 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomURL } = require('../../helper/services');
 const session = require('supertest-session');
 const fs = require('fs');
+const User = require('../../../../src/v5/models/users');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -30,6 +31,9 @@ const { loginPolicy } = require(`${src}/utils/config`);
 
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
+
+jest.mock('../../../../src/v5/services/sso/aad');
+const Aad = require(`${src}/services/sso/aad`);
 
 let testSession;
 let server;
@@ -48,6 +52,7 @@ const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
 const userEmailSso = 'exampleSso@email.com';
+const ssoUserId = generateRandomString();
 const userEmail2 = 'example2@email.com';
 const fsAvatarData = generateRandomString();
 const gridFsAvatarData = generateRandomString();
@@ -58,9 +63,9 @@ const expiredPasswordToken = { token: generateRandomString(), expiredAt: new Dat
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
-		ServiceHelper.db.createUser(ssoTestUser, [], { email: userEmailSso,
-			sso: { type: providers.AAD,
-				id: generateRandomString() } }),
+		ServiceHelper.db.createUser(ssoTestUser, [], {
+			email: userEmailSso, sso: { type: providers.AAD, id: ssoUserId },
+		}),
 		ServiceHelper.db.createUser(userWithFsAvatar, []),
 		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
 		ServiceHelper.db.createUser(nonVerifiedUser, [], {
@@ -225,15 +230,16 @@ const testGetUsername = () => {
 	});
 };
 
-const formatUserProfile = (user, email, hasAvatar) => ({
+const formatUserProfile = (user, email, hasAvatar = false, sso) => ({
 	username: user.user,
 	firstName: user.basicData.firstName,
 	lastName: user.basicData.lastName,
-	email,
 	apiKey: user.apiKey,
 	hasAvatar,
 	countryCode: user.basicData.billing.billingInfo.countryCode,
 	company: user.basicData.billing.billingInfo.company,
+	...(sso ? { sso } : {}),
+	...(email ? { email } : {}),
 });
 
 const testGetProfile = () => {
@@ -245,7 +251,7 @@ const testGetProfile = () => {
 
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser, userEmail, false));
+			expect(res.body).toEqual(formatUserProfile(testUser, userEmail));
 		});
 
 		test('should return the user profile if the user has a session via an API key and has avatar', async () => {
@@ -263,7 +269,22 @@ const testGetProfile = () => {
 
 			test('should return the user profile if the user is logged in', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(testUser, userEmail, false));
+				expect(res.body).toEqual(formatUserProfile(testUser, userEmail));
+			});
+		});
+
+		describe('With valid authentication (SSO user)', () => {
+			beforeAll(async () => {
+				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
+				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should return the user profile if the user is logged in', async () => {
+				const res = await testSession.get('/v5/user/').expect(200);
+				expect(res.body).toEqual(formatUserProfile(ssoTestUser, userEmailSso, false, providers.AAD));
 			});
 		});
 	});
@@ -363,6 +384,29 @@ const testUpdateProfile = () => {
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
 				// change password back to the original
 				await testSession.put('/v5/user/').send({ oldPassword: 'Passport123!', newPassword: testUser.password });
+			});
+		});
+
+		describe('With valid authentication (SSO user)', () => {
+			beforeAll(async () => {
+				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
+				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should fail if the user tries to update sso fields', async () => {
+				const data = { firstName: generateRandomString(), lastName: generateRandomString() };
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+
+			test('should succeed if the user tries to update non sso fields', async () => {
+				const data = { company: generateRandomString(), countryCode: 'GB' };
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body).toEqual(expect.objectContaining(data));
 			});
 		});
 	});
@@ -524,8 +568,11 @@ const testForgotPassword = () => {
 		});
 
 		test('should not send email but return ok if user is an SSO user', async () => {
+			await User.linkToSso(ssoTestUser.user, ssoTestUser.basicData.firstName, ssoTestUser.basicData.lastName,
+				userEmailSso, { type: generateRandomString(), id: generateRandomString() });
 			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })
 				.expect(templates.ok.status);
+			await User.unlinkFromSso(ssoTestUser.user, ssoTestUser.password);
 			expect(Mailer.sendEmail).not.toHaveBeenCalled();
 		});
 

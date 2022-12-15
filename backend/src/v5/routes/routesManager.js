@@ -26,6 +26,7 @@ const FederationRevisionRoutes = require('./teamspaces/projects/federations/revi
 const FederationRoutes = require('./teamspaces/projects/federations/federations');
 const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
+const SsoRoutes = require('./sso');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
@@ -37,6 +38,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/', UserRoutes);
 
 	// Single Sign On
+	app.use('/v5/sso', SsoRoutes);
 	app.use('/v5/sso/aad', AadRoutes);
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
