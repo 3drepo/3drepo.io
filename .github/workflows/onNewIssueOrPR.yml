@@ -53,7 +53,7 @@ jobs:
           field: Sprint
           operation: read
       - name: Set issue to QA
-        id: issue-sprint
+        id: issue-to-qa
         uses: 3drepo/update-project-action@v1.1
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
