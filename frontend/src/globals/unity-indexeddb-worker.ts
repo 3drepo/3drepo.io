@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable class-methods-use-this */
 
 /**
  * This entire script/file is run inside a WebWorker to service requests from
@@ -25,7 +27,13 @@
  * by this worker.
  */
 
-class IndexedDbCacheWorker {
+declare global {
+	interface Window {
+		repoCache: any;
+	}
+}
+
+export class IndexedDbCacheWorker {
 	constructor() {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
@@ -130,7 +138,7 @@ class IndexedDbCacheWorker {
 				size: record.size,
 				result: record,
 			});
-		} else if (!this.index.hasOwnProperty(key)) {
+		} else if (!Object.prototype.hasOwnProperty.apply(this.index.hasOwnProperty, key)) {
 			// We know the database doesnt have the key, so return immediately again
 			this.sendGetTransactionComplete({
 				id,
@@ -324,7 +332,8 @@ class IndexedDbCacheWorker {
 			const start = performance.now();
 			const request = objectStore.get(key);
 
-			request.onsuccess = (ev) => {
+			request.onsuccess = () => {
+				// eslint-disable-next-line no-console
 				console.log(`Time ${performance.now() - start}`);
 			};
 		}
