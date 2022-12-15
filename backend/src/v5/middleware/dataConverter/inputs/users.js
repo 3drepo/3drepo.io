@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
+const { authenticate, getUserByEmail, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail, isSsoUser } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { getUserFromSession } = require('../../../utils/sessions');
 const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
@@ -57,28 +58,34 @@ Users.validateLoginData = async (req, res, next) => {
 	}
 };
 
-Users.validateUpdateData = async (req, res, next) => {
+const generateUpdateSchema = (isSSO, username) => {
+	const ssoFieldUpdateCheck = (value) => !isSSO || value === undefined;
+
 	const schema = Yup.object().shape({
-		firstName: types.strings.name,
-		lastName: types.strings.name,
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
 			async (value) => {
 				if (value) {
 					try {
-						await getUserByQuery({ 'customData.email': value, user: { $ne: req.session?.user?.username } }, { _id: 1 });
+						await getUserByQuery({ 'customData.email': value, user: { $ne: username } }, { _id: 1 });
 						return false;
 					} catch {
 						// do nothing
 					}
 				}
 				return true;
-			}),
-		company: types.strings.title,
-		countryCode: types.strings.countryCode.optional(),
+			}).test(
+			'non-sso-field',
+			'Email can only be updated for non Single sign on users',
+			ssoFieldUpdateCheck,
+		),
 		oldPassword: Yup.string().optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
 			then: Yup.string().required(),
-		}),
+		}).test(
+			'non-sso-field',
+			'Password can only be updated for non Single sign on users',
+			ssoFieldUpdateCheck,
+		),
 		newPassword: types.strings.password.optional().when('oldPassword', {
 			is: (oldPass) => oldPass?.length > 0,
 			then: types.strings.password.required(),
@@ -91,7 +98,24 @@ Users.validateUpdateData = async (req, res, next) => {
 				const { oldPassword } = this.parent;
 				return !oldPassword || (value !== oldPassword);
 			},
-		}),
+		}).test(
+			'non-sso-field',
+			'Password can only be updated for non Single sign on users',
+			ssoFieldUpdateCheck,
+		),
+		firstName: types.strings.name.test(
+			'non-sso-field',
+			'First name can only be updated for non Single sign on users',
+			ssoFieldUpdateCheck,
+		),
+		lastName: types.strings.name.test(
+			'non-sso-field',
+			'Last name can only be updated for non Single sign on users',
+			ssoFieldUpdateCheck,
+		),
+
+		company: types.strings.title,
+		countryCode: types.strings.countryCode.optional(),
 	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
 		.test(
 			'at-least-one-property',
@@ -100,14 +124,21 @@ Users.validateUpdateData = async (req, res, next) => {
 		)
 		.required();
 
+	return schema;
+};
+
+Users.validateUpdateData = async (req, res, next) => {
 	try {
+		const username = getUserFromSession(req.session);
+		const isSso = await isSsoUser(username);
+		const schema = generateUpdateSchema(isSso, username);
 		await schema.validate(req.body);
 
 		if (req.body.oldPassword) {
-			await authenticate(req.session.user.username, req.body.oldPassword);
+			await authenticate(username, req.body.oldPassword);
 		}
 
-		next();
+		await next();
 	} catch (err) {
 		if (err.code === templates.incorrectUsernameOrPassword.code) {
 			respond(req, res, templates.incorrectPassword);
