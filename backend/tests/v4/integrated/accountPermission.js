@@ -24,6 +24,8 @@ const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
+const { findModelSettingById } = require("../../../src/v4/models/modelSetting.js");
+const { findProjectPermsByUser } = require("../../../src/v4/models/project.js");
 
 describe("Account permission::", function () {
 
@@ -108,14 +110,11 @@ describe("Account permission::", function () {
 
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 
-		const projectRes = await agent.get(`/${username}/projects/${project}`)
-			.expect(200);
-		expect(projectRes.body.permissions).to.deep.equal([]);
+		const newProjectPermissions = await findProjectPermsByUser(username, project, "testing");	
+		expect(newProjectPermissions).to.deep.equal(undefined);
 
-		const modelPermissionsRes = await agent.get(`/${username}/${model}/permissions`)
-			.expect(200);
-		const userPermissions = modelPermissionsRes.body.find(perm => perm.user === 'testing');
-		expect(userPermissions).to.deep.equal([]);
+		const newModelPermissions = await findModelSettingById(username, model, { 'permissions': 1 });						
+		expect(newModelPermissions.permissions.find(p => p.user === "testing")).to.deep.equal(undefined);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
