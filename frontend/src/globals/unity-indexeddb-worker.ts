@@ -224,21 +224,21 @@ export class IndexedDbCacheWorker {
 		self.postMessage({
 			type: 'OnSetTransactionComplete',
 			parms,
-		});
+		}, '*');
 	}
 
 	sendGetTransactionComplete(parms: any) {
 		self.postMessage({
 			type: 'OnGetTransactionComplete',
 			parms,
-		});
+		}, '*');
 	}
 
 	sendIndexedDbUpdated(parms: any) {
 		self.postMessage({
 			type: 'OnIndexedDbUpdated',
 			parms,
-		});
+		}, '*');
 	}
 
 	commitMemoryCache() {
