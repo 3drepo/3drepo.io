@@ -63,6 +63,8 @@ import {
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
+import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 const types = [{ value: 'issues', name: 'Issues' } , { value: 'risks', name: 'Risks' }];
 
@@ -370,13 +372,13 @@ export function Board(props: IProps) {
 			<FormControl>
 				<InputLabel shrink htmlFor="model-select">
 					{isV5()
-						? formatMessage({ id: 'board.select.federationOrContainer.label', defaultMessage: 'Federation/Container' })
+						? formatMessage({ id: 'board.select.federationOrContainer.label', defaultMessage: 'Federation / Container' })
 						: 'Model/Federation'
 					}
 				</InputLabel>
 				<CellSelect
 					placeholder={isV5()
-						? formatMessage({ id: 'board.select.federationOrContainer.placeholdert', defaultMessage: 'Select Federation/Container' })
+						? formatMessage({ id: 'board.select.federationOrContainer.placeholdert', defaultMessage: 'Select Federation / Container' })
 						: 'Select model/federation'
 					}
 					items={models}
@@ -444,8 +446,12 @@ export function Board(props: IProps) {
 	};
 
 	const renderBoard = renderWhenTrue(() => (
-			<BoardContainer>
-				<div ref={boardRef}>
+		<BoardContainer>
+			<div ref={boardRef}>
+				<ConditionalV5Wrapper
+					v5Wrapper={ScrollArea}
+					v5WrapperProps={{ style: { height: 692 } }}
+				>
 					<TrelloBoard
 						data={boardData}
 						hideCardDeleteIcon
@@ -455,8 +461,9 @@ export function Board(props: IProps) {
 						components={components}
 						cardDraggable
 					/>
-				</div>
-			</BoardContainer>
+				</ConditionalV5Wrapper>
+			</div>
+		</BoardContainer>
 	));
 
 	const renderLoader = renderWhenTrue(() => (
@@ -476,7 +483,9 @@ export function Board(props: IProps) {
 		const noModel = !modelId;
 		const messagePrefix = 'You have to choose';
 		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
-		const chooseMessage = `${messagePrefix} ${messageSufix} to show board.`;
+		const chooseMessage = isV5()
+			? formatMessage({ defaultMessage: `Select the federation or container to show board`, id: 'board.emptyBoard.placeholder' })
+			: `${messagePrefix} ${messageSufix} to show board.`;
 		const areModels =
 			getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project).length > 1;
 
