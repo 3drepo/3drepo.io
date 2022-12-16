@@ -31,24 +31,28 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 			color: ${({ theme }) => theme.palette.secondary.main};
 		}
 		${StyledChipInput} {
-			.MuiAutocomplete-tag{
-				background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-				color: ${({ theme }) => theme.palette.secondary.main};
-				border-radius: 5px;
-				font-weight: 600;
-				font-size: 12px;
-				height: 30px;
-				padding: 7px 15px;
-				.MuiChip-label {
-					padding: 0;
+			margin-top: 0;
+			.MuiAutocomplete-inputRoot {
+				padding: 0;
+				.MuiAutocomplete-tag {
+					background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+					color: ${({ theme }) => theme.palette.secondary.main};
+					border-radius: 5px;
+					font-weight: 600;
+					font-size: 12px;
+					height: 30px;
+					padding: 7px 15px;
+					.MuiChip-label {
+						padding: 0;
+					}
+					svg {
+						margin: 0 0 0 5px;
+						color: ${({ theme }) => theme.palette.secondary.main};
+					}
 				}
-				svg {
-					margin: 0 0 0 5px;
+				.MuiInputBase-input {
 					color: ${({ theme }) => theme.palette.secondary.main};
 				}
-			}
-			.MuiInputBase-input {
-				color: ${({ theme }) => theme.palette.secondary.main};
 			}
 			fieldset, &:hover fieldset, .Mui-focused fieldset {
 				border: none;
