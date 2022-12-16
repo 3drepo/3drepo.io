@@ -25,6 +25,7 @@ const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 const C = require("../../../src/v4/constants");
+const { findModelSettings } = require("../../../src/v4/models/modelSetting.js");
 
 describe("Projects", function () {
 
@@ -34,6 +35,8 @@ describe("Projects", function () {
 	const password = "projectuser";
 
 	const projectName = "project_exists";
+
+	const modelIds = ['a05974d0-2a8b-11eb-a58a-fde0111b8800', 'a5cd0670-2a8b-11eb-9358-1ff831483af6', 'ad8a39f0-2a8b-11eb-89a2-59e199077914'];
 
 	const goldenTestModelList = [
 		{
@@ -411,21 +414,18 @@ describe("Projects", function () {
 			},
 			callback => {
 				agent.get(`/${username}/projects/${projectName}`)
-					.expect(200, function(err, res) {
+					.expect(200, async function(err, res) {
 						const entriesFiltered = res.body.permissions.filter((entry => {
 							return entry.permissions.length > 0;
 						}));
 						expect(entriesFiltered).to.deep.equal(project.permissions);
-						callback(err);
-					});
-			},
-			callback => {
-				agent.get(`/${username}/projects/${projectName}/models`)
-					.expect(200, function(err, res) {
-						const entriesFiltered = res.body.filter((entry => {
-							return entry.permissions.length > 0;
+
+						const models = await findModelSettings(username, { _id: { $in: modelIds } }, { permissions: 1 });
+						const modelsFiltered = models.filter((entry => {
+							return entry.permissions.filter(p => p.user === 'testing').length;
 						}));
-						expect(entriesFiltered).to.deep.equal([]);
+						expect(modelsFiltered).to.deep.equal([]);
+
 						callback(err);
 					});
 			}
