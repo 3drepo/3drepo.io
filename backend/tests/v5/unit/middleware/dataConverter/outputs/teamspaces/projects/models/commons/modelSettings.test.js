@@ -80,11 +80,50 @@ const testFormatModelSettings = () => {
 				};
 				delete formattedSettings.properties;
 
-				expect(respondFn.mock.calls[nextIdx][3]).toEqual({ ...formattedSettings });
+				expect(respondFn.mock.calls[nextIdx][3]).toEqual(formattedSettings);
+			});
+	});
+};
+
+const testFormatModelStats = () => {
+	describe.each([
+		[true, { lastUpdated: new Date() }, 'lastUpdated field'],
+		[true, {}, 'no lastUpdated field'],
+		[false, { revisions: {} }, 'no data to convert'],
+		[false, { revisions: {
+			lastUpdated: new Date(),
+			latestRevision: generateUUID(),
+		},
+		errorReason: { timestamp: new Date() } }, 'data to convert'],
+	])('Format model stats data', (isFed, data, desc) => {
+		test(`[${isFed ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
+			async () => {
+				const nextIdx = respondFn.mock.calls.length;
+				await ModelSettingsOutputMiddlewares.formatModelStats(isFed)({ outputData: cloneDeep(data) }, {});
+				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
+				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+
+				const formattedStats = {
+					...data,
+				};
+
+				if (isFed) {
+					formattedStats.lastUpdated = data.lastUpdated ? data.lastUpdated.getTime() : undefined;
+				} else {
+					formattedStats.revisions.lastUpdated = formattedStats.revisions.lastUpdated
+						? formattedStats.revisions.lastUpdated.getTime() : undefined;
+					if (formattedStats.errorReason?.timestamp) {
+						formattedStats.errorReason.timestamp = formattedStats.errorReason.timestamp.getTime();
+					}
+					formattedStats.revisions.latestRevision = UUIDToString(formattedStats.revisions.latestRevision);
+				}
+
+				expect(respondFn.mock.calls[nextIdx][3]).toEqual(formattedStats);
 			});
 	});
 };
 
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings', () => {
 	testFormatModelSettings();
+	testFormatModelStats();
 });
