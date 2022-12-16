@@ -3,6 +3,9 @@ import styled from 'styled-components';
 
 export const V5TeamspaceSettingsOverrides = styled.div`
 	${StyledForm} {
+		.MuiAutocomplete-popper {
+			display: none;
+		}
 		${StyledGrid}:first-of-type {
 			display: none;
 		}
