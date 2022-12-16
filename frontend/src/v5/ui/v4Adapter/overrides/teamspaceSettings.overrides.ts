@@ -59,6 +59,11 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 				box-shadow: none;
 			}
 		}
+		${SuggestionsContainer} {
+			${Headline} {
+				${({ theme }) => theme.typography.h5};
+			}
+		}
 		${ButtonContainer} {
 			width: 100%;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
