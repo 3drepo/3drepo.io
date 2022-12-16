@@ -23,8 +23,11 @@ import Add from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
-import { useParams } from 'react-router-dom';
+import { useParams, generatePath } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
+import { isV5 } from '@/v4/helpers/isV5';
+import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { formatMessage } from '@/v5/services/intl';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
@@ -155,7 +158,9 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
-	const { type, teamspace, project, modelId } = useParams<RouteParams>();
+	const { type, teamspace, project: projectId, modelId: v4Model, containerOrFederation } = useParams<RouteParams>();
+	const project = isV5() ? props.projectsMap[projectId]?.name : projectId;
+	const modelId = isV5() ? containerOrFederation : v4Model;
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';
@@ -224,8 +229,17 @@ export function Board(props: IProps) {
 
 	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
+	const getV5Path = ({ typePath, modelPath }: any) => generatePath(BOARD_ROUTE, {
+		type: typePath || type,
+		containerOrFederation: modelPath || modelId,
+		project: projectId,
+		teamspace,
+	});
+
 	const handleTypeChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
+		const url = isV5()
+			? getV5Path({ typePath: e.target.value })
+			: `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
 		props.history.push(url);
 		props.setBoardType(e.target.value);
 	};
@@ -242,7 +256,9 @@ export function Board(props: IProps) {
 
 	const handleModelChange = (e) => {
 		const newModelId = e.target.value;
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
+		const url = isV5()
+			? getV5Path({ modelPath: newModelId })
+			: `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
 
 		if (!isIssuesBoard) {
 			props.unsubscribeOnRiskChanges(teamspace, modelId);
@@ -352,9 +368,17 @@ export function Board(props: IProps) {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (
 			<FormControl>
-				<InputLabel shrink htmlFor="model-select">Model/Federation</InputLabel>
+				<InputLabel shrink htmlFor="model-select">
+					{isV5()
+						? formatMessage({ id: 'board.select.federationOrContainer.label', defaultMessage: 'Federation/Container' })
+						: 'Model/Federation'
+					}
+				</InputLabel>
 				<CellSelect
-					placeholder="Select model/federation"
+					placeholder={isV5()
+						? formatMessage({ id: 'board.select.federationOrContainer.placeholdert', defaultMessage: 'Select Federation/Container' })
+						: 'Select model/federation'
+					}
 					items={models}
 					value={models.length ? modelId : ''}
 					onChange={handleModelChange}
