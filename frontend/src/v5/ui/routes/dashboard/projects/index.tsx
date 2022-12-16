@@ -56,10 +56,10 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
 						<Containers />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues & Risks' })} exact path={`${path}/t/board`}>
+					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board`}>
 						<Redirect to={`${discardSlash(pathname)}/issues`} />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues & Risks' })} exact path={`${path}/t/board/:type?/:containerOrFederation?`}>
+					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board/:type?/:containerOrFederation?`}>
 						<Board />
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.tasks', defaultMessage: ':project - Tasks' })} exact path={`${path}/t/tasks`}>
