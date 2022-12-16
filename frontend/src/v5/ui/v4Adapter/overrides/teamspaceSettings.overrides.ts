@@ -15,67 +15,83 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { StyledChipInput } from '@/v4/routes/components/chipsInput/chipsInput.styles';
-import { ButtonContainer, Headline, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
+import { Container as Panel, Title } from '@/v4/routes/components/panel/panel.styles';
+import { ButtonContainer, CreateMitigationsGrid, Headline, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
 import styled from 'styled-components';
 
 export const V5TeamspaceSettingsOverrides = styled.div`
-	${StyledForm} {
-		.MuiAutocomplete-popper {
+	${Panel} {
+		border: none;
+		box-shadow: none;
+		${Title} {
 			display: none;
 		}
-		${StyledGrid}:first-of-type {
-			display: none;
-		}
-		${Headline} {
-			${({ theme }) => theme.typography.h2};
-			color: ${({ theme }) => theme.palette.secondary.main};
-		}
-		${StyledChipInput} {
-			margin-top: 0;
-			.MuiAutocomplete-inputRoot {
-				padding: 0;
-				.MuiAutocomplete-tag {
-					background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-					color: ${({ theme }) => theme.palette.secondary.main};
-					border-radius: 5px;
-					font-weight: 600;
-					font-size: 12px;
-					height: 30px;
-					padding: 7px 15px;
-					.MuiChip-label {
-						padding: 0;
+		${StyledForm} {
+			overflow-y: hidden;
+			padding: 0 0 30px;
+			.MuiAutocomplete-popper {
+				display: none;
+			}
+			${StyledGrid}, ${SuggestionsContainer} {
+				padding: 30px 0 0 0;
+				&${StyledGrid}:first-of-type {
+					display: none;
+				}
+			}
+			${Headline} {
+				${({ theme }) => theme.typography.h2};
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+			${StyledChipInput} {
+				margin-top: 0;
+				.MuiAutocomplete-inputRoot {
+					padding: 0;
+					.MuiAutocomplete-tag {
+						background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+						color: ${({ theme }) => theme.palette.secondary.main};
+						border-radius: 5px;
+						font-weight: 600;
+						font-size: 12px;
+						height: 30px;
+						padding: 7px 15px;
+						.MuiChip-label {
+							padding: 0;
+						}
+						svg {
+							margin: 0 0 0 5px;
+							color: ${({ theme }) => theme.palette.secondary.main};
+						}
 					}
-					svg {
-						margin: 0 0 0 5px;
+					.MuiInputBase-input {
 						color: ${({ theme }) => theme.palette.secondary.main};
 					}
 				}
-				.MuiInputBase-input {
+				fieldset, &:hover fieldset, .Mui-focused fieldset {
+					border: none;
+					box-shadow: none;
+				}
+			}
+			${SuggestionsContainer} {
+				${Headline} {
+					${({ theme }) => theme.typography.h5};
+				}
+				.MuiIconButton-root:not(.Mui-disabled) svg {
 					color: ${({ theme }) => theme.palette.secondary.main};
 				}
 			}
-			fieldset, &:hover fieldset, .Mui-focused fieldset {
-				border: none;
-				box-shadow: none;
+			${CreateMitigationsGrid} {
+				width: 320px;
 			}
-		}
-		${SuggestionsContainer} {
-			${Headline} {
-				${({ theme }) => theme.typography.h5};
-			}
-			.MuiIconButton-root:not(.Mui-disabled) svg {
-				color: ${({ theme }) => theme.palette.secondary.main};
-			}
-		}
-		${ButtonContainer} {
-			width: 100%;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			
-			button:not(.Mui-disabled) {
-				background-color: ${({ theme }) => theme.palette.primary.main};
-				color: ${({ theme }) => theme.palette.primary.contrast};
-				:hover {
-					background-color: ${({ theme }) => theme.palette.primary.dark};
+			${ButtonContainer} {
+				width: 100%;
+				background-color: transparent;
+				
+				button:not(.Mui-disabled) {
+					background-color: ${({ theme }) => theme.palette.primary.main};
+					color: ${({ theme }) => theme.palette.primary.contrast};
+					:hover {
+						background-color: ${({ theme }) => theme.palette.primary.dark};
+					}
 				}
 			}
 		}
