@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { StyledChipInput } from '@/v4/routes/components/chipsInput/chipsInput.styles';
-import { Headline, StyledForm, StyledGrid } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
+import { ButtonContainer, Headline, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
 import styled from 'styled-components';
 
 export const V5TeamspaceSettingsOverrides = styled.div`
@@ -53,6 +53,18 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 			fieldset, &:hover fieldset, .Mui-focused fieldset {
 				border: none;
 				box-shadow: none;
+			}
+		}
+		${ButtonContainer} {
+			width: 100%;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			
+			button:not(.Mui-disabled) {
+				background-color: ${({ theme }) => theme.palette.primary.main};
+				color: ${({ theme }) => theme.palette.primary.contrast};
+				:hover {
+					background-color: ${({ theme }) => theme.palette.primary.dark};
+				}
 			}
 		}
 	}
