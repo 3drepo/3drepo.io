@@ -63,6 +63,9 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 			${Headline} {
 				${({ theme }) => theme.typography.h5};
 			}
+			.MuiIconButton-root:not(.Mui-disabled) svg {
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
 		}
 		${ButtonContainer} {
 			width: 100%;
