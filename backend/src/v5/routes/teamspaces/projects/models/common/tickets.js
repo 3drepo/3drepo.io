@@ -21,6 +21,8 @@ const {
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
 	updateTicket: updateConTicket,
+	addComment: addConTicketComment,
+	updateComment: updateConTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
 	addTicket: addFedTicket,
@@ -28,6 +30,8 @@ const {
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	updateTicket: updateFedTicket,
+	addComment: addFedTicketComment,
+	updateComment: updateFedTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const {
 	hasCommenterAccessToContainer,
@@ -37,7 +41,7 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -141,6 +145,39 @@ const updateTicket = (isFed) => async (req, res) => {
 		respond(req, res, err);
 	}
 };
+
+const createComment = (isFed) => async (req, res) => {
+	const {	params, body: commentData } = req;
+	const { teamspace, project, model, ticket } = params;
+	const user = getUserFromSession(req.session);
+
+	try {
+		const addComment = isFed ? addFedTicketComment : addConTicketComment;
+		await addComment(teamspace, project, model, ticket, commentData, user);
+
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const updateComment = (isFed) => async (req, res) => {
+	const {	params, body: commentData } = req;
+	const { teamspace, project, model, ticket } = params;
+	const user = getUserFromSession(req.session);
+
+	try {
+		const updateComment = isFed ? updateFedTicketComment : updateConTicketComment;
+		await updateComment(teamspace, project, model, ticket, commentData, user);
+
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 
 const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
@@ -665,6 +702,10 @@ const establishRoutes = (isFed) => {
 	 *         description: ticket has been successfully updated
 	 */
 	router.patch('/:ticket', hasCommenterAccess, validateUpdateTicket, updateTicket(isFed));
+
+
+	router.post('/:ticket/comments', hasCommenterAccess, validateNewComment, createComment(isFed));
+	router.put('/:ticket/comments/:comment', hasCommenterAccess, validateUpdateComment, updateComment(isFed));
 
 	return router;
 };

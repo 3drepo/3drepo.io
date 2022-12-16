@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
+const { addTicket, getAllTickets, getTicketById } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { addComment, updateComment } = require('../../../../../models/tickets.comments');
 
 const Tickets = {};
 
@@ -87,6 +88,10 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 		storeFiles(teamspace, project, model, oldTicket._id, toAdd),
 	]);
 };
+
+Tickets.addComment = addComment;
+
+Tickets.updateComment = updateComment;
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
 	teamspace, TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket },

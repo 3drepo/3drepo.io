@@ -16,7 +16,7 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { processReadOnlyValues, validateTicket } = require('../../../../../../../schemas/tickets');
+const { processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getTicketById } = require('../../../../../../../models/tickets');
@@ -25,10 +25,11 @@ const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
+const { getCommentByQuery } = require('../../../../../../../models/tickets.comments');
 
 const TicketsMiddleware = {};
 
-const validate = (isNewTicket) => async (req, res, next) => {
+const validateTicket = (isNewTicket) => async (req, res, next) => {
 	try {
 		const oldTicket = req.ticketData;
 		const newTicket = req.body;
@@ -37,10 +38,10 @@ const validate = (isNewTicket) => async (req, res, next) => {
 		const { teamspace } = req.params;
 
 		if (isNewTicket && template.deprecated) {
-			throw createResponseCode(templates.invalidArguments, 'Template type has been deprecated');
+			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body = await validateTicket(teamspace, template, newTicket, oldTicket);
+		req.body = await validateTicketSchema(teamspace, template, newTicket, oldTicket);
 
 		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
 			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
@@ -54,13 +55,54 @@ const validate = (isNewTicket) => async (req, res, next) => {
 	}
 };
 
+const validateComment = (isNewComment) => async (req, res, next) => {
+	try {
+		if (req.templateData.deprecated) {
+			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
+		}
+
+		const schema = Yup.object().shape({
+			comment: Yup.string(),
+			images: Yup.array().of(isNewComment ?
+				types.embeddedImage(true) :
+				Yup.array().of(Yup.mixed().test('test-name', 'error-msg', async (value) => {
+					if (isUUIDString(value)) {
+						const { images } = await getCommentByQuery(req.params.teamspace, 
+							{ _id: req.params.comment }, { images: 1 }) ?? [];
+
+						return images.includes(value);
+					}
+
+					try {
+						Buffer.from(value, 'base64')
+						return true;
+					} catch {
+						return false;
+					}					
+				}))
+			),
+		}).strict(true).noUnknown().test(
+			'at-least-one-property',
+			'You must provide either a comment or a set of images',
+			(value) => Object.keys(value).length,
+		).required();
+
+		await schema.validate(commentData);
+
+		await next();
+	} catch (err) {
+		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err.message);
+		respond(req, res, response);
+	}
+};
+
 const templateIDToParams = async (req, res, next) => {
 	if (req.body?.type) {
 		req.body.type = stringToUUID(req.body.type);
 		req.params.template = req.body.type;
 		await next();
 	} else {
-		respond(req, res, createResponseCode(templates.invalidArguments, 'Template type must be provided'));
+		respond(req, res, createResponseCode(templates.invalidArguments, 'Template must be provided'));
 	}
 };
 
@@ -78,8 +120,23 @@ const checkTicketExists = async (req, res, next) => {
 	}
 };
 
-TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validate(true)]);
-TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, validate(false)]);
+const checkCommentExists = async (req, res, next) => {
+	const { teamspace, comment } = req.params;
+	const model = req.params.container ?? req.params.federation;
+
+	try {
+		req.commentData = await getCommentByQuery(teamspace, { _id: comment, model }, { history: 1, comment, images });
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateTicket(true)]);
+TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, validateTicket(false)]);
+TicketsMiddleware.validateNewComment = validateMany([checkTicketExists, validateComment(true)]);
+TicketsMiddleware.validateUpdateComment = validateMany([checkTicketExists, checkCommentExists, validateComment()]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
