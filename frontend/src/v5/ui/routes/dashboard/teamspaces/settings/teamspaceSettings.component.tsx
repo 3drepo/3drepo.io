@@ -16,6 +16,7 @@
  */
 
 import { TeamspaceSettings as V4TeamspaceSettings } from '@/v4/routes/teamspaceSettings';
+import { V5TeamspaceSettingsOverrides } from '@/v5/ui/v4Adapter/overrides/teamspaceSettings.overrides';
 import { FormattedMessage } from 'react-intl';
 import {
 	useLocation,
@@ -23,20 +24,19 @@ import {
 	useHistory,
 } from 'react-router-dom';
 import { Header, Title } from '../projects/projectsList.styles';
-import { Container } from './teamspaceSettings.styles';
 
 export const TeamspaceSettings = () => {
 	const history = useHistory();
 	const location = useLocation();
 	const match = useRouteMatch();
 	return (
-		<Container>
+		<V5TeamspaceSettingsOverrides>
 			<Header>
 				<Title>
 					<FormattedMessage id="teamspaceSettings.title" defaultMessage="Teamspace Settings" />
 				</Title>
 			</Header>
 			<V4TeamspaceSettings match={match} location={location} history={history} />
-		</Container>
+		</V5TeamspaceSettingsOverrides>
 	);
 };
