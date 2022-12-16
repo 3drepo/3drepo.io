@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { formatModelSettings, formatModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const {
 	hasAccessToTeamspace,
 	hasAdminAccessToContainer,
@@ -28,7 +29,7 @@ const { validateAddModelData, validateUpdateSettingsData } = require('../../../.
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { formatModelSettings } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
+const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
 
@@ -101,14 +102,13 @@ const deleteFavourites = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelStats = (isFed) => async (req, res) => {
+const getModelStats = (isFed) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	try {
 		const fn = isFed ? Federations.getFederationStats : Containers.getContainerStats;
 		const stats = await fn(teamspace, model);
-		const statsSerialised = { ...stats };
-		statsSerialised.lastUpdated = stats.lastUpdated ? stats.lastUpdated.getTime() : undefined;
-		respond(req, res, templates.ok, statsSerialised);
+		req.outputData = stats;
+		await next();
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -144,6 +144,7 @@ const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
 	const hasAdminAccessToModel = isFed ? hasAdminAccessToFederation : hasAdminAccessToContainer;
 	const hasReadAccessToModel = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
+	const canDeleteModel = isFed ? async (req, res, next) => { await next(); } : canDeleteContainer;
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/models:
@@ -245,7 +246,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   get:
 	 *     description: Get a list of models within the specified project the user has access to
 	 *     tags: [Models]
@@ -263,6 +264,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -300,7 +308,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models/favourites:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   patch:
 	 *     description: Add models to the user's favourites list
 	 *     tags: [Models]
@@ -318,6 +326,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
@@ -341,7 +356,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models/favourites:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   delete:
 	 *     description: Remove models from the user's favourites list
 	 *     tags: [Models]
@@ -377,7 +392,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models/{model}/stats:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
 	 *   get:
 	 *     description: Get the statistics and general information about a model
 	 *     tags: [Models]
@@ -395,6 +410,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
    	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -445,11 +467,11 @@ const establishRoutes = (isFed) => {
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
 	 */
-	router.get('/:model/stats', hasReadAccessToModel, getModelStats(isFed));
+	router.get('/:model/stats', hasReadAccessToModel, getModelStats(isFed), formatModelStats(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models/{model}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   delete:
 	 *     description: Delete model from project the user is admin of
 	 *     tags: [Models]
@@ -467,6 +489,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
    	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -481,11 +510,11 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: Model removed.
 	 */
-	router.delete('/:model', hasAdminAccessToModel, deleteModel(isFed));
+	router.delete('/:model', hasAdminAccessToModel, canDeleteModel, deleteModel(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models/{model}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   patch:
 	 *     description: Updates the settings of a model
 	 *     tags: [Models]
@@ -503,6 +532,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *       - name: model
 	 *         description: ID of model
 	 *         in: path
@@ -563,7 +599,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models/{model}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   get:
 	 *     description: Get the model settings of model
 	 *     tags: [Models]
@@ -581,6 +617,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *       - name: model
 	 *         description: Model ID
 	 *         in: path

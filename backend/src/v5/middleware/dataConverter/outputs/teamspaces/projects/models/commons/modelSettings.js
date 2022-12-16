@@ -41,4 +41,21 @@ ModelSettings.formatModelSettings = (req, res) => {
 	respond(req, res, templates.ok, formattedSettings);
 };
 
+ModelSettings.formatModelStats = (isFed) => (req, res) => {
+	const { outputData } = req;
+
+	if (isFed) {
+		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
+	} else {
+		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated
+			? outputData.revisions.lastUpdated.getTime() : undefined;
+		if (outputData.errorReason?.timestamp) {
+			outputData.errorReason.timestamp = outputData.errorReason.timestamp.getTime();
+		}
+		outputData.revisions.latestRevision = UUIDToString(outputData.revisions.latestRevision);
+	}
+
+	respond(req, res, templates.ok, outputData);
+};
+
 module.exports = ModelSettings;
