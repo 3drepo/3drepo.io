@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicket, getAllTickets, getTicketById } = require('../../../../../models/tickets');
+const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
-const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addComment, updateComment } = require('../../../../../models/tickets.comments');
+const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 
 const Tickets = {};
 
@@ -89,9 +90,38 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 	]);
 };
 
-Tickets.addComment = addComment;
+const processCommentImages = (images = []) => {
+	const refsAndBinary = [];
 
-Tickets.updateComment = updateComment;
+	for (let i = 0; i< images.length; i++) {		
+		const data = images[i];
+		if(isBuffer(data)) {
+			const ref = generateUUID();
+			refsAndBinary.push({ data, ref });
+			images[i] = ref;
+		} else {
+			images[i] = stringToUUID(data);
+		}
+	}
+
+	return refsAndBinary;
+};
+
+Tickets.addComment = async (teamspace, project, model, ticket, commentData, author) => {
+	const refsAndBinary = processCommentImages(commentData.images);
+	await addComment(teamspace, project, model, ticket, commentData, author);
+	await Promise.all([
+		storeFiles(teamspace, project, model, ticket, refsAndBinary),
+	]);
+};
+
+Tickets.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
+	const refsAndBinary = processCommentImages(updateData.images);
+	await updateComment(teamspace, oldComment, updateData);
+	await Promise.all([
+		storeFiles(teamspace, project, model, ticket, refsAndBinary),
+	]);
+};
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
 	teamspace, TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket },

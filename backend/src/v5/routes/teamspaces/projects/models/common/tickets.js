@@ -163,13 +163,12 @@ const createComment = (isFed) => async (req, res) => {
 };
 
 const updateComment = (isFed) => async (req, res) => {
-	const {	params, body: commentData } = req;
+	const {	params, body: updateData, commentData } = req;
 	const { teamspace, project, model, ticket } = params;
-	const user = getUserFromSession(req.session);
 
 	try {
 		const updateComment = isFed ? updateFedTicketComment : updateConTicketComment;
-		await updateComment(teamspace, project, model, ticket, commentData, user);
+		await updateComment(teamspace, project, model, ticket, commentData, updateData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {

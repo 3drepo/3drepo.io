@@ -23,9 +23,12 @@ const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
-const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
+const { stringToUUID, UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
 const { getCommentByQuery } = require('../../../../../../../models/tickets.comments');
+const Yup = require('yup');
+const { types } = require('../../../../../../../utils/helper/yup');
+const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
 
 const TicketsMiddleware = {};
 
@@ -62,32 +65,39 @@ const validateComment = (isNewComment) => async (req, res, next) => {
 		}
 
 		const schema = Yup.object().shape({
-			comment: Yup.string(),
-			images: Yup.array().of(isNewComment ?
-				types.embeddedImage(true) :
-				Yup.array().of(Yup.mixed().test('test-name', 'error-msg', async (value) => {
-					if (isUUIDString(value)) {
-						const { images } = await getCommentByQuery(req.params.teamspace, 
-							{ _id: req.params.comment }, { images: 1 }) ?? [];
+			comment: Yup.string().min(1),
+			images: Yup.array().min(1).of(isNewComment ?
+				types.embeddedImage() :
+				Yup.lazy((value) => {		
+					switch (typeof value) {
+						case 'string':
+						  return isUUIDString(value) ?
+									Yup.string()						
+									.test(
+										'not-valid-ref',
+										'One or more image refs do not correspond to a current comment image.',
+										async () => {
+											const { images } = await getCommentByQuery(req.params.teamspace,
+												{ _id: req.params.comment }, { images: 1 }) ?? [];
 
-						return images.includes(value);
-					}
-
-					try {
-						Buffer.from(value, 'base64')
-						return true;
-					} catch {
-						return false;
-					}					
-				}))
+											return images.map(UUIDToString).includes(value);
+										}) :
+									types.embeddedImage();						
+						default:
+						//   return Yup.mixed().test('Base64 or current ref',
+						//   	'Image values should be either a Base64 string or a ref to an image currently used in the comment.',
+						//   	() => false);
+							return Yup.mixed();
+					  }
+				})
 			),
-		}).strict(true).noUnknown().test(
+		}).noUnknown().test(
 			'at-least-one-property',
 			'You must provide either a comment or a set of images',
 			(value) => Object.keys(value).length,
 		).required();
 
-		await schema.validate(commentData);
+		req.body = await schema.validate(req.body);
 
 		await next();
 	} catch (err) {
@@ -125,7 +135,7 @@ const checkCommentExists = async (req, res, next) => {
 	const model = req.params.container ?? req.params.federation;
 
 	try {
-		req.commentData = await getCommentByQuery(teamspace, { _id: comment, model }, { history: 1, comment, images });
+		req.commentData = await getCommentByQuery(teamspace, { _id: comment, model }, { history: 1, comment: 1, images: 1 });
 
 		await next();
 	} catch (err) {
