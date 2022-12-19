@@ -16,7 +16,7 @@
  */
 import { StyledChipInput } from '@/v4/routes/components/chipsInput/chipsInput.styles';
 import { Container as Panel, Title } from '@/v4/routes/components/panel/panel.styles';
-import { ButtonContainer, CreateMitigationsGrid, Headline, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
+import { ButtonContainer, CreateMitigationsGrid, DataText, Headline, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
 import styled from 'styled-components';
 
 export const V5TeamspaceSettingsOverrides = styled.div`
@@ -28,20 +28,21 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 		}
 		${StyledForm} {
 			overflow-y: hidden;
-			padding: 0 0 30px;
+			padding: 0;
 			.MuiAutocomplete-popper {
 				display: none;
 			}
-			${StyledGrid}, ${SuggestionsContainer} {
-				padding: 30px 0 0 0;
+			${StyledGrid} {
+				padding: 0 0 30px 0;
 				&${StyledGrid}:first-of-type {
 					display: none;
 				}
+				${Headline} {
+					${({ theme }) => theme.typography.h2};
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
-			${Headline} {
-				${({ theme }) => theme.typography.h2};
-				color: ${({ theme }) => theme.palette.secondary.main};
-			}
+			
 			${StyledChipInput} {
 				margin-top: 0;
 				.MuiAutocomplete-inputRoot {
@@ -72,6 +73,7 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 				}
 			}
 			${SuggestionsContainer} {
+				padding: 0;
 				${Headline} {
 					${({ theme }) => theme.typography.h5};
 				}
