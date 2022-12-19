@@ -174,7 +174,6 @@
 	}
 
 	function createPermission(req, res, next) {
-		console.log("CREATE PERMISSION");
 		if (Object.keys(req.body).length === 2 && Object.prototype.toString.call(req.body.user) === "[object String]" && Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
 			if(req.params.account === req.body.user) {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);

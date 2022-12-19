@@ -87,9 +87,6 @@ const isAccountLocked = function (user) {
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
-	console.log("===== hasReachedLicenceLimit");
-	console.log(teamspace.user);
-	console.log("===== hasReachedLicenceLimit:end");
 	const Invitations = require("./invitations");
 	const [userArr, invitations] = await Promise.all([
 		User.getAllUsersInTeamspace(teamspace.user),
@@ -852,9 +849,6 @@ User.listAccounts = async function(user) {
 };
 
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) {
-	console.log("========= removeTeamMember");
-	console.log(teamspace.user);
-	console.log("========= removeTeamMember:end");
 	if (teamspace.user === userToRemove) {
 		// The user should not be able to remove itself from the teamspace
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
