@@ -20,6 +20,7 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
+import { intersection } from 'lodash';
 
 type ManyOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };
 export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
@@ -30,9 +31,10 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	} else {
 		items = (values as string[]).map((value) => ({ value, label: value }));
 	}
+	const filterImpossibleValues = intersection(props.value, items.map((i) => i.value));
 
 	return (
-		<MultiSelect {...props} value={props.value ?? []}>
+		<MultiSelect {...props} value={filterImpossibleValues ?? []}>
 			{(items).map(({ value, label }) => (
 				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
 			))}
