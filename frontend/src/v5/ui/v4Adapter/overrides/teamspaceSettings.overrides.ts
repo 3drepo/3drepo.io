@@ -83,8 +83,11 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 				width: 320px;
 			}
 			${ButtonContainer} {
-				width: 100%;
+				width: 84px;
+				height: 51px;
 				background-color: transparent;
+				right: 0;
+				bottom: -8px;
 				
 				button:not(.Mui-disabled) {
 					background-color: ${({ theme }) => theme.palette.primary.main};
