@@ -72,13 +72,21 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 					box-shadow: none;
 				}
 			}
+			${DataText} {
+				color: ${({ theme }) => theme.palette.base.main};
+			}
 			${SuggestionsContainer} {
 				padding: 0;
 				${Headline} {
 					${({ theme }) => theme.typography.h5};
 				}
-				.MuiIconButton-root:not(.Mui-disabled) svg {
-					color: ${({ theme }) => theme.palette.secondary.main};
+				.MuiIconButton-root {
+					svg {
+						color: ${({ theme }) => theme.palette.secondary.main};
+					}
+					&.Mui-disabled svg {
+						color: ${({ theme }) => theme.palette.base.lightest};
+					}
 				}
 			}
 			${CreateMitigationsGrid} {
