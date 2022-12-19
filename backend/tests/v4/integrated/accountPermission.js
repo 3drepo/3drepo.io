@@ -185,14 +185,11 @@ describe("Account permission::", function () {
 	});
 
 	it("should be able to update users permissions", function(done) {
-		console.log("=========================");
 		async.series([
 			callback => {
 				agent.put(`/${username}/permissions/user2`)
 					.send({ "permissions": []})
 					.expect(200, function(err, res) {
-						console.log("CALL 1 - res.body");
-						console.log(res.body);
 						callback(err);
 					});
 			},
@@ -200,8 +197,6 @@ describe("Account permission::", function () {
 			callback => {
 				agent.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
-						console.log("CALL 2 - res.body");
-						console.log(res.body);
 						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
 						callback(err);
 					});

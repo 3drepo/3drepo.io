@@ -218,9 +218,9 @@
 	}
 
 	function deletePermission(req, res, next) {
-		User.findByUserName(req.params.account)
-			.then(user => {
-				return AccountPermissions.remove(user, req.params.user);
+		getTeamspaceSettings(req.params.account)
+			.then(teamspaceSettings => {
+				return AccountPermissions.remove(teamspaceSettings, req.params.user);
 			})
 			.then(() => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});

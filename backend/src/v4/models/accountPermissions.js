@@ -44,9 +44,6 @@ const checkValidUpdate = async (teamspaceSettings, teamMember, permissions) => {
 const AccountPermissions = {};
 
 AccountPermissions.findByUser = function(user, username) {
-	console.log(this.get(user));
-	console.log(username);
-	console.log(this.get(user).find(perm => perm.user === username));
 	return this.get(user).find(perm => perm.user === username);
 };
 
@@ -55,10 +52,8 @@ AccountPermissions.get = function(teamspaceSettings) {
 };
 
 AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, permissions) {
-	console.log("updateOrCreate");
 	await checkValidUpdate(teamspaceSettings, username, permissions);
 
-	console.log("uHERHEHREHRate");
 	if(permissions && permissions.length === 0) {
 		// this is actually a remove
 		return await this.remove(teamspaceSettings, username);
@@ -73,7 +68,6 @@ AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, 
 AccountPermissions.update = async function(teamspaceSettings, username, permissions) {
 	const currPermission = this.findByUser(teamspaceSettings, username);
 
-	console.log("update");
 	if(!currPermission) {
 		throw (responseCodes.ACCOUNT_PERM_NOT_FOUND);
 	}
