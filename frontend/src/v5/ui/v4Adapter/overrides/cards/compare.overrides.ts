@@ -15,12 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tabs } from '@/v4/routes/viewerGui/components/compare/compare.styles';
 import { Revisions } from '@/v4/routes/viewerGui/components/compare/components/compareDiffItem/compareDiffItem.styles';
 import { FilterPanel } from '@/v4/routes/viewerGui/components/compare/components/compareFilters/compareFilters.styles';
 import { SelectField } from '@/v4/routes/viewerGui/components/compare/components/revisionsSelect/revisionsSelect.styles';
 import { css } from 'styled-components';
 
 export default css`
+	${Tabs} .MuiTab-root {
+		white-space: nowrap;
+		overflow: visible;
+	}
 	${Revisions} {
 		height: 26px;
 		display: flex;
