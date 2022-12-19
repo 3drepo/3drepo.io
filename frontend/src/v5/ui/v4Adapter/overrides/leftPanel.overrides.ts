@@ -71,6 +71,10 @@ export default css`
 			svg {
 				font-size: 1.2rem;
 			}
+
+			[hidden] {
+				display: none;
+			}
 		}
 	}
 	
