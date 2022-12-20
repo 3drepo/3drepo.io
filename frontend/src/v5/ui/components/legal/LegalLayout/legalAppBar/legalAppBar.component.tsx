@@ -16,8 +16,8 @@
  */
 
 import { Link } from 'react-router-dom';
-import LogoIcon from '@assets/icons/logo.svg';
-import PrintIcon from '@assets/icons/print.svg';
+import LogoIcon from '@assets/icons/filled/logo-filled.svg';
+import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
