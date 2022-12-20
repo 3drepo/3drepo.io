@@ -43,7 +43,7 @@ export const Assignees = memo(({
 	const [values, setValues] = useState(initialValues);
 	const [open, setOpen] = useState(false);
 	const listedAssignees = initialValues.slice(0, max - 1);
-	const overflowAssignees = initialValues.slice(max - 1);
+	const overflowValue = initialValues.slice(max - 1).length;
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
 
 	const preventPropagation = (e) => {
@@ -81,11 +81,11 @@ export const Assignees = memo(({
 			) : (
 				<FormattedMessage id="assignees.unassigned" defaultMessage="Unassigned" />
 			)}
-			{overflowAssignees.length ? (
+			{values.length ? (
 				<HoverPopover
-					anchor={(extraProps) => <ExtraAssignees assignees={overflowAssignees} {...extraProps} />}
+					anchor={(extraProps) => <ExtraAssignees overflowValue={overflowValue} {...extraProps} />}
 				>
-					<ExtraAssigneesPopover assignees={overflowAssignees} />
+					<ExtraAssigneesPopover assignees={values} />
 				</HoverPopover>
 			) : <></>}
 		</AssigneesList>
