@@ -20,12 +20,11 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
 import { defaults, isEqual, pick } from 'lodash';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
 export interface IPersonalFormInput {

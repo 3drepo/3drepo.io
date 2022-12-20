@@ -27,7 +27,7 @@ import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
-import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
+import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
 
 const APP_VERSION = ClientConfig.VERSION;
@@ -70,14 +70,19 @@ export const Login = () => {
 				<AuthHeading>
 					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
 				</AuthHeading>
-				<UsernameField control={control} />
-				<PasswordField
+				<FormUsernameField
+					control={control}
+					name="username"
+					required
+				/>
+				<FormPasswordField
 					control={control}
 					name="password"
 					label={formatMessage({
 						id: 'auth.login.password',
 						defaultMessage: 'Password',
 					})}
+					required
 				/>
 				<UnhandledErrorInterceptor expectedErrorValidators={[isExpectedError]} />
 				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}

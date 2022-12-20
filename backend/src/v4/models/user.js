@@ -464,7 +464,7 @@ User.verify = async function (username, token, options) {
 	options = options || {};
 
 	const allowRepeatedVerify = options.allowRepeatedVerify;
-	const skipImportToyModel = options.skipImportToyModel;
+	const skipImportToyModel = true; // As of 4.28 we no longer import a toy project for users // options.skipImportToyModel;
 
 	const user = await User.findByUserName(username);
 

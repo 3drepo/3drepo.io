@@ -80,6 +80,10 @@ export const password = (passwordName = 'Password') => Yup.string()
 	);
 
 export const firstName = trimmedString
+	.required(formatMessage({
+		id: 'validation.firstName.error.required',
+		defaultMessage: 'First name is a required field',
+	}))
 	.min(1, formatMessage({
 		id: 'validation.firstName.error.min',
 		defaultMessage: 'First name must be at least 1 characters',
@@ -87,13 +91,13 @@ export const firstName = trimmedString
 	.max(35, formatMessage({
 		id: 'validation.firstName.error.max',
 		defaultMessage: 'First name is limited to 35 characters',
-	}))
-	.required(formatMessage({
-		id: 'validation.firstName.error.required',
-		defaultMessage: 'First name is a required field',
 	}));
 
 export const lastName = trimmedString
+	.required(formatMessage({
+		id: 'validation.lastName.error.required',
+		defaultMessage: 'Last name is a required field',
+	}))
 	.min(1, formatMessage({
 		id: 'validation.lastName.error.min',
 		defaultMessage: 'Last name must be at least 1 characters',
@@ -101,10 +105,6 @@ export const lastName = trimmedString
 	.max(35, formatMessage({
 		id: 'validation.lastName.error.max',
 		defaultMessage: 'Last name is limited to 35 characters',
-	}))
-	.required(formatMessage({
-		id: 'validation.lastName.error.required',
-		defaultMessage: 'Last name is a required field',
 	}));
 
 export const company = trimmedString
