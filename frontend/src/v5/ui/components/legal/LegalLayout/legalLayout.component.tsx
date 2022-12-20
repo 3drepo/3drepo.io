@@ -17,8 +17,8 @@
 
 import { useRouteMatch } from 'react-router-dom';
 
-import { ScrollArea } from '@controls/scrollArea';
-import { LegalContent } from './legalLayout.styles';
+// import { ScrollArea } from '@controls/scrollArea';
+import { Container, LegalContent } from './legalLayout.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';
 
 type ILegalLayout = {
@@ -30,11 +30,11 @@ export const LegalLayout = ({ children }: ILegalLayout) => {
 	return (
 		<>
 			<LegalAppBar activePage={legalPage} />
-			<ScrollArea>
+			<Container>
 				<LegalContent>
 					{children}
 				</LegalContent>
-			</ScrollArea>
+			</Container>
 		</>
 	);
 };
