@@ -86,6 +86,7 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 			${SuggestionsContainer} {
 				padding: 0;
 				${Headline} {
+					color: ${({ theme }) => theme.palette.secondary.main};
 					${({ theme }) => theme.typography.h5};
 				}
 				.MuiIconButton-root {
