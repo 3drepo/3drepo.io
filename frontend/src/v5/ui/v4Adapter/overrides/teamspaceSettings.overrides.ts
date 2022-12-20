@@ -15,14 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { StyledChipInput } from '@/v4/routes/components/chipsInput/chipsInput.styles';
+import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as Panel, Title } from '@/v4/routes/components/panel/panel.styles';
-import { ButtonContainer, CreateMitigationsGrid, DataText, Headline, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
+import { ButtonContainer, CreateMitigationsGrid, DataText, Headline, LoaderContainer, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
 import styled from 'styled-components';
 
 export const V5TeamspaceSettingsOverrides = styled.div`
 	${Panel} {
 		border: none;
 		box-shadow: none;
+		${LoaderContainer} {
+			padding: 50px 0;
+			${LoadingText} {
+				color: ${({ theme }) => theme.palette.base.main};
+				${({ theme }) => theme.typography.h4};
+			}
+		}
 		${Title} {
 			display: none;
 		}
