@@ -17,8 +17,8 @@ const findOneComment = (ts, query, projection) => db.findOne(ts, TICKET_COMMENTS
 const updateOneComment = (ts, query, data) => db.updateOne(ts, TICKET_COMMENTS_COL, query, data);
 const insertOneComment = (ts, data) => db.insertOne(ts, TICKET_COMMENTS_COL, data);
 
-TicketComments.getCommentByQuery = async (teamspace, query, projection) => {
-	const comment = await findOneComment(teamspace, query, projection);
+TicketComments.getCommentById = async (teamspace, project, model, ticket, _id, projection) => {
+	const comment = await findOneComment(teamspace, { teamspace, project, model, ticket, _id }, projection);
 
 	if(!comment){
 		throw templates.commentNotFound;
@@ -34,9 +34,9 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
     await insertOneComment(teamspace, comment);
 };
 
-TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
+const getFormattedComment = (oldComment, updateData) => {
 	const updatedAt = new Date();
-    const formattedUpdateData = { updatedAt, ...updateData };
+    const formattedComment = { updatedAt, ...updateData };
     
 	const historyEntry = { 
 		timestamp: updatedAt,
@@ -44,9 +44,20 @@ TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 		...(oldComment.images ? { images: oldComment.images } : {}),
 	};
 
-	formattedUpdateData.history = concat(oldComment.history ?? [], [historyEntry]);
+	formattedComment.history = concat(oldComment.history ?? [], [historyEntry]);
 
-    await updateOneComment(teamspace, { _id: oldComment._id }, { $set: { ...formattedUpdateData } });	
+	return formattedComment;
 };
+
+TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
+	const formattedComment = getFormattedComment(oldComment, updateData);
+    await updateOneComment(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment } });	
+};
+
+TicketComments.deleteComment = async (teamspace, oldComment) => {	
+	const formattedComment = getFormattedComment(oldComment, { deleted: true });
+    await updateOneComment(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });	
+};
+
 
 module.exports = TicketComments;

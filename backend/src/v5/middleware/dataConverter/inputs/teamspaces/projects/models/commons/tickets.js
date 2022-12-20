@@ -25,7 +25,7 @@ const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID, UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
-const { getCommentByQuery } = require('../../../../../../../models/tickets.comments');
+const { getCommentById } = require('../../../../../../../models/tickets.comments');
 const Yup = require('yup');
 const { types } = require('../../../../../../../utils/helper/yup');
 const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
@@ -66,36 +66,37 @@ const validateComment = (isNewComment) => async (req, res, next) => {
 
 		const schema = Yup.object().shape({
 			comment: Yup.string().min(1),
-			images: Yup.array().min(1).of(isNewComment ?
-				types.embeddedImage() :
-				Yup.lazy((value) => {		
-					switch (typeof value) {
-						case 'string':
-						  return isUUIDString(value) ?
-									Yup.string()						
-									.test(
-										'not-valid-ref',
-										'One or more image refs do not correspond to a current comment image.',
-										async () => {
-											const { images } = await getCommentByQuery(req.params.teamspace,
-												{ _id: req.params.comment }, { images: 1 }) ?? [];
+			images: Yup.array().min(1).of(
+				types.embeddedImage()
+				// isNewComment ?
+				// types.embeddedImage() :
+				// Yup.lazy((value) => {		
+				// 	switch (typeof value) {
+				// 		case 'string':
+				// 		  return isUUIDString(value) ?
+				// 					Yup.string()						
+				// 					.test(
+				// 						'not-valid-ref',
+				// 						'One or more image refs do not correspond to a current comment image.',
+				// 						async () => {
+				// 							const { images } = await getCommentByQuery(req.params.teamspace,
+				// 								{ _id: req.params.comment }, { images: 1 }) ?? [];
 
-											return images.map(UUIDToString).includes(value);
-										}) :
-									types.embeddedImage();						
-						default:
-						//   return Yup.mixed().test('Base64 or current ref',
-						//   	'Image values should be either a Base64 string or a ref to an image currently used in the comment.',
-						//   	() => false);
-							return Yup.mixed();
-					  }
-				})
+				// 							return images.map(UUIDToString).includes(value);
+				// 						}) :
+				// 					types.embeddedImage();
+				// 		default:
+				// 		  return Yup.mixed().test('Base64 or current ref',
+				// 		  	'Image values should be either a Base64 string or a ref to an image currently used in the comment.',
+				// 		  	(value) => value instanceof Uint8Array);
+				// 	  }
+				// })
 			),
-		}).noUnknown().test(
+		}).test(
 			'at-least-one-property',
 			'You must provide either a comment or a set of images',
 			(value) => Object.keys(value).length,
-		).required();
+		).required().noUnknown();
 
 		req.body = await schema.validate(req.body);
 
@@ -117,8 +118,7 @@ const templateIDToParams = async (req, res, next) => {
 };
 
 const checkTicketExists = async (req, res, next) => {
-	const { teamspace, project, ticket } = req.params;
-	const model = req.params.container ?? req.params.federation;
+	const { teamspace, project, model, ticket } = req.params;
 
 	try {
 		req.ticketData = await getTicketById(teamspace, project, model, ticket);
@@ -130,12 +130,11 @@ const checkTicketExists = async (req, res, next) => {
 	}
 };
 
-const checkCommentExists = async (req, res, next) => {
-	const { teamspace, comment } = req.params;
-	const model = req.params.container ?? req.params.federation;
+TicketsMiddleware.setCommentData = async (req, res, next) => {
+	const { teamspace, project, model, ticket, comment } = req.params;
 
 	try {
-		req.commentData = await getCommentByQuery(teamspace, { _id: comment, model }, { history: 1, comment: 1, images: 1 });
+		req.commentData = await getCommentById(teamspace, project, model, ticket, comment, { history: 1, comment: 1, images: 1 });
 
 		await next();
 	} catch (err) {
@@ -146,7 +145,7 @@ const checkCommentExists = async (req, res, next) => {
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateTicket(true)]);
 TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, validateTicket(false)]);
 TicketsMiddleware.validateNewComment = validateMany([checkTicketExists, validateComment(true)]);
-TicketsMiddleware.validateUpdateComment = validateMany([checkTicketExists, checkCommentExists, validateComment()]);
+TicketsMiddleware.validateUpdateComment = validateMany([checkTicketExists, TicketsMiddleware.setCommentData, validateComment()]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

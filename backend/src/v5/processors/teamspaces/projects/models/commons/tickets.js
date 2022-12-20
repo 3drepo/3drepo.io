@@ -21,7 +21,7 @@ const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addComment, updateComment } = require('../../../../../models/tickets.comments');
+const { addComment, deleteComment, updateComment } = require('../../../../../models/tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 
 const Tickets = {};
@@ -107,22 +107,6 @@ const processCommentImages = (images = []) => {
 	return refsAndBinary;
 };
 
-Tickets.addComment = async (teamspace, project, model, ticket, commentData, author) => {
-	const refsAndBinary = processCommentImages(commentData.images);
-	await addComment(teamspace, project, model, ticket, commentData, author);
-	await Promise.all([
-		storeFiles(teamspace, project, model, ticket, refsAndBinary),
-	]);
-};
-
-Tickets.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
-	const refsAndBinary = processCommentImages(updateData.images);
-	await updateComment(teamspace, oldComment, updateData);
-	await Promise.all([
-		storeFiles(teamspace, project, model, ticket, refsAndBinary),
-	]);
-};
-
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
 	teamspace, TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket },
 );
@@ -155,5 +139,23 @@ Tickets.getTicketList = (teamspace, project, model) => {
 
 	return getAllTickets(teamspace, project, model, projection, sort);
 };
+
+Tickets.addComment = async (teamspace, project, model, ticket, commentData, author) => {
+	const refsAndBinary = processCommentImages(commentData.images);
+	await addComment(teamspace, project, model, ticket, commentData, author);
+	await Promise.all([
+		storeFiles(teamspace, project, model, ticket, refsAndBinary),
+	]);
+};
+
+Tickets.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
+	const refsAndBinary = processCommentImages(updateData.images);
+	await updateComment(teamspace, oldComment, updateData);
+	await Promise.all([
+		storeFiles(teamspace, project, model, ticket, refsAndBinary),
+	]);
+};
+
+Tickets.deleteComment = deleteComment;
 
 module.exports = Tickets;
