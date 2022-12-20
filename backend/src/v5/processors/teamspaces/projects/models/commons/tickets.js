@@ -21,7 +21,7 @@ const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addComment, deleteComment, updateComment } = require('../../../../../models/tickets.comments');
+const { addComment, deleteComment, getComentsByTicket, updateComment } = require('../../../../../models/tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 
 const Tickets = {};
@@ -93,9 +93,9 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 const processCommentImages = (images = []) => {
 	const refsAndBinary = [];
 
-	for (let i = 0; i< images.length; i++) {		
+	for (let i = 0; i < images.length; i++) {
 		const data = images[i];
-		if(isBuffer(data)) {
+		if (isBuffer(data)) {
 			const ref = generateUUID();
 			refsAndBinary.push({ data, ref });
 			images[i] = ref;
@@ -157,5 +157,9 @@ Tickets.updateComment = async (teamspace, project, model, ticket, oldComment, up
 };
 
 Tickets.deleteComment = deleteComment;
+
+Tickets.getComentsByTicket = (teamspace, ticket) => getComentsByTicket(teamspace, ticket,
+	{ _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 },
+	{ createdAt: -1 });
 
 module.exports = Tickets;

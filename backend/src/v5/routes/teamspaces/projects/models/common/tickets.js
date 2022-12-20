@@ -24,6 +24,7 @@ const {
 	addComment: addConTicketComment,
 	updateComment: updateConTicketComment,
 	deleteComment: deleteConTicketComment,
+	getComentsByTicket: getConTicketComments,
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
 	addTicket: addFedTicket,
@@ -34,6 +35,7 @@ const {
 	addComment: addFedTicketComment,
 	updateComment: updateFedTicketComment,
 	deleteComment: deleteFedTicketComment,
+	getComentsByTicket: getFedTicketComments,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const {
 	hasCommenterAccessToContainer,
@@ -43,7 +45,7 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment, setCommentData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment, setCommentData, checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -194,11 +196,28 @@ const deleteComment = (isFed) => async (req, res) => {
 	}
 };
 
+const getTicketComments = (isFed) => async (req, res) => {
+	const {	params } = req;
+	const { teamspace, ticket } = params;
+
+	try {
+		const getComentsByTicket = isFed ? getFedTicketComments : getConTicketComments;
+		const comments = await getComentsByTicket(teamspace, ticket);
+		
+		respond(req, res, templates.ok, 
+			{ comments: comments.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 
 const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
 	const hasReadAccess = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
 	const hasCommenterAccess = isFed ? hasCommenterAccessToFederation : hasCommenterAccessToContainer;
+
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates:
@@ -723,6 +742,7 @@ const establishRoutes = (isFed) => {
 	router.post('/:ticket/comments', hasCommenterAccess, validateNewComment, createComment(isFed));
 	router.put('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, validateUpdateComment, updateComment(isFed));
 	router.delete('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, setCommentData, deleteComment(isFed));
+	router.get('/:ticket/comments', hasReadAccess, checkTicketExists, getTicketComments(isFed));
 
 	return router;
 };

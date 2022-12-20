@@ -12,29 +12,32 @@ const { concat } = require('lodash');
 const TicketComments = {};
 const TICKET_COMMENTS_COL = 'tickets.comments';
 
-const findComments = (ts, query, projection, sort) => db.find(ts, TICKET_COMMENTS_COL, query, projection, sort);
-const findOneComment = (ts, query, projection) => db.findOne(ts, TICKET_COMMENTS_COL, query, projection);
-const updateOneComment = (ts, query, data) => db.updateOne(ts, TICKET_COMMENTS_COL, query, data);
-const insertOneComment = (ts, data) => db.insertOne(ts, TICKET_COMMENTS_COL, data);
+const findMany = (ts, query, projection, sort) => db.find(ts, TICKET_COMMENTS_COL, query, projection, sort);
+const findOne = (ts, query, projection) => db.findOne(ts, TICKET_COMMENTS_COL, query, projection);
+const updateOne = (ts, query, data) => db.updateOne(ts, TICKET_COMMENTS_COL, query, data);
+const insertOne = (ts, data) => db.insertOne(ts, TICKET_COMMENTS_COL, data);
 
 TicketComments.getCommentById = async (teamspace, project, model, ticket, _id, projection) => {
-	const comment = await findOneComment(teamspace, { teamspace, project, model, ticket, _id }, projection);
+	const comment = await findOne(teamspace, { teamspace, project, model, ticket, _id }, projection);
 
 	if(!comment){
 		throw templates.commentNotFound;
 	}
 
 	return comment;
-}
+};
+
+TicketComments.getComentsByTicket = async (teamspace, ticket, projection, sort) =>
+	findMany(teamspace, { ticket }, projection, sort);
 
 TicketComments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
     const _id = generateUUID();
     const createdAt = new Date();
     const comment = { _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt, ...commentData };
-    await insertOneComment(teamspace, comment);
+    await insertOne(teamspace, comment);
 };
 
-const getFormattedComment = (oldComment, updateData) => {
+const getUpdatedComment = (oldComment, updateData) => {
 	const updatedAt = new Date();
     const formattedComment = { updatedAt, ...updateData };
     
@@ -50,13 +53,13 @@ const getFormattedComment = (oldComment, updateData) => {
 };
 
 TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
-	const formattedComment = getFormattedComment(oldComment, updateData);
-    await updateOneComment(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment } });	
+	const formattedComment = getUpdatedComment(oldComment, updateData);
+    await updateOne(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment } });	
 };
 
 TicketComments.deleteComment = async (teamspace, oldComment) => {	
-	const formattedComment = getFormattedComment(oldComment, { deleted: true });
-    await updateOneComment(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });	
+	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
+    await updateOne(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });	
 };
 
 

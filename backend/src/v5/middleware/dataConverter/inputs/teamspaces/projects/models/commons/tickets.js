@@ -117,7 +117,7 @@ const templateIDToParams = async (req, res, next) => {
 	}
 };
 
-const checkTicketExists = async (req, res, next) => {
+TicketsMiddleware.checkTicketExists = async (req, res, next) => {
 	const { teamspace, project, model, ticket } = req.params;
 
 	try {
@@ -143,9 +143,9 @@ TicketsMiddleware.setCommentData = async (req, res, next) => {
 };
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateTicket(true)]);
-TicketsMiddleware.validateUpdateTicket = validateMany([checkTicketExists, validateTicket(false)]);
-TicketsMiddleware.validateNewComment = validateMany([checkTicketExists, validateComment(true)]);
-TicketsMiddleware.validateUpdateComment = validateMany([checkTicketExists, TicketsMiddleware.setCommentData, validateComment()]);
+TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
+TicketsMiddleware.validateNewComment = validateMany([TicketsMiddleware.checkTicketExists, validateComment(true)]);
+TicketsMiddleware.validateUpdateComment = validateMany([TicketsMiddleware.setCommentData, validateComment()]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
