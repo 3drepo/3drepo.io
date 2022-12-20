@@ -94,22 +94,6 @@ describe("Account permission::", function () {
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 	});
 
-	/*
-	it("should able to assign permissions to another user", async function() {
-
-		const permission = { user: "user2", permissions: ["create_project"]};
-
-		await agent.post(`/${username}/permissions`)
-					.send(permission)
-					.expect(200);
-
-		const {body} = await agent.get(`/${username}/permissions`)
-					.expect(200);
-
-		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
-	});
-	*/
-
 	it("should not be able to assign permissions of owner", function(done) {
 
 		const permission = { permissions: ["create_project"]};
