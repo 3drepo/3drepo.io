@@ -100,7 +100,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 				<RevisionsListHeaderLabel width="20%" tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={887}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
-			<ScrollArea variant="secondary" autoHeight>
+			<ScrollArea>
 				<RevisionsList>
 					{isLoading ? (
 						range(revisionsCount).map((key) => <SkeletonListItem key={key} />)

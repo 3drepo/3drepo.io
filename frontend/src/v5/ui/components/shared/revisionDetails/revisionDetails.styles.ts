@@ -19,7 +19,6 @@ import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { ScrollArea as Scrollbar } from '@controls/scrollArea';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 const revisionsListItemHeight = '52px';
@@ -166,8 +165,8 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	`}
 `;
 
-export const ScrollArea = styled(Scrollbar).attrs({
-	autoHeightMax: `calc(${revisionsListItemHeight} * 5)`,
-})`
+export const ScrollArea = styled.div`
+	max-height: calc(${revisionsListItemHeight} * 5);
+	overflow: auto;
 	margin-bottom: 40px;
 `;
