@@ -36,6 +36,7 @@ export const Header = styled.div`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 74px;
+	min-height: 74px;
 	width: 100%;
 	box-sizing: border-box;
 	align-items: center;
