@@ -48,7 +48,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	// Session middlewares
 	app.use(keyAuthentication, manageSessions);
 
-	app.use(cors({ origin: true, credentials: true }));
+	app.use(cors({ origin: "*", credentials: true }));
 
 	app.use(bodyParser.urlencoded({
 		extended: true
