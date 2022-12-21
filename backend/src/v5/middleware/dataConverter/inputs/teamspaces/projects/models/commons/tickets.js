@@ -134,7 +134,7 @@ TicketsMiddleware.setCommentData = async (req, res, next) => {
 	const { teamspace, project, model, ticket, comment } = req.params;
 
 	try {
-		req.commentData = await getCommentById(teamspace, project, model, ticket, comment, { history: 1, comment: 1, images: 1 });
+		req.commentData = await getCommentById(teamspace, project, model, ticket, comment);
 
 		await next();
 	} catch (err) {
@@ -145,7 +145,7 @@ TicketsMiddleware.setCommentData = async (req, res, next) => {
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateTicket(true)]);
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
 TicketsMiddleware.validateNewComment = validateMany([TicketsMiddleware.checkTicketExists, validateComment(true)]);
-TicketsMiddleware.validateUpdateComment = validateMany([TicketsMiddleware.setCommentData, validateComment()]);
+TicketsMiddleware.validateUpdateComment = validateMany([TicketsMiddleware.checkTicketExists, TicketsMiddleware.setCommentData, validateComment()]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

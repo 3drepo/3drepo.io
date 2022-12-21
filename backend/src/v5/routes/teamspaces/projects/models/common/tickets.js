@@ -44,7 +44,7 @@ const {
 	hasReadAccessToFederation,
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList, serialiseComment, serialiseCommentList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment, setCommentData, checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
@@ -196,22 +196,20 @@ const deleteComment = (isFed) => async (req, res) => {
 	}
 };
 
-const getTicketComments = (isFed) => async (req, res) => {
+const getTicketComments = (isFed) => async (req, res, next) => {
 	const {	params } = req;
 	const { teamspace, ticket } = params;
 
 	try {
 		const getComentsByTicket = isFed ? getFedTicketComments : getConTicketComments;
 		const comments = await getComentsByTicket(teamspace, ticket);
-		
-		respond(req, res, templates.ok, 
-			{ comments: comments.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+		req.comments = comments;
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
-
 
 const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
@@ -742,7 +740,8 @@ const establishRoutes = (isFed) => {
 	router.post('/:ticket/comments', hasCommenterAccess, validateNewComment, createComment(isFed));
 	router.put('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, validateUpdateComment, updateComment(isFed));
 	router.delete('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, setCommentData, deleteComment(isFed));
-	router.get('/:ticket/comments', hasReadAccess, checkTicketExists, getTicketComments(isFed));
+	router.get('/:ticket/comments', hasReadAccess, checkTicketExists, getTicketComments(isFed), serialiseCommentList);
+	router.get('/:ticket/comments/:comment', hasReadAccess, checkTicketExists, setCommentData, serialiseComment);
 
 	return router;
 };
