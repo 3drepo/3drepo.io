@@ -16,13 +16,11 @@
  */
 import styled from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
-import { ScrollArea } from '@controls/scrollArea';
 
-export const DashboardScroll = styled(ScrollArea)`
-	>div {
-		display: flex;
-		flex-direction: column;
-	}
+export const DashboardScroll = styled.div`
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
 `;
 
 export const Content = styled.div`
