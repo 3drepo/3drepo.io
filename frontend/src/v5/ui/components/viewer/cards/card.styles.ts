@@ -66,6 +66,10 @@ export const CardContentContainer = styled.div`
 	min-height: 100%;
 `;
 
+export const CardContentContainerScroll = styled.div`
+	overflow: auto;
+`;
+
 export const EmptyCardMessage = styled(DashedContainer).attrs({
 	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
 	borderRadius: 5,
