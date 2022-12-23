@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	overflow: scroll;
-	inset: 0px;
+	inset: 0;
 `;
 
 export const LegalContent = styled.div`
