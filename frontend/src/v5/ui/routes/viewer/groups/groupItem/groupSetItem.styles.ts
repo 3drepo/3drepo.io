@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import SmallChevron from '@assets/icons/small_chevron.svg';
+import SmallChevron from '@assets/icons/outlined/small_chevron-outlined.svg';
 import { ChevronStyledIconButton } from '@controls/chevronButton/chevronButton.styles';
 import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';

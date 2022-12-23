@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import {
 	DashboardListEmptyText,
 	Divider,

@@ -16,8 +16,8 @@
  */
 
 import styled from 'styled-components';
-import IncludeIconBase from '@assets/icons/include_element.svg';
-import RemoveIconBase from '@assets/icons/remove_element.svg';
+import IncludeIconBase from '@assets/icons/twoToned/add_circle-two_toned.svg';
+import RemoveIconBase from '@assets/icons/twoToned/remove_element-two_toned.svg';
 
 export const IconContainer = styled.div`
 	display: grid;

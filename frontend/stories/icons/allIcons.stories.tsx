@@ -29,6 +29,9 @@ export default {
 			type: 'number',
 			defaultValue: 10,
 		},
+		color: {
+			type: 'string',
+		},
 	},
 	parameters: { controls: { exclude: 'icons' } },
 } as ComponentMeta<any>;
