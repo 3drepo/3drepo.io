@@ -87,7 +87,7 @@ const testAuthenticatePost = () => {
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.USER_NOT_FOUND}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}/?error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test(`should redirect with ${errorCodes.NON_SSO_USER} if user is a non SSO user`, async () => {
@@ -101,7 +101,7 @@ const testAuthenticatePost = () => {
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.NON_SSO_USER}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}/?error=${errorCodes.NON_SSO_USER}`);
 		});
 
 		test('should retain a query param in the redirectUri if it redirects with error', async () => {
@@ -111,7 +111,7 @@ const testAuthenticatePost = () => {
 				firstName: generateRandomString(),
 				lastName: generateRandomString(),
 			};
-			const state = { redirectUri: `${generateRandomURL()}?queryParam=someValue` };
+			const state = { redirectUri: `${generateRandomURL()}/?queryParam=someValue` };
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
@@ -341,7 +341,7 @@ const testLinkPost = () => {
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
+			expect(res.headers.location).toEqual(`${state.redirectUri}/?error=${errorCodes.EMAIL_EXISTS}`);
 		});
 
 		test('should link user if email is taken by the logged in user', async () => {

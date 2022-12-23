@@ -81,7 +81,7 @@ const testVerifyNewUserDetails = () => {
 			await Aad.verifyNewUserDetails(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.UNKNOWN}`);
 		});
 
 		test(`should respond with error code ${errorCodes.EMAIL_EXISTS} if the email already exists`, async () => {
@@ -91,7 +91,7 @@ const testVerifyNewUserDetails = () => {
 			await Aad.verifyNewUserDetails(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.EMAIL_EXISTS}`);
 		});
 
 		test(`should respond with error code ${errorCodes.EMAIL_EXISTS_WITH_SSO} if the email already exists (SSO user)`, async () => {
@@ -101,7 +101,7 @@ const testVerifyNewUserDetails = () => {
 			await Aad.verifyNewUserDetails(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.EMAIL_EXISTS_WITH_SSO}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.EMAIL_EXISTS_WITH_SSO}`);
 		});
 
 		test('should call next if email is available', async () => {
@@ -166,7 +166,7 @@ const testEmailNotUsed = () => {
 			await Aad.emailNotUsed(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.UNKNOWN}`);
 		});
 
 		test(`should respond with error code ${errorCodes.UNKNOWN} if the user details cannot be fetched`, async () => {
@@ -175,7 +175,7 @@ const testEmailNotUsed = () => {
 			await Aad.emailNotUsed(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.UNKNOWN}`);
 		});
 
 		test(`should respond with error code ${errorCodes.EMAIL_EXISTS} if the email already exists by another user`, async () => {
@@ -185,7 +185,7 @@ const testEmailNotUsed = () => {
 			await Aad.emailNotUsed(getRequest(), res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.EMAIL_EXISTS}`);
 		});
 
 		test('should call next if email is available', async () => {
@@ -333,7 +333,7 @@ const testHasAssociatedAccount = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.UNKNOWN}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.UNKNOWN}`);
 		});
 
 		test(`should redirect with error code ${errorCodes.USER_NOT_FOUND} if user does not exist`, async () => {
@@ -343,7 +343,7 @@ const testHasAssociatedAccount = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.USER_NOT_FOUND}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test(`should redirect with error code ${errorCodes.NON_SSO_USER} if user is a non SSO user`, async () => {
@@ -353,7 +353,7 @@ const testHasAssociatedAccount = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(res.redirect).toHaveBeenCalledTimes(1);
-			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}?error=${errorCodes.NON_SSO_USER}`);
+			expect(res.redirect).toHaveBeenCalledWith(`${redirectUri}/?error=${errorCodes.NON_SSO_USER}`);
 		});
 
 		test('should set req session and call next if MS user is linked to 3D repo ', async () => {
