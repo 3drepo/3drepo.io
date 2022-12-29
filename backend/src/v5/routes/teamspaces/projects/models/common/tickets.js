@@ -277,6 +277,8 @@ const establishRoutes = (isFed) => {
 	 *                       _id:
 	 *                         type: string
 	 *                         format: uuid
+	 *                         description: The ID of the template
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       name:
 	 *                         type: string
 	 *                         example: Risk
@@ -431,6 +433,7 @@ const establishRoutes = (isFed) => {
 	 *                 _id:
 	 *                   type: string
 	 *                   format: uuid
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
 	router.post('/', hasCommenterAccess, validateNewTicket, createTicket(isFed));
 
@@ -489,10 +492,12 @@ const establishRoutes = (isFed) => {
 	 *                         type: string
 	 *                         format: uuid
 	 *                         description: id of the ticket
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       type:
 	 *                         type: string
 	 *                         format: uuid
 	 *                         description: template id
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       title:
 	 *                         type: string
 	 *                         description: ticket title
@@ -500,6 +505,7 @@ const establishRoutes = (isFed) => {
 	 *                       number:
 	 *                         type: number
 	 *                         description: ticket number
+	 *                         example: 1
 	 *                       properties:
 	 *                         type: object
 	 *                         description: ticket properties
@@ -572,10 +578,12 @@ const establishRoutes = (isFed) => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: id of the ticket
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 type:
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: template id
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 title:
 	 *                   type: string
 	 *                   description: ticket title
@@ -583,6 +591,7 @@ const establishRoutes = (isFed) => {
 	 *                 number:
 	 *                   type: number
 	 *                   description: ticket number
+	 *                   example: 1
 	 *                 properties:
 	 *                   type: object
 	 *                   description: ticket properties
@@ -736,11 +745,385 @@ const establishRoutes = (isFed) => {
 	 */
 	router.patch('/:ticket', hasCommenterAccess, validateUpdateTicket, updateTicket(isFed));
 
-
+    /**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
+	 *   post:
+	 *     description: Create a ticket comment
+	 *     tags: [Tickets]
+	 *     operationId: createComment
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               comment:
+	 *                 type: string
+	 *                 description: Content of the comment
+	 *                 example: Example comment
+	 *               images:
+	 *                 description: Images of the comment
+	 *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   description: Image in a Base64 format
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comment has been successfully created
+	 */
 	router.post('/:ticket/comments', hasCommenterAccess, validateNewComment, createComment(isFed));
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
+	 *   put:
+	 *     description: Update a ticket comment. The current images or comment are inserted into the history array of the comment
+	 *     tags: [Tickets]
+	 *     operationId: updateComment
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: comment
+	 *         description: Comment ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *                 comment:
+	 *                   type: string
+	 *                   description: Content of the comment
+	 *                   example: Example comment
+	 *                 images:
+	 *                   description: Images of the comment
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
+	 *                     description: Image in a Base64 format or an ID of an image currently used in the comment
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comment has been successfully updated
+	 */
 	router.put('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, validateUpdateComment, updateComment(isFed));
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
+	 *   delete:
+	 *     description: Delete a ticket comment
+	 *     tags: [Tickets]
+	 *     operationId: deleteComment
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: comment
+	 *         description: Comment ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comment has been successfully deleted
+	 */
 	router.delete('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, setCommentData, deleteComment(isFed));
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
+	 *   get:
+	 *     description: Get the comments of a ticket
+	 *     tags: [Tickets]
+	 *     operationId: getComments
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comments have been successfully retrieved
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: array
+	 *               items:
+	 *                 type: object
+	 *                 properties:
+	 *                   _id:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The ID of the comment
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+     *                   deleted:
+	 *                     type: boolean
+	 *                     example: true
+	 *                     description: Whether or not the comment is deleted
+	 *                   author:
+	 *                     type: string
+	 *                     example: username1
+	 *                     description: The username of the comment's author
+	 *                   createdAt:
+	 *                     type: number
+	 *                     example: 1632821119000
+	 *                     description: Timestamp of when the comment was created
+	 *                   updatedAt:
+	 *                     type: number
+	 *                     example: 1632821119000
+	 *                     description: Timestamp of when the comment was last updated
+	 */
 	router.get('/:ticket/comments', hasReadAccess, checkTicketExists, getTicketComments(isFed), serialiseCommentList);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
+	 *   get:
+	 *     description: Get the details of a comment
+	 *     tags: [Tickets]
+	 *     operationId: getComment
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+     *       - name: comment
+	 *         description: Comment ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comment have been successfully retrieved
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The ID of the comment
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 comment:
+	 *                   type: string
+	 *                   example: Example comment
+	 *                   description: Content of the comment
+	 *                 images:
+	 *                   type: array
+	 *                   description: The images of the comment
+	 *                   items:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The Id of the comment image
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 history:
+	 *                   type: array
+	 *                   description: The update history of the comment
+	 *                   properties:
+	 *                     timestamp:
+	 *                       type: number
+	 *                       example: 1632821119000
+	 *                       description: Timestamp of the update
+	 *                     comment:
+	 *                       type: string
+	 *                       example: Example comment
+	 *                       description: The content of the comment
+	 *                     images:
+	 *                       type: array
+	 *                       description: The images of the comment
+	 *                       items:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: The Id of the comment image
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+     *                 deleted:
+	 *                   type: boolean
+	 *                   example: true
+	 *                   description: Whether or not the comment is deleted
+	 *                 author:
+	 *                   type: string
+	 *                   example: username1
+	 *                   description: The username of the comment's author
+	 *                 createdAt:
+	 *                   type: number
+	 *                   example: 1632821119000
+	 *                   description: Timestamp of when the comment was created
+	 *                 updatedAt:
+	 *                   type: number
+	 *                   example: 1632821119000
+	 *                   description: Timestamp of when the comment was last updated
+	 */
 	router.get('/:ticket/comments/:comment', hasReadAccess, checkTicketExists, setCommentData, serialiseComment);
 
 	return router;
