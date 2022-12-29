@@ -67,30 +67,29 @@ const validateComment = (isNewComment) => async (req, res, next) => {
 		const schema = Yup.object().shape({
 			comment: Yup.string().min(1),
 			images: Yup.array().min(1).of(
-				types.embeddedImage()
-				// isNewComment ?
-				// types.embeddedImage() :
-				// Yup.lazy((value) => {		
-				// 	switch (typeof value) {
-				// 		case 'string':
-				// 		  return isUUIDString(value) ?
-				// 					Yup.string()						
-				// 					.test(
-				// 						'not-valid-ref',
-				// 						'One or more image refs do not correspond to a current comment image.',
-				// 						async () => {
-				// 							const { images } = await getCommentByQuery(req.params.teamspace,
-				// 								{ _id: req.params.comment }, { images: 1 }) ?? [];
+				isNewComment ?
+				types.embeddedImage() :
+				Yup.lazy((value) => {		
+					switch (typeof value) {
+						case 'string':
+						  return isUUIDString(value) ?
+									Yup.string()						
+									.test(
+										'not-valid-ref',
+										'One or more image refs do not correspond to a current comment image.',
+										async () => {
+											const { images } = await getCommentByQuery(req.params.teamspace,
+												{ _id: req.params.comment }, { images: 1 }) ?? [];
 
-				// 							return images.map(UUIDToString).includes(value);
-				// 						}) :
-				// 					types.embeddedImage();
-				// 		default:
-				// 		  return Yup.mixed().test('Base64 or current ref',
-				// 		  	'Image values should be either a Base64 string or a ref to an image currently used in the comment.',
-				// 		  	(value) => value instanceof Uint8Array);
-				// 	  }
-				// })
+											return images.map(UUIDToString).includes(value);
+										}) :
+									types.embeddedImage();
+						default:
+						  return Yup.mixed().test('Base64 or current ref',
+						  	'Image values should be either a Base64 string or a ref to an image currently used in the comment.',
+						  	(value) => value instanceof Uint8Array);
+					  }
+				})
 			),
 		}).test(
 			'at-least-one-property',
