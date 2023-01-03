@@ -16,7 +16,7 @@
  */
 import { PureComponent, createRef } from 'react';
 import RemoveCircle from '@mui/icons-material/RemoveCircle';
-import BinIcon from '@assets/icons/delete.svg';
+import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import {
 	cond,
 	filter,
