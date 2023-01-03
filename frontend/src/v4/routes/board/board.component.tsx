@@ -28,6 +28,8 @@ import TrelloBoard from 'react-trello';
 import { isV5 } from '@/v4/helpers/isV5';
 import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
+import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
@@ -63,8 +65,6 @@ import {
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { ScrollArea } from '@controls/scrollArea';
 
 const types = [{ value: 'issues', name: 'Issues' } , { value: 'risks', name: 'Risks' }];
 
