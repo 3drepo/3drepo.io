@@ -26,8 +26,8 @@ import { PasswordChangeSchema } from '@/v5/validation/userSchemes/passwordChange
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
-import ErrorIcon from '@assets/icons/warning_small.svg';
-import { AuthHeading, AuthParagraph, ErrorMessage, PasswordField } from '../components/components.styles';
+import ErrorIcon from '@assets/icons/twoToned/warning_small-two_toned.svg';
+import { AuthHeading, AuthParagraph, ErrorMessage, FormPasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';
 
@@ -61,7 +61,7 @@ export const PasswordChange = () => {
 				</AuthHeading>
 				{ username && token ? (
 					<>
-						<PasswordField
+						<FormPasswordField
 							control={control}
 							name="newPassword"
 							label={formatMessage({
@@ -69,8 +69,9 @@ export const PasswordChange = () => {
 								defaultMessage: 'New password',
 							})}
 							formError={errors.newPassword}
+							required
 						/>
-						<PasswordField
+						<FormPasswordField
 							control={control}
 							name="newPasswordConfirm"
 							label={formatMessage({
@@ -78,6 +79,7 @@ export const PasswordChange = () => {
 								defaultMessage: 'Confirm new password',
 							})}
 							formError={errors.newPasswordConfirm}
+							required
 						/>
 						<SubmitButton disabled={!isValid}>
 							<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />

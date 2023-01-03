@@ -16,12 +16,13 @@
  */
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { FormMultiSelect } from '@controls/formMultiSelect/formMultiSelect.component';
-import { PropertyProps } from './properties.types';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
+import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
-export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
-	const { name, readOnly, required, values } = property;
+type ManyOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };
+export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	let items = [];
 
 	if (values === 'jobsAndUsers') {
@@ -31,15 +32,10 @@ export const ManyOfProperty = ({ property, ...props }: PropertyProps) => {
 	}
 
 	return (
-		<FormMultiSelect
-			label={name}
-			disabled={readOnly}
-			required={required}
-			{...props}
-		>
+		<MultiSelect {...props} value={props.value ?? []}>
 			{(items).map(({ value, label }) => (
 				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
 			))}
-		</FormMultiSelect>
+		</MultiSelect>
 	);
 };

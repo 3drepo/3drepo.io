@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import DownloadIconBase from '@assets/icons/download_arrow.svg';
+import DownloadIconBase from '@assets/icons/filled/download_arrow-filled.svg';
 import { IconButton } from '@mui/material';
 
 import { Link } from 'react-router-dom';

@@ -18,26 +18,19 @@
 import { useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
-import CrossIcon from '@assets/icons/close.svg';
-import DeleteIcon from '@assets/icons/delete.svg';
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
+import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormControl, FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
-interface PinDetailsProps {
-	value?: any;
-	error?: boolean;
-	helperText?: string;
-	label?: string;
-	onChange?: (...args) => void;
-	onBlur?: (...args) => void;
-	required?: boolean;
-}
+type PinDetailsProps = Omit<FormInputProps, 'inputRef'>;
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }:PinDetailsProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }: PinDetailsProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = `new-${label}`;
