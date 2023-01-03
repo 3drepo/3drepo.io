@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ChevronLeft from '@mui/icons-material/ArrowBackIosNew';
-import ChevronRight from '@mui/icons-material/ArrowForwardIos';
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -32,6 +30,7 @@ import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } fr
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { IssueProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
+import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
