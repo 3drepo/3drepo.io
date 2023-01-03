@@ -34,10 +34,5 @@ export default ({ className }: IProps) => (
 				fill="currentColor"
 			/>
 		</g>
-		<defs>
-			<clipPath id="clip0_806_7949">
-				<rect width="36" height="36" fill="#fff" />
-			</clipPath>
-		</defs>
 	</svg>
 );

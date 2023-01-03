@@ -18,8 +18,8 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Chip } from '@controls/chip';
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
-import ClockIcon from '@assets/icons/clock.svg';
-import BellIcon from '@assets/icons/notifications.svg';
+import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
+import BellIcon from '@assets/icons/outlined/bell-outlined.svg';
 import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
 
 const Icons = {

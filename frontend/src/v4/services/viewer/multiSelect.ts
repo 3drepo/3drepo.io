@@ -30,11 +30,11 @@ export class MultiSelectService {
 	private areaSelectMode = false;
 
 	private cursorIcons = {
-		accumMode: 'url(./assets/icons/cursor_add.png), auto',
-		decumMode: 'url(./assets/icons/cursor_del.png), auto',
-		areaMode: 'url(./assets/icons/cursor_rect.png), auto',
-		areaAccumMode: 'url(./assets/icons/cursor_rect_add.png), auto',
-		areaDecumMode: 'url(./assets/icons/cursor_rect_del.png), auto',
+		accumMode: 'url(./assets/icons/v4/cursor_add.png), auto',
+		decumMode: 'url(./assets/icons/v4/cursor_del.png), auto',
+		areaMode: 'url(./assets/icons/v4/cursor_rect.png), auto',
+		areaAccumMode: 'url(./assets/icons/v4/cursor_rect_add.png), auto',
+		areaDecumMode: 'url(./assets/icons/v4/cursor_rect_del.png), auto',
 		noneCanvas: 'default',
 		nonePanel: 'pointer'
 	};

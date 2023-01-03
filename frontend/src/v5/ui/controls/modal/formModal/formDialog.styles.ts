@@ -29,8 +29,8 @@ export const RemoveWhiteCorners = styled(Paper)`
 export const CloseButton = styled(IconButton)`
 	&& {
 		position: absolute;
-		top: 8px;
-		right: 10px;
+		top: 10.5px;
+		right: 11px;
 
 		svg path {
 			stroke: ${({ theme }) => theme.palette.primary.contrast}
@@ -49,6 +49,7 @@ export const Form = styled.form`
 
 export const Header = styled.div`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
+	color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 74px;
 	width: 100%;
 	box-sizing: border-box;
@@ -62,7 +63,6 @@ export const Title = styled(Typography).attrs({
 	component: 'div',
 })`
 	text-align: left;
-	color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const Subtitle = styled(Typography).attrs({

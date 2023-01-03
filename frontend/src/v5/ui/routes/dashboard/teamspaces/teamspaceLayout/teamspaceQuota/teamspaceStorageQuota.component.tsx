@@ -19,7 +19,7 @@ import { isQuotaUnitCapped, isQuotaUnitUnlimited } from '@/v5/store/teamspaces/t
 import { QuotaUnit } from '@/v5/store/teamspaces/teamspaces.redux';
 import { FormattedMessage } from 'react-intl';
 
-import StorageIcon from '@assets/icons/storage.svg';
+import StorageIcon from '@assets/icons/filled/storage-filled.svg';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { QuotaValuesContainer, WarningIcon } from './teamspaceQuota.styles';
 
