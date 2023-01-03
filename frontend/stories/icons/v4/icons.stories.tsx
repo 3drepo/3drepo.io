@@ -20,7 +20,7 @@ import { IconsTemplate } from '../icons.component';
 import { getIcons } from '../icons.helper';
 
 export default {
-	title: 'Icons/\\Socials',
+	title: 'Icons/\\v4',
 	argTypes: {
 		backgroundColor: {
 			type: 'string',
@@ -30,9 +30,10 @@ export default {
 			defaultValue: 10,
 		},
 	},
+	parameters: { controls: { exclude: 'icons' } },
 } as ComponentMeta<any>;
 
 export const Icons = IconsTemplate.bind({});
 Icons.args = {
-	icons: getIcons(require.context('@assets/icons/socials/', false, /\.*(svg)/), 'socials'),
+	icons: getIcons(require.context('@assets/icons/v4/', false, /\.*(svg)/), 'v4'),
 };

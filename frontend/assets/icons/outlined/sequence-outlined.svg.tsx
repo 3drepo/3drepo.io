@@ -21,7 +21,7 @@ type IProps = {
 export default ({ className }: IProps) => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" className={className}>
 		<g clipPath="url(#clip0_1244_11677)">
-			<rect width="1024" height="1024" fill="white" />
+			<rect width="1024" height="1024" fill="none" />
 			<circle cx="512" cy="512" r="476" stroke="currentColor" strokeWidth="72" />
 			<path
 				d="M403 684.679V345.252C403 314.77 438.518 298.083 461.981 317.542L673.063 492.601C690.769 507.285 690.349 534.582 672.199 548.715L461.118 713.083C437.474 731.495 403 714.646 403 684.679Z"
@@ -31,7 +31,7 @@ export default ({ className }: IProps) => (
 		</g>
 		<defs>
 			<clipPath id="clip0_1244_11677">
-				<rect width="1024" height="1024" fill="white" />
+				<rect width="1024" height="1024" fill="none" />
 			</clipPath>
 		</defs>
 	</svg>

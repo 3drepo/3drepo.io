@@ -16,7 +16,7 @@
  */
 import { Dialog } from '@mui/material';
 
-import CloseIcon from '@assets/icons/close.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { CloseButton } from './modal.styles';
 
 interface IModal {

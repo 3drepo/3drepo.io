@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { DialogContainer, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 
 interface IWarningModal {
 	message: string;
