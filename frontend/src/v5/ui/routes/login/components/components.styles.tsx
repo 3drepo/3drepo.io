@@ -17,8 +17,8 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { Typography } from '@controls/typography';
-import UserIcon from '@assets/icons/user.svg';
-import PasswordIcon from '@assets/icons/lock.svg';
+import UserIcon from '@assets/icons/outlined/user-outlined.svg';
+import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
 import styled, { css } from 'styled-components';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 import { FormTextField, FormPasswordField as FormPasswordFieldBase } from '@controls/inputs/formInputs.component';
@@ -47,6 +47,10 @@ export const FormUsernameField = styled(FormTextField).attrs({
 	}),
 	autoComplete: 'login',
 })`
+	svg {
+		width: 16px;
+		height: 15px;
+	}
 	${authFieldStyles}
 `;
 

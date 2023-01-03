@@ -16,7 +16,7 @@
  */
 
 import { Dispatch, ReactNode } from 'react';
-import ArrowIcon from '@assets/icons/arrow.svg';
+import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Container, Button, Indicator, Label } from './dashboardListHeaderLabel.styles';

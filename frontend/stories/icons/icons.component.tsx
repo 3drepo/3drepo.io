@@ -40,6 +40,7 @@ const IconBoxContainer = styled.div<{ $size: number }>`
 	& > span {
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 		font-weight: 500;
+		color: #000;
 		${({ $size }) => css`
 			font-size: ${$size * 1.5}px;
 		`}
@@ -59,10 +60,12 @@ const TemplateContainer = styled.div`
 	flex-flow: wrap;
 	align-items: baseline;
     justify-content: space-evenly;
+    max-height: 100vh;
+    overflow-y: scroll;
 `;
 
-export const IconsTemplate = ({ backgroundColor = '#6d9ded', icons, iconSize }) => (
-	<TemplateContainer style={{ backgroundColor }}>
+export const IconsTemplate = ({ backgroundColor = '#6d9ded', color, icons, iconSize }) => (
+	<TemplateContainer style={{ backgroundColor, color }}>
 		{icons.map((icon) => <IconBox {...icon} $size={iconSize} key={icon.name} />)}
 	</TemplateContainer>
 );

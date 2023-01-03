@@ -20,7 +20,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { isEmpty, isEqual, memoize, pick } from 'lodash';
 import { PureComponent } from 'react';
 
-import AdminIconSrc from '@assets/icons/how_to_reg.svg';
+import AdminIconSrc from '@assets/icons/v4/how_to_reg.svg';
 import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { CellUserSearch } from '../customTable/components/cellUserSearch/cellUserSearch.component';
 import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/tableHeadingRadio.component';
