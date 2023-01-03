@@ -28,7 +28,6 @@ jobs:
   check-merge-ready:
     name: Ensure all reviewers have approved the PR
     runs-on: ubuntu-latest
-    needs: [ get-details ]
     outputs:
       approved: ${{ steps.checkReviews.outputs.approved }}
     steps:
@@ -36,7 +35,7 @@ jobs:
         id: checkReviews
         uses: 3drepo/all-reviewers-approved@v1
         with:
-          pr: ${{ needs.get-details.outputs.issue-number }}
+          pr: ${{ github.event.pull_request.number }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"

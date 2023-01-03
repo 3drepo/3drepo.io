@@ -16,7 +16,7 @@
  */
 
 import { PasswordForgotSchema } from '@/v5/validation/userSchemes/passwordChangeSchemes';
-import EmailIcon from '@assets/icons/email.svg';
+import EmailIcon from '@assets/icons/filled/email-filled.svg';
 import { AuthTemplate } from '@components/authTemplate';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';

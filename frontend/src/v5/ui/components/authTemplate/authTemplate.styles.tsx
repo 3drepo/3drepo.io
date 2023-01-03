@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import LoginBackground from '@assets/images/login_background.svg';
-import DefaultLogoBase from '@assets/icons/colored_logo.svg';
+import DefaultLogoBase from '@assets/icons/filled/logo_text-filled.svg';
 import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';

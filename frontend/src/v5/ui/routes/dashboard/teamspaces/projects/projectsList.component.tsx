@@ -17,7 +17,7 @@
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
