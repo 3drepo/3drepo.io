@@ -62,7 +62,7 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 						font-weight: 600;
 						font-size: 12px;
 						height: 30px;
-						padding: 7px 15px;
+						padding: 7px 10px;
 						.MuiChip-label {
 							padding: 0;
 						}
