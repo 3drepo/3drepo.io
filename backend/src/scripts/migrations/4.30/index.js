@@ -15,24 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const moveTeamspacePermissions = require('./moveTeamspacePermissions');
-const moveTeamspaceFlags = require('./moveTeamspaceFlags');
+const moveCustomDataToTeamspaceSettings = require('./moveCustomDataToTeamspaceSettings');
 
 const scripts = [
-	{ script: moveTeamspacePermissions, desc: 'Move teamspace permissions to teamspace settings' },
-	{ script: moveTeamspaceFlags, desc: 'Move teamspace flags to addOns' },
+	{ script: moveCustomDataToTeamspaceSettings, desc: 'Move customData to teamspace settings' },
 ];
 
-const argsDef = (yargs) => yargs.option('maxParallelSizeMB',
-	{
-		describe: 'Maximum amount of file size to process in parallel',
-		type: 'number',
-		default: 2048,
-	}).option('maxParallelFiles',
-	{
-		describe: 'Maximum amount of files to process in parallel',
-		type: 'number',
-		default: 2000,
-	});
-
-module.exports = { scripts, argsDef };
+module.exports = scripts;
