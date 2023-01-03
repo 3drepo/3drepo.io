@@ -37,7 +37,7 @@ const trelloBoardStyles = css`
 	}
 
 	.react-trello-lane {
-		height: 648px;
+		height: 629px;
 		width: 405px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
@@ -84,6 +84,7 @@ export const Container = styled.div`
 
 	${BoardContainer} {
 		padding-top: 16px;
+		border-top: none;
 	}
 
 	// header with ellipsis menu
