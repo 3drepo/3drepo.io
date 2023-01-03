@@ -27,9 +27,10 @@ import {
 	PlaceholderText,
 } from '@/v4/routes/components/filterPanel/filterPanel.styles';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
+import { Container } from '@/v4/routes/viewerGui/viewerGui.styles';
 
 export default css`
-	#gui-container {
+	${Container} {
 		${Title} {
 			color: ${({ theme }) => theme.palette.secondary.main};
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
