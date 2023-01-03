@@ -45,10 +45,10 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 				&${StyledGrid}:first-of-type {
 					display: none;
 				}
-				${Headline} {
-					${({ theme }) => theme.typography.h2};
-					color: ${({ theme }) => theme.palette.secondary.main};
-				}
+			}
+			${Headline} {
+				${({ theme }) => theme.typography.h5};
+				color: ${({ theme }) => theme.palette.secondary.main};
 			}
 			
 			${StyledChipInput} {
@@ -85,10 +85,7 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 			}
 			${SuggestionsContainer} {
 				padding: 0;
-				${Headline} {
-					color: ${({ theme }) => theme.palette.secondary.main};
-					${({ theme }) => theme.typography.h5};
-				}
+
 				.MuiIconButton-root {
 					svg {
 						color: ${({ theme }) => theme.palette.secondary.main};
