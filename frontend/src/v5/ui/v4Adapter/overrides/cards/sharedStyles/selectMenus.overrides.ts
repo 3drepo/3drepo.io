@@ -110,11 +110,12 @@ export const FieldsRowStyles = css`
 		}
 		${StyledFormControl} {
 			margin: 0;
-			&:first-child {
-				margin-right: 5px;
-			}
 			&:last-child {
 				margin-left: 5px;
+			}
+			&:first-child {
+				margin-right: 5px;
+				margin-left: 0;
 			}
 			${IssuesDateFieldContainer},
 			${RisksDateFieldContainer} {

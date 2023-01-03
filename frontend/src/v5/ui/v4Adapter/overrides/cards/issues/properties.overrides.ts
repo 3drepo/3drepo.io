@@ -45,7 +45,6 @@ export default css`
 			}
 
 			&:last-of-type:first-child {
-				margin-left: 0;
 				margin-right: 10px;
 			}
 		}
