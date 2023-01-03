@@ -27,7 +27,7 @@ const CommonChevronStyle = styled(ChevronIcon)`
 export const ChevronLeft = styled(CommonChevronStyle)`
 	transform: rotate(90deg);
 	margin-right: 2px;
-	`;
+`;
 
 export const ChevronRight = styled(CommonChevronStyle)`
 	transform: rotate(-90deg);
