@@ -22,7 +22,7 @@ import { range } from 'lodash';
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { Button } from '@controls/button';
-import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';

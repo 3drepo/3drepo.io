@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TickIcon from '@assets/icons/tick.svg';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { formatMessage } from '@/v5/services/intl';

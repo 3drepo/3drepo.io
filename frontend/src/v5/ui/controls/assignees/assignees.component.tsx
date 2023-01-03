@@ -16,7 +16,7 @@
  */
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { isEqual } from 'lodash';
 import { memo, useState } from 'react';
@@ -64,7 +64,6 @@ export const Assignees = memo(({
 		<AssigneesList onClick={onClick} {...props}>
 			<HiddenSearchSelect
 				value={values}
-				multiple
 				open={open}
 				onClose={handleClose}
 				onChange={onChange}

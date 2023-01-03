@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Button, DialogContentText, DialogTitle } from '@mui/material';
-import DeleteIcon from '@assets/icons/delete.svg';
+import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import {
 	DialogContainer,
