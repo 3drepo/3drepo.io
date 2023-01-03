@@ -39,7 +39,7 @@ export const OpenInViewerButton = memo((props: IProps) => {
 	const handleGoToModel = (event) => {
 		event.stopPropagation();
 		const { teamspace, model, query, match } = props;
-		let targetUrl = window.location.origin; 
+		let targetUrl = window.location.origin;
 		if (isV5()) {
 			const { project } = match.params;
 			const viewerParams = {
