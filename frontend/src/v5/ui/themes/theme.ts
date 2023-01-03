@@ -866,9 +866,12 @@ export const theme = createTheme({
 						height: 35,
 						lineHeight: '35px',
 					},
-					'input, textarea, .MuiInputAdornment-root': {
+					'input, textarea': {
 						...typography.body1,
 						color: COLOR.SECONDARY_MAIN,
+					},
+					'.MuiInputAdornment-root': {
+						color: COLOR.BASE_MAIN,
 					},
 					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
 						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
@@ -878,18 +881,18 @@ export const theme = createTheme({
 					'&, &:focus, &:active, &:hover': {
 						'.MuiOutlinedInput-notchedOutline': {
 							borderRadius: 5,
-							border: `1px solid ${COLOR.BASE_LIGHTER}`,
+							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 						},
 						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.BASE_LIGHT,
+							borderColor: COLOR.SECONDARY_LIGHTEST,
 						},
 						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
 							borderColor: COLOR.ERROR_MAIN,
 						},
 					},
 					'&.Mui-disabled': {
-						borderColor: COLOR.BASE_LIGHT,
-						'input, textarea, .MuiInputAdornment-root, .MuiSelect-select': {
+						borderColor: COLOR.BASE_LIGHTEST,
+						'input, textarea, .MuiInputAdornment-root svg, .MuiSelect-select, .MuiSelect-icon': {
 							color: COLOR.BASE_LIGHT,
 							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
 						},
@@ -924,7 +927,7 @@ export const theme = createTheme({
 					position: 'absolute',
 					top: 'unset',
 					boxSizing: 'border-box',
-					border: `1px solid ${COLOR.BASE_LIGHTER}`,
+					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 					legend: {
 						display: 'none',
 					},
@@ -954,7 +957,7 @@ export const theme = createTheme({
 						width: 10,
 						top: '40%',
 						pointerEvents: 'none',
-						color: COLOR.SECONDARY_MAIN,
+						color: COLOR.BASE_MAIN,
 					},
 				},
 			},

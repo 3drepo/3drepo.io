@@ -32,6 +32,10 @@ export default css`
 				padding: 0px 11px;
 			}
 
+			.MuiSelect-select {
+				border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			}
+
 			// Drop down icon for date selector
 			.MuiInputAdornment-root {
 				position: absolute;

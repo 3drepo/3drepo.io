@@ -37,6 +37,10 @@ export default css`
 		padding: 0 15px;
 		/* TODO - fix after new palette is released */
 		background-color: #F7F8FA;
+
+		.MuiSelect-select {
+			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		}
 		
 		${safetiBaseRisk}
 		${safetiBaseTreatments}
