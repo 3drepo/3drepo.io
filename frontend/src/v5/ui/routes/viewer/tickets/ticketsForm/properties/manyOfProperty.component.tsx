@@ -31,10 +31,10 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	} else {
 		items = (values as string[]).map((value) => ({ value, label: value }));
 	}
-	const filterImpossibleValues = intersection(props.value, items.map((i) => i.value));
+	const validValues = intersection(props.value, items.map((i) => i.value));
 
 	return (
-		<MultiSelect {...props} value={filterImpossibleValues ?? []}>
+		<MultiSelect {...props} value={validValues ?? []}>
 			{(items).map(({ value, label }) => (
 				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
 			))}
