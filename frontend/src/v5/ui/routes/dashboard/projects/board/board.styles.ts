@@ -32,7 +32,6 @@ const trelloBoardStyles = css`
 
 	.react-trello-board {
 		padding: 0;
-		/* padding: 16px 0; */
 		overflow: unset;
 	}
 
@@ -87,12 +86,12 @@ export const Container = styled.div`
 		border-top: none;
 	}
 
-	// header with ellipsis menu
+	/* header with ellipsis menu */
 	${Title} {
 		display: none;
 	}
 
-	// general select styling
+	/* general select styling */
 	.MuiSelect-select {
 		padding-left: 15px;
 		border: solid 1px ${({ theme }) => theme.palette.base.lighter};
@@ -102,7 +101,7 @@ export const Container = styled.div`
 		}
 	}
 
-	// background
+	/* background */
 	.MuiPaper-root {
 		background-color: transparent;
 		box-shadow: none;
@@ -112,7 +111,7 @@ export const Container = styled.div`
 		background-color: transparent;
 		padding: 10px 75px;
 
-		// left handside selects
+		/* left handside selects */
 		${DataConfig} {
 			display: flex;
 			width: 403px;
@@ -120,20 +119,20 @@ export const Container = styled.div`
 			> * {
 				width: 403px;
 
-				// hide teamspace & project select
+				/* hide teamspace & project select */
 				&:not(:last-child) {
 					display: none;
 				}
 			}
 		}
 
-		// right handside selects
+		/* right handside selects */
 		${ViewConfig} > div {
 			width: 140px;
 		}
 	}
 
-	// add new card styling
+	/* add new card styling */
 	.MuiButtonBase-root[aria-label="Add new card"] {
 		height: 48px;
 		width: 48px;
@@ -150,7 +149,8 @@ export const Container = styled.div`
 		}
 
 		&:disabled {
-			background-color: #edf0f8; // TODO - fix after new palette is released
+			/* TODO - fix after new palette is released */
+			background-color: #edf0f8;
 		}
 	}
 
