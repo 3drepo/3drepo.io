@@ -31,6 +31,8 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	} else {
 		items = (values as string[]).map((value) => ({ value, label: value }));
 	}
+	// Must filter out users not included in this teamspace. This can occur when a user
+	// has been assigned to a ticket and later on is removed from the teamspace
 	const validValues = intersection(props.value, items.map((i) => i.value));
 
 	return (

@@ -41,6 +41,8 @@ export const Assignees = memo(({
 	...props
 }: AssigneesProps) => {
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
+	// Must filter out users not included in this teamspace. This can occur when a user
+	// has been assigned to a ticket and later on is removed from the teamspace
 	const [values, setValues] = useState(intersection(initialValues, allUsersAndJobs.map((i) => i.value)));
 	const [open, setOpen] = useState(false);
 	const listedAssignees = values.slice(0, max - 1);
