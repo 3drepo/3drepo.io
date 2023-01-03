@@ -450,7 +450,7 @@ export function Board(props: IProps) {
 			<div ref={boardRef}>
 				<ConditionalV5Wrapper
 					v5Wrapper={ScrollArea}
-					v5WrapperProps={{ style: { height: 692 } }}
+					v5WrapperProps={{ style: { height: 648 } }}
 				>
 					<TrelloBoard
 						data={boardData}

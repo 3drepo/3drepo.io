@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { BoardItem, Config, DataConfig, LoaderContainer, ViewConfig, Container as V4Container } from '@/v4/routes/board/board.styles';
+import { BoardItem, Config, DataConfig, LoaderContainer, ViewConfig, Container as V4Container, BoardContainer } from '@/v4/routes/board/board.styles';
 import { Title } from '@/v4/routes/components/panel/panel.styles';
 import { ThumbnailPlaceholder } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 
@@ -31,12 +31,13 @@ const trelloBoardStyles = css`
 	}
 
 	.react-trello-board {
-		padding: 16px 0;
+		padding: 0;
+		/* padding: 16px 0; */
 		overflow: unset;
 	}
 
 	.react-trello-lane {
-		height: 673px;
+		height: 648px;
 		width: 405px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
@@ -80,6 +81,10 @@ export const Container = styled.div`
 	width: 100vw;
 	box-sizing: border-box;
 	max-width: unset;
+
+	${BoardContainer} {
+		padding-top: 16px;
+	}
 
 	// header with ellipsis menu
 	${Title} {
