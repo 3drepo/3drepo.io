@@ -76,14 +76,6 @@ const EditIssue = css`
 			${ShowModelButtonContainer} button {
 				margin: 0 0 -21px 150px;
 				color: ${({ theme }) => theme.palette.secondary.main};
-
-				&:hover {
-					color: ${({ theme }) => theme.palette.secondary.dark};
-				}
-
-				&:active {
-					color: ${({ theme }) => theme.palette.secondary.darkest};
-				}
 			}
 		}
 
