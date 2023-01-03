@@ -26,7 +26,7 @@ import { PasswordChangeSchema } from '@/v5/validation/userSchemes/passwordChange
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
-import ErrorIcon from '@assets/icons/warning_small.svg';
+import ErrorIcon from '@assets/icons/twoToned/warning_small-two_toned.svg';
 import { AuthHeading, AuthParagraph, ErrorMessage, FormPasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';

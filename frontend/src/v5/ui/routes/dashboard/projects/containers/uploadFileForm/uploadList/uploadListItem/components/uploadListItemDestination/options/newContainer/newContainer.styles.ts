@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import UnstyledIcon from '@assets/icons/add_circle.svg';
+import UnstyledIcon from '@assets/icons/filled/add_circle-filled.svg';
 
 export const NewContainerOption = styled.div`
 	&& {

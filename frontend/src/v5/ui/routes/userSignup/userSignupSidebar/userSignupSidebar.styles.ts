@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CheckBase from '@assets/icons/check.svg';
+import TickBase from '@assets/icons/outlined/tick-outlined.svg';
 import LatopIconBase from '@assets/icons/outlined/laptop-outlined.svg';
 import { Button } from '@controls/button';
 import { Display } from '@/v5/ui/themes/media';
@@ -64,7 +64,7 @@ export const BulletPointIcon = styled.div`
 	margin-right: 10px;
 `;
 
-export const Check = styled(CheckBase)`
+export const Tick = styled(TickBase)`
 	width: 13px;
 	height: 13px;
 	color: ${({ theme }) => theme.palette.primary.main};
