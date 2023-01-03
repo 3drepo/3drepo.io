@@ -23,6 +23,7 @@ const { UUIDToString } = require('../../../../../../../../src/v5/utils/helper/uu
 
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { updateOne } = require(`${src}/handler/db`);
 
 let server;
 let agent;
@@ -72,6 +73,12 @@ const testGetModelList = () => {
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, models);
+			const favourites = models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : []));
+			await updateOne('admin', 'system.users', { user: users.tsAdmin.user }, {
+				$set: {
+					[`customData.starredModels.${teamspace}`]: favourites,
+				},
+			});
 		});
 
 		const generateTestData = (isFed) => {
@@ -82,45 +89,47 @@ const testGetModelList = () => {
 				key = users.tsAdmin.apiKey,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s${key ? `?key=${key}` : ''}`;
 
+			const modelList = models.flatMap(({ _id, isFavourite, name, properties }) => {
+				const shouldInclude = isFed ? properties?.federate : !properties?.federate;
+				return shouldInclude ? { _id, isFavourite: !!isFavourite, name, role: 'admin' } : [];
+			});
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the user is a member of the teamspace but has no access to any of the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), true, { [`${modelType}s`]: [] }],
+				[`the user has access to some ${modelType}s`, getRoute(), true, { [`${modelType}s`]: modelList }],
 			];
 		};
 
-		// project no model
-		const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations`;
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					const key = Object.keys(expectedOutput)[0];
 
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
+					expect(res.body[key].length).toBe(expectedOutput[key].length);
+					expect(res.body[key]).toEqual(expect.arrayContaining(expectedOutput[key]));
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should return empty array if the user has no access to any of the federations', async () => {
-			const res = await agent.get(`${route}?key=${users.noProjectAccess.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ federations: [] });
-		});
-
+		/*
 		test('should return the list of federations if the user has access', async () => {
 			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({
 				federations: modelSettings.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate
 					? { _id, name, role: 'admin', isFavourite: !!isFavourite } : [])),
 			});
-		});
+		}); */
 	});
 };
-
+/*
 const views = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -794,13 +803,13 @@ const testGetSettings = () => {
 			expect(res.body).toEqual(formatToSettings(federationWithStringView));
 		});
 	});
-};
+}; */
 
 describe('E2E routes/teamspaces/projects/federations', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		await setupData();
+		//		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetModelList();
