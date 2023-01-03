@@ -32,16 +32,16 @@ interface IProps {
 	query?: string;
 	history?: any;
 	preview?: boolean;
-	match?: any;
+	location?: any;
 }
 
 export const OpenInViewerButton = memo((props: IProps) => {
 	const handleGoToModel = (event) => {
 		event.stopPropagation();
-		const { teamspace, model, query, match } = props;
+		const { teamspace, model, query, location } = props;
 		let targetUrl = window.location.origin;
 		if (isV5()) {
-			const { project } = match.params;
+			const project = location.pathname.split("/")[4];
 			const viewerParams = {
 				containerOrFederation: model,
 				teamspace,
