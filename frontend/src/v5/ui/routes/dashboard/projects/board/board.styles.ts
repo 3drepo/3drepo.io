@@ -36,7 +36,7 @@ const trelloBoardStyles = css`
 	}
 
 	.react-trello-lane {
-		height: 629px;
+		height: 100%;
 		width: 405px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
@@ -78,6 +78,7 @@ export const Container = styled.div`
 	position: absolute;
 	left: 0;
 	width: 100vw;
+	height: calc(100vh - 182px);
 	box-sizing: border-box;
 	max-width: unset;
 
