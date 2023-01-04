@@ -301,7 +301,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 									shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 									name="date"
 									value={value}
-									inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES}
+									inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 : LONG_DATE_TIME_FORMAT_NO_MINUTES}
 									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
 									placeholder="date"
 									dateTime
