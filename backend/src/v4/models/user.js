@@ -49,7 +49,7 @@ const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
 const { assignUserToJob } = require(`${v5Path}/models/jobs.js`);
-const { getAddOns } = require(`${v5Path}/models/teamspaces`);
+const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 

@@ -19,7 +19,7 @@ const { src } = require('../../helper/path');
 
 const { generateRandomString } = require('../../helper/services');
 
-const Teamspace = require(`${src}/models/teamspaces`);
+const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -481,7 +481,7 @@ const testGetRiskCategories = () => {
 	});
 };
 
-describe('models/teamspaces', () => {
+describe('models/teamspaceSettings', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
 	testGetSubscriptions();

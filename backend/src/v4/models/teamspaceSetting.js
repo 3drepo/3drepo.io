@@ -23,7 +23,7 @@ const responseCodes = require("../response_codes");
 const utils = require("../utils");
 const Mitigation = require("./mitigation");
 const {v5Path} = require("../../interop");
-const TeamspaceModelV5 = require(`${v5Path}/models/teamspaces`);
+const TeamspaceModelV5 = require(`${v5Path}/models/teamspaceSettings`);
 const SettingProcessorV5 = require(`${v5Path}/processors/teamspaces/settings`);
 
 const colName = "teamspace";

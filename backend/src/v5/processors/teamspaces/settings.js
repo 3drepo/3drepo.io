@@ -16,7 +16,7 @@
  */
 
 const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
-const { getRiskCategories } = require('../../models/teamspaces');
+const { getRiskCategories } = require('../../models/teamspaceSettings');
 
 const Settings = {};
 
