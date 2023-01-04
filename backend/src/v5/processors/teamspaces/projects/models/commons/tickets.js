@@ -128,12 +128,11 @@ const processCommentImages = (images = []) => {
 
 	for (let i = 0; i < images.length; i++) {
 		const data = images[i];
+
 		if (isBuffer(data)) {
 			const ref = generateUUID();
 			refsAndBinary.push({ data, ref });
 			images[i] = ref;
-		} else {
-			images[i] = stringToUUID(data);
 		}
 	}
 
@@ -148,7 +147,7 @@ Tickets.addComment = async (teamspace, project, model, ticket, commentData, auth
 };
 
 Tickets.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
-	const refsAndBinary = processCommentImages(updateData.images);
+	const refsAndBinary = processCommentImages(updateData.images);	
 	await updateComment(teamspace, oldComment, updateData);
 	await storeFiles(teamspace, project, model, ticket, refsAndBinary);
 };

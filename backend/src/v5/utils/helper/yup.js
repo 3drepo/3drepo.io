@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('./uuids');
+const { UUIDToString, stringToUUID } = require('./uuids');
 const Yup = require('yup');
 const { fileExtensionFromBuffer, isUUIDString } = require('./typeCheck');
 const { fileUploads } = require('../config');
@@ -102,8 +102,8 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
 Yup.addMethod(Yup.mixed, 'imageValidityTest', function (isNullable){
-	return this.test('Image validity test', '', async (value, { createError }) => {
-		if (isUUIDString(value)){
+	return this.test('Image validity test', '', async (value, { createError, originalValue }) => {
+		if (isUUIDString(originalValue)){
 			return true;
 		}
 
@@ -131,12 +131,17 @@ YupHelper.types.embeddedImage = (isNullable) => Yup.mixed()
 	.imageValidityTest(isNullable);
 
 YupHelper.types.embeddedImageOrRef = (teamspace, project, model, ticket, comment) => Yup.mixed()
-	.transform((n, orgVal) => orgVal && !isUUIDString(orgVal) ? Buffer.from(orgVal, 'base64') : n)
-	.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref' , async (value) => {
+	.transform((currValue, orgVal) => {
+		if(orgVal)
+			return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+		
+		return currValue;
+	})
+	.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref' , async (value, { originalValue }) => {
 		try{
-			if (isUUIDString(value)) {
+			if (isUUIDString(originalValue)) {
 				const { images } = await getCommentById(teamspace, project, model, ticket, comment, { images: 1 }) ?? [];
-				return images.map(UUIDToString).includes(value);
+				return images.map(UUIDToString).includes(originalValue);
 			}	
 	
 			return true;
@@ -144,6 +149,6 @@ YupHelper.types.embeddedImageOrRef = (teamspace, project, model, ticket, comment
 			return false;
 		}		
 	})
-	.imageValidityTest();
+	.imageValidityTest()
 
 module.exports = YupHelper;

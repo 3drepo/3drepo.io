@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../helper/services');
+const { generateRandomString, generateTemplate, generateTicket, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
@@ -358,62 +358,89 @@ const testGetTicketList = () => {
 	});
 };
 
-const addCommentImageTest = async () => {
-	const teamspace = generateRandomString();
-	const project = generateRandomString();
-	const model = generateRandomString();
-	const ticket = generateRandomString();
-	const author = generateRandomString();
-	const expectedOutput = generateRandomString();
-	const imageBuffer = generateRandomString();
-	const commentData = {
-		[generateRandomString()]: generateRandomString(),
-		images: [imageBuffer]
-	};
-
-	TicketsModel.addComment.mockResolvedValueOnce(expectedOutput);
-
-	await expect(Tickets.addComment(teamspace, project, model, ticket, commentData, author))
-		.resolves.toEqual(expectedOutput);
-
-	const processedComment = CommentsModel.addComment.mock.calls[0][4];
-	const imgRef = processedComment.images[0];
-
-	expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
-	expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
-		{ ...commentData, images: [imgRef] }, author);
-
-	const meta = { teamspace, project, model, ticket };
-	expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-	expect(FilesManager.storeFile).toHaveBeenCalledWith(
-		teamspace, TICKETS_RESOURCES_COL, imgRef, imageBuffer, meta,
-	);
-};
-
 const testAddComment = () => {
 	describe('Add comment', () => {
-		test('should call addComment in model and return whatever it returns', async () => {
-			const teamspace = generateRandomString();
-			const project = generateRandomString();
-			const model = generateRandomString();
-			const ticket = generateRandomString();			
-			const author = generateRandomString();
-			const commentData = generateRandomString();
-			const expectedOutput = generateRandomString();
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+		const author = generateRandomString();
+		const expectedOutput = generateRandomString();		
 
+		test('should call addComment in model and return whatever it returns', async () => {					
+			const commentData = generateRandomString();		
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
 			await expect(Tickets.addComment(teamspace, project, model, ticket, commentData, author))
 				.resolves.toEqual(expectedOutput);
 
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket);
+			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket, commentData, author);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
 
-		test('should process image and store a ref', () => addTicketImageTest());
-		test('should process screenshot from view data and store a ref', () => addTicketImageTest(true));
+		test('should process image and store a ref', async () => {			
+			const imageBuffer = generateRandomBuffer();
+			const commentData = {
+				[generateRandomString()]: generateRandomString(),
+				images: [imageBuffer]
+			};
+			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.addComment(teamspace, project, model, ticket, commentData, author))
+				.resolves.toEqual(expectedOutput);
+
+			const imgRef = CommentsModel.addComment.mock.calls[0][4].images[0];
+			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
+				{ ...commentData, images: [imgRef] }, author);
+
+			const meta = { teamspace, project, model, ticket };
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, imgRef, imageBuffer, meta);
+		});
+	});
+};
+
+const testUpdateComment = () => {
+	describe('Update comment', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+		const oldComment = { [generateRandomString()]: generateRandomString() };
+
+		test('should call updateComment in model', async () => {					
+			const updateData = generateRandomString();		
+
+			await expect(Tickets.updateComment(teamspace, project, model, ticket, oldComment, updateData))
+				.resolves.toEqual(undefined);
+
+			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, oldComment, updateData);
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+		});
+
+		test('should process image and store a ref', async () => {			
+			const imageBuffer = generateRandomBuffer();
+			const updateData = {
+				[generateRandomString()]: generateRandomString(),
+				images: [imageBuffer, generateUUIDString()]
+			};			
+
+			await expect(Tickets.updateComment(teamspace, project, model, ticket, oldComment, updateData))
+				.resolves.toEqual(undefined);
+
+			const imgRef = CommentsModel.updateComment.mock.calls[0][2].images[0];
+			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, oldComment, updateData);
+
+			const meta = { teamspace, project, model, ticket };
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, imgRef, imageBuffer, meta);
+		});
 	});
 };
 
@@ -424,4 +451,5 @@ describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testUpdateTicket();
 	testGetTicketList();
 	testAddComment();
+	testUpdateComment();
 });
