@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 import {
 	HorizontalView as HorizontalViewRisk,
 	MessageContainer as MessageContainerRisk,
@@ -31,6 +30,7 @@ import { Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/comp
 import { FilterWrapper, Container as CommentListContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { Counter, Actions, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { BoardDialogTitle } from '@/v4/routes/board/board.styles';
+import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 
 const PrimaryButtonStyles = css`
 	background-color: ${({ theme }) => theme.palette.primary.main};
