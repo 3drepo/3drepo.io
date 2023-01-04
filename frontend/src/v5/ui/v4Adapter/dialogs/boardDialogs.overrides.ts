@@ -126,7 +126,9 @@ const EditIssue = css`
 
 export default css`
 	#issues-card-save-button,
-	#issues-card-add-new-comment {
+	#issues-card-add-new-comment,
+	#risks-card-save-button,
+	#risks-card-add-new-comment {
 		${PrimaryButtonStyles}
 	}
 	${EditIssue}
