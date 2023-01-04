@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import sequences from './sequences.overrides';
+import sequencesTab from './sequencesTab.overrides';
 import selectMenus from './selectMenus.overrides';
 import shapes from './shapes.overrides';
 
 export default css`
-	${sequences}
+	${sequencesTab}
 	${shapes}
 	${selectMenus}
 `;
