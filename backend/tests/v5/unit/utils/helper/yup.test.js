@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, generateUUID } = require('../../../helper/services');
 
 const YupHelper = require(`${src}/utils/helper/yup`);
 
@@ -134,6 +135,19 @@ const testEmbeddedImage = () => {
 	});
 };
 
+const testEmbeddedImageOrRef = () => {
+	const existingRef = generateUUID();
+	describe.each([
+		[null, [], false],
+		[UUIDToString(existingRef), [existingRef], true],
+		[generateUUIDString(), [existingRef], false],
+	])('Image validator', (data, images, res) => {
+		test(`${data} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.embeddedImageOrRef(images).isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
 describe('utils/helper/yup', () => {
 	testId();
 	testColorArr();
@@ -143,4 +157,5 @@ describe('utils/helper/yup', () => {
 	testLongDesc();
 	testTimestamp();
 	testEmbeddedImage();
+	testEmbeddedImageOrRef();
 });

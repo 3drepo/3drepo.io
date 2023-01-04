@@ -130,7 +130,7 @@ YupHelper.types.embeddedImage = (isNullable) => Yup.mixed()
 	.transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n))
 	.imageValidityTest(isNullable);
 
-YupHelper.types.embeddedImageOrRef = (teamspace, project, model, ticket, comment) => Yup.mixed()
+YupHelper.types.embeddedImageOrRef = (currentImages = []) => Yup.mixed()
 	.transform((currValue, orgVal) => {
 		if(orgVal)
 			return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
@@ -138,16 +138,7 @@ YupHelper.types.embeddedImageOrRef = (teamspace, project, model, ticket, comment
 		return currValue;
 	})
 	.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref' , async (value, { originalValue }) => {
-		try{
-			if (isUUIDString(originalValue)) {
-				const { images } = await getCommentById(teamspace, project, model, ticket, comment, { images: 1 }) ?? [];
-				return images.map(UUIDToString).includes(originalValue);
-			}	
-	
-			return true;
-		} catch (err) {
-			return false;
-		}		
+		return !isUUIDString(originalValue) || currentImages.map(UUIDToString).includes(originalValue);
 	})
 	.imageValidityTest()
 

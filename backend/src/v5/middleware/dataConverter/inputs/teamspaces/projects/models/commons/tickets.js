@@ -28,6 +28,7 @@ const { validateMany } = require('../../../../../../common');
 const Yup = require('yup');
 const { types } = require('../../../../../../../utils/helper/yup');
 const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
+const { getCommentById } = require('../../../../../../../models/tickets.comments');
 
 const TicketsMiddleware = {};
 
@@ -59,13 +60,21 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 
 const validateComment = (isNewComment) => async (req, res, next) => {
 	try {
-		const {  params: { teamspace, project, model, ticket, comment }} = req;
+		const {  params: { teamspace, project, model, ticket, comment: _id }} = req;		
+
+		const comment = await getCommentById(teamspace, project, model, ticket, _id, { images: 1, deleted: 1 })
+			.catch(() => undefined);
+
+		if (!isNewComment && comment?.deleted) {
+			throw createResponseCode(templates.invalidArguments, "Cannot update a deleted comment");
+		}
+
 		const schema = Yup.object().shape({
 			comment: Yup.string().min(1),
 			images: Yup.array().min(1).of(
 				isNewComment ?
 				types.embeddedImage() :
-				types.embeddedImageOrRef(teamspace, project, model, ticket, comment)
+				types.embeddedImageOrRef(comment?.images)
 			),
 		}).test(
 			'at-least-one-property',

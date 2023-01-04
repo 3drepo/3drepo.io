@@ -444,6 +444,28 @@ const testUpdateComment = () => {
 	});
 };
 
+const testGetCommentsByTicket = () => {
+	describe('Get comments by ticket', () => {
+		test('should call getCommentsByTicket in model with the expected projection', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+
+			const expectedOutput = generateRandomString();
+
+			CommentsModel.getCommentsByTicket.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getCommentsByTicket(teamspace, project, model, ticket))
+				.resolves.toEqual(expectedOutput);
+
+			const projection = { _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 };
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model, ticket, projection, { createdAt: -1 });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
 	testGetTicketResourceAsStream();
@@ -452,4 +474,5 @@ describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testGetTicketList();
 	testAddComment();
 	testUpdateComment();
+	testGetCommentsByTicket();
 });
