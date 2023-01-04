@@ -22,7 +22,7 @@ const { ADD_ONS } = require(`${v5Path}/models/teamspaces.constants`);
 const { USERS_DB_NAME } = require(`${v5Path}/models/users.constants`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const flags = Object.values(ADD_ONS);
+const addOnFields = Object.values(ADD_ONS);
 
 const run = async () => {
 	const oldFields = {
@@ -30,17 +30,17 @@ const run = async () => {
 		'customData.billing.subscriptions': 1,
 		'customData.addOns': 1,
 	};
-	flags.map((f) => {
+	addOnFields.map((f) => {
 		oldFields[`customData.${f}`] = 1;
 		return f;
 	});
 
 	const failedUsers = [];
 	const query = { $or: [
-		{'customData.permissions': { $exists: true }},
-		{'customData.billing.subscriptions': { $exists: true }},
-		{'customData.addOns': { $exists: true }},
-		...flags.map((f) => ({ [`customData.${f}`]: { $exists: true } })),
+		{ 'customData.permissions': { $exists: true } },
+		{ 'customData.billing.subscriptions': { $exists: true } },
+		{ 'customData.addOns': { $exists: true } },
+		...addOnFields.map((f) => ({ [`customData.${f}`]: { $exists: true } })),
 	] };
 
 	const users = await find(
@@ -50,7 +50,12 @@ const run = async () => {
 		{ _id: 0, user: 1, ...oldFields },
 	);
 
-	await Promise.all(users.map(({ user, customData: { addOns, billing: { subscriptions }, permissions, ...flags } }) => {
+	await Promise.all(users.map(({ user, customData: {
+		addOns,
+		billing: { subscriptions },
+		permissions,
+		...flags
+	} }) => {
 		logger.logInfo(`\t\t-${user}`);
 		const tsSettingsUpdate = {};
 
@@ -73,7 +78,7 @@ const run = async () => {
 		}
 
 		return Object.keys(tsSettingsUpdate).length > 0 && updateOne(user, 'teamspace', {}, { $set: tsSettingsUpdate }).catch((err) => {
-			logger.logError(`\t\t\t-Update teamspace settings for ${user} unsuccessful`);
+			logger.logError(`\t\t\t-Update teamspace settings for ${user} unsuccessful: ${err}`);
 			failedUsers.push(user);
 		});
 	}));
