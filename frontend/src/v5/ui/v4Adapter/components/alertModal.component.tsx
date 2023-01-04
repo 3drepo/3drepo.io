@@ -17,10 +17,9 @@
 
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import WarningIcon from '@assets/icons/warning.svg';
-import CloseIcon from '@assets/icons/close.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { CloseButton } from '@controls/modal/modal.styles';
-import { Actions, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Actions, Status, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 import { Container } from './alertModal.styles';
 
 interface AlertModalProps {

@@ -25,14 +25,12 @@ import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { ShareTextField } from '@controls/shareTextField';
-import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -292,11 +290,11 @@ export const SettingsForm = ({
 			)}
 			<FormSelectView
 				control={control}
+				name="defaultView"
+				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
 				views={containerOrFederation.views}
 				containerOrFederationId={containerOrFederation._id}
 				isContainer={isContainer}
-				name="defaultView"
-				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
 			<SectionTitle>
 				<FormattedMessage

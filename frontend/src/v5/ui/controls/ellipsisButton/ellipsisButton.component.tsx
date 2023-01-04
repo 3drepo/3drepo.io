@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import EllipsisIcon from '@assets/icons/ellipsis.svg';
+import EllipsisIcon from '@assets/icons/outlined/ellipsis-outlined.svg';
 import { CircleButton } from './ellipsisButton.styles';
 
 export type IEllipsisButton = {

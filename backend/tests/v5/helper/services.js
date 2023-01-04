@@ -74,12 +74,12 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
+db.createTeamspace = async (teamspace, admins = [], breaking = false, customData) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
+	await ServiceHelper.db.createTeamspaceRole(teamspace);
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
 			{ permissions: breaking ? undefined : permissions, ...customData }),
-		ServiceHelper.db.createTeamspaceRole(teamspace),
 		createTeamspaceSettings(teamspace),
 	]);
 };
@@ -206,7 +206,7 @@ ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
-ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
+ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),

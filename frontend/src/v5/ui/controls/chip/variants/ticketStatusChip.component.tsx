@@ -16,10 +16,10 @@
  */
 
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
-import ClockIcon from '@assets/icons/clock.svg';
-import CrossIcon from '@assets/icons/close.svg';
-import BellIcon from '@assets/icons/notifications.svg';
-import TickIcon from '@assets/icons/tick.svg';
+import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
+import BellIcon from '@assets/icons/outlined/bell-outlined.svg';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { formatMessage } from '@/v5/services/intl';
 import { Chip } from '../chip.component';

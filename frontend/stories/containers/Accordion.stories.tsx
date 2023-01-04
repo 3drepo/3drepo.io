@@ -17,7 +17,7 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Accordion } from '@controls/accordion/accordion.component';
-import Icon from '@assets/icons/stepper_error.svg';
+import Icon from '@assets/icons/outlined/stepper_error-outlined.svg';
 
 export default {
 	title: 'Containers/Accordion',
