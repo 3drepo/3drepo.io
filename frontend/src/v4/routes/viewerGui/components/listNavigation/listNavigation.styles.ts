@@ -30,12 +30,12 @@ export const StyledIconButton = styled(IconButton)`
 
 export const SkipPreviousIconV5 = styled(ChevronIcon)`
 	transform: rotate(90deg);
-    width: 14px;
-    height: 14px;
+	width: 14px;
+	height: 14px;
 `;
 
 export const SkipNextIconV5 = styled(ChevronIcon)`
 	transform: rotate(-90deg);
-    width: 14px;
-    height: 14px;
+	width: 14px;
+	height: 14px;
 `;
