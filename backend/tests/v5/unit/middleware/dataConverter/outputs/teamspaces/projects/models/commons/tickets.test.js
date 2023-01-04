@@ -386,8 +386,86 @@ const testSerialiseTicketList = () => {
 	});
 };
 
+const testSerialiseComment = () => {
+	describe('Serialise Comment', () => {				
+		test('Should cast dates correctly', async () => {		
+			const commentData = {
+				createdAt: generateRandomDate(),
+				updatedAt: generateRandomDate(),
+				history: [{	timestamp: generateRandomDate() }]				
+			};
+
+			const req = { commentData };
+
+			await expect(TicketOutputMiddleware.serialiseComment(req, {})).resolves.toBeUndefined();
+		
+			const output = {
+				createdAt: commentData.createdAt.getTime(),
+				updatedAt: commentData.updatedAt.getTime(),
+				history: [{ timestamp: commentData.history[0].timestamp.getTime() }]	
+			}
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { ...output });
+		});
+
+		test('Should cast uuids correctly', async () => {
+			const commentData = { _id: generateUUID() };
+			const req = { commentData };
+
+			await expect(TicketOutputMiddleware.serialiseComment(req, {})).resolves.toBeUndefined();
+		
+			const output = { _id: UUIDToString(commentData._id) };
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { ...output });
+		});
+	});
+};
+
+const testSerialiseCommentList = () => {
+	describe('Serialise Comment List', () => {				
+		test('Should cast dates correctly', async () => {		
+			const comments = times(5, () => ({
+				createdAt: generateRandomDate(),
+				updatedAt: generateRandomDate(),
+				history: [{	timestamp: generateRandomDate() }]				
+			}));
+
+			const req = { comments };
+			
+			await expect(TicketOutputMiddleware.serialiseCommentList(req, {})).resolves.toBeUndefined();
+		
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+
+			// the serialiser is already tested by testSerialiseComment.
+			const output = Responder.respond.mock.calls[0][3];
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output);
+		});
+
+		test('Should cast uuids correctly', async () => {
+			const comments = times(5, () => ({
+				_id: generateUUID()			
+			}));
+
+			const req = { comments };
+			
+			await expect(TicketOutputMiddleware.serialiseCommentList(req, {})).resolves.toBeUndefined();
+		
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+
+			// the serialiser is already tested by testSerialiseComment.
+			const output = Responder.respond.mock.calls[0][3];
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output);
+		});
+	});
+};
+
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
 	testSerialiseTicketList();
+	testSerialiseComment();
+	testSerialiseCommentList();
 });

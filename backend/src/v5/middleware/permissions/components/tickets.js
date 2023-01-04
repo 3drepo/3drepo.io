@@ -14,12 +14,13 @@ TicketPerms.canEditComment = async (req, res, next) => {
 		//ensure ticket exists
 		await getTicketById(teamspace, project, model, ticket);
 		
-        const { author } = await getCommentById(teamspace, project, model, ticket, comment, { _id: 0, author: 1 });
+        const commentData = await getCommentById(teamspace, project, model, ticket, comment);
 
-		if (user !== author) {			
+		if (user !== commentData.author) {			
 			return respond(req, res, templates.notAuthorized);
 		}
 
+		req.commentData = commentData;
 		await next();
 	} catch (err) {
 		respond(req, res, err);

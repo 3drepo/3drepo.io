@@ -80,9 +80,9 @@ Tickets.serialiseTicketList = async (req, res) => {
 
 Tickets.serialiseComment = async (req, res) => {
 	try {
-		const { commentData } = req;
-		respond(req, res, templates.ok, serialiseComment(commentData));
+		respond(req, res, templates.ok, serialiseComment(req.commentData));
 	} catch (err) {
+		/* istanbul ignore next */
 		respond(req, res, templates.unknown);
 	}
 };
@@ -92,6 +92,7 @@ Tickets.serialiseCommentList = async (req, res) => {
 		const comments = req.comments.map(c => serialiseComment(c));
 		respond(req, res, templates.ok, { comments });
 	} catch (err) {
+		/* istanbul ignore next */
 		respond(req, res, templates.unknown);
 	}
 };

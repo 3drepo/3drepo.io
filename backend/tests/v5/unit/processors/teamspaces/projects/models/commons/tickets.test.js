@@ -25,6 +25,9 @@ const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = r
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
+jest.mock('../../../../../../../../src/v5/models/tickets.comments');
+const CommentsModel = require(`${src}/models/tickets.comments`);
+
 jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
 const TemplatesModel = require(`${src}/schemas/tickets/templates`);
 
@@ -355,10 +358,70 @@ const testGetTicketList = () => {
 	});
 };
 
+const addCommentImageTest = async () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const ticket = generateRandomString();
+	const author = generateRandomString();
+	const expectedOutput = generateRandomString();
+	const imageBuffer = generateRandomString();
+	const commentData = {
+		[generateRandomString()]: generateRandomString(),
+		images: [imageBuffer]
+	};
+
+	TicketsModel.addComment.mockResolvedValueOnce(expectedOutput);
+
+	await expect(Tickets.addComment(teamspace, project, model, ticket, commentData, author))
+		.resolves.toEqual(expectedOutput);
+
+	const processedComment = CommentsModel.addComment.mock.calls[0][4];
+	const imgRef = processedComment.images[0];
+
+	expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
+	expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
+		{ ...commentData, images: [imgRef] }, author);
+
+	const meta = { teamspace, project, model, ticket };
+	expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+	expect(FilesManager.storeFile).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, imgRef, imageBuffer, meta,
+	);
+};
+
+const testAddComment = () => {
+	describe('Add comment', () => {
+		test('should call addComment in model and return whatever it returns', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();			
+			const author = generateRandomString();
+			const commentData = generateRandomString();
+			const expectedOutput = generateRandomString();
+
+			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.addComment(teamspace, project, model, ticket, commentData, author))
+				.resolves.toEqual(expectedOutput);
+
+			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket);
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+		});
+
+		test('should process image and store a ref', () => addTicketImageTest());
+		test('should process screenshot from view data and store a ref', () => addTicketImageTest(true));
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
 	testGetTicketResourceAsStream();
 	testGetTicketById();
 	testUpdateTicket();
 	testGetTicketList();
+	testAddComment();
 });

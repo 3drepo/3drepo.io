@@ -24,7 +24,8 @@ const {
 	addComment: addConTicketComment,
 	updateComment: updateConTicketComment,
 	deleteComment: deleteConTicketComment,
-	getComentsByTicket: getConTicketComments,
+	getCommentsByTicket: getConTicketComments,
+	getCommentById: getConTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
 	addTicket: addFedTicket,
@@ -35,7 +36,8 @@ const {
 	addComment: addFedTicketComment,
 	updateComment: updateFedTicketComment,
 	deleteComment: deleteFedTicketComment,
-	getComentsByTicket: getFedTicketComments,
+	getCommentsByTicket: getFedTicketComments,
+	getCommentById: getFedTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const {
 	hasCommenterAccessToContainer,
@@ -45,7 +47,7 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList, serialiseComment, serialiseCommentList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment, setCommentData, checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment, checkCommentExists, checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -158,9 +160,8 @@ const createComment = (isFed) => async (req, res) => {
 
 	try {
 		const addComment = isFed ? addFedTicketComment : addConTicketComment;
-		await addComment(teamspace, project, model, ticket, commentData, user);
-
-		respond(req, res, templates.ok);
+		const _id = await addComment(teamspace, project, model, ticket, commentData, user);
+		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -198,12 +199,26 @@ const deleteComment = (isFed) => async (req, res) => {
 
 const getTicketComments = (isFed) => async (req, res, next) => {
 	const {	params } = req;
-	const { teamspace, ticket } = params;
+	const { teamspace, project, model, ticket } = params;
 
 	try {
-		const getComentsByTicket = isFed ? getFedTicketComments : getConTicketComments;
-		const comments = await getComentsByTicket(teamspace, ticket);
+		const getCommentsByTicket = isFed ? getFedTicketComments : getConTicketComments;
+		const comments = await getCommentsByTicket(teamspace, project, model, ticket);
 		req.comments = comments;
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketComment = (isFed) => async (req, res, next) => {
+	const {	params } = req;
+	const { teamspace, project, model, ticket, comment } = params;
+
+	try {
+		const getCommentById = isFed ? getFedTicketComment : getConTicketComment;		
+		req.commentData = await getCommentById(teamspace, project, model, ticket, comment);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -808,7 +823,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully created
 	 */
-	router.post('/:ticket/comments', hasCommenterAccess, validateNewComment, createComment(isFed));
+	router.post('/:ticket/comments', hasCommenterAccess, checkTicketExists, validateNewComment, createComment(isFed));
 
 	/**
 	 * @openapi
@@ -934,7 +949,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully deleted
 	 */
-	router.delete('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, setCommentData, deleteComment(isFed));
+	router.delete('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, deleteComment(isFed));
 
 	/**
 	 * @openapi
@@ -1124,7 +1139,7 @@ const establishRoutes = (isFed) => {
 	 *                   example: 1632821119000
 	 *                   description: Timestamp of when the comment was last updated
 	 */
-	router.get('/:ticket/comments/:comment', hasReadAccess, checkTicketExists, setCommentData, serialiseComment);
+	router.get('/:ticket/comments/:comment', hasReadAccess, checkTicketExists, getTicketComment(isFed), serialiseComment);
 
 	return router;
 };

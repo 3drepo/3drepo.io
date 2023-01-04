@@ -279,10 +279,6 @@ Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
 Tickets.serialiseComment = (comment) => {
 	const caster =  Yup.object({
 		_id: uuidString,
-		teamspace: Yup.mixed().strip(),
-		project: Yup.mixed().strip(),
-		model: Yup.mixed().strip(),
-		ticket: Yup.mixed().strip(),
 		createdAt: Yup.number().transform((_, val) => val.getTime()),
 		updatedAt: Yup.number().transform((_, val) => val.getTime()),
 		history: Yup.array().of(Yup.object({
