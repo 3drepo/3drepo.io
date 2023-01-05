@@ -31,8 +31,8 @@ const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/
 const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testFormatModelSettings = () => {
-	const withoutDefaultView = { ...generateRandomModelProperties() };
-	delete withoutDefaultView.defaultView;
+	const withoutDefaultView = { ...generateRandomModelProperties(), defaultView: undefined };
+	const withoutDefaultLegend = { ...generateRandomModelProperties(), defaultLegend: undefined };
 	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };
 	const withErrorReason = { ...generateRandomModelProperties(),
 		errorReason: {
@@ -51,13 +51,19 @@ const testFormatModelSettings = () => {
 		defaultView: generateUUID(),
 	};
 
+	const withUuidDefaultLegend = { ...generateRandomModelProperties(),
+		defaultLegend: generateUUID(),
+	};
+
 	describe.each([
 		[generateRandomModelProperties(), 'no timestamp, no errorReason'],
 		[withoutDefaultView, 'no defaultView'],
+		[withoutDefaultLegend, 'no defaultLegend'],
 		[withTimestamp, 'timestamp'],
 		[withErrorReason, 'errorReason'],
 		[withErrorReasonNoTimestamp, 'errorReason without timestamp'],
 		[withUuidDefaultView, 'with defaultView that is UUID'],
+		[withUuidDefaultLegend, 'with defaultLegend that is UUID'],
 	])('Format model settings data', (data, desc) => {
 		test(`should format correctly with ${desc}`,
 			() => {
@@ -69,6 +75,7 @@ const testFormatModelSettings = () => {
 				const formattedSettings = {
 					...data,
 					defaultView: UUIDToString(data.defaultView),
+					defaultLegend: UUIDToString(data.defaultLegend),
 					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
 					code: data.properties.code,
 					unit: data.properties.unit,
