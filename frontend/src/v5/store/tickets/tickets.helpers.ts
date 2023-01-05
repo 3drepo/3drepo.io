@@ -179,3 +179,8 @@ export const sanitizeViewVals = (vals, template) => {
 
 	return vals;
 };
+
+export const templateAlreadyFetched = (template: ITemplate) => {
+	const fetchedProperties = ['modules', 'properties', 'config'];
+	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
+};
