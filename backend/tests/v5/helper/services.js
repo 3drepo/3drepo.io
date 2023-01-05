@@ -31,7 +31,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamspaceSettings, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaceSettings`);
+const { createTeamspaceSettings, editSubscriptions, grantAdminToUser, grantMemberToUser } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -73,7 +73,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-db.createTeamspace = async (teamspace, admins = [], members = [], customData) => {
+db.createTeamspace = async (teamspace, admins = [], members = [], subscriptions, customData) => {
 	await ServiceHelper.db.createTeamspaceRole(teamspace);
 	await createTeamspaceSettings(teamspace);
 	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace], customData);
@@ -82,6 +82,14 @@ db.createTeamspace = async (teamspace, admins = [], members = [], customData) =>
 		...admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)),
 		...members.map((memberUser) => grantMemberToUser(teamspace, memberUser)),
 	]);
+
+	if (subscriptions) {
+		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace, subType, {
+			collaborators: subscriptions[subType].collaborators,
+			data: subscriptions[subType].data,
+			expiryDate: subscriptions[subType].expiryDate,
+		})));
+	}
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {

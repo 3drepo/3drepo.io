@@ -88,14 +88,10 @@ const setupData = async () => {
 		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user]),
 		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user]),
 		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], undefined, {
-			billing: {
-				subscriptions: {
-					discretionary: {
-						collaborators: userCollabs,
-						data: licenseData,
-						expiryDate: validExpiryDate,
-					},
-				},
+			discretionary: {
+				collaborators: userCollabs,
+				data: licenseData,
+				expiryDate: validExpiryDate,
 			},
 		}),
 		ServiceHelper.db.createTeamspace(
@@ -103,44 +99,31 @@ const setupData = async () => {
 			[userWithMultipleLicenses.user],
 			undefined,
 			{
-				billing: {
-					subscriptions: {
-						discretionary: {
-							collaborators: userCollabs,
-							data: licenseData,
-							expiryDate: validExpiryDate,
-						},
-						enterprise: {
-							collaborators: userCollabs,
-							data: licenseData,
-							expiryDate: validExpiryDate - 10,
-						},
-					},
+				discretionary: {
+					collaborators: userCollabs,
+					data: licenseData,
+					expiryDate: validExpiryDate,
+				},
+				enterprise: {
+					collaborators: userCollabs,
+					data: licenseData,
+					expiryDate: validExpiryDate - 10,
 				},
 			},
 		),
 		ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
 			[userWithLicenseUnlimitedCollabs.user], undefined, {
-				billing: {
-					subscriptions: {
-						discretionary: {
-							collaborators: 'unlimited',
-							data: licenseData,
-							expiryDate: validExpiryDate,
-						},
-					},
+				discretionary: {
+					collaborators: 'unlimited',
+					data: licenseData,
+					expiryDate: validExpiryDate,
 				},
 			}),
 		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], undefined, {
-			billing: {
-				subscriptions: {
-					discretionary: {
-						collaborators: 'unlimited',
-						data: licenseData,
-						expiryDate: Date.now() - 100000,
-					},
-				},
-
+			discretionary: {
+				collaborators: 'unlimited',
+				data: licenseData,
+				expiryDate: Date.now() - 100000,
 			},
 		}),
 		ServiceHelper.db.createTeamspace(tsWithUsersToRemove.name, [
