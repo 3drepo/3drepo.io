@@ -163,7 +163,7 @@ TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
 };
 
 const grantPermissionToUser = async (teamspace, username, permission) => {
-	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+	await teamspaceSettingUpdate(teamspace, { _id: teamspace },
 		{ $push: { permissions: { user: username, permissions: [permission] } } });
 };
 
@@ -180,13 +180,11 @@ TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
 };
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
-	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $pull: { permissions: { user } } });
+	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $pull: { permissions: { user } } });
 };
 
 TeamspaceSetting.getRiskCategories = async (teamspace) => {
-	const { riskCategories } = await db.findOne(
-		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { riskCategories: 1 },
-	);
+	const { riskCategories } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { riskCategories: 1 });
 	return riskCategories;
 };
 

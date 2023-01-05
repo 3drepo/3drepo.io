@@ -475,7 +475,7 @@ const testGetRiskCategories = () => {
 			await expect(Teamspace.getRiskCategories(teamspace)).resolves.toEqual(expectedRes);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
-				{ _id: teamspace }, { riskCategories: 1 });
+				{ _id: teamspace }, { riskCategories: 1 }, undefined);
 		});
 	});
 };
