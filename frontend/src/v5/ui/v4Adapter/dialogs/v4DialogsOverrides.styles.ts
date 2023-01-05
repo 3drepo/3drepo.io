@@ -20,6 +20,7 @@ import attachResourcesDialog from './attachResourcesDialog.overrides';
 import screenshotDialog from './screenshotDialog.overrides';
 import suggestedTreatmentsDialog from './suggestedTreatmentsDialog.overrides';
 import snackbarStyles from './snackbar.overrides';
+import sequencesDialogs from './sequencesDialogs.overrides';
 
 export const V4DialogsOverridesContainer = styled.div`
 	display: contents;
@@ -29,4 +30,5 @@ export const V4DialogsOverridesContainer = styled.div`
 	${screenshotDialog}
 	${suggestedTreatmentsDialog}
 	${snackbarStyles}
+	${sequencesDialogs}
 `;
