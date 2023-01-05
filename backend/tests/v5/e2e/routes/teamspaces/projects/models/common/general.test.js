@@ -158,7 +158,8 @@ const addRevision = async (teamspace, model) => {
 	await ServiceHelper.db.createRevision(teamspace, model._id, rev);
 
 	/* eslint-disable-next-line no-param-reassign */
-	model.latestRev = rev;
+	model.revs = model.revs || [];
+	model.revs.push(rev);
 	return rev;
 };
 
@@ -169,13 +170,36 @@ const testGetModelStats = () => {
 			2, () => ServiceHelper.generateRandomModel({ isFederation: true }),
 		);
 
-		const conNoRev = ServiceHelper.generateRandomModel();
+		const [
+			conNoRev, conFailedProcessing1, conFailedProcessing2,
+		] = times(3, () => ServiceHelper.generateRandomModel());
 
 		fed.properties.subModels = [con._id, conNoRev._id];
 		fedWithNoRevInSubModel.properties.subModels = [conNoRev._id];
 
+		conFailedProcessing1.properties = {
+			...conFailedProcessing1.properties,
+			status: 'failed',
+			errorReason: {
+				message: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+			},
+		};
+
+		conFailedProcessing2.properties = {
+			...conFailedProcessing2.properties,
+			errorReason: {
+				message: ServiceHelper.generateRandomString(),
+				errorCode: 1,
+			},
+
+		};
+
 		beforeAll(async () => {
-			const models = [fed, con, fedWithNoSubModel, fedWithNoRevInSubModel];
+			const models = [
+				fed, con, fedWithNoSubModel, fedWithNoRevInSubModel,
+				conNoRev, conFailedProcessing1, conFailedProcessing2,
+			];
 			await setupBasicData(users, teamspace, project, models);
 			await Promise.all([
 				addIssuesAndRisks(teamspace, fed),
@@ -183,13 +207,14 @@ const testGetModelStats = () => {
 			]);
 
 			const rev = await addRevision(teamspace, con);
-			fed.latestRev = rev;
+			fed.revs = [rev];
 		});
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 			const model = isFed ? fed : con;
+			const wrongTypeModel = isFed ? con : fed;
 
 			const getRoute = ({
 				projectId = project.id,
@@ -203,6 +228,7 @@ const testGetModelStats = () => {
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 			];
 
 			return [
@@ -213,30 +239,58 @@ const testGetModelStats = () => {
 						[`the ${modelType} contains subModels with no revision`, getRoute({ modelId: fedWithNoRevInSubModel._id }), true, fedWithNoRevInSubModel],
 						[`the ${modelType} does not have subModels`, getRoute({ modelId: fedWithNoSubModel._id }), true, fedWithNoSubModel],
 					]
-					: []),
+					: [
+						[`the ${modelType} is valid and user has access`, getRoute(), true, model],
+						[`the ${modelType} is valid and user has access (no revision)`, getRoute({ modelId: conNoRev._id }), true, conNoRev],
+						[`the ${modelType} is valid and user has access (with failed revision - 1)`, getRoute({ modelId: conFailedProcessing1._id }), true, conFailedProcessing1],
+						[`the ${modelType} is valid and user has access (with failed revision - 2)`, getRoute({ modelId: conFailedProcessing2._id }), true, conFailedProcessing2],
+					]),
 			];
 		};
-		const formatToStats = ({ properties, issuesCount = 0, risksCount = 0, latestRev }) => {
-			const { subModels, status, desc, properties: { code } } = properties;
+		const formatToStats = ({ properties, issuesCount = 0, risksCount = 0, revs = [] }) => {
+			const { subModels, status, desc, properties: { code, unit }, federate, errorReason, type } = properties;
+			revs.sort(({ timestamp: t1 }, { timestamp: t2 }) => {
+				if (t1 < t2) return -1;
+				if (t1 > t2) return 1;
+				return 0;
+			});
+
+			const latestRev = revs.length ? revs[revs.length - 1] : undefined;
 			const res = {
 				code,
 				status,
-				tickets: {
-					issues: issuesCount,
-					risks: risksCount,
-				},
 			};
 
-			if (subModels) {
-				res.containers = subModels;
+			if (federate) {
+				if (subModels) {
+					res.containers = subModels;
+				}
+				if (desc) {
+					res.desc = desc;
+				}
+				res.tickets = {
+					issues: issuesCount,
+					risks: risksCount,
+				};
+				if (latestRev) {
+					res.lastUpdated = latestRev.timestamp.getTime();
+				}
+			} else {
+				res.revisions = {
+					total: revs.length,
+					lastUpdated: latestRev?.timestamp ? latestRev.timestamp.getTime() : undefined,
+					latestRevision: latestRev?.tag || latestRev?._id,
+				};
+
+				res.type = type;
+				res.unit = unit;
 			}
 
-			if (desc) {
-				res.desc = desc;
-			}
-
-			if (latestRev) {
-				res.lastUpdated = latestRev.timestamp.getTime();
+			if (status === 'failed') {
+				res.errorReason = {
+					message: errorReason.message,
+					timestamp: errorReason.timestamp ? errorReason.timestamp.getTime() : undefined,
+				};
 			}
 
 			return res;
