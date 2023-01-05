@@ -16,6 +16,7 @@
  */
 import { PureComponent, createRef } from 'react';
 import RemoveCircle from '@mui/icons-material/RemoveCircle';
+import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import {
 	cond,
 	filter,
@@ -29,6 +30,7 @@ import {
 } from 'lodash';
 import ReactDOM from 'react-dom';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -100,6 +102,7 @@ interface IProps {
 	showDialog: (config: any) => void;
 	fetchQuotaAndInvitations: (teamspace) => void;
 	isPending: boolean;
+	className?: string;
 }
 
 interface IState {
@@ -187,7 +190,7 @@ export class Users extends PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					Icon: RemoveCircle,
+					Icon: isV5() ? BinIcon : RemoveCircle,
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
 				}
@@ -272,7 +275,10 @@ export class Users extends PureComponent<IProps, IState> {
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
-			onInvitationOpen: this.handleInvitationOpen
+			onInvitationOpen: (email, job, isAdmin) => {
+				this.handleInvitationOpen(email, job, isAdmin);
+				closePanel();
+			}
 		};
 		return <NewUserForm {...formProps} onCancel={closePanel} />;
 	}
@@ -348,7 +354,7 @@ export class Users extends PureComponent<IProps, IState> {
 
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel(true)}>
+				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
 					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
