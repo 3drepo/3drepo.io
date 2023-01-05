@@ -18,9 +18,9 @@
 import { css } from 'styled-components';
 import { SequenceTasksListItem } from '@/v4/routes/viewerGui/components/sequences/sequences.styles';
 import { Container as LegendItem, StyledTextField as LegendTextField } from '@/v4/routes/viewerGui/components/legend/components/legendItem/legendItem.styles';
-import { ActivitiesListStyles } from '../overrides/cards/sequences.overrides';
 import { ActionsLine, StyledIconButton, StyledLinkableField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 import { Container as ActivityDetailsContainer, Row } from '@/v4/routes/viewerGui/components/activities/components/activityDetails/activityDetails.styles';
+import { ActivitiesListStyles } from '../overrides/cards/sequences.overrides';
 
 const LegendDialogStyles = css`
 	${LegendItem} {

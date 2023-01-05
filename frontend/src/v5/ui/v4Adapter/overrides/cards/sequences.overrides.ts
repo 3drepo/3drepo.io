@@ -15,11 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IntervalRow, SequenceItemContainer, SequencePlayerAllInputs, SequencePlayerContainer, DatePicker, SequenceRow, SequenceTasksListContainer, StepLabel, SliderRow, TaskListLabelTime, TaskListLabel, SequenceTasksListItem, SubTasksItemContainer, TaskSmallDot, Task, TaskItemLabel, SequenceName } from '@/v4/routes/viewerGui/components/sequences/sequences.styles';
+import {
+	IntervalRow,
+	SequenceItemContainer,
+	SequencePlayerAllInputs,
+	SequencePlayerContainer,
+	DatePicker,
+	SequenceRow,
+	SequenceTasksListContainer,
+	StepLabel,
+	SliderRow,
+	TaskListLabelTime,
+	TaskListLabel,
+	SequenceTasksListItem,
+	TaskSmallDot,
+	Task,
+	TaskItemLabel,
+} from '@/v4/routes/viewerGui/components/sequences/sequences.styles';
 import { StyledTextField as SequenceEditableTitle } from '@/v4/routes/viewerGui/components/sequences/components/sequenceForm/sequenceForm.styles';
 import { css } from 'styled-components';
-import { EditableFieldStyles } from './sharedStyles/selectMenus.overrides';
 import { ActionsLine } from '@/v4/routes/components/textField/textField.styles';
+import { EditableFieldStyles } from './sharedStyles/selectMenus.overrides';
 
 const ItemPreviewStyles = css`
 	${SequenceItemContainer} {
