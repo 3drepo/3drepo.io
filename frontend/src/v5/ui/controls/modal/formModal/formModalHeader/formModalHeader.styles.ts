@@ -41,6 +41,7 @@ export const Header = styled.div`
 	box-sizing: border-box;
 	align-items: center;
 	display: flex;
+	flex-shrink: 0;
 	padding: 0 35px;
 `;
 
