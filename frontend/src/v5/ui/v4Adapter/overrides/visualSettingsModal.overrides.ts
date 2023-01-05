@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,27 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link, ItemIcon, ItemText } from './actionMenuItemLink.styles';
-import { ActionMenuItem } from '../actionMenuItem/actionMenuItem.component';
 
-type ActionMenuItemLinkProps = {
-	className?: string;
-	Icon?: any;
-	to?: string;
-	children?: React.ReactNode;
-	onClick?: () => void;
-};
+import styled from 'styled-components';
 
-export const ActionMenuItemLink = ({ Icon, to = '#', children, ...otherProps }: ActionMenuItemLinkProps) => (
-	<ActionMenuItem {...otherProps}>
-		<Link to={to}>
-			{Icon && (
-				<ItemIcon>
-					<Icon />
-				</ItemIcon>
-			)}
-			<ItemText>{children}</ItemText>
-		</Link>
-	</ActionMenuItem>
-);
-ActionMenuItemLink.isActionMenuClosingElement = true;
+export const V5VisualSettingsOverrides = styled.div`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+`;
