@@ -311,6 +311,72 @@ const testGetModelStats = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
+
+const testAppendFavourites = () => {
+	describe('Append Favourites', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const favFed = { ...ServiceHelper.generateRandomModel({ isFederation: true }), isFavourite: true };
+		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
+
+		beforeAll(async () => {
+			const models = [con, fed, favFed, favCon];
+			await setupBasicData(users, teamspace, project, models);
+			const favourites = models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : []));
+			await updateOne('admin', 'system.users', { user: users.tsAdmin.user }, {
+				$set: {
+					[`customData.starredModels.${teamspace}`]: favourites,
+				},
+			});
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongModelType = isFed ? 'container' : 'federation';
+			const model = isFed ? fed : con;
+			const favModel = isFed ? favFed : favCon;
+			const wrongTypeModel = isFed ? con : fed;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/favourites${key ? `?key=${key}` : ''}`;
+
+			const standardPayload = { [`${modelType}s`]: [model._id] };
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn, standardPayload],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound, standardPayload],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound, standardPayload],
+				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments, standardPayload],
+				[`the ${modelType} list provided contains a ${wrongModelType}`, getRoute(), false, templates.invalidArguments, { [`${modelType}s`]: [wrongTypeModel._id] }],
+				[`the ${modelType} list provided isEmpty`, getRoute(), false, templates.invalidArguments, { [`${modelType}s`]: [] }],
+				['the payload is empty', getRoute(), false, templates.invalidArguments, { }],
+				[`the ${modelType} list contains a ${modelType} that does not exist`, getRoute(), false, templates.invalidArguments, { [`${modelType}s`]: [ServiceHelper.generateRandomString()] }],
+				[`the ${modelType} list is valid`, getRoute(), true, undefined, standardPayload],
+				[`the ${modelType} list contains ${modelType} that is already a favourite`, getRoute(), true, undefined, { [`${modelType}s`]: [favModel._id] }],
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput, payload) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.patch(route).send(payload).expect(expectedStatus);
+				if (!success) {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+		/*
+
+		test('should append a new federation to the user favourites', async () => {
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.ok.status).send({ federations: [modelSettings[1]._id] });
+		}); */
+	});
+};
+
 /*
 const views = [
 	{
@@ -606,52 +672,6 @@ const testDeleteFederation = () => {
 	});
 };
 
-const testAppendFavourites = () => {
-	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/favourites`;
-	describe('Append Favourite Federations', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.patch(route)
-				.expect(templates.notLoggedIn.status).send({ federations: [modelSettings[1]._id] });
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.patch(`${route}?key=${nobody.apiKey}`)
-				.expect(templates.teamspaceNotFound.status).send({ federations: [modelSettings[1]._id] });
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/favourites?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.projectNotFound.status).send({ federations: [modelSettings[1]._id] });
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the user has no access to one or more federations', async () => {
-			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [modelSettings[1]._id] });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the favourites list provided has a container', async () => {
-			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [federation._id] });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the favourites list provided is empty', async () => {
-			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [] });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should append a new federation to the user favourites', async () => {
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status).send({ federations: [modelSettings[1]._id] });
-		});
-	});
-};
-
 const testDeleteFavourites = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/favourites`;
 	describe('Remove Favourite Federations', () => {
@@ -925,14 +945,12 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		//		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetModelList();
 	testGetModelStats();
-	/*
 	testAppendFavourites();
-	testDeleteFavourites();
+	/* testDeleteFavourites();
 	testAddFederation();
 	testDeleteFederation();
 	testUpdateFederationSettings();
