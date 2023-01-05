@@ -37,9 +37,19 @@ interface IDeleteModal {
 	name: string,
 	message?: string,
 	confidenceCheck?: boolean,
+	titleLabel?: string,
+	confirmLabel?: string,
 }
 
-export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confidenceCheck }: IDeleteModal) => {
+export const DeleteModal = ({
+	onClickConfirm,
+	onClickClose,
+	name,
+	message,
+	confidenceCheck,
+	titleLabel,
+	confirmLabel,
+}: IDeleteModal) => {
 	const { control, watch, handleSubmit } = useForm({
 		mode: 'onChange',
 		defaultValues: { retypedName: '' },
@@ -62,11 +72,13 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 			</CircledIcon>
 			<DialogTitle>
 				<TruncatableTitle>
-					<FormattedMessage
-						id="deleteModal.header"
-						defaultMessage="Delete {name}?"
-						values={{ name }}
-					/>
+					{titleLabel || (
+						<FormattedMessage
+							id="deleteModal.header"
+							defaultMessage="Delete {name}?"
+							values={{ name }}
+						/>
+					)}
 				</TruncatableTitle>
 			</DialogTitle>
 			<Message>
@@ -100,10 +112,12 @@ export const DeleteModal = ({ onClickConfirm, onClickClose, name, message, confi
 					/>
 				</Button>
 				<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
-					<FormattedMessage
-						id="deleteModal.action.confirm"
-						defaultMessage="Delete"
-					/>
+					{ confirmLabel || (
+						<FormattedMessage
+							id="deleteModal.action.confirm"
+							defaultMessage="Delete"
+						/>
+					)}
 				</Button>
 			</Actions>
 		</DialogContainer>
