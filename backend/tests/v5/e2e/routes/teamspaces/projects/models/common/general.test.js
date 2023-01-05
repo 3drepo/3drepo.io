@@ -564,6 +564,83 @@ const testDeleteModel = () => {
 	});
 };
 
+const testUpdateModelSettings = () => {
+	describe('Update Settings', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const conIsSubModel = ServiceHelper.generateRandomModel();
+		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ isFederation: true });
+
+		fedOfSubModelCon.properties.subModels = [conIsSubModel._id];
+
+		fed.legend = { _id: ServiceHelper.generateUUID() };
+		con.legend = { _id: ServiceHelper.generateUUID() };
+		fed.view = { _id: ServiceHelper.generateUUID() };
+		con.view = { _id: ServiceHelper.generateUUID() };
+
+		beforeAll(async () => {
+			const models = [con, fed, conIsSubModel, fedOfSubModelCon];
+			await setupBasicData(users, teamspace, project, models);
+
+			await Promise.all([
+				ServiceHelper.db.createViews(teamspace, fed._id, [fed.view]),
+				ServiceHelper.db.createLegends(teamspace, fed._id, [fed.legend]),
+				ServiceHelper.db.createViews(teamspace, con._id, [con.view]),
+				ServiceHelper.db.createLegends(teamspace, con._id, [con.legend]),
+			]);
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const model = isFed ? fed : con;
+			const wrongTypeModel = isFed ? con : fed;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
+
+			const dummyPayload = { name: ServiceHelper.generateRandomString() };
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, dummyPayload, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, dummyPayload, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, dummyPayload, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, dummyPayload, modelNotFound],
+				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, dummyPayload, modelNotFound],
+				['the user lacks sufficient permissions', getRoute({ key: users.viewer.apiKey }), false, dummyPayload, templates.notAuthorized],
+				['the payload does not conform to the schema', getRoute(), false, { name: 123 }, templates.invalidArguments],
+				['the payload contains unrecognised data', getRoute(), false, { name: 123, [ServiceHelper.generateRandomString()]: true }, templates.invalidArguments],
+				['the user is trying to toggle federate', getRoute(), false, { federate: !isFed }, templates.invalidArguments],
+				['the defaultView is not recognised', getRoute(), false, { defaultView: ServiceHelper.generateRandomString() }, templates.invalidArguments],
+				['the defaultView is set to a valid view', getRoute(), true, { defaultView: UUIDToString(model.view._id) }],
+				['the defaultLegend is not recognised', getRoute(), false, { defaultLegend: ServiceHelper.generateRandomString() }, templates.invalidArguments],
+				['the defaultLegend is set to a valid legend', getRoute(), true, { defaultLegend: UUIDToString(model.legend._id) }],
+				['the defaultView is set to null', getRoute(), true, { defaultView: null }],
+				['the defaultLegend is set to null', getRoute(), true, { defaultLegend: null }],
+				['the payload is valid', getRoute(), true, dummyPayload],
+				...(isFed ? [
+					['the user tries to edit submodel array', getRoute(), false, { subModels: [con._id] }, templates.invalidArguments],
+				] : [
+				]),
+			];
+		};
+
+		const runTest = (desc, route, success, payload, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.patch(route).send(payload).expect(expectedStatus);
+				if (!success) {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
+};
+
 /*
 const views = [
 	{
@@ -781,152 +858,6 @@ const setupData = async () => {
 	]);
 };
 
-const testUpdateFederationSettings = () => {
-	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}`;
-	describe('Update the settings of a federation', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.patch(`${route}`)
-				.send({ name: 'name' }).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.patch(`${route}?key=${nobody.apiKey}`)
-				.send({ name: 'name' }).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the user does not have access to the project', async () => {
-			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.send({ name: 'name' }).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the user does not have adequate permissions to edit the federation (viewer)', async () => {
-			const res = await agent.patch(`${route}?key=${users.viewer.apiKey}`)
-				.send({ name: 'name' }).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the user does not have adequate permissions to edit the federation (commenter)', async () => {
-			const res = await agent.patch(`${route}?key=${users.commenter.apiKey}`)
-				.send({ name: 'name' }).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${federation._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name' }).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the federation does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/dfsfaewfc?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name' }).expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
-
-		test('should fail if a body param is not of the expected type', async () => {
-			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 123 }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the body of the request contains extra data', async () => {
-			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', extra: 123 }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the defaultView is not found', async () => {
-			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the defaultLegend is not found', async () => {
-			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the a container Id is passed', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${container._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name' }).expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
-
-		test('should update a federation\'s settings if all the params of the body have values', async () => {
-			const data = {
-				name: 'newName',
-				desc: 'newDesc',
-				surveyPoints: [
-					{
-						position: [7, 8, 9],
-						latLong: [10, 11],
-					},
-				],
-				angleFromNorth: 180,
-				unit: 'mm',
-				code: 'CODE1',
-				defaultView: views[1]._id,
-				defaultLegend: legends[1]._id,
-			};
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send(data).expect(templates.ok.status);
-		});
-
-		test('should update a federation\'s settings if defaultView is null', async () => {
-			const data = {
-				name: 'newName',
-				desc: 'newDesc',
-				surveyPoints: [
-					{
-						position: [7, 8, 9],
-						latLong: [10, 11],
-					},
-				],
-				angleFromNorth: 180,
-				unit: 'mm',
-				code: 'CODE1',
-				defaultView: null,
-				defaultLegend: legends[1]._id,
-			};
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send(data).expect(templates.ok.status);
-		});
-
-		test('should update a federation\'s settings if defaultLegend is null', async () => {
-			const data = {
-				name: 'newName',
-				desc: 'newDesc',
-				surveyPoints: [
-					{
-						position: [7, 8, 9],
-						latLong: [10, 11],
-					},
-				],
-				angleFromNorth: 180,
-				unit: 'mm',
-				code: 'CODE1',
-				defaultView: views[1]._id,
-				defaultLegend: null,
-			};
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send(data).expect(templates.ok.status);
-		});
-
-		test('should update a federation\'s settings if not all body params are provided', async () => {
-			const data = {
-				name: 'newName',
-				desc: 'newDesc',
-			};
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send(data).expect(templates.ok.status);
-		});
-	});
-};
-
 const formatToSettings = (settings) => ({
 	_id: settings._id,
 	name: settings.name,
@@ -1016,6 +947,6 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testDeleteFavourites();
 	testAddModel();
 	testDeleteModel();
-	/* testUpdateFederationSettings();
-	testGetSettings(); */
+	testUpdateModelSettings();
+	/* testGetSettings(); */
 });
