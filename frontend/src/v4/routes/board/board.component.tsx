@@ -378,7 +378,7 @@ export function Board(props: IProps) {
 				</InputLabel>
 				<CellSelect
 					placeholder={isV5()
-						? formatMessage({ id: 'board.select.federationOrContainer.placeholdert', defaultMessage: 'Select Federation / Container' })
+						? formatMessage({ id: 'board.select.federationOrContainer.placeholder', defaultMessage: 'Select Federation / Container' })
 						: 'Select model/federation'
 					}
 					items={models}
