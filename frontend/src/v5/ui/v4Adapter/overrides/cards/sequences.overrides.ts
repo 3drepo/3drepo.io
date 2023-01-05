@@ -52,6 +52,10 @@ const ItemPreviewStyles = css`
 
 				& > :nth-child(2) {
 					${({ theme }) => theme.typography.body1}
+					text-overflow: ellipsis;
+					overflow: hidden;
+					white-space: nowrap;
+					max-width: 250px;
 				}
 
 				& > :last-child {
