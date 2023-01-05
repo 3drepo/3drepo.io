@@ -63,7 +63,7 @@ const LegendDialogStyles = css`
 		}
 
 		// edit mode
-		form {			
+		form {
 			span, input {
 				height: 23px;
 				font-size: 12px;
@@ -127,7 +127,6 @@ const ActivityDetailsStyles = css`
 		}
 	}
 `;
-
 
 export default css`
 	${ActivitiesListStyles}
