@@ -16,14 +16,43 @@
  */
 
 import {
+	DialogTab,
+	DialogTabs,
 	NegativeActionButton as ResetButton,
 	NeutralActionButton as CancelButton,
 	VisualSettingsButtonsContainer as Actions,
+	VisualSettingsDialogContent,
 } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import styled from 'styled-components';
 
 export const V5VisualSettingsOverrides = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+
+	${VisualSettingsDialogContent} {
+		padding: 0;
+		${DialogTabs} {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			padding: 0 27px;
+			box-sizing: border-box;
+			position: fixed;
+			z-index: 1;
+			width: inherit;
+			${DialogTab} {
+				min-height: unset;
+				min-width: unset;
+				max-width: unset;
+    			flex-grow: 0;
+				margin: 0;
+				padding: 10px;
+				height: 48px;
+				font-size: 13px;
+			}
+		}
+
+		form {
+			margin-top: 48px;
+		}
+	}
 
 	${Actions} {
 		box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
