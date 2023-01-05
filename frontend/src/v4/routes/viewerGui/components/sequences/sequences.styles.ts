@@ -74,6 +74,9 @@ export const TaskListLabel = styled.div`
 	padding: 15px;
 `;
 
+export const TaskListLabelTime = styled.span``;
+
+
 export const SequenceTasksListItem = styled.div`
 	&& {
 		background-color:  ${COLOR.WHITE};
