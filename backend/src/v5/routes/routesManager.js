@@ -17,13 +17,13 @@
 
 const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
-const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
+const ContainerRevisionRoutes = require('./teamspaces/projects/models/containers/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
-const FederationRevisionRoutes = require('./teamspaces/projects/federations/revisions');
-const MetadataRoutes = require('./teamspaces/projects/containers/metadata');
+const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
+const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const SsoRoutes = require('./sso');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
