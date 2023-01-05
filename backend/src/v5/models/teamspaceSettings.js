@@ -158,7 +158,7 @@ TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
 	const settings = { _id: teamspace,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
-		permissions: [{ user: teamspace, permissions: [TEAMSPACE_ADMIN] }] };
+		permissions: [] };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
 };
 
