@@ -231,9 +231,9 @@ export function Board(props: IProps) {
 
 	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
-	const getV5Path = ({ typePath, modelPath }: any) => generatePath(BOARD_ROUTE, {
-		type: typePath || type,
-		containerOrFederation: modelPath || modelId,
+	const getV5Path = ({ typePath = type, modelPath = modelId }: any) => generatePath(BOARD_ROUTE, {
+		type: typePath,
+		containerOrFederation: modelPath,
 		project: projectId,
 		teamspace,
 	});
@@ -252,9 +252,13 @@ export function Board(props: IProps) {
 	};
 
 	const handleProjectChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${e.target.value}`;
+		const url = isV5()
+			? getV5Path({ projectPath: e.target.value })
+			: `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${e.target.value}`;
 		props.history.push(url);
 	};
+
+	useEffect(() => handleModelChange({ target: { value: null } }), [projectId]);
 
 	const handleModelChange = (e) => {
 		const newModelId = e.target.value;
