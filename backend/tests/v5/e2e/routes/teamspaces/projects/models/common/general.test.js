@@ -118,15 +118,143 @@ const testGetModelList = () => {
 		};
 		describe.each(generateTestData(true))('Federations', runTest);
 		describe.each(generateTestData())('Containers', runTest);
+	});
+};
 
-		/*
-		test('should return the list of federations if the user has access', async () => {
-			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({
-				federations: modelSettings.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate
-					? { _id, name, role: 'admin', isFavourite: !!isFavourite } : [])),
+const addIssuesAndRisks = async (teamspace, model) => {
+	const issues = ['open', 'closed', 'in progress', 'void'].map((status) => ({
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		status,
+	}));
+
+	const risks = ['unmitigated', 'proposed', 'void', 'agreed_fully', 'agreed_partial'].map((status) => ({
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		mitigation_status: status,
+	}));
+
+	await Promise.all([
+		...issues.map((issue) => ServiceHelper.db.createIssue(
+			teamspace,
+			model._id,
+			issue,
+		)),
+		...risks.map((risk) => ServiceHelper.db.createRisk(
+			teamspace,
+			model._id,
+			risk,
+		)),
+	]);
+
+	/* eslint-disable no-param-reassign */
+	model.issuesCount = 2;
+	model.risksCount = 3;
+	/* eslint-enable no-param-reassign */
+};
+
+const addRevision = async (teamspace, model) => {
+	const rev = ServiceHelper.generateRevisionEntry(false, false);
+	await ServiceHelper.db.createRevision(teamspace, model._id, rev);
+
+	/* eslint-disable-next-line no-param-reassign */
+	model.latestRev = rev;
+	return rev;
+};
+
+const testGetModelStats = () => {
+	describe('Get model stats', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
+			2, () => ServiceHelper.generateRandomModel({ isFederation: true }),
+		);
+
+		const conNoRev = ServiceHelper.generateRandomModel();
+
+		fed.properties.subModels = [con._id, conNoRev._id];
+		fedWithNoRevInSubModel.properties.subModels = [conNoRev._id];
+
+		beforeAll(async () => {
+			const models = [fed, con, fedWithNoSubModel, fedWithNoRevInSubModel];
+			await setupBasicData(users, teamspace, project, models);
+			await Promise.all([
+				addIssuesAndRisks(teamspace, fed),
+				addIssuesAndRisks(teamspace, fedWithNoRevInSubModel),
+			]);
+
+			const rev = await addRevision(teamspace, con);
+			fed.latestRev = rev;
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const model = isFed ? fed : con;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/stats${key ? `?key=${key}` : ''}`;
+
+			const basicCases = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+			];
+
+			return [
+				...basicCases,
+				...(isFed
+					? [
+						[`the ${modelType} contains subModels with revisions`, getRoute(), true, model],
+						[`the ${modelType} contains subModels with no revision`, getRoute({ modelId: fedWithNoRevInSubModel._id }), true, fedWithNoRevInSubModel],
+						[`the ${modelType} does not have subModels`, getRoute({ modelId: fedWithNoSubModel._id }), true, fedWithNoSubModel],
+					]
+					: []),
+			];
+		};
+		const formatToStats = ({ properties, issuesCount = 0, risksCount = 0, latestRev }) => {
+			const { subModels, status, desc, properties: { code } } = properties;
+			const res = {
+				code,
+				status,
+				tickets: {
+					issues: issuesCount,
+					risks: risksCount,
+				},
+			};
+
+			if (subModels) {
+				res.containers = subModels;
+			}
+
+			if (desc) {
+				res.desc = desc;
+			}
+
+			if (latestRev) {
+				res.lastUpdated = latestRev.timestamp.getTime();
+			}
+
+			return res;
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(formatToStats(expectedOutput));
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
 			});
-		}); */
+		};
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 /*
@@ -344,72 +472,6 @@ const setupData = async () => {
 		ServiceHelper.db.createViews(teamspace, federation._id, views),
 		ServiceHelper.db.createLegends(teamspace, federation._id, legends),
 	]);
-};
-
-const formatToStats = (fed, issueCount, riskCount, latestRev) => {
-	const formattedStats = {
-		...(fed.properties.desc ? { desc: fed.properties.desc } : {}),
-		code: fed.properties.properties.code,
-		status: fed.properties.status,
-		containers: fed.properties.subModels
-			? fed.properties.subModels.map(({ model }) => model) : undefined,
-		lastUpdated: latestRev ? latestRev.getTime() : undefined,
-		tickets: {
-			issues: issueCount,
-			risks: riskCount,
-		},
-	};
-
-	return formattedStats;
-};
-
-const testGetFederationStats = () => {
-	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}/stats`;
-	describe('Get federation stats', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(federationWithRev._id)).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route(federationWithRev._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${federationWithRev._id}/stats?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the user does not have access to the federation', async () => {
-			const res = await agent.get(`${route(federationWithRev._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the federation does not exist', async () => {
-			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
-
-		test('should return the federation stats correctly if the user has access (subModels with revisions)', async () => {
-			const res = await agent.get(`${route(federationWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithRev,
-				getUnresolvedIssues(federationWithRevIssues).length,
-				getUnresolvedRisks(federationWithRevRisks).length, latestRevision.timestamp));
-		});
-
-		test('should return the federation stats correctly if the user has access (subModels without revisions)', async () => {
-			const res = await agent.get(`${route(federationWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithoutRev,
-				getUnresolvedIssues(federationWithoutRevIssues).length,
-				getUnresolvedRisks(federationWithoutRevRisks).length));
-		});
-
-		test('should return the federation stats correctly if the user has access (no subModels)', async () => {
-			const res = await agent.get(`${route(federationWithoutSubModels._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithoutSubModels, 0, 0));
-		});
-	});
 };
 
 const testAddFederation = () => {
@@ -813,7 +875,8 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetModelList();
-	/*	testGetFederationStats();
+	testGetModelStats();
+	/*
 	testAppendFavourites();
 	testDeleteFavourites();
 	testAddFederation();
