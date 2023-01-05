@@ -170,8 +170,6 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.grantMemberToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAM_MEMBER);
-
 TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
 	const users = await findMany(query, { user: 1 });

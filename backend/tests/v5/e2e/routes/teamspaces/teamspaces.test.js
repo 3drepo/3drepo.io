@@ -87,7 +87,7 @@ const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user]),
 		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user]),
-		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], undefined, {
+		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], {
 			discretionary: {
 				collaborators: userCollabs,
 				data: licenseData,
@@ -97,7 +97,6 @@ const setupData = async () => {
 		ServiceHelper.db.createTeamspace(
 			tsWithMultipleLicenses.name,
 			[userWithMultipleLicenses.user],
-			undefined,
 			{
 				discretionary: {
 					collaborators: userCollabs,
@@ -112,14 +111,14 @@ const setupData = async () => {
 			},
 		),
 		ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
-			[userWithLicenseUnlimitedCollabs.user], undefined, {
+			[userWithLicenseUnlimitedCollabs.user], {
 				discretionary: {
 					collaborators: 'unlimited',
 					data: licenseData,
 					expiryDate: validExpiryDate,
 				},
 			}),
-		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], undefined, {
+		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], {
 			discretionary: {
 				collaborators: 'unlimited',
 				data: licenseData,
@@ -129,7 +128,7 @@ const setupData = async () => {
 		ServiceHelper.db.createTeamspace(tsWithUsersToRemove.name, [
 			userToRemoveFromTs.user,
 			testUser.user,
-		], [testUser2.user])]);
+		])]);
 
 	await Promise.all([
 		ServiceHelper.db.createUser(
