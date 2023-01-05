@@ -641,299 +641,106 @@ const testUpdateModelSettings = () => {
 	});
 };
 
-/*
-const views = [
-	{
-		_id: ServiceHelper.generateUUIDString(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-	},
-];
-
-const legends = [
-	{
-		_id: ServiceHelper.generateUUIDString(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-	},
-];
-
-const modelSettings = [
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		isFavourite: true,
-		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			subModels: [{ model: modelWithRevId }],
-			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
-		},
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		isFavourite: true,
-		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			subModels: [{ model: modelWithoutRevId }],
-		},
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(true),
-	},
-	{
-		_id: modelWithRevId,
-		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
-	},
-	{
-		_id: modelWithoutRevId,
-		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			timestamp: new Date(),
-			errorReason: {
-				message: 'error reason',
-				timestamp: new Date(),
-				errorCode: 1,
-			},
-		},
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			errorReason: {
-				message: 'error reason',
-				errorCode: 1,
-			},
-		},
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			defaultView: ServiceHelper.generateUUID(),
-			timestamp: new Date(),
-			errorReason: {
-				message: 'error reason',
-				timestamp: new Date(),
-				errorCode: 1,
-			},
-		},
-	},
-	// NOTE: this model gets deleted after deleteFederation test
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(true),
-	},
-];
-
-const issues = [
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'issue1',
-		status: 'open',
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'issue2',
-		status: 'closed',
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'issue3',
-		status: 'in progress',
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'issue3',
-		status: 'void',
-	},
-];
-
-const risks = [
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'risk1',
-		mitigation_status: 'unmitigated',
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'risk2',
-		mitigation_status: 'proposed',
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: 'risk3',
-		mitigation_status: 'void',
-	},
-];
-
-const getUnresolvedIssues = (issuesList) => issuesList.filter((i) => i.status !== 'void' && i.status !== 'closed');
-
-const getUnresolvedRisks = (risksList) => risksList.filter((i) => i.mitigation_status !== 'void' && i.mitigation_status !== 'agreed_fully'
-		&& i.mitigation_status !== 'rejected');
-
-const container = modelSettings.find(({ properties }) => !properties.federate);
-const federation = modelSettings.find(({ properties }) => properties.federate);
-
-const revisions = [
-	ServiceHelper.generateRevisionEntry(),
-	ServiceHelper.generateRevisionEntry(),
-	ServiceHelper.generateRevisionEntry(true),
-];
-
-const federationWithRev = modelSettings[0];
-const federationWithoutRev = modelSettings[1];
-const federationWithoutSubModels = modelSettings[2];
-const federationToDelete = modelSettings[8];
-const federationWithUUIDView = modelSettings[7];
-const federationWithRevIssues = [issues[0], issues[1]];
-const federationWithRevRisks = [risks[0], risks[1]];
-const federationWithoutRevIssues = [issues[2]];
-const federationWithoutRevRisks = [risks[2]];
-
-const latestRevision = revisions.filter((rev) => !rev.void)
-	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
-
-const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
-	const customData = { starredModels: {
-		[teamspace]: modelSettings.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
-	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = modelSettings.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
-	const federationWithRevIssueProms = federationWithRevIssues.map((issue) => ServiceHelper.db.createIssue(
-		teamspace,
-		federationWithRev._id,
-		issue,
-	));
-	const federationWithRevRiskProms = federationWithRevRisks.map((risk) => ServiceHelper.db.createRisk(
-		teamspace,
-		federationWithRev._id,
-		risk,
-	));
-	const federationWithoutRevIssueProms = federationWithoutRevIssues.map((issue) => ServiceHelper.db.createIssue(
-		teamspace,
-		federationWithoutRev._id,
-		issue,
-	));
-	const federationWithoutRevRiskProms = federationWithoutRevRisks.map((risk) => ServiceHelper.db.createRisk(
-		teamspace,
-		federationWithoutRev._id,
-		risk,
-	));
-
-	return Promise.all([
-		...userProms,
-		...modelProms,
-		...federationWithRevIssueProms,
-		...federationWithRevRiskProms,
-		...federationWithoutRevIssueProms,
-		...federationWithoutRevRiskProms,
-		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
-		ServiceHelper.db.createViews(teamspace, federation._id, views),
-		ServiceHelper.db.createLegends(teamspace, federation._id, legends),
-	]);
-};
-
-const formatToSettings = (settings) => ({
-	_id: settings._id,
-	name: settings.name,
-	desc: settings.properties.desc,
-	code: settings.properties.properties.code,
-	unit: settings.properties.properties.unit,
-	defaultView: settings.properties.defaultView,
-	defaultLegend: settings.properties.defaultLegend,
-	timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
-	angleFromNorth: settings.properties.angleFromNorth,
-	status: settings.properties.status,
-	surveyPoints: settings.properties.surveyPoints,
-	errorReason: settings.properties.errorReason ? {
-		message: settings.properties.errorReason.message,
-		timestamp: settings.properties.errorReason.timestamp
-			? settings.properties.errorReason.timestamp.getTime() : undefined,
-		errorCode: settings.properties.errorReason.errorCode,
-	} : undefined,
-});
-
 const testGetSettings = () => {
-	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
-	describe('Get federation settings', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(modelSettings[5]._id)).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+	describe('Get Model Settings', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+
+		fed.properties = {
+			...fed.properties,
+			defaultView: ServiceHelper.generateUUID(),
+			defaultLegend: ServiceHelper.generateUUID(),
+			timestamp: new Date(),
+			errorReason: {
+				message: 'error reason',
+				timestamp: new Date(),
+				errorCode: 1,
+			},
+		};
+
+		con.properties = {
+			...con.properties,
+			defaultView: ServiceHelper.generateUUID(),
+			defaultLegend: ServiceHelper.generateUUID(),
+			timestamp: new Date(),
+			status: 'failed',
+			errorReason: {
+				message: 'error reason',
+				timestamp: new Date(),
+				errorCode: 1,
+			},
+		};
+
+		const fed2 = ServiceHelper.generateRandomModel({ isFederation: true });
+		const con2 = ServiceHelper.generateRandomModel();
+
+		beforeAll(async () => {
+			const models = [con, fed, fed2, con2];
+			await setupBasicData(users, teamspace, project, models);
 		});
 
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route(modelSettings[5]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const model = isFed ? fed : con;
+			const model2 = isFed ? fed2 : con2;
+
+			const wrongTypeModel = isFed ? con : fed;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the model exists and the user has access', getRoute(), true, model],
+				['the model exists and the user has access (2)', getRoute({ modelId: model2._id }), true, model2],
+			];
+		};
+
+		const formatToSettings = (settings) => ({
+			_id: settings._id,
+			name: settings.name,
+			desc: settings.properties.desc,
+			code: settings.properties.properties.code,
+			unit: settings.properties.properties.unit,
+			type: settings.properties.type,
+			defaultView: settings.properties.defaultView ? UUIDToString(settings.properties.defaultView) : undefined,
+			defaultLegend: settings.properties.defaultLegend
+				? UUIDToString(settings.properties.defaultLegend) : undefined,
+			timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
+			angleFromNorth: settings.properties.angleFromNorth,
+			status: settings.properties.status,
+			surveyPoints: settings.properties.surveyPoints,
+			errorReason: settings.properties.errorReason ? {
+				message: settings.properties.errorReason.message,
+				timestamp: settings.properties.errorReason.timestamp
+					? settings.properties.errorReason.timestamp.getTime() : undefined,
+				errorCode: settings.properties.errorReason.errorCode,
+			} : undefined,
 		});
 
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${modelSettings[5]._id}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the user does not have access to the federation', async () => {
-			const res = await agent.get(`${route(modelSettings[5]._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the model is a container', async () => {
-			const res = await agent.get(`${route(container._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
-
-		test('should fail if the federation does not exist', async () => {
-			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
-
-		test('should return the federation settings correctly if the user has access', async () => {
-			const res = await agent.get(`${route(modelSettings[5]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToSettings(modelSettings[5]));
-		});
-
-		test('should return the federation settings correctly if the user has access (no timestamp)', async () => {
-			const res = await agent.get(`${route(modelSettings[6]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToSettings(modelSettings[6]));
-		});
-
-		test('should return the federation settings correctly if the user has access (with UUID default view)', async () => {
-			const res = await agent.get(`${route(federationWithUUIDView._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			const federationWithStringView = {
-				...federationWithUUIDView,
-				properties: {
-					...federationWithUUIDView.properties,
-					defaultView: UUIDToString(federationWithUUIDView.properties.defaultView),
-				},
-			};
-			expect(res.body).toEqual(formatToSettings(federationWithStringView));
-		});
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(formatToSettings(expectedOutput));
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
-}; */
+};
 
 describe('E2E routes/teamspaces/projects/federations', () => {
 	beforeAll(async () => {
@@ -948,5 +755,5 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testAddModel();
 	testDeleteModel();
 	testUpdateModelSettings();
-	/* testGetSettings(); */
+	testGetSettings();
 });

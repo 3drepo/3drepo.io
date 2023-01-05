@@ -256,7 +256,7 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...ServiceHelper.generateRandomModelProperties(isFederation),
 			...(isFederation ? { federate: true } : {}),
 			...properties,
 			permissions,
