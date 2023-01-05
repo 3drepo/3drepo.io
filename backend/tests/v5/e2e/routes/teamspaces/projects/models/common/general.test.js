@@ -368,12 +368,73 @@ const testAppendFavourites = () => {
 		};
 		describe.each(generateTestData(true))('Federations', runTest);
 		describe.each(generateTestData())('Containers', runTest);
-		/*
+	});
+};
 
-		test('should append a new federation to the user favourites', async () => {
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status).send({ federations: [modelSettings[1]._id] });
-		}); */
+const testDeleteFavourites = () => {
+	describe('Remove Favourites', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const favFed = { ...ServiceHelper.generateRandomModel({ isFederation: true }), isFavourite: true };
+		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
+
+		beforeAll(async () => {
+			const models = [con, fed, favFed, favCon];
+			await setupBasicData(users, teamspace, project, models);
+			const favourites = models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : []));
+			await updateOne('admin', 'system.users', { user: users.tsAdmin.user }, {
+				$set: {
+					[`customData.starredModels.${teamspace}`]: favourites,
+				},
+			});
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongModelType = isFed ? 'container' : 'federation';
+			const model = isFed ? fed : con;
+			const favModel = isFed ? favFed : favCon;
+			const wrongTypeModel = isFed ? con : fed;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelIds = [model._id],
+			} = {}) => {
+				let url = `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/favourites`;
+				let firstParam = true;
+				if (key) {
+					url += `${firstParam ? '?' : '&'}key=${key}`;
+					firstParam = false;
+				}
+				if (modelIds) {
+					url += `${firstParam ? '?' : '&'}ids=${modelIds.join(',')}`;
+				}
+
+				return url;
+			};
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments],
+				[`the ${modelType} list provided has a ${wrongModelType}`, getRoute({ modelIds: [wrongTypeModel._id] }), false, templates.invalidArguments],
+				[`the ${modelType} list is not provided`, getRoute({ modelIds: null }), false, templates.invalidArguments],
+				[`the ${modelType} list contains correct data`, getRoute({ modelIds: [favModel._id] }), true],
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.delete(route).expect(expectedStatus);
+				if (!success) {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
@@ -672,52 +733,6 @@ const testDeleteFederation = () => {
 	});
 };
 
-const testDeleteFavourites = () => {
-	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/favourites`;
-	describe('Remove Favourite Federations', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.delete(`${route}?ids=${modelSettings[0]._id}`)
-				.expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.delete(`${route}?key=${nobody.apiKey}&ids=${modelSettings[0]._id}`)
-				.expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/favourites?key=${users.tsAdmin.apiKey}&ids=${modelSettings[0]._id}`)
-				.expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the user has no access to one or more federations', async () => {
-			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}&ids=${modelSettings[1]._id}`)
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the favourites list provided has a container', async () => {
-			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}&ids=${container._id}`)
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the favourites list provided is empty', async () => {
-			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should remove a federation from the user favourites', async () => {
-			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}&ids=${modelSettings[0]._id},${modelSettings[1]._id}`)
-				.expect(templates.ok.status);
-		});
-	});
-};
-
 const testUpdateFederationSettings = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}`;
 	describe('Update the settings of a federation', () => {
@@ -950,8 +965,8 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testGetModelList();
 	testGetModelStats();
 	testAppendFavourites();
-	/* testDeleteFavourites();
-	testAddFederation();
+	testDeleteFavourites();
+	/* testAddFederation();
 	testDeleteFederation();
 	testUpdateFederationSettings();
 	testGetSettings(); */
