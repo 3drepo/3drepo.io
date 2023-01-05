@@ -19,7 +19,7 @@ const {
 	ADD_ONS,
 	DEFAULT_RISK_CATEGORIES,
 	DEFAULT_TOPIC_TYPES,
-	SUBSCRIPTION_TYPES,
+	// SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { TEAM_MEMBER } = require('./roles.constants');
@@ -27,30 +27,33 @@ const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
+const SUBSCRIPTION_PATH = 'subscriptions';
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
-const Teamspace = {};
+const TeamspaceSetting = {};
 
-const teamspaceUpdate = (query, actions) => db.updateOne(USERS_DB_NAME, 'system.users', query, actions);
 const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
 
-const getTeamspace = async (ts, projection) => {
-	const tsDoc = await teamspaceQuery({ user: ts }, projection);
+const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPACE_SETTINGS_COL, query, actions);
+const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
+	TEAMSPACE_SETTINGS_COL, query, projection, sort);
+
+const getTeamspaceSetting = async (ts, projection) => {
+	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
 		throw templates.teamspaceNotFound;
 	}
 	return tsDoc;
 };
 
-Teamspace.getSubscriptions = async (ts) => {
-	const tsDoc = await getTeamspace(ts, { [SUBSCRIPTION_PATH]: 1 });
-	return tsDoc.customData?.billing?.subscriptions || {};
+TeamspaceSetting.getSubscriptions = async (ts) => {
+	const { subscriptions } = await getTeamspaceSetting(ts, { [SUBSCRIPTION_PATH]: 1 });
+	return subscriptions || {};
 };
 
-Teamspace.editSubscriptions = async (ts, type, data) => {
+TeamspaceSetting.editSubscriptions = async (ts, type, data) => {
 	const subsObjPath = `${SUBSCRIPTION_PATH}.${type}`;
 	const action = {};
 	const fields = ['collaborators', 'data', 'expiryDate'];
@@ -61,35 +64,35 @@ Teamspace.editSubscriptions = async (ts, type, data) => {
 	});
 
 	if (Object.keys(action).length) {
-		await teamspaceUpdate({ user: ts }, { $set: action });
+		await teamspaceSettingUpdate(ts, { _id: ts }, { $set: action });
 	}
 };
 
-Teamspace.removeSubscription = (ts, type) => {
+TeamspaceSetting.removeSubscription = (ts, type) => {
 	const field = type ? `${SUBSCRIPTION_PATH}.${type}` : `${SUBSCRIPTION_PATH}`;
-	return teamspaceUpdate({ user: ts }, { $unset: { [field]: 1 } });
+	return teamspaceSettingUpdate(ts, { _id: ts }, { $unset: { [field]: 1 } });
 };
 
 const possibleAddOns = {
-	[`customData.addOns.${ADD_ONS.VR}`]: 1,
-	[`customData.addOns.${ADD_ONS.HERE}`]: 1,
-	[`customData.addOns.${ADD_ONS.SRC}`]: 1,
-	[`customData.addOns.${ADD_ONS.POWERBI}`]: 1,
+	[`addOns.${ADD_ONS.VR}`]: 1,
+	[`addOns.${ADD_ONS.HERE}`]: 1,
+	[`addOns.${ADD_ONS.SRC}`]: 1,
+	[`addOns.${ADD_ONS.POWERBI}`]: 1,
 };
 
-Teamspace.getAddOns = async (teamspace) => {
-	const { customData } = await getTeamspace(teamspace, possibleAddOns);
-	return customData?.addOns || {};
+TeamspaceSetting.getAddOns = async (teamspace) => {
+	const { addOns } = await getTeamspaceSetting(teamspace, possibleAddOns);
+	return addOns || {};
 };
 
-Teamspace.updateAddOns = async (teamspace, addOns) => {
+TeamspaceSetting.updateAddOns = async (teamspace, addOns) => {
 	const set = {};
 	const unset = {};
 
 	const addOnTypes = new Set(Object.values(ADD_ONS));
 	Object.keys(addOns).forEach((key) => {
 		if (addOnTypes.has(key)) {
-			const path = `customData.addOns.${key}`;
+			const path = `addOns.${key}`;
 			if (addOns[key]) {
 				set[path] = true;
 			} else {
@@ -107,32 +110,26 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 		action.$unset = unset;
 	}
 
-	if (Object.keys(action).length) await teamspaceUpdate({ user: teamspace }, action);
+	if (Object.keys(action).length) await teamspaceSettingUpdate(teamspace, { _id: teamspace }, action);
 };
 
-Teamspace.removeAddOns = (teamspace) => teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
+TeamspaceSetting.removeAddOns = (teamspace) => teamspaceSettingUpdate(teamspace,
+	{ _id: teamspace }, { $unset: possibleAddOns });
 
-Teamspace.getTeamspaceAdmins = async (teamspace) => {
-	const tsSettings = await db.findOne(
-		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { permissions: 1 },
-	);
-
-	if (!tsSettings) {
-		throw templates.teamspaceNotFound;
-	}
-
+TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
+	const tsSettings = await getTeamspaceSetting(teamspace, { permissions: 1 });
 	return tsSettings.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
 };
 
-Teamspace.hasAccessToTeamspace = async (teamspace, username) => {
+TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 	const query = { user: username, 'roles.db': teamspace };
 	const userDoc = await teamspaceQuery(query, { _id: 1 });
 	return !!userDoc;
 };
 
-Teamspace.getMembersInfo = async (teamspace) => {
+TeamspaceSetting.getMembersInfo = async (teamspace) => {
 	const query = { 'roles.db': teamspace };
 	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
 	const data = await findMany(query, projection);
@@ -147,15 +144,17 @@ Teamspace.getMembersInfo = async (teamspace) => {
 	});
 };
 
-Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
+/*
+TeamspaceSetting.getAllTeamspacesWithActiveLicenses = (projection) => {
 	const currentDate = new Date();
 	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`${SUBSCRIPTION_PATH}.${type}`]: { $exists: true }, [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: null },
 		{ [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
 	return findMany(query, projection);
 };
+*/
 
-Teamspace.createTeamspaceSettings = async (teamspace) => {
+TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
 	const settings = { _id: teamspace,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
@@ -168,26 +167,27 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 		{ $push: { permissions: { user: username, permissions: [permission] } } });
 };
 
-Teamspace.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAMSPACE_ADMIN);
+TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
+	username, TEAMSPACE_ADMIN);
 
-Teamspace.grantMemberToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAM_MEMBER);
+TeamspaceSetting.grantMemberToUser = (teamspace, username) => grantPermissionToUser(teamspace, username, TEAM_MEMBER);
 
-Teamspace.getAllUsersInTeamspace = async (teamspace) => {
+TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
 	const users = await findMany(query, { user: 1 });
 
 	return users.map(({ user }) => user);
 };
 
-Teamspace.removeUserFromAdminPrivilege = async (teamspace, user) => {
+TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await db.updateOne(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $pull: { permissions: { user } } });
 };
 
-Teamspace.getRiskCategories = async (teamspace) => {
+TeamspaceSetting.getRiskCategories = async (teamspace) => {
 	const { riskCategories } = await db.findOne(
 		teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { riskCategories: 1 },
 	);
 	return riskCategories;
 };
 
-module.exports = Teamspace;
+module.exports = TeamspaceSetting;

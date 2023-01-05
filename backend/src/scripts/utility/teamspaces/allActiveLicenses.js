@@ -30,11 +30,10 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('Teamspace,Type, Data(MB),Seats,ExpiryDate\n');
-	results.forEach(({ user, customData }) => {
-		const subs = customData.billing.subscriptions;
+	results.forEach(({ _id, subs }) => {
 		Object.keys(subs).forEach((subType) => {
 			const { collaborators, expiryDate, data } = subs[subType];
-			writeStream.write(`${user},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
+			writeStream.write(`${_id},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
 		});
 	});
 
@@ -42,7 +41,7 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 });
 
 const run = async (outFile) => {
-	const teamspaces = await getAllTeamspacesWithActiveLicenses({ user: 1, 'customData.billing.subscriptions': 1 });
+	const teamspaces = await getAllTeamspacesWithActiveLicenses({ _id: 1, subscriptions: 1 });
 	await writeResultsToFile(teamspaces, outFile);
 };
 
