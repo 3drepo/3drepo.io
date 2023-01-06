@@ -365,26 +365,27 @@ const testAddComment = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const author = generateRandomString();
-		const expectedOutput = generateRandomString();		
+		const expectedOutput = generateRandomString();
 
-		test('should call addComment in model and return whatever it returns', async () => {					
-			const commentData = generateRandomString();		
+		test('should call addComment in model and return whatever it returns', async () => {
+			const commentData = generateRandomString();
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
 			await expect(Tickets.addComment(teamspace, project, model, ticket, commentData, author))
 				.resolves.toEqual(expectedOutput);
 
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket, commentData, author);
+			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model,
+				ticket, commentData, author);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
 
-		test('should process image and store a ref', async () => {			
+		test('should process image and store a ref', async () => {
 			const imageBuffer = generateRandomBuffer();
 			const commentData = {
 				[generateRandomString()]: generateRandomString(),
-				images: [imageBuffer]
+				images: [imageBuffer],
 			};
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
@@ -398,7 +399,8 @@ const testAddComment = () => {
 
 			const meta = { teamspace, project, model, ticket };
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, imgRef, imageBuffer, meta);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				imgRef, imageBuffer, meta);
 		});
 	});
 };
@@ -411,8 +413,8 @@ const testUpdateComment = () => {
 		const ticket = generateRandomString();
 		const oldComment = { [generateRandomString()]: generateRandomString() };
 
-		test('should call updateComment in model', async () => {					
-			const updateData = generateRandomString();		
+		test('should call updateComment in model', async () => {
+			const updateData = generateRandomString();
 
 			await expect(Tickets.updateComment(teamspace, project, model, ticket, oldComment, updateData))
 				.resolves.toEqual(undefined);
@@ -423,12 +425,12 @@ const testUpdateComment = () => {
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
 
-		test('should process image and store a ref', async () => {			
+		test('should process image and store a ref', async () => {
 			const imageBuffer = generateRandomBuffer();
 			const updateData = {
 				[generateRandomString()]: generateRandomString(),
-				images: [imageBuffer, generateUUIDString()]
-			};			
+				images: [imageBuffer, generateUUIDString()],
+			};
 
 			await expect(Tickets.updateComment(teamspace, project, model, ticket, oldComment, updateData))
 				.resolves.toEqual(undefined);
@@ -439,7 +441,8 @@ const testUpdateComment = () => {
 
 			const meta = { teamspace, project, model, ticket };
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, imgRef, imageBuffer, meta);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				imgRef, imageBuffer, meta);
 		});
 	});
 };
@@ -461,7 +464,8 @@ const testGetCommentsByTicket = () => {
 
 			const projection = { _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 };
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model, ticket, projection, { createdAt: -1 });
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model,
+				ticket, projection, { createdAt: -1 });
 		});
 	});
 };

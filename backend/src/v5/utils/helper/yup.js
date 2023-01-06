@@ -16,10 +16,9 @@
  */
 
 const { UUIDToString, stringToUUID } = require('./uuids');
-const Yup = require('yup');
 const { fileExtensionFromBuffer, isUUIDString } = require('./typeCheck');
+const Yup = require('yup');
 const { fileUploads } = require('../config');
-const { getCommentById } = require('../../models/tickets.comments');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
 
@@ -101,26 +100,27 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-Yup.addMethod(Yup.mixed, 'imageValidityTest', function (isNullable){
-	return this.test('Image validity test', '', async (value, { createError, originalValue }) => {
-		if (isUUIDString(originalValue)){
+// eslint-disable-next-line func-names
+Yup.addMethod(Yup.mixed, 'imageValidityTest', function (isNullable) {
+	return this.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
+		if (isUUIDString(originalValue)) {
 			return true;
 		}
 
 		if (value === null && !isNullable) {
-			return createError({ message: `Image cannot be null` });
-		}			
+			return createError({ message: 'Image cannot be null' });
+		}
 
-		if(value){
+		if (value) {
 			if (value?.length > fileUploads.resourceSizeLimit) {
 				return createError({ message: `Image must be smaller than ${fileUploads.resourceSizeLimit} Bytes` });
 			}
-	
+
 			const ext = await fileExtensionFromBuffer(value);
 			if (!ext || !fileUploads.imageExtensions.includes(ext.toLowerCase())) {
 				return createError({ message: `Image must be of type ${fileUploads.imageExtensions.join(',')}` });
 			}
-		}		
+		}
 
 		return true;
 	});
@@ -132,14 +132,11 @@ YupHelper.types.embeddedImage = (isNullable) => Yup.mixed()
 
 YupHelper.types.embeddedImageOrRef = (currentImages = []) => Yup.mixed()
 	.transform((currValue, orgVal) => {
-		if(orgVal)
-			return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
-		
+		if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+
 		return currValue;
 	})
-	.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref' , async (value, { originalValue }) => {
-		return !isUUIDString(originalValue) || currentImages.map(UUIDToString).includes(originalValue);
-	})
-	.imageValidityTest()
+	.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref', (value, { originalValue }) => !isUUIDString(originalValue) || currentImages.map(UUIDToString).includes(originalValue))
+	.imageValidityTest();
 
 module.exports = YupHelper;

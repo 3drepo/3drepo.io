@@ -16,8 +16,9 @@
  */
 
 const { src, image } = require('../../../../../../../../helper/path');
+
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
-const { generateRandomString, generateRandomBuffer, generateUUID } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
 const FS = require('fs');
 const { UUIDToString } = require('../../../../../../../../../../src/v5/utils/helper/uuids');
 
@@ -284,8 +285,8 @@ const testValidateUpdateTicket = () => {
 };
 
 const testValidateNewComment = () => {
-	describe('Validate new comment', () => {		
-		const params = {};	
+	describe('Validate new comment', () => {
+		const params = {};
 		describe.each([
 			[{ params, body: { comment: '' } }, false, 'with invalid comment'],
 			[{ params, body: { comment: generateRandomString() } }, true, 'with valid comment'],
@@ -304,7 +305,7 @@ const testValidateNewComment = () => {
 				} else {
 					expect(mockCB).not.toHaveBeenCalled();
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(req, {}, 
+					expect(Responder.respond).toHaveBeenCalledWith(req, {},
 						expect.objectContaining({ code: templates.invalidArguments.code }));
 				}
 			});
@@ -313,8 +314,8 @@ const testValidateNewComment = () => {
 };
 
 const testValidateUpdateComment = () => {
-	describe('Validate update comment', () => {		
-		const params = { };	
+	describe('Validate update comment', () => {
+		const params = { };
 		const existingRef = generateUUID();
 
 		describe.each([
@@ -323,7 +324,7 @@ const testValidateUpdateComment = () => {
 			[{ params, body: { comment: generateRandomString() } }, true, 'with valid comment'],
 			[{ params, body: { images: [] } }, false, 'with invalid images'],
 			[{ params, body: { images: [FS.readFileSync(image, { encoding: 'base64' })] } }, true, 'with valid base64 image'],
-			[{ params, body: { images: [UUIDToString(existingRef)]}}, true, 'with valid image ref', { images: [existingRef] }],
+			[{ params, body: { images: [UUIDToString(existingRef)] } }, true, 'with valid image ref', { images: [existingRef] }],
 			[{ params, body: {} }, false, 'with empty body'],
 		])('Check if req arguments for new comment are valid', (data, shouldPass, desc, comment = {}) => {
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
@@ -337,7 +338,7 @@ const testValidateUpdateComment = () => {
 				} else {
 					expect(mockCB).not.toHaveBeenCalled();
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(req, {}, 
+					expect(Responder.respond).toHaveBeenCalledWith(req, {},
 						expect.objectContaining({ code: templates.invalidArguments.code }));
 				}
 			});

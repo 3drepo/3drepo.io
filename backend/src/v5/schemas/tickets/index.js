@@ -271,19 +271,19 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
 	const caster = generateCastObject({
 		...fullTemplate,
-		properties: fullTemplate.properties.concat(defaultProperties)
+		properties: fullTemplate.properties.concat(defaultProperties),
 	}, stripDeprecated);
 	return caster.cast(ticket);
 };
 
 Tickets.serialiseComment = (comment) => {
-	const caster =  Yup.object({
+	const caster = Yup.object({
 		_id: uuidString,
 		createdAt: Yup.number().transform((_, val) => val.getTime()),
 		updatedAt: Yup.number().transform((_, val) => val.getTime()),
 		history: Yup.array().of(Yup.object({
 			timestamp: Yup.number().transform((_, val) => val.getTime()),
-		}))
+		})),
 	});
 	return caster.cast(comment);
 };

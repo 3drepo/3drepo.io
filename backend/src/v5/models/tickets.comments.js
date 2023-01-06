@@ -1,7 +1,24 @@
+/**
+ *  Copyright (C) 2023 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const { concat } = require('lodash');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
-const { concat } = require('lodash');
 
 const TicketComments = {};
 const TICKET_COMMENTS_COL = 'tickets.comments';
@@ -27,8 +44,8 @@ TicketComments.getCommentById = async (teamspace, project, model, ticket, _id,
 	return comment;
 };
 
-TicketComments.getCommentsByTicket = async (teamspace, project, model, ticket, projection, sort) =>
-	findMany(teamspace, { teamspace, project, model, ticket }, projection, sort);
+TicketComments.getCommentsByTicket = (teamspace, project, model, ticket, projection, sort) => findMany(teamspace,
+	{ teamspace, project, model, ticket }, projection, sort);
 
 TicketComments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const _id = generateUUID();
@@ -60,8 +77,8 @@ TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 
 TicketComments.deleteComment = async (teamspace, oldComment) => {
 	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
-	await updateOne(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });
+	await updateOne(teamspace, { _id: oldComment._id },
+		{ $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });
 };
-
 
 module.exports = TicketComments;

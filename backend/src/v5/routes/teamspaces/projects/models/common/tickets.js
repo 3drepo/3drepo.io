@@ -17,28 +17,29 @@
 
 const {
 	addTicket: addConTicket,
+	addComment: addConTicketComment,
+	deleteComment: deleteConTicketComment,
 	getTicketById: getConTicketById,
+	getCommentById: getConTicketComment,
+	getCommentsByTicket: getConTicketComments,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
 	updateTicket: updateConTicket,
-	addComment: addConTicketComment,
 	updateComment: updateConTicketComment,
-	deleteComment: deleteConTicketComment,
-	getCommentsByTicket: getConTicketComments,
-	getCommentById: getConTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
 	addTicket: addFedTicket,
+	addComment: addFedTicketComment,
+	deleteComment: deleteFedTicketComment,
 	getTicketById: getFedTicketById,
+	getCommentById: getFedTicketComment,
+	getCommentsByTicket: getFedTicketComments,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	updateTicket: updateFedTicket,
-	addComment: addFedTicketComment,
 	updateComment: updateFedTicketComment,
-	deleteComment: deleteFedTicketComment,
-	getCommentsByTicket: getFedTicketComments,
-	getCommentById: getFedTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
+const { checkTicketExists, templateExists, validateNewComment, validateNewTicket, validateUpdateComment, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -46,14 +47,13 @@ const {
 	hasReadAccessToFederation,
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList, serialiseComment, serialiseCommentList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket, validateNewComment, validateUpdateComment, checkCommentExists, checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { serialiseComment, serialiseCommentList, serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
+const { canEditComment } = require('../../../../../middleware/permissions/components/tickets');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { canEditComment } = require('../../../../../middleware/permissions/components/tickets');
 
 const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
@@ -153,44 +153,14 @@ const updateTicket = (isFed) => async (req, res) => {
 	}
 };
 
-const createComment = (isFed) => async (req, res) => {
-	const {	params, body: commentData } = req;
-	const { teamspace, project, model, ticket } = params;
-	const user = getUserFromSession(req.session);
+const getTicketComment = (isFed) => async (req, res, next) => {
+	const { params } = req;
+	const { teamspace, project, model, ticket, comment } = params;
 
 	try {
-		const addComment = isFed ? addFedTicketComment : addConTicketComment;
-		const _id = await addComment(teamspace, project, model, ticket, commentData, user);
-		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
-};
-
-const updateComment = (isFed) => async (req, res) => {
-	const {	params, body: updateData, commentData } = req;
-	const { teamspace, project, model, ticket } = params;
-
-	try {
-		const updateComment = isFed ? updateFedTicketComment : updateConTicketComment;
-		await updateComment(teamspace, project, model, ticket, commentData, updateData);
-
-		respond(req, res, templates.ok);
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
-};
-
-const deleteComment = (isFed) => async (req, res) => {
-	const {	params, commentData } = req;
-
-	try {
-		const deleteComment = isFed ? deleteFedTicketComment : deleteConTicketComment;
-		await deleteComment(params.teamspace, commentData);
-
-		respond(req, res, templates.ok);
+		const getCommentById = isFed ? getFedTicketComment : getConTicketComment;
+		req.commentData = await getCommentById(teamspace, project, model, ticket, comment);
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -198,7 +168,7 @@ const deleteComment = (isFed) => async (req, res) => {
 };
 
 const getTicketComments = (isFed) => async (req, res, next) => {
-	const {	params } = req;
+	const { params } = req;
 	const { teamspace, project, model, ticket } = params;
 
 	try {
@@ -212,14 +182,44 @@ const getTicketComments = (isFed) => async (req, res, next) => {
 	}
 };
 
-const getTicketComment = (isFed) => async (req, res, next) => {
-	const {	params } = req;
-	const { teamspace, project, model, ticket, comment } = params;
+const createComment = (isFed) => async (req, res) => {
+	const { params, body: commentData } = req;
+	const { teamspace, project, model, ticket } = params;
+	const user = getUserFromSession(req.session);
 
 	try {
-		const getCommentById = isFed ? getFedTicketComment : getConTicketComment;		
-		req.commentData = await getCommentById(teamspace, project, model, ticket, comment);
-		await next();
+		const createComm = isFed ? addFedTicketComment : addConTicketComment;
+		const _id = await createComm(teamspace, project, model, ticket, commentData, user);
+		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const updateComment = (isFed) => async (req, res) => {
+	const { params, body: updateData, commentData } = req;
+	const { teamspace, project, model, ticket } = params;
+
+	try {
+		const updateComm = isFed ? updateFedTicketComment : updateConTicketComment;
+		await updateComm(teamspace, project, model, ticket, commentData, updateData);
+
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const deleteComment = (isFed) => async (req, res) => {
+	const { params, commentData } = req;
+
+	try {
+		const deleteComm = isFed ? deleteFedTicketComment : deleteConTicketComment;
+		await deleteComm(params.teamspace, commentData);
+
+		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -253,7 +253,7 @@ const establishRoutes = (isFed) => {
 	 *           type: string
 	 *           format: uuid
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -321,7 +321,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -333,14 +333,14 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: template
+		   *       - name: template
 	 *         description: Template ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
- 	 *       - name: showDeprecated
+	   *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
 	 *         in: query
 	 *         required: false
@@ -381,7 +381,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -473,7 +473,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -552,7 +552,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -570,7 +570,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
- 	 *       - name: showDeprecated
+	   *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
 	 *         in: query
 	 *         required: false
@@ -638,7 +638,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -656,7 +656,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: resource
+		   *       - name: resource
 	 *         description: Resource ID
 	 *         in: path
 	 *         required: true
@@ -698,7 +698,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -760,7 +760,197 @@ const establishRoutes = (isFed) => {
 	 */
 	router.patch('/:ticket', hasCommenterAccess, validateUpdateTicket, updateTicket(isFed));
 
-    /**
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
+	 *   get:
+	 *     description: Get the details of a comment
+	 *     tags: [Tickets]
+	 *     operationId: getComment
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	   *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: comment
+	 *         description: Comment ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comment have been successfully retrieved
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The ID of the comment
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 comment:
+	 *                   type: string
+	 *                   example: Example comment
+	 *                   description: Content of the comment
+	 *                 images:
+	 *                   type: array
+	 *                   description: The images of the comment
+	 *                   items:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The Id of the comment image
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 history:
+	 *                   type: array
+	 *                   description: The update history of the comment
+	 *                   properties:
+	 *                     timestamp:
+	 *                       type: number
+	 *                       example: 1632821119000
+	 *                       description: Timestamp of the update
+	 *                     comment:
+	 *                       type: string
+	 *                       example: Example comment
+	 *                       description: The content of the comment
+	 *                     images:
+	 *                       type: array
+	 *                       description: The images of the comment
+	 *                       items:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: The Id of the comment image
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 deleted:
+	 *                   type: boolean
+	 *                   example: true
+	 *                   description: Whether or not the comment is deleted
+	 *                 author:
+	 *                   type: string
+	 *                   example: username1
+	 *                   description: The username of the comment's author
+	 *                 createdAt:
+	 *                   type: number
+	 *                   example: 1632821119000
+	 *                   description: Timestamp of when the comment was created
+	 *                 updatedAt:
+	 *                   type: number
+	 *                   example: 1632821119000
+	 *                   description: Timestamp of when the comment was last updated
+	 */
+	router.get('/:ticket/comments/:comment', hasReadAccess, checkTicketExists, getTicketComment(isFed), serialiseComment);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
+	 *   get:
+	 *     description: Get the comments of a ticket
+	 *     tags: [Tickets]
+	 *     operationId: getComments
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	   *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: comments have been successfully retrieved
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: array
+	 *               items:
+	 *                 type: object
+	 *                 properties:
+	 *                   _id:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The ID of the comment
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   deleted:
+	 *                     type: boolean
+	 *                     example: true
+	 *                     description: Whether or not the comment is deleted
+	 *                   author:
+	 *                     type: string
+	 *                     example: username1
+	 *                     description: The username of the comment's author
+	 *                   createdAt:
+	 *                     type: number
+	 *                     example: 1632821119000
+	 *                     description: Timestamp of when the comment was created
+	 *                   updatedAt:
+	 *                     type: number
+	 *                     example: 1632821119000
+	 *                     description: Timestamp of when the comment was last updated
+	 */
+	router.get('/:ticket/comments', hasReadAccess, checkTicketExists, getTicketComments(isFed), serialiseCommentList);
+
+	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
 	 *   post:
@@ -781,7 +971,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -846,7 +1036,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -917,7 +1107,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	   *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -950,196 +1140,6 @@ const establishRoutes = (isFed) => {
 	 *         description: comment has been successfully deleted
 	 */
 	router.delete('/:ticket/comments/:comment', hasCommenterAccess, canEditComment, deleteComment(isFed));
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
-	 *   get:
-	 *     description: Get the comments of a ticket
-	 *     tags: [Tickets]
-	 *     operationId: getComments
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations]
-	 *       - name: model
-	 *         description: Container/Federation ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: ticket
-	 *         description: Ticket ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: comments have been successfully retrieved
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: array
-	 *               items:
-	 *                 type: object
-	 *                 properties:
-	 *                   _id:
-	 *                     type: string
-	 *                     format: uuid
-	 *                     description: The ID of the comment
-	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-     *                   deleted:
-	 *                     type: boolean
-	 *                     example: true
-	 *                     description: Whether or not the comment is deleted
-	 *                   author:
-	 *                     type: string
-	 *                     example: username1
-	 *                     description: The username of the comment's author
-	 *                   createdAt:
-	 *                     type: number
-	 *                     example: 1632821119000
-	 *                     description: Timestamp of when the comment was created
-	 *                   updatedAt:
-	 *                     type: number
-	 *                     example: 1632821119000
-	 *                     description: Timestamp of when the comment was last updated
-	 */
-	router.get('/:ticket/comments', hasReadAccess, checkTicketExists, getTicketComments(isFed), serialiseCommentList);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
-	 *   get:
-	 *     description: Get the details of a comment
-	 *     tags: [Tickets]
-	 *     operationId: getComment
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations]
-	 *       - name: model
-	 *         description: Container/Federation ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: ticket
-	 *         description: Ticket ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-     *       - name: comment
-	 *         description: Comment ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: comment have been successfully retrieved
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 _id:
-	 *                   type: string
-	 *                   format: uuid
-	 *                   description: The ID of the comment
-	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                 comment:
-	 *                   type: string
-	 *                   example: Example comment
-	 *                   description: Content of the comment
-	 *                 images:
-	 *                   type: array
-	 *                   description: The images of the comment
-	 *                   items:
-	 *                     type: string
-	 *                     format: uuid
-	 *                     description: The Id of the comment image
-	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                 history:
-	 *                   type: array
-	 *                   description: The update history of the comment
-	 *                   properties:
-	 *                     timestamp:
-	 *                       type: number
-	 *                       example: 1632821119000
-	 *                       description: Timestamp of the update
-	 *                     comment:
-	 *                       type: string
-	 *                       example: Example comment
-	 *                       description: The content of the comment
-	 *                     images:
-	 *                       type: array
-	 *                       description: The images of the comment
-	 *                       items:
-	 *                         type: string
-	 *                         format: uuid
-	 *                         description: The Id of the comment image
-	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-     *                 deleted:
-	 *                   type: boolean
-	 *                   example: true
-	 *                   description: Whether or not the comment is deleted
-	 *                 author:
-	 *                   type: string
-	 *                   example: username1
-	 *                   description: The username of the comment's author
-	 *                 createdAt:
-	 *                   type: number
-	 *                   example: 1632821119000
-	 *                   description: Timestamp of when the comment was created
-	 *                 updatedAt:
-	 *                   type: number
-	 *                   example: 1632821119000
-	 *                   description: Timestamp of when the comment was last updated
-	 */
-	router.get('/:ticket/comments/:comment', hasReadAccess, checkTicketExists, getTicketComment(isFed), serialiseComment);
 
 	return router;
 };

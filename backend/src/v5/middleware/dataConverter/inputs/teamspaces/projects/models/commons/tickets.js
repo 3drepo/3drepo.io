@@ -17,18 +17,17 @@
 
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
+const Yup = require('yup');
 const { checkTicketTemplateExists } = require('../../../settings');
+const { getCommentById } = require('../../../../../../../models/tickets.comments');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
-const { stringToUUID, UUIDToString } = require('../../../../../../../utils/helper/uuids');
-const { validateMany } = require('../../../../../../common');
-const Yup = require('yup');
+const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
-const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
-const { getCommentById } = require('../../../../../../../models/tickets.comments');
+const { validateMany } = require('../../../../../../common');
 
 const TicketsMiddleware = {};
 
@@ -60,27 +59,28 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 
 const validateComment = (isNewComment) => async (req, res, next) => {
 	try {
-		const {  params: { teamspace, project, model, ticket, comment: _id }} = req;		
+		const { params: { teamspace, project, model, ticket, comment: _id } } = req;
 
 		const comment = await getCommentById(teamspace, project, model, ticket, _id, { images: 1, deleted: 1 })
 			.catch(() => undefined);
 
 		if (!isNewComment && comment?.deleted) {
-			throw createResponseCode(templates.invalidArguments, "Cannot update a deleted comment");
+			throw createResponseCode(templates.invalidArguments, 'Cannot update a deleted comment');
 		}
 
 		const schema = Yup.object().shape({
 			comment: Yup.string().min(1),
 			images: Yup.array().min(1).of(
-				isNewComment ?
-				types.embeddedImage() :
-				types.embeddedImageOrRef(comment?.images)
+				isNewComment
+					? types.embeddedImage()
+					: types.embeddedImageOrRef(comment?.images),
 			),
 		}).test(
 			'at-least-one-property',
 			'You must provide either a comment or a set of images',
 			(value) => Object.keys(value).length,
-		).required().noUnknown();
+		).required()
+			.noUnknown();
 
 		req.body = await schema.validate(req.body);
 
@@ -114,7 +114,8 @@ TicketsMiddleware.checkTicketExists = async (req, res, next) => {
 	}
 };
 
-TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists, validateTicket(true)]);
+TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams, checkTicketTemplateExists,
+	validateTicket(true)]);
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
 TicketsMiddleware.validateNewComment = validateComment(true);
 TicketsMiddleware.validateUpdateComment = validateComment();

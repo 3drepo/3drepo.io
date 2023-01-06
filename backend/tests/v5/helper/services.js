@@ -161,6 +161,19 @@ db.createTicket = (teamspace, project, model, ticket) => {
 	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
 };
 
+db.createComment = (teamspace, project, model, ticket, comment) => {
+	const formattedComment = {
+		...comment,
+		_id: stringToUUID(comment._id),
+		project: stringToUUID(project),
+		ticket: stringToUUID(ticket),
+		teamspace,
+		model,
+	};
+
+	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
+};
+
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
@@ -395,6 +408,13 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 
 	return ticket;
 };
+
+ServiceHelper.generateComment = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	createdAt: ServiceHelper.generateRandomDate(),
+	updatedAt: ServiceHelper.generateRandomDate(),
+	comment: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
