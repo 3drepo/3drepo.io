@@ -104,13 +104,12 @@ export const V5VisualSettingsOverrides = styled.div`
 
 		form {
 			margin-bottom: 65px;
-			padding: 17px 30px;
 			overflow-y: auto;
-			height: 40vh;
+			height: 415px;
 			box-sizing: border-box;
 			.MuiList-root {
 				box-shadow: none;
-				padding: 0;
+				padding: 17px 30px;
 				.MuiListItem-root {
 					height: 38px;
 					padding: 0;
