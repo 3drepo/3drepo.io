@@ -23,6 +23,7 @@ import {
 	NeutralActionButton as CancelButton,
 	VisualSettingsButtonsContainer as Actions,
 	VisualSettingsDialogContent,
+	WarningMessage,
 } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import styled, { css } from 'styled-components';
 
@@ -117,6 +118,10 @@ export const V5VisualSettingsOverrides = styled.div`
 					${sharedInputStyles} {
 						${selectStyles}
 						${textInputStyles}
+					}
+					${WarningMessage} {
+						color: ${({ theme }) => theme.palette.error.main};
+						margin-top: 25px;
 					}
 				}
 				${StreamingHeadline} {
