@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import WarningIconSmall from '@assets/icons/warning_small.svg';
+import WarningIconSmall from '@assets/icons/twoToned/warning_small-two_toned.svg';
 import { Link } from '@mui/material';
 
 export const TeamspaceQuotaLayout = styled.div`

@@ -19,7 +19,7 @@ const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, authenticate, deleteApiKey, generateApiKey,
-	getUserByUsername, removeUser, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
+	getUserByUsername, linkToSso, removeUser, unlinkFromSso, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
@@ -93,6 +93,7 @@ Users.getProfileByUsername = async (username) => {
 		'customData.apiKey': 1,
 		'customData.billing.billingInfo.company': 1,
 		'customData.billing.billingInfo.countryCode': 1,
+		'customData.sso': 1,
 	});
 
 	const { customData } = user;
@@ -111,6 +112,7 @@ Users.getProfileByUsername = async (username) => {
 		company: customData.billing?.billingInfo?.company,
 		countryCode: customData.billing?.billingInfo?.countryCode,
 		...(intercomRef ? { intercomRef } : {}),
+		...(customData.sso ? { sso: customData.sso.type } : {}),
 	};
 };
 
@@ -152,5 +154,9 @@ Users.generateResetPasswordToken = async (username) => {
 };
 
 Users.updatePassword = updatePassword;
+
+Users.unlinkFromSso = unlinkFromSso;
+
+Users.linkToSso = linkToSso;
 
 module.exports = Users;

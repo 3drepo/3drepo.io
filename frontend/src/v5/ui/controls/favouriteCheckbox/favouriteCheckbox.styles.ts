@@ -30,6 +30,7 @@ export const Checkbox = styled(CheckboxComponent)<{ selected?: boolean }>`
 	svg {
 		height: 16px;
 		width: 16px;
+		color: ${({ theme }) => theme.palette.favourite.main};
 
 		path {
 			fill: none;

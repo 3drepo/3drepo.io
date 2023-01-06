@@ -19,8 +19,8 @@ import { FormattedMessage } from 'react-intl';
 import { useState } from 'react';
 
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import TeamspacesIcon from '@assets/icons/teamspaces.svg';
-import VisualSettingsIcon from '@assets/icons/settings.svg';
+import TeamspacesIcon from '@assets/icons/filled/teamspaces-filled.svg';
+import VisualSettingsIcon from '@assets/icons/filled/settings-filled.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { Avatar } from '@controls/avatar';

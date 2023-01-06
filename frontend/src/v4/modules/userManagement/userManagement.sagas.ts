@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 import { isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
@@ -27,6 +30,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
+import { dispatch } from '../store';
 import {
 	selectCurrentTeamspace,
 	selectInvitations,
@@ -166,24 +170,53 @@ export function* removeUser({ username }) {
 		const errorData = error.response.data || {};
 
 		if (errorData.status === 400 && errorData.value === responseCode) {
-			const config = {
-				title: 'Remove User',
-				template: RemoveUserDialog,
-				confirmText: 'Remove',
-				onConfirm: () => UserManagementActions.removeUserCascade(username),
-				data: {
-					models: errorData.models,
-					projects: errorData.projects,
-					teamspacePerms: '',
-					username
+			if (isV5()) {
+				DialogsActionsDispatchers.open('delete', {
+					name: username,
+					onClickConfirm: () => new Promise<void>(
+						(accept, reject) => {
+							try {
+								dispatch(UserManagementActions.removeUserCascade(username))
+								accept();
+							} catch {
+								reject();
+							}
+						},
+					),
+					titleLabel: formatMessage({
+						id: 'deleteModal.teamspaceUser.title',
+						defaultMessage: 'Remove {username}',
+					}, { username }),
+					confirmLabel: formatMessage({
+						id: 'deleteModal.teamspaceUser.confirm',
+						defaultMessage: 'Remove',
+					}),
+					message: formatMessage({
+						id: 'deleteModal.teamspaceUser.message',
+						defaultMessage: 'Are you sure you want to remove this Teamspace admin?',
+					}),
+					confidenceCheck: true,
+				});
+			} else {
+				const config = {
+					title: 'Remove User',
+					template: RemoveUserDialog,
+					confirmText: 'Remove',
+					onConfirm: () => UserManagementActions.removeUserCascade(username),
+					data: {
+						models: errorData.models,
+						projects: errorData.projects,
+						teamspacePerms: '',
+						username
+					}
+				};
+
+				if (errorData.teamspace) {
+					config.data.teamspacePerms = errorData.teamspace.permissions.join(', ');
 				}
-			};
 
-			if (errorData.teamspace) {
-				config.data.teamspacePerms = errorData.teamspace.permissions.join(', ');
+				yield put(DialogActions.showDialog(config));
 			}
-
-			yield put(DialogActions.showDialog(config));
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('remove', 'licence', error));
 		}
