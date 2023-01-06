@@ -46,7 +46,7 @@ export const RevisionsListItemAuthor = ({
 						$active={active}
 						{...props}
 					>
-						{author.firstName} {author.lastName}
+						{author?.firstName || authorName} {author?.lastName}
 					</Text>
 				)}
 			>
