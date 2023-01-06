@@ -20,7 +20,7 @@ import { Dialog } from '@mui/material';
 import { FormModalHeader } from '@controls/modal/formModal/formModalHeader/formModalHeader.component';
 import { RemoveWhiteCorners } from '@controls/modal/formModal/formDialog.styles';
 import { formatMessage } from '@/v5/services/intl';
-import { V5VisualSettingsOverrides } from '../../../../v4Adapter/overrides/visualSettingsModal.overrides';
+import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
 	onClickClose: () => void;
@@ -45,11 +45,11 @@ export const VisualSettingsModal = ({
 			})}
 			handleClose={onClickClose}
 		/>
-		<V5VisualSettingsOverrides>
+		<VisualSettingsModalContent>
 			<VisualSettingsDialog
 				handleClose={onClickClose}
 				{...visualSettingsProps}
 			/>
-		</V5VisualSettingsOverrides>
+		</VisualSettingsModalContent>
 	</Dialog>
 );

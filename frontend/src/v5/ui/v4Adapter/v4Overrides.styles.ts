@@ -21,6 +21,7 @@ import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/com
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
+import visualSettings from './overrides/visualSettings.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
@@ -51,6 +52,7 @@ export const V4OverridesContainer = styled.div`
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
+	${visualSettings}
 
 	${leftPanel}
 	${panelsMenu}
@@ -61,7 +63,7 @@ export const V4OverridesContainer = styled.div`
 	${previewComments}
 	${sharedStyles}
 	${colorPicker}
-
+	
 	${bim}
 	
 	${groups}
@@ -70,11 +72,11 @@ export const V4OverridesContainer = styled.div`
 	${measurements}
 	${issues}
 	${safetiBase}
-
+	
 	${views}
 	${gis}
 	${compare}
-
+	
 	${RevisionsSwitchContainer} {
 		display: none;
 	}
