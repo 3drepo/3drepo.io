@@ -842,7 +842,7 @@ async function _createAccounts(roles, userName) {
 }
 
 User.getSubscriptionLimits = function(user) {
-	return UserBilling.getSubscriptionLimits(user.customData.billing);
+	return UserBilling.getSubscriptionLimits(user.user);
 };
 
 User.listAccounts = async function(user) {
