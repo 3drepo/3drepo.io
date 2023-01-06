@@ -388,7 +388,7 @@ const testSerialiseTicketList = () => {
 
 const testSerialiseComment = () => {
 	describe('Serialise Comment', () => {
-		test('Should cast dates correctly', async () => {
+		test('Should cast dates correctly', () => {
 			const commentData = {
 				createdAt: generateRandomDate(),
 				updatedAt: generateRandomDate(),
@@ -397,7 +397,7 @@ const testSerialiseComment = () => {
 
 			const req = { commentData };
 
-			await expect(TicketOutputMiddleware.serialiseComment(req, {})).resolves.toBeUndefined();
+			expect(TicketOutputMiddleware.serialiseComment(req, {})).toBeUndefined();
 
 			const output = {
 				createdAt: commentData.createdAt.getTime(),
@@ -409,11 +409,11 @@ const testSerialiseComment = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { ...output });
 		});
 
-		test('Should cast uuids correctly', async () => {
+		test('Should cast uuids correctly', () => {
 			const commentData = { _id: generateUUID() };
 			const req = { commentData };
 
-			await expect(TicketOutputMiddleware.serialiseComment(req, {})).resolves.toBeUndefined();
+			expect(TicketOutputMiddleware.serialiseComment(req, {})).toBeUndefined();
 
 			const output = { _id: UUIDToString(commentData._id) };
 
@@ -425,7 +425,7 @@ const testSerialiseComment = () => {
 
 const testSerialiseCommentList = () => {
 	describe('Serialise Comment List', () => {
-		test('Should cast dates correctly', async () => {
+		test('Should cast dates correctly', () => {
 			const comments = times(5, () => ({
 				createdAt: generateRandomDate(),
 				updatedAt: generateRandomDate(),
@@ -434,7 +434,7 @@ const testSerialiseCommentList = () => {
 
 			const req = { comments };
 
-			await expect(TicketOutputMiddleware.serialiseCommentList(req, {})).resolves.toBeUndefined();
+			expect(TicketOutputMiddleware.serialiseCommentList(req, {})).toBeUndefined();
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 
@@ -443,14 +443,14 @@ const testSerialiseCommentList = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output);
 		});
 
-		test('Should cast uuids correctly', async () => {
+		test('Should cast uuids correctly', () => {
 			const comments = times(5, () => ({
 				_id: generateUUID(),
 			}));
 
 			const req = { comments };
 
-			await expect(TicketOutputMiddleware.serialiseCommentList(req, {})).resolves.toBeUndefined();
+			expect(TicketOutputMiddleware.serialiseCommentList(req, {})).toBeUndefined();
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 
