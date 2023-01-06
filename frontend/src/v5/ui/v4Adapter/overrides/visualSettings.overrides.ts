@@ -18,6 +18,7 @@
 import {
 	DialogTab,
 	DialogTabs,
+	ErrorTooltip,
 	Headline as StreamingHeadline,
 	NegativeActionButton as ResetButton,
 	NeutralActionButton as CancelButton,
@@ -77,6 +78,14 @@ const textInputStyles = css`
 `;
 
 export default css`
+	${ErrorTooltip} {
+		.tooltip {
+			border: 1px solid ${({ theme }) => theme.palette.error.main};
+			color: ${({ theme }) => theme.palette.error.main};
+			background-color: ${({ theme }) => theme.palette.error.lightest};
+			margin: 0;
+		}
+	}
 	${VisualSettingsModalContent} {
 
 		${VisualSettingsDialogContent} {
