@@ -30,6 +30,8 @@ import { Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/comp
 import { FilterWrapper, Container as CommentListContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { Counter, Actions, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { BoardDialogTitle } from '@/v4/routes/board/board.styles';
+import { UserAndModelDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
+import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
 import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 
 const PrimaryButtonStyles = css`
@@ -73,9 +75,36 @@ const EditIssue = css`
 			/* TODO - fix after new palette is released */
 			background-color: #f7f8fa;
 
-			${ShowModelButtonContainer} button {
-				margin: 0 0 -21px 150px;
-				color: ${({ theme }) => theme.palette.secondary.main};
+			${UserAndModelDetails} {
+				width: 100%;
+				align-items: center;
+
+				> span {
+					margin-top: 4px;
+				}
+
+				> ${UserIndicator}${UserIndicator} {
+					margin-bottom: 0;
+				}
+			}
+
+			${ShowModelButtonContainer} {
+				top: 3px;
+				position: relative;
+
+				width: 100%;
+				display: flex;
+				justify-content: flex-end;
+				cursor: initial;
+				
+				button {
+					margin: 0;
+					color: ${({ theme }) => theme.palette.secondary.main};
+
+					&:hover {
+						background-color: transparent;
+					}
+				}
 			}
 		}
 
@@ -115,11 +144,6 @@ const EditIssue = css`
 
 		${PreviewDetailsContainer} {
 			background-color: inherit;
-		}
-
-		${ShowModelButtonContainer} {
-			margin: 0;
-			margin-top: -10px;
 		}
 	}
 `;
