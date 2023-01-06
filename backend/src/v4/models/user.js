@@ -89,11 +89,11 @@ const isAccountLocked = function (user) {
 const hasReachedLicenceLimit = async function (teamspace) {
 	const Invitations = require("./invitations");
 	const [userArr, invitations] = await Promise.all([
-		User.getAllUsersInTeamspace(teamspace.user),
-		Invitations.getInvitationsByTeamspace(teamspace.user)
+		User.getAllUsersInTeamspace(teamspace),
+		Invitations.getInvitationsByTeamspace(teamspace)
 	]);
 
-	const limits =  UserBilling.getSubscriptionLimits(teamspace.customData.billing);
+	const limits = await UserBilling.getSubscriptionLimits(teamspace);
 
 	const seatedLicences = userArr.length + invitations.length;
 	const reachedLimit =  (limits.collaboratorLimit !== "unlimited" &&  seatedLicences >= limits.collaboratorLimit);
@@ -633,9 +633,9 @@ async function _findModelDetails(dbUserCache, username, model) {
 	return { setting, permissions };
 }
 
-async function _calSpace(user) {
-	const quota = UserBilling.getSubscriptionLimits(user.customData.billing);
-	const sizeInBytes = await User.getTeamspaceSpaceUsed(user.user);
+async function _calSpace(teamspace) {
+	const quota = await UserBilling.getSubscriptionLimits(teamspace);
+	const sizeInBytes = await User.getTeamspaceSpaceUsed(teamspace);
 
 	if (quota.spaceLimit > 0) {
 		quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
@@ -897,7 +897,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 	const teamspaceUser = await User.findByUserName(teamspace);
 
-	await hasReachedLicenceLimit(teamspaceUser);
+	await hasReachedLicenceLimit(teamspaceUser.user);
 
 	let userEntry = null;
 	if (C.EMAIL_REGEXP.test(userToAdd)) { // if the submited username is the email
@@ -951,7 +951,7 @@ User.getQuotaInfo = async function (teamspace) {
 		throw responseCodes.USER_NOT_FOUND;
 	}
 
-	return _calSpace(teamspaceUser);
+	return _calSpace(teamspaceUser.user);
 };
 
 User.hasSufficientQuota = async (teamspace, size) => {
@@ -960,10 +960,7 @@ User.hasSufficientQuota = async (teamspace, size) => {
 	return spaceLeft >= size;
 };
 
-User.hasReachedLicenceLimitCheck = async function(teamspace) {
-	const teamspaceUser = await User.findByUserName(teamspace);
-	await hasReachedLicenceLimit(teamspaceUser);
-};
+User.hasReachedLicenceLimitCheck = hasReachedLicenceLimit;
 
 User.getMembers = async function (teamspace) {
 	const promises = [];
@@ -1078,9 +1075,7 @@ User.updateAvatar = async function(username, avatarBuffer) {
 
 User.updatePermissions = TeamspaceSettings.updatePermissions;
 
-User.updateSubscriptions = async function(username, subscriptions) {
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.billing.subscriptions": subscriptions}});
-};
+User.updateSubscriptions = TeamspaceSettings.updateSubscriptions;
 
 /*
 Payment (paypal) stuff

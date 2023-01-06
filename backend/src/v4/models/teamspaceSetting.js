@@ -131,6 +131,14 @@ class TeamspaceSettings {
 	async updatePermissions(teamspace, updatedPermissions) {
 		await db.updateOne(teamspace, colName, {_id: teamspace}, {$set: {permissions: updatedPermissions}});
 	}
+
+	async updateSubscriptions(teamspace, subscriptions) {
+		await Promise.all(Object.keys(subscriptions).map((subType) => TeamspaceModelV5.editSubscriptions(teamspace, subType, {
+			collaborators: subscriptions[subType].collaborators,
+			data: subscriptions[subType].data,
+			expiryDate: subscriptions[subType].expiryDate,
+		})));
+	}
 }
 
 module.exports = new TeamspaceSettings();
