@@ -29,7 +29,6 @@ export const Title = styled(Button).attrs({
 	margin: 0;
 	justify-content: flex-start;
 	max-width: 100%;
-	
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
