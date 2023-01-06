@@ -61,7 +61,7 @@ export const UserFullName = styled.div`
 	text-align: center;
 `;
 
-export const UserUserName = styled.div`
+export const UserUserName = styled(TruncatableName)`
 	font-size: 12px;
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-bottom: 11px;
