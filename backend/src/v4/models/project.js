@@ -469,7 +469,7 @@
 		}
 
 		if (data.permissions) {
-			data.permissions.forEach(async (permissionUpdate) => {
+			await Promise.all(data.permissions.map(async (permissionUpdate) => {
 				const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
 
 				if (-1 !== userIndex) {
@@ -482,7 +482,7 @@
 					project.permissions.push(permissionUpdate);
 					await removePermissionsFromModels(account, project.models, permissionUpdate.user);
 				}
-			});
+			}));						
 		}
 
 		return Project.updateAttrs(account, projectName, project);
