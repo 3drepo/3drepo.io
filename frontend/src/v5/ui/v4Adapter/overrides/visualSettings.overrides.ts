@@ -71,9 +71,10 @@ const textInputStyles = css`
 		width: auto;
 		text-align: left;
 		color: ${({ theme }) => theme.palette.secondary.main};
-		.MuiInputAdornment-root {
-			margin: 0;
-		}
+	}
+	.MuiInputAdornment-root {
+		margin: 0 4px;
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
