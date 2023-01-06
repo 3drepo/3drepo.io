@@ -28,7 +28,7 @@ import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
 	NegativeActionButton, NeutralActionButton,
-	ShortInput, VisualSettingsButtonsContainer,
+	ShortInput, V5Divider, VisualSettingsButtonsContainer,
 	VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
@@ -73,6 +73,7 @@ const BasicSettings = (props) => {
 						<MenuItem value="hard">Hard</MenuItem>
 					</SelectField>)} />
 			</FormListItem>
+			<V5Divider />
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
@@ -85,6 +86,7 @@ const BasicSettings = (props) => {
 					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
+			<V5Divider />
 			<FormListItem>
 				Clipping plane border width
 				<Field name="clipPlaneBorderWidth" render={ ({ field, form }) => {
@@ -148,6 +150,7 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
+			<V5Divider />
 			<FormListItem>
 				Minimum near plane
 				<Field name="nearPlane" render={ ({ field, form }) => {
@@ -174,6 +177,7 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
+			<V5Divider />
 			<FormListItem>
 				Maximum far plane
 				<Field name="maxFarPlane" render={ ({ field, form }) => {
@@ -211,6 +215,7 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
+			<V5Divider />
 			<FormListItem>
 				Maximum Shadow Distance
 				<Field name="maxShadowDistance" render={ ({ field, form }) => {

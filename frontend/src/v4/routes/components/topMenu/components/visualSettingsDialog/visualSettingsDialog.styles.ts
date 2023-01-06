@@ -19,7 +19,8 @@ import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@mui
 import { TooltipProps } from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { omit } from 'lodash';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
 export const Headline = styled(Typography)``;
@@ -106,6 +107,14 @@ export const DialogTabs = styled(Tabs)`
 	&& {
 		width: 100%;
 	}
+`;
+
+export const V5Divider = styled.hr`
+	border: none;
+	display: ${isV5() ? 'block' : 'none'};
+	${isV5() && css`
+		border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	`}
 `;
 
 export const DialogTab = styled(Tab)`

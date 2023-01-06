@@ -130,7 +130,7 @@ export const V5VisualSettingsOverrides = styled.div`
 					display: flex;
 					align-items: center;
 					white-space: nowrap;
-					&::after { /* linebreak after headline */
+					&::after { /* divider after headline */
 						content: '';
 						border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 						height: 0;
