@@ -253,7 +253,7 @@ const establishRoutes = (isFed) => {
 	 *           type: string
 	 *           format: uuid
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -321,7 +321,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -333,14 +333,14 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - name: template
+	 *       - name: template
 	 *         description: Template ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	   *       - name: showDeprecated
+	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
 	 *         in: query
 	 *         required: false
@@ -381,7 +381,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -473,7 +473,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -552,7 +552,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -570,7 +570,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	   *       - name: showDeprecated
+	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
 	 *         in: query
 	 *         required: false
@@ -638,7 +638,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -656,7 +656,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - name: resource
+	 *       - name: resource
 	 *         description: Resource ID
 	 *         in: path
 	 *         required: true
@@ -698,7 +698,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -781,7 +781,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -894,7 +894,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -971,7 +971,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -1036,7 +1036,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -1107,7 +1107,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
