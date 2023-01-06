@@ -17,7 +17,7 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { AppBar as MuiAppBar } from '@mui/material';
-import NotificationsIcon from '@assets/icons/notifications.svg';
+import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
 export default {
 	title: 'Buttons/NavbarButton',

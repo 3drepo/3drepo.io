@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import ErrorIconBase from '@assets/icons/warning_small.svg';
+import ErrorIconBase from '@assets/icons/twoToned/warning_small-two_toned.svg';
 
 export const Container = styled.div`
 	color: ${({ theme }) => theme.palette.error.main};

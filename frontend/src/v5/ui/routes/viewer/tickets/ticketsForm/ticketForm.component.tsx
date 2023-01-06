@@ -123,7 +123,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
-								key={module.name}
+								key={module.name || module.type}
 								module={module}
 								moduleValues={ticket.modules[module.name]}
 								{...rest}

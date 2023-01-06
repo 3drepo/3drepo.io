@@ -18,7 +18,7 @@
 import { isQuotaUnitCapped, isQuotaUnitUnlimited } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { QuotaUnit } from '@/v5/store/teamspaces/teamspaces.redux';
 import { FormattedMessage } from 'react-intl';
-import SeatsIcon from '@assets/icons/seats.svg';
+import SeatsIcon from '@assets/icons/filled/seats-filled.svg';
 import { WarningIcon, QuotaValuesContainer } from './teamspaceQuota.styles';
 
 type SeatsInfoProps = {
