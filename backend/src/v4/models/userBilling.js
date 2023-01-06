@@ -449,7 +449,10 @@ billingSchema.methods.executeBillingAgreement = function(user) {
 
 const UserBilling = {};
 
-UserBilling.getSubscriptions = TeamspaceModelV5.getSubscriptions;
+UserBilling.getSubscriptions = async (teamspace) => {
+	const subscriptions = await TeamspaceModelV5.getSubscriptions(teamspace);
+	return { basic: config.subscriptions.basic, ...subscriptions };
+};
 
 UserBilling.getSubscriptionLimits = async (teamspace) => {
 	const subscriptions = await TeamspaceModelV5.getSubscriptions(teamspace);
