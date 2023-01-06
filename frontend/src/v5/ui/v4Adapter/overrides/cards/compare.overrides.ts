@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Revisions } from '@/v4/routes/viewerGui/components/compare/components/compareDiffItem/compareDiffItem.styles';
+import { Revisions, Name } from '@/v4/routes/viewerGui/components/compare/components/compareDiffItem/compareDiffItem.styles';
 import { FilterPanel } from '@/v4/routes/viewerGui/components/compare/components/compareFilters/compareFilters.styles';
 import { SelectField } from '@/v4/routes/viewerGui/components/compare/components/revisionsSelect/revisionsSelect.styles';
 import { css } from 'styled-components';
@@ -34,5 +34,11 @@ export default css`
 
 	${FilterPanel} .MuiInputBase-root {
 		padding-left: 39px;
+	}
+
+	${Name} {
+		max-width: 317px;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 `;
