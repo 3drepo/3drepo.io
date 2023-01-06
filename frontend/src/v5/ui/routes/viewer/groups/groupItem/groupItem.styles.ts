@@ -21,10 +21,10 @@ import styled, { css } from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
 
 export const GroupsTreeListItem = styled.li<{ $highlighted?: boolean }>`
-	background-color: ${({ $highlighted, theme: { palette } }) => isV5()
-		? ($highlighted ? palette.base.lightest : palette.primary.contrast)
-		: ($highlighted ? '#F7F7F7' : '#FFFFFF')
-	};
+	background-color: ${({ $highlighted, theme: { palette } }) => {
+		if (isV5()) return $highlighted ? palette.base.lightest : palette.primary.contrast;
+		return $highlighted ? '#F7F7F7' : '#FFFFFF';
+	}};
 	cursor: default;
 	position: relative;
 `;
@@ -32,7 +32,7 @@ export const GroupsTreeListItem = styled.li<{ $highlighted?: boolean }>`
 export const Separator = styled.hr``;
 
 const GroupsTreeListItemContainerV4 = css`
-    max-width: 282px;
+	max-width: 282px;
 	
 	~ ${Separator} {
 		border: solid 0 #DCDCDC;
@@ -40,7 +40,7 @@ const GroupsTreeListItemContainerV4 = css`
 `;
 
 const GroupsTreeListItemContainerV5 = css`
-    max-width: 311px;
+	max-width: 311px;
 
 	~ ${Separator} {
 		border: solid 0 ${({ theme: { palette } }) => palette.base.lightest};
@@ -77,7 +77,7 @@ const PseudoElement = css`
 
 export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
 	${IconSize}
-	padding: 0 0px;
+	padding: 0;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -120,8 +120,8 @@ export const GroupItemTextContainer = styled.div`
 	padding-left: 10px;
 	display: inline-flex;
 	flex-direction: column;
-    max-width: 100%;
-    overflow: hidden;
+	max-width: 100%;
+	overflow: hidden;
 `;
 
 const GroupItemNameV4 = css`
