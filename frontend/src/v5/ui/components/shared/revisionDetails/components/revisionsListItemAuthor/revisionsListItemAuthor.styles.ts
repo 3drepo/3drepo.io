@@ -17,10 +17,18 @@
 
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
+import { FixedOrGrowContainer as FixedOrGrowContainerBase } from '@controls/fixedOrGrowContainer';
 
 export const Text = styled(Typography)<{ $active: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 	display: inline;
 	cursor: pointer;
+`;
+
+export const FixedOrGrowContainer = styled(FixedOrGrowContainerBase)<{ $active }>`
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding-right: 10px;
+	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 `;
