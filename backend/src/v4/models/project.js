@@ -482,7 +482,7 @@
 					project.permissions.push(permissionUpdate);
 					await removePermissionsFromModels(account, project.models, permissionUpdate.user);
 				}
-			}));						
+			}));
 		}
 
 		return Project.updateAttrs(account, projectName, project);
