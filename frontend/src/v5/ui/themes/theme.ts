@@ -23,7 +23,7 @@ import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
-import ChevronIcon from '@assets/icons/chevron.svg';
+import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
@@ -432,7 +432,13 @@ export const theme = createTheme({
 					color: null,
 				},
 				colorPrimary: {
-					color: COLOR.PRIMARY_MAIN,
+					color: COLOR.BASE_LIGHT,
+					'&.Mui-checked': {
+						color: COLOR.PRIMARY_MAIN,
+					},
+					'&.Mui-disabled': {
+						color: COLOR.BASE_LIGHTEST,
+					},
 				},
 			},
 		},

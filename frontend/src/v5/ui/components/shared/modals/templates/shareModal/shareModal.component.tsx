@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
-import CloseIcon from '@assets/icons/close.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import {
 	Title,
 	Header,

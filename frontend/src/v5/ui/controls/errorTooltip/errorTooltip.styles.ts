@@ -49,4 +49,5 @@ export const IconWrapper = styled.div`
 
 	align-items: center;
 	display: flex;
+	color: ${({ theme }) => theme.palette.error.main};
 `;

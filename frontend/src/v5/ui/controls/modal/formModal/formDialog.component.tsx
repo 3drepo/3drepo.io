@@ -16,7 +16,7 @@
  */
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
-import CloseIcon from '@assets/icons/close.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { DialogProps } from '@mui/material/Dialog';
 import { FormattedMessage } from 'react-intl';
 import { ScrollArea } from '@controls/scrollArea';

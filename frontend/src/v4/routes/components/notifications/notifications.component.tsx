@@ -23,7 +23,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
-import V5NotificationsIcon from '@assets/icons/notifications.svg';
+import V5NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
