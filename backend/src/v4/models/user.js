@@ -531,6 +531,7 @@ User.verify = async function (username, token, options) {
 
 	try {
 		await TeamspaceSettings.createTeamspaceSettings(username);
+		await TeamspaceSettings.grantAdminToUser(username, username);
 	} catch(err) {
 		systemLogger.logError("Failed to create teamspace settings for ", username, err);
 	}

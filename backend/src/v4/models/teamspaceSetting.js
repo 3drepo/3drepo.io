@@ -37,6 +37,10 @@ class TeamspaceSettings {
 		return db.getCollection(account, colName);
 	}
 
+	grantAdminToUser(teamspace, username) {
+		return TeamspaceModelV5.grantAdminToUser(teamspace, username);
+	}
+
 	async getTeamspaceSettings(account, projection = {}) {
 		const foundSettings = await db.findOne(account, colName , {}, projection);
 
@@ -136,7 +140,7 @@ class TeamspaceSettings {
 		await Promise.all(Object.keys(subscriptions).map((subType) => TeamspaceModelV5.editSubscriptions(teamspace, subType, {
 			collaborators: subscriptions[subType].collaborators,
 			data: subscriptions[subType].data,
-			expiryDate: subscriptions[subType].expiryDate,
+			expiryDate: subscriptions[subType].expiryDate
 		})));
 	}
 }
