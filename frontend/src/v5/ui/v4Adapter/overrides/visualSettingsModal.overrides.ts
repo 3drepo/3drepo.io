@@ -161,6 +161,9 @@ export const V5VisualSettingsOverrides = styled.div`
 					:hover {
 						text-decoration: underline;
 					}
+					&.Mui-disabled {
+						visibility: hidden;
+					}
 				}
 				${CancelButton} {
 					border: 1px solid ${({ theme }) => theme.palette.secondary.main};
