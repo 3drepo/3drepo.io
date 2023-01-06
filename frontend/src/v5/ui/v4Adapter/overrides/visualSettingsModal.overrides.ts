@@ -23,7 +23,55 @@ import {
 	VisualSettingsButtonsContainer as Actions,
 	VisualSettingsDialogContent,
 } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+const sharedInputStyles = css`
+	.MuiInputBase-root, .MuiGrid-container {
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		border-radius: 5px;
+		box-sizing: content-box;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		height: 24px;
+		width: 130px;
+		padding: 0 12px;
+		&.Mui-focused {
+			box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
+			border-color: ${({ theme }) => theme.palette.primary.main};
+		}
+	}
+	.MuiGrid-container {
+		width: 50px;
+		box-sizing: border-box;
+		.MuiGrid-root:first-of-type {
+			height: 10px;
+			width: 10px;
+		}
+		.MuiGrid-root:last-of-type {
+			position: absolute;
+			right: 0
+		}
+	}
+`;
+const selectStyles = css`
+	.MuiSelect-select {
+		background-color: transparent;
+		padding: 0;
+	}
+	.MuiOutlinedInput-notchedOutline {
+		border: none;
+		height: inherit;
+	}
+`;
+const textInputStyles = css`
+	.shortInput {
+		width: auto;
+		text-align: left;
+		color: ${({ theme }) => theme.palette.secondary.main};
+		.MuiInputAdornment-root {
+			margin: 0;
+		}
+	}
+`;
 
 export const V5VisualSettingsOverrides = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -54,7 +102,7 @@ export const V5VisualSettingsOverrides = styled.div`
 
 		form {
 			margin-bottom: 65px;
-			padding: 23px 30px;
+			padding: 17px 30px;
 			overflow-y: auto;
 			height: 40vh;
 			box-sizing: border-box;
@@ -62,10 +110,12 @@ export const V5VisualSettingsOverrides = styled.div`
 				box-shadow: none;
 				padding: 0;
 				.MuiListItem-root {
+					height: 38px;
 					padding: 0;
 					color: ${({ theme }) => theme.palette.base.main};
-					.MuiInputBase-root {
-						width: 130px;
+					${sharedInputStyles} {
+						${selectStyles}
+						${textInputStyles}
 					}
 				}
 			}
