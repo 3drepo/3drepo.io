@@ -18,6 +18,7 @@
 import {
 	DialogTab,
 	DialogTabs,
+	Headline as StreamingHeadline,
 	NegativeActionButton as ResetButton,
 	NeutralActionButton as CancelButton,
 	VisualSettingsButtonsContainer as Actions,
@@ -116,6 +117,23 @@ export const V5VisualSettingsOverrides = styled.div`
 					${sharedInputStyles} {
 						${selectStyles}
 						${textInputStyles}
+					}
+				}
+				${StreamingHeadline} {
+					${({ theme }) => theme.typography.h5};
+					color: ${({ theme }) => theme.palette.secondary.main};
+					height: 38px;
+					display: flex;
+					align-items: center;
+					white-space: nowrap;
+					&::after { /* linebreak after headline */
+						content: '';
+						border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+						height: 0;
+						width: 100%;
+						border-top: none;
+						box-sizing: border-box;
+						margin-left: 12px;
 					}
 				}
 			}
