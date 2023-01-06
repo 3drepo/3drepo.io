@@ -21,6 +21,7 @@ import { CoverImage } from '@controls/coverImage/coverImage.component';
 import { Content as DashboardContent } from '../../projects/projects.styles';
 
 export const Container = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	height: 100%;
 	display: flex;
 	flex-direction: column;

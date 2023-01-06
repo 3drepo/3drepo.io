@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import styled from 'styled-components';
 import { FONT_WEIGHT } from '../../../styles';
 
 export const Mark = styled.mark`
-	color: #06563c;
+	color: ${isV5() ? ({ theme }) => theme.palette.primary.main : '#06563c'};
 	font-weight: ${FONT_WEIGHT.SEMIBOLD};
 	background: none;
 `;
