@@ -16,7 +16,7 @@
  */
 
 import { ReactNode } from 'react';
-import ErrorCircleIcon from '@assets/icons/error_circle.svg';
+import ErrorCircleIcon from '@assets/icons/filled/error_circle-filled.svg';
 import { Container, Tooltip, IconWrapper } from './errorTooltip.styles';
 
 interface IErrorTooltip {

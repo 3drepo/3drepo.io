@@ -16,8 +16,8 @@
  */
 
 import styled from 'styled-components';
-import OrthogonalIconSVG from '@assets/icons/orthogonal.svg';
-import PerspectiveIconSVG from '@assets/icons/perspective.svg';
+import OrthogonalIconSVG from '@assets/icons/v4/orthogonal.svg';
+import PerspectiveIconSVG from '@assets/icons/v4/perspective.svg';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 

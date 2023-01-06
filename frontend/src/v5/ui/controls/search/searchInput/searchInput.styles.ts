@@ -23,6 +23,11 @@ import {
 
 export const IconButton = styled(IconButtonComponent)`
 	padding: 6px;
+	width: 22px;
+
+	svg {
+		height: 9px;
+	}
 `;
 
 export const TextField = styled(TextFieldComponent)`
@@ -41,6 +46,9 @@ export const StartAdornment = styled(InputAdornmentComponent).attrs({
 	position: 'start',
 })`
 	margin-right: 0;
+	svg {
+		color: ${({ theme }) => theme.palette.base.main};
+	}
 `;
 
 export const EndAdornment = styled(InputAdornmentComponent).attrs({
