@@ -45,10 +45,6 @@ export const Ticket = styled.div<{ $selected?: boolean }>`
 	cursor: pointer;
 	padding: 12px 14px 16px;
 	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-
-	&:hover {
-		${({ $selected }) => !$selected && 'background-color: #f9faff;'}
-	}
 `;
 
 export const ChipList = styled.div`
