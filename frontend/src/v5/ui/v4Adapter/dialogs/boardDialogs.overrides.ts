@@ -19,11 +19,15 @@ import {
 	HorizontalView as HorizontalViewRisk,
 	MessageContainer as MessageContainerRisk,
 	PreviewDetails as PreviewDetailsRisk,
+	TabContent as TabContentRisks,
+	Content as ContentRisks,
 } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	HorizontalView as HorizontalViewIssue,
 	MessageContainer as MessageContainerIssue,
 	PreviewDetails as PreviewDetailsIssue,
+	TabContent as TabContentIssues,
+	Content as ContentIssues,
 } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { ShowModelButtonContainer } from '@/v4/routes/components/openInViewerButton/openInViewerButton.styles';
 import { Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
@@ -74,6 +78,18 @@ const EditIssue = css`
 		${PreviewDetailsRisk}${PreviewDetailsRisk} {
 			/* TODO - fix after new palette is released */
 			background-color: #f7f8fa;
+			max-height: 558px;
+			overflow-y: hidden;
+
+			${TabContentIssues}, ${TabContentRisks} {
+				overflow-y: auto;
+				max-height: 437px;
+				
+				${ContentIssues}, ${ContentRisks} {
+					height: 100%;
+					margin-bottom: 16px;
+				}
+			}
 
 			${UserAndModelDetails} {
 				width: 100%;

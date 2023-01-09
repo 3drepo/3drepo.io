@@ -22,8 +22,8 @@ import { Container as CommentPadding } from '@/v4/routes/components/messagesList
 import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollapsableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
-import { Container as TabContainer, TabContent as TabContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { TabContent as TabContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { Container as TabContainer, TabContent as TabContentRisks, Content as ContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { TabContent as TabContentIssues, Content as ContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export const CommentListStyling = css`
@@ -145,7 +145,14 @@ export default css`
 
 		${TabContentIssues}, ${TabContentRisks} {
 			background-color: inherit;
-			padding: 0 16px;
+			padding: 0;
+
+			${ContentIssues}, ${ContentRisks} {
+				padding: 0 16px;
+				margin-bottom: 16px;
+				height: 100%;
+				box-sizing: border-box;
+			}
 
 			${EmptyStateInfo} {
 				margin-left: 0;
