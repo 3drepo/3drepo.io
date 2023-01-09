@@ -81,11 +81,9 @@ const runTest = (data) => {
 			checkFileExists(data.referencedLinks, true);
 			checkFileExists(data.toyLinks, true);
 			checkFileExists(data.zombiedLinks, false);
-		});
 
-		test('State should not change if no zombie files are found', async () => {
+			// re-run should not be removing any more files
 			await IdentifyZombieFiles.run(true);
-
 			checkFileExists(data.referencedLinks, true);
 			checkFileExists(data.toyLinks, true);
 			checkFileExists(data.zombiedLinks, false);
