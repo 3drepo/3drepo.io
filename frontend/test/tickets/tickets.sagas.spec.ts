@@ -49,7 +49,7 @@ describe('Tickets: sagas', () => {
 		it('should call fetchContainerTickets endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`)
-				.reply(400);
+				.reply(404);
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTickets(teamspace, projectId, modelId, false))
@@ -115,7 +115,7 @@ describe('Tickets: sagas', () => {
 		it('should call fetchFederationsTickets endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets`)
-				.reply(400);
+				.reply(404);
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTickets(teamspace, projectId, modelId, true))
@@ -178,9 +178,7 @@ describe('Tickets: sagas', () => {
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false))
-				.put(TicketsActions.fetchRiskCategories(teamspace))
 				.put(TicketsActions.fetchTemplatesSuccess(modelId, templates))
-				.put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, templates[0]._id, false))
 				.silentRun();
 		});
 
@@ -212,22 +210,17 @@ describe('Tickets: sagas', () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
 				.reply(200, { templates });
-			mockServer
-				.get(`/teamspaces/${teamspace}/settings/tickets/riskCategories`)
-				.reply(200);
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, true))
-				.put(TicketsActions.fetchRiskCategories(teamspace))
 				.put(TicketsActions.fetchTemplatesSuccess(modelId, templates))
-				.put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, templates[0]._id, true))
 				.silentRun();
 		})
 
 		it('should call fetchFederationTemplates endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
-				.reply(400);
+				.reply(404);
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, true))

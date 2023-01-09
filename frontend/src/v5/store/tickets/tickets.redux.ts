@@ -71,7 +71,11 @@ export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template
 	const modelTemplate = state.templatesByModelId[modelId]
 		.find((loadedTemplate) => loadedTemplate._id === template._id);
 
-	mergeWithArray(modelTemplate, template);
+	if (modelTemplate) {
+		mergeWithArray(modelTemplate, template);
+	} else {
+		state.templatesByModelId[modelId].push(template);
+	}
 };
 
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {
