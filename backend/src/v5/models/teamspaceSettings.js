@@ -27,8 +27,6 @@ const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-const SUBSCRIPTION_PATH = 'subscriptions';
-
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const TeamspaceSetting = {};
@@ -49,12 +47,12 @@ const getTeamspaceSetting = async (ts, projection) => {
 };
 
 TeamspaceSetting.getSubscriptions = async (ts) => {
-	const { subscriptions } = await getTeamspaceSetting(ts, { [SUBSCRIPTION_PATH]: 1 });
+	const { subscriptions } = await getTeamspaceSetting(ts, { subscriptions: 1 });
 	return subscriptions || {};
 };
 
 TeamspaceSetting.editSubscriptions = async (ts, type, data) => {
-	const subsObjPath = `${SUBSCRIPTION_PATH}.${type}`;
+	const subsObjPath = `subscriptions.${type}`;
 	const action = {};
 	const fields = ['collaborators', 'data', 'expiryDate'];
 	fields.forEach((field) => {
@@ -69,7 +67,7 @@ TeamspaceSetting.editSubscriptions = async (ts, type, data) => {
 };
 
 TeamspaceSetting.removeSubscription = (ts, type) => {
-	const field = type ? `${SUBSCRIPTION_PATH}.${type}` : `${SUBSCRIPTION_PATH}`;
+	const field = type ? `subscriptions.${type}` : 'subscriptions';
 	return teamspaceSettingUpdate(ts, { _id: ts }, { $unset: { [field]: 1 } });
 };
 
@@ -146,8 +144,8 @@ TeamspaceSetting.getMembersInfo = async (teamspace) => {
 
 TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace, projection) => {
 	const currentDate = new Date();
-	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`${SUBSCRIPTION_PATH}.${type}`]: { $exists: true }, [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: null },
-		{ [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: { $gt: currentDate } },
+	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
+		{ [`subscriptions.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
 	return teamspaceSettingQuery(teamspace, query, projection);
 };

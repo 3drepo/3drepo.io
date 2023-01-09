@@ -23,11 +23,6 @@ const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
 
-Quota.getAllTeamspacesWithActiveLicenses = async (projection) => {
-	const teamspaces = (await DBHandler.listDatabases()).map((entry) => entry.name);
-	return (await Promise.all(teamspaces.map((ts) => getTeamspaceActiveLicenses(ts, projection)))).filter((ts) => ts);
-};
-
 Quota.getQuotaInfo = async (teamspace) => {
 	let freeTier = true;
 	let userHasHadPaidPlan = false;

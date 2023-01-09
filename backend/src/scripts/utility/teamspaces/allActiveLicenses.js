@@ -22,7 +22,8 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getAllTeamspacesWithActiveLicenses } = require(`${v5Path}/utils/quota`);
+const { getTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
+const { getTeamspaceList } = require('../../utils');
 
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
@@ -41,8 +42,17 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 });
 
 const run = async (outFile) => {
-	const teamspaces = await getAllTeamspacesWithActiveLicenses({ _id: 1, subscriptions: 1 });
-	await writeResultsToFile(teamspaces, outFile);
+	const teamspaces = await getTeamspaceList();
+	const res = [];
+	for (const teamspace of teamspaces) {
+		logger.logInfo(`\t-${teamspace}`);
+		// eslint-disable-next-line no-await-in-loop
+		const tsLicenses = await getTeamspaceActiveLicenses(teamspace, { _id: 1, subscriptions: 1 });
+		if (tsLicenses) {
+			res.push(tsLicenses);
+		}
+	}
+	await writeResultsToFile(res, outFile);
 };
 
 const genYargs = (yargs) => {

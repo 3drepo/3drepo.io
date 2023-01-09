@@ -25,7 +25,6 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
-// const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
@@ -73,7 +72,7 @@ const testGrantAdminPermissionToUser = () => {
 		test('Should grant teamspace admin permission to user', async () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'updateOne');
 			await Teamspace.grantAdminToUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
@@ -437,12 +436,18 @@ const testRemoveUserFromAdminPrivileges = () => {
 	});
 };
 
-const testGetAllTeamspacesWithActiveLicenses = () => {
-	describe('Get all teamspaces with active licenses', () => {
-		test('Should perform a query to find all teamspaces with active subscriptions', async () => {
-			const expectedRes = [generateRandomString()];
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedRes);
-			await expect(Teamspace.getAllTeamspacesWithActiveLicenses()).resolves.toEqual(expectedRes);
+const testGetTeamspaceActiveLicenses = () => {
+	describe('Get active licenses in teamspace', () => {
+		test('Should perform a query to find all active subscriptions', async () => {
+			const teamspace = generateRandomString();
+			const dayMS = 1000 * 60 * 60 * 24;
+			const validDate = new Date(new Date().getTime() + dayMS);
+			const expectedRes = { subscription: {
+				discretionary: { expiryDate: validDate },
+				enterprise: { expiryDate: validDate },
+			} };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
+			await expect(Teamspace.getTeamspaceActiveLicenses(teamspace)).resolves.toEqual(expectedRes);
 			expect(fn).toHaveBeenCalledTimes(1);
 		});
 	});
@@ -475,7 +480,7 @@ describe('models/teamspaceSettings', () => {
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
-	testGetAllTeamspacesWithActiveLicenses();
+	testGetTeamspaceActiveLicenses();
 	testGetRiskCategories();
 	testGrantAdminPermissionToUser();
 });

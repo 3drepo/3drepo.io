@@ -972,7 +972,7 @@ User.getMembers = async function (teamspace) {
 	});
 	const getJobInfo = usersWithJob(teamspace);
 
-	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(user => user.permissions);
+	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(({permissions}) => permissions);
 
 	promises.push(
 		getTeamspaceMembers,
