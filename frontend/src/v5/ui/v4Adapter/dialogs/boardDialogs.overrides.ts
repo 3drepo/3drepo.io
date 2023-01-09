@@ -21,6 +21,7 @@ import {
 	PreviewDetails as PreviewDetailsRisk,
 	TabContent as TabContentRisks,
 	Content as ContentRisks,
+	Container as TabsContainer,
 } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	HorizontalView as HorizontalViewIssue,
@@ -30,10 +31,10 @@ import {
 	Content as ContentIssues,
 } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { ShowModelButtonContainer } from '@/v4/routes/components/openInViewerButton/openInViewerButton.styles';
-import { Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Container as PreviewDetailsContainer, ScrollableContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FilterWrapper, Container as CommentListContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { Counter, Actions, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
-import { BoardDialogTitle } from '@/v4/routes/board/board.styles';
+import { BoardDialogTitle, FormWrapper } from '@/v4/routes/board/board.styles';
 import { UserAndModelDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
 import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
@@ -70,6 +71,19 @@ const EditIssue = css`
 		}
 	}
 
+	/* voids parent custom-scrollbar hiding content */
+	${FormWrapper} {
+		& > ${TabsContainer} > div > div {
+			position: unset !important;
+			margin: 0 !important;
+			overflow: auto !important;
+		}
+
+		${ScrollableContainer} {
+			min-height: 437px;
+		}
+	}
+
 	${HorizontalViewIssue},
 	${HorizontalViewRisk} {
 
@@ -78,12 +92,8 @@ const EditIssue = css`
 		${PreviewDetailsRisk}${PreviewDetailsRisk} {
 			/* TODO - fix after new palette is released */
 			background-color: #f7f8fa;
-			max-height: 558px;
-			overflow-y: hidden;
 
 			${TabContentIssues}, ${TabContentRisks} {
-				overflow-y: auto;
-				max-height: 437px;
 				
 				${ContentIssues}, ${ContentRisks} {
 					height: 100%;
