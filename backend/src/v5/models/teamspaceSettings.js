@@ -19,7 +19,7 @@ const {
 	ADD_ONS,
 	DEFAULT_RISK_CATEGORIES,
 	DEFAULT_TOPIC_TYPES,
-	// SUBSCRIPTION_TYPES,
+	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { TEAM_MEMBER } = require('./roles.constants');
@@ -144,15 +144,13 @@ TeamspaceSetting.getMembersInfo = async (teamspace) => {
 	});
 };
 
-/*
-TeamspaceSetting.getAllTeamspacesWithActiveLicenses = (projection) => {
+TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace, projection) => {
 	const currentDate = new Date();
 	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`${SUBSCRIPTION_PATH}.${type}`]: { $exists: true }, [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: null },
 		{ [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
-	return findMany(query, projection);
+	return teamspaceSettingQuery(teamspace, query, projection);
 };
-*/
 
 TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
 	const settings = { _id: teamspace,

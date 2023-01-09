@@ -22,7 +22,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getAllTeamspacesWithActiveLicenses } = require(`${v5Path}/models/teamspaces`);
+const { getAllTeamspacesWithActiveLicenses } = require(`${v5Path}/utils/quota`);
 
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
@@ -30,9 +30,9 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('Teamspace,Type, Data(MB),Seats,ExpiryDate\n');
-	results.forEach(({ _id, subs }) => {
-		Object.keys(subs).forEach((subType) => {
-			const { collaborators, expiryDate, data } = subs[subType];
+	results.forEach(({ _id, subscriptions }) => {
+		Object.keys(subscriptions).forEach((subType) => {
+			const { collaborators, expiryDate, data } = subscriptions[subType];
 			writeStream.write(`${_id},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
 		});
 	});
@@ -41,7 +41,8 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 });
 
 const run = async (outFile) => {
-	const teamspaces = await getAllTeamspacesWithActiveLicenses({ _id: 1, subscriptions: 1 });
+	const teamspaces = (await getAllTeamspacesWithActiveLicenses({ _id: 1, subscriptions: 1 })).filter((ts) => ts);
+	console.log(teamspaces);
 	await writeResultsToFile(teamspaces, outFile);
 };
 

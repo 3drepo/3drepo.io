@@ -437,7 +437,6 @@ const testRemoveUserFromAdminPrivileges = () => {
 	});
 };
 
-/*
 const testGetAllTeamspacesWithActiveLicenses = () => {
 	describe('Get all teamspaces with active licenses', () => {
 		test('Should perform a query to find all teamspaces with active subscriptions', async () => {
@@ -448,7 +447,6 @@ const testGetAllTeamspacesWithActiveLicenses = () => {
 		});
 	});
 };
-*/
 
 const testGetRiskCategories = () => {
 	describe('Get risk categories', () => {
@@ -477,7 +475,7 @@ describe('models/teamspaceSettings', () => {
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
-	// testGetAllTeamspacesWithActiveLicenses();
+	testGetAllTeamspacesWithActiveLicenses();
 	testGetRiskCategories();
 	testGrantAdminPermissionToUser();
 });

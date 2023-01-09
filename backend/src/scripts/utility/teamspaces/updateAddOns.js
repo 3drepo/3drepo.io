@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getAddOns, removeAddOns, updateAddOns } = require(`${v5Path}/models/teamspaces`);
+const { getAddOns, removeAddOns, updateAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 
 const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled, removeAll) => {
 	const addOns = await getAddOns(teamspace);

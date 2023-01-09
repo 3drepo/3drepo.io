@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getSubscriptions } = require(`${v5Path}/models/teamspaces`);
+const { getSubscriptions } = require(`${v5Path}/models/teamspaceSettings`);
 
 const run = async (teamspace) => {
 	const subs = await getSubscriptions(teamspace);
