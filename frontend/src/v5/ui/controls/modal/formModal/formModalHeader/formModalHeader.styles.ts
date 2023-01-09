@@ -22,14 +22,12 @@ import { IconButton } from '@mui/material';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 10.5px;
-		right: 11px;
+	position: absolute;
+	top: 10.5px;
+	right: 11px;
 
-		svg path {
-			stroke: ${({ theme }) => theme.palette.primary.contrast}
-		}
+	svg path {
+		stroke: ${({ theme }) => theme.palette.primary.contrast}
 	}
 `;
 
@@ -48,14 +46,11 @@ export const Header = styled.div`
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
 	component: 'div',
-})`
-	text-align: left;
-`;
+})``;
 
 export const Subtitle = styled(Typography).attrs({
 	variant: 'h5',
 	component: 'div',
 })`
-	text-align: left;
 	color: ${({ theme }) => hexToOpacity(theme.palette.secondary.lightest, 60)};
 `;
