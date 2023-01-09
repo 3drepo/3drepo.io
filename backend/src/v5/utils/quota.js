@@ -25,8 +25,7 @@ const Quota = {};
 
 Quota.getAllTeamspacesWithActiveLicenses = async (projection) => {
 	const teamspaces = (await DBHandler.listDatabases()).map((entry) => entry.name);
-	console.log(teamspaces);
-	return Promise.all(teamspaces.map((ts) => getTeamspaceActiveLicenses(ts, projection)));
+	return (await Promise.all(teamspaces.map((ts) => getTeamspaceActiveLicenses(ts, projection)))).filter((ts) => ts);
 };
 
 Quota.getQuotaInfo = async (teamspace) => {

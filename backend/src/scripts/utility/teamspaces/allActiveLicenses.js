@@ -41,8 +41,7 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 });
 
 const run = async (outFile) => {
-	const teamspaces = (await getAllTeamspacesWithActiveLicenses({ _id: 1, subscriptions: 1 })).filter((ts) => ts);
-	console.log(teamspaces);
+	const teamspaces = await getAllTeamspacesWithActiveLicenses({ _id: 1, subscriptions: 1 });
 	await writeResultsToFile(teamspaces, outFile);
 };
 
