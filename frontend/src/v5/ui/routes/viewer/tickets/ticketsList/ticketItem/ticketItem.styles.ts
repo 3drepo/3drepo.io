@@ -33,6 +33,9 @@ export const Title = styled.div`
 	line-height: 16px;
 	padding-top: 5px;
 	width: fit-content;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
 
 	&:hover {
 		text-decoration: underline;
