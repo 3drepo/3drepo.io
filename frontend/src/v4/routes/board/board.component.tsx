@@ -259,7 +259,9 @@ export function Board(props: IProps) {
 	};
 
 	useEffect(() => {
-		if (isV5() && boardRef.current) handleModelChange({ target: { value: null } });
+		if (isV5() && boardRef.current) {
+			handleModelChange({ target: { value: null } });
+		}
 	}, [projectId]);
 
 	const handleModelChange = (e) => {
