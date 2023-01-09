@@ -30,5 +30,6 @@ export const FixedOrGrowContainer = styled(FixedOrGrowContainerBase)<{ $active }
 	overflow: hidden;
 	text-overflow: ellipsis;
 	padding-right: 10px;
+	box-sizing: border-box;
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 `;

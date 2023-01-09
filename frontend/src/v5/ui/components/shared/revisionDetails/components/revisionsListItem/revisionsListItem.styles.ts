@@ -36,6 +36,7 @@ export const Container = styled(Link)`
 	${fixedOrGrowContainer} > * {
 		text-overflow: ellipsis;
 		overflow: hidden;
+		padding-right: 10px;
 	}
 `;
 
