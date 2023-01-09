@@ -26,8 +26,7 @@ SsoConstants.errorCodes = {
 	EMAIL_EXISTS_WITH_SSO: 2,
 	NON_SSO_USER: 3,
 	USER_NOT_FOUND: 4,
-	ALREADY_LOGGED_IN: 5,
-	UNKNOWN: 6,
+	UNKNOWN: 5,
 };
 
 module.exports = SsoConstants;

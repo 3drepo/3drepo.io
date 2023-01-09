@@ -4,11 +4,10 @@ const webpack = require('webpack');
 const path = require('path');
 
 const PATHS = require('./tools/paths');
-const MODES = require('./tools/modes');
 const loaders = require('./tools/loaders');
 
-module.exports = (env, options) => ({
-	mode: options.mode || MODES.DEVELOPMENT,
+module.exports = (options) => ({
+	mode: options.mode,
 	context: PATHS.APP_DIR,
 	entry: {
 		maintenance: './src/maintenance.ts',
@@ -23,10 +22,8 @@ module.exports = (env, options) => ({
 	},
 	module: {
 		rules: [
-			loaders.TSLoader({ transpileOnly: env.noTypeChecking }),
-			loaders.LodashTSLoader,
+			loaders.TSLoader,
 			loaders.CSSLoader,
-			loaders.CSSExternalLoader,
 			loaders.FontLoader,
 			loaders.ImageLoader,
 			loaders.HTMLLoader
@@ -49,16 +46,7 @@ module.exports = (env, options) => ({
 		new HTMLWebpackPlugin({
 			template: './index.html',
 			filename: '../index.html',
-			removeComments: true,
-			collapseWhitespace: true,
-			removeRedundantAttributes: true,
-			useShortDoctype: true,
-			removeEmptyAttributes: true,
-			removeStyleLinkTypeAttributes: true,
-			keepClosingSlash: true,
-			minifyJS: true,
-			minifyCSS: true,
-			minifyURLs: true,
+			minify: true,
 		}),
 		new webpack.ProvidePlugin({
 			process: 'process/browser',

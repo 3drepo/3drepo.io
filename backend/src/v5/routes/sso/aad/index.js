@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
-const { authenticateRedirectEndpoint, authenticateRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { authenticate, emailNotUsed, hasAssociatedAccount, redirectToStateURL, verifyNewUserDetails } = require('../../../middleware/sso/aad');
+const { authenticateRedirectEndpoint, authenticateRedirectUri, linkRedirectEndpoint, linkRedirectUri, signupRedirectEndpoint, signupRedirectUri } = require('../../../services/sso/aad/aad.constants');
+const { isLoggedIn, notLoggedIn } = require('../../../middleware/auth');
 const { Router } = require('express');
 const Users = require('../../../processors/users');
-const { notLoggedIn } = require('../../../middleware/auth');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { isNonSsoUser } = require('../../../middleware/sso');
 const { respond } = require('../../../utils/responder');
 const { updateSession } = require('../../../middleware/sessions');
 const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inputs/users');
@@ -27,6 +29,18 @@ const { validateSsoSignUpData } = require('../../../middleware/dataConverter/inp
 const signUpPost = async (req, res, next) => {
 	try {
 		await Users.signUp(req.body);
+		await next();
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const linkPost = async (req, res, next) => {
+	try {
+		const username = getUserFromSession(req.session);
+		const { email, sso, firstName, lastName } = req.body;
+		await Users.linkToSso(username, email, firstName, lastName, sso);
 		await next();
 	} catch (err) {
 		/* istanbul ignore next */
@@ -63,7 +77,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/signup:
 	 *   post:
-	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. Error codes - 1 There is a non SSO account with the same email, 2 there is an SSO account witht he same email, 3 the user is non SSO, 4 the user was not found, 5 the user is already logged in, 6 unknown
+	 *     description: Redirects the user to Microsoft's authentication page and signs the user up. Upon successful signup the user is redirected to the URI provided. In case an error is occured during the signup process the user is redirected to the provided URI with the error code specified in the query. See schemas/errorCodes for more details.
 	 *     tags: [Aad]
 	 *     operationId: aadSignup
 	 *     parameters:
@@ -111,6 +125,29 @@ const establishRoutes = () => {
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
 	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
+
+	/**
+	 * @openapi
+	 * /sso/aad/link:
+	 *   get:
+	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. See schemas/errorCodes for more details.
+	 *     tags: [Aad]
+	 *     operationId: aadLink
+	 *     parameters:
+	 *       - in: query
+	 *         name: redirectUri
+	 *         schema:
+	 *           type: string
+	 *         description: a URI to redirect to when authentication finished
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/invalidArguments"
+	 *       302:
+	 *         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
+	 */
+	router.get('/link', isLoggedIn, isNonSsoUser, authenticate(linkRedirectUri));
+
+	router.get(linkRedirectEndpoint, emailNotUsed, linkPost, redirectToStateURL);
 
 	return router;
 };

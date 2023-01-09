@@ -16,7 +16,7 @@
  */
 
 import { forwardRef, Ref } from 'react';
-import StarIcon from '@assets/icons/star.svg';
+import StarIcon from '@assets/icons/filled/star-filled.svg';
 import { CheckboxProps, Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Checkbox } from './favouriteCheckbox.styles';

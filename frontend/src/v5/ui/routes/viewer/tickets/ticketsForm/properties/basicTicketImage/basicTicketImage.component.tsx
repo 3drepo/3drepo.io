@@ -15,22 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormControl, FormHelperText } from '@mui/material';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
-export type BasicTicketImageProps = {
-	value: string,
-	error?: any,
-	helperText?: string,
-	label: string,
-	className?: string,
+type BasicTicketImageProps = Omit<FormInputProps, 'inputRef' | 'onBlur'> & {
 	children: any,
-	required?: boolean,
-	disabled?: boolean,
-	onChange?: (...args) => void,
 };
 
 export const BasicTicketImage = ({

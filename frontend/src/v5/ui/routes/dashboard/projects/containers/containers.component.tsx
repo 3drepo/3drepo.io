@@ -18,7 +18,7 @@
 import { createContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';

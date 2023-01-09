@@ -17,12 +17,12 @@
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ActionComponents, Container, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
+import { ActionComponents, Header, NewProjectButton, Title, ProjectCardsList, SearchInput } from './projectsList.styles';
 import { CreateProjectModal } from '../../projects/projectsList/createProjectModal/createProjectModal.component';
 
 export const ProjectsList = () => {
@@ -31,40 +31,38 @@ export const ProjectsList = () => {
 
 	return (
 		<SearchContextComponent items={projects} fieldsToFilter={['name']}>
-			<Container>
-				<Header>
-					<Title>
-						<FormattedMessage id="projectsList.title" defaultMessage="Projects" />
-					</Title>
-					<ActionComponents>
-						<SearchInput
-							placeholder={formatMessage({ id: 'projectsList.search.placeholder', defaultMessage: 'Search projects...' })}
-						/>
-						<NewProjectButton
-							startIcon={<AddCircleIcon />}
-							onClick={openNewProjectModal}
-						>
-							<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
-						</NewProjectButton>
-					</ActionComponents>
-				</Header>
-				<ProjectCardsList>
-					<SearchContext.Consumer>
-						{ ({ query, filteredItems }: SearchContextType<IProject>) => (
-							<>
-								{filteredItems.map((project) => (
-									<ProjectCard
-										filterQuery={query}
-										key={project._id}
-										project={project}
-									/>
-								))}
-							</>
-						)}
-					</SearchContext.Consumer>
-					<AddProjectCard onClick={openNewProjectModal} />
-				</ProjectCardsList>
-			</Container>
+			<Header>
+				<Title>
+					<FormattedMessage id="projectsList.title" defaultMessage="Projects" />
+				</Title>
+				<ActionComponents>
+					<SearchInput
+						placeholder={formatMessage({ id: 'projectsList.search.placeholder', defaultMessage: 'Search projects...' })}
+					/>
+					<NewProjectButton
+						startIcon={<AddCircleIcon />}
+						onClick={openNewProjectModal}
+					>
+						<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
+					</NewProjectButton>
+				</ActionComponents>
+			</Header>
+			<ProjectCardsList>
+				<SearchContext.Consumer>
+					{ ({ query, filteredItems }: SearchContextType<IProject>) => (
+						<>
+							{filteredItems.map((project) => (
+								<ProjectCard
+									filterQuery={query}
+									key={project._id}
+									project={project}
+								/>
+							))}
+						</>
+					)}
+				</SearchContext.Consumer>
+				<AddProjectCard onClick={openNewProjectModal} />
+			</ProjectCardsList>
 		</SearchContextComponent>
 	);
 };

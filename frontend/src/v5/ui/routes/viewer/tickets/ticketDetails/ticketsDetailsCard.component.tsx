@@ -22,7 +22,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation, sanitizeViewVals } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
@@ -54,18 +54,6 @@ export const TicketDetailsCard = () => {
 	const goPrev = () => changeTicketIndex(-1);
 	const goNext = () => changeTicketIndex(1);
 
-	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket._id,
-			isFederation,
-		);
-	}, [ticket._id]);
-
-	if (!ticket) return (<></>);
-
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
 		mode: 'onChange',
@@ -88,10 +76,28 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
+		TicketsActionsDispatchers.fetchTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticket._id,
+			isFederation,
+		);
+		if (!templateAlreadyFetched(template)) {
+			TicketsActionsDispatchers.fetchTemplate(
+				teamspace,
+				project,
+				containerOrFederation,
+				template._id,
+				isFederation,
+			);
+		}
 		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
 		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
 	}, [ticket._id]);
+
+	if (!ticket) return (<></>);
 
 	return (
 		<CardContainer>
@@ -99,8 +105,8 @@ export const TicketDetailsCard = () => {
 				<ArrowBack onClick={goBack} />
 				{template.code}:{ticket.number}
 				<HeaderButtons>
-					<CircleButton size="medium" variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-					<CircleButton size="medium" variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+					<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+					<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
 				</HeaderButtons>
 			</CardHeader>
 			<FormProvider {...formData}>

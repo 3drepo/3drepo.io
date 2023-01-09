@@ -61,7 +61,6 @@ export const UploadListItemDestination = ({
 	defaultValue,
 	containersNamesInUse,
 	setContainersNamesInUse,
-	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!value.name);
@@ -169,9 +168,9 @@ export const UploadListItemDestination = ({
 
 	return (
 		<Autocomplete
+			value={value}
 			className={className}
 			disableClearable={disableClearable}
-			disabled={disabled}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={optionIsUsed}
 			getOptionLabel={({ name }: IContainer) => name}
@@ -182,15 +181,15 @@ export const UploadListItemDestination = ({
 			onFocus={onFocus}
 			options={containers}
 			renderOption={getRenderOption}
-			value={value}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
-					{...params}
-					{...props}
-					neworexisting={newOrExisting}
 					control={control}
 					formError={errors.containerName}
 					name="containerName"
+					disabled={disabled}
+					value={value}
+					{...params}
+					neworexisting={newOrExisting}
 					InputProps={{
 						...InputProps,
 						startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),

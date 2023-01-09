@@ -19,7 +19,7 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import AddIcon from '@assets/icons/add_circle.svg';
+import AddIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { sortBy } from 'lodash';
 import { ActionMenu, MenuItem, NewTicketButton } from '../ticketsList.styles';
 import { TicketsCardViews } from '../../tickets.constants';

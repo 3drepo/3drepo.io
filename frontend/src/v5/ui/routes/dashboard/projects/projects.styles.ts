@@ -28,7 +28,6 @@ export const DashboardScroll = styled(ScrollArea)`
 export const Content = styled.div`
 	max-width: 1289px;
 	margin: 18px auto;
-	padding: 0 30px;
 	height: auto;
 	width: 90vw;
 
