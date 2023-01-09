@@ -24,6 +24,8 @@ const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
+const { findModelSettingById } = require("../../../src/v4/models/modelSetting.js");
+const { findProjectPermsByUser } = require("../../../src/v4/models/project.js");
 
 describe("Account permission::", function () {
 
@@ -32,6 +34,8 @@ describe("Account permission::", function () {
 	let agentAdmin;
 	const username = "accountPerm";
 	const password = "accountPerm";
+	const project = 'Sample_Project';
+	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 
 	before(function(done) {
 		server = app.listen(8080, function () {
@@ -80,7 +84,7 @@ describe("Account permission::", function () {
 		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
 	});
 
-	it("should able to assign permissions to a user", async function() {
+	it("should be able to assign permissions to a user", async function() {
 
 		const permission = { user: "testing", permissions: ["create_project"]};
 
@@ -92,6 +96,25 @@ describe("Account permission::", function () {
 					.expect(200);
 
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+	});
+
+	it("should remove model and project permissions if a user becomes teamspace admin", async function() {
+		const permission = { user: "testing", permissions: ["teamspace_admin"]};
+
+		await agent.post(`/${username}/permissions`)
+					.send(permission)
+					.expect(200);
+
+		const {body} = await agent.get(`/${username}/permissions`)
+					.expect(200);
+
+		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+
+		const newProjectPermissions = await findProjectPermsByUser(username, project, "testing");	
+		expect(newProjectPermissions).to.deep.equal(undefined);
+
+		const newModelPermissions = await findModelSettingById(username, model, { 'permissions': 1 });						
+		expect(newModelPermissions.permissions.find(p => p.user === "testing")).to.deep.equal(undefined);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
