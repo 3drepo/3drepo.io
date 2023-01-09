@@ -16,8 +16,8 @@
  */
 import { forwardRef } from 'react';
 import { ScrollbarProps } from 'react-custom-scrollbars';
-import { ConditionalV5ScrollContainerBase } from './conditionalV5ScrollContainer.styles';
 import { isV5 } from '@/v4/helpers/isV5';
+import { ConditionalV5ScrollContainerBase } from './conditionalV5ScrollContainer.styles';
 
 export const ConditionalV5ScrollContainer = forwardRef(({ children, ...props }: ScrollbarProps, ref: any) => {
 	if (isV5()) {
