@@ -135,6 +135,9 @@ function runServer() {
 	const mainApp = express();
 	mainApp.use(compression());
 
+	const cors = require("cors");
+	mainApp.use(cors({origin: true, credentials: true}));
+
 	if(utils.hasField(config, "umask")) {
 		systemLogger.logInfo("Setting umask: " + config.umask);
 		process.umask(config.umask);
