@@ -17,7 +17,6 @@
 import styled, { css } from 'styled-components';
 import { alpha } from '@mui/material/styles';
 import { LabelButton, labelButtonSecondaryStyles } from '@controls/button/button.styles';
-import { Container as TextOverflowContainer, fadeToLeft } from '@controls/textOverflow/textOverflow.styles';
 
 export const Container = styled.div<{ selected?: boolean }>`
 	position: relative;
@@ -35,11 +34,6 @@ export const Container = styled.div<{ selected?: boolean }>`
 		::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
-		}
-		
-		${TextOverflowContainer}::after {
-			border: solid 2px red;
-			${fadeToLeft(theme.palette.secondary.main)}
 		}
 
 		${LabelButton} {
