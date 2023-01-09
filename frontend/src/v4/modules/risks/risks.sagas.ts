@@ -129,7 +129,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		risk = {
 			...risk,
-			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
+			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']),
 			owner: riskData.author,
 			rev_id: revision,
 			creator_role: userJob._id
@@ -402,7 +402,6 @@ function* cloneRisk({ dialogId }) {
 		'lastUpdated',
 		'resources',
 		'thumbnail',
-		'viewpoint',
 		'priority_last_changed',
 		'status_last_changed',
 	]);
@@ -410,6 +409,16 @@ function* cloneRisk({ dialogId }) {
 	if (activeRisk.descriptionThumbnail) {
 		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
 		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	}
+
+	if (clonedProperties.viewpoint?.screenshot) {
+		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
+		clonedProperties.viewpoint.screenshot = `data:image/png;base64,${base64Image}`;
+	}
+
+	if (clonedProperties.viewpoint?.screenshotSmall) {
+		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
+		clonedProperties.viewpoint.screenshotSmall = `data:image/png;base64,${base64Image}`;
 	}
 
 	try {

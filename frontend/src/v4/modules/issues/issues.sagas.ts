@@ -122,7 +122,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 
 		issue = {
 			...issue,
-			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
+			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']),
 			owner: issueData.author,
 			rev_id: revision,
 			creator_role: userJob._id,
@@ -476,7 +476,6 @@ export function* cloneIssue({ dialogId }) {
 		'lastUpdated',
 		'resources',
 		'thumbnail',
-		'viewpoint',
 		'priority_last_changed',
 		'status_last_changed',
 	]);
@@ -484,6 +483,16 @@ export function* cloneIssue({ dialogId }) {
 	if (activeIssue.descriptionThumbnail) {
 		const base64Image = yield imageUrlToBase64(activeIssue.descriptionThumbnail);
 		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	}
+
+	if (clonedProperties.viewpoint?.screenshot) {
+		const base64Image = yield imageUrlToBase64(activeIssue.descriptionThumbnail);
+		clonedProperties.viewpoint.screenshot = `data:image/png;base64,${base64Image}`;
+	}
+
+	if (clonedProperties.viewpoint?.screenshotSmall) {
+		const base64Image = yield imageUrlToBase64(activeIssue.descriptionThumbnail);
+		clonedProperties.viewpoint.screenshotSmall = `data:image/png;base64,${base64Image}`;
 	}
 
 	try {
