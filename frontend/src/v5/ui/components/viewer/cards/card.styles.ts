@@ -20,7 +20,8 @@ import ArrowBackMui from '@mui/icons-material/ArrowBack';
 
 export const ArrowBack = styled(ArrowBackMui)`
 	cursor: pointer;
-	height: 1.2rem;
+	height: 17px;
+	width: 17px;
 `;
 
 export const CardContainer = styled.div`
