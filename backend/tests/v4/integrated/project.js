@@ -24,6 +24,8 @@ const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
+const C = require("../../../src/v4/constants");
+const { findModelSettings } = require("../../../src/v4/models/modelSetting.js");
 
 describe("Projects", function () {
 
@@ -33,6 +35,8 @@ describe("Projects", function () {
 	const password = "projectuser";
 
 	const projectName = "project_exists";
+
+	const modelIds = ['a05974d0-2a8b-11eb-a58a-fde0111b8800', 'a5cd0670-2a8b-11eb-9358-1ff831483af6', 'ad8a39f0-2a8b-11eb-89a2-59e199077914'];
 
 	const goldenTestModelList = [
 		{
@@ -386,6 +390,42 @@ describe("Projects", function () {
 							return entry.permissions.length > 0;
 						}));
 						expect(entriesFiltered).to.deep.equal(project.permissions);
+						callback(err);
+					});
+			}
+		], (err, res) => done(err));
+	});
+
+	it("should remove all model permissions if a user gets project admin permission", function(done) {
+		const project = {
+			permissions: [{
+				user: "testing",
+				permissions: [C.PERM_PROJECT_ADMIN]
+			}]
+		};
+
+		async.series([
+			callback => {
+				agent.patch(`/${username}/projects/${projectName}`)
+					.send(project)
+					.expect(200, function(err, res) {
+						callback(err);
+					});
+			},
+			callback => {
+				agent.get(`/${username}/projects/${projectName}`)
+					.expect(200, async function(err, res) {
+						const entriesFiltered = res.body.permissions.filter((entry => {
+							return entry.permissions.length > 0;
+						}));
+						expect(entriesFiltered).to.deep.equal(project.permissions);
+
+						const models = await findModelSettings(username, { _id: { $in: modelIds } }, { permissions: 1 });
+						const modelsFiltered = models.filter((entry => {
+							return entry.permissions.filter(p => p.user === 'testing').length;
+						}));
+						expect(modelsFiltered).to.deep.equal([]);
+
 						callback(err);
 					});
 			}
