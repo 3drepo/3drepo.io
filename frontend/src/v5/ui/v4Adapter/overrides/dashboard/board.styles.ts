@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import { css } from 'styled-components';
 import { BoardItem, Config, DataConfig, LoaderContainer, ViewConfig, Container as V4Container, BoardContainer } from '@/v4/routes/board/board.styles';
 import { Title } from '@/v4/routes/components/panel/panel.styles';
 import { ThumbnailPlaceholder } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
