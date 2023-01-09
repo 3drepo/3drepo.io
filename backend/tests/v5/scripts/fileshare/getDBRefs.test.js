@@ -70,7 +70,7 @@ const runTest = (data) => {
 				const content = readFileSync(output).toString().split('\n').filter((a) => a.length);
 				expect(content.length).toEqual(refList.length);
 				expect(content).toEqual(expect.arrayContaining(refList));
-				await unlinkSync(output);
+				unlinkSync(output);
 			} else {
 				await expect(GetDBRefs.run(dbArr, outFile)).rejects.toEqual(expectedOut);
 			}

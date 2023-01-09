@@ -93,7 +93,7 @@ const runTest = (testData) => {
 			await setupData(testData);
 		});
 
-		test(`Should ${success ? 'succeed' : 'with an error'} if ${desc}`, async () => {
+		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
 			const { remove, removeAll, type, collaborators, data, expiryDate } = params;
 			const exe = UpdateLicense.run(teamspace.name, remove, removeAll, type, collaborators, data, expiryDate);
 			if (success) {

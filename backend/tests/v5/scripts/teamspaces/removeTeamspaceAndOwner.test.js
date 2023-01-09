@@ -43,7 +43,7 @@ const generateData = () => ({
 	partial: times(2, (i) => ({
 		name: generateRandomString(),
 		hasTS: i % 2 === 0,
-		hasUsers: i < 0,
+		hasUsers: i === 0,
 		hasAccount: i === 0,
 	})),
 	missing: times(2, generateRandomString()),

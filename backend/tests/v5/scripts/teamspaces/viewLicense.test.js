@@ -78,7 +78,7 @@ const runTest = (testData) => {
 			await setupData(testData);
 		});
 
-		test(`Should ${success ? 'succeed' : 'with an error'} if ${desc}`, async () => {
+		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
 			const exe = ViewLicense.run(teamspace.name);
 			if (success) {
 				await expect(exe).resolves.toEqual(determineExpectedResults(teamspace));

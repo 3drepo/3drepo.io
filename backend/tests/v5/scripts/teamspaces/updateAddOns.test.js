@@ -82,7 +82,7 @@ const runTest = (data) => {
 			await setupData(data);
 		});
 
-		test(`Should ${success ? 'succeed' : 'with an error'} if ${desc}`, async () => {
+		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
 			const exe = UpdateAddOns.run(teamspace.name,
 				params[ADD_ONS.VR],
 				params[ADD_ONS.SRC],
