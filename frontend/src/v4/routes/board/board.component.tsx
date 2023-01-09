@@ -258,7 +258,9 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
-	useEffect(() => handleModelChange({ target: { value: null } }), [projectId]);
+	useEffect(() => {
+		if (isV5() && boardRef.current) handleModelChange({ target: { value: null } });
+	}, [projectId]);
 
 	const handleModelChange = (e) => {
 		const newModelId = e.target.value;
@@ -446,7 +448,8 @@ export function Board(props: IProps) {
 	};
 
 	const components = {
-		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
+		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard,
+		...(isV5() && { ScrollableLane: ScrollArea }),
 	};
 
 	const renderBoard = renderWhenTrue(() => (
