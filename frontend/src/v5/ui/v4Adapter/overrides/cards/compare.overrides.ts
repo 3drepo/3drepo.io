@@ -40,5 +40,6 @@ export default css`
 		max-width: 317px;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 `;
