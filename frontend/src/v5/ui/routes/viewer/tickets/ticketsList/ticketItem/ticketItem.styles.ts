@@ -36,6 +36,7 @@ export const Title = styled.div`
 	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	white-space: nowrap;
 
 	&:hover {
 		text-decoration: underline;
