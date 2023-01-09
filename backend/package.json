@@ -1,8 +1,8 @@
 {
   "name": "3drepo.io",
-  "version": "4.28.0",
+  "version": "4.28.1",
   "engines": {
-    "node": "14.x.x"
+    "node": "18.x.x"
   },
   "private": true,
   "scripts": {
@@ -42,7 +42,7 @@
     "dayjs": "1.10.7",
     "device": "0.3.12",
     "ejs": "3.1.7",
-    "elastic-apm-node": "3.31.0",
+    "elastic-apm-node": "3.41.1",
     "express": "4.17.3",
     "express-body-parser-error-handler": "1.0.4",
     "express-session": "1.17.0",
@@ -55,7 +55,7 @@
     "mime-types": "2.1.24",
     "moment": "2.29.2",
     "moment-timezone": "0.5.23",
-    "mongodb": "3.6.12",
+    "mongodb": "3.7.3",
     "multer": "1.4.1",
     "nodemailer": "6.6.3",
     "openapi-schema-validator": "12.0.0",
@@ -63,7 +63,7 @@
     "pug": "3.0.2",
     "serialize-javascript": "4.0.0",
     "serve-favicon": "2.5.0",
-    "sharp": "0.30.3",
+    "sharp": "0.31.3",
     "shortid": "2.2.14",
     "slash": "3.0.0",
     "socket.io": "4.4.1",
@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@jest/test-sequencer": "^27.5.1",
-    "@shelf/jest-mongodb": "2.0.1",
+    "@shelf/jest-mongodb": "2.2.2",
     "chai": "4.2.0",
     "chai-shallow-deep-equal": "1.4.6",
     "cross-env": "7.0.2",
@@ -99,10 +99,12 @@
     "eslint-plugin-require-sort": "1.2.2",
     "eslint-plugin-security": "1.4.0",
     "form-data": "4.0.0",
-    "jest": "27.0.6",
+    "jest": "27.5.1",
+    "jest-environment-node": "27.5.1",
     "mocha": "9.0.2",
     "mock-express-request": "0.2.2",
     "nodemon": "2.0.12",
+    "openapi-types": "12.1.0",
     "proxyquire": "2.1.0",
     "sinon": "7.2.3",
     "socket.io-client": "4.4.1",
