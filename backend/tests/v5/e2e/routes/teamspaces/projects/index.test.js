@@ -37,8 +37,9 @@ const teamspace = 'teamspace';
 const model = ServiceHelper.generateRandomModel({ viewers: [modelPermUser.user] });
 
 const setupData = async () => {
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
 	await Promise.all([
-		ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]),
 		ServiceHelper.db.createUser(tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(nonAdminUser, [teamspace]),
 		ServiceHelper.db.createUser(unlicencedUser),

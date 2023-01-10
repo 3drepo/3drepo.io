@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const moveCustomDataToTeamspaceSettings = require('./moveCustomDataToTeamspaceSettings');
+const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
 
 const scripts = [
-	{ script: moveCustomDataToTeamspaceSettings, desc: 'Move customData to teamspace settings' },
+	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
 ];
 
 module.exports = scripts;

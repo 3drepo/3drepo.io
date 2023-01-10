@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('./responseCodes');
-const { getAllUsersInTeamspace, getSubscriptions, getTeamspaceActiveLicenses } = require('../models/teamspaceSettings');
+const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaceSettings');
 const DBHandler = require('../handler/db');
 const config = require('./config');
 const { getInvitationsByTeamspace } = require('../models/invitations');

@@ -637,7 +637,7 @@ async function _findModelDetails(dbUserCache, username, model) {
 async function _calSpace(teamspace) {
 	const [quota, sizeInBytes] = await Promise.all([
 		UserBilling.getSubscriptionLimits(teamspace),
-		User.getTeamspaceSpaceUsed(teamspace),
+		User.getTeamspaceSpaceUsed(teamspace)
 	]);
 
 	if (quota.spaceLimit > 0) {
