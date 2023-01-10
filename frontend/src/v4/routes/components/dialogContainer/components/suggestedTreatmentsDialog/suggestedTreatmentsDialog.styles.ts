@@ -35,8 +35,9 @@ export const StyledTypography = styled(Typography).attrs({
 	}
 `;
 
-export const StyledList = styled(List)`
-`;
+export const StyledList = styled(List)``;
+
+export const TextLabel = styled.span``;
 
 export const StyledListItem = styled(ListItem)`
 	&& {

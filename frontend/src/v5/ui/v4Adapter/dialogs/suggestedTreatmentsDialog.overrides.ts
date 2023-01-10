@@ -23,37 +23,42 @@ import {
 	StyledDialogContent,
 	Description,
 	ExpandButton,
+	ViewerScrollArea,
+	TextLabel,
+	StyledListItem,
 } from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
 import { labelButtonSecondaryStyles } from '@controls/button/button.styles';
 
 export default css`
 	${Container} {
+		/* top bar */
 		${StyledGrid} {
 			display: flex;
 			justify-content: center;
 		}
 
-		${Label} ${StyledTypography} {
-			font-weight: 400;
-			font-size: 13px;
-			line-height: 1.125rem;
-			color: ${({ theme }) => theme.palette.base.main};
-		}
-
-		.MuiInputBase-root {
-			svg {
-				color: ${({ theme }) => theme.palette.base.lightest};
-				margin-top: -15px;
+		${Label} {
+			font-weight: 600;
+			${StyledTypography} {
+				font-weight: 400;
+				font-size: 13px;
+				line-height: 1.125rem;
+				color: ${({ theme }) => theme.palette.base.main};
 			}
 		}
 
-		.MuiSelect-select {
+		/* main dashboard */
+		${ViewerScrollArea} {
 			margin-top: 0;
+
+			.MuiDialogContent-root {
+				min-height: 260px;
+			}
 		}
 
 		${StyledDialogContent} {
-			margin-top: 52px;
+			margin-top: 51px;
 			
 			& * {
 				font-family: ${({ theme }) => theme.typography.fontFamily};
@@ -62,7 +67,13 @@ export default css`
 			}
 
 			& > ul {
-				padding: 0 24px;
+				padding: 0;
+				box-shadow: none !important;
+				margin-top: -16px;
+
+				li:last-of-type ${StyledListItem} {
+					border: none;
+				}
 			}
 
 			.MuiListItemText-root * {
@@ -92,16 +103,24 @@ export default css`
 				padding: 8px 15px;
 			}
 
-			${StyledTypography} {
-				color: ${({ theme }) => theme.palette.base.dark};
-			}
-
 			// "Stage:" & "Type"
-			.MuiTypography-noWrap {
-				font-weight: 600;
+			.MuiGrid-grid-xs-4 {
+				max-width: 50%;
+				min-width: 50%;
+				padding-right: 3px;
 
-				& > span {
-					font-weight: 400;
+				.MuiTypography-noWrap {
+					color: ${({ theme }) => theme.palette.base.main};
+					${TextLabel} {
+						color: ${({ theme }) => theme.palette.secondary.main};
+						${({ theme }) => theme.typography.h5}
+						font-size: 12px;
+					}
+	
+					${StyledTypography} {
+						color: ${({ theme }) => theme.palette.base.main};
+						${({ theme }) => theme.typography.body1}
+					}
 				}
 			}
 		}
