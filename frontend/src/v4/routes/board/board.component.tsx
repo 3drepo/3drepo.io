@@ -425,7 +425,7 @@ export function Board(props: IProps) {
 							items={types}
 							value={type}
 							onChange={handleTypeChange}
-							disabled={!types.length}
+							disabled={!types.length || (isV5() && !containerOrFederation)}
 							disabledPlaceholder
 							inputId="type-select"
 						/>
@@ -439,7 +439,7 @@ export function Board(props: IProps) {
 							items={FILTER_VALUES}
 							value={props.filterProp}
 							onChange={handleFilterClick}
-							disabled={!FILTER_VALUES.length}
+							disabled={!FILTER_VALUES.length || (isV5() && !containerOrFederation)}
 							disabledPlaceholder
 							inputId="group-select"
 						/>
