@@ -409,6 +409,8 @@ export function Board(props: IProps) {
 			disabled={props.isPending || !modelId || !project}
 		>
 			<Add />
+			{isV5() && isIssuesBoard && formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}
+			{isV5() && !isIssuesBoard && formatMessage({ id: 'board.newRisk.button', defaultMessage: 'New risk' })}
 		</AddButton>
 	);
 

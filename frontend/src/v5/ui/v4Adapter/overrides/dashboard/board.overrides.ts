@@ -134,24 +134,59 @@ const boardContainerStyles = css`
 
 	/* add new card styling */
 	.MuiButtonBase-root[aria-label="Add new card"] {
-		height: 48px;
-		width: 48px;
-		margin-bottom: -29px;
 		background-color: ${({ theme }) => theme.palette.primary.main};
+		text-transform: none;
+		margin-bottom: -28px;
+		margin-left: 0;
+		height: 35px;
+		width: fit-content;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 10px 15px;
+
+		svg {
+			background: currentColor;
+			border-radius: 50%;
+			fill: ${({ theme }) => theme.palette.primary.main};
+			height: 17px;
+			width: 17px;
+			margin-right: 8px;
+			transform: scale(.7);
+		}
 
 		&:hover {
 			background-color: ${({ theme }) => theme.palette.primary.dark};
+			
+			svg {
+				fill: ${({ theme }) => theme.palette.primary.dark};
+			}
 		}
 
 		&:active {
 			box-shadow: none;
 			background-color: ${({ theme }) => theme.palette.primary.darkest};
+
+			svg {
+				fill: ${({ theme }) => theme.palette.primary.darkest};
+			}
 		}
 
 		&:disabled {
-			/* TODO - fix after new palette is released */
-			background-color: #edf0f8;
+			background-color: ${({ theme }) => theme.palette.base.lightest};
+			color: ${({ theme }) => theme.palette.primary.contrast};
+			
+			svg {
+				fill: ${({ theme }) => theme.palette.base.lightest};
+			}
 		}
+	}
+`;
+
+const dropdownStyles = css`
+	[group="1"] {
+		opacity: 1;
+		padding: 14px 12px;
 	}
 `;
 
