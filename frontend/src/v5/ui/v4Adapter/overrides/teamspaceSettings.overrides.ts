@@ -17,7 +17,19 @@
 import { StyledChipInput } from '@/v4/routes/components/chipsInput/chipsInput.styles';
 import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as Panel, Title } from '@/v4/routes/components/panel/panel.styles';
-import { ButtonContainer, CreateMitigationsGrid, DataText, Headline, LoaderContainer, StyledForm, StyledGrid, SuggestionsContainer } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
+import { FileLabel } from '@/v4/routes/teamspaceSettings/components/fileInputField/fileInputField.styles';
+import { ButtonContainer,
+	CreateMitigationsGrid,
+	DataText,
+	FileGrid,
+	Headline,
+	LoaderContainer,
+	StyledButton,
+	StyledForm,
+	StyledGrid,
+	StyledIconButton,
+	SuggestionsContainer,
+} from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
 import styled from 'styled-components';
 
 export const V5TeamspaceSettingsOverrides = styled.div`
@@ -80,18 +92,26 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 					box-shadow: none;
 				}
 			}
-			${DataText} {
-				color: ${({ theme }) => theme.palette.base.main};
-			}
 			${SuggestionsContainer} {
 				padding: 0;
-
-				.MuiIconButton-root {
-					svg {
-						color: ${({ theme }) => theme.palette.secondary.main};
+				${FileGrid} {
+					width: max-content;
+					height: 40px;
+					${DataText} {
+						color: ${({ theme }) => theme.palette.base.main};
 					}
-					&.Mui-disabled svg {
-						color: ${({ theme }) => theme.palette.base.lightest};
+					${FileLabel} {
+						margin: 0;
+					}
+					${StyledIconButton}, ${StyledButton} {
+						padding: 0;
+						margin: 0 10px;
+						svg {
+							color: ${({ theme }) => theme.palette.secondary.main};
+						}
+						&.Mui-disabled svg {
+							color: ${({ theme }) => theme.palette.base.lightest};
+						}
 					}
 				}
 			}
