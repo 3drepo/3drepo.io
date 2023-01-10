@@ -47,6 +47,8 @@ const trelloBoardStyles = css`
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
 		border-radius: 10px;
+		padding: 12px 10px;
+		margin-right: 10px;
 
 		&:first-child {
 			margin-left: 75px;
@@ -57,6 +59,8 @@ const trelloBoardStyles = css`
 		}
 		
 		header {
+			padding-bottom: 5px;
+
 			> span:nth-child(1) {
 				color: ${({ theme }) => theme.palette.secondary.main};
 				${({ theme }) => theme.typography.h3}
@@ -97,7 +101,7 @@ const boardContainerStyles = css`
 		border: solid 1px ${({ theme }) => theme.palette.base.lighter};
 		
 		& ~ svg {
-			top: -25px;
+			top: -26px;
 		}
 	}
 
