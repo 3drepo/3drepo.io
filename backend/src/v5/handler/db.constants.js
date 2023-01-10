@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,38 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { ADMIN_DB } = require('../handler/db.constants');
+const DbConstants = {};
 
-const UserConstants = {};
+DbConstants.ADMIN_DB = 'admin';
 
-UserConstants.AVATARS_COL_NAME = 'avatars.ref';
-UserConstants.USERS_DB_NAME = ADMIN_DB;
-
-UserConstants.USERNAME_BLACKLIST = [
-	'payment',
-	'test',
-	'config',
-	'os',
-	'info',
-	'contact',
-	'config',
-	'cookies',
-	'password-change',
-	'password-forgot',
-	'pricing',
-	'privacy',
-	'register-request',
-	'register-verify',
-	'signUp',
-	'termsAndConditions',
-	'false',
-	'admin',
-	'local',
-	'root',
-	'notifications',
-	'loginRecords',
-	'sessions',
-	'internal',
-];
-
-module.exports = UserConstants;
+module.exports = DbConstants;

@@ -37,18 +37,10 @@ User.isAccountActive = async (user) => {
 };
 
 User.authenticate = async (user, password) => {
-	try {
-		await db.authenticate(user, password);
-	} catch (err) {
-		if (err.code === templates.incorrectUsernameOrPassword.code) {
-			publish(events.FAILED_LOGIN_ATTEMPT, { user });
-			throw templates.incorrectUsernameOrPassword;
-		}
+	if (await db.authenticate(user, password)) return;
 
-		throw err;
-	}
-
-	return { username: user };
+	publish(events.FAILED_LOGIN_ATTEMPT, { user });
+	throw templates.incorrectUsernameOrPassword;
 };
 
 User.getUserByQuery = async (query, projection) => {

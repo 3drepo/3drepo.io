@@ -26,12 +26,16 @@ const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
 	const { user, password } = req.body;
-	Users.login(user, password).then((loginData) => {
-		req.loginData = loginData;
-		next();
-	}).catch((err) => respond(req, res, err));
+	try {
+		await Users.login(user, password);
+		req.loginData = { username: user };
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const getUsername = (req, res) => {

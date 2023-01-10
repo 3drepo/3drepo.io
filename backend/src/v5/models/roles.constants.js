@@ -17,6 +17,7 @@
 
 const RolesConstants = {};
 
+RolesConstants.ROLES_COL = 'system.roles';
 RolesConstants.DEFAULT = 'user';
 RolesConstants.TEAM_MEMBER = 'team_member';
 
