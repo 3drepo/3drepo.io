@@ -100,11 +100,7 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
 	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
 
 	if (subscriptions) {
-		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace, subType, {
-			collaborators: subscriptions[subType].collaborators,
-			data: subscriptions[subType].data,
-			expiryDate: subscriptions[subType].expiryDate,
-		})));
+		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace, subType, subscriptions[subType])));
 	}
 };
 

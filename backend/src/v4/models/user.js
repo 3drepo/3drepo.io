@@ -635,8 +635,10 @@ async function _findModelDetails(dbUserCache, username, model) {
 }
 
 async function _calSpace(teamspace) {
-	const quota = await UserBilling.getSubscriptionLimits(teamspace);
-	const sizeInBytes = await User.getTeamspaceSpaceUsed(teamspace);
+	const [quota, sizeInBytes] = await Promise.all([
+		UserBilling.getSubscriptionLimits(teamspace),
+		User.getTeamspaceSpaceUsed(teamspace),
+	]);
 
 	if (quota.spaceLimit > 0) {
 		quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
@@ -896,9 +898,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 };
 
 User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
-	const teamspaceUser = await User.findByUserName(teamspace);
-
-	await hasReachedLicenceLimit(teamspaceUser.user);
+	await hasReachedLicenceLimit(teamspace);
 
 	let userEntry = null;
 	if (C.EMAIL_REGEXP.test(userToAdd)) { // if the submited username is the email
