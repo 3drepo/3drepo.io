@@ -43,7 +43,7 @@ const run = async (teamspace, remove, removeAll, type, collaborators, data, expi
 	logger.logInfo(`${teamspace} has been updated. Current subscription(s): ${JSON.stringify(subsUpdated)}`);
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */ (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('users',
 		{

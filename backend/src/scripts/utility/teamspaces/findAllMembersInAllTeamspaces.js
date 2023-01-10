@@ -71,7 +71,7 @@ const run = async (outFile) => {
 	await writeResultsToFile(res, outFile);
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('out', {
 		describe: 'file path for the output CSV',
