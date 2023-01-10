@@ -70,7 +70,7 @@ const trelloBoardStyles = css`
 
 		${BoardItem} {
 			border-radius: 5px;
-			border-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			border-color: ${({ theme }) => theme.palette.base.lightest};
 
 			${ThumbnailPlaceholder} {
 				background-color: ${({ theme }) => theme.palette.tertiary.lightest};
