@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
+
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const config = require('../../../../../src/v5/utils/config');
 
