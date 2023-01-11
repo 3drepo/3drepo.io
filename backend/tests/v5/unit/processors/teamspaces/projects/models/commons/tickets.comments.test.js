@@ -126,7 +126,7 @@ const testDeleteComment = () => {
 			CommentsModel.deleteComment.mockResolvedValueOnce(undefined);
 
 			await expect(Comments.deleteComment(teamspace, oldComment));
-			
+
 			expect(CommentsModel.deleteComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.deleteComment).toHaveBeenCalledWith(teamspace, oldComment);
 		});
@@ -149,7 +149,7 @@ const testGetCommentsByTicket = () => {
 
 			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, projection, sort))
 				.resolves.toEqual(expectedOutput);
-			
+
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model,
 				ticket, projection, sort);
@@ -164,7 +164,7 @@ const testGetCommentById = () => {
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const ticket = generateRandomString();
-			const comment = generateRandomString();			
+			const comment = generateRandomString();
 			const projection = { [generateRandomString()]: generateRandomString() };
 
 			const expectedOutput = generateRandomString();
@@ -172,7 +172,7 @@ const testGetCommentById = () => {
 
 			await expect(Comments.getCommentById(teamspace, project, model, ticket, comment, projection))
 				.resolves.toEqual(expectedOutput);
-			
+
 			expect(CommentsModel.getCommentById).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.getCommentById).toHaveBeenCalledWith(teamspace, project, model,
 				ticket, comment, projection);
@@ -180,10 +180,10 @@ const testGetCommentById = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/tickets.comments', () => {	
+describe('processors/teamspaces/projects/models/commons/tickets.comments', () => {
 	testAddComment();
 	testUpdateComment();
 	testDeleteComment();
 	testGetCommentsByTicket();
-	testGetCommentById();	
+	testGetCommentById();
 });

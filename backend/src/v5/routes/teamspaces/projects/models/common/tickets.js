@@ -39,22 +39,23 @@ const {
 	updateTicket: updateFedTicket,
 	updateComment: updateFedTicketComment,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
-const { checkTicketExists, templateExists, validateNewTicket,validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { canUpdateComment, validateNewComment, validateUpdateComment } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.comments');
+const { checkTicketExists, templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
 } = require('../../../../../middleware/permissions/permissions');
+
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const { serialiseComment, serialiseCommentList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.comments');
 const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { validateNewComment, validateUpdateComment, canUpdateComment } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.comments');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { serialiseComment, serialiseCommentList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.comments');
 
 const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;

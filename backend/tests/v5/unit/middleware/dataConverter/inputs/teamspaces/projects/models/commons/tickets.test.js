@@ -17,7 +17,7 @@
 
 const { src } = require('../../../../../../../../helper/path');
 
-const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
+const { generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

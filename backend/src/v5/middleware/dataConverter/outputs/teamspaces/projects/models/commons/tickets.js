@@ -16,10 +16,10 @@
  */
 
 const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
-const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { respond } = require('../../../../../../../utils/responder');
+const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
 const { templates } = require('../../../../../../../utils/responseCodes');
 

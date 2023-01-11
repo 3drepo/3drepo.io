@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateTemplate, generateTicket, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
+const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../helper/services');
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
@@ -24,9 +24,6 @@ const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = r
 
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
-
-jest.mock('../../../../../../../../src/v5/models/tickets.comments');
-const CommentsModel = require(`${src}/models/tickets.comments`);
 
 jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
 const TemplatesModel = require(`${src}/schemas/tickets/templates`);

@@ -93,6 +93,24 @@ const testGetCommentsByTicket = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
 				{ teamspace, project, model, ticket }, projection, sort);
 		});
+
+		test('should return whatever the database query returns usign default projection and sort', async () => {
+			const expectedOutput = [
+				{ [generateRandomString()]: generateRandomString() },
+				{ [generateRandomString()]: generateRandomString() },
+			];
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
+				{ teamspace, project, model, ticket },
+				{ _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 },
+				{ createdAt: -1 });
+		});
 	});
 };
 

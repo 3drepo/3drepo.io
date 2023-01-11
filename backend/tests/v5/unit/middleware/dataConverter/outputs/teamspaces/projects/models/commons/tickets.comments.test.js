@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times } = require('lodash');
+const { times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateRandomDate, generateUUID, generateRandomString } = require('../../../../../../../../helper/services');
 
@@ -29,7 +29,7 @@ const CommentOutputMiddleware = require(`${src}/middleware/dataConverter/outputs
 
 const testSerialiseComment = () => {
 	describe('Serialise Comment', () => {
-		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, async () => {
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, () => {
 			const req = { commentData: { createdAt: generateRandomString() } };
 
 			expect(CommentOutputMiddleware.serialiseComment(req, {})).toBeUndefined();
@@ -75,7 +75,7 @@ const testSerialiseComment = () => {
 
 const testSerialiseCommentList = () => {
 	describe('Serialise Comment List', () => {
-		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, async () => {
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, () => {
 			const comments = times(5, () => ({
 				createdAt: generateRandomString(),
 				updatedAt: generateRandomDate(),
@@ -87,7 +87,7 @@ const testSerialiseCommentList = () => {
 			expect(CommentOutputMiddleware.serialiseCommentList(req, {})).toBeUndefined();
 
 			// the serialiser is already tested by testSerialiseComment.
-			expect(Responder.respond).toHaveBeenCalledTimes(1);						
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
 

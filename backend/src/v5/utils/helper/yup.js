@@ -100,34 +100,32 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-const imageValidityTests = (yupType, isNullable) => {
-	return yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
-		if (isUUIDString(originalValue)) {
-			return true;
-		}
-
-		if (value === null && !isNullable) {
-			return createError({ message: 'Image cannot be null' });
-		}
-
-		if (value) {
-			if (value?.length > fileUploads.resourceSizeLimit) {
-				return createError({ message: `Image must be smaller than ${fileUploads.resourceSizeLimit} Bytes` });
-			}
-
-			const ext = await fileExtensionFromBuffer(value);
-			if (!ext || !fileUploads.imageExtensions.includes(ext.toLowerCase())) {
-				return createError({ message: `Image must be of type ${fileUploads.imageExtensions.join(',')}` });
-			}
-		}
-
+const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
+	if (isUUIDString(originalValue)) {
 		return true;
-	});
-}
+	}
+
+	if (value === null && !isNullable) {
+		return createError({ message: 'Image cannot be null' });
+	}
+
+	if (value) {
+		if (value?.length > fileUploads.resourceSizeLimit) {
+			return createError({ message: `Image must be smaller than ${fileUploads.resourceSizeLimit} Bytes` });
+		}
+
+		const ext = await fileExtensionFromBuffer(value);
+		if (!ext || !fileUploads.imageExtensions.includes(ext.toLowerCase())) {
+			return createError({ message: `Image must be of type ${fileUploads.imageExtensions.join(',')}` });
+		}
+	}
+
+	return true;
+});
 
 YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
 	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
-	isNullable
+	isNullable,
 );
 
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
@@ -135,7 +133,7 @@ YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
 		.transform((currValue, orgVal) => {
 			if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
 			return currValue;
-		})
+		}),
 );
 
 module.exports = YupHelper;
