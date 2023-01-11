@@ -157,13 +157,12 @@ User.authenticate =  async function (username, password) {
 		throw responseCodes.TOO_MANY_LOGIN_ATTEMPTS;
 	}
 
-	try {
-		await db.authenticate(user.user, password);
-	} catch (err) {
+	if(!await db.authenticate(user.user, password)) {
+
 		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
 
-		if (err.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
-			remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
+		const err = responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
+		if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
 			throw appendRemainingLoginsInfo(err, remainingLoginAttempts);
 		}
 

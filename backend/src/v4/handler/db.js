@@ -16,6 +16,8 @@
  */
 
 "use strict";
+const { v5Path } = require("../../interop");
+const HandlerV5 = require(`${v5Path}/handler/db`);
 (function() {
 	const config	  = require("../config.js");
 	const C = require("../constants");
@@ -83,20 +85,7 @@
 
 	let db;
 
-	Handler.authenticate = async (user, password) => {
-		let conn;
-		try {
-			conn = await connect(user, password);
-			await conn.db("admin");
-		} catch (err) {
-			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
-		} finally {
-			if(conn) {
-				conn.close();
-			}
-		}
-
-	};
+	Handler.authenticate = HandlerV5.authenticate;
 
 	Handler.disconnect = function () {
 		if(db) {
