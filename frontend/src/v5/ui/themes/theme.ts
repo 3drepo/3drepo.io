@@ -1213,6 +1213,8 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					textTransform: 'none',
+					whiteSpace: 'nowrap',
+					overflow: 'visible',
 				},
 			},
 		},
