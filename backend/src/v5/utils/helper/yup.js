@@ -100,9 +100,8 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-// eslint-disable-next-line func-names
-Yup.addMethod(Yup.mixed, 'imageValidityTest', function (isNullable) {
-	return this.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
+const imageValidityTests = (yupType, isNullable) => {
+	return yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
 		if (isUUIDString(originalValue)) {
 			return true;
 		}
@@ -124,19 +123,19 @@ Yup.addMethod(Yup.mixed, 'imageValidityTest', function (isNullable) {
 
 		return true;
 	});
-});
+}
 
-YupHelper.types.embeddedImage = (isNullable) => Yup.mixed()
-	.transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n))
-	.imageValidityTest(isNullable);
+YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
+	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
+	isNullable
+);
 
-YupHelper.types.embeddedImageOrRef = (currentImages = []) => Yup.mixed()
-	.transform((currValue, orgVal) => {
-		if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
-
-		return currValue;
-	})
-	.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref', (value, { originalValue }) => !isUUIDString(originalValue) || currentImages.map(UUIDToString).includes(originalValue))
-	.imageValidityTest();
+YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
+	Yup.mixed()
+		.transform((currValue, orgVal) => {
+			if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			return currValue;
+		})
+);
 
 module.exports = YupHelper;

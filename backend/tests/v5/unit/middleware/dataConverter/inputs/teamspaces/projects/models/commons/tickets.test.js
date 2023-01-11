@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, image } = require('../../../../../../../../helper/path');
+const { src } = require('../../../../../../../../helper/path');
 
-const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
-const FS = require('fs');
-const { UUIDToString } = require('../../../../../../../../../../src/v5/utils/helper/uuids');
-
-jest.mock('../../../../../../../../../../src/v5/models/tickets.comments');
-const TicketComments = require(`${src}/models/tickets.comments`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -284,71 +278,7 @@ const testValidateUpdateTicket = () => {
 	});
 };
 
-const testValidateNewComment = () => {
-	describe('Validate new comment', () => {
-		const params = {};
-		describe.each([
-			[{ params, body: { comment: '' } }, false, 'with invalid comment'],
-			[{ params, body: { comment: generateRandomString() } }, true, 'with valid comment'],
-			[{ params, body: { images: [] } }, false, 'with invalid images'],
-			[{ params, body: { images: [FS.readFileSync(image, { encoding: 'base64' })] } }, true, 'with valid image'],
-			[{ params, body: {} }, false, 'with empty body'],
-		])('Check if req arguments for new comment are valid', (data, shouldPass, desc) => {
-			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
-				const mockCB = jest.fn();
-				const req = { ...cloneDeep(data) };
-				TicketComments.getCommentById.mockRejectedValueOnce(templates.commentNotFound);
-
-				await Tickets.validateNewComment(req, {}, mockCB);
-				if (shouldPass) {
-					expect(mockCB).toHaveBeenCalledTimes(1);
-				} else {
-					expect(mockCB).not.toHaveBeenCalled();
-					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(req, {},
-						expect.objectContaining({ code: templates.invalidArguments.code }));
-				}
-			});
-		});
-	});
-};
-
-const testValidateUpdateComment = () => {
-	describe('Validate update comment', () => {
-		const params = { };
-		const existingRef = generateUUID();
-
-		describe.each([
-			[{ params, body: { comment: generateRandomString() } }, false, 'with deleted comment', { deleted: true }],
-			[{ params, body: { comment: '' } }, false, 'with invalid comment'],
-			[{ params, body: { comment: generateRandomString() } }, true, 'with valid comment'],
-			[{ params, body: { images: [] } }, false, 'with invalid images'],
-			[{ params, body: { images: [FS.readFileSync(image, { encoding: 'base64' })] } }, true, 'with valid base64 image'],
-			[{ params, body: { images: [UUIDToString(existingRef)] } }, true, 'with valid image ref', { images: [existingRef] }],
-			[{ params, body: {} }, false, 'with empty body'],
-		])('Check if req arguments for new comment are valid', (data, shouldPass, desc, comment = {}) => {
-			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
-				const mockCB = jest.fn();
-				const req = { ...cloneDeep(data) };
-				TicketComments.getCommentById.mockResolvedValueOnce(comment);
-
-				await Tickets.validateUpdateComment(req, {}, mockCB);
-				if (shouldPass) {
-					expect(mockCB).toHaveBeenCalledTimes(1);
-				} else {
-					expect(mockCB).not.toHaveBeenCalled();
-					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(req, {},
-						expect.objectContaining({ code: templates.invalidArguments.code }));
-				}
-			});
-		});
-	});
-};
-
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets', () => {
 	testValidateNewTicket();
 	testValidateUpdateTicket();
-	testValidateNewComment();
-	testValidateUpdateComment();
 });

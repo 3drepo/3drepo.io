@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addComment, deleteComment, getCommentById, getCommentsByTicket, updateComment } = require('../../../../../models/tickets.comments');
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
-const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 
 const Tickets = {};
 
@@ -122,44 +120,5 @@ Tickets.getTicketList = (teamspace, project, model) => {
 
 	return getAllTickets(teamspace, project, model, projection, sort);
 };
-
-const processCommentImages = (images = []) => {
-	const refsAndBinary = [];
-
-	for (let i = 0; i < images.length; i++) {
-		const data = images[i];
-
-		if (isBuffer(data)) {
-			const ref = generateUUID();
-			refsAndBinary.push({ data, ref });
-			// eslint-disable-next-line no-param-reassign
-			images[i] = ref;
-		}
-	}
-
-	return refsAndBinary;
-};
-
-Tickets.addComment = async (teamspace, project, model, ticket, commentData, author) => {
-	const refsAndBinary = processCommentImages(commentData.images);
-	const res = await addComment(teamspace, project, model, ticket, commentData, author);
-	await storeFiles(teamspace, project, model, ticket, refsAndBinary);
-	return res;
-};
-
-Tickets.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
-	const refsAndBinary = processCommentImages(updateData.images);
-	await updateComment(teamspace, oldComment, updateData);
-	await storeFiles(teamspace, project, model, ticket, refsAndBinary);
-};
-
-Tickets.deleteComment = deleteComment;
-
-Tickets.getCommentsByTicket = (teamspace, project, model, ticket) => getCommentsByTicket(teamspace,
-	project, model, ticket,
-	{ _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 },
-	{ createdAt: -1 });
-
-Tickets.getCommentById = getCommentById;
 
 module.exports = Tickets;

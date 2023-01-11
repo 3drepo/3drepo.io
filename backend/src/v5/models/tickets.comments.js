@@ -44,13 +44,15 @@ TicketComments.getCommentById = async (teamspace, project, model, ticket, _id,
 	return comment;
 };
 
-TicketComments.getCommentsByTicket = (teamspace, project, model, ticket, projection, sort) => findMany(teamspace,
-	{ teamspace, project, model, ticket }, projection, sort);
+TicketComments.getCommentsByTicket = (teamspace, project, model, ticket, 
+	projection = { _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 },
+	sort = {createdAt: -1 }
+	) => findMany(teamspace, { teamspace, project, model, ticket }, projection, sort);
 
 TicketComments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const _id = generateUUID();
 	const createdAt = new Date();
-	const comment = { _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt, ...commentData };
+	const comment = {  ...commentData, _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt };
 	await insertOne(teamspace, comment);
 	return _id;
 };
@@ -60,7 +62,7 @@ const getUpdatedComment = (oldComment, updateData) => {
 	const formattedComment = { updatedAt, ...updateData };
 
 	const historyEntry = {
-		timestamp: updatedAt,
+		timestamp: oldComment.updatedAt,
 		...(oldComment.comment ? { comment: oldComment.comment } : {}),
 		...(oldComment.images ? { images: oldComment.images } : {}),
 	};

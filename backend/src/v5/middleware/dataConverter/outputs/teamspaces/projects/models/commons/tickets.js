@@ -16,7 +16,7 @@
  */
 
 const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
-const { serialiseComment, serialiseTicket } = require('../../../../../../../schemas/tickets');
+const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { respond } = require('../../../../../../../utils/responder');
@@ -74,25 +74,6 @@ Tickets.serialiseTicketList = async (req, res) => {
 		));
 		respond(req, res, templates.ok, { tickets: await Promise.all(outputProms) });
 	} catch (err) {
-		respond(req, res, templates.unknown);
-	}
-};
-
-Tickets.serialiseComment = (req, res) => {
-	try {
-		respond(req, res, templates.ok, serialiseComment(req.commentData));
-	} catch (err) {
-		/* istanbul ignore next */
-		respond(req, res, templates.unknown);
-	}
-};
-
-Tickets.serialiseCommentList = (req, res) => {
-	try {
-		const comments = req.comments.map((c) => serialiseComment(c));
-		respond(req, res, templates.ok, { comments });
-	} catch (err) {
-		/* istanbul ignore next */
 		respond(req, res, templates.unknown);
 	}
 };
