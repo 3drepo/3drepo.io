@@ -84,26 +84,16 @@ const newJobIds = [];
 describe("Check DB handler", function() {
 
 	describe("authenticate", function () {
-		it("valid credentials should succeed", async function() {
-			await db.authenticate(account, password);
+		it('valid credentials should succeed', async () => {
+			expect(await db.authenticate(account, password)).to.be(true);
 		});
 
-		it("incorrect username casing should fail", async function() {
-			try {
-				await db.authenticate(account.toUpperCase(), password);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err).to.be.not.empty;
-			}
+		it('incorrect username casing should fail', async () => {
+			expect(await db.authenticate(account.toUpperCase(), password)).to.be(false);
 		});
 
-		it("incorrect password should fail", async function() {
-			try {
-				await db.authenticate(account, "badPassword");
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err).to.be.not.empty;
-			}
+		it('incorrect password should fail', async () => {
+			expect(await db.authenticate(account.toUpperCase(), "bad password")).to.be(false);
 		});
 	});
 
