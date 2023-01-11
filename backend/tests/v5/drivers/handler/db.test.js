@@ -116,9 +116,61 @@ const testCreateUser = () => {
 	});
 };
 
+const testDropCollection = () => {
+	describe('Drop Collection', () => {
+		const database = generateRandomString();
+		const collection = generateRandomString();
+
+		beforeAll(() => DB.insertOne(database, collection, { _id: generateRandomString() }));
+
+		test('Should function if the collection does not exist', async () => {
+			await expect(DB.dropCollection(ADMIN_DB, generateRandomString())).resolves.toBeUndefined();
+		});
+
+		test('Should function if the database does not exist', async () => {
+			await expect(DB.dropCollection(ADMIN_DB, generateRandomString())).resolves.toBeUndefined();
+		});
+
+		test('Should function if the collection exists', async () => {
+			// A sanity check to make sure the collection exists
+			await expect(DB.findOne(database, collection, { })).resolves.not.toBe(null);
+
+			await expect(DB.dropCollection(database, collection)).resolves.toBeUndefined();
+
+			await expect(DB.findOne(database, collection, { })).resolves.toBe(null);
+		});
+	});
+};
+
+const testInsertOne = () => {
+	describe('Insert One', () => {
+		test('Should insert document successfully', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const key = generateRandomString();
+
+			await expect(DB.insertOne(database, col, { _id: key })).resolves.toBeUndefined();
+			await expect(DB.findOne(database, col, { _id: key })).resolves.toEqual({ _id: key });
+		});
+
+		test('Should fail if the key already exists', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const key = generateRandomString();
+
+			await expect(DB.insertOne(database, col, { _id: key })).resolves.toBeUndefined();
+			await expect(DB.findOne(database, col, { _id: key })).resolves.toEqual({ _id: key });
+
+			await expect(DB.insertOne(database, col, { _id: key })).rejects.not.toBeUndefined();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
 	testDisconnect();
 	testCreateUser();
+	testDropCollection();
+	testInsertOne();
 });

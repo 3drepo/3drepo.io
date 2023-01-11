@@ -85,15 +85,15 @@ describe("Check DB handler", function() {
 
 	describe("authenticate", function () {
 		it('valid credentials should succeed', async () => {
-			expect(await db.authenticate(account, password)).to.be(true);
+			expect(await db.authenticate(account, password)).to.equal(true);
 		});
 
 		it('incorrect username casing should fail', async () => {
-			expect(await db.authenticate(account.toUpperCase(), password)).to.be(false);
+			expect(await db.authenticate(account.toUpperCase(), password)).to.equal(false);
 		});
 
 		it('incorrect password should fail', async () => {
-			expect(await db.authenticate(account.toUpperCase(), "bad password")).to.be(false);
+			expect(await db.authenticate(account.toUpperCase(), "bad password")).to.equal(false);
 		});
 	});
 

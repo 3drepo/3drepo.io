@@ -139,11 +139,35 @@ DBHandler.createUser = async (username, password, customData, roles = []) => {
 	await db.addUser(username, password, { customData, roles: [...roles, { db: ADMIN_DB, role: DEFAULT_ROLE }] });
 };
 
+const dropAllIndicies = async (database, colName) => {
+	const collection = await getCollection(database, colName);
+	return collection.dropIndexes();
+};
+
+DBHandler.dropCollection = async (database, collection) => {
+	try {
+		await dropAllIndicies(database, collection);
+		const db = await getDB(database);
+		await db.dropCollection(collection);
+	} catch (err) {
+		/* istanbul ignore if */
+		if (!err.message.includes('ns not found')) {
+			DBHandler.disconnect();
+			throw err;
+		}
+	}
+};
+
 DBHandler.findOne = async (database, colName, query, projection, sort) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection, sort });
 
 	return collection.findOne(query, options);
+};
+
+DBHandler.insertOne = async (database, colName, data) => {
+	const collection = await getCollection(database, colName);
+	await collection.insertOne(data);
 };
 
 module.exports = DBHandler;

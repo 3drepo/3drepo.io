@@ -99,20 +99,7 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		return collection.dropIndexes();
 	};
 
-	Handler.dropCollection = async (database, collection) => {
-		const colName = collection.name || collection;
-		try {
-			await dropAllIndicies(database, colName);
-			const dbConn = await Handler.getDB(database);
-			await dbConn.dropCollection(colName);
-
-		} catch(err) {
-			if(!err.message.includes("ns not found")) {
-				Handler.disconnect();
-				throw err;
-			}
-		}
-	};
+	Handler.dropCollection = async (database, collection) => HandlerV5.dropCollection(database, collection.name ?? collection);
 
 	Handler.aggregate = async (database, colName, pipelines) => {
 		const collection = await Handler.getCollection(database, colName);
