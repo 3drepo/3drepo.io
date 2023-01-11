@@ -19,6 +19,7 @@ import { BoardItem, Config, DataConfig, LoaderContainer, ViewConfig, Container a
 import { Title } from '@/v4/routes/components/panel/panel.styles';
 import { ThumbnailPlaceholder } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 import { Container as V5Board } from '@/v5/ui/routes/dashboard/projects/board/board.styles';
+import { ShowModelButtonContainer } from '@/v4/routes/components/openInViewerButton/openInViewerButton.styles';
 
 const trelloBoardStyles = css`
 	/* empty board */
@@ -47,7 +48,6 @@ const trelloBoardStyles = css`
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
 		border-radius: 10px;
-		padding: 12px 10px;
 		margin-right: 10px;
 
 		&:first-child {
@@ -88,6 +88,14 @@ const boardContainerStyles = css`
 	${BoardContainer} {
 		padding-top: 16px;
 		border-top: none;
+	}
+
+	${ShowModelButtonContainer} button {
+		margin-bottom: 38px;
+
+		&:hover {
+			background: transparent;
+		}
 	}
 
 	/* header with ellipsis menu */
@@ -184,13 +192,6 @@ const boardContainerStyles = css`
 				fill: ${({ theme }) => theme.palette.base.lightest};
 			}
 		}
-	}
-`;
-
-const dropdownStyles = css`
-	[group="1"] {
-		opacity: 1;
-		padding: 14px 12px;
 	}
 `;
 
