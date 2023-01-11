@@ -18,28 +18,30 @@
 const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require('../models/roles.constants');
 const { ADMIN_DB } = require('./db.constants');
 const { MongoClient } = require('mongodb');
-const { db: dbConfig } = require('../utils/config');
+const config = require('../utils/config');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 
 let dbConn;
+let defaultRoleProm;
 const DBHandler = {};
 
-const getURL = (username, password) => {
+// not testing coverage for options as anything that fails to connect has a long wait time
+const getURL = /* istanbul ignore next */(username, password) => {
 	const urlElements = ['mongodb://'];
-	const user = username ?? dbConfig.username;
-	const pw = password ?? dbConfig.password;
+	const user = username ?? config.db.username;
+	const pw = password ?? config.db.password;
 
 	urlElements.push((user && pw) ? `${user}:${encodeURIComponent(pw)}@` : '');
 
-	const hostsAndPorts = dbConfig.host.map((host, i) => `${host}:${dbConfig.port[i]}`);
+	const hostsAndPorts = config.db.host.map((host, i) => `${host}:${config.db.port[i]}`);
 
 	urlElements.push(hostsAndPorts, '/?');
 
-	urlElements.push(dbConfig.replicaSet ? `&replicaSet=${dbConfig.replicaSet}` : '');
-	urlElements.push(dbConfig.authSource ? `&authSource=${dbConfig.authSource}` : '');
+	urlElements.push(config.db.replicaSet ? `&replicaSet=${config.db.replicaSet}` : '');
+	urlElements.push(config.db.authSource ? `&authSource=${config.db.authSource}` : '');
 
-	if (Number.isInteger(dbConfig.timeout)) {
-		urlElements.push(`&socketTimeoutMS=${dbConfig.timeout}`);
+	if (Number.isInteger(config.db.timeout)) {
+		urlElements.push(`&socketTimeoutMS=${config.db.timeout}`);
 	}
 	return urlElements.join('');
 };
@@ -51,13 +53,6 @@ const connect = (username, password) => MongoClient.connect(
 		useUnifiedTopology: true,
 	},
 );
-
-const disconnect = async () => {
-	if (dbConn) {
-		await dbConn.close();
-		dbConn = null;
-	}
-};
 
 const getDB = async (db) => {
 	if (!dbConn) {
@@ -72,7 +67,9 @@ const getCollection = async (db, col) => {
 		const conn = await getDB(db);
 		return conn.collection(col);
 	} catch (err) {
-		await disconnect();
+		// istanbul ignore next
+		await DBHandler.disconnect();
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -82,7 +79,9 @@ const runCommand = async (database, cmd) => {
 	try {
 		conn.command(cmd);
 	} catch (err) {
-		await disconnect();
+		// istanbul ignore next
+		await DBHandler.disconnect();
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -106,12 +105,10 @@ DBHandler.authenticate = async (user, password) => {
 
 DBHandler.getAuthDB = () => getDB(ADMIN_DB);
 
-let defaultRoleProm;
-
 const ensureDefaultRoleExists = () => {
 	if (!defaultRoleProm) {
 		const createDefaultRole = async () => {
-			const roleFound = await DBHandler.findOne(ADMIN_DB, ROLES_COL, { _id: `${ADMIN_DB}.${DEFAULT_ROLE}}` }, { _id: 1 });
+			const roleFound = await DBHandler.findOne(ADMIN_DB, ROLES_COL, { _id: `${ADMIN_DB}.${DEFAULT_ROLE}` }, { _id: 1 });
 
 			if (!roleFound) {
 				const createRoleCmd = { createRole: DEFAULT_ROLE, privileges: [], roles: [] };
@@ -124,14 +121,22 @@ const ensureDefaultRoleExists = () => {
 	return defaultRoleProm;
 };
 
+DBHandler.canConnect = () => DBHandler.authenticate();
+DBHandler.disconnect = async () => {
+	if (dbConn) {
+		await dbConn.close();
+		dbConn = null;
+		defaultRoleProm = null;
+	}
+};
+
 DBHandler.createUser = async (username, password, customData, roles = []) => {
 	const [db] = await Promise.all([
 		DBHandler.getAuthDB(),
 		ensureDefaultRoleExists(),
 	]);
 
-	roles.push({ db: ADMIN_DB, role: DEFAULT_ROLE });
-	await db.addUser(username, password, { customData, roles });
+	await db.addUser(username, password, { customData, roles: [...roles, { db: ADMIN_DB, role: DEFAULT_ROLE }] });
 };
 
 DBHandler.findOne = async (database, colName, query, projection, sort) => {

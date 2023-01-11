@@ -19,6 +19,9 @@ const { src } = require('../../helper/path');
 const { determineTestGroup, generateRandomString, generateUserCredentials, db } = require('../../helper/services');
 
 const DB = require(`${src}/handler/db`);
+const { ADMIN_DB } = require(`${src}/handler/db.constants`);
+const { USERS_COL } = require(`${src}/models/users.constants`);
+const { DEFAULT: DEFAULT_ROLE } = require(`${src}/models/roles.constants`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -28,21 +31,94 @@ const testAuthenticate = () => {
 		beforeAll(async () => {
 			await db.createUser(user);
 		});
-		test('Should authenticate successfully if username and password are not passed in (using config)', async () => {
-			await expect(DB.authenticate()).resolves.toBeTruthy();
+
+		const testCases = [
+			['using default credentials', true],
+			['username and password are correct', true, user.user, user.password],
+			['username is incorrect', false, generateRandomString(), user.password],
+			['password is incorrect', false, user.user, generateRandomString()],
+			['both username and password are incorrect', false, generateRandomString(), generateRandomString()],
+		];
+
+		testCases.forEach(([desc, success, username, password]) => {
+			test(`Should return ${success} if ${desc}`, async () => {
+				await expect(DB.authenticate(username, password)).resolves.toBe(success);
+			});
+		});
+	});
+};
+
+const testCanConnect = () => {
+	describe('Test connection', () => {
+		const dbConfig = { ...config.db };
+
+		afterEach(() => {
+			config.db = { ...dbConfig };
 		});
 
-		test('Should authenticate successfully if the username and password are correct', async () => {
-			await expect(DB.authenticate(user.user, user.password)).resolves.toBeTruthy();
+		test('Should return true if config is sound', async () => {
+			await expect(DB.canConnect()).resolves.toBe(true);
 		});
 
-		test('Should fail to authenticate if the username or password are incorrect', async () => {
-			await expect(DB.authenticate(generateRandomString(), user.password)).resolves.toBeFalsy();
-			await expect(DB.authenticate(user.user, generateRandomString())).resolves.toBeFalsy();
+		test('Should return false if credentials are incorrect', async () => {
+			config.db.username = generateRandomString();
+			config.db.password = generateRandomString();
+			await expect(DB.canConnect()).resolves.toBe(false);
+		});
+	});
+};
+
+const testDisconnect = () => {
+	describe('Disconnect', () => {
+		test('Should function regardless of whether a connection has been established', async () => {
+			await expect(DB.disconnect()).resolves.toBeUndefined();
+
+			// Call again to make sure it doesn't fail when we don't have a connection
+			await expect(DB.disconnect()).resolves.toBeUndefined();
+		});
+	});
+};
+
+const testCreateUser = () => {
+	const findUser = (user) => DB.findOne(ADMIN_DB, USERS_COL, { user });
+	let first = true;
+	describe.each([
+		['correct data is supplied', true, generateRandomString(), generateRandomString(), { [generateRandomString()]: generateRandomString() }],
+		['customData is not supplied', true, generateRandomString(), generateRandomString()],
+		['roles is an empty array', true, generateRandomString(), generateRandomString(), {}, []],
+		['username is not provided', false, undefined, generateRandomString()],
+		['password is not provided', false, generateRandomString(), undefined],
+		['an unrecognised role is provided in the array', false, generateRandomString(), generateRandomString, {}, [{ db: ADMIN_DB, role: generateRandomString() }]],
+		['valid roles are supplied', true, generateRandomString(), generateRandomString(), {}, [{ db: ADMIN_DB, role: 'readWrite' }]],
+	])('Create User', (desc, success, username, password, customData = {}, roles) => {
+		test(`Should ${success ? '' : 'fail to '}create the user if ${desc}`, async () => {
+			// workaround to get code coverage on ensureDefaultRoleExists
+			if (first) await DB.disconnect();
+			first = false;
+			const fn = expect(DB.createUser(username, password, customData, roles));
+			if (success) {
+				await fn.resolves.toBeUndefined();
+				const user = await findUser(username);
+				expect(user).toEqual(expect.objectContaining({
+					customData, user: username }));
+
+				const expectedRoles = [...(roles ?? []), { db: ADMIN_DB, role: DEFAULT_ROLE }];
+				expect(user.roles.length).toEqual(expectedRoles.length);
+				expect(user.roles).toEqual(expect.arrayContaining(expectedRoles));
+			} else {
+				await fn.rejects.not.toBeUndefined();
+				if (username) {
+					const user = await findUser(username);
+					expect(user).toBe(null);
+				}
+			}
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
+	testCanConnect();
+	testDisconnect();
+	testCreateUser();
 });

@@ -21,6 +21,7 @@ const UserConstants = {};
 
 UserConstants.AVATARS_COL_NAME = 'avatars.ref';
 UserConstants.USERS_DB_NAME = ADMIN_DB;
+UserConstants.USERS_COL = 'system.users';
 
 UserConstants.USERNAME_BLACKLIST = [
 	'payment',
