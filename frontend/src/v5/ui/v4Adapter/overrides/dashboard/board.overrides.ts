@@ -48,6 +48,7 @@ const trelloBoardStyles = css`
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
 		border-radius: 10px;
+		padding: 10px 13px;
 		margin-right: 10px;
 
 		&:first-child {
