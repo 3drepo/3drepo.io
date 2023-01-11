@@ -40,8 +40,8 @@ import { UserIndicator } from '@/v4/routes/components/messagesList/components/me
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
-import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 import { ResourcesList } from '@/v4/routes/components/resources/resources.styles';
+import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 
 const PrimaryButtonStyles = css`
 	background-color: ${({ theme }) => theme.palette.primary.main};
