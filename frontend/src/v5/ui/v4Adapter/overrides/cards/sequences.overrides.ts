@@ -88,16 +88,16 @@ const ItemPreviewStyles = css`
 const SequencePlayerStyles = css`
 	/* Title */
 	${StyledForm} > div {
-		justify-content: left;
 		padding: 6px 15.5px 0;
 		box-sizing: border-box;
+		width: fit-content;
+		margin-right: auto;
 	}
 
 	${SequenceEditableTitle} {
 		${EditableFieldStyles}
 		max-width: 100%;
 		padding: 1px;
-		width: fit-content;
 		margin: 0;
 		color: ${({ theme }) => theme.palette.secondary.main};
 
