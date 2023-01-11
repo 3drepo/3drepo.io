@@ -15,18 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = require('path');
+const config = require('./jest.config');
 
-const PathHelper = {};
+config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
+config.coveragePathIgnorePatterns = ['index.js'];
 
-PathHelper.tmpDir = require('os').tmpdir();
+config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
 
-PathHelper.src = `${__dirname}/../../../src/v5`;
-PathHelper.srcV4 = `${__dirname}/../../../src/v4`;
-PathHelper.utilScripts = `${__dirname}/../../../src/scripts/utility`;
-PathHelper.modelFolder = `${__dirname}/../resources/models`;
-PathHelper.imagesFolder = `${__dirname}/../resources/images`;
-PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');
-PathHelper.image = Path.join(PathHelper.imagesFolder, 'valid.png');
-PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.OBJ');
-module.exports = PathHelper;
+module.exports = config;
