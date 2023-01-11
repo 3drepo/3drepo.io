@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
+const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const config = require('../../../../../src/v5/utils/config');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -240,7 +241,7 @@ const testGetTeamspaceMembers = () => {
 
 				return data;
 			});
-			expectedData.push({ user: teamspaces[0].name });
+			expectedData.push({ job: DEFAULT_OWNER_JOB, user: teamspaces[0].name });
 			expect(res.body.members.length).toBe(expectedData.length);
 			expect(res.body.members).toEqual(expect.arrayContaining(expectedData));
 		});
