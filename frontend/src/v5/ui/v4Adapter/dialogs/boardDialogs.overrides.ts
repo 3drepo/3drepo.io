@@ -31,13 +31,17 @@ import {
 	Content as ContentIssues,
 } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { ShowModelButtonContainer } from '@/v4/routes/components/openInViewerButton/openInViewerButton.styles';
-import { Container as PreviewDetailsContainer, ScrollableContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { CollapsableContent, Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FilterWrapper, Container as CommentListContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { Counter, Actions, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { BoardDialogTitle, FormWrapper } from '@/v4/routes/board/board.styles';
-import { UserAndModelDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
+import { UserAndModelDetails, Details } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
+import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
+import { ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
+import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
+import { ResourcesList } from '@/v4/routes/components/resources/resources.styles';
 
 const PrimaryButtonStyles = css`
 	background-color: ${({ theme }) => theme.palette.primary.main};
@@ -75,31 +79,26 @@ const EditIssue = css`
 	${FormWrapper} {
 		& > ${TabsContainer} > div > div {
 			position: unset !important;
-			margin: 0 !important;
-			overflow: auto !important;
-		}
 
-		${ScrollableContainer} {
-			min-height: 437px;
+			&:nth-of-type(2) {
+				height: 0 !important;
+			}
 		}
 	}
 
 	${HorizontalViewIssue},
 	${HorizontalViewRisk} {
 
+		${CollapsableContent} {
+			margin-bottom: 0;
+		}
+
 		/* left panel */
 		${PreviewDetailsIssue}${PreviewDetailsIssue},
 		${PreviewDetailsRisk}${PreviewDetailsRisk} {
 			/* TODO - fix after new palette is released */
 			background-color: #f7f8fa;
-
-			${TabContentIssues}, ${TabContentRisks} {
-				
-				${ContentIssues}, ${ContentRisks} {
-					height: 100%;
-					margin-bottom: 16px;
-				}
-			}
+			min-height: 75vh;
 
 			${UserAndModelDetails} {
 				width: 100%;
@@ -124,7 +123,6 @@ const EditIssue = css`
 				cursor: initial;
 				
 				button {
-					margin: 0;
 					color: ${({ theme }) => theme.palette.secondary.main};
 
 					&:hover {
@@ -132,14 +130,38 @@ const EditIssue = css`
 					}
 				}
 			}
+
+			${Details} ${StyledButton} {
+				margin-bottom: 10px;
+			}
+
+			${TabContentIssues}, ${TabContentRisks} {
+				${ContentIssues}, ${ContentRisks} {
+					height: fit-content;
+					padding: 0 16px;
+					margin-bottom: 0 0 16px;
+					box-sizing: border-box;
+				}
+			}
+
+			${ResourcesList} {
+				/* margin-top: 0; */
+			}
 		}
 
 		/* right panel */
 		${MessageContainerIssue}, ${MessageContainerRisk} {
 			${CommentStyling}
 			${CommentListStyling}
+
+			${EmptyStateInfo} {
+				margin-top: 15px;
+			}
+
 			padding: 0;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			border: solid ${({ theme }) => theme.palette.base.light} 0;
+			border-left-width: 1px;
 			
 			${FilterWrapper} {
 				padding: 13px;
@@ -151,7 +173,18 @@ const EditIssue = css`
 				background-color: ${({ theme }) => theme.palette.primary.contrast};
 			}
 
+			${ViewerPanelFooter} {
+				border-color: ${({ theme }) => theme.palette.base.main};
+			}
+
+			${ViewerPanelFooter} {
+				border: 0;
+			}
+
 			${AddNewCommentContainer} {
+				border: solid ${({ theme }) => theme.palette.base.light} 0;
+				border-top-width: 1px;
+
 				${Counter} {
 					left: 55px;
 				}

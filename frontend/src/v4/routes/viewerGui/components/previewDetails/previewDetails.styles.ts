@@ -217,7 +217,10 @@ const unexpandedStyles  = css`
 	}
 `;
 
-export const ScrollableContainer = styled(ConditionalV5ScrollContainer)`
+export const ScrollableContainer = styled(ConditionalV5ScrollContainer).attrs({
+	autoHeight: true,
+	autoHeightMax: '100%',
+})`
 	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;

@@ -160,7 +160,7 @@ const boardContainerStyles = css`
 		border-radius: 6px;
 		font-size: 0.75rem;
 		font-weight: 600;
-		padding: 10px 15px;
+		padding: 10px 15px 10px 8px;
 
 		svg {
 			background: currentColor;
