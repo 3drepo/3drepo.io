@@ -101,10 +101,7 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 
 	Handler.dropCollection = async (database, collection) => HandlerV5.dropCollection(database, collection.name ?? collection);
 
-	Handler.aggregate = async (database, colName, pipelines) => {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.aggregate(pipelines).toArray();
-	};
+	Handler.aggregate = HandlerV5.aggregate;
 
 	/**
 	 * @param {string} database

@@ -158,6 +158,11 @@ DBHandler.dropCollection = async (database, collection) => {
 	}
 };
 
+DBHandler.aggregate = async (database, colName, pipelines) => {
+	const collection = await getCollection(database, colName);
+	return collection.aggregate(pipelines).toArray();
+};
+
 DBHandler.findOne = async (database, colName, query, projection, sort) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection, sort });
