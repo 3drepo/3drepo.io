@@ -142,7 +142,7 @@ const SequencePlayerStyles = css`
 				}
 
 				svg {
-					width: 20px;
+					width: 24px;
 					margin-top: -11px;
 				}
 			}
@@ -176,7 +176,7 @@ const SequencePlayerStyles = css`
 				}
 
 				${DatePicker} {
-					margin: 0 0 12px;
+					margin: 0 3px 12px;
 					width: 146px;
 
 					input {
