@@ -18,9 +18,11 @@ import { css } from 'styled-components';
 import sequences from './sequences.overrides';
 import selectMenus from './selectMenus.overrides';
 import shapes from './shapes.overrides';
+import attachments from './attachments.overrides';
 
 export default css`
 	${sequences}
 	${shapes}
 	${selectMenus}
+	${attachments}
 `;
