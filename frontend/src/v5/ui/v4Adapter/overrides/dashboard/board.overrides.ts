@@ -73,6 +73,10 @@ const trelloBoardStyles = css`
 			}
 		}
 
+		&[label^="0"] header > span:nth-child(2) {
+			color: ${({ theme }) => theme.palette.base.light};
+		}
+
 		${BoardItem} {
 			border-radius: 5px;
 			border-color: ${({ theme }) => theme.palette.base.lightest};
