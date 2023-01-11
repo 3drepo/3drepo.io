@@ -81,7 +81,6 @@ const testGetAllRemovableEntriesByType = () => {
 
 			const query = { noDelete: { $exists: false }, type: { $ne: 'http' } };
 			const projection = { type: 1, link: 1 };
-			const sort = { type: 1 }; dd;
 
 			expect(findFn).toHaveBeenCalledTimes(1);
 
