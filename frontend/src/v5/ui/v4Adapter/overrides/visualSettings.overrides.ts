@@ -22,6 +22,7 @@ import {
 	Headline as StreamingHeadline,
 	NegativeActionButton as ResetButton,
 	NeutralActionButton as CancelButton,
+	V5ErrorText,
 	VisualSettingsButtonsContainer as Actions,
 	VisualSettingsDialogContent,
 	WarningMessage,
@@ -41,6 +42,15 @@ const sharedInputStyles = css`
 		&.Mui-focused {
 			box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
 			border-color: ${({ theme }) => theme.palette.primary.main};
+		}
+		&.Mui-error {
+			border-color: ${({ theme }) => theme.palette.error.main};
+			&.Mui-focused {
+				box-shadow: 0 0 2px ${({ theme }) => theme.palette.error.main};
+			}
+			.MuiInputAdornment-root {
+				color: ${({ theme }) => theme.palette.error.light};
+			}
 		}
 	}
 	.MuiGrid-container {
@@ -76,15 +86,19 @@ const textInputStyles = css`
 		margin: 0 4px;
 		color: ${({ theme }) => theme.palette.base.main};
 	}
+	${V5ErrorText} {
+		top: 21px;
+		width: 156px;
+		margin: 2px 0;
+		display: block;
+		color: ${({ theme }) => theme.palette.error.main};
+	}
 `;
 
 export default css`
 	${ErrorTooltip} {
 		.tooltip {
-			border: 1px solid ${({ theme }) => theme.palette.error.main};
-			color: ${({ theme }) => theme.palette.error.main};
-			background-color: ${({ theme }) => theme.palette.error.lightest};
-			margin: 0;
+			display: none;
 		}
 	}
 	${VisualSettingsModalContent} {
@@ -121,7 +135,8 @@ export default css`
 					box-shadow: none;
 					padding: 17px 30px;
 					.MuiListItem-root {
-						height: 38px;
+						min-height: 38px;
+						height: auto;
 						padding: 0;
 						color: ${({ theme }) => theme.palette.base.main};
 						${sharedInputStyles} {

@@ -28,7 +28,7 @@ import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
 	NegativeActionButton, NeutralActionButton,
-	ShortInput, V5Divider, VisualSettingsButtonsContainer,
+	ShortInput, V5Divider, V5ErrorText, VisualSettingsButtonsContainer,
 	VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
@@ -91,12 +91,18 @@ const BasicSettings = (props) => {
 				Clipping plane border width
 				<Field name="clipPlaneBorderWidth" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.clipPlaneBorderWidth || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.clipPlaneBorderWidth)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.clipPlaneBorderWidth || ''} placement="bottom-end">
+								<ShortInput
+									error={Boolean(form.errors.clipPlaneBorderWidth)}
+									{...field}
+									helperText={form.errors.clipPlaneBorderWidth}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.clipPlaneBorderWidth}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -127,12 +133,17 @@ const AdvancedSettings = (props) => {
 					Memory for Unity
 					<Field name="memory" render={ ({ field, form }) => {
 						return (
-						<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
-						<ShortInput
-							error={Boolean(form.errors.memory)}
-							{...field}
-							endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-						</ErrorTooltip>
+							<div>
+								<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
+								<ShortInput
+									error={Boolean(form.errors.memory)}
+									{...field}
+									endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+								</ErrorTooltip>
+								<V5ErrorText>
+									{form.errors.memory}
+								</V5ErrorText>
+							</div>
 						);
 					}} />
 				</FormListItem>
@@ -141,12 +152,17 @@ const AdvancedSettings = (props) => {
 				Number of Caching Threads
 				<Field name="numCacheThreads" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.numCacheThreads || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.numCacheThreads)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.numCacheThreads || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.numCacheThreads)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.numCacheThreads}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -155,12 +171,17 @@ const AdvancedSettings = (props) => {
 				Minimum near plane
 				<Field name="nearPlane" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.nearPlane || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.nearPlane)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.nearPlane || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.nearPlane)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.nearPlane}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -168,12 +189,17 @@ const AdvancedSettings = (props) => {
 				Maximum near plane
 				<Field name="maxNearPlane" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.maxNearPlane || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.maxNearPlane)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.maxNearPlane || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.maxNearPlane)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.maxNearPlane}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -182,12 +208,17 @@ const AdvancedSettings = (props) => {
 				Maximum far plane
 				<Field name="maxFarPlane" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.maxFarPlane || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.maxFarPlane)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.maxFarPlane || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.maxFarPlane)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.maxFarPlane}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -205,13 +236,18 @@ const AdvancedSettings = (props) => {
 				Far plane points
 				<Field name="farPlaneSamplingPoints" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.farPlaneSamplingPoints || ''} placement="bottom-end">
-					<ShortInput
-						disabled={form.values.farPlaneAlgorithm !== 'box'}
-						error={Boolean(form.errors.farPlaneSamplingPoints)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.farPlaneSamplingPoints || ''} placement="bottom-end">
+							<ShortInput
+								disabled={form.values.farPlaneAlgorithm !== 'box'}
+								error={Boolean(form.errors.farPlaneSamplingPoints)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.farPlaneSamplingPoints}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -220,12 +256,17 @@ const AdvancedSettings = (props) => {
 				Maximum Shadow Distance
 				<Field name="maxShadowDistance" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.maxShadowDistance || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.maxShadowDistance)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.maxShadowDistance || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.maxShadowDistance)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.maxShadowDistance}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -240,12 +281,17 @@ const StreamingSettings = (props) => {
 				Reserved
 				<Field name="memoryThreshold" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.memoryThreshold || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.memoryThreshold)}
-						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.memoryThreshold || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.memoryThreshold)}
+								{...field}
+								endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.memoryThreshold}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -253,12 +299,17 @@ const StreamingSettings = (props) => {
 				Limit
 				<Field name="memoryLimit" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.memoryLimit)}
-						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.memoryLimit)}
+								{...field}
+								endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.memoryLimit}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -266,12 +317,17 @@ const StreamingSettings = (props) => {
 				FoV Weight
 				<Field name="fovWeight" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.fovWeight || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.fovWeight)}
-						{...field}
-					/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.fovWeight || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.fovWeight)}
+								{...field}
+							/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.fovWeight}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -280,12 +336,17 @@ const StreamingSettings = (props) => {
 				 Fade distance
 				<Field name="phBundleFadeDistance" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleFadeDistance || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phBundleFadeDistance)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phBundleFadeDistance || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phBundleFadeDistance)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phBundleFadeDistance}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -293,12 +354,17 @@ const StreamingSettings = (props) => {
 				 Fade bias
 				<Field name="phBundleFadeBias" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleFadeBias || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phBundleFadeBias)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phBundleFadeBias || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phBundleFadeBias)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phBundleFadeBias}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -306,12 +372,17 @@ const StreamingSettings = (props) => {
 				 Fade power
 				<Field name="phBundleFadePower" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleFadePower || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phBundleFadePower)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phBundleFadePower || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phBundleFadePower)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phBundleFadePower}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -328,12 +399,17 @@ const StreamingSettings = (props) => {
 				 Face alpha
 				<Field name="phBundleFaceAlpha" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phBundleFaceAlpha)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phBundleFaceAlpha || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phBundleFaceAlpha)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phBundleFaceAlpha}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -341,12 +417,17 @@ const StreamingSettings = (props) => {
 				 Line alpha
 				<Field name="phBundleLineAlpha" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phBundleLineAlpha)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phBundleLineAlpha || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phBundleLineAlpha)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phBundleLineAlpha}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -355,12 +436,17 @@ const StreamingSettings = (props) => {
 				 Rendering radius
 				<Field name="phElementRenderingRadius" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phElementRenderingRadius || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phElementRenderingRadius)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phElementRenderingRadius || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phElementRenderingRadius)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phElementRenderingRadius}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -378,12 +464,17 @@ const StreamingSettings = (props) => {
 				 Face alpha
 				<Field name="phElementFaceAlpha" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phElementFaceAlpha || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phElementFaceAlpha)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phElementFaceAlpha || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phElementFaceAlpha)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phElementFaceAlpha}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
@@ -391,12 +482,17 @@ const StreamingSettings = (props) => {
 				 Line alpha
 				<Field name="phElementLineAlpha" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip title={form.errors.phElementLineAlpha || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.phElementLineAlpha)}
-						{...field}
-						/>
-					</ErrorTooltip>
+						<div>
+							<ErrorTooltip title={form.errors.phElementLineAlpha || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.phElementLineAlpha)}
+								{...field}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.phElementLineAlpha}
+							</V5ErrorText>
+						</div>
 					);
 				}} />
 			</FormListItem>
