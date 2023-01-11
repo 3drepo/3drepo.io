@@ -41,6 +41,9 @@ export default css`
 		.MuiSelect-select {
 			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 		}
+		.Mui-focused .MuiSelect-select {
+			border-color: ${({ theme }) => theme.palette.primary.main};
+		}
 		
 		${safetiBaseRisk}
 		${safetiBaseTreatments}
