@@ -119,9 +119,9 @@ export default css`
 					min-width: unset;
 					max-width: unset;
 					flex-grow: 0;
-					margin: 0;
-					padding: 10px;
-					height: 48px;
+					padding: 0;
+					margin: 10px;
+					height: 28px;
 					font-size: 13px;
 				}
 			}
