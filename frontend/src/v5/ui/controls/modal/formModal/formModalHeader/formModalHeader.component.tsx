@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,27 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link, ItemIcon, ItemText } from './actionMenuItemLink.styles';
-import { ActionMenuItem } from '../actionMenuItem/actionMenuItem.component';
 
-type ActionMenuItemLinkProps = {
-	className?: string;
-	Icon?: any;
-	to?: string;
-	children?: React.ReactNode;
-	onClick?: () => void;
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { CloseButton, Header, Subtitle, Title } from './formModalHeader.styles';
+
+type IFormModalHeader = {
+	title: string;
+	subtitle?: string;
+	handleClose: () => void;
+	disableClosing?: boolean;
 };
 
-export const ActionMenuItemLink = ({ Icon, to = '#', children, ...otherProps }: ActionMenuItemLinkProps) => (
-	<ActionMenuItem {...otherProps}>
-		<Link to={to}>
-			{Icon && (
-				<ItemIcon>
-					<Icon />
-				</ItemIcon>
-			)}
-			<ItemText>{children}</ItemText>
-		</Link>
-	</ActionMenuItem>
+export const FormModalHeader = ({ title, subtitle, handleClose, disableClosing }: IFormModalHeader) => (
+	<Header>
+		<div>
+			<Title>
+				{title}
+			</Title>
+			{subtitle && <Subtitle>{subtitle}</Subtitle>}
+		</div>
+		<CloseButton aria-label="Close dialog" onClick={handleClose} disabled={disableClosing}>
+			<CloseIcon />
+		</CloseButton>
+	</Header>
 );
-ActionMenuItemLink.isActionMenuClosingElement = true;
