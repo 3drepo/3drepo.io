@@ -97,14 +97,29 @@ const SequencePlayerStyles = css`
 		${EditableFieldStyles}
 		max-width: 100%;
 		padding: 1px;
+		width: fit-content;
 		margin: 0;
 		color: ${({ theme }) => theme.palette.secondary.main};
 
-		.MuiFormControl-root .MuiInputBase-root {
-			margin-top: 5px;
-			
-			.MuiOutlinedInput-notchedOutline {
-				min-height: unset;
+		${ActionsLine} {
+			position: initial;
+			margin-bottom: 5px;
+			margin-left: 3px;
+		}
+
+		.MuiFormControl-root {
+			& + ${ActionsLine} {
+				position: absolute;
+				margin-left: 0;
+				top: 8px;
+			}
+
+			.MuiInputBase-root {
+				margin-top: 5px;
+				
+				.MuiOutlinedInput-notchedOutline {
+					min-height: unset;
+				}
 			}
 		}
 
@@ -112,24 +127,23 @@ const SequencePlayerStyles = css`
 			${({ theme }) => theme.typography.h3}
 			box-sizing: border-box;
 			margin-bottom: 0;
+			text-align: left;
 		}
 
 		span {
 			margin-bottom: 2px;
+			width: fit-content;
 		}
 
 		input {
 			margin-right: 36px;
-		}
-
-		${ActionsLine} {
-			top: 8px;
+			width: 311px;
 		}
 	}
 
 	/* Player (upper section) */
 	${SequencePlayerContainer} {
-		height: 155px;
+		height: 130px;
 
 		${SequencePlayerAllInputs} {
 			display: flex;
