@@ -31,8 +31,9 @@ import {
 	TaskSmallDot,
 	Task,
 	TaskItemLabel,
+	StepInput,
 } from '@/v4/routes/viewerGui/components/sequences/sequences.styles';
-import { StyledTextField as SequenceEditableTitle } from '@/v4/routes/viewerGui/components/sequences/components/sequenceForm/sequenceForm.styles';
+import { StyledTextField as SequenceEditableTitle, StyledForm } from '@/v4/routes/viewerGui/components/sequences/components/sequenceForm/sequenceForm.styles';
 import { css } from 'styled-components';
 import { ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 import { EditableFieldStyles } from './sharedStyles/selectMenus.overrides';
@@ -86,9 +87,15 @@ const ItemPreviewStyles = css`
 
 const SequencePlayerStyles = css`
 	/* Title */
+	${StyledForm} > div {
+		justify-content: left;
+		padding: 6px 15.5px 0;
+		box-sizing: border-box;
+	}
+
 	${SequenceEditableTitle} {
 		${EditableFieldStyles}
-		max-width: 300px;
+		max-width: 100%;
 		padding: 1px;
 		margin: 0;
 		color: ${({ theme }) => theme.palette.secondary.main};
@@ -128,6 +135,9 @@ const SequencePlayerStyles = css`
 			display: flex;
 			flex-direction: row;
 			margin-top: 22px;
+			width: 100%;
+			padding: 0 15.5px;
+			box-sizing: border-box;
 
 			& > {
 				display: inline-block;
@@ -150,6 +160,7 @@ const SequencePlayerStyles = css`
 			${SequenceRow} {
 				input {
 					color: ${({ theme }) => theme.palette.secondary.main};
+					margin: 0;
 
 					/* Remove arrows to increase/decrease value */
 					/* Chrome, Safari, Edge, Opera */
@@ -162,9 +173,25 @@ const SequencePlayerStyles = css`
 					/* Firefox */
 					&[type=number] {
 						-moz-appearance: textfield;
-						padding: 0 !important;
-						width: 35px;
+						
+						padding: 2px !important;
+						width: 26px;
+						border: 1px solid ${({ theme }) => theme.palette.base.lighter};
+						border-radius: 5px;
+						margin-top: 0px;
+						margin-bottom: 0px;
+						font-size: 0.75rem;
+						text-align: center;
+
+						&:focus {
+							border: 1px solid ${({ theme }) => theme.palette.primary.main};
+							box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
+						}
 					}
+				}
+
+				${StepInput} {
+					width: 33px;
 				}
 
 				${StepLabel} {
@@ -172,7 +199,6 @@ const SequencePlayerStyles = css`
 					color: ${({ theme }) => theme.palette.base.main};
 					position: absolute;
 					top: 7px;
-					margin-left: 13px;
 				}
 
 				${DatePicker} {
@@ -195,7 +221,7 @@ const SequencePlayerStyles = css`
 			}
 
 			${IntervalRow} {
-				width: 156px;
+				margin-left: 10px;
 
 				.MuiSelect-select {
 					width: 89px;
@@ -207,10 +233,22 @@ const SequencePlayerStyles = css`
 		${SliderRow} {
 			button {
 				color: ${({ theme }) => theme.palette.primary.main};
-				margin: -5px 0 0 0;
+				margin: -5px 13px 0 5px;
+				padding: 0;
 
 				&:hover {
 					background-color: transparent;
+				}
+
+				[data-testid="StopIcon"] {
+					margin-left: 2px;
+					margin-right: -2px;
+				}
+
+				[data-testid="ReplayIcon"] {
+					width: 18px;
+					margin-left: 2px;
+					margin-right: -2px;
 				}
 			}
 
@@ -218,6 +256,11 @@ const SequencePlayerStyles = css`
 				&-thumb {
 					width: 12px;
 					height: 12px;
+
+					&::after {
+						width: 24px;
+						height: 24px;
+					}
 				}
 
 				&-rail {
