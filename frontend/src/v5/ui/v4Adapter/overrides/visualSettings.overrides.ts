@@ -144,7 +144,7 @@ export default css`
 							${textInputStyles}
 						}
 						${WarningMessage} {
-							color: ${({ theme }) => theme.palette.error.main};
+							color: ${({ theme }) => theme.palette.warning.main};
 							margin-top: 25px;
 						}
 					}
