@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { BoardItem, Config, DataConfig, LoaderContainer, ViewConfig, Container as V4Container, BoardContainer, NoDataMessage } from '@/v4/routes/board/board.styles';
+import { BoardItem, Config, DataConfig, LoaderContainer, ViewConfig, Container as V4Container, BoardContainer, NoDataMessage, DefaultInfoCell } from '@/v4/routes/board/board.styles';
 import { Title } from '@/v4/routes/components/panel/panel.styles';
 import { ThumbnailPlaceholder } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 import { Container as V5Board } from '@/v5/ui/routes/dashboard/projects/board/board.styles';
@@ -161,6 +161,7 @@ const boardContainerStyles = css`
 		font-size: 0.75rem;
 		font-weight: 600;
 		padding: 10px 15px 10px 8px;
+		border: none;
 
 		svg {
 			background: currentColor;
