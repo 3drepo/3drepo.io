@@ -31,6 +31,10 @@ export const numberField = Yup.number()
 		defaultMessage: 'Must be a number',
 	}));
 
+export const nullableNumberField = Yup.number()
+	.transform((value) => (Number.isNaN(value) ? 0 : value))
+	.nullable();
+
 export const name = trimmedString
 	.max(120,
 		formatMessage({

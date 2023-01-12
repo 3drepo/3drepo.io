@@ -25,9 +25,10 @@ const { getSubscriptions } = require(`${v5Path}/models/teamspaces`);
 const run = async (teamspace) => {
 	const subs = await getSubscriptions(teamspace);
 	logger.logInfo(`${teamspace} currently has the following subscription(s): ${JSON.stringify(subs)}`);
+	return subs;
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace',
 		{

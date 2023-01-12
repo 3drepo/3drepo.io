@@ -146,12 +146,12 @@ Teamspace.getMembersInfo = async (teamspace) => {
 	});
 };
 
-Teamspace.getAllTeamspacesWithActiveLicenses = (projection) => {
+Teamspace.getAllTeamspacesWithActiveLicenses = () => {
 	const currentDate = new Date();
 	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`${SUBSCRIPTION_PATH}.${type}`]: { $exists: true }, [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: null },
 		{ [`${SUBSCRIPTION_PATH}.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
-	return findMany(query, projection);
+	return findMany(query, { user: 1, 'customData.billing.subscriptions': 1 });
 };
 
 Teamspace.createTeamspaceSettings = async (teamspace) => {
