@@ -170,9 +170,21 @@ DBHandler.findOne = async (database, colName, query, projection, sort) => {
 	return collection.findOne(query, options);
 };
 
+DBHandler.find = async (database, colName, query, projection, sort, limit) => {
+	const collection = await getCollection(database, colName);
+	const options = deleteIfUndefined({ projection, sort });
+	const cmd = collection.find(query, options);
+	return limit ? cmd.limit(limit).toArray() : cmd.toArray();
+};
+
 DBHandler.insertOne = async (database, colName, data) => {
 	const collection = await getCollection(database, colName);
 	await collection.insertOne(data);
+};
+
+DBHandler.insertMany = async (database, colName, data) => {
+	const collection = await getCollection(database, colName);
+	await collection.insertMany(data);
 };
 
 module.exports = DBHandler;

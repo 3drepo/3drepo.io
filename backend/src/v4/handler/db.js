@@ -111,28 +111,9 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 	 * @param {object} sort
 	 * @returns {Promise<Array<Object>}
 	 */
-	Handler.find = async function (database, colName, query, projection = {}, sort = {}, limit) {
-		const collection = await Handler.getCollection(database, colName);
-		const options = { projection };
+	Handler.find = (database, colName, query, projection = {}, sort = {}, limit) => HandlerV5.find(database, colName, query, projection, sort, limit);
 
-		if (sort) {
-			options.sort = sort;
-		}
-
-		const cmd = collection.find(query, options);
-		return limit ? cmd.limit(limit).toArray() : cmd.toArray();
-	};
-
-	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
-		const collection = await Handler.getCollection(database, colName);
-		const options = { projection };
-
-		if (sort) {
-			options.sort = sort;
-		}
-
-		return collection.findOne(query, options);
-	};
+	Handler.findOne = (database, colName, query, projection = {}, sort) => HandlerV5.findOne(database, colName, query, projection, sort);
 
 	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
