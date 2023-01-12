@@ -60,7 +60,7 @@ const trelloBoardStyles = css`
 		}
 		
 		header {
-			padding-bottom: 5px;
+			padding: 5px;
 
 			> span:nth-child(1) {
 				color: ${({ theme }) => theme.palette.secondary.main};
