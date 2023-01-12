@@ -62,7 +62,7 @@ AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, 
 
 	const permissionsToReturn = await updatePermissions(teamspaceSettings, updatedPermissions);
 	if(permissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
-		await removePermissionsFromAllProjects(teamspaceSettings.user, username);
+		await removePermissionsFromAllProjects(teamspaceSettings._id, username);
 	}
 
 	return permissionsToReturn;
