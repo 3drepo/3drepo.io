@@ -98,11 +98,16 @@ export const FieldsRowStyles = css`
 		.MuiInputBase-input, .MuiSelect-select, .MuiOutlinedInput-notchedOutline {
 			box-sizing: border-box;
 			margin: 0;
-			color: ${({ theme }) => theme.palette.secondary.main};
 			~ svg {
 				margin-top: 0px;
 				top: 10px;
+			}
+
+			&:not(.Mui-disabled) {
 				color: ${({ theme }) => theme.palette.secondary.main};
+				~ svg {
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 		input, fieldset {
