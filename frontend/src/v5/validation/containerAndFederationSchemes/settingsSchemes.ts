@@ -18,7 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { numberField, name, unit, desc, code } from './validators';
+import { numberField, name, unit, desc, code, nullableNumberField } from './validators';
 
 export const SettingsSchema = Yup.object().shape({
 	name,
@@ -31,9 +31,9 @@ export const SettingsSchemaWithGeoPosition = SettingsSchema.shape({
 	defaultView: Yup.string()
 		.nullable()
 		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
-	latitude: numberField.required(),
-	longitude: numberField.required(),
-	angleFromNorth: numberField
+	latitude: nullableNumberField,
+	longitude: nullableNumberField,
+	angleFromNorth: nullableNumberField
 		.min(0,
 			formatMessage({
 				id: 'settings.angle.error.min',
