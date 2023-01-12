@@ -62,7 +62,7 @@ export const Item = styled(MenuItem)<{ group: number }>`
 				&& {
 					${theme.typography.h3}
 					opacity: 1;
-					padding: 17px 14px;
+					padding: 17px 14px 8px;
 					height: fit-content;
 					border-color: ${theme.palette.secondary.lightest};
 				}
