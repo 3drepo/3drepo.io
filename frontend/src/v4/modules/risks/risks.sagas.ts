@@ -127,9 +127,15 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			};
 		}
 
+		const extraRiskData = omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']);
+
+		if (risk?.viewpoint?.position) {
+			delete extraRiskData.viewpoint;
+		}
+
 		risk = {
 			...risk,
-			...omit(riskData, ['author', 'statusColor', 'roleColor', 'viewpoint', 'defaultHidden', 'descriptionThumbnail']),
+			...extraRiskData,
 			owner: riskData.author,
 			rev_id: revision,
 			creator_role: userJob._id

@@ -120,9 +120,15 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			};
 		}
 
+		const extraIssueData = omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']);
+
+		if (issue?.viewpoint?.position) {
+			delete extraIssueData.viewpoint;
+		}
+
 		issue = {
 			...issue,
-			...omit(issueData, ['author', 'statusColor', 'roleColor', 'viewpoint', 'defaultHidden', 'descriptionThumbnail']),
+			...extraIssueData,
 			owner: issueData.author,
 			rev_id: revision,
 			creator_role: userJob._id,
