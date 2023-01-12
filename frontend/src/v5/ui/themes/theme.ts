@@ -701,6 +701,10 @@ export const theme = createTheme({
 
 					'&.Mui-selected, &.Mui-selected:hover, &:hover': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+
+						'&.Mui-disabled': {
+							backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
+						}
 					},
 				},
 			},
