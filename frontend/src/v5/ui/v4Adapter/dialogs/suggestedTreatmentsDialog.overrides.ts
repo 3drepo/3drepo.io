@@ -28,14 +28,18 @@ import {
 	StyledListItem,
 } from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
-import { labelButtonSecondaryStyles } from '@controls/button/button.styles';
+import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export default css`
 	${Container} {
 		/* top bar */
 		${StyledGrid} {
-			display: flex;
-			justify-content: center;
+			position: initial;
+
+			& > :nth-child(2) {
+				margin-right: 10px;
+			}
 		}
 
 		${Label} {
@@ -51,6 +55,7 @@ export default css`
 		/* main dashboard */
 		${ViewerScrollArea} {
 			margin-top: 0;
+			position: initial;
 
 			.MuiDialogContent-root {
 				min-height: 260px;
@@ -58,8 +63,11 @@ export default css`
 		}
 
 		${StyledDialogContent} {
-			margin-top: 51px;
-			
+			${EmptyStateInfo} {
+				margin-right: 0;
+				margin-left: 0;
+			}
+
 			& * {
 				font-family: ${({ theme }) => theme.typography.fontFamily};
 				text-transform: none;
@@ -98,9 +106,9 @@ export default css`
 			}
 
 			${LabelButton} {
-				${labelButtonSecondaryStyles}
+				${labelButtonPrimaryStyles}
 				border-radius: 5px;
-				padding: 8px 15px;
+				padding: 5px 15px;
 			}
 
 			// "Stage:" & "Type"
