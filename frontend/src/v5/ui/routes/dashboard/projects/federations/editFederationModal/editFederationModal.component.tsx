@@ -21,31 +21,23 @@ import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
 import { IFormModal } from '@controls/modal/formModal/formDialog.component';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EditFederation } from './editFederation';
 import { FormModal } from './editFederationModal.styles';
-import { useContainersData } from '../../containers/containers.hooks';
 
 type EditFederationModalProps = IFormModal & {
-	openState?: boolean;
 	federation: IFederation;
-	isNewFederation?: boolean;
 	onClickClose?: () => void;
-	onContainersChange?: (containers) => void;
 };
 
 export const EditFederationModal = ({
-	openState,
 	federation,
-	isNewFederation,
 	onClickClose,
-	onContainersChange,
 	...otherProps
 }: EditFederationModalProps): JSX.Element => {
-	useContainersData();
-	const { teamspace, project } = useParams<DashboardParams>();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
 
 	const saveChanges = (event: SyntheticEvent) => {
@@ -61,7 +53,7 @@ export const EditFederationModal = ({
 
 	return (
 		<FormModal
-			open={openState}
+			open
 			title={
 				formatMessage({
 					id: 'modal.editFederation.title',

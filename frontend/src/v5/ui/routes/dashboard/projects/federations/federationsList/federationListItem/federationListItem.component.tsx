@@ -42,7 +42,6 @@ import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
-	editFederation: 'editFederation',
 	federationSettings: 'federationSettings',
 	none: 'none',
 };
@@ -77,6 +76,12 @@ export const FederationListItem = memo(({
 		} else {
 			FederationsActionsDispatchers.removeFavourite(teamspace, project, federation._id);
 		}
+	};
+
+	const onClickEdit = () => {
+		DialogsActionsDispatchers.open(EditFederationModal, {
+			federation,
+		});
 	};
 
 	useEffect(() => combineSubscriptions(
@@ -133,7 +138,7 @@ export const FederationListItem = memo(({
 					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={Display.Tablet}
-						onClick={() => setOpenModal(MODALS.editFederation)}
+						onClick={onClickEdit}
 						width={165}
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
@@ -161,16 +166,11 @@ export const FederationListItem = memo(({
 						<FederationEllipsisMenu
 							federation={federation}
 							openShareModal={onClickShare}
-							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
+							openEditFederationModal={onClickEdit}
 							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
-				<EditFederationModal
-					openState={openModal === MODALS.editFederation}
-					federation={federation}
-					onClickClose={closeModal}
-				/>
 				<FederationSettingsForm
 					open={openModal === MODALS.federationSettings}
 					federation={federation}
