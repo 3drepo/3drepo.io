@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/ConditionalV5OrViewerScrollArea.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,

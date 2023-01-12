@@ -17,7 +17,7 @@
 
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/ConditionalV5OrViewerScrollArea.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
