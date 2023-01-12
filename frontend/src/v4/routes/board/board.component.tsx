@@ -421,7 +421,7 @@ export function Board(props: IProps) {
 			<>
 				<SelectContainer>
 					<FormControl>
-						<InputLabel shrink htmlFor="type-select">Show</InputLabel>
+						<InputLabel disabled={isV5() && !containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
 						<CellSelect
 							placeholder="Select type"
 							items={types}
@@ -435,7 +435,7 @@ export function Board(props: IProps) {
 				</SelectContainer>
 				<SelectContainer>
 					<FormControl>
-						<InputLabel shrink htmlFor="group-select">Group by</InputLabel>
+						<InputLabel disabled={isV5() && !containerOrFederation} shrink htmlFor="group-select">Group by</InputLabel>
 						<CellSelect
 							placeholder="Select grouping type"
 							items={FILTER_VALUES}
