@@ -42,18 +42,10 @@ import { ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 import { ResourcesList } from '@/v4/routes/components/resources/resources.styles';
 import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
+import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 
-const PrimaryButtonStyles = css`
-	background-color: ${({ theme }) => theme.palette.primary.main};
-
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.dark};
-	}
-
-	&:active {
-		box-shadow: none;
-		background-color: ${({ theme }) => theme.palette.primary.darkest};
-	}
+const primaryButtonStyles = css`
+	${labelButtonPrimaryStyles}
 
 	&:disabled {
 		/* TODO - fix after new palette is released */
@@ -212,7 +204,7 @@ export default css`
 	#issues-card-add-new-comment,
 	#risks-card-save-button,
 	#risks-card-add-new-comment {
-		${PrimaryButtonStyles}
+		${primaryButtonStyles}
 	}
 	${EditIssue}
 `;
