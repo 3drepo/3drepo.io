@@ -103,17 +103,9 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 
 	Handler.aggregate = HandlerV5.aggregate;
 
-	/**
-	 * @param {string} database
-	 * @param {string} colName
-	 * @param {object} query
-	 * @param {object} projection
-	 * @param {object} sort
-	 * @returns {Promise<Array<Object>}
-	 */
-	Handler.find = (database, colName, query, projection = {}, sort = {}, limit) => HandlerV5.find(database, colName, query, projection, sort, limit);
+	Handler.find = HandlerV5.find;
 
-	Handler.findOne = (database, colName, query, projection = {}, sort) => HandlerV5.findOne(database, colName, query, projection, sort);
+	Handler.findOne = HandlerV5.findOne;
 
 	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
