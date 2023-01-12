@@ -28,6 +28,7 @@ let agent;
 const generateBasicData = () => ({
 	users: {
 		tsAdmin: ServiceHelper.generateUserCredentials(),
+		tsAdmin2: ServiceHelper.generateUserCredentials(),
 		viewer: ServiceHelper.generateUserCredentials(),
 		noProjectAccess: ServiceHelper.generateUserCredentials(),
 		nobody: ServiceHelper.generateUserCredentials(),
@@ -39,7 +40,7 @@ const generateBasicData = () => ({
 });
 
 const setupBasicData = async (users, teamspace, project, models) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user, users.tsAdmin2.user]);
 
 	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
@@ -100,7 +101,7 @@ const testGetComment = () => {
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
 				['the comment does not exist', { ...baseRouteParams, commentId: ServiceHelper.generateRandomString() }, false, templates.commentNotFound],
-				['the comment id is valid', { ...baseRouteParams }, true],
+				['the comment id is valid', baseRouteParams, true],
 			];
 		};
 
@@ -180,7 +181,7 @@ const testGetCommentsList = () => {
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the ticket id is valid', { ...baseRouteParams }, true],
+				['the ticket id is valid', baseRouteParams, true],
 			];
 		};
 
@@ -255,7 +256,7 @@ const testCreateComment = () => {
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the ticket id is valid', { ...baseRouteParams }, true],
+				['the ticket id is valid', baseRouteParams, true],
 			];
 		};
 
@@ -322,13 +323,14 @@ const testUpdateComment = () => {
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user is not the author of the comment', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, false, templates.notAuthorized],
 				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
 				['the comment does not exist', { ...baseRouteParams, commentId: ServiceHelper.generateRandomString() }, false, templates.commentNotFound],
-				['the comment id is valid', { ...baseRouteParams }, true],
+				['the comment id is valid', baseRouteParams, true],
 			];
 		};
 
@@ -409,13 +411,14 @@ const testDeleteComment = () => {
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user is not the author of the comment', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, false, templates.notAuthorized],
 				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
 				['the comment does not exist', { ...baseRouteParams, commentId: ServiceHelper.generateRandomString() }, false, templates.commentNotFound],
-				['the comment id is valid', { ...baseRouteParams }, true],
+				['the comment id is valid', baseRouteParams, true],
 			];
 		};
 

@@ -294,6 +294,18 @@ const establishRoutes = (isFed) => {
 	 *                     format: uuid
 	 *                     description: The ID of the comment
 	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 comment:
+	 *                   type: string
+	 *                   example: Example comment
+	 *                   description: Content of the comment
+	 *                 images:
+	 *                   type: array
+	 *                   description: The images of the comment
+	 *                   items:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The Id of the comment image
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                   deleted:
 	 *                     type: boolean
 	 *                     example: true
