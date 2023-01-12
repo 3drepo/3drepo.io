@@ -68,6 +68,9 @@ export const Item = styled(MenuItem)<{ group: number }>`
 				}
 			`}
 		` : ''}
+		${({ disabled, group }) => isV5() && disabled && !group && css`
+			padding-top: 2px;
+		`}
 	}
 `;
 
