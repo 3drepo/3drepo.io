@@ -129,7 +129,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		risk = {
 			...risk,
-			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']),
+			...omit(riskData, ['author', 'statusColor', 'roleColor', 'viewpoint', 'defaultHidden', 'descriptionThumbnail']),
 			owner: riskData.author,
 			rev_id: revision,
 			creator_role: userJob._id

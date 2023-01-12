@@ -122,7 +122,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 
 		issue = {
 			...issue,
-			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']),
+			...omit(issueData, ['author', 'statusColor', 'roleColor', 'viewpoint', 'defaultHidden', 'descriptionThumbnail']),
 			owner: issueData.author,
 			rev_id: revision,
 			creator_role: userJob._id,
