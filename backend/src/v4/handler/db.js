@@ -81,11 +81,9 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		});
 	};
 
-	const Handler = {};
+	const Handler = {...HandlerV5};
 
 	let db;
-
-	Handler.authenticate = HandlerV5.authenticate;
 
 	Handler.disconnect = function () {
 		if(db) {
@@ -100,34 +98,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 	};
 
 	Handler.dropCollection = async (database, collection) => HandlerV5.dropCollection(database, collection.name ?? collection);
-
-	Handler.aggregate = HandlerV5.aggregate;
-
-	Handler.find = HandlerV5.find;
-
-	Handler.findOne = HandlerV5.findOne;
-
-	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
-		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.findOneAndUpdate(query, action, {projection});
-		return findResult.value;
-	};
-
-	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
-		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.findOneAndDelete(query, projection);
-		return findResult.value;
-	};
-
-	Handler.deleteMany = async function (database, colName, query) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.deleteMany(query);
-	};
-
-	Handler.deleteOne = async function (database, colName, query) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.deleteOne(query);
-	};
 
 	Handler.getDB = async (database) => {
 		if (db) {

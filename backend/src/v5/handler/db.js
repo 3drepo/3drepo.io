@@ -194,4 +194,21 @@ DBHandler.findOneAndUpdate = async (database, colName, query, action, projection
 	return value;
 };
 
+DBHandler.findOneAndDelete = async (database, colName, query, projection) => {
+	const collection = await getCollection(database, colName);
+	const options = deleteIfUndefined({ projection });
+	const { value } = await collection.findOneAndDelete(query, options);
+	return value;
+};
+
+DBHandler.deleteMany = async (database, colName, query) => {
+	const collection = await getCollection(database, colName);
+	await collection.deleteMany(query);
+};
+
+DBHandler.deleteOne = async (database, colName, query) => {
+	const collection = await getCollection(database, colName);
+	await collection.deleteOne(query);
+};
+
 module.exports = DBHandler;

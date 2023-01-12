@@ -322,7 +322,7 @@ const testFindOneAndUpdate = () => {
 			await DB.insertMany(dbName, col, data);
 		});
 
-		test('Should return matching document', async () => {
+		test('Should return then update the matchin document', async () => {
 			const newProp = generateRandomString();
 			await expect(DB.findOneAndUpdate(dbName, col, { _id: data[3]._id }, { $set: { newProp } }))
 				.resolves.toEqual(data[3]);
@@ -330,7 +330,7 @@ const testFindOneAndUpdate = () => {
 			await expect(DB.findOne(dbName, col, { _id: data[3]._id })).resolves.toEqual({ ...data[3], newProp });
 		});
 
-		test('Should return matching document (projection)', async () => {
+		test('Should return then update matching document (projection)', async () => {
 			const newProp = generateRandomString();
 			await expect(DB.findOneAndUpdate(dbName, col, { _id: data[2]._id }, { $set: { newProp } }, { n: 0 }))
 				.resolves.toEqual({ ...data[2], n: undefined });
@@ -356,6 +356,103 @@ const testFindOneAndUpdate = () => {
 	});
 };
 
+const testFindOneAndDelete = () => {
+	describe('Find One and Delete', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should return and delete matching document', async () => {
+			await expect(DB.findOneAndDelete(dbName, col, { _id: data[3]._id }))
+				.resolves.toEqual(data[3]);
+
+			await expect(DB.findOne(dbName, col, { _id: data[3]._id })).resolves.toEqual(null);
+		});
+
+		test('Should return and delete matching document (projection)', async () => {
+			await expect(DB.findOneAndDelete(dbName, col, { _id: data[2]._id }, { n: 0 }))
+				.resolves.toEqual({ ...data[2], n: undefined });
+
+			await expect(DB.findOne(dbName, col, { _id: data[2]._id })).resolves.toEqual(null);
+		});
+
+		test('Should return null if no document is found', async () => {
+			await expect(DB.findOneAndDelete(dbName, col, { [generateRandomString()]: generateRandomString() }))
+				.resolves.toEqual(null);
+		});
+
+		test('Should return null if collection doesn\'t exist', async () => {
+			await expect(DB.findOneAndDelete(dbName, generateRandomString(), { }))
+				.resolves.toEqual(null);
+		});
+
+		test('Should return null if database doesn\'t exist', async () => {
+			await expect(DB.findOneAndDelete(generateRandomString(), col, { })).resolves.toEqual(null);
+		});
+	});
+};
+
+const testDeleteMany = () => {
+	describe('Delete Many', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should delete matching documents', async () => {
+			await expect(DB.deleteMany(dbName, col, { n: { $lt: 5 } })).resolves.toBeUndefined();
+			await expect(DB.find(dbName, col, { n: { $lt: 5 } })).resolves.toEqual([]);
+		});
+
+		test('Should return successfully if the document was not found', async () => {
+			await expect(DB.deleteMany(dbName, col, { [generateRandomString()]: generateRandomString() }))
+				.resolves.toBeUndefined();
+		});
+
+		test('Should return empty array if collection doesn\'t exist', async () => {
+			await expect(DB.deleteMany(dbName, generateRandomString(), { })).resolves.toBeUndefined();
+		});
+
+		test('Should return empty array if database doesn\'t exist', async () => {
+			await expect(DB.deleteMany(generateRandomString(), col, { })).resolves.toBeUndefined();
+		});
+	});
+};
+
+const testDeleteOne = () => {
+	describe('Delete One', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should delete matching document', async () => {
+			await expect(DB.deleteOne(dbName, col, { _id: data[5] })).resolves.toBeUndefined();
+			await expect(DB.find(dbName, col, { _id: data[5] })).resolves.toEqual([]);
+		});
+
+		test('Should return successfully if the document was not found', async () => {
+			await expect(DB.deleteOne(dbName, col, { [generateRandomString()]: generateRandomString() }))
+				.resolves.toBeUndefined();
+		});
+
+		test('Should return empty array if collection doesn\'t exist', async () => {
+			await expect(DB.deleteOne(dbName, generateRandomString(), { })).resolves.toBeUndefined();
+		});
+
+		test('Should return empty array if database doesn\'t exist', async () => {
+			await expect(DB.deleteOne(generateRandomString(), col, { })).resolves.toBeUndefined();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -368,4 +465,7 @@ describe(determineTestGroup(__filename), () => {
 	testFind();
 	testFindOne();
 	testFindOneAndUpdate();
+	testFindOneAndDelete();
+	testDeleteMany();
+	testDeleteOne();
 });
