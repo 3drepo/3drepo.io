@@ -25,6 +25,9 @@ const { UUIDToString } = require('../../../../../../../../../../src/v5/utils/hel
 jest.mock('../../../../../../../../../../src/v5/models/tickets.comments');
 const TicketComments = require(`${src}/models/tickets.comments`);
 
+jest.mock('../../../../../../../../../../src/v5/models/tickets');
+const Tickets = require(`${src}/models/tickets`);
+
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
@@ -88,6 +91,8 @@ const testValidateUpdateComment = () => {
 		])('Check if req arguments for new comment are valid', (request, shouldPass, desc, comment = existingComment, error = templates.invalidArguments) => {
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 				const mockCB = jest.fn();
+
+				Tickets.getTicketById.mockResolvedValueOnce({ [generateRandomString()]: generateRandomString() });
 				TicketComments.getCommentById.mockResolvedValueOnce(comment);
 
 				await Comments.validateUpdateComment(request, {}, mockCB);

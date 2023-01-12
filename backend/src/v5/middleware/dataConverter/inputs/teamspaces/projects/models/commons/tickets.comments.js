@@ -19,6 +19,7 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const { getCommentById } = require('../../../../../../../models/tickets.comments');
+const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
@@ -59,6 +60,9 @@ CommentsMiddleware.canUpdateComment = async (req, res, next) => {
 	const { teamspace, project, model, ticket, comment: _id } = req.params;
 
 	try {
+		// to ensure ticket exists
+		await getTicketById(teamspace, project, model, ticket, { _id: 1 });
+
 		const comment = await getCommentById(teamspace, project, model, ticket, _id);
 
 		if (user !== comment.author) {
@@ -70,9 +74,9 @@ CommentsMiddleware.canUpdateComment = async (req, res, next) => {
 		}
 
 		req.commentData = comment;
-		return next();
+		await next();
 	} catch (err) {
-		return respond(req, res, err);
+		respond(req, res, err);
 	}
 };
 
