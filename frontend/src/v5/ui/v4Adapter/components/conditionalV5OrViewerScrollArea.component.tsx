@@ -22,7 +22,7 @@ import { ConditionalV5OrViewerScrollAreaBase } from './conditionalV5OrViewerScro
 
 export const ConditionalV5OrViewerScrollArea = forwardRef(({ children, ...props }: ScrollbarProps, ref: any) => {
 	const { pathname } = useLocation();
-	const isViewer = pathname.startsWith("/viewer");
+	const isViewer = pathname.startsWith('/viewer');
 	if (isV5() || isViewer) {
 		return (
 			<ConditionalV5OrViewerScrollAreaBase {...props} ref={ref}>
