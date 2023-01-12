@@ -704,7 +704,7 @@ export const theme = createTheme({
 
 						'&.Mui-disabled': {
 							backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
-						}
+						},
 					},
 				},
 			},
