@@ -23,6 +23,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IFormModal } from '@controls/modal/formModal/formDialog.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { compact, isEqual } from 'lodash';
 import { EditFederation } from './editFederation';
 import { FormModal } from './editFederationModal.styles';
 
@@ -50,7 +51,10 @@ export const EditFederationModal = ({
 		event.preventDefault();
 		onClickClose();
 	};
-
+	const formIsDirty = () => !isEqual(
+		compact(includedContainers).map((c) => c._id),
+		federation.containers,
+	);
 	return (
 		<FormModal
 			open
@@ -63,7 +67,7 @@ export const EditFederationModal = ({
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
-			isValid={includedContainers.length > 0}
+			isValid={formIsDirty()}
 			maxWidth="lg"
 			hideHorizontalScroll={false}
 			{...otherProps}
