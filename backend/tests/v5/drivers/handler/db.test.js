@@ -242,39 +242,6 @@ const testAggregate = () => {
 	});
 };
 
-const testFindOne = () => {
-	describe('Find One', () => {
-		const data = generateBSONData(10);
-		const dbName = generateRandomString();
-		const col = generateRandomString();
-		beforeAll(async () => {
-			await DB.insertMany(dbName, col, data);
-		});
-
-		test('Should return matching document', async () => {
-			await expect(DB.findOne(dbName, col, { _id: data[3]._id })).resolves.toEqual(data[3]);
-		});
-
-		test('Should return matching document (sort and projection)', async () => {
-			await expect(DB.findOne(dbName, col, { }, { n: 1, _id: 0 }, { n: -1 }))
-				.resolves.toEqual({ n: data[9].n });
-		});
-
-		test('Should return null if no document is found', async () => {
-			await expect(DB.findOne(dbName, col, { [generateRandomString()]: generateRandomString() }))
-				.resolves.toEqual(null);
-		});
-
-		test('Should return null if collection doesn\'t exist', async () => {
-			await expect(DB.findOne(dbName, generateRandomString(), { _id: data[3]._id })).resolves.toEqual(null);
-		});
-
-		test('Should return null if database doesn\'t exist', async () => {
-			await expect(DB.findOne(generateRandomString(), col, { _id: data[3]._id })).resolves.toEqual(null);
-		});
-	});
-};
-
 const testFind = () => {
 	describe('Find Many', () => {
 		const data = generateBSONData(10);
@@ -313,6 +280,82 @@ const testFind = () => {
 	});
 };
 
+const testFindOne = () => {
+	describe('Find One', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should return matching document', async () => {
+			await expect(DB.findOne(dbName, col, { _id: data[3]._id })).resolves.toEqual(data[3]);
+		});
+
+		test('Should return matching document (sort and projection)', async () => {
+			await expect(DB.findOne(dbName, col, { }, { n: 1, _id: 0 }, { n: -1 }))
+				.resolves.toEqual({ n: data[9].n });
+		});
+
+		test('Should return null if no document is found', async () => {
+			await expect(DB.findOne(dbName, col, { [generateRandomString()]: generateRandomString() }))
+				.resolves.toEqual(null);
+		});
+
+		test('Should return null if collection doesn\'t exist', async () => {
+			await expect(DB.findOne(dbName, generateRandomString(), { _id: data[3]._id })).resolves.toEqual(null);
+		});
+
+		test('Should return null if database doesn\'t exist', async () => {
+			await expect(DB.findOne(generateRandomString(), col, { _id: data[3]._id })).resolves.toEqual(null);
+		});
+	});
+};
+
+const testFindOneAndUpdate = () => {
+	describe('Find One and Update', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should return matching document', async () => {
+			const newProp = generateRandomString();
+			await expect(DB.findOneAndUpdate(dbName, col, { _id: data[3]._id }, { $set: { newProp } }))
+				.resolves.toEqual(data[3]);
+
+			await expect(DB.findOne(dbName, col, { _id: data[3]._id })).resolves.toEqual({ ...data[3], newProp });
+		});
+
+		test('Should return matching document (projection)', async () => {
+			const newProp = generateRandomString();
+			await expect(DB.findOneAndUpdate(dbName, col, { _id: data[2]._id }, { $set: { newProp } }, { n: 0 }))
+				.resolves.toEqual({ ...data[2], n: undefined });
+
+			await expect(DB.findOne(dbName, col, { _id: data[2]._id })).resolves.toEqual({ ...data[2], newProp });
+		});
+
+		const action = { $set: { [generateRandomString()]: generateRandomString() } };
+
+		test('Should return null if no document is found', async () => {
+			await expect(DB.findOneAndUpdate(dbName, col, { [generateRandomString()]: generateRandomString() }, action))
+				.resolves.toEqual(null);
+		});
+
+		test('Should return null if collection doesn\'t exist', async () => {
+			await expect(DB.findOneAndUpdate(dbName, generateRandomString(), { }, action))
+				.resolves.toEqual(null);
+		});
+
+		test('Should return null if database doesn\'t exist', async () => {
+			await expect(DB.findOneAndUpdate(generateRandomString(), col, { }, action)).resolves.toEqual(null);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -322,6 +365,7 @@ describe(determineTestGroup(__filename), () => {
 	testInsertOne();
 	testInsertMany();
 	testAggregate();
-	testFindOne();
 	testFind();
+	testFindOne();
+	testFindOneAndUpdate();
 });

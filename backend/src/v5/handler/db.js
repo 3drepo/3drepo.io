@@ -187,4 +187,11 @@ DBHandler.insertMany = async (database, colName, data) => {
 	await collection.insertMany(data);
 };
 
+DBHandler.findOneAndUpdate = async (database, colName, query, action, projection) => {
+	const collection = await getCollection(database, colName);
+	const options = deleteIfUndefined({ projection });
+	const { value } = await collection.findOneAndUpdate(query, action, options);
+	return value;
+};
+
 module.exports = DBHandler;
