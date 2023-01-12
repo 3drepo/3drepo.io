@@ -958,6 +958,7 @@ export const theme = createTheme({
 					width: '100%',
 					boxSizing: 'border-box',
 					pointerEvents: 'auto',
+					borderColor: COLOR.BASE_LIGHTER,
 					'& ~ svg': {
 						position: 'absolute',
 						right: 14,
@@ -965,6 +966,14 @@ export const theme = createTheme({
 						top: '40%',
 						pointerEvents: 'none',
 						color: COLOR.SECONDARY_MAIN,
+					},
+
+					'&.Mui-disabled': {
+						borderColor: COLOR.SECONDARY_LIGHTEST,
+						color: COLOR.BASE_LIGHT,
+						'& ~ svg': {
+							color: COLOR.BASE_LIGHT,
+						},
 					},
 				},
 			},

@@ -111,7 +111,8 @@ const boardContainerStyles = css`
 	/* general select styling */
 	.MuiSelect-select {
 		padding-left: 15px;
-		border: solid 1px ${({ theme }) => theme.palette.base.lighter};
+		border-style: solid;
+		border-width: 1px;
 		
 		& ~ svg {
 			top: -26px;
