@@ -22,7 +22,7 @@ import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IUser } from '@/v5/store/users/users.redux';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { Text, FixedOrGrowContainer } from './revisionsListItemAuthor.styles';
+import { Text, Name, FixedOrGrowContainer } from './revisionsListItemAuthor.styles';
 
 interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
@@ -46,7 +46,8 @@ export const RevisionsListItemAuthor = ({
 						$active={active}
 						{...props}
 					>
-						{author?.firstName || authorName} {author?.lastName}
+						<Name>{author?.firstName || authorName}</Name>
+						<Name>{author?.lastName}</Name>
 					</Text>
 				)}
 			>
