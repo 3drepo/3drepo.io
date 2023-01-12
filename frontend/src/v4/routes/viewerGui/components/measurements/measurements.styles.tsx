@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { ConditionalV5ScrollContainer } from '@/v5/ui/v4Adapter/components/conditionalV5ScrollContainer.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/ConditionalV5OrViewerScrollArea.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -33,7 +33,7 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASUREMENTS]}px;
 `;
 
-export const Container = styled(ConditionalV5ScrollContainer)`
+export const Container = styled(ConditionalV5OrViewerScrollArea)`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;

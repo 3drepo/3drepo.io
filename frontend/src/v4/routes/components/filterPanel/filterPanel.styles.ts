@@ -22,7 +22,7 @@ import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
 import styled from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ConditionalV5ScrollContainer as ConditionalV5ScrollContainerBase } from '@/v5/ui/v4Adapter/components/conditionalV5ScrollContainer.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/ConditionalV5OrViewerScrollArea.component';
 import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
@@ -145,7 +145,7 @@ export const SuggestionsList = styled(Popper)`
 	}
 `;
 
-export const SuggestionsScrollArea = styled(ConditionalV5ScrollContainerBase).attrs({
+export const SuggestionsScrollArea = styled(ConditionalV5OrViewerScrollArea).attrs({
 	autoHeight: true,
 	autoHeightMax: 250,
 })`

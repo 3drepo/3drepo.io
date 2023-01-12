@@ -17,7 +17,7 @@
 
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
-import { ConditionalV5ScrollContainer } from '@/v5/ui/v4Adapter/components/conditionalV5ScrollContainer.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/ConditionalV5OrViewerScrollArea.component';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
@@ -107,7 +107,7 @@ export const TitleIcon = styled.div`
 	}
 `;
 
-export const ViewerPanelContent = styled(ConditionalV5ScrollContainer)<IViewerPanelContent>`
+export const ViewerPanelContent = styled(ConditionalV5OrViewerScrollArea)<IViewerPanelContent>`
 	overflow: ${({ scrollDisabled }) => scrollDisabled ? 'hidden' : 'auto'};
 	display: ${({ scrollDisabled }) => scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${({ scrollDisabled }) => scrollDisabled ? 'column' : 'unset'};
