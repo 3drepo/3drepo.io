@@ -50,9 +50,15 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	};
 
 	const getSafePathName = () => {
-		if (isTeamspaceNotFound(code)) return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
-		if (isProjectNotFound(code)) return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
-		if (isResourceNotFound(code)) return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
+		if (isTeamspaceNotFound(code)) {
+			return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
+		}
+		if (isProjectNotFound(code)) {
+			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
+		}
+		if (isResourceNotFound(code)) {
+			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
+		}
 	};
 	
 	const redirectToSafePath = () => {
