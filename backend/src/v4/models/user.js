@@ -23,7 +23,7 @@ const db = require("../handler/db");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
-const { addDefaultJobs, findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
+const { findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
 
 const Intercom = require("./intercom");
 
@@ -48,9 +48,9 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
-const { assignUserToJob } = require(`${v5Path}/models/jobs.js`);
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
+const TeamspaceProcessorV5 = require(`${v5Path}/processors/teamspaces/teamspaces`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 
 const COLL_NAME = "system.users";
@@ -511,29 +511,15 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		await Role.createTeamSpaceRole(username);
 		await Role.grantTeamSpaceRoleToUser(username, username);
 	} catch(err) {
 		systemLogger.logError("Failed to create role for ", username, err);
 	}
 
 	try {
-		await addDefaultJobs(username);
+		await TeamspaceProcessorV5.intTeamspace(username);
 	} catch(err) {
-		systemLogger.logError("Failed to create default jobs for ", username, err);
-	}
-
-	try {
-		await assignUserToJob(username, C.DEFAULT_OWNER_JOB, username);
-	} catch(err) {
-		systemLogger.logError("Failed to assign user to job ", C.DEFAULT_OWNER_JOB, err);
-	}
-
-	try {
-		await TeamspaceSettings.createTeamspaceSettings(username);
-		await TeamspaceSettings.grantAdminToUser(username, username);
-	} catch(err) {
-		systemLogger.logError("Failed to create teamspace settings for ", username, err);
+		systemLogger.logError("Failed to init teamspace settings for ", username, err);
 	}
 };
 
