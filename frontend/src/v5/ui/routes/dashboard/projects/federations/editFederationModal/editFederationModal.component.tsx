@@ -67,7 +67,7 @@ export const EditFederationModal = ({
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
-			isValid={formIsDirty()}
+			isValid={includedContainers.length && formIsDirty()}
 			maxWidth="lg"
 			hideHorizontalScroll={false}
 			{...otherProps}
