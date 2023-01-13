@@ -517,7 +517,7 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		await TeamspaceProcessorV5.intTeamspace(username);
+		await TeamspaceProcessorV5.initTeamspace(username);
 	} catch(err) {
 		systemLogger.logError("Failed to init teamspace settings for ", username, err);
 	}
