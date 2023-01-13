@@ -519,6 +519,75 @@ const testBulkWrite = () => {
 	});
 };
 
+const testIndices = () => {
+	describe('Indexing', () => {
+		test('Should fail on a collection that does not exist', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await expect(DB.listIndices(database, col)).rejects.not.toBeUndefined();
+		});
+
+		test('Should return with the default index on an unindexed collection', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, generateBSONData(10));
+
+			const res = await DB.listIndices(database, col);
+			expect(res.length).toBe(1);
+			expect(res[0]).toEqual(expect.objectContaining({ key: { _id: 1 } }));
+		});
+
+		test('Should be able to remove an index', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, generateBSONData(10));
+
+			const newIndex = { n: 1 };
+			await expect(DB.createIndex(database, col, newIndex)).resolves.toBeUndefined();
+
+			const res = await DB.listIndices(database, col);
+			expect(res.length).toBe(2);
+
+			await expect(DB.dropIndex(database, col, 'n_1')).resolves.toBeUndefined();
+
+			await expect(DB.listIndices(database, col)).resolves.toEqual([{ key: { _id: 1 }, name: '_id_', v: 2 }]);
+		});
+
+		test('Should be able to add a new index', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, generateBSONData(10));
+
+			const newIndex = { n: 1 };
+			await expect(DB.createIndex(database, col, newIndex)).resolves.toBeUndefined();
+
+			const res = await DB.listIndices(database, col);
+			const array = res.map(({ key }) => key);
+			expect(array.length).toBe(2);
+			expect(array).toEqual(expect.arrayContaining([{ _id: 1 }, newIndex]));
+		});
+
+		test('Should be able to add multiple indices', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, generateBSONData(10));
+
+			const newIndex = [{ key: { n: 1 } }, { key: { n: -1, _id: 1 } }];
+			await expect(DB.createIndices(database, col, newIndex)).resolves.toBeUndefined();
+
+			const res = await DB.listIndices(database, col);
+			expect(res.length).toBe(newIndex.length + 1);
+			const array = res.map(({ key }) => key);
+			expect(array).toEqual(expect.arrayContaining([{ _id: 1 }, ...newIndex.map(({ key }) => key)]));
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -536,4 +605,5 @@ describe(determineTestGroup(__filename), () => {
 	testDeleteMany();
 	testDeleteOne();
 	testGridFS();
+	testIndices();
 });

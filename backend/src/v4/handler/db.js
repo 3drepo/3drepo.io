@@ -22,24 +22,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 	const config	  = require("../config.js");
 	const C = require("../constants");
 	const MongoClient = require("mongodb").MongoClient;
-	const GridFSBucket = require("mongodb").GridFSBucket;
-	const { PassThrough } = require("stream");
-
-	async function getGridFSBucket(database, collection, chunksize = null) {
-		try {
-			const dbConn = await Handler.getDB(database);
-			const options = {bucketName: collection};
-
-			if (chunksize) {
-				options.chunksize =  chunksize;
-			}
-
-			return new GridFSBucket(dbConn, options);
-		} catch (err) {
-			Handler.disconnect();
-			throw err;
-		}
-	}
 
 	function getHostPorts() {
 		const hostPorts = [];
@@ -132,21 +114,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	};
-	Handler.createIndex = async (database, colName, indexDef, { runInBackground } = {}) => {
-		const collection = await Handler.getCollection(database, colName);
-		const options = runInBackground ? { background: true } : undefined;
-		return collection.createIndex(indexDef, options);
-	};
-
-	Handler.createIndices = async (database, colName, indicesDef) => {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.createIndexes(indicesDef);
-	};
-
-	Handler.dropIndex = async (database, colName, indexName) => {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.dropIndex(indexName);
 	};
 
 	Handler.getAllValues = async (database, colName, key) => {

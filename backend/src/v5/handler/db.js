@@ -277,4 +277,25 @@ DBHandler.storeFileInGridFS = async (database, collection, filename, buffer) => 
 	});
 };
 
+DBHandler.createIndex = async (database, colName, indexDef, { runInBackground: background } = {}) => {
+	const collection = await getCollection(database, colName);
+	const options = deleteIfUndefined({ background });
+	await collection.createIndex(indexDef, options);
+};
+
+DBHandler.createIndices = async (database, colName, indicesDef) => {
+	const collection = await getCollection(database, colName);
+	await collection.createIndexes(indicesDef);
+};
+
+DBHandler.dropIndex = async (database, colName, indexName) => {
+	const collection = await getCollection(database, colName);
+	await collection.dropIndex(indexName);
+};
+
+DBHandler.listIndices = async (database, colName) => {
+	const collection = await getCollection(database, colName);
+	return collection.listIndexes().toArray();
+};
+
 module.exports = DBHandler;
