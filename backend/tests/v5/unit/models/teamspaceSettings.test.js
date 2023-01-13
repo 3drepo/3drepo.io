@@ -258,10 +258,10 @@ const testRemoveAddOns = () => {
 			const teamspace = generateRandomString();
 
 			const unsetObj = {
-				'addOns.vrEnabled': 1,
-				'addOns.srcEnabled': 1,
-				'addOns.hereEnabled': 1,
-				'addOns.powerBIEnabled': 1,
+				[`addOns.${ADD_ONS.VR}`]: 1,
+				[`addOns.${ADD_ONS.SRC}`]: 1,
+				[`addOns.${ADD_ONS.HERE}`]: 1,
+				[`addOns.${ADD_ONS.POWERBI}`]: 1,
 			};
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
@@ -277,26 +277,26 @@ const testGetAddOns = () => {
 		test('should get all applicable addOns', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({
 				addOns: {
-					vrEnabled: true,
-					srcEnabled: true,
-					hereEnabled: true,
-					powerBIEnabled: true,
+					[ADD_ONS.VR]: true,
+					[ADD_ONS.SRC]: true,
+					[ADD_ONS.HERE]: true,
+					[ADD_ONS.POWERBI]: true,
 				} });
 
 			const teamspace = generateRandomString();
 
 			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-				powerBIEnabled: true,
+				[ADD_ONS.VR]: true,
+				[ADD_ONS.SRC]: true,
+				[ADD_ONS.HERE]: true,
+				[ADD_ONS.POWERBI]: true,
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
-				'addOns.vrEnabled': 1,
-				'addOns.srcEnabled': 1,
-				'addOns.hereEnabled': 1,
-				'addOns.powerBIEnabled': 1,
+				[`addOns.${ADD_ONS.VR}`]: 1,
+				[`addOns.${ADD_ONS.SRC}`]: 1,
+				[`addOns.${ADD_ONS.HERE}`]: 1,
+				[`addOns.${ADD_ONS.POWERBI}`]: 1,
 			}, undefined);
 		});
 
@@ -308,10 +308,10 @@ const testGetAddOns = () => {
 			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
-				'addOns.vrEnabled': 1,
-				'addOns.srcEnabled': 1,
-				'addOns.hereEnabled': 1,
-				'addOns.powerBIEnabled': 1,
+				[`addOns.${ADD_ONS.VR}`]: 1,
+				[`addOns.${ADD_ONS.SRC}`]: 1,
+				[`addOns.${ADD_ONS.HERE}`]: 1,
+				[`addOns.${ADD_ONS.POWERBI}`]: 1,
 			}, undefined);
 		});
 	});

@@ -17,12 +17,37 @@
 
 const { v5Path } = require('../../../interop');
 
-const { find, updateMany, updateOne } = require(`${v5Path}/handler/db`);
+const { find, listDatabases, updateMany, updateOne } = require(`${v5Path}/handler/db`);
 const { ADD_ONS } = require(`${v5Path}/models/teamspaces.constants`);
 const { USERS_DB_NAME } = require(`${v5Path}/models/users.constants`);
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const addOnFields = Object.values(ADD_ONS);
+
+const migrateTeamspaceData = async (user, customData) => {
+	const { addOns, billing: { subscriptions }, permissions, ...flags } = customData;
+	const tsSettingsUpdate = deleteIfUndefined({
+		subscriptions,
+		permissions,
+	});
+
+	// addOns
+	if (addOns) {
+		tsSettingsUpdate.addOns = { ...addOns, ...flags };
+	}
+
+	if (Object.keys(tsSettingsUpdate).length > 0) {
+		try {
+			await updateOne(user, 'teamspace', {}, { $set: tsSettingsUpdate });
+			return user;
+		} catch (err) {
+			logger.logError(`\t-Update teamspace settings for ${user} unsuccessful: ${err}`);
+		}
+	}
+
+	return undefined;
+};
 
 const run = async () => {
 	const oldFields = {
@@ -30,18 +55,13 @@ const run = async () => {
 		'customData.billing.subscriptions': 1,
 		'customData.addOns': 1,
 	};
-	addOnFields.map((f) => {
-		oldFields[`customData.${f}`] = 1;
-		return f;
+	addOnFields.forEach((addOn) => {
+		oldFields[`customData.${addOn}`] = 1;
 	});
 
-	const failedUsers = [];
-	const query = { $or: [
-		{ 'customData.permissions': { $exists: true } },
-		{ 'customData.billing.subscriptions': { $exists: true } },
-		{ 'customData.addOns': { $exists: true } },
-		...addOnFields.map((f) => ({ [`customData.${f}`]: { $exists: true } })),
-	] };
+	const query = { $or: Object.keys(oldFields).map((key) => ({ [key]: { $exists: true } })) };
+
+	const dbs = (await listDatabases()).map(({ name }) => name);
 
 	const users = await find(
 		USERS_DB_NAME,
@@ -50,40 +70,18 @@ const run = async () => {
 		{ _id: 0, user: 1, ...oldFields },
 	);
 
-	await Promise.all(users.map(({ user, customData: {
-		addOns,
-		billing: { subscriptions },
-		permissions,
-		...flags
-	} }) => {
-		logger.logInfo(`\t\t-${user}`);
-		const tsSettingsUpdate = {};
+	// Sort users into those with/without a database
+	const [usersWithDb, usersWithoutDb] = users.reduce(([hasDb, noDb], user) => (dbs.includes(user.user)
+		? [[...hasDb, user], noDb] : [hasDb, [...noDb, user]]), [[], []]);
 
-		// addOns
-		if (addOns) {
-			logger.logInfo('\t\t\t-addOns');
-			tsSettingsUpdate.addOns = { ...addOns, ...flags };
-		}
+	logger.logError(`-Preparing to migrate the following users: ${usersWithDb.map((user) => user.user)}`);
+	const updatedUsers = await Promise.all(usersWithDb.map(({ user, customData }) => migrateTeamspaceData(user,
+		customData)));
 
-		// subscriptions
-		if (subscriptions) {
-			logger.logInfo('\t\t\t-subscriptions');
-			tsSettingsUpdate.subscriptions = subscriptions;
-		}
+	const usersToCleanUp = [...usersWithoutDb.map(({ user }) => user), ...updatedUsers.filter((user) => user)];
+	logger.logError(`-Cleaning up the following users: ${usersToCleanUp}`);
 
-		// permissions
-		if (permissions) {
-			logger.logInfo('\t\t\t-permissions');
-			tsSettingsUpdate.permissions = permissions;
-		}
-
-		return Object.keys(tsSettingsUpdate).length > 0 && updateOne(user, 'teamspace', {}, { $set: tsSettingsUpdate }).catch((err) => {
-			logger.logError(`\t\t\t-Update teamspace settings for ${user} unsuccessful: ${err}`);
-			failedUsers.push(user);
-		});
-	}));
-
-	await updateMany(USERS_DB_NAME, 'system.users', { user: { $not: { $in: failedUsers } }, ...query }, { $unset: oldFields });
+	await updateMany(USERS_DB_NAME, 'system.users', { user: { $in: usersToCleanUp }, ...query }, { $unset: oldFields });
 };
 
 module.exports = run;
