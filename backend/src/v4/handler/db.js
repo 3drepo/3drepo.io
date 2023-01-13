@@ -121,27 +121,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		return collection.distinct(key);
 	};
 
-	Handler.listDatabases = async (nameOnly = true) => {
-		try {
-			const res = await Handler.runCommand("admin", {listDatabases :1, nameOnly });
-			return res.databases;
-		} catch (err) {
-			Handler.disconnect();
-			throw err;
-		}
-	};
-
-	Handler.listCollections = async function (database) {
-		try {
-			const dbConn = await Handler.getDB(database);
-			const colls = await dbConn.listCollections().toArray();
-			return colls.map(({name, options}) => ({name, options}));
-		} catch (err) {
-			Handler.disconnect();
-			throw err;
-		}
-	};
-
 	Handler.runCommand = function (database, cmd) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
@@ -206,21 +185,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 
 	Handler.reset = () => {
 		defaultRoleProm = null;
-	};
-	Handler.dropDatabase = async (database) => {
-		if(!["config", "admin"].includes(database)) {
-			try {
-				const dbConn = await Handler.getDB(database);
-				const collections = await Handler.listCollections(database);
-				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
-				await dbConn.dropDatabase();
-			} catch (err) {
-				if(err.message !== "ns not found") {
-					Handler.disconnect();
-					throw err;
-				}
-			}
-		}
 	};
 
 	Handler.createUser = async function (username, password, customData, roles = []) {

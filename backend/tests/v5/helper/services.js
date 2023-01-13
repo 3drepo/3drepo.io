@@ -81,7 +81,7 @@ db.reset = async () => {
 	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
 
 	await Promise.all([...dbProms, ...colProms]);
-	DbHandler.reset();
+	await DbHandler.disconnect();
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials

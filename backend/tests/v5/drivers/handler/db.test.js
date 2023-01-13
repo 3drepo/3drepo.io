@@ -588,6 +588,63 @@ const testIndices = () => {
 	});
 };
 
+const testListDatabases = () => {
+	describe('List databases', () => {
+		const databaseList = times(10, () => generateRandomString());
+		beforeAll(async () => {
+			await db.reset();
+			await Promise.all(databaseList.map(
+				(dbName) => DB.insertOne(dbName, generateRandomString(), generateBSONData(1)[0]),
+			));
+		});
+		test('Should list all available databases', async () => {
+			const expectedList = [...databaseList, ADMIN_DB, 'local', 'config'];
+			await expect(DB.listDatabases()).resolves
+				.toEqual(expect.arrayContaining(expectedList.map((name) => ({ name }))));
+		});
+	});
+};
+
+const testListCollections = () => {
+	describe('List collections', () => {
+		const dbName = generateRandomString();
+		const collectionList = times(10, () => generateRandomString());
+		beforeAll(async () => {
+			await db.reset();
+			await Promise.all(collectionList.map(
+				(colName) => DB.insertOne(dbName, colName, generateBSONData(1)[0]),
+			));
+		});
+		test('Should list all available collections within a database', async () => {
+			const list = await DB.listCollections(dbName);
+			expect(list.length).toEqual(collectionList.length);
+			expect(list.map(({ name }) => name)).toEqual(expect.arrayContaining(collectionList));
+		});
+
+		test('Should return an empty list if the database doesn\'t exist', async () => {
+			await expect(DB.listCollections(generateRandomString())).resolves.toEqual([]);
+		});
+	});
+};
+
+const testDropDatabase = () => {
+	describe('Drop database', () => {
+		const dbName = generateRandomString();
+		const colName = generateRandomString();
+		beforeAll(() => DB.insertOne(dbName, colName, generateBSONData(1)[0]));
+
+		test('Should remove database specificed', async () => {
+			await expect(DB.dropDatabase(dbName)).resolves.toBeUndefined();
+			const dbList = await DB.listDatabases();
+			expect(dbList.find(({ name }) => name === dbName)).toBeUndefined();
+		});
+
+		test('Should return as normal if the database doesn\'t exist', async () => {
+			await expect(DB.dropDatabase(generateRandomString())).resolves.toBeUndefined();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -606,4 +663,7 @@ describe(determineTestGroup(__filename), () => {
 	testDeleteOne();
 	testGridFS();
 	testIndices();
+	testListDatabases();
+	testListCollections();
+	testDropDatabase();
 });

@@ -79,7 +79,7 @@ const getCollection = async (db, col) => {
 const runCommand = async (database, cmd) => {
 	const conn = await getDB(database);
 	try {
-		conn.command(cmd);
+		return conn.command(cmd);
 	} catch (err) {
 		// istanbul ignore next
 		await DBHandler.disconnect();
@@ -271,7 +271,6 @@ DBHandler.storeFileInGridFS = async (database, collection, filename, buffer) => 
 			stream.end(buffer);
 		} catch (e) {
 		/* istanbul ignore next */
-
 			reject(e);
 		}
 	});
@@ -296,6 +295,48 @@ DBHandler.dropIndex = async (database, colName, indexName) => {
 DBHandler.listIndices = async (database, colName) => {
 	const collection = await getCollection(database, colName);
 	return collection.listIndexes().toArray();
+};
+
+DBHandler.listDatabases = async () => {
+	try {
+		const res = await runCommand('admin', { listDatabases: 1, nameOnly: true });
+		return res.databases;
+	} catch (err) {
+		/* istanbul ignore next */
+		await DBHandler.disconnect();
+		/* istanbul ignore next */
+		throw err;
+	}
+};
+
+DBHandler.listCollections = async (database) => {
+	try {
+		const conn = await getDB(database);
+		const colls = await conn.listCollections().toArray();
+		return colls.map(({ name, options }) => ({ name, options }));
+	} catch (err) {
+		/* istanbul ignore next */
+		await DBHandler.disconnect();
+		/* istanbul ignore next */
+		throw err;
+	}
+};
+
+DBHandler.dropDatabase = async (database) => {
+	if (!['config', 'admin'].includes(database)) {
+		try {
+			const conn = await getDB(database);
+			const collections = await DBHandler.listCollections(database);
+			await Promise.all(collections.map(({ name }) => dropAllIndicies(database, name)));
+			await conn.dropDatabase();
+		} catch (err) {
+			/* istanbul ignore next */
+			if (err.message !== 'ns not found') {
+				DBHandler.disconnect();
+				throw err;
+			}
+		}
+	}
 };
 
 module.exports = DBHandler;
