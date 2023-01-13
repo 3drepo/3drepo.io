@@ -57,6 +57,8 @@ export const ShapesFormTab = ({
 		}
 	}, [active]);
 
+	useEffect(() => () => setMeasureMode(''), []);
+
 	return (
 		<Content active={active}>
 			{addButtonsEnabled &&
