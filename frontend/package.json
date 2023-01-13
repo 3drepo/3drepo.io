@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.28.1",
+	"version": "4.28.2",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
 		"node": "18.x.x"
