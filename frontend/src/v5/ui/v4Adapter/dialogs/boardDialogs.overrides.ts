@@ -40,7 +40,6 @@ import { UserIndicator } from '@/v4/routes/components/messagesList/components/me
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
-import { ResourcesList } from '@/v4/routes/components/resources/resources.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 
@@ -69,11 +68,17 @@ const EditIssue = css`
 
 	/* voids parent custom-scrollbar hiding content */
 	${FormWrapper} {
-		& > ${TabsContainer} > div > div {
-			position: unset !important;
+		& > ${TabsContainer} {
+			${CollapsableContent} {
+				height: min(50vh, 100%);
+			}
 
-			&:nth-of-type(2) {
-				height: 0 !important;
+			& > div > div {
+				position: unset !important;
+
+				&:nth-of-type(2) {
+					height: 0 !important;
+				}
 			}
 		}
 	}
@@ -135,10 +140,6 @@ const EditIssue = css`
 					box-sizing: border-box;
 				}
 			}
-
-			${ResourcesList} {
-				/* margin-top: 0; */
-			}
 		}
 
 		/* right panel */
@@ -192,10 +193,13 @@ const EditIssue = css`
 				}
 			}
 		}
+	}
 
-		${PreviewDetailsContainer} {
-			background-color: inherit;
-		}
+	.MuiDialog-container ${PreviewDetailsContainer} {
+		/* TODO - fix after new palette is released */
+		background-color: #f7f8fa;
+		min-height: calc(75vh - 65px);
+		max-height: calc(75vh - 65px);
 	}
 `;
 
