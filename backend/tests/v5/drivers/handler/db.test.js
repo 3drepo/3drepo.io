@@ -480,6 +480,45 @@ const testGridFS = () => {
 	});
 };
 
+const testBulkWrite = () => {
+	describe('Bulk write', () => {
+		test('Should write all data successfully', async () => {
+			const database = generateRandomString();
+			const collection = generateRandomString();
+
+			const [data, data2] = generateBSONData(2);
+
+			await expect(DB.bulkWrite(database, collection, [
+				{ insertOne: { document: data } },
+				{ insertOne: { document: data2 } },
+				{ updateMany: { filter: {}, update: { $set: { a: 1 } } } },
+			])).resolves.toBeUndefined();
+
+			const records = await DB.find(database, collection, {});
+			expect(records.length).toBe(2);
+			expect(records).toEqual(expect.arrayContaining([{ ...data, a: 1 }, { ...data2, a: 1 }]));
+		});
+
+		test('Should reject with error if the query failed', async () => {
+			const database = generateRandomString();
+			const collection = generateRandomString();
+
+			const [data] = generateBSONData(1);
+
+			await expect(DB.bulkWrite(database, collection, [
+				{ insertOne: { document: data } },
+				{ insertOne: { document: data } },
+				{ updateMany: { filter: {}, update: { $set: { a: 1 } } } },
+			])).rejects.not.toBeUndefined();
+
+			const records = await DB.find(database, collection, {});
+
+			expect(records.length).toBe(1);
+			expect(records).toEqual([data]);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -488,6 +527,7 @@ describe(determineTestGroup(__filename), () => {
 	testDropCollection();
 	testInsertOne();
 	testInsertMany();
+	testBulkWrite();
 	testAggregate();
 	testFind();
 	testFindOne();

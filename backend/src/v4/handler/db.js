@@ -133,66 +133,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 			return Promise.reject(err);
 		});
 	};
-
-	Handler.bulkWrite = async function (database, colName, instructions) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.bulkWrite(instructions);
-	};
-
-	Handler.insertMany = async function (database, colName, data) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.insertMany(data);
-	};
-
-	Handler.insertOne = async function (database, colName, data) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.insertOne(data);
-	};
-
-	Handler.getFileFromGridFS = function (database, collection, filename) {
-		return Handler.getFileStreamFromGridFS(database, collection, filename).then((file) => {
-			const fileStream = file.stream;
-			return new Promise((resolve) => {
-				const bufs = [];
-				fileStream.on("data", function(d) {
-					bufs.push(d);
-				});
-
-				fileStream.on("end", function() {
-					resolve(Buffer.concat(bufs));
-				});
-			});
-		});
-	};
-
-	Handler.storeFileInGridFS = function (database, collection, filename, buffer) {
-		return getGridFSBucket(database, collection).then(bucket => {
-			return new Promise(function(resolve, reject) {
-				try {
-					const stream = new PassThrough();
-					stream
-						.pipe(bucket.openUploadStream(filename))
-						.on("error", function(error) {
-							reject(error);
-						})
-						.on("finish", function() {
-							resolve(filename);
-						});
-
-					stream.end(buffer);
-
-				} catch (e) {
-					reject(e);
-				}
-			});
-		});
-	};
-
-	Handler.indexExists = async (database, colName, index) => {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.indexExists(index);
-	};
-
 	Handler.createIndex = async (database, colName, indexDef, { runInBackground } = {}) => {
 		const collection = await Handler.getCollection(database, colName);
 		const options = runInBackground ? { background: true } : undefined;

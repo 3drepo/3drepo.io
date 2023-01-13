@@ -189,6 +189,11 @@ DBHandler.insertMany = async (database, colName, data) => {
 	await collection.insertMany(data);
 };
 
+DBHandler.bulkWrite = async (database, colName, instructions) => {
+	const collection = await getCollection(database, colName);
+	await collection.bulkWrite(instructions);
+};
+
 DBHandler.findOneAndUpdate = async (database, colName, query, action, projection) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection });
@@ -266,6 +271,7 @@ DBHandler.storeFileInGridFS = async (database, collection, filename, buffer) => 
 			stream.end(buffer);
 		} catch (e) {
 		/* istanbul ignore next */
+
 			reject(e);
 		}
 	});
