@@ -58,7 +58,6 @@ export const TeamspaceSelection = (): JSX.Element => {
 				</HomeContent>
 				<DashboardFooter variant="dark" />
 			</ScrollBar>
-			<ModalsDispatcher />
 		</>
 	);
 };
