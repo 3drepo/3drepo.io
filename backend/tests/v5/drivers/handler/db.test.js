@@ -18,14 +18,20 @@
 const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
-const { determineTestGroup, generateRandomString, generateUserCredentials, db } = require('../../helper/services');
+const {
+	determineTestGroup,
+	generateRandomBuffer,
+	generateRandomString,
+	generateUserCredentials,
+	db,
+} = require('../../helper/services');
 
 const DB = require(`${src}/handler/db`);
 const { ADMIN_DB } = require(`${src}/handler/db.constants`);
 const { USERS_COL } = require(`${src}/models/users.constants`);
 const { DEFAULT: DEFAULT_ROLE } = require(`${src}/models/roles.constants`);
 const config = require(`${src}/utils/config`);
-// const { templates } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const generateBSONData = (nDocs = 1, prop = generateRandomString()) => times(nDocs, (n) => ({
 	_id: generateRandomString(), n, [prop]: generateRandomString() }));
@@ -453,6 +459,27 @@ const testDeleteOne = () => {
 	});
 };
 
+const testGridFS = () => {
+	describe('GridFS', () => {
+		test('Should store and get the file successfully', async () => {
+			const buffer = generateRandomBuffer();
+			const database = generateRandomString();
+			const collection = generateRandomString();
+			const filename = generateRandomString();
+			await expect(DB.storeFileInGridFS(database, collection, filename, buffer)).resolves.toEqual(filename);
+			const resFile = await DB.getFileFromGridFS(database, collection, filename);
+			expect(resFile).toEqual(buffer);
+		});
+
+		test('Should fail to fetch a file that doesn\'t exist', async () => {
+			const database = generateRandomString();
+			const collection = generateRandomString();
+			const filename = generateRandomString();
+			await expect(DB.getFileFromGridFS(database, collection, filename)).rejects.toEqual(templates.fileNotFound);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -468,4 +495,5 @@ describe(determineTestGroup(__filename), () => {
 	testFindOneAndDelete();
 	testDeleteMany();
 	testDeleteOne();
+	testGridFS();
 });

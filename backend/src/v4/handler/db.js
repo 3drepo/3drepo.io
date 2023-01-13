@@ -24,7 +24,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
-	const responseCodes = require("../response_codes");
 
 	async function getGridFSBucket(database, collection, chunksize = null) {
 		try {
@@ -132,17 +131,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		}).catch(err => {
 			Handler.disconnect();
 			return Promise.reject(err);
-		});
-	};
-
-	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
-		return getGridFSBucket(database,collection).then((bucket) => {
-			return bucket.find({filename}).toArray().then(file => {
-				if(file.length === 0) {
-					return Promise.reject(responseCodes.NO_FILE_FOUND);
-				}
-				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
-			});
 		});
 	};
 

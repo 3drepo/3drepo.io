@@ -16,10 +16,12 @@
  */
 
 const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require('../models/roles.constants');
+const { GridFSBucket, MongoClient } = require('mongodb');
 const { ADMIN_DB } = require('./db.constants');
-const { MongoClient } = require('mongodb');
+const { PassThrough } = require('stream');
 const config = require('../utils/config');
 const { deleteIfUndefined } = require('../utils/helper/objects');
+const { templates } = require('../utils/responseCodes');
 
 let dbConn;
 let defaultRoleProm;
@@ -209,6 +211,64 @@ DBHandler.deleteMany = async (database, colName, query) => {
 DBHandler.deleteOne = async (database, colName, query) => {
 	const collection = await getCollection(database, colName);
 	await collection.deleteOne(query);
+};
+
+const getGridFSBucket = async (database, collection, chunksize) => {
+	try {
+		const db = await getDB(database);
+		const options = deleteIfUndefined({ bucketName: collection, chunksize });
+		return new GridFSBucket(db, options);
+	} catch (err) {
+		/* istanbul ignore next */
+		DBHandler.disconnect();
+		/* istanbul ignore next */
+		throw err;
+	}
+};
+DBHandler.getFileStreamFromGridFS = async (database, collection, filename) => {
+	const bucket = await getGridFSBucket(database, collection);
+	const file = await bucket.find({ filename }).toArray();
+	if (file.length === 0) {
+		throw templates.fileNotFound;
+	}
+
+	return { stream: bucket.openDownloadStream(file[0]._id), size: file[0].length };
+};
+
+DBHandler.getFileFromGridFS = async (database, collection, filename) => {
+	const { stream } = await DBHandler.getFileStreamFromGridFS(database, collection, filename);
+	return new Promise((resolve) => {
+		const bufs = [];
+		stream.on('data', (d) => {
+			bufs.push(d);
+		});
+
+		stream.on('end', () => {
+			resolve(Buffer.concat(bufs));
+		});
+	});
+};
+
+DBHandler.storeFileInGridFS = async (database, collection, filename, buffer) => {
+	const bucket = await getGridFSBucket(database, collection);
+	return new Promise((resolve, reject) => {
+		try {
+			const stream = new PassThrough();
+			stream
+				.pipe(bucket.openUploadStream(filename))
+				.on('error', /* istanbul ignore next */(error) => {
+					reject(error);
+				})
+				.on('finish', () => {
+					resolve(filename);
+				});
+
+			stream.end(buffer);
+		} catch (e) {
+		/* istanbul ignore next */
+			reject(e);
+		}
+	});
 };
 
 module.exports = DBHandler;
