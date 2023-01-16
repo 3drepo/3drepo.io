@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { TextField } from './baseCalendarPicker.styles';
 import { formatDayOfWeek } from '../dateFormatHelper';
+import { formatMessage } from '@/v5/services/intl';
 
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
@@ -31,6 +32,7 @@ export const BaseCalendarPicker = ({
 	PickerComponent,
 	helperText,
 	error,
+	value = null,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -43,6 +45,7 @@ export const BaseCalendarPicker = ({
 	return (
 		<PickerComponent
 			{...props}
+			value={value}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
@@ -55,20 +58,24 @@ export const BaseCalendarPicker = ({
 			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
 			renderInput={({ ref, inputRef, ...textFieldProps }) => (
-				<TextField
-					{...textFieldProps}
-					ref={inputRef}
-					inputRef={inputRef}
-					onClick={handleClick}
-					onKeyDown={(e) => e.preventDefault()}
-					error={error}
-					helperText={helperText}
-					inputProps={{
-						...textFieldProps.inputProps,
-						placeholder: ' ',
-					}}
-				/>
-			)}
+					<TextField
+						{...textFieldProps}
+						ref={inputRef}
+						inputRef={inputRef}
+						onClick={handleClick}
+						onKeyDown={(e) => e.preventDefault()}
+						error={error}
+						helperText={helperText}
+						inputProps={{
+							...textFieldProps.inputProps,
+							placeholder: formatMessage({
+								id: 'calendarPicker.placeholder',
+								defaultMessage: 'Choose a date'
+							}),
+						}}
+					/>
+				);
+			}
 		/>
 	);
 };
