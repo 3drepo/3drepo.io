@@ -35,7 +35,7 @@ export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 export const openHandler = (state, { modalType, props }: OpenAction) => {
 	// avoid opening 2+ redirect modals
 	const currentErrorIsPathNotFound = isPathNotFound(props.error);
-	const pathNotFoundErrorAlreadyExists = state.dialogs.find(dialog => isPathNotFound(dialog.props.error));
+	const pathNotFoundErrorAlreadyExists = state.dialogs.find((dialog) => isPathNotFound(dialog.props.error));
 	if (currentErrorIsPathNotFound && pathNotFoundErrorAlreadyExists) return;
 
 	const dialog = {
