@@ -124,18 +124,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		});
 	};
 
-	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
-		const collection = await Handler.getCollection(database, colName);
-		const options = upsert ? { upsert } : undefined;
-		return collection.updateMany(query, data, options);
-	};
-
-	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
-		const collection = await Handler.getCollection(database, colName);
-		const options = upsert ? { upsert } : undefined;
-		return collection.updateOne(query, data, options);
-	};
-
 	Handler.replaceOne = async function (database, colName, query, data) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.replaceOne(query, data);

@@ -205,6 +205,89 @@ const testInsertMany = () => {
 	});
 };
 
+const testUpdateMany = () => {
+	describe('Update Many', () => {
+		const db = generateRandomString();
+		const collection = generateRandomString();
+		const docs = generateBSONData(10);
+
+		beforeAll(() => DB.insertMany(db, collection, docs));
+
+		test('Should perform an insert if upsert is set to true and the document doesn\'t exist', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.updateMany(database, col, {}, { $set: update }, true)).resolves.toBeUndefined();
+			const res = await DB.find(database, col, {});
+
+			expect(res.length).toEqual(1);
+			expect(res[0]).toEqual(expect.objectContaining(update));
+		});
+
+		test('Should update nothing if upsert is not set and the document doesn\'t exist', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.updateMany(database, col, {}, { $set: update })).resolves.toBeUndefined();
+			await expect(DB.find(database, col, {})).resolves.toEqual([]);
+		});
+
+		test('Should update all satisfying documents', async () => {
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.updateMany(db, collection, { n: { $gt: 5 } }, { $set: update })).resolves.toBeUndefined();
+			const res = await DB.find(db, collection, {});
+
+			const expectedRes = docs.map((doc) => (doc.n > 5 ? { ...doc, ...update } : doc));
+
+			expect(res.length).toEqual(expectedRes.length);
+			expect(res).toEqual(expect.arrayContaining(expectedRes));
+		});
+	});
+};
+
+const testUpdateOne = () => {
+	describe('Update One', () => {
+		const db = generateRandomString();
+		const collection = generateRandomString();
+		const docs = generateBSONData(10);
+
+		beforeAll(() => DB.insertMany(db, collection, docs));
+
+		test('Should perform an insert if upsert is set to true and the document doesn\'t exist', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.updateOne(database, col, {}, { $set: update }, true)).resolves.toBeUndefined();
+			const res = await DB.find(database, col, {});
+
+			expect(res.length).toEqual(1);
+			expect(res[0]).toEqual(expect.objectContaining(update));
+		});
+
+		test('Should update nothing if upsert is not set and the document doesn\'t exist', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.updateOne(database, col, {}, { $set: update })).resolves.toBeUndefined();
+			await expect(DB.find(database, col, {})).resolves.toEqual([]);
+		});
+
+		test('Should update one satisfying document', async () => {
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.updateOne(db, collection, { n: { $gt: 5 } }, { $set: update })).resolves.toBeUndefined();
+			const res = await DB.find(db, collection, update);
+
+			expect(res.length).toBe(1);
+		});
+	});
+};
+
 const testAggregate = () => {
 	describe('Aggregate', () => {
 		const data = generateBSONData(10);
@@ -778,6 +861,8 @@ describe(determineTestGroup(__filename), () => {
 	testDropCollection();
 	testInsertOne();
 	testInsertMany();
+	testUpdateMany();
+	testUpdateOne();
 	testBulkWrite();
 	testAggregate();
 	testFind();

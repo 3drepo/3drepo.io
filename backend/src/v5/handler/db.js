@@ -189,6 +189,16 @@ DBHandler.insertMany = async (database, colName, data) => {
 	await collection.insertMany(data);
 };
 
+DBHandler.updateMany = async (database, colName, query, data, upsert = false) => {
+	const collection = await getCollection(database, colName);
+	await collection.updateMany(query, data, { upsert });
+};
+
+DBHandler.updateOne = async (database, colName, query, data, upsert = false) => {
+	const collection = await getCollection(database, colName);
+	await collection.updateOne(query, data, { upsert });
+};
+
 DBHandler.bulkWrite = async (database, colName, instructions) => {
 	const collection = await getCollection(database, colName);
 	await collection.bulkWrite(instructions);
