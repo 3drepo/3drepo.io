@@ -39,7 +39,7 @@ export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists
 export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
 
-export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith("NOT_FOUND");
+export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith('NOT_FOUND');
 
-export const isProjectNotFound = (code: string): boolean => code === "PROJECT_NOT_FOUND";
-export const isResourceNotFound = (code: string): boolean => code === "RESOURCE_NOT_FOUND";
+export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
+export const isResourceNotFound = (code: string): boolean => code === 'RESOURCE_NOT_FOUND';
