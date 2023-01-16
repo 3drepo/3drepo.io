@@ -23,24 +23,26 @@ const {
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
-	db,
+	db: dbHelper,
 } = require('../../helper/services');
 
 const DB = require(`${src}/handler/db`);
 const { ADMIN_DB } = require(`${src}/handler/db.constants`);
 const { USERS_COL } = require(`${src}/models/users.constants`);
-const { DEFAULT: DEFAULT_ROLE } = require(`${src}/models/roles.constants`);
+const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require(`${src}/models/roles.constants`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const generateBSONData = (nDocs = 1, prop = generateRandomString()) => times(nDocs, (n) => ({
 	_id: generateRandomString(), n, [prop]: generateRandomString() }));
 
+const DEFAULT_ROLE_ENTRY = { db: ADMIN_DB, role: DEFAULT_ROLE };
+
 const testAuthenticate = () => {
 	describe('Authenticate', () => {
 		const user = generateUserCredentials();
 		beforeAll(async () => {
-			await db.createUser(user);
+			await dbHelper.createUser(user);
 		});
 
 		const testCases = [
@@ -113,7 +115,7 @@ const testCreateUser = () => {
 				expect(user).toEqual(expect.objectContaining({
 					customData, user: username }));
 
-				const expectedRoles = [...(roles ?? []), { db: ADMIN_DB, role: DEFAULT_ROLE }];
+				const expectedRoles = [...(roles ?? []), DEFAULT_ROLE_ENTRY];
 				expect(user.roles.length).toEqual(expectedRoles.length);
 				expect(user.roles).toEqual(expect.arrayContaining(expectedRoles));
 			} else {
@@ -592,7 +594,7 @@ const testListDatabases = () => {
 	describe('List databases', () => {
 		const databaseList = times(10, () => generateRandomString());
 		beforeAll(async () => {
-			await db.reset();
+			await dbHelper.reset();
 			await Promise.all(databaseList.map(
 				(dbName) => DB.insertOne(dbName, generateRandomString(), generateBSONData(1)[0]),
 			));
@@ -610,7 +612,7 @@ const testListCollections = () => {
 		const dbName = generateRandomString();
 		const collectionList = times(10, () => generateRandomString());
 		beforeAll(async () => {
-			await db.reset();
+			await dbHelper.reset();
 			await Promise.all(collectionList.map(
 				(colName) => DB.insertOne(dbName, colName, generateBSONData(1)[0]),
 			));
@@ -645,6 +647,103 @@ const testDropDatabase = () => {
 	});
 };
 
+const testCreateRole = () => {
+	describe('Create role', () => {
+		const findRole = (db, role) => DB.findOne(ADMIN_DB, ROLES_COL, { role, db });
+		test('Should create the role specified', async () => {
+			const db = generateRandomString();
+			const roleName = generateRandomString();
+
+			await expect(DB.createRole(db, roleName)).resolves.toBeUndefined();
+
+			await expect(findRole(db, roleName)).resolves.toEqual(
+				expect.objectContaining({ role: roleName, db, privileges: [], roles: [] }),
+			);
+		});
+	});
+};
+
+const testDropRole = () => {
+	describe('Drop role', () => {
+		const findRole = (db, role) => DB.findOne(ADMIN_DB, ROLES_COL, { role, db });
+		const existingRole = { db: generateRandomString(), name: generateRandomString() };
+		beforeAll(() => DB.createRole(existingRole.db, existingRole.name));
+		test('Should drop the role specified', async () => {
+			await expect(DB.dropRole(existingRole.db, existingRole.name)).resolves.toBeUndefined();
+
+			await expect(findRole(existingRole.db, existingRole.name)).resolves.toEqual(null);
+		});
+
+		test('Should fail if the role never existed', async () => {
+			await expect(DB.dropRole(ADMIN_DB, generateRandomString())).rejects.not.toBeUndefined();
+		});
+	});
+};
+
+const testGrantRole = () => {
+	describe('Grant role', () => {
+		const role = { db: generateRandomString(), name: generateRandomString() };
+
+		const userWithRole = generateUserCredentials();
+		const userWithoutRole = generateUserCredentials();
+
+		const getUser = (user) => DB.findOne(ADMIN_DB, USERS_COL, { user }, { roles: 1, _id: 0 });
+		beforeAll(async () => {
+			await Promise.all([
+				DB.createRole(role.db, role.name),
+				dbHelper.createUser(userWithRole),
+				dbHelper.createUser(userWithoutRole),
+			]);
+		});
+		test('should grant the role specified to the user', async () => {
+			await expect(DB.grantRole(role.db, role.name, userWithoutRole.user)).resolves.toBeUndefined();
+			const { roles: resRoles } = await getUser(userWithoutRole.user);
+			expect(resRoles).toEqual(expect.arrayContaining([{ db: role.db, role: role.name }, DEFAULT_ROLE_ENTRY]));
+
+			// Doing it again should not cause failure
+			await expect(DB.grantRole(role.db, role.name, userWithRole.user)).resolves.toBeUndefined();
+		});
+
+		test('should fail if the role doesn\'t exist', async () => {
+			await expect(DB.grantRole(role.db, generateRandomString(), userWithoutRole.user))
+				.rejects.not.toBeUndefined();
+		});
+	});
+};
+
+const testRevokeRole = () => {
+	describe('Revoke role', () => {
+		const role = { db: generateRandomString(), name: generateRandomString() };
+
+		const userWithRole = generateUserCredentials();
+
+		const getUser = (user) => DB.findOne(ADMIN_DB, USERS_COL, { user }, { roles: 1, _id: 0 });
+		beforeAll(async () => {
+			await Promise.all([
+				DB.createRole(role.db, role.name),
+				dbHelper.createUser(userWithRole),
+			]);
+
+			await DB.grantRole(role.db, role.name, userWithRole.user);
+		});
+		test('should revoke the role from the user', async () => {
+			await expect(DB.revokeRole(role.db, role.name, userWithRole.user)).resolves.toBeUndefined();
+			const { roles: resRoles } = await getUser(userWithRole.user);
+			expect(resRoles).not.toEqual(
+				expect.arrayContaining([{ db: role.db, role: role.name }, DEFAULT_ROLE_ENTRY]),
+			);
+
+			// Doing it again should not cause failure
+			await expect(DB.revokeRole(role.db, role.name, userWithRole.user)).resolves.toBeUndefined();
+		});
+
+		test('should fail if the role doesn\'t exist', async () => {
+			await expect(DB.revokeRole(role.db, generateRandomString(), userWithRole.user))
+				.rejects.not.toBeUndefined();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -666,4 +765,8 @@ describe(determineTestGroup(__filename), () => {
 	testListDatabases();
 	testListCollections();
 	testDropDatabase();
+	testCreateRole();
+	testDropRole();
+	testGrantRole();
+	testRevokeRole();
 });

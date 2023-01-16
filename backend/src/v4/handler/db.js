@@ -20,7 +20,6 @@ const { v5Path } = require("../../interop");
 const HandlerV5 = require(`${v5Path}/handler/db`);
 (function() {
 	const config	  = require("../config.js");
-	const C = require("../constants");
 	const MongoClient = require("mongodb").MongoClient;
 
 	function getHostPorts() {
@@ -71,11 +70,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 			db.close();
 			db = null;
 		}
-	};
-
-	const dropAllIndicies = async (database, colName) => {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.dropIndexes();
 	};
 
 	Handler.dropCollection = async (database, collection) => HandlerV5.dropCollection(database, collection.name ?? collection);
@@ -161,40 +155,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);
-	};
-
-	let defaultRoleProm;
-
-	const ensureDefaultRoleExists = async () => {
-		if(!defaultRoleProm) {
-
-			const createDefaultRole = async () => {
-
-				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_ROLE_OBJ.role}` });
-
-				if (!roleFound) {
-					const createRoleCmd = { createRole: C.DEFAULT_ROLE_OBJ.role, privileges: [], roles: [] };
-					await Handler.runCommand("admin", createRoleCmd);
-				}
-			};
-
-			defaultRoleProm = createDefaultRole();
-		}
-		return defaultRoleProm;
-	};
-
-	Handler.reset = () => {
-		defaultRoleProm = null;
-	};
-
-	Handler.createUser = async function (username, password, customData, roles = []) {
-		const [adminDB] = await Promise.all([
-			Handler.getAuthDB(),
-			ensureDefaultRoleExists()
-		]);
-
-		roles.push(C.DEFAULT_ROLE_OBJ);
-		await adminDB.addUser(username, password, { customData, roles});
 	};
 
 	Handler.dropUser = async (user) => {

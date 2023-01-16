@@ -113,8 +113,7 @@ const ensureDefaultRoleExists = () => {
 			const roleFound = await DBHandler.findOne(ADMIN_DB, ROLES_COL, { _id: `${ADMIN_DB}.${DEFAULT_ROLE}` }, { _id: 1 });
 
 			if (!roleFound) {
-				const createRoleCmd = { createRole: DEFAULT_ROLE, privileges: [], roles: [] };
-				await runCommand(ADMIN_DB, createRoleCmd);
+				await DBHandler.createRole(ADMIN_DB, DEFAULT_ROLE);
 			}
 		};
 
@@ -337,6 +336,45 @@ DBHandler.dropDatabase = async (database) => {
 			}
 		}
 	}
+};
+
+DBHandler.createRole = async (database, roleName) => {
+	// At application level, roles are only used in a contextual way.
+	// We should never be in a situation where we want to create a role
+	// that has actual mongo level privileges
+	const createRoleCmd = {
+		createRole: roleName,
+		privileges: [],
+		roles: [],
+	};
+
+	await runCommand(database, createRoleCmd);
+};
+
+DBHandler.dropRole = async (database, roleName) => {
+	const dropRoleCmd = {
+		dropRole: roleName,
+	};
+
+	await runCommand(database, dropRoleCmd);
+};
+
+DBHandler.grantRole = async (db, role, user) => {
+	const grantRoleCmd = {
+		grantRolesToUser: user,
+		roles: [{ role, db }],
+	};
+
+	await runCommand(ADMIN_DB, grantRoleCmd);
+};
+
+DBHandler.revokeRole = async (db, role, user) => {
+	const revokeRoleCmd = {
+		revokeRolesFromUser: user,
+		roles: [{ role, db }],
+	};
+
+	await runCommand(ADMIN_DB, revokeRoleCmd);
 };
 
 module.exports = DBHandler;
