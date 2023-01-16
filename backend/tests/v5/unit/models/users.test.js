@@ -534,14 +534,14 @@ const testGrantTeamspacePermissionToUser = () => {
 
 const testRemoveUser = () => {
 	describe('Drop user', () => {
-		test('Should call dropUser to remove the user from the database', async () => {
-			const fn = jest.spyOn(db, 'dropUser').mockResolvedValueOnce(undefined);
+		test('Should call deleteOne to remove the user from the database', async () => {
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValueOnce(undefined);
 
 			const username = generateRandomString();
 			await expect(User.removeUser(username)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(username);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, userCol, { user: username });
 		});
 	});
 };

@@ -288,6 +288,35 @@ const testUpdateOne = () => {
 	});
 };
 
+const testReplaceOne = () => {
+	describe('Replace One', () => {
+		const db = generateRandomString();
+		const collection = generateRandomString();
+		const docs = generateBSONData(10);
+
+		beforeAll(() => DB.insertMany(db, collection, docs));
+
+		test('Should replace nothing if matching the document doesn\'t exist', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.replaceOne(database, col, {}, update)).resolves.toBeUndefined();
+			await expect(DB.find(database, col, {})).resolves.toEqual([]);
+		});
+
+		test('Should replace one satisfying document', async () => {
+			const update = { [generateRandomString()]: generateRandomString() };
+
+			await expect(DB.replaceOne(db, collection, { n: { $gt: 5 } }, update)).resolves.toBeUndefined();
+			const res = await DB.find(db, collection, update);
+
+			expect(res.length).toBe(1);
+			expect(Object.keys(res[0]).length).toBe(2); // should've wiped out anything that is not _id or on the update
+		});
+	});
+};
+
 const testAggregate = () => {
 	describe('Aggregate', () => {
 		const data = generateBSONData(10);
@@ -540,6 +569,33 @@ const testDeleteOne = () => {
 
 		test('Should return empty array if database doesn\'t exist', async () => {
 			await expect(DB.deleteOne(generateRandomString(), col, { })).resolves.toBeUndefined();
+		});
+	});
+};
+
+const testCount = () => {
+	describe('Count', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should return correct count', async () => {
+			await expect(DB.count(dbName, col, { })).resolves.toBe(data.length);
+		});
+
+		test('Should return correct count (with query)', async () => {
+			await expect(DB.count(dbName, col, { n: { $lt: 5 } })).resolves.toBe(data.length / 2);
+		});
+
+		test('Should return 0 if the collection does not exist', async () => {
+			await expect(DB.count(dbName, generateRandomString(), { })).resolves.toBe(0);
+		});
+
+		test('Should return 0 if the database does not exist', async () => {
+			await expect(DB.count(generateRandomString(), generateRandomString(), { })).resolves.toBe(0);
 		});
 	});
 };
@@ -845,14 +901,6 @@ const testSetPassword = () => {
 	});
 };
 
-const testGetSessionStore = () => {
-	describe('Get Session Store', () => {
-		test('Should succeed', async () => {
-			await expect(DB.getSessionStore()).resolves.not.toBeUndefined();
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -863,6 +911,7 @@ describe(determineTestGroup(__filename), () => {
 	testInsertMany();
 	testUpdateMany();
 	testUpdateOne();
+	testReplaceOne();
 	testBulkWrite();
 	testAggregate();
 	testFind();
@@ -871,6 +920,7 @@ describe(determineTestGroup(__filename), () => {
 	testFindOneAndDelete();
 	testDeleteMany();
 	testDeleteOne();
+	testCount();
 	testGridFS();
 	testIndices();
 	testListDatabases();
@@ -881,5 +931,4 @@ describe(determineTestGroup(__filename), () => {
 	testGrantRole();
 	testRevokeRole();
 	testSetPassword();
-	testGetSessionStore();
 });

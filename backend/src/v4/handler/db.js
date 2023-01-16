@@ -124,22 +124,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		});
 	};
 
-	Handler.replaceOne = async function (database, colName, query, data) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.replaceOne(query, data);
-	};
-
-	Handler.count = async function (database, colName, query, options) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.countDocuments(query, options);
-	};
-
-	Handler.dropUser = async (user) => {
-		await Handler.deleteOne("admin", "system.users", { user });
-	};
-
-	Handler.INTERNAL_DB = "internal";
-
 	module.exports = Handler;
 }());
 

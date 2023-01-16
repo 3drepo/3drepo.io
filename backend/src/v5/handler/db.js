@@ -199,6 +199,11 @@ DBHandler.updateOne = async (database, colName, query, data, upsert = false) => 
 	await collection.updateOne(query, data, { upsert });
 };
 
+DBHandler.replaceOne = async (database, colName, query, data) => {
+	const collection = await getCollection(database, colName);
+	await collection.replaceOne(query, data);
+};
+
 DBHandler.bulkWrite = async (database, colName, instructions) => {
 	const collection = await getCollection(database, colName);
 	await collection.bulkWrite(instructions);
@@ -226,6 +231,11 @@ DBHandler.deleteMany = async (database, colName, query) => {
 DBHandler.deleteOne = async (database, colName, query) => {
 	const collection = await getCollection(database, colName);
 	await collection.deleteOne(query);
+};
+
+DBHandler.count = async (database, colName, query, options) => {
+	const collection = await getCollection(database, colName);
+	return collection.countDocuments(query, options);
 };
 
 const getGridFSBucket = async (database, collection, chunksize) => {
@@ -397,7 +407,7 @@ DBHandler.setPassword = async (user, newPassword) => {
 	await runCommand(ADMIN_DB, updateUserCmd);
 };
 
-DBHandler.getSessionStore = () => {
+DBHandler.getSessionStore = /* istanbul ignore next */() => {
 	const sessionStore = MongoStore.create({
 		clientPromise: connect(),
 		dbName: 'admin',
