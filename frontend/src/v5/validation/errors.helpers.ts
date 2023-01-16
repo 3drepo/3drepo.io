@@ -41,6 +41,5 @@ export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(
 
 export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith("NOT_FOUND");
 
-export const isTeamspaceNotFound = (code: string): boolean => code === "TEAMSPACE_NOT_FOUND";
 export const isProjectNotFound = (code: string): boolean => code === "PROJECT_NOT_FOUND";
 export const isResourceNotFound = (code: string): boolean => code === "RESOURCE_NOT_FOUND";
