@@ -1030,8 +1030,9 @@ export const theme = createTheme({
 			styleOverrides: {
 				contained: {
 					position: 'absolute',
-					bottom: -18,
 					margin: 0,
+					top: 55,
+					lineHeight: '12px',
 				},
 			},
 		},
