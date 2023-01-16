@@ -124,17 +124,6 @@ const HandlerV5 = require(`${v5Path}/handler/db`);
 		});
 	};
 
-	Handler.getSessionStore = () => {
-		const MongoStore = require("connect-mongo");
-		const sessionStore = MongoStore.create({
-			clientPromise: connect(),
-			dbName: "admin",
-			collectionName: "sessions",
-			stringify: false
-		});
-		return Promise.resolve(sessionStore);
-	};
-
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;

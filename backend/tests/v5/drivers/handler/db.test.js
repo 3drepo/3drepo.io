@@ -762,6 +762,14 @@ const testSetPassword = () => {
 	});
 };
 
+const testGetSessionStore = () => {
+	describe('Get Session Store', () => {
+		test('Should succeed', async () => {
+			await expect(DB.getSessionStore()).resolves.not.toBeUndefined();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -788,4 +796,5 @@ describe(determineTestGroup(__filename), () => {
 	testGrantRole();
 	testRevokeRole();
 	testSetPassword();
+	testGetSessionStore();
 });

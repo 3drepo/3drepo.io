@@ -18,6 +18,7 @@
 const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require('../models/roles.constants');
 const { GridFSBucket, MongoClient } = require('mongodb');
 const { ADMIN_DB } = require('./db.constants');
+const MongoStore = require('connect-mongo');
 const { PassThrough } = require('stream');
 const config = require('../utils/config');
 const { deleteIfUndefined } = require('../utils/helper/objects');
@@ -374,7 +375,7 @@ DBHandler.revokeRole = async (db, role, user) => {
 		roles: [{ role, db }],
 	};
 
-	await runCommand(db, revokeRoleCmd);
+	await runCommand(ADMIN_DB, revokeRoleCmd);
 };
 
 DBHandler.setPassword = async (user, newPassword) => {
@@ -384,6 +385,16 @@ DBHandler.setPassword = async (user, newPassword) => {
 	};
 
 	await runCommand(ADMIN_DB, updateUserCmd);
+};
+
+DBHandler.getSessionStore = () => {
+	const sessionStore = MongoStore.create({
+		clientPromise: connect(),
+		dbName: 'admin',
+		collectionName: 'sessions',
+		stringify: false,
+	});
+	return Promise.resolve(sessionStore);
 };
 
 module.exports = DBHandler;
