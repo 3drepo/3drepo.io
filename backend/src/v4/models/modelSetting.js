@@ -188,7 +188,7 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 
 	if (data.subModels) {
 		setting.federate = true;
-		setting.subModels = data.subModels;
+		// setting.subModels = data.subModels;
 	}
 
 	if (data.surveyPoints) {
@@ -401,15 +401,6 @@ ModelSetting.setCorrelationId = async function(account, model, correlationId, ad
 	systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
 
 	return correlationId;
-};
-
-ModelSetting.updateSubModels = async function(account, model, subModels) {
-	const data = {
-		subModels,
-		timestamp: new Date()
-	};
-
-	return ModelSetting.updateModelSetting(account, model, data);
 };
 
 ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
