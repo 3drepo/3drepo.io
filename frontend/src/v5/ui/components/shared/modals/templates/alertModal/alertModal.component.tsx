@@ -19,7 +19,7 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import { DialogContainer, Actions, Details, Status, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 import { AxiosError } from 'axios';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isProjectNotFound, isResourceNotFound, isTeamspaceNotFound } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -44,23 +44,23 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const pathNotFound = isPathNotFound(error);
 
 	const getSafePath = () => {
-		if (isTeamspaceNotFound(code)) return generatePath(DASHBOARD_ROUTE);
-		if (isProjectNotFound(code)) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
 		if (isResourceNotFound(code)) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
+		if (isProjectNotFound(code)) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
+		// Teamspace not found
+		return generatePath(DASHBOARD_ROUTE);
 	};
 
 	const getSafePathName = () => {
-		if (isTeamspaceNotFound(code)) {
-			return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
+		if (isResourceNotFound(code)) {
+			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
 		}
 		if (isProjectNotFound(code)) {
 			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
 		}
-		if (isResourceNotFound(code)) {
-			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
-		}
+		// teamspace not found
+		return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
 	};
-	
+
 	const redirectToSafePath = () => {
 		const path = getSafePath();
 		history.push(path);
