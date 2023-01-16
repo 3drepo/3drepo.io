@@ -288,13 +288,14 @@ const testUpdatePassword = () => {
 	describe('Update user password', () => {
 		test('should update a user password', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const fn2 = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
-			const newPassword = 1234;
-			await expect(User.updatePassword('user 1', newPassword)).resolves.toBeUndefined();
+			const fn2 = jest.spyOn(db, 'setPassword').mockImplementation(() => { });
+			const user = generateRandomString();
+			const newPassword = generateRandomString();
+			await expect(User.updatePassword(user, newPassword)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({ $unset: { 'customData.resetPasswordToken': 1 } });
-			expect(fn2.mock.calls.length).toBe(1);
-			expect(fn2.mock.calls[0][1]).toEqual({ updateUser: 'user 1', pwd: 1234 });
+			expect(fn2).toHaveBeenCalledTimes(1);
+			expect(fn2).toHaveBeenCalledWith(user, newPassword);
 		});
 	});
 };
@@ -567,7 +568,7 @@ const testUnlinkFromSso = () => {
 	describe('Unlink user from SSO', () => {
 		test('Should unlink user from SSO', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const fn2 = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			const fn2 = jest.spyOn(db, 'setPassword').mockImplementation(() => { });
 			const username = generateRandomString();
 			const password = generateRandomString();
 			await User.unlinkFromSso(username, password);
@@ -576,7 +577,7 @@ const testUnlinkFromSso = () => {
 			expect(fn).toHaveBeenNthCalledWith(1, 'admin', 'system.users', { user: username }, { $unset: { 'customData.sso': 1 } });
 			expect(fn).toHaveBeenNthCalledWith(2, 'admin', 'system.users', { user: username }, { $unset: { 'customData.resetPasswordToken': 1 } });
 			expect(fn2).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledWith('admin', { updateUser: username, pwd: password });
+			expect(fn2).toHaveBeenCalledWith(username, password);
 		});
 	});
 };

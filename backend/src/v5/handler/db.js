@@ -374,7 +374,16 @@ DBHandler.revokeRole = async (db, role, user) => {
 		roles: [{ role, db }],
 	};
 
-	await runCommand(ADMIN_DB, revokeRoleCmd);
+	await runCommand(db, revokeRoleCmd);
+};
+
+DBHandler.setPassword = async (user, newPassword) => {
+	const updateUserCmd = {
+		updateUser: user,
+		pwd: newPassword,
+	};
+
+	await runCommand(ADMIN_DB, updateUserCmd);
 };
 
 module.exports = DBHandler;

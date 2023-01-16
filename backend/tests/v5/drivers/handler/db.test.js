@@ -744,6 +744,24 @@ const testRevokeRole = () => {
 	});
 };
 
+const testSetPassword = () => {
+	describe('Set Password', () => {
+		const user = generateUserCredentials();
+		beforeAll(() => dbHelper.createUser(user));
+		test('should change the password of the given user successfully', async () => {
+			const newPwd = generateRandomString();
+			await expect(DB.setPassword(user.user, newPwd)).resolves.toBeUndefined();
+
+			await expect(DB.authenticate(user.user, newPwd)).resolves.toBeTruthy();
+		});
+
+		test('should fail if the user doesn\'t exist', async () => {
+			await expect(DB.setPassword(generateRandomString(), generateRandomString()))
+				.rejects.not.toBeUndefined();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -769,4 +787,5 @@ describe(determineTestGroup(__filename), () => {
 	testDropRole();
 	testGrantRole();
 	testRevokeRole();
+	testSetPassword();
 });

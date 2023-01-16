@@ -113,12 +113,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 };
 
 User.updatePassword = async (username, newPassword) => {
-	const updateUserCmd = {
-		updateUser: username,
-		pwd: newPassword,
-	};
-
-	await db.runCommand(USERS_DB_NAME, updateUserCmd);
+	await db.setPassword(username, newPassword);
 	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
@@ -202,7 +197,7 @@ User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(use
 
 User.unlinkFromSso = async (username, newPassword) => {
 	await updateUser(username, { $unset: { 'customData.sso': 1 } });
-	await User.updatePassword(username, newPassword);
+	await User.setPassword(username, newPassword);
 };
 
 User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(username,
