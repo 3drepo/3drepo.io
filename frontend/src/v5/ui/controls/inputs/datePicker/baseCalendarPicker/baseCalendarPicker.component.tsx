@@ -17,9 +17,9 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { FormInputProps } from '@controls/inputs/inputController.component';
+import { formatMessage } from '@/v5/services/intl';
 import { TextField } from './baseCalendarPicker.styles';
 import { formatDayOfWeek } from '../dateFormatHelper';
-import { formatMessage } from '@/v5/services/intl';
 
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
@@ -58,24 +58,23 @@ export const BaseCalendarPicker = ({
 			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
 			renderInput={({ ref, inputRef, ...textFieldProps }) => (
-					<TextField
-						{...textFieldProps}
-						ref={inputRef}
-						inputRef={inputRef}
-						onClick={handleClick}
-						onKeyDown={(e) => e.preventDefault()}
-						error={error}
-						helperText={helperText}
-						inputProps={{
-							...textFieldProps.inputProps,
-							placeholder: formatMessage({
-								id: 'calendarPicker.placeholder',
-								defaultMessage: 'Choose a date'
-							}),
-						}}
-					/>
-				);
-			}
+				<TextField
+					{...textFieldProps}
+					ref={inputRef}
+					inputRef={inputRef}
+					onClick={handleClick}
+					onKeyDown={(e) => e.preventDefault()}
+					error={error}
+					helperText={helperText}
+					inputProps={{
+						...textFieldProps.inputProps,
+						placeholder: formatMessage({
+							id: 'calendarPicker.placeholder',
+							defaultMessage: 'Choose a date',
+						}),
+					}}
+				/>
+			)}
 		/>
 	);
 };
