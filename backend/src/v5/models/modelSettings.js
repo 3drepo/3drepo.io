@@ -149,7 +149,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			 *  containers used to be called models in v4, and models used to be called
 			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
 			 */
-			set.subModels = containers.map(({ project: modelId }) => modelId);
+			// set.subModels = containers.map(({ project: modelId }) => modelId);
 		}
 	} else {
 		set.status = 'failed';
