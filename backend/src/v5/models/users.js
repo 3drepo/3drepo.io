@@ -197,7 +197,7 @@ User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(use
 
 User.unlinkFromSso = async (username, newPassword) => {
 	await updateUser(username, { $unset: { 'customData.sso': 1 } });
-	await User.setPassword(username, newPassword);
+	await User.updatePassword(username, newPassword);
 };
 
 User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(username,

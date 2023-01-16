@@ -18,7 +18,6 @@
 const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require('../models/roles.constants');
 const { GridFSBucket, MongoClient } = require('mongodb');
 const { ADMIN_DB } = require('./db.constants');
-const MongoStore = require('connect-mongo');
 const { PassThrough } = require('stream');
 const config = require('../utils/config');
 const { deleteIfUndefined } = require('../utils/helper/objects');
@@ -408,6 +407,9 @@ DBHandler.setPassword = async (user, newPassword) => {
 };
 
 DBHandler.getSessionStore = /* istanbul ignore next */() => {
+	// For some reason this library is very problematic...
+	// eslint-disable-next-line global-require
+	const MongoStore = require('connect-mongo');
 	const sessionStore = MongoStore.create({
 		clientPromise: connect(),
 		dbName: 'admin',

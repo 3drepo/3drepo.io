@@ -264,20 +264,20 @@ const testAuthenticate = () => {
 		const user = generateRandomString();
 		const pw = generateRandomString();
 		test('should log in successfully with user', async () => {
-			const dbAuthFn = jest.spyOn(db, 'authenticate').mockResolvedValueOnce(undefined);
+			const dbAuthFn = jest.spyOn(db, 'authenticate').mockResolvedValueOnce(true);
 			const res = await User.authenticate(user, pw);
-			expect(res).toEqual({ username: user });
+			expect(res).toBeUndefined();
 
 			expect(dbAuthFn).toHaveBeenCalledTimes(1);
 			expect(dbAuthFn).toHaveBeenCalledWith(user, pw);
 		});
 
 		test('should return error if username is incorrect', async () => {
-			jest.spyOn(db, 'authenticate').mockRejectedValueOnce(templates.incorrectUsernameOrPassword);
+			jest.spyOn(db, 'authenticate').mockResolvedValueOnce(templates.false);
 			await expect(User.authenticate(user, pw)).rejects.toEqual(templates.incorrectUsernameOrPassword);
 		});
 
-		test('should return error if db.authenticate throws a different error', async () => {
+		test('should return error if db.authenticate throws an error', async () => {
 			jest.spyOn(db, 'authenticate').mockRejectedValueOnce(templates.unknown);
 			await expect(User.authenticate(user, pw)).rejects.toEqual(templates.unknown);
 		});

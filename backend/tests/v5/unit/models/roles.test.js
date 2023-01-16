@@ -18,7 +18,6 @@
 const { src } = require('../../helper/path');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
 const { generateRandomString } = require('../../helper/services');
-const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const Roles = require(`${src}/models/roles`);
 const db = require(`${src}/handler/db`);
@@ -58,7 +57,7 @@ const testGrantTeamspaceRoleToUser = () => {
 			const fn = jest.spyOn(db, 'grantRole').mockImplementation(() => { });
 			await Roles.grantTeamspaceRoleToUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, TEAM_MEMBER, username);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER, username);
 		});
 	});
 };
@@ -71,7 +70,7 @@ const testRevokeTeamspaceRoleFromUser = () => {
 			const fn = jest.spyOn(db, 'revokeRole').mockImplementation(() => { });
 			await Roles.revokeTeamspaceRoleFromUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, TEAM_MEMBER, username);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER, username);
 		});
 	});
 };
