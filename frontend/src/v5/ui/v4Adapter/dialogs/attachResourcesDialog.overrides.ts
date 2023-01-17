@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { Header } from '@controls/modal/formModal/formDialog.styles';
+import { Header } from '@controls/headedModal/formModal/formModal.styles';
 import { DialogTabs, NeutralActionButton, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { ResourceIconContainer, IconButton } from '@/v4/routes/components/resources/resources.styles';

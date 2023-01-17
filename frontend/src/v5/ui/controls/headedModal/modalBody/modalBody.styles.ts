@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { FormModal as FormModalBase } from '@controls/headedModal/formModal/formModal.component';
-import { FormDialogContent } from '@controls/headedModal/formModal/formModal.styles';
+import { DialogContent } from '@mui/material';
 
-export const FormModal = styled(FormModalBase)`
-	${FormDialogContent} {
-		padding: 7px 24px 22px;
-	}
+export const FormDialogContent = styled(DialogContent)`
+	padding: 27px 58px 65px;
+	display: block;
+	overflow: visible;
 `;

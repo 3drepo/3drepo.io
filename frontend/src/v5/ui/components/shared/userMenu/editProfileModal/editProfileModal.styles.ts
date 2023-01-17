@@ -18,16 +18,23 @@ import styled, { css } from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
-import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
+import { FormModal as FormModalBase } from '@controls/headedModal/formModal/formModal.component';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { SubmitButton } from '@controls/headedModal/formModal/formModal.styles';
 
-export const FormModal = styled(FormModalBase)`
+export const FormModal = styled(FormModalBase)<{ confirmLabel?: string }>`
 	.MuiDialogContent-root {
 		padding: 0;
 		margin-bottom: 0;
 		min-width: 522px;
 		width: 522px;
 	}
+
+	${({ confirmLabel }) => !confirmLabel && css`
+		${SubmitButton} {
+			display: none;
+		}
+	`}
 `;
 
 export const TruncatableName = styled(Truncate).attrs({

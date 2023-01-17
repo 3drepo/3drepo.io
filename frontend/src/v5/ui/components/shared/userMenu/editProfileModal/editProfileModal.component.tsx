@@ -109,7 +109,6 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 			isValid={getTabSubmitFunction()}
 			isSubmitting={isSubmitting}
 			disableClosing={isSubmitting}
-			hideSubmitButton={activeTab === INTEGRATIONS_TAB}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,15 +16,9 @@
  */
 
 import styled from 'styled-components';
-
 import { Typography } from '@controls/typography';
-import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
-import { DialogActions, DialogContent, IconButton, Paper } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
-
-export const RemoveWhiteCorners = styled(Paper)`
-	background-color: rgba(0, 0, 0, 0);
-`;
 
 export const CloseButton = styled(IconButton)`
 	&& {
@@ -36,15 +30,6 @@ export const CloseButton = styled(IconButton)`
 			stroke: ${({ theme }) => theme.palette.primary.contrast}
 		}
 	}
-`;
-
-export const Form = styled.form`
-	display: flex;
-	flex-direction: column;
-	min-width: 520px;
-
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	border-radius: 15px; /* prevents white pixels in corners */
 `;
 
 export const Header = styled.div`
@@ -71,19 +56,4 @@ export const Subtitle = styled(Typography).attrs({
 })`
 	text-align: left;
 	color: ${({ theme }) => hexToOpacity(theme.palette.secondary.lightest, 60)};
-`;
-
-export const FormDialogContent = styled(DialogContent)`
-	padding: 27px 58px 65px;
-	display: block;
-	overflow: visible;
-`;
-
-export const FormDialogActions = styled(DialogActions)`
-	background: ${({ theme }) => theme.palette.tertiary.lightest};
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
-`;
-
-export const SubmitButton = styled(SubmitButtonBase)`
-	margin: 8px;
 `;

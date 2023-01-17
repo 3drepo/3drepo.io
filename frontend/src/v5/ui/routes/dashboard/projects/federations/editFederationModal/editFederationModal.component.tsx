@@ -22,7 +22,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
-import { IFormModal } from '@controls/modal/formModal/formDialog.component';
+import { IFormModal } from '@controls/headedModal/formModal/formModal.component';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { EditFederation } from './editFederation';
 import { FormModal } from './editFederationModal.styles';
