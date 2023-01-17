@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { Modal } from '@controls/modal';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
@@ -30,10 +29,13 @@ import {
 } from './ticketImageDisplayer.styles';
 
 const LoadedImage = ({ imgSrc }) => {
-	const [showLargePicture, setShowLargePicture] = useState(false);
+	const onClickViewImage = () => DialogsActionsDispatchers.open(Image, {
+		src: imgSrc,
+		alt: formatMessage({ id: 'viewer.cards.ticketImage.largeImage', defaultMessage: 'enlarged image' }),
+	});
 	return (
 		<>
-			<OverlappingContainer onClick={() => setShowLargePicture(true)}>
+			<OverlappingContainer onClick={onClickViewImage}>
 				<Image
 					src={imgSrc}
 					alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
@@ -45,12 +47,6 @@ const LoadedImage = ({ imgSrc }) => {
 					</IconText>
 				</EnlargeContainer>
 			</OverlappingContainer>
-			<Modal open={showLargePicture} onClickClose={() => setShowLargePicture(false)}>
-				<Image
-					src={imgSrc}
-					alt={formatMessage({ id: 'viewer.cards.ticketImage.largeImage', defaultMessage: 'enlarged image' })}
-				/>
-			</Modal>
 		</>
 	);
 };
