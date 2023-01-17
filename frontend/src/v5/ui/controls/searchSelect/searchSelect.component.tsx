@@ -39,7 +39,7 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 		<SearchContextComponent filteringFunction={filterItems} items={children as ReactNode[]}>
 			<SearchContext.Consumer>
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => (
-					<Select {...props}>
+					<Select {...props} MenuProps={{ disableAutoFocusItem: true }}>
 						<SearchInputContainer>
 							<SearchInput
 								placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
