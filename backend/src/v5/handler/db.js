@@ -195,7 +195,8 @@ DBHandler.updateMany = async (database, colName, query, data, upsert = false) =>
 
 DBHandler.updateOne = async (database, colName, query, data, upsert = false) => {
 	const collection = await getCollection(database, colName);
-	await collection.updateOne(query, data, { upsert });
+	const { matchedCount } = await collection.updateOne(query, data, { upsert });
+	return matchedCount > 0;
 };
 
 DBHandler.replaceOne = async (database, colName, query, data) => {

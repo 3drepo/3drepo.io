@@ -261,7 +261,7 @@ const testUpdateOne = () => {
 			const col = generateRandomString();
 			const update = { [generateRandomString()]: generateRandomString() };
 
-			await expect(DB.updateOne(database, col, {}, { $set: update }, true)).resolves.toBeUndefined();
+			await expect(DB.updateOne(database, col, {}, { $set: update }, true)).resolves.toBeFalsy();
 			const res = await DB.find(database, col, {});
 
 			expect(res.length).toEqual(1);
@@ -273,14 +273,14 @@ const testUpdateOne = () => {
 			const col = generateRandomString();
 			const update = { [generateRandomString()]: generateRandomString() };
 
-			await expect(DB.updateOne(database, col, {}, { $set: update })).resolves.toBeUndefined();
+			await expect(DB.updateOne(database, col, {}, { $set: update })).resolves.toBeFalsy();
 			await expect(DB.find(database, col, {})).resolves.toEqual([]);
 		});
 
 		test('Should update one satisfying document', async () => {
 			const update = { [generateRandomString()]: generateRandomString() };
 
-			await expect(DB.updateOne(db, collection, { n: { $gt: 5 } }, { $set: update })).resolves.toBeUndefined();
+			await expect(DB.updateOne(db, collection, { n: { $gt: 5 } }, { $set: update })).resolves.toBeTruthy();
 			const res = await DB.find(db, collection, update);
 
 			expect(res.length).toBe(1);
