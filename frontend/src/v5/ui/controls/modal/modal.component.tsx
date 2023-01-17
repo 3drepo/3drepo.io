@@ -21,14 +21,13 @@ import { CloseButton } from './modal.styles';
 
 interface IModal {
 	onClickClose: () => void;
-	open:boolean;
-	children:any;
+	children: any;
 	className?: string;
 }
 
-export const Modal = ({ onClickClose, open, children, className }: IModal) => (
+export const Modal = ({ onClickClose, children, className }: IModal) => (
 	<Dialog
-		open={open}
+		open
 		onClose={onClickClose}
 		className={className}
 		maxWidth={false}

@@ -38,7 +38,6 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	onClickCancel?: () => void;
 	title?: any;
 	subtitle?: string;
-	open?: boolean;
 	confirmLabel?: string;
 	cancelLabel?: string;
 	isValid?: boolean;
@@ -59,7 +58,6 @@ export const FormModal = (props: IFormModal) => {
 		subtitle,
 		confirmLabel,
 		cancelLabel,
-		open,
 		children,
 		className,
 		isValid = true,
@@ -80,7 +78,7 @@ export const FormModal = (props: IFormModal) => {
 	return (
 		<Dialog
 			onClose={handleClose}
-			open={open}
+			open
 			PaperComponent={RemoveWhiteCorners}
 			className={className}
 			maxWidth={maxWidth}

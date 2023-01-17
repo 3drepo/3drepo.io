@@ -28,7 +28,6 @@ import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledError
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 
 interface CreateProjectModalProps {
-	open: boolean;
 	onClickClose: () => void;
 }
 
@@ -37,7 +36,7 @@ interface IFormInput {
 	teamspace: string;
 }
 
-export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
+export const CreateProjectModal = ({ onClickClose }: CreateProjectModalProps) => {
 	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
@@ -95,7 +94,6 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	return (
 		<FormModal
 			title={formatMessage({ id: 'project.creation.form.title', defaultMessage: 'Create new Project' })}
-			open={open}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'project.creation.form.createButton', defaultMessage: 'Create Project' })}

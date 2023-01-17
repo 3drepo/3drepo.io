@@ -61,7 +61,6 @@ export const EditFederationModal = ({
 
 	return (
 		<FormModal
-			open={openState}
 			title={
 				formatMessage({
 					id: 'modal.editFederation.title',
