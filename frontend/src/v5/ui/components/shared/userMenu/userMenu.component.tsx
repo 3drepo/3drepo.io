@@ -16,9 +16,8 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useState } from 'react';
 
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import TeamspacesIcon from '@assets/icons/filled/teamspaces-filled.svg';
 import VisualSettingsIcon from '@assets/icons/filled/settings-filled.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
@@ -44,71 +43,63 @@ type UserMenuProps = {
 export const UserMenu = ({ user } : UserMenuProps) => {
 	const signOut = () => AuthActionsDispatchers.logout();
 
-	const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+	const onClickEditProfile = () => DialogsActionsDispatchers.open(EditProfileModal, { user });
 
 	return (
-		<>
-			<AvatarContainer>
-				<ActionMenu TriggerButton={<div><Avatar user={user} isButton /></div>}>
-					<ActionMenuSection>
-						<AvatarSection>
-							<Avatar
-								user={user}
-								size="medium"
-							/>
-							<UserFullName>
-								<TruncatableName>{user.firstName}</TruncatableName>
+		<AvatarContainer>
+			<ActionMenu TriggerButton={<div><Avatar user={user} isButton /></div>}>
+				<ActionMenuSection>
+					<AvatarSection>
+						<Avatar
+							user={user}
+							size="medium"
+						/>
+						<UserFullName>
+							<TruncatableName>{user.firstName}</TruncatableName>
 								&nbsp;
-								<TruncatableName>{user.lastName}</TruncatableName>
-							</UserFullName>
-							<UserUserName>{user.username}</UserUserName>
-							<ActionMenuItem>
-								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
-									<FormattedMessage
-										id="userMenu.editYourProfile"
-										defaultMessage="Edit your profile"
-									/>
-								</EditProfileButton>
-							</ActionMenuItem>
-						</AvatarSection>
-					</ActionMenuSection>
-					<ActionMenuSection>
-						<ActionMenuItemLink
-							Icon={TeamspacesIcon}
-							to={DASHBOARD_ROUTE}
-						>
-							<FormattedMessage
-								id="userMenu.teamspaces"
-								defaultMessage="Teamspaces"
-							/>
-						</ActionMenuItemLink>
-						<ActionMenuItemLink
-							Icon={VisualSettingsIcon}
-						>
-							<FormattedMessage
-								id="userMenu.visualSettings"
-								defaultMessage="Visual settings"
-							/>
-						</ActionMenuItemLink>
-					</ActionMenuSection>
-					<ActionMenuSection>
+							<TruncatableName>{user.lastName}</TruncatableName>
+						</UserFullName>
+						<UserUserName>{user.username}</UserUserName>
 						<ActionMenuItem>
-							<SignOutButton onClick={signOut}>
+							<EditProfileButton onClick={onClickEditProfile}>
 								<FormattedMessage
-									id="userMenu.logOut"
-									defaultMessage="Log out"
+									id="userMenu.editYourProfile"
+									defaultMessage="Edit your profile"
 								/>
-							</SignOutButton>
+							</EditProfileButton>
 						</ActionMenuItem>
-					</ActionMenuSection>
-				</ActionMenu>
-			</AvatarContainer>
-			{isEditProfileModalOpen && (
-				<EditProfileModal
-					user={user}
-					onClose={() => setIsEditProfileModalOpen(false)}
-				/>
-			)}
-		</>
+					</AvatarSection>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<ActionMenuItemLink
+						Icon={TeamspacesIcon}
+						to={DASHBOARD_ROUTE}
+					>
+						<FormattedMessage
+							id="userMenu.teamspaces"
+							defaultMessage="Teamspaces"
+						/>
+					</ActionMenuItemLink>
+					<ActionMenuItemLink
+						Icon={VisualSettingsIcon}
+					>
+						<FormattedMessage
+							id="userMenu.visualSettings"
+							defaultMessage="Visual settings"
+						/>
+					</ActionMenuItemLink>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<ActionMenuItem>
+						<SignOutButton onClick={signOut}>
+							<FormattedMessage
+								id="userMenu.logOut"
+								defaultMessage="Log out"
+							/>
+						</SignOutButton>
+					</ActionMenuItem>
+				</ActionMenuSection>
+			</ActionMenu>
+		</AvatarContainer>
 	);
 };
