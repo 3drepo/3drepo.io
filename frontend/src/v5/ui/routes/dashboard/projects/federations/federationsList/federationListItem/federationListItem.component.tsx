@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
@@ -41,11 +41,6 @@ import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
-const MODALS = {
-	editFederation: 'editFederation',
-	federationSettings: 'federationSettings',
-	none: 'none',
-};
 interface IFederationListItem {
 	federation: IFederation;
 }
@@ -54,9 +49,6 @@ export const FederationListItem = memo(({
 	federation,
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-
-	const [openModal, setOpenModal] = useState(MODALS.none);
-	const closeModal = () => setOpenModal(MODALS.none);
 
 	const onClickShare = () => {
 		const link = prefixBaseDomain(viewerRoute(teamspace, project, federation));
@@ -78,6 +70,9 @@ export const FederationListItem = memo(({
 			FederationsActionsDispatchers.removeFavourite(teamspace, project, federation._id);
 		}
 	};
+
+	// eslint-disable-next-line max-len
+	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsForm, { federationId: federation._id });
 
 	useEffect(() => combineSubscriptions(
 		enableRealtimeFederationUpdateSettings(teamspace, project, federation._id),
@@ -162,20 +157,10 @@ export const FederationListItem = memo(({
 							federation={federation}
 							openShareModal={onClickShare}
 							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
-							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
+							openFederationSettings={onClickSettings}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
-				<EditFederationModal
-					openState={openModal === MODALS.editFederation}
-					federation={federation}
-					onClickClose={closeModal}
-				/>
-				<FederationSettingsForm
-					open={openModal === MODALS.federationSettings}
-					federation={federation}
-					onClose={closeModal}
-				/>
 			</DashboardListItem>
 		</>
 	);

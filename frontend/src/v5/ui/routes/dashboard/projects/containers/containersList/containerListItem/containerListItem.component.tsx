@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import {
@@ -73,8 +73,6 @@ export const ContainerListItem = memo(({
 		return null;
 	}, [container._id]);
 
-	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
-
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
 			ContainersActionsDispatchers.addFavourite(teamspace, project, container._id);
@@ -95,6 +93,8 @@ export const ContainerListItem = memo(({
 			link,
 		});
 	};
+
+	const onClickSettings = () => DialogsActionsDispatchers.open(ContainerSettingsForm, { containerId: container._id });
 
 	return (
 		<DashboardListItem
@@ -155,7 +155,7 @@ export const ContainerListItem = memo(({
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
 						openShareModal={onClickShare}
-						openContainerSettings={() => setContainerSettingsOpen(true)}
+						openContainerSettings={onClickSettings}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -166,11 +166,6 @@ export const ContainerListItem = memo(({
 					status={container.status}
 				/>
 			)}
-			<ContainerSettingsForm
-				open={containerSettingsOpen}
-				container={container}
-				onClose={() => setContainerSettingsOpen(false)}
-			/>
 		</DashboardListItem>
 	);
 });

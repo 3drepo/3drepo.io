@@ -22,16 +22,15 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler, useWatch } from 'react-hook-form';
-import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormNumberField, FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -118,11 +117,10 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 };
 
 type ISettingsForm = {
-	open: boolean;
 	containerOrFederation: IContainer | IFederation;
 	settingsSchema: any;
 	isContainer?: boolean;
-	onClose: () => void;
+	onClickClose: () => void;
 	fetchSettings: (teamspace: string, project: string, containerOrFederationId: string) => void;
 	fetchViews: (teamspace: string, project: string, containerOrFederationId: string) => void;
 	updateSettings: (
@@ -136,14 +134,13 @@ type ISettingsForm = {
 };
 
 export const SettingsForm = ({
-	open,
 	containerOrFederation,
 	settingsSchema,
 	isContainer,
 	fetchSettings,
 	fetchViews,
 	updateSettings,
-	onClose,
+	onClickClose,
 }: ISettingsForm) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isValid, setIsValid] = useState(false);
@@ -165,7 +162,8 @@ export const SettingsForm = ({
 	});
 
 	const currentUnit = useWatch({ control, name: 'unit' });
-	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 	const EMPTY_GIS_VALUES = { latitude: 0, longitude: 0, angleFromNorth: 0 };
@@ -212,29 +210,28 @@ export const SettingsForm = ({
 			project,
 			containerOrFederation._id,
 			settings,
-			onClose,
+			onClickClose,
 			onSubmitError,
 		);
 	};
 
 	useEffect(() => {
-		if (open) {
-			fetchSettings(teamspace, project, containerOrFederation._id);
-			fetchViews(teamspace, project, containerOrFederation._id);
-			reset(getDefaultValues(containerOrFederation, isContainer));
-			setAlreadyExistingNames([]);
-		}
-	}, [open]);
+		fetchSettings(teamspace, project, containerOrFederation._id);
+		fetchViews(teamspace, project, containerOrFederation._id);
+		setAlreadyExistingNames([]);
+	}, []);
 
-	useEffect(() => { reset(getDefaultValues(containerOrFederation, isContainer)); }, [containerOrFederation]);
+	useEffect(() => {
+		reset(getDefaultValues(containerOrFederation, isContainer));
+	}, [containerOrFederation]);
 
 	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [JSON.stringify(watch())]);
 
 	return (
 		<FormModal
+			open
 			title={formatMessage({ id: 'settings.title', defaultMessage: `${containerOrFederationName} settings` })}
-			open={open}
-			onClickClose={onClose}
+			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'settings.ok', defaultMessage: 'Save Changes' })}
 			isValid={isValid}

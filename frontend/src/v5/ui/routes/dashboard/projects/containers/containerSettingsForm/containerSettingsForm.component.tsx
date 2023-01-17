@@ -15,28 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SettingsForm } from '../../settingsForm/settingsForm.component';
 
 type ContainerSettingsFormProps = {
-	open: boolean;
-	container: IContainer;
-	onClose: () => void;
+	containerId: string;
+	onClickClose: () => void;
 };
 
 export const ContainerSettingsForm = ({
-	container,
+	containerId,
 	...otherProps
-}: ContainerSettingsFormProps) => (
-	<SettingsForm
-		containerOrFederation={container}
-		isContainer
-		settingsSchema={ContainerSettingsSchema}
-		fetchSettings={ContainersActionsDispatchers.fetchContainerSettings}
-		fetchViews={ContainersActionsDispatchers.fetchContainerViews}
-		updateSettings={ContainersActionsDispatchers.updateContainerSettings}
-		{...otherProps}
-	/>
-);
+}: ContainerSettingsFormProps) => {
+	const container = ContainersHooksSelectors.selectContainerById(containerId);
+	return (
+		<SettingsForm
+			containerOrFederation={container}
+			isContainer
+			settingsSchema={ContainerSettingsSchema}
+			fetchSettings={ContainersActionsDispatchers.fetchContainerSettings}
+			fetchViews={ContainersActionsDispatchers.fetchContainerViews}
+			updateSettings={ContainersActionsDispatchers.updateContainerSettings}
+			{...otherProps}
+		/>
+	);
+};

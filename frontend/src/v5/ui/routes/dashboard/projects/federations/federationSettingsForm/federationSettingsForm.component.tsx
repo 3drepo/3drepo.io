@@ -17,25 +17,27 @@
 
 import { FederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IFederation } from '@/v5/store/federations/federations.types';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SettingsForm } from '../../settingsForm/settingsForm.component';
 
 type FederationSettingsFormProps = {
-	open: boolean;
-	federation: IFederation;
-	onClose: () => void;
+	federationId: string;
+	onClickClose: () => void;
 };
 
 export const FederationSettingsForm = ({
-	federation,
+	federationId,
 	...otherProps
-}: FederationSettingsFormProps) => (
-	<SettingsForm
-		containerOrFederation={federation}
-		settingsSchema={FederationSettingsSchema}
-		fetchSettings={FederationsActionsDispatchers.fetchFederationSettings}
-		fetchViews={FederationsActionsDispatchers.fetchFederationViews}
-		updateSettings={FederationsActionsDispatchers.updateFederationSettings}
-		{...otherProps}
-	/>
-);
+}: FederationSettingsFormProps) => {
+	const federation = FederationsHooksSelectors.selectFederationById(federationId);
+	return (
+		<SettingsForm
+			containerOrFederation={federation}
+			settingsSchema={FederationSettingsSchema}
+			fetchSettings={FederationsActionsDispatchers.fetchFederationSettings}
+			fetchViews={FederationsActionsDispatchers.fetchFederationViews}
+			updateSettings={FederationsActionsDispatchers.updateFederationSettings}
+			{...otherProps}
+		/>
+	);
+};
