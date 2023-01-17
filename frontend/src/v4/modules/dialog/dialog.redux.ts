@@ -17,6 +17,7 @@
 
 import { DialogProps as IDialogProps } from '@mui/material/Dialog';
 import { push } from 'connected-react-router';
+import { generatePath } from 'react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
@@ -58,7 +59,7 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showScreenshotDialog: ['config'],
 	showNewUpdateDialog: ['config'],
 	showLoggedOutDialog: [],
-	showRedirectToTeamspaceDialog: ['error'],
+	showRedirectToTeamspaceDialog: ['error', 'teamspace'],
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -166,10 +167,10 @@ const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
 };
 
 const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
-	const { method, dataType, error } = action;
+	const { method, dataType, error, teamspace } = action;
 	const status = get(error.response, 'status', 'Implementation error');
 	const message = get(error.response, 'data.message', error.message);
-	const teamspaceRoute = isV5() ? ROUTES.V5_TEAMSPACES : ROUTES.TEAMSPACES;
+	const teamspaceRoute = isV5() ? generatePath(ROUTES.V5_TEAMSPACE, { teamspace }) : ROUTES.TEAMSPACES;
 	const config = {
 		title: 'Error',
 		content: 'We cannot load the model due to the following:',
