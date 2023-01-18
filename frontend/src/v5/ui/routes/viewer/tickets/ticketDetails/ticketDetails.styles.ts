@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { css } from 'styled-components';
-import { DescriptionImage } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
-import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
+import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import styled from 'styled-components';
 
-export default css`
-	#risks-card-details {
-		${DescriptionImage} img {
-			border-radius: 5px;
-		}
-		${UpdateButtonsContainer} {
-			justify-content: left;
-			padding-top: 0;
-	
-			${ButtonContainer} {
-				min-height: 26px;
-			}
-		}
+const CommonChevronStyle = styled(ChevronIcon)`
+	&& {
+		height: 10px;
 	}
+`;
+
+export const ChevronLeft = styled(CommonChevronStyle)`
+	transform: rotate(90deg);
+	margin-right: 2px;
+`;
+
+export const ChevronRight = styled(CommonChevronStyle)`
+	transform: rotate(-90deg);
+	margin-left: 2px;
 `;

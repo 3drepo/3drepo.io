@@ -46,7 +46,7 @@ export const Assignees = memo(({
 	const [values, setValues] = useState(intersection(initialValues, allUsersAndJobs.map((i) => i.value)));
 	const [open, setOpen] = useState(false);
 	const listedAssignees = values.slice(0, max - 1);
-	const overflowAssignees = values.slice(max - 1);
+	const overflowValue = initialValues.slice(max - 1).length;
 
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
@@ -83,11 +83,11 @@ export const Assignees = memo(({
 			) : (
 				<FormattedMessage id="assignees.unassigned" defaultMessage="Unassigned" />
 			)}
-			{overflowAssignees.length ? (
+			{overflowValue ? (
 				<HoverPopover
-					anchor={(extraProps) => <ExtraAssignees assignees={overflowAssignees} {...extraProps} />}
+					anchor={(extraProps) => <ExtraAssignees overflowValue={overflowValue} {...extraProps} />}
 				>
-					<ExtraAssigneesPopover assignees={overflowAssignees} />
+					<ExtraAssigneesPopover assignees={values} />
 				</HoverPopover>
 			) : <></>}
 		</AssigneesList>
