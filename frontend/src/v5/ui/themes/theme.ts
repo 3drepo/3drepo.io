@@ -1029,9 +1029,12 @@ export const theme = createTheme({
 		MuiFormHelperText: {
 			styleOverrides: {
 				contained: {
-					position: 'absolute',
-					bottom: -18,
-					margin: 0,
+					position: 'relative',
+					margin: '-12px 0 0',
+					bottom: -14,
+					lineHeight: '12px',
+					height: 12,
+					maxHeight: 12,
 				},
 			},
 		},
