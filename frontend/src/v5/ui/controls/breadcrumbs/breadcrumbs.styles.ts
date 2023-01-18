@@ -29,6 +29,7 @@ export const Container = styled(Breadcrumbs)`
 			text-overflow: ellipsis;
 			overflow: hidden;
 			display: block;
+			white-space: nowrap;
 		}
 
 		.MuiBreadcrumbs-li {
