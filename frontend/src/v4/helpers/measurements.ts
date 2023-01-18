@@ -33,5 +33,4 @@ export const generateName = (measurement, measurements) => {
 
 export const disableConflictingMeasurementActions = () => {
 	dispatch(ViewerGuiActions.setClipEdit(false));
-	dispatch(BimActions.setIsActive(false));
 };
