@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
+const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -67,11 +67,9 @@ const testFormatModelSettings = () => {
 	])('Format model settings data', (data, desc) => {
 		test(`should format correctly with ${desc}`,
 			() => {
-				const nextIdx = respondFn.mock.calls.length;
-				ModelSettingsOutputMiddlewares.formatModelSettings({ outputData: cloneDeep(data) }, {}, () => {});
-				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
-				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
-
+				const req = { outputData: cloneDeep(data) };
+				const res = {};
+				ModelSettingsOutputMiddlewares.formatModelSettings(req, res, () => {});
 				const formattedSettings = {
 					...data,
 					defaultView: UUIDToString(data.defaultView),
@@ -87,7 +85,8 @@ const testFormatModelSettings = () => {
 				};
 				delete formattedSettings.properties;
 
-				expect(respondFn.mock.calls[nextIdx][3]).toEqual(formattedSettings);
+				expect(respondFn).toHaveBeenCalledTimes(1);
+				expect(respondFn).toHaveBeenCalledWith(req, res, templates.ok, formattedSettings);
 			});
 	});
 };
@@ -105,10 +104,9 @@ const testFormatModelStats = () => {
 	])('Format model stats data', (isFed, data, desc) => {
 		test(`[${isFed ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
 			async () => {
-				const nextIdx = respondFn.mock.calls.length;
-				await ModelSettingsOutputMiddlewares.formatModelStats(isFed)({ outputData: cloneDeep(data) }, {});
-				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
-				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+				const req = { outputData: cloneDeep(data) };
+				const res = {};
+				await ModelSettingsOutputMiddlewares.formatModelStats(isFed)(req, res);
 
 				const formattedStats = {
 					...data,
@@ -125,12 +123,13 @@ const testFormatModelStats = () => {
 					formattedStats.revisions.latestRevision = UUIDToString(formattedStats.revisions.latestRevision);
 				}
 
-				expect(respondFn.mock.calls[nextIdx][3]).toEqual(formattedStats);
+				expect(respondFn).toHaveBeenCalledTimes(1);
+				expect(respondFn).toHaveBeenCalledWith(req, res, templates.ok, formattedStats);
 			});
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings', () => {
+describe(determineTestGroup(__filename), () => {
 	testFormatModelSettings();
 	testFormatModelStats();
 });

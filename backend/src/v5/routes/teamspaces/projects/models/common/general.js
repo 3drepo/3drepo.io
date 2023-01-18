@@ -76,8 +76,8 @@ const appendFavourites = (isFed) => async (req, res) => {
 	const favouritesToAdd = req.body[isFed ? 'federations' : 'containers'];
 
 	try {
-		const Models = isFed ? Federations : Containers;
-		await Models.appendFavourites(user, teamspace, project, favouritesToAdd);
+		const { appendFavourites: fn } = isFed ? Federations : Containers;
+		await fn(user, teamspace, project, favouritesToAdd);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		respond(req, res, err);
@@ -88,11 +88,11 @@ const deleteFavourites = (isFed) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	try {
-		const Models = isFed ? Federations : Containers;
+		const { deleteFavourites: fn } = isFed ? Federations : Containers;
 		if (req.query.ids?.length) {
 			const favouritesToRemove = req.query.ids.split(',');
 
-			await Models.deleteFavourites(user, teamspace, project, favouritesToRemove);
+			await fn(user, teamspace, project, favouritesToRemove);
 			respond(req, res, templates.ok);
 		} else {
 			respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
@@ -118,8 +118,8 @@ const getModelStats = (isFed) => async (req, res, next) => {
 const updateModelSettings = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
-		const Models = isFed ? Federations : Containers;
-		await Models.updateSettings(teamspace, project, model, req.body);
+		const { updateSettings: fn } = isFed ? Federations : Containers;
+		await fn(teamspace, project, model, req.body);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -130,8 +130,8 @@ const updateModelSettings = (isFed) => async (req, res) => {
 const getModelSettings = (isFed) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	try {
-		const Models = isFed ? Federations : Containers;
-		const settings = await Models.getSettings(teamspace, model);
+		const { getSettings: fn } = isFed ? Federations : Containers;
+		const settings = await fn(teamspace, model);
 		req.outputData = settings;
 		await next();
 	} catch (err) {

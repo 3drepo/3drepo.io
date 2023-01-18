@@ -338,32 +338,45 @@ const testAppendFavourites = () => {
 			const favModel = isFed ? favFed : favCon;
 			const wrongTypeModel = isFed ? con : fed;
 
-			const getRoute = ({
-				projectId = project.id,
-				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/favourites${key ? `?key=${key}` : ''}`;
-
 			const standardPayload = { [`${modelType}s`]: [model._id] };
 
+			const generateRouteParams = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+			} = {}) => ({
+				projectId, modelType, key,
+			});
+
 			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn, standardPayload],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound, standardPayload],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound, standardPayload],
-				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments, standardPayload],
-				[`the ${modelType} list provided contains a ${wrongModelType}`, getRoute(), false, templates.invalidArguments, { [`${modelType}s`]: [wrongTypeModel._id] }],
-				[`the ${modelType} list provided isEmpty`, getRoute(), false, templates.invalidArguments, { [`${modelType}s`]: [] }],
-				['the payload is empty', getRoute(), false, templates.invalidArguments, { }],
-				[`the ${modelType} list contains a ${modelType} that does not exist`, getRoute(), false, templates.invalidArguments, { [`${modelType}s`]: [ServiceHelper.generateRandomString()] }],
-				[`the ${modelType} list is valid`, getRoute(), true, undefined, standardPayload],
-				[`the ${modelType} list contains ${modelType} that is already a favourite`, getRoute(), true, undefined, { [`${modelType}s`]: [favModel._id] }],
+				['the user does not have a valid session', generateRouteParams({ key: null }), false, templates.notLoggedIn, standardPayload],
+				['the user is not a member of the teamspace', generateRouteParams({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound, standardPayload],
+				['the project does not exist', generateRouteParams({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound, standardPayload],
+				[`the user does not have access to the ${modelType}`, generateRouteParams({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments, standardPayload],
+				[`the ${modelType} list provided contains a ${wrongModelType}`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [wrongTypeModel._id] }],
+				[`the ${modelType} list provided isEmpty`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [] }],
+				['the payload is empty', generateRouteParams(), false, templates.invalidArguments, { }],
+				[`the ${modelType} list contains a ${modelType} that does not exist`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [ServiceHelper.generateRandomString()] }],
+				[`the ${modelType} list is valid`, generateRouteParams(), true, undefined, standardPayload],
+				[`the ${modelType} list contains ${modelType} that is already a favourite`, generateRouteParams(), true, undefined, { [`${modelType}s`]: [favModel._id] }],
 			];
 		};
 
-		const runTest = (desc, route, success, expectedOutput, payload) => {
+		const runTest = (desc, routeParams, success, expectedOutput, payload) => {
+			const getRoute = ({
+				modelType,
+				projectId,
+				key,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/favourites${key ? `?key=${key}` : ''}`;
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.patch(route).send(payload).expect(expectedStatus);
-				if (!success) {
+				const res = await agent.patch(getRoute(routeParams)).send(payload).expect(expectedStatus);
+				if (success) {
+					const { modelType, projectId, key } = routeParams;
+					const getModelListRoute = `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s?key=${key}`;
+					const listRes = await agent.get(getModelListRoute).expect(expectedStatus);
+					const favModels = listRes.body[`${modelType}s`].flatMap(({ isFavourite, _id }) => (isFavourite ? _id : []));
+					expect(favModels).toEqual(expect.arrayContaining(payload[`${modelType}s`]));
+				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
@@ -397,15 +410,36 @@ const testDeleteFavourites = () => {
 			const favModel = isFed ? favFed : favCon;
 			const wrongTypeModel = isFed ? con : fed;
 
-			const getRoute = ({
+			const generateRouteParams = ({
 				projectId = project.id,
 				key = users.tsAdmin.apiKey,
 				modelIds = [model._id],
-			} = {}) => {
+			} = {}) => ({
+				projectId, modelType, key, modelIds,
+			});
+
+			return [
+				['the user does not have a valid session', generateRouteParams({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', generateRouteParams({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', generateRouteParams({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the user does not have access to the ${modelType}`, generateRouteParams({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments],
+				[`the ${modelType} list provided has a ${wrongModelType}`, generateRouteParams({ modelIds: [wrongTypeModel._id] }), false, templates.invalidArguments],
+				[`the ${modelType} list is not provided`, generateRouteParams({ modelIds: null }), false, templates.invalidArguments],
+				[`the ${modelType} list contains correct data`, generateRouteParams({ modelIds: [favModel._id] }), true],
+			];
+		};
+
+		const runTest = (desc, routeParams, success, expectedOutput) => {
+			const getRoute = ({
+				projectId,
+				key,
+				modelIds,
+				modelType,
+			}) => {
 				let url = `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/favourites`;
 				let firstParam = true;
 				if (key) {
-					url += `${firstParam ? '?' : '&'}key=${key}`;
+					url += `?key=${key}`;
 					firstParam = false;
 				}
 				if (modelIds) {
@@ -415,22 +449,16 @@ const testDeleteFavourites = () => {
 				return url;
 			};
 
-			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments],
-				[`the ${modelType} list provided has a ${wrongModelType}`, getRoute({ modelIds: [wrongTypeModel._id] }), false, templates.invalidArguments],
-				[`the ${modelType} list is not provided`, getRoute({ modelIds: null }), false, templates.invalidArguments],
-				[`the ${modelType} list contains correct data`, getRoute({ modelIds: [favModel._id] }), true],
-			];
-		};
-
-		const runTest = (desc, route, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.delete(route).expect(expectedStatus);
-				if (!success) {
+				const res = await agent.delete(getRoute(routeParams)).expect(expectedStatus);
+				if (success) {
+					const { modelType, projectId, key, modelIds } = routeParams;
+					const getModelListRoute = `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s?key=${key}`;
+					const listRes = await agent.get(getModelListRoute).expect(expectedStatus);
+					const favModels = listRes.body[`${modelType}s`].flatMap(({ isFavourite, _id }) => (isFavourite ? _id : []));
+					expect(favModels).not.toEqual(expect.arrayContaining(modelIds));
+				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
@@ -742,7 +770,7 @@ const testGetSettings = () => {
 	});
 };
 
-describe('E2E routes/teamspaces/projects/federations', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
