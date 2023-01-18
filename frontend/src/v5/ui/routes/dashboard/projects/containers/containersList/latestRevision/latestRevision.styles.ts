@@ -26,6 +26,7 @@ export const Container = styled.div<{ disabled?: boolean }>`
 	display: flex;
 	padding-right: 10px;
 	align-items: center;
+	max-width: 100%;
 	${({ theme, disabled }) => disabled && (css`
 		${Label} {
 			color: ${theme.palette.base.light};
