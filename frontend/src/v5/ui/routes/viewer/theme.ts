@@ -115,12 +115,6 @@ export const theme = createTheme(
 								lineHeight: 22,
 								height: 26,
 							},
-
-							'& .MuiFormHelperText-root': {
-								position: 'relative',
-								height: 0,
-								top: 0,
-							},
 						},
 					},
 				},
