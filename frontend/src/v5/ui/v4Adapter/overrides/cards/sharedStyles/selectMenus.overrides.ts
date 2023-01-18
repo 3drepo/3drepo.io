@@ -72,7 +72,7 @@ export const DescriptionStyles = css`
 			right: 0;
 		}
 		${StyledMarkdownField} {
-			border: 1px solid ${({ theme }) => theme.palette.base.lighter};
+			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 			border-radius: 5px;
 			min-height: 32px;
 			padding: 4px 10px;
