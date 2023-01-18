@@ -47,13 +47,19 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 	return res.length > 0 ? res[0].total : 0;
 };
 
-FileRefs.getAllRemovableEntriesByType = (teamspace, collection) => {
-	const pipeline = [
-		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
-		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
-	];
+FileRefs.getAllRemovableEntriesByType = async (teamspace, collection) => {
+	const query = { noDelete: { $exists: false }, type: { $ne: 'http' } };
+	const projection = { type: 1, link: 1 };
+	const refs = await db.find(teamspace, collectionName(collection), query, projection);
 
-	return db.aggregate(teamspace, collectionName(collection), pipeline);
+	const res = {};
+
+	refs.forEach(({ type, link }) => {
+		res[type] = res[type] ?? { _id: type, links: [] };
+		res[type].links.push(link);
+	});
+
+	return Object.values(res);
 };
 
 FileRefs.insertRef = async (teamspace, collection, refInfo) => {
