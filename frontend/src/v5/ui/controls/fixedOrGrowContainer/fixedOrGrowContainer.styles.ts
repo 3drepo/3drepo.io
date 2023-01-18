@@ -35,7 +35,7 @@ const withDefaultUnits = (width: WidthType) => (isString(width) ? width : `${wid
 export const Container = styled.div<ContainerProps>`
 	min-width: ${({ minWidth }) => withDefaultUnits(minWidth || 0)};
 
-	${({ maxWidth }) => maxWidth && css`max-width: ${withDefaultUnits(maxWidth)};`}
+	${({ maxWidth, width }) => css`max-width: ${withDefaultUnits(maxWidth ?? width)};`}
 
 	${({ width }) => (width
 		? css`
