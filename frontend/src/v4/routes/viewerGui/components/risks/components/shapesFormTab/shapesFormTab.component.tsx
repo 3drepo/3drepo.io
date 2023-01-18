@@ -17,6 +17,7 @@
 
 import { isEmpty } from 'lodash';
 import { isV5 } from '@/v4/helpers/isV5';
+import { useEffect } from 'react';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
@@ -49,6 +50,15 @@ export const ShapesFormTab = ({
 	const shapes = props.shapes || [];
 	const areaMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.AREA);
 	const lengthMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH);
+
+	useEffect(() => {
+		if (!active) {
+			setMeasureMode('');
+		}
+	}, [active]);
+
+	useEffect(() => () => setMeasureMode(''), []);
+
 	return (
 		<Content active={active}>
 			{addButtonsEnabled &&

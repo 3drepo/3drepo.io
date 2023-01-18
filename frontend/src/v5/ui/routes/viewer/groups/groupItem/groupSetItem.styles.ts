@@ -35,7 +35,16 @@ const GroupSetNameV4 = styled.div`
 	line-height: 16px;
 `;
 
-export const GroupSetName = isV5() ? GroupSetNameV5 : GroupSetNameV4;
+export const GroupSetName = styled(isV5() ? GroupSetNameV5 : GroupSetNameV4)`
+	display: flex;
+	overflow: hidden;
+`;
+
+export const GroupSetTitle = styled.div`
+	max-width: 100%;
+	text-overflow: ellipsis;
+	overflow: hidden;
+`;
 
 export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>`
 	${ChevronStyledIconButton} {
