@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import MovieIcon from '@mui/icons-material/Movie';
+import PlayIcon from '@assets/icons/filled/play-filled.svg';
 
 import { DATE_FIELDS } from './timeIcon.constants';
 import { StyledIconButton } from './timeIcon.styles';
@@ -35,7 +37,7 @@ export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
 
 	return (
 		<StyledIconButton onClick={handleOnIconClick}>
-			<MovieIcon />
+			{isV5() ? <PlayIcon /> : <MovieIcon />}
 		</StyledIconButton>
 	);
 };
