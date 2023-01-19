@@ -22,4 +22,5 @@ export const Text = styled(Typography)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	display: inline;
 	cursor: pointer;
+	padding-right: 10px;
 `;
