@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-interface IProps {
-	className?: string;
-}
+type IProps = {
+	className?: any;
+};
 
 export default ({ className }: IProps) => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none" className={className}>

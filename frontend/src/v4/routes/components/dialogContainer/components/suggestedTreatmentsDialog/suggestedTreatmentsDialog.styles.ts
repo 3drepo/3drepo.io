@@ -35,8 +35,9 @@ export const StyledTypography = styled(Typography).attrs({
 	}
 `;
 
-export const StyledList = styled(List)`
-`;
+export const StyledList = styled(List)``;
+
+export const TextLabel = styled.span``;
 
 export const StyledListItem = styled(ListItem)`
 	&& {
@@ -81,7 +82,7 @@ export const Container = styled.div`
 
 export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
 	autoHeight: true,
-	autoHeightMax: isV5() ? 'calc(100vh - 205px)' : '60vh',
+	autoHeightMax: isV5() ? '100%' : '60vh',
 })`
 	margin-top: 66px;
 `;

@@ -73,6 +73,10 @@ export default css`
 				svg {
 					font-size: 1.2rem;
 				}
+
+				&[hidden] {
+					display: none;
+				}
 			}
 		}
 
@@ -95,11 +99,13 @@ export default css`
 					height: 0.8em;
 					color: ${({ theme }) => theme.palette.secondary.main};
 				}
+
 				${PlaceholderText} {
 					font-size: 13px;
 					color: ${({ theme }) => theme.palette.base.main};
 				}
 			}
+
 			${ButtonContainer} {
 				color: ${({ theme }) => theme.palette.base.main};
 			}
@@ -143,12 +149,10 @@ export default css`
 				&:hover {
 					background-color: ${({ theme }) => theme.palette.primary.dark};
 				}
-
 				&:active {
 					box-shadow: none;
 					background-color: ${({ theme }) => theme.palette.primary.darkest};
 				}
-
 				&:disabled {
 					background-color: #edf0f8; // TODO - fix after new palette is released
 				}

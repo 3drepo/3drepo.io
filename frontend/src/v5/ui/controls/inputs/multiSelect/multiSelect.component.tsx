@@ -21,7 +21,7 @@ import { SelectProps } from '../select/select.component';
 export const MultiSelect = ({ defaultValue = [], ...props }: SelectProps) => (
 	<SearchSelect
 		defaultValue={defaultValue}
-		renderValue={(val) => (val as any[]).join(',')}
+		renderValue={(val) => (val as any[]).join(', ')}
 		{...props}
 		multiple
 	/>
