@@ -209,7 +209,7 @@ const testEmailNotUsed = () => {
 };
 
 const testAuthenticate = () => {
-	describe('Add PKCE codes, set session referrer and redirect to MS authentication page', () => {
+	describe('Authenticate', () => {
 		const redirectUri = generateRandomString();
 		const res = { redirect: () => { } };
 
@@ -236,13 +236,15 @@ const testAuthenticate = () => {
 				createResponseCode(templates.ssoNotAvailable));
 		});
 
-		test('should set authParams and reqirect to ms authentication page if req has no body', async () => {
+		test('should set authParams and respond with a link if req has no body', async () => {
 			const req = { query: { redirectUri: generateRandomString() }, headers: {} };
 			addPkceCodes(req);
 
 			await Aad.authenticate(redirectUri)(req, res);
 			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, expect.anything());
+			expect(Responder.respond.mock.calls[0][3]).toHaveProperty('link');
 			expect(req.authParams).toEqual({
 				redirectUri,
 				state: JSON.stringify({ redirectUri: req.query.redirectUri }),
@@ -251,7 +253,7 @@ const testAuthenticate = () => {
 			});
 		});
 
-		test('should set authParams and reqirect to ms authentication page if req has body', async () => {
+		test('should set authParams and respond with a link if req has body', async () => {
 			const req = {
 				query: { redirectUri: generateRandomString() },
 				body: { username: generateRandomString() },
@@ -261,7 +263,9 @@ const testAuthenticate = () => {
 
 			await Aad.authenticate(redirectUri)(req, res);
 			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, expect.anything());
+			expect(Responder.respond.mock.calls[0][3]).toHaveProperty('link');
 			expect(req.authParams).toEqual({
 				redirectUri,
 				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
@@ -270,7 +274,7 @@ const testAuthenticate = () => {
 			});
 		});
 
-		test('should set authParams, set session referre and reqirect to ms authentication page if req headers have referer', async () => {
+		test('should set authParams, set session referer and respond with a link if req headers have referer', async () => {
 			const referer = generateRandomString();
 			const req = {
 				query: { redirectUri: generateRandomString() },
@@ -281,7 +285,9 @@ const testAuthenticate = () => {
 
 			await Aad.authenticate(redirectUri)(req, res);
 			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, expect.anything());
+			expect(Responder.respond.mock.calls[0][3]).toHaveProperty('link');
 			expect(req.authParams).toEqual({
 				redirectUri,
 				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
