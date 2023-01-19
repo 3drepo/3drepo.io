@@ -19,7 +19,7 @@ import Grid from '@mui/material/Grid';
 import { TypographyProps } from '@mui/material';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { Description, ExpandButton, StyledTypography, TextContainer } from '../suggestedTreatmentsDialog.styles';
+import { Description, ExpandButton, StyledTypography, TextContainer, TextLabel } from '../suggestedTreatmentsDialog.styles';
 
 interface ITextWrapper {
 	noWrap?: boolean;
@@ -94,7 +94,7 @@ export const SuggestionDetails: FunctionComponent<ISuggestionDetails> = ({
 			</TextContainer>
 			<TextContainer item xs={4} zeroMinWidth>
 				<TextWrapper noWrap>
-					Stage:&nbsp;
+					<TextLabel>Stage:&nbsp;</TextLabel>
 					<TextWrapper inline color="textSecondary">
 						{mitigation_stage}
 					</TextWrapper>
@@ -102,7 +102,7 @@ export const SuggestionDetails: FunctionComponent<ISuggestionDetails> = ({
 			</TextContainer>
 			<Grid item xs={4}>
 				<TextWrapper noWrap>
-					Type:&nbsp;
+					<TextLabel>Type:&nbsp;</TextLabel>
 					<TextWrapper inline color="textSecondary">
 						{mitigation_type}
 					</TextWrapper>
