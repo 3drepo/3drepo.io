@@ -17,7 +17,7 @@
 
 import { css } from 'styled-components';
 
-import { Container, Submenu } from '@/v4/routes/viewerGui/components/toolbar/toolbar.styles';
+import { Container, Submenu, ToolbarButton } from '@/v4/routes/viewerGui/components/toolbar/toolbar.styles';
 import { Container as CloseFocusModeButton } from '@/v4/routes/viewerGui/components/closeFocusModeButton/closeFocusModeButton.styles';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 import { hexToOpacity } from '../../themes/theme';
@@ -44,6 +44,11 @@ export default css`
 			background: transparent;
 			border-radius: 0;
 			margin: 0;
+			${ToolbarButton} {
+				&[active="1"] {
+					color: ${({ theme }) => theme.palette.primary.main};
+				}
+			}
 		}
 
 		${Submenu} ${StyledIconButton} {

@@ -80,7 +80,7 @@ const SearchSelectMultipleControlledStory: ComponentStory<typeof SearchSelect> =
 				value={value}
 				onChange={handleChange}
 				multiple
-				renderValue={(val) => (val as any[]).join(',')}
+				renderValue={(val) => (val as any[]).join(', ')}
 			>
 				{values.map((valueItem) => (
 					<MultiSelectMenuItem value={valueItem} key={valueItem}>
