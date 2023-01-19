@@ -4,7 +4,7 @@
 	</head><body>
 
 <script>
-	const DOMAIN = "http://example.org/";
+	const DOMAIN = (new URL(window.location.href)).origin;
 	window.onload = () => {
 		const params = new Proxy(new URLSearchParams(window.location.search), {
 			get: (searchParams, prop) => searchParams.get(prop)});
@@ -27,7 +27,7 @@
 	}
 	const runPOST = () => {
 		var xhr = new XMLHttpRequest();
-		xhr.open("POST", `/api/v5/sso/aad/signup?redirectUri=${DOMAIN}sso.html?signupPost=1`, true);
+		xhr.open("POST", `/api/v5/sso/aad/signup?redirectUri=${DOMAIN}/sso.html?signupPost=1`, true);
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.send(JSON.stringify({
 		  "username": document.getElementById('username').value,
