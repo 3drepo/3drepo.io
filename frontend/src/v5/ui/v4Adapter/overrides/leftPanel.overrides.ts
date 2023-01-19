@@ -64,9 +64,12 @@ export default css`
 			height: 32px;
 			width: 32px;
 			margin: 0 0 0 5px;
-
 			svg {
 				font-size: 1.2rem;
+			}
+
+			&[hidden] {
+				display: none;
 			}
 		}
 	}
