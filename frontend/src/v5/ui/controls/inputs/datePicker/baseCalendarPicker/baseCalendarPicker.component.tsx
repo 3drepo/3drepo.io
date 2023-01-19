@@ -17,6 +17,7 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { FormInputProps } from '@controls/inputs/inputController.component';
+import { formatMessage } from '@/v5/services/intl';
 import { TextField } from './baseCalendarPicker.styles';
 import { formatDayOfWeek } from '../dateFormatHelper';
 
@@ -31,6 +32,7 @@ export const BaseCalendarPicker = ({
 	PickerComponent,
 	helperText,
 	error,
+	value = null,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -43,6 +45,7 @@ export const BaseCalendarPicker = ({
 	return (
 		<PickerComponent
 			{...props}
+			value={value}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
@@ -65,7 +68,10 @@ export const BaseCalendarPicker = ({
 					helperText={helperText}
 					inputProps={{
 						...textFieldProps.inputProps,
-						placeholder: ' ',
+						placeholder: formatMessage({
+							id: 'calendarPicker.placeholder',
+							defaultMessage: 'Choose a date',
+						}),
 					}}
 				/>
 			)}
