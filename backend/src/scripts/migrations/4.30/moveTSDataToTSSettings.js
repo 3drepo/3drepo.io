@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 const { find, listDatabases, updateMany, updateOne } = require(`${v5Path}/handler/db`);
 const { ADD_ONS } = require(`${v5Path}/models/teamspaces.constants`);
 const { USERS_DB_NAME } = require(`${v5Path}/models/users.constants`);
-const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
+const { deleteIfUndefined, isEmpty } = require(`${v5Path}/utils/helper/objects`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const addOnFields = Object.values(ADD_ONS);
@@ -33,11 +33,11 @@ const migrateTeamspaceData = async (user, customData) => {
 	});
 
 	// addOns
-	if (Object.keys(addOns).length || Object.keys(flags).length) {
+	if (!isEmpty(addOns) || !isEmpty(flags)) {
 		tsSettingsUpdate.addOns = { ...addOns, ...flags };
 	}
 
-	if (Object.keys(tsSettingsUpdate).length) {
+	if (!isEmpty(tsSettingsUpdate)) {
 		try {
 			await updateOne(user, 'teamspace', {}, { $set: tsSettingsUpdate });
 			return user;
@@ -63,7 +63,8 @@ const run = async () => {
 
 	const dbs = {};
 
-	(await listDatabases()).forEach(({ name }) => { dbs[name] = 1; });
+	const dbList = await listDatabases();
+	dbList.forEach(({ name }) => { dbs[name] = 1; });
 
 	const users = await find(
 		USERS_DB_NAME,
