@@ -27,7 +27,7 @@ const testCreateTeamspaceRole = () => {
 		test('should create a new teamspace role', async () => {
 			const teamspace = generateRandomString();
 
-			const fn = jest.spyOn(db, 'createRole').mockImplementation(() => { });
+			const fn = jest.spyOn(db, 'createRole').mockImplementationOnce(() => { });
 			await Roles.createTeamspaceRole(teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER);
@@ -40,7 +40,7 @@ const testRemoveTeamspaceRole = () => {
 		test('should remove the teamspace role', async () => {
 			const teamspace = generateRandomString();
 
-			const fn = jest.spyOn(db, 'dropRole').mockImplementation(() => { });
+			const fn = jest.spyOn(db, 'dropRole').mockImplementationOnce(() => { });
 			await Roles.removeTeamspaceRole(teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER);
@@ -54,7 +54,7 @@ const testGrantTeamspaceRoleToUser = () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
 
-			const fn = jest.spyOn(db, 'grantRole').mockImplementation(() => { });
+			const fn = jest.spyOn(db, 'grantRole').mockImplementationOnce(() => { });
 			await Roles.grantTeamspaceRoleToUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER, username);
@@ -67,7 +67,7 @@ const testRevokeTeamspaceRoleFromUser = () => {
 		test('should revoke teamspace role from the user', async () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'revokeRole').mockImplementation(() => { });
+			const fn = jest.spyOn(db, 'revokeRole').mockImplementationOnce(() => { });
 			await Roles.revokeTeamspaceRoleFromUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER, username);

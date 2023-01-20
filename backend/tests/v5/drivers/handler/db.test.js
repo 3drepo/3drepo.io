@@ -563,11 +563,11 @@ const testDeleteOne = () => {
 				.resolves.toBeUndefined();
 		});
 
-		test('Should return empty array if collection doesn\'t exist', async () => {
+		test('Should return undefined if collection doesn\'t exist', async () => {
 			await expect(DB.deleteOne(dbName, generateRandomString(), { })).resolves.toBeUndefined();
 		});
 
-		test('Should return empty array if database doesn\'t exist', async () => {
+		test('Should return undefined if database doesn\'t exist', async () => {
 			await expect(DB.deleteOne(generateRandomString(), col, { })).resolves.toBeUndefined();
 		});
 	});

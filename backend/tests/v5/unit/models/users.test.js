@@ -273,7 +273,7 @@ const testAuthenticate = () => {
 		});
 
 		test('should return error if username is incorrect', async () => {
-			jest.spyOn(db, 'authenticate').mockResolvedValueOnce(templates.false);
+			jest.spyOn(db, 'authenticate').mockResolvedValueOnce(false);
 			await expect(User.authenticate(user, pw)).rejects.toEqual(templates.incorrectUsernameOrPassword);
 		});
 
@@ -287,13 +287,13 @@ const testAuthenticate = () => {
 const testUpdatePassword = () => {
 	describe('Update user password', () => {
 		test('should update a user password', async () => {
-			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const fn2 = jest.spyOn(db, 'setPassword').mockImplementation(() => { });
+			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
+			const fn2 = jest.spyOn(db, 'setPassword').mockImplementationOnce(() => { });
 			const user = generateRandomString();
 			const newPassword = generateRandomString();
 			await expect(User.updatePassword(user, newPassword)).resolves.toBeUndefined();
-			expect(fn1.mock.calls.length).toBe(1);
-			expect(fn1.mock.calls[0][3]).toEqual({ $unset: { 'customData.resetPasswordToken': 1 } });
+			expect(fn1).toHaveBeenCalledTimes(1);
+			expect(fn1).toHaveBeenCalledWith('admin', 'system.users', { user }, { $unset: { 'customData.resetPasswordToken': 1 } });
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(user, newPassword);
 		});
@@ -303,7 +303,7 @@ const testUpdatePassword = () => {
 const testUpdateProfile = () => {
 	describe('Update user profile', () => {
 		test('should update a user profile', async () => {
-			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
 			const updatedProfile = { firstName: 'John' };
 			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
@@ -568,7 +568,7 @@ const testUnlinkFromSso = () => {
 	describe('Unlink user from SSO', () => {
 		test('Should unlink user from SSO', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const fn2 = jest.spyOn(db, 'setPassword').mockImplementation(() => { });
+			const fn2 = jest.spyOn(db, 'setPassword').mockImplementationOnce(() => { });
 			const username = generateRandomString();
 			const password = generateRandomString();
 			await User.unlinkFromSso(username, password);
