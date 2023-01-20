@@ -33,10 +33,11 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
+const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
@@ -93,15 +94,15 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-// breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = async (teamspace, admins = [], breaking = false, customData) => {
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
-	await ServiceHelper.db.createTeamspaceRole(teamspace);
-	return Promise.all([
-		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
-			{ permissions: breaking ? undefined : permissions, ...customData }),
-		createTeamspaceSettings(teamspace),
-	]);
+db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
+	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
+	await initTeamspace(teamspace);
+	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
+
+	if (subscriptions) {
+		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
+			subType, subscriptions[subType])));
+	}
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {

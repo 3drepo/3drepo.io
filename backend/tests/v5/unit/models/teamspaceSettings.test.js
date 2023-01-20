@@ -19,13 +19,12 @@ const { src } = require('../../helper/path');
 
 const { generateRandomString } = require('../../helper/services');
 
-const Teamspace = require(`${src}/models/teamspaces`);
+const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
-const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
@@ -48,13 +47,11 @@ const testTeamspaceAdmins = () => {
 	describe('Get teamspace admins', () => {
 		test('should return list of admins if teamspace exists', async () => {
 			const expectedData = {
-				customData: {
-					permissions: [
-						{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
-						{ user: 'personB', permissions: ['someOtherPerm'] },
-						{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
-					],
-				},
+				permissions: [
+					{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
+					{ user: 'personB', permissions: ['someOtherPerm'] },
+					{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
+				],
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
 
@@ -66,6 +63,20 @@ const testTeamspaceAdmins = () => {
 
 			await expect(Teamspace.getTeamspaceAdmins('someTS'))
 				.rejects.toEqual(templates.teamspaceNotFound);
+		});
+	});
+};
+
+const testGrantAdminPermissionToUser = () => {
+	describe('Grant teamspace admin permission to user', () => {
+		test('Should grant teamspace admin permission to user', async () => {
+			const teamspace = generateRandomString();
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne');
+			await Teamspace.grantAdminToUser(teamspace, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				{ $push: { permissions: { user: username, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
 };
@@ -110,13 +121,9 @@ const testGetSubscriptions = () => {
 	describe('Get teamspace subscriptions', () => {
 		test('should succeed if teamspace exists', async () => {
 			const expectedData = {
-				customData: {
-					billing: {
-						subscriptions: {
-							a: 1,
-							b: 2,
-						},
-					},
+				subscriptions: {
+					a: 1,
+					b: 2,
 				},
 			};
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
@@ -124,8 +131,8 @@ const testGetSubscriptions = () => {
 			const teamspace = 'someTS';
 			const res = await Teamspace.getSubscriptions(teamspace);
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ user: teamspace });
-			expect(res).toEqual(expectedData.customData.billing.subscriptions);
+			expect(fn.mock.calls[0][2]).toEqual({ _id: teamspace });
+			expect(res).toEqual(expectedData.subscriptions);
 		});
 
 		test('should return empty object if the teamspace has no subs', async () => {
@@ -134,7 +141,7 @@ const testGetSubscriptions = () => {
 			const teamspace = 'someTS';
 			const res = await Teamspace.getSubscriptions(teamspace);
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ user: teamspace });
+			expect(fn.mock.calls[0][2]).toEqual({ _id: teamspace });
 			expect(res).toEqual({});
 		});
 
@@ -170,12 +177,12 @@ const testEditSubscriptions = () => {
 				data: 100,
 				expiryDate: new Date(),
 			};
-			const subsObjPath = `customData.billing.subscriptions.${type}`;
+			const subsObjPath = `subscriptions.${type}`;
 
 			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME,
-				USER_COL, { user: teamspace }, { $set: formatToMongoAction(update, subsObjPath) });
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $set: formatToMongoAction(update, subsObjPath) });
 		});
 
 		test('should only update fields that are recognised', async () => {
@@ -188,11 +195,11 @@ const testEditSubscriptions = () => {
 				collaborators: 10,
 				[generateRandomString()]: generateRandomString(),
 			};
-			const subsObjPath = `customData.billing.subscriptions.${type}`;
+			const subsObjPath = `subscriptions.${type}`;
 
 			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace },
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
 				{ $set: formatToMongoAction({ collaborators: update.collaborators }, subsObjPath) });
 		});
 
@@ -220,12 +227,12 @@ const testRemoveSubscription = () => {
 			const teamspace = generateRandomString();
 			const type = generateRandomString();
 
-			const subsObjPath = `customData.billing.subscriptions.${type}`;
+			const subsObjPath = `subscriptions.${type}`;
 
 			await expect(Teamspace.removeSubscription(teamspace, type)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL,
-				{ user: teamspace }, { $unset: { [subsObjPath]: 1 } });
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $unset: { [subsObjPath]: 1 } });
 		});
 
 		test('should get rid of all licenses if subscription type is not given', async () => {
@@ -233,12 +240,12 @@ const testRemoveSubscription = () => {
 
 			const teamspace = generateRandomString();
 
-			const subsObjPath = 'customData.billing.subscriptions';
+			const subsObjPath = 'subscriptions';
 
 			await expect(Teamspace.removeSubscription(teamspace)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL,
-				{ user: teamspace }, { $unset: { [subsObjPath]: 1 } });
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $unset: { [subsObjPath]: 1 } });
 		});
 	});
 };
@@ -251,16 +258,16 @@ const testRemoveAddOns = () => {
 			const teamspace = generateRandomString();
 
 			const unsetObj = {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
-
+				[`addOns.${ADD_ONS.VR}`]: 1,
+				[`addOns.${ADD_ONS.SRC}`]: 1,
+				[`addOns.${ADD_ONS.HERE}`]: 1,
+				[`addOns.${ADD_ONS.POWERBI}`]: 1,
 			};
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $unset: unsetObj });
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $unset: unsetObj });
 		});
 	});
 };
@@ -268,54 +275,43 @@ const testRemoveAddOns = () => {
 const testGetAddOns = () => {
 	describe('Get teamspace addOns', () => {
 		test('should get all applicable addOns', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({
 				addOns: {
-					powerBIEnabled: true,
-				},
-			} });
+					[ADD_ONS.VR]: true,
+					[ADD_ONS.SRC]: true,
+					[ADD_ONS.HERE]: true,
+					[ADD_ONS.POWERBI]: true,
+				} });
 
 			const teamspace = generateRandomString();
 
 			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-				powerBIEnabled: true,
+				[ADD_ONS.VR]: true,
+				[ADD_ONS.SRC]: true,
+				[ADD_ONS.HERE]: true,
+				[ADD_ONS.POWERBI]: true,
 			});
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
-
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
+				[`addOns.${ADD_ONS.VR}`]: 1,
+				[`addOns.${ADD_ONS.SRC}`]: 1,
+				[`addOns.${ADD_ONS.HERE}`]: 1,
+				[`addOns.${ADD_ONS.POWERBI}`]: 1,
 			}, undefined);
 		});
 
-		test('should get all applicable addOns (without powerBI)', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-			} });
+		test('should get all applicable addOns (no addOns)', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({});
 
 			const teamspace = generateRandomString();
 
-			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
-				vrEnabled: true,
-				srcEnabled: true,
-				hereEnabled: true,
-			});
+			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, {
-				'customData.vrEnabled': 1,
-				'customData.srcEnabled': 1,
-				'customData.hereEnabled': 1,
-				'customData.addOns': 1,
-
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
+				[`addOns.${ADD_ONS.VR}`]: 1,
+				[`addOns.${ADD_ONS.SRC}`]: 1,
+				[`addOns.${ADD_ONS.HERE}`]: 1,
+				[`addOns.${ADD_ONS.POWERBI}`]: 1,
 			}, undefined);
 		});
 	});
@@ -328,7 +324,7 @@ const testUpdateAddOns = () => {
 			const unset = {};
 
 			Object.keys(obj).forEach((val) => {
-				const prefix = val === ADD_ONS.POWERBI ? 'customData.addOns' : 'customData';
+				const prefix = 'addOns';
 				if (obj[val]) {
 					set[`${prefix}.${val}`] = true;
 				} else {
@@ -354,7 +350,8 @@ const testUpdateAddOns = () => {
 			};
 			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, formatToMongoAction(update));
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, formatToMongoAction(update));
 		});
 
 		test('should only update fields that are recognised', async () => {
@@ -369,7 +366,7 @@ const testUpdateAddOns = () => {
 
 			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace },
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
 				formatToMongoAction({ [ADD_ONS.POWERBI]: true }));
 		});
 
@@ -396,6 +393,7 @@ const testCreateTeamspaceSettings = () => {
 				_id: teamspace,
 				topicTypes: DEFAULT_TOPIC_TYPES,
 				riskCategories: DEFAULT_RISK_CATEGORIES,
+				permissions: [],
 			};
 
 			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
@@ -432,17 +430,24 @@ const testRemoveUserFromAdminPrivileges = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
 			await expect(Teamspace.removeUserFromAdminPrivilege(teamspace, user)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USER_COL, { user: teamspace }, { $pull: { 'customData.permissions': { user } } });
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $pull: { permissions: { user } } });
 		});
 	});
 };
 
-const testGetAllTeamspacesWithActiveLicenses = () => {
-	describe('Get all teamspaces with active licenses', () => {
-		test('Should perform a query to find all teamspaces with active subscriptions', async () => {
-			const expectedRes = [generateRandomString()];
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedRes);
-			await expect(Teamspace.getAllTeamspacesWithActiveLicenses()).resolves.toEqual(expectedRes);
+const testGetTeamspaceActiveLicenses = () => {
+	describe('Get active licenses in teamspace', () => {
+		test('Should perform a query to find all active subscriptions', async () => {
+			const teamspace = generateRandomString();
+			const dayMS = 1000 * 60 * 60 * 24;
+			const validDate = new Date(new Date().getTime() + dayMS);
+			const expectedRes = { subscription: {
+				discretionary: { expiryDate: validDate },
+				enterprise: { expiryDate: validDate },
+			} };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
+			await expect(Teamspace.getTeamspaceActiveLicenses(teamspace)).resolves.toEqual(expectedRes);
 			expect(fn).toHaveBeenCalledTimes(1);
 		});
 	});
@@ -457,12 +462,12 @@ const testGetRiskCategories = () => {
 			await expect(Teamspace.getRiskCategories(teamspace)).resolves.toEqual(expectedRes);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
-				{ _id: teamspace }, { riskCategories: 1 });
+				{ _id: teamspace }, { riskCategories: 1 }, undefined);
 		});
 	});
 };
 
-describe('models/teamspaces', () => {
+describe('models/teamspaceSettings', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
 	testGetSubscriptions();
@@ -475,6 +480,7 @@ describe('models/teamspaces', () => {
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
-	testGetAllTeamspacesWithActiveLicenses();
+	testGetTeamspaceActiveLicenses();
 	testGetRiskCategories();
+	testGrantAdminPermissionToUser();
 });
