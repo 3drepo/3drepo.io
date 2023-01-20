@@ -16,14 +16,15 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { types, utils: { stripWhen } } = require('../../../../../../../utils/helper/yup');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const { getCommentById } = require('../../../../../../../models/tickets.comments');
 const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
+const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
-const { types } = require('../../../../../../../utils/helper/yup');
 const { validateMany } = require('../../../../../../common');
 
 const CommentsMiddleware = {};
@@ -31,14 +32,23 @@ const CommentsMiddleware = {};
 const validateComment = (isNewComment) => async (req, res, next) => {
 	try {
 		const schema = Yup.object().shape({
-			comment: types.strings.longDescription,
+			comment: isNewComment
+				? types.strings.longDescription
+				: stripWhen(types.strings.longDescription, (t) => isEqual(t, req.commentData.comment)),
 			images: Yup.array().min(1).of(
 				isNewComment
 					? types.embeddedImage()
 					: types.embeddedImageOrRef()
 						.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref',
-							(value, { originalValue }) => !isUUIDString(originalValue)
-								|| req.commentData?.images.map(UUIDToString).includes(originalValue)),
+							(value, { originalValue }) => {
+								if (!isUUIDString(originalValue)) return true;
+
+								const historyImages = req.commentData.history?.flatMap((h) => h.images)
+									.filter((i) => i) ?? [];
+								const acceptableRefs = [...new Set([...req.commentData.images, ...historyImages])]
+									.map(UUIDToString);
+								return acceptableRefs.includes(originalValue);
+							}),
 			),
 		}).test(
 			'at-least-one-property',

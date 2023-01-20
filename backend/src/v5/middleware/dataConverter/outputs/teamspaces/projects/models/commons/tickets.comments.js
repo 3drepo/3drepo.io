@@ -15,16 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const Yup = require('yup');
+const { logger } = require('../../../../../../../utils/logger');
 const { respond } = require('../../../../../../../utils/responder');
-const { serialiseComment } = require('../../../../../../../schemas/tickets/comments');
 const { templates } = require('../../../../../../../utils/responseCodes');
+const { types } = require('../../../../../../../utils/helper/yup');
 
 const Comments = {};
+
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+
+const serialiseComment = (comment) => {
+	const caster = Yup.object({
+		_id: uuidString,
+		createdAt: types.timestamp,
+		updatedAt: types.timestamp,
+		images: Yup.array().of(uuidString),
+		history: Yup.array().of(Yup.object({
+			timestamp: types.timestamp,
+			images: Yup.array().of(uuidString),
+		})),
+	});
+	return caster.cast(comment);
+};
 
 Comments.serialiseComment = (req, res) => {
 	try {
 		respond(req, res, templates.ok, serialiseComment(req.commentData));
 	} catch (err) {
+		logger.logError(`Failed to serialise comment: ${err}`);
 		respond(req, res, templates.unknown);
 	}
 };
@@ -34,6 +54,7 @@ Comments.serialiseCommentList = (req, res) => {
 		const comments = req.comments.map(serialiseComment);
 		respond(req, res, templates.ok, { comments });
 	} catch (err) {
+		logger.logError(`Failed to serialise comments: ${err}`);
 		respond(req, res, templates.unknown);
 	}
 };

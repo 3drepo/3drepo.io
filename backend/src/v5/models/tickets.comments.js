@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { concat } = require('lodash');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
@@ -45,7 +44,7 @@ TicketComments.getCommentById = async (teamspace, project, model, ticket, _id,
 };
 
 TicketComments.getCommentsByTicket = (teamspace, project, model, ticket,
-	projection = { _id: 1, comment: 1, images: 1, author: 1, createdAt: 1, updatedAt: 1, deleted: 1 },
+	projection = { teamspace: 0, project: 0, model: 0, ticket: 0 },
 	sort = { createdAt: -1 }) => findMany(teamspace, { teamspace, project, model, ticket }, projection, sort);
 
 TicketComments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
@@ -58,7 +57,7 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 
 const getUpdatedComment = (oldComment, updateData) => {
 	const updatedAt = new Date();
-	const formattedComment = { updatedAt, ...updateData };
+	const formattedComment = { ...updateData, updatedAt };
 
 	const historyEntry = {
 		timestamp: oldComment.updatedAt,
@@ -66,14 +65,23 @@ const getUpdatedComment = (oldComment, updateData) => {
 		...(oldComment.images ? { images: oldComment.images } : {}),
 	};
 
-	formattedComment.history = concat(oldComment.history ?? [], [historyEntry]);
+	formattedComment.history = [...(oldComment.history ?? []), historyEntry];
 
 	return formattedComment;
 };
 
 TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 	const formattedComment = getUpdatedComment(oldComment, updateData);
-	await updateOne(teamspace, { _id: oldComment._id }, { $set: { ...formattedComment } });
+
+	const toSet = { $set: { ...formattedComment } };
+	const toUnset = {
+		$unset: {
+			...(updateData.comment ? { } : { comment: 1 }),
+			...(updateData.images ? { } : { images: 1 }),
+		},
+	};
+
+	await updateOne(teamspace, { _id: oldComment._id }, { ...toSet, ...toUnset });
 };
 
 TicketComments.deleteComment = async (teamspace, oldComment) => {
