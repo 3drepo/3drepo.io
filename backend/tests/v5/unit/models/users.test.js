@@ -24,9 +24,7 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString } = require('../../helper/services');
 const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
-const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-
-const userCol = 'system.users';
+const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
@@ -52,7 +50,7 @@ const testGetAccessibleTeamspaces = () => {
 				roles: [
 					{ db: 'ts1', role: 'a' },
 					{ db: 'ts2', role: 'b' },
-					{ db: 'admin', role: generateRandomString() },
+					{ db: USERS_DB_NAME, role: generateRandomString() },
 				],
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
@@ -293,7 +291,7 @@ const testUpdatePassword = () => {
 			const newPassword = generateRandomString();
 			await expect(User.updatePassword(user, newPassword)).resolves.toBeUndefined();
 			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn1).toHaveBeenCalledWith('admin', 'system.users', { user }, { $unset: { 'customData.resetPasswordToken': 1 } });
+			expect(fn1).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user }, { $unset: { 'customData.resetPasswordToken': 1 } });
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(user, newPassword);
 		});
@@ -399,7 +397,7 @@ const testGetUserByEmail = () => {
 			const res = await User.getUserByEmail(email);
 			expect(res).toEqual({ user: 'user' });
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', userCol, { 'customData.email': 'example@email.com' }, undefined, undefined);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.email': 'example@email.com' }, undefined, undefined);
 		});
 
 		test('should throw error if user does not exist', async () => {
@@ -505,7 +503,7 @@ const testVerify = () => {
 			const res = await User.verify(username);
 			expect(res).toEqual(customData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, userCol, { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
 				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
 				{
 					'customData.firstName': 1,
@@ -526,7 +524,7 @@ const testGrantTeamspacePermissionToUser = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			await User.grantAdminToUser(username, teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, userCol, { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
 				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
@@ -541,7 +539,7 @@ const testRemoveUser = () => {
 			await expect(User.removeUser(username)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, userCol, { user: username });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username });
 		});
 	});
 };
@@ -559,7 +557,7 @@ const testIsAccountActive = () => {
 			await expect(User.isAccountActive(username)).resolves.toBe(success);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, userCol, { user: username }, { 'customData.inactive': 1 }, undefined);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username }, { 'customData.inactive': 1 }, undefined);
 		});
 	});
 };
@@ -574,8 +572,8 @@ const testUnlinkFromSso = () => {
 			await User.unlinkFromSso(username, password);
 
 			expect(fn).toHaveBeenCalledTimes(2);
-			expect(fn).toHaveBeenNthCalledWith(1, 'admin', 'system.users', { user: username }, { $unset: { 'customData.sso': 1 } });
-			expect(fn).toHaveBeenNthCalledWith(2, 'admin', 'system.users', { user: username }, { $unset: { 'customData.resetPasswordToken': 1 } });
+			expect(fn).toHaveBeenNthCalledWith(1, USERS_DB_NAME, USERS_COL, { user: username }, { $unset: { 'customData.sso': 1 } });
+			expect(fn).toHaveBeenNthCalledWith(2, USERS_DB_NAME, USERS_COL, { user: username }, { $unset: { 'customData.resetPasswordToken': 1 } });
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(username, password);
 		});
@@ -594,7 +592,7 @@ const testLinkToSso = () => {
 			await User.linkToSso(username, email, firstName, lastName, ssoData);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
 				{ $set: { 'customData.email': email, 'customData.firstName': firstName, 'customData.lastName': lastName, 'customData.sso': ssoData } });
 		});
 	});
@@ -609,7 +607,7 @@ const testIsSso = () => {
 			await User.isSsoUser(username);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username }, { 'customData.sso': 1 }, undefined);
 		});
 
 		test('Should return false if user is non SSO', async () => {
@@ -619,7 +617,7 @@ const testIsSso = () => {
 			await User.isSsoUser(username);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username }, { 'customData.sso': 1 }, undefined);
 		});
 	});
 };
