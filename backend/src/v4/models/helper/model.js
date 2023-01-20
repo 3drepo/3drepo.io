@@ -560,13 +560,7 @@ function listSubModels(account, model, branch = "master") {
 			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
 				if (subModel) {
-					console.log(ref.project);
-					// subModels.push(ref.project);
-					subModels.push({
-						database: ref.owner,
-						model: ref.project,
-						name: subModel.name
-					});
+					subModels.push(ref.project);
 				}
 
 			})

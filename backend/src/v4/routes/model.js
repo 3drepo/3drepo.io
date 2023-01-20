@@ -1811,7 +1811,6 @@ function updateHeliSpeed(req, res, next) {
 }
 
 function getModelSetting(req, res, next) {
-	console.log("======= v4 getModelSetting ========");
 	const place = utils.APIInfo(req);
 	const username = req.session.user.username;
 	const {model, account} = req.params;
