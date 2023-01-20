@@ -183,7 +183,10 @@ describe("Implied permission::", function () {
 				.send(Object.assign({
 					modelName: modelName,
 					"project": "Sample_Project",
-					subModels:[modelId]
+					subModels:[{
+						"database": sharedTeamspace,
+						"model": modelId
+					}]
 				}, model))
 				.expect(200, done);
 		});
@@ -425,7 +428,10 @@ describe("Implied permission::", function () {
 				.send(Object.assign({
 					modelName : modelName,
 					project: "Sample_Project",
-					subModels:[modelId]
+					subModels:[{
+						"database": sharedTeamspace,
+						"model": modelId
+					}]
 				}, model))
 				.expect(401, done);
 		});
@@ -441,7 +447,10 @@ describe("Implied permission::", function () {
 				.send(Object.assign({
 					project: project2,
 					modelName: modelName,
-					subModels:[modelId]
+					subModels:[{
+						"database": sharedTeamspace,
+						"model": modelId
+					}]
 				}, model))
 				.expect(200, done);
 		});
@@ -763,7 +772,10 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName: modelName,
-					subModels:[modelId]
+					subModels:[{
+						"database": sharedTeamspace,
+						"model": modelId
+					}]
 				}, model))
 				.expect(401, done);
 		});
@@ -1080,7 +1092,10 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName: modelName,
-					subModels:[modelId]
+					subModels:[{
+						"database": sharedTeamspace,
+						"model": modelId
+					}]
 				}, model))
 				.expect(401, done);
 		});
@@ -1382,7 +1397,10 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName: modelName,
-					subModels:[modelId]
+					subModels:[{
+						"database": sharedTeamspace,
+						"model": modelId
+					}]
 				}, model))
 				.expect(401, done);
 		});
