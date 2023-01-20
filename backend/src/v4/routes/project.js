@@ -235,21 +235,21 @@
 	 *     "timestamp": "2019-05-02T16:17:37.902Z",
 	 *     "type": "Federation",
 	 *     "subModels": [
-	 *         {
-	 *           "database": "teamSpace1",
-	 *           "model": "b1fceab8-b0e9-4e45-850b-b9888efd6521",
-	 *           "name": "block"
-	 *         },
-	 *         {
-	 *           "database": "teamSpace1",
-	 *           "model": "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
-	 *           "name": "letters"
-	 *         },
-	 *         {
-	 *           "database": "teamSpace1",
-	 *           "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
-	 *           "name": "pipes"
-	 *         }
+	 *       {
+	 *         "database": "teamSpace1",
+	 *         "model": "b1fceab8-b0e9-4e45-850b-b9888efd6521",
+	 *         "name": "block"
+	 *       },
+	 *       {
+	 *         "database": "teamSpace1",
+	 *         "model": "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+	 *         "name": "letters"
+	 *       },
+	 *       {
+	 *         "database": "teamSpace1",
+	 *         "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+	 *         "name": "pipes"
+	 *       }
 	 *     ],
 	 *     "surveyPoints": [
 	 *       {

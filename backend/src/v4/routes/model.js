@@ -560,11 +560,11 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  *       subModels: [
  *          {
  *             database: "teamSpace1",
- *             model: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+ *             model: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
  *          },
  *          {
  *             database: "teamSpace1",
- *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
  *          }
  *       ],
  *       surveyPoints: [
@@ -712,7 +712,7 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5N
  *       subModels: [
  *          {
  *             database: "teamSpace1",
- *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
  *          },
  *          {
  *             database: "teamSpace1",
@@ -1046,7 +1046,7 @@ router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel,
  *       subModels: [
  *          {
  *             database: "teamSpace1",
- *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
  *          },
  *          {
  *             database: "teamSpace1",
