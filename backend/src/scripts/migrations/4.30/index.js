@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
 const updateFedSettingSubModels = require('./updateFedSettingSubModels');
 
 const scripts = [
+	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
 	{ script: updateFedSettingSubModels, desc: 'Update subModels in federation settings' },
 ];
 

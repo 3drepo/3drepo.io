@@ -30,7 +30,6 @@ const {
 	setModelStatus,
 	createCorrelationId
 } = require("../modelSetting");
-const User = require("../user");
 const responseCodes = require("../../response_codes");
 const importQueue = require("../../services/queue");
 const C = require("../../constants");
@@ -44,6 +43,7 @@ const middlewares = require("../../middlewares/middlewares");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const { addModelToProject, createProject, findOneProject } = require("../project");
+const { getTeamspaceSettings } = require("../teamspaceSetting");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
@@ -717,7 +717,7 @@ async function getModelPermission(username, setting, account) {
 
 	try {
 		let permissions = [];
-		const dbUser = await User.findByUserName(account);
+		const dbUser = await getTeamspaceSettings(account);
 		if(!dbUser) {
 			return [];
 		}

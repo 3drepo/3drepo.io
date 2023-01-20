@@ -331,7 +331,7 @@
 	 *   }
 	 * ]	 *
 	 */
-	router.get("/projects/:project/models",  middlewares.project.canList, listModels);
+	router.get("/projects/:project/models", middlewares.project.canList, listModels);
 
 	/**
 	 * @api {get} /:teamspace/projects List projects
