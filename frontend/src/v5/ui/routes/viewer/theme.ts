@@ -115,20 +115,14 @@ export const theme = createTheme(
 								lineHeight: 22,
 								height: 26,
 							},
-
-							'& .MuiFormHelperText-root': {
-								position: 'relative',
-								height: 0,
-								top: 0,
-							},
 						},
 					},
 				},
 				MuiSelect: {
 					styleOverrides: {
 						select: {
-							border: `1px solid ${COLOR.BASE_LIGHTER}`,
-							lineHeight: '24px',
+							border: 'none',
+							lineHeight: '26px',
 							height: 26,
 							padding: '0 10px',
 							marginTop: 0,

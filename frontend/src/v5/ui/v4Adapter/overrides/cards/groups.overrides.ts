@@ -130,7 +130,7 @@ const expandedGroupItem = css`
 					margin-top: -18px;
 				}
 				${TextFieldContainer} {
-					border: 1px solid ${({ theme }) => theme.palette.base.lighter};
+					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					border-radius: 5px;
 					background-color: ${({ theme }) => theme.palette.primary.contrast};
 
