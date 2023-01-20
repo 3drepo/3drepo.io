@@ -44,9 +44,6 @@ export default css`
 
 		// back arrow icon
 		${TitleIcon} {
-			width: 30px;
-			padding-left: 8px;
-
 			svg {
 				font-size: 1.4rem;
 			}

@@ -26,7 +26,7 @@ const { src, utilScripts } = require('../../helper/path');
 
 const UpdateAddOns = require(`${utilScripts}/teamspaces/updateAddOns`);
 
-const { getAddOns, updateAddOns } = require(`${src}/models/teamspaces`);
+const { getAddOns, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 

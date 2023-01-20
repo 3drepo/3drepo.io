@@ -27,7 +27,7 @@ const { src, utilScripts } = require('../../helper/path');
 
 const RemoveTeamspaceData = require(`${utilScripts}/teamspaces/removeTeamspaceData`);
 
-const { getMembersInfo } = require(`${src}/models/teamspaces`);
+const { getMembersInfo } = require(`${src}/models/teamspaceSettings`);
 const { getUserByUsername } = require(`${src}/models/users`);
 const { createProject, getProjectList } = require(`${src}/models/projectSettings`);
 

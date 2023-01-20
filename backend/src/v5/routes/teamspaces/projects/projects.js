@@ -26,12 +26,16 @@ const { validateProjectData } = require('../../../middleware/dataConverter/input
 
 const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
 
-const getProjectList = (req, res) => {
+const getProjectList = async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
-	Projects.getProjectList(teamspace, user).then((projects) => {
+	try {
+		const projects = await Projects.getProjectList(teamspace, user);
 		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
-	}).catch((err) => respond(req, res, err));
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const createProject = async (req, res) => {

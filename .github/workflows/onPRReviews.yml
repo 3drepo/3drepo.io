@@ -3,9 +3,7 @@ on:
   pull_request:
     types: [ready_for_review, review_requested, review_request_removed]
   pull_request_review:
-    types: [edited, dismissed, submitted]
-  pull_request_review_comment:
-    types: [created]
+    types: [submitted]
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -48,12 +46,19 @@ jobs:
       status: ${{ steps.setStatusOutputIssue.outputs.status }}
     needs: [ get-details, check-merge-ready ]
     steps:
+      - name: getStatus
+        uses: haya14busa/action-cond@v1
+        with:
+          cond: ${{ github.event.action == 'submitted' }}
+          if_true:  ${{ github.event.review.state }}
+          if_false: ${{ github.event.action }}
+        id: statusExtractor
       - name: Set status message for issue
         id: setStatusOutputIssue
         run: |
           set -ex
           case $ACTION in
-            submitted )
+            changes_requested )
               echo "status=Address Feedback" >> $GITHUB_OUTPUT
               ;;
             review_requested )
@@ -67,7 +72,7 @@ jobs:
               ;;
           esac
         env:
-          ACTION: ${{ github.event.action }}
+          ACTION: ${{ steps.statusExtractor.outputs.value }}
 
       - name: Update status on the Issue
         if: ${{ steps.setStatusOutputIssue.outputs.status }}

@@ -15,14 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
-const { getRiskCategories } = require('../../models/teamspaceSettings');
+const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
 
-const Settings = {};
+const scripts = [
+	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
+];
 
-Settings.addTicketTemplate = addTemplate;
-Settings.updateTicketTemplate = updateTemplate;
-Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
-Settings.getRiskCategories = getRiskCategories;
-
-module.exports = Settings;
+module.exports = scripts;
