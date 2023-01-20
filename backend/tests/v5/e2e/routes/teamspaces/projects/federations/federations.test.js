@@ -78,7 +78,7 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			subModels: [{ model: modelWithRevId }],
+			subModels: [modelWithRevId],
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
 	},
@@ -87,7 +87,7 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(true),
-			subModels: [{ model: modelWithoutRevId }],
+			subModels: [modelWithoutRevId],
 		},
 	},
 	{
@@ -302,8 +302,7 @@ const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 		...(fed.properties.desc ? { desc: fed.properties.desc } : {}),
 		code: fed.properties.properties.code,
 		status: fed.properties.status,
-		containers: fed.properties.subModels
-			? fed.properties.subModels.map(({ model }) => model) : undefined,
+		containers: fed.properties.subModels,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 		tickets: {
 			issues: issueCount,

@@ -560,11 +560,7 @@ function listSubModels(account, model, branch = "master") {
 			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
 				if (subModel) {
-					subModels.push({
-						database: ref.owner,
-						model: ref.project,
-						name: subModel.name
-					});
+					subModels.push(ref.project);
 				}
 
 			})
@@ -658,7 +654,7 @@ function isSubModel(account, model) {
 
 		feds.forEach(modelSetting => {
 			promises.push(listSubModels(account, modelSetting._id).then(subModels => {
-				return subModels.find(subModel => subModel.model === model);
+				return subModels.find(subModel => subModel === model);
 			}));
 		});
 

@@ -97,7 +97,7 @@ const models = [
 ];
 
 // setup sub model
-models[2].properties.subModels = [{ model: models[1]._id, database: teamspace }];
+models[2].properties.subModels = [models[1]._id];
 
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
