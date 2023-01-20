@@ -188,7 +188,6 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 
 	if (data.subModels) {
 		setting.federate = true;
-		// setting.subModels = data.subModels;
 	}
 
 	if (data.surveyPoints) {
