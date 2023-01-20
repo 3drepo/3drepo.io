@@ -534,8 +534,14 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  * PUT /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5 HTTP/1.1
  * {
  *    subModels: [
- *          "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
- *          "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *       {
+ *          database: "teamSpace1",
+ *          model: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+ *       },
+ *       {
+ *          database: "teamSpace1",
+ *          model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *       }
  *    ]
  * }
  *
@@ -552,8 +558,14 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  *       timestamp: "2019-08-22T10:42:05.242Z",
  *       type: "Federation",
  *       subModels: [
- *             "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
- *             "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
+ *          {
+ *             database: "teamSpace1",
+ *             model: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+ *          },
+ *          {
+ *             database: "teamSpace1",
+ *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *          }
  *       ],
  *       surveyPoints: [
  *          {
@@ -698,8 +710,14 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5N
  *          }
  *       ],
  *       subModels: [
- *             "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
- *             "b1fceab8-b0e9-4e45-850b-b9888efd6521"
+ *          {
+ *             database: "teamSpace1",
+ *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *          },
+ *          {
+ *             database: "teamSpace1",
+ *             model: "b1fceab8-b0e9-4e45-850b-b9888efd6521"
+ *          }
  *       ]
  *    }
  * ]
@@ -1026,8 +1044,14 @@ router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel,
  *          }
  *       ],
  *       subModels: [
- *             "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
- *             "b1fceab8-b0e9-4e45-850b-b9888efd6521"
+ *          {
+ *             database: "teamSpace1",
+ *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *          },
+ *          {
+ *             database: "teamSpace1",
+ *             model: "b1fceab8-b0e9-4e45-850b-b9888efd6521"
+ *          }
  *       ]
  *    }
  * ]
@@ -1787,6 +1811,7 @@ function updateHeliSpeed(req, res, next) {
 }
 
 function getModelSetting(req, res, next) {
+	console.log("======= v4 getModelSetting ========");
 	const place = utils.APIInfo(req);
 	const username = req.session.user.username;
 	const {model, account} = req.params;

@@ -272,8 +272,16 @@ router.get("/version", printVersion);
  * 					"status": "ok",
  * 					"timestamp": "2017-05-11T12:49:59.000Z",
  * 					"subModels": [
- *						"00000000-0000-0000-0000-000000000001",
- *						"00000000-0000-0000-0000-000000000002",
+ *						{
+ *							"database": "breakingbad",
+ *							"model": "00000000-0000-0000-0000-000000000001",
+ *							"name": "homelab"
+ *						},
+ *						{
+ *							"database": "breakingbad",
+ *							"model": "00000000-0000-0000-0000-000000000002",
+ *							"name": "laundrylab"
+ *						}
  * 					]
  * 				}
  * 			],
