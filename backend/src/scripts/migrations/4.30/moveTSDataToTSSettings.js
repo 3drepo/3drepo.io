@@ -63,7 +63,7 @@ const run = async () => {
 
 	const dbs = {};
 
-	(await listDatabases()).forEach(({ name }) => dbs[name] = 1);
+	(await listDatabases()).forEach(({ name }) => { dbs[name] = 1; });
 
 	const users = await find(
 		USERS_DB_NAME,
