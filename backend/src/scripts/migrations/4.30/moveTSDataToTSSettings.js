@@ -33,11 +33,11 @@ const migrateTeamspaceData = async (user, customData) => {
 	});
 
 	// addOns
-	if (addOns) {
+	if (Object.keys(addOns).length || Object.keys(flags).length) {
 		tsSettingsUpdate.addOns = { ...addOns, ...flags };
 	}
 
-	if (Object.keys(tsSettingsUpdate).length > 0) {
+	if (Object.keys(tsSettingsUpdate).length) {
 		try {
 			await updateOne(user, 'teamspace', {}, { $set: tsSettingsUpdate });
 			return user;
@@ -61,7 +61,9 @@ const run = async () => {
 
 	const query = { $or: Object.keys(oldFields).map((key) => ({ [key]: { $exists: true } })) };
 
-	const dbs = (await listDatabases()).map(({ name }) => name);
+	const dbs = {};
+
+	(await listDatabases()).forEach(({ name }) => dbs[name] = 1);
 
 	const users = await find(
 		USERS_DB_NAME,
@@ -71,15 +73,15 @@ const run = async () => {
 	);
 
 	// Sort users into those with/without a database
-	const [usersWithDb, usersWithoutDb] = users.reduce(([hasDb, noDb], user) => (dbs.includes(user.user)
-		? [[...hasDb, user], noDb] : [hasDb, [...noDb, user]]), [[], []]);
+	const [usersWithDb, usersWithoutDb] = users.reduce(([hasDb, noDb], user) => (dbs[user.user]
+		? [[...hasDb, user], noDb] : [hasDb, [...noDb, user.user]]), [[], []]);
 
-	logger.logError(`-Preparing to migrate the following users: ${usersWithDb.map((user) => user.user)}`);
+	logger.logInfo(`-Preparing to migrate ${usersWithDb.length} users`);
 	const updatedUsers = await Promise.all(usersWithDb.map(({ user, customData }) => migrateTeamspaceData(user,
 		customData)));
 
-	const usersToCleanUp = [...usersWithoutDb.map(({ user }) => user), ...updatedUsers.filter((user) => user)];
-	logger.logError(`-Cleaning up the following users: ${usersToCleanUp}`);
+	const usersToCleanUp = [...usersWithoutDb, ...updatedUsers.filter((user) => user)];
+	logger.logInfo(`-Cleaning up ${usersToCleanUp.length} users`);
 
 	await updateMany(USERS_DB_NAME, 'system.users', { user: { $in: usersToCleanUp }, ...query }, { $unset: oldFields });
 };
