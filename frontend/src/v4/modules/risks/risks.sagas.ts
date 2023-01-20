@@ -32,7 +32,7 @@ import {
 
 import { EXTENSION_RE } from '../../constants/resources';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
+import { imageUrlToBase64IfNotAlready } from '../../helpers/imageUrlToBase64';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
 import { chopShapesUuids } from '../../helpers/shapes';
@@ -412,19 +412,18 @@ function* cloneRisk({ dialogId }) {
 		'status_last_changed',
 	]);
 
-	if (activeRisk.descriptionThumbnail) {
-		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
-		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	const { descriptionThumbnail } = activeRisk;
+
+	if (descriptionThumbnail) {
+		clonedProperties.descriptionThumbnail = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
 	}
 
 	if (clonedProperties.viewpoint?.screenshot) {
-		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
-		clonedProperties.viewpoint.screenshot = `data:image/png;base64,${base64Image}`;
+		clonedProperties.viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
 	}
 
 	if (clonedProperties.viewpoint?.screenshotSmall) {
-		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
-		clonedProperties.viewpoint.screenshotSmall = `data:image/png;base64,${base64Image}`;
+		clonedProperties.viewpoint.screenshotSmall = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
 	}
 
 	try {
