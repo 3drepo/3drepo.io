@@ -59,7 +59,7 @@ function* fetchData({ teamspace, model }) {
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
-		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
+		yield put(DialogActions.showRedirectToTeamspaceDialog(error, teamspace));
 		return;
 	}
 

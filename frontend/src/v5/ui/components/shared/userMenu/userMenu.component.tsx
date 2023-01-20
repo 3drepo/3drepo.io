@@ -58,7 +58,6 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 							/>
 							<UserFullName>
 								<TruncatableName>{user.firstName}</TruncatableName>
-								&nbsp;
 								<TruncatableName>{user.lastName}</TruncatableName>
 							</UserFullName>
 							<UserUserName>{user.username}</UserUserName>
