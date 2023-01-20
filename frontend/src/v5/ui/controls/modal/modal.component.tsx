@@ -31,7 +31,7 @@ export const Modal = ({ onClickClose, open, children, className }: IModal) => (
 		open={open}
 		onClose={onClickClose}
 		className={className}
-		maxWidth={false}
+		maxWidth="md"
 	>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 			<CloseIcon />

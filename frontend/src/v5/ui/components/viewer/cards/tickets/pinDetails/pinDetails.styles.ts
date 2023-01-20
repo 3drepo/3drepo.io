@@ -21,7 +21,7 @@ import styled, { css } from 'styled-components';
 export const PinContainer = styled.div<{ selected: boolean, error: boolean }>`
 	width: auto;
 	color: ${({ theme }) => theme.palette.secondary.main};
-	border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;
 	padding: 10px 15px;
 	margin: 4px 0;

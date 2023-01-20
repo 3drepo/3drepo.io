@@ -27,17 +27,18 @@ export const Title = styled(Button).attrs({
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
-	max-width: 100%;
 	justify-content: flex-start;
+	max-width: 100%;
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
 
-	& span {
+	a {
 		text-overflow: ellipsis;
-		white-space: nowrap;
 		overflow: hidden;
+		max-width: 100%;
+		padding-right: 10px;
 	}
 `;
 
