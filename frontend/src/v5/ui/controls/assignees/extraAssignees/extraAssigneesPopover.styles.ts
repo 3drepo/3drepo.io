@@ -18,7 +18,8 @@
 import styled from 'styled-components';
 
 export const ExtraAssigneesList = styled.ul`
-	padding: 0 20px;
+	padding: 8px 10px;
+	margin: 0;
 `;
 
 export const ExtraAssigneesListItem = styled.li`

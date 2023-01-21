@@ -16,11 +16,7 @@
  */
 
 import { css } from 'styled-components';
-import {
-	Container as ViewerContainer,
-	SearchField,
-	ViewpointsList,
-} from '@/v4/routes/viewerGui/components/views/views.styles';
+import { ViewpointsList } from '@/v4/routes/viewerGui/components/views/views.styles';
 import {
 	Image,
 	ThumbnailPlaceholder,
@@ -31,17 +27,6 @@ import {
 
 export default css`
 	#views-card {
-		${ViewerContainer} {
-			${SearchField} {
-				.MuiOutlinedInput-notchedOutline, .Mui-focused .MuiOutlinedInput-notchedOutline {
-					box-sizing: border-box;
-					box-shadow: none;
-					border: 0;
-					border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-					border-radius: 0;
-				}
-			}
-		}
 
 		${NewViewpointName} {
 			margin-top: -18px;

@@ -725,7 +725,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-
 	testGetAllTemplates();
 	testGetTemplateDetails();
 	testAddTicket();

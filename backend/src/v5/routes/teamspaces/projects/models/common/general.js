@@ -15,113 +15,143 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation, isAdminToProject } = require('../../../../middleware/permissions/permissions');
-const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-const Federations = require('../../../../processors/teamspaces/projects/models/federations');
+const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { formatModelSettings, formatModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
+const {
+	hasAccessToTeamspace,
+	hasAdminAccessToContainer,
+	hasAdminAccessToFederation,
+	hasReadAccessToContainer,
+	hasReadAccessToFederation,
+	isAdminToProject,
+} = require('../../../../../middleware/permissions/permissions');
+const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
+const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
+const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
-const { getUserFromSession } = require('../../../../utils/sessions');
-const { respond } = require('../../../../utils/responder');
+const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { getUserFromSession } = require('../../../../../utils/sessions');
+const { respond } = require('../../../../../utils/responder');
 
-const addFederation = (req, res) => {
+const addModel = (isFed) => async (req, res) => {
 	const { teamspace, project } = req.params;
-
-	Federations.addFederation(teamspace, project, req.body).then((federationId) => {
-		respond(req, res, templates.ok, { _id: federationId });
-	}).catch(
+	try {
+		const fn = isFed ? Federations.addFederation : Containers.addContainer;
+		const modelId = await fn(teamspace, project, req.body);
+		respond(req, res, templates.ok, { _id: modelId });
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
-};
-
-const deleteFederation = (req, res) => {
-	const { teamspace, project, federation } = req.params;
-
-	Federations.deleteFederation(teamspace, project, federation).then(() => {
-		respond(req, res, templates.ok);
-	}).catch(
-		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
-};
-
-const getFederationList = (req, res) => {
-	const user = getUserFromSession(req.session);
-	const { teamspace, project } = req.params;
-	Federations.getFederationList(teamspace, project, user).then((federations) => {
-		respond(req, res, templates.ok, { federations });
-	}).catch((err) => respond(req, res, err));
-};
-
-const appendFavourites = (req, res) => {
-	const user = getUserFromSession(req.session);
-	const { teamspace, project } = req.params;
-	const favouritesToAdd = req.body.federations;
-
-	Federations.appendFavourites(user, teamspace, project, favouritesToAdd)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
-};
-
-const deleteFavourites = (req, res) => {
-	const user = getUserFromSession(req.session);
-	const { teamspace, project } = req.params;
-	if (req.query.ids?.length) {
-		const favouritesToRemove = req.query.ids.split(',');
-
-		Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
-			.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
-	} else {
-		respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
+		respond(req, res, err);
 	}
 };
 
-const getFederationStats = (req, res) => {
-	const { teamspace, federation } = req.params;
-	Federations.getFederationStats(teamspace, federation).then((stats) => {
-		const statsSerialised = { ...stats };
-		statsSerialised.lastUpdated = stats.lastUpdated ? stats.lastUpdated.getTime() : undefined;
-		respond(req, res, templates.ok, statsSerialised);
-	}).catch(
-		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
-};
-
-const updateFederationSettings = (req, res) => {
-	const { teamspace, project, federation } = req.params;
-
-	Federations.updateSettings(teamspace, project, federation, req.body)
-		.then(() => respond(req, res, templates.ok)).catch(
-			// istanbul ignore next
-			(err) => respond(req, res, err),
-		);
-};
-
-const getFederationSettings = (req, res, next) => {
-	const { teamspace, federation } = req.params;
-
-	Federations.getSettings(teamspace, federation)
-		.then((settings) => {
-			req.outputData = settings;
-			next();
-		})
-		.catch(
+const deleteModel = (isFed) => async (req, res) => {
+	const { teamspace, project, model } = req.params;
+	try {
+		const fn = isFed ? Federations.deleteFederation : Containers.deleteContainer;
+		await fn(teamspace, project, model);
+		respond(req, res, templates.ok);
+	} catch (err) {
 		// istanbul ignore next
-			(err) => respond(req, res, err),
-		);
+		respond(req, res, err);
+	}
 };
 
-const establishRoutes = () => {
-	const router = Router({ mergeParams: true });
+const getModelList = (isFed) => async (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
 
+	try {
+		const fn = isFed ? Federations.getFederationList : Containers.getContainerList;
+		const models = await fn(teamspace, project, user);
+		respond(req, res, templates.ok, { [`${isFed ? 'federations' : 'containers'}`]: models });
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const appendFavourites = (isFed) => async (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	const favouritesToAdd = req.body[isFed ? 'federations' : 'containers'];
+
+	try {
+		const { appendFavourites: fn } = isFed ? Federations : Containers;
+		await fn(user, teamspace, project, favouritesToAdd);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const deleteFavourites = (isFed) => async (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	try {
+		const { deleteFavourites: fn } = isFed ? Federations : Containers;
+		if (req.query.ids?.length) {
+			const favouritesToRemove = req.query.ids.split(',');
+
+			await fn(user, teamspace, project, favouritesToRemove);
+			respond(req, res, templates.ok);
+		} else {
+			respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
+		}
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const getModelStats = (isFed) => async (req, res, next) => {
+	const { teamspace, model } = req.params;
+	try {
+		const fn = isFed ? Federations.getFederationStats : Containers.getContainerStats;
+		const stats = await fn(teamspace, model);
+		req.outputData = stats;
+		await next();
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
+const updateModelSettings = (isFed) => async (req, res) => {
+	const { teamspace, project, model } = req.params;
+	try {
+		const { updateSettings: fn } = isFed ? Federations : Containers;
+		await fn(teamspace, project, model, req.body);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getModelSettings = (isFed) => async (req, res, next) => {
+	const { teamspace, model } = req.params;
+	try {
+		const { getSettings: fn } = isFed ? Federations : Containers;
+		const settings = await fn(teamspace, model);
+		req.outputData = settings;
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const establishRoutes = (isFed) => {
+	const router = Router({ mergeParams: true });
+	const hasAdminAccessToModel = isFed ? hasAdminAccessToFederation : hasAdminAccessToContainer;
+	const hasReadAccessToModel = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
+	const canDeleteModel = isFed ? async (req, res, next) => { await next(); } : canDeleteContainer;
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations:
+	 * /teamspaces/{teamspace}/projects/{project}/models:
 	 *   post:
-	 *     description: Add a new federation to the specified project the user is admin of
-	 *     tags: [Federations]
-	 *     operationId: addFederation
+	 *     description: Add a new model to the specified project the user is admin of
+	 *     tags: [Models]
+	 *     operationId: addModel
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -148,7 +178,7 @@ const establishRoutes = () => {
 	 *               name:
 	 *                 type: string
 	 *                 example: Lego House Architecture
-	 *                 description: Name of the federation - this has to be unique within the project
+	 *                 description: Name of the model - this has to be unique within the project
 	 *                 maxLength: 120
 	 *               unit:
 	 *                 type: string
@@ -158,19 +188,19 @@ const establishRoutes = () => {
 	 *               desc:
 	 *                 type: string
 	 *                 example: The Architecture model of the Lego House
-	 *                 description: Federation description
+	 *                 description: Model description
 	 *                 maxLength: 50
 	 *               code:
 	 *                 type: string
 	 *                 example: LEGO_ARCHIT_001
-	 *                 description: Federation reference code
+	 *                 description: Model reference code
 	 *               type:
 	 *                 type: string
 	 *                 example: Architecture
-	 *                 description: Federation type
+	 *                 description: Model type
 	 *               surveyPoints:
 	 *                 type: array
-	 *                 description: Survey points for federation location
+	 *                 description: Survey points for model location
 	 *                 items:
 	 *                   type: object
 	 *                   properties:
@@ -200,7 +230,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/projectNotFound"
 	 *       200:
-	 *         description: Federation ID
+	 *         description: Model ID
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -209,18 +239,18 @@ const establishRoutes = () => {
 	 *                 _id:
 	 *                   type: string
 	 *                   format: uuid
-	 *                   description: Federation ID
+	 *                   description: Model ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('/', isAdminToProject, validateAddModelData, addFederation);
+	router.post('/', isAdminToProject, validateAddModelData(isFed), addModel(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   get:
-	 *     description: Get a list of federations within the specified project the user has access to
-	 *     tags: [Federations]
-	 *     operationId: getFederationList
+	 *     description: Get a list of models within the specified project the user has access to
+	 *     tags: [Models]
+	 *     operationId: getModelList
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -234,48 +264,55 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/federationNotFound"
+	 *         $ref: "#/components/responses/containerNotFound"
 	 *       200:
-	 *         description: returns list of federations
+	 *         description: returns list of models
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *                 federations:
+	 *                 models:
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
 	 *                       id:
 	 *                         type: string
-	 *                         description: Federation ID
+	 *                         description: Model ID
 	 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
 	 *                       name:
 	 *                         type: string
-	 *                         description: name of the federation
+	 *                         description: name of the model
 	 *                         example: Complete structure
 	 *                       role:
 	 *                         $ref: "#/components/schemas/roles"
 	 *                       isFavourite:
 	 *                         type: boolean
-	 *                         description: whether the federation is a favourited item for the user
+	 *                         description: whether the model is a favourited item for the user
 	 *
 	 *
 	 */
-	router.get('/', hasAccessToTeamspace, getFederationList);
+	router.get('/', hasAccessToTeamspace, getModelList(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/favourites:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   patch:
-	 *     description: Add federations to the user's favourites list
-	 *     tags: [Federations]
-	 *     operationId: appendFederations
+	 *     description: Add models to the user's favourites list
+	 *     tags: [Models]
+	 *     operationId: appendModels
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: name of teamspace
@@ -289,13 +326,20 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *               federations:
+	 *               models:
 	 *                 type: array
 	 *                 items:
 	 *                   type: string
@@ -306,17 +350,17 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: adds the federations found in the request body to the user's favourites list
+	 *         description: adds the models found in the request body to the user's favourites list
 	 */
-	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/favourites:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   delete:
-	 *     description: Remove federations from the user's favourites list
-	 *     tags: [Federations]
-	 *     operationId: deleteFederations
+	 *     description: Remove models from the user's favourites list
+	 *     tags: [Models]
+	 *     operationId: deleteModels
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: name of teamspace
@@ -331,7 +375,7 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *       - name: ids
-	 *         description: list of federation ids to remove (comma separated)
+	 *         description: list of model ids to remove (comma separated)
 	 *         in: query
 	 *         schema:
 	 *           type: string
@@ -342,17 +386,17 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: removes the federations found in the request body from the user's favourites list
+	 *         description: removes the models found in the request body from the user's favourites list
 	 */
-	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/stats:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
 	 *   get:
-	 *     description: Get the statistics and general information about a federation
-	 *     tags: [Federations]
-	 *     operationId: getFederationStats
+	 *     description: Get the statistics and general information about a model
+	 *     tags: [Models]
+	 *     operationId: getModelStats
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -366,8 +410,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: federation
-	 *         description: Federation ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+   	 *       - name: model
+	 *         description: Model ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -378,7 +429,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns the statistics of a federation
+	 *         description: returns the statistics of a model
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -386,15 +437,15 @@ const establishRoutes = () => {
 	 *               properties:
 	 *                 code:
 	 *                   type: string
-	 *                   description: Federation code
+	 *                   description: Model code
 	 *                   example: STR-01
      *                 status:
 	 *                   type: string
-	 *                   description: Current status of the federation
+	 *                   description: Current status of the model
 	 *                   example: ok
    	 *                 containers:
 	 *                   type: array
-	 *                   description: The IDs of the models the federation consists of
+	 *                   description: The IDs of the models the model consists of
 	 *                   items:
 	 *                     type: string
 	 *                     format: uuid
@@ -403,28 +454,28 @@ const establishRoutes = () => {
 	 *                   properties:
 	 *                     issues:
 	 *                       type: integer
-	 *                       description: The number of non closed issues of the federation
+	 *                       description: The number of non closed issues of the model
 	 *                     risks:
 	 *                       type: integer
-	 *                       description: The number of unmitigated risks of the federation
+	 *                       description: The number of unmitigated risks of the model
      *                 desc:
 	 *                   type: string
-	 *                   description: Federation description
+	 *                   description: Model description
 	 *                   example: Floor 1 MEP with Facade
      *                 lastUpdated:
 	 *                   type: integer
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
 	 */
-	router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
+	router.get('/:model/stats', hasReadAccessToModel, getModelStats(isFed), formatModelStats(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   delete:
-	 *     description: Delete federation from project the user is admin of
-	 *     tags: [Federations]
-	 *     operationId: deleteFederation
+	 *     description: Delete model from project the user is admin of
+	 *     tags: [Models]
+	 *     operationId: deleteModel
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -438,8 +489,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: federation
-	 *         description: Federation ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+   	 *       - name: model
+	 *         description: Model ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -448,19 +506,19 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/federationNotFound"
+	 *         $ref: "#/components/responses/containerNotFound"
 	 *       200:
-	 *         description: Federation removed.
+	 *         description: Model removed.
 	 */
-	router.delete('/:federation', hasAdminAccessToFederation, deleteFederation);
+	router.delete('/:model', hasAdminAccessToModel, canDeleteModel, deleteModel(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   patch:
-	 *     description: Updates the settings of a federation
-	 *     tags: [Federations]
-	 *     operationId: updateFederationSettings
+	 *     description: Updates the settings of a model
+	 *     tags: [Models]
+	 *     operationId: updateModelSettings
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: name of teamspace
@@ -474,8 +532,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: federation
-	 *         description: ID of federation
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: ID of model
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -488,7 +553,7 @@ const establishRoutes = () => {
 	 *             properties:
 	 *               name:
 	 *                 type: string
-	 *                 example: federation1
+	 *                 example: model1
 	 *               desc:
 	 *                 type: string
 	 *                 example: description1
@@ -528,17 +593,17 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: updates the settings of the federation
+	 *         description: updates the settings of the model
 	 */
-	router.patch('/:federation', hasAdminAccessToFederation, validateUpdateSettingsData, updateFederationSettings);
+	router.patch('/:model', hasAdminAccessToModel, validateUpdateSettingsData(isFed), updateModelSettings(isFed));
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   get:
-	 *     description: Get the model settings of federation
-	 *     tags: [Federations]
-	 *     operationId: getFederationSettings
+	 *     description: Get the model settings of model
+	 *     tags: [Models]
+	 *     operationId: getModelSettings
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -552,8 +617,15 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: federation
-	 *         description: Federation ID
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Model ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -564,14 +636,14 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns the model settings of a federation
+	 *         description: returns the model settings of a model
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:federation', hasReadAccessToFederation, getFederationSettings, formatModelSettings);
+	router.get('/:model', hasReadAccessToModel, getModelSettings(isFed), formatModelSettings);
 	return router;
 };
 
-module.exports = establishRoutes();
+module.exports = establishRoutes;
