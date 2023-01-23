@@ -680,7 +680,12 @@ async function _createAccounts(roles, userName) {
 			}
 
 			const tsPromises = [];
-			const settings = await TeamspaceSettings.getTeamspaceSettings(role.db);
+			let settings;
+			try {
+				settings = await TeamspaceSettings.getTeamspaceSettings(role.db);
+			} catch (err) {
+				return;
+			}
 			const permission = AccountPermissions.findByUser(settings, userName);
 
 			if (permission) {
