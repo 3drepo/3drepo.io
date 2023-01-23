@@ -21,7 +21,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Comment } from './comment/comment.component';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
 import { MinimumComment } from '@/v5/store/tickets/tickets.types';
@@ -41,109 +42,12 @@ import {
 	DeleteButton,
 	CommentReplyContainer,
 } from './commentsPanel.styles';
+import { Comment } from './comment/comment.component';
 import { addAuthor, addReply } from './comment/commentMarkDown/commentMarkDown.helpers';
 import { MDCommentReply } from './comment/commentMarkDown/markDownElements/markDownComponents.component';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-
-const CHARS_LIMIT = 1200;
-
-const commentsNotStateAll: Partial<MinimumComment>[] = [
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('12 12 2021'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: 'This is n current user comment',
-		createdAt: new Date('1 1 2022'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: 'short',
-		createdAt: new Date('1 1 2022'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: 'Super duper uper bonder longgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg sdfs dfs dfs df sdf sd fs df sdf sdf sdfsd fsdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf ',
-		createdAt: new Date('1 1 2022'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('1 23 2022'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('4 1 2022'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'inviteUser1',
-		comment: 'A comment from an external user',
-		createdAt: new Date('4 1 2022'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: 'This is n current user comment',
-		createdAt: new Date('1 1 2023'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: 'This is n current user comment',
-		createdAt: new Date('1 17 2023'),
-		deleted: true,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: 'This is n current user comment',
-		createdAt: new Date(2023, 0, 18, 10),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'inviteUser1',
-		comment: 'A comment from an external user',
-		createdAt: new Date(2023, 0, 18, 13),
-		deleted: true,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'inviteUser1',
-		comment: 'A comment from an external user',
-		createdAt: new Date(2023, 0, 18, 15),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'This is n current user comment',
-		createdAt: new Date(2023, 0, 18, 17),
-		deleted: true,
-	},
-].map((x, index) => ({ ...x, _id: index+"" }));
+import { CHARS_LIMIT } from './comment/comment.helpers';
 
 export const CommentsPanel = () => {
-	const [comments, setComments] = useState(commentsNotStateAll);
 	const [commentReply, setCommentReply] = useState(null);
 	const formData = useForm<{ comment: string }>({ mode: 'all' });
 	const inputComment = formData.watch('comment');
@@ -151,6 +55,7 @@ export const CommentsPanel = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const { comments = [], number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
@@ -181,29 +86,6 @@ export const CommentsPanel = () => {
 	};
 	
 	const createComment = async () => {
-		// let s, p;
-		// try {
-		// 	s = await createFederationComment(
-		// 		teamspace,
-		// 		project,
-		// 		containerOrFederation,
-		// 		ticketId,
-		// 		message,
-		// 	)
-		// } catch (e) {
-		// 	alert("single fails")
-		// }
-		// try {
-		// 	p = await createFederationsComment(
-		// 		teamspace,
-		// 		project,
-		// 		containerOrFederation,
-		// 		ticketId,
-		// 		message,
-		// 	)
-		// } catch (e) {
-		// 	alert("plural fails")
-		// }
 		let comment = inputComment;
 		if (commentReply) {
 			comment = addReply(commentReply, comment); 
@@ -211,17 +93,35 @@ export const CommentsPanel = () => {
 		const author = currentUser.username;
 		comment = addAuthor(author, comment);
 		const newComment: MinimumComment = {
-			_id: commentsNotStateAll.length + 1 + "",
 			author,
 			comment,
 			images: [],
 			createdAt: new Date(),
+			updatedAt: new Date(),
 			deleted: false,
 		};
-		// setComments(comments.concat(newComment));
+		TicketsActionsDispatchers.createTicketComment(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+			newComment,
+		);
 		setCommentReply(null);
 		formData.reset();
 	};
+
+	useEffect(() => {
+		if (!number) return;
+		TicketsActionsDispatchers.fetchTicketComments(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+		)
+	}, [number]);
 
 	return (
 		<Accordion
