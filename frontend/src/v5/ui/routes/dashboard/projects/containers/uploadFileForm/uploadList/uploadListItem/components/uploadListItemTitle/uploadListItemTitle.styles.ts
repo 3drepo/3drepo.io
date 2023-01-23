@@ -22,8 +22,12 @@ export const DashboardListItemTitle = styled(ListItemTitle)`
 	min-width: 90px;
 	padding-right: 5px;
 	box-sizing: border-box;
+
 	.MuiButton-root {
 		cursor: default;
 		text-decoration-line: none;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		display: inline-block;
 	}
 `;

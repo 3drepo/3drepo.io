@@ -17,7 +17,6 @@
 
 import { css } from 'styled-components';
 import { ActionsLine } from '@/v4/routes/components/textField/textField.styles';
-import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 import { DescriptionImage, Content as PropertiesTabContent } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { DateFieldContainer as IssuesDateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
 import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
@@ -30,6 +29,13 @@ export default css`
 		${StyledFormControl} {
 			input {
 				padding: 0px 11px;
+			}
+
+			.MuiSelect-select {
+				border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			}
+			.Mui-focused .MuiSelect-select {
+				border-color: ${({ theme }) => theme.palette.primary.main};
 			}
 
 			// Drop down icon for date selector
@@ -69,21 +75,18 @@ export default css`
 				}
 			}
 		}
-	}
-
-	${DescriptionImage} img {
-		border-radius: 5px;
-	}
-
-	${UpdateButtonsContainer} {
-		justify-content: left;
-		padding-top: 0 !important;
-		${StyledButton} {
-			margin: 0;
+		${DescriptionImage} img {
+			border-radius: 5px;
 		}
-
-		${ButtonContainer} {
-			min-height: 26px;
+	
+		${UpdateButtonsContainer} {
+			justify-content: left;
+			padding-top: 0;
+	
+			${ButtonContainer} {
+				min-height: 26px;
+			}
 		}
 	}
+
 `;

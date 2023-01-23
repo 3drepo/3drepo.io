@@ -23,6 +23,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
+	const { getTeamspaceSettings } = require("../models/teamspaceSetting");
 	const utils = require("../utils");
 	const _ = require("lodash");
 
@@ -140,13 +141,13 @@
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
 	function listPermissions(req, res, next) {
-		User.findByUserName(req.params.account)
-			.then(user => {
-				const permissions = user.customData.permissions;
+		getTeamspaceSettings(req.params.account)
+			.then(settings => {
+				const permissions = settings.permissions;
 
 				return User.getAllUsersInTeamspace(req.params.account).then(
 					users => {
-						users.forEach(_user => {
+						users.forEach(async _user => {
 							if (
 								!_.find(permissions, { user: _user })
 							) {
@@ -177,7 +178,7 @@
 			if(req.params.account === req.body.user) {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
-				User.findByUserName(req.params.account)
+				getTeamspaceSettings(req.params.account)
 					.then(teamspace => {
 						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
 					})
@@ -199,7 +200,7 @@
 			if(req.params.account === req.params.user) {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
-				User.findByUserName(req.params.account)
+				getTeamspaceSettings(req.params.account)
 					.then(teamspace => {
 						return AccountPermissions.update(teamspace, req.params.user, req.body.permissions);
 					})
@@ -216,9 +217,9 @@
 	}
 
 	function deletePermission(req, res, next) {
-		User.findByUserName(req.params.account)
-			.then(user => {
-				return AccountPermissions.remove(user, req.params.user);
+		getTeamspaceSettings(req.params.account)
+			.then(teamspaceSettings => {
+				return AccountPermissions.remove(teamspaceSettings, req.params.user);
 			})
 			.then(() => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});

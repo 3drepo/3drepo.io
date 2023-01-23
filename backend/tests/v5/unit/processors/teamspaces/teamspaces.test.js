@@ -30,8 +30,8 @@ const UsersModel = require(`${src}/models/users`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
-jest.mock('../../../../../src/v5/models/teamspaces');
-const TeamspacesModel = require(`${src}/models/teamspaces`);
+jest.mock('../../../../../src/v5/models/teamspaceSettings');
+const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
 jest.mock('../../../../../src/v5/models/roles');
 const RolesModel = require(`${src}/models/roles`);

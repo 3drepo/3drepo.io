@@ -25,21 +25,26 @@ const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
 
-const getTeamspaceList = (req, res) => {
+const getTeamspaceList = async (req, res) => {
 	const user = req.session.user.username;
-	Teamspaces.getTeamspaceListByUser(user).then((teamspaces) => {
+	try {
+		const teamspaces = await Teamspaces.getTeamspaceListByUser(user);
 		respond(req, res, templates.ok, { teamspaces });
-	}).catch((err) => respond(req, res, err));
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
 };
 
-const getTeamspaceMembers = (req, res) => {
+const getTeamspaceMembers = async (req, res) => {
 	const { teamspace } = req.params;
-	Teamspaces.getTeamspaceMembersInfo(teamspace).then((members) => {
+	try {
+		const members = await Teamspaces.getTeamspaceMembersInfo(teamspace);
 		respond(req, res, templates.ok, { members });
-	}).catch(
+	} catch (err) {
 		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 const getAvatar = async (req, res) => {

@@ -20,31 +20,50 @@ import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButto
 import styled, { css } from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
 
-export const GroupsTreeListItem = styled.li`
+export const GroupsTreeListItem = styled.li<{ $highlighted?: boolean }>`
+	background-color: ${({ $highlighted, theme: { palette } }) => {
+		if (isV5()) return $highlighted ? palette.base.lightest : palette.primary.contrast;
+		return $highlighted ? '#F7F7F7' : '#FFFFFF';
+	}};
 	cursor: default;
 	position: relative;
 `;
 
-const GroupsTreeListItemContainerV4 = css<{$highlighted?: boolean}>`
-	background-color: ${({ $highlighted }) => ($highlighted ? '#F7F7F7' : '#FFFFFF')};
-	border-bottom: 1px solid #DCDCDC;
+export const Separator = styled.hr``;
+
+const GroupsTreeListItemContainerV4 = css`
+	max-width: 282px;
+	
+	~ ${Separator} {
+		border: solid 0 #DCDCDC;
+	}
 `;
 
-const GroupsTreeListItemContainerV5 = css<{$highlighted?: boolean}>`
-	background-color: ${({ $highlighted, theme: { palette } }) => ($highlighted ? palette.base.lightest : palette.primary.contrast)};
-	border-bottom: 1px solid  ${({ theme: { palette } }) => palette.base.lightest};
+const GroupsTreeListItemContainerV5 = css`
+	max-width: 311px;
+
+	~ ${Separator} {
+		border: solid 0 ${({ theme: { palette } }) => palette.base.lightest};
+	}
 `;
 
-export const GroupsTreeListItemContainer = styled.div<{$highlighted?: boolean, $depth }>`
+export const GroupsTreeListItemContainer = styled.div<{ $depth }>`
 	padding-left: ${({ $depth }) => $depth * 10}px;
 	min-height: 41px;
 	align-items: center;
 	display: flex;
+	overflow: hidden;
+	box-sizing: border-box;
 	${isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4}
+
+	~ ${Separator} {
+		margin: 0;
+		border-bottom-width: 1px;
+	}
 `;
 
 const IconSize = css`
-	width: 30px;
+	min-width: 30px;
 	height: 28px;
 `;
 
@@ -58,7 +77,7 @@ const PseudoElement = css`
 
 export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
 	${IconSize}
-	padding: 0 0 px;
+	padding: 0;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -101,6 +120,8 @@ export const GroupItemTextContainer = styled.div`
 	padding-left: 10px;
 	display: inline-flex;
 	flex-direction: column;
+	max-width: 100%;
+	overflow: hidden;
 `;
 
 const GroupItemNameV4 = css`
@@ -109,13 +130,11 @@ const GroupItemNameV4 = css`
 	font-weight: 500;
 	font-size: 12px;
 	line-height: 16px;
-	max-width: 233px;
 `;
 
 const GroupItemNameV5 = css`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
-	max-width: 261px;
 `;
 
 const GroupItemObjectsV4 = css`
