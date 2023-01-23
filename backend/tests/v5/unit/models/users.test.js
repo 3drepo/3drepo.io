@@ -23,7 +23,6 @@ jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString } = require('../../helper/services');
-const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
@@ -422,7 +421,6 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 				company: newUserData.company,
 			},
 		},
-		permissions: newUserData.permissions,
 	};
 
 	if (newUserData.sso) {
@@ -451,7 +449,6 @@ const testAddUser = () => {
 				mailListAgreed: true,
 				countryCode: 'GB',
 				company: generateRandomString(),
-				permissions: [],
 			};
 
 			const fn = jest.spyOn(db, 'createUser');
@@ -475,7 +472,6 @@ const testAddUser = () => {
 				mailListAgreed: true,
 				countryCode: 'GB',
 				company: generateRandomString(),
-				permissions: [],
 				sso: {
 					type: generateRandomString(),
 					id: generateRandomString(),
@@ -512,20 +508,6 @@ const testVerify = () => {
 					'customData.billing.billingInfo.company': 1,
 					'customData.mailListOptOut': 1,
 				});
-		});
-	});
-};
-
-const testGrantTeamspacePermissionToUser = () => {
-	describe('Grant teamspace permission to user', () => {
-		test('Should grant teamspace permission to user', async () => {
-			const teamspace = generateRandomString();
-			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
-			await User.grantAdminToUser(username, teamspace);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
-				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
 };
@@ -638,7 +620,6 @@ describe('models/users', () => {
 	testAddUser();
 	testRemoveUser();
 	testVerify();
-	testGrantTeamspacePermissionToUser();
 	testIsAccountActive();
 	testUnlinkFromSso();
 	testLinkToSso();

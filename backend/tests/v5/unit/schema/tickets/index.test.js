@@ -28,8 +28,8 @@ const JobsModel = require(`${src}/models/jobs`);
 
 const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
-jest.mock('../../../../../src/v5/models/teamspaces');
-const TeamspaceModel = require(`${src}/models/teamspaces`);
+jest.mock('../../../../../src/v5/models/teamspaceSettings');
+const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
 
 const TicketSchema = require(`${src}/schemas/tickets`);
 const {

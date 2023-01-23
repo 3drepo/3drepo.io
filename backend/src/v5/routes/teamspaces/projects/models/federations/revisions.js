@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Federations = require('../../../../processors/teamspaces/projects/models/federations');
+const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasWriteAccessToFederation } = require('../../../../middleware/permissions/permissions');
-const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
-const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
+const { getUserFromSession } = require('../../../../../utils/sessions');
+const { hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
+const { respond } = require('../../../../../utils/responder');
+const { templates } = require('../../../../../utils/responseCodes');
+const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 
 const createNewFederationRevision = async (req, res) => {
 	const revInfo = req.body;
@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [Federations]
+	 *     tags: [Revisions]
 	 *     operationId: createNewFederationRevision
 	 *     parameters:
 	 *       - name: teamspace
