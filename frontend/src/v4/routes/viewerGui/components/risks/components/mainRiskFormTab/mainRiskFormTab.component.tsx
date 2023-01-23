@@ -75,7 +75,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 	};
 
 	return (
-		<Content active={active}>
+		<Content active={active} id="risks-card-details">
 			<Container>
 				<Field name="desc" render={({ field }) => (
 					<TextField

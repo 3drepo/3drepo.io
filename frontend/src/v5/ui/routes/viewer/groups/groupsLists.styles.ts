@@ -26,6 +26,6 @@ export const GroupsTreeList = styled.ul`
 export const GroupsListContainer = styled.div`
 	/* stylelint-disable-next-line */
 	& > ${GroupsTreeList} > ${GroupsSetTreeListItemComponent} {
-		padding-top: 11px;
+		margin-top: 11px;
 	}
 `;

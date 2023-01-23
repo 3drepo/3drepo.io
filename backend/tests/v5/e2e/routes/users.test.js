@@ -74,7 +74,6 @@ const setupData = async () => {
 				token: validEmailToken.token,
 				expiredAt: validEmailToken.expiredAt,
 			},
-			permissions: [],
 		}),
 		ServiceHelper.db.createUser(nonVerifiedUserWithExpiredToken, [], {
 			inactive: true,
@@ -82,7 +81,6 @@ const setupData = async () => {
 				token: expiredEmailToken.token,
 				expiredAt: expiredEmailToken.expiredAt,
 			},
-			permissions: [],
 		}),
 		ServiceHelper.db.createUser(testUserWithToken, [], {
 			email: userEmail2,

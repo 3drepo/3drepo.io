@@ -15,13 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Tooltip as TooltipComponent, alpha } from '@mui/material';
+import { Tooltip as TooltipComponent } from '@mui/material';
 
 import withStyles from '@mui/styles/withStyles';
-
-export const fadeToLeft = (color: string) => `
-	background-image: linear-gradient(to left, ${color} 0%, ${alpha(color, 0.886)} 37.72%, ${alpha(color, 0)} 52.55%);
-`;
 
 export const Tooltip = withStyles(() => ({
 	tooltip: {

@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { respond, writeStreamRespond } = require('../../../../utils/responder');
-const Containers = require('../../../../processors/teamspaces/projects/models/containers');
+const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../../middleware/permissions/permissions');
+const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
-const { getUserFromSession } = require('../../../../utils/sessions');
-const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
-const { templates } = require('../../../../utils/responseCodes');
-const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
-const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { getUserFromSession } = require('../../../../../utils/sessions');
+const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
+const { templates } = require('../../../../../utils/responseCodes');
+const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -79,8 +79,8 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
 	 *   get:
 	 *     description: Get a list of revisions of a container
-	 *     tags: [Containers]
-	 *     operationId: getRevisions
+	 *     tags: [Revisions]
+	 *     operationId: getContainerRevisions
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -145,7 +145,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [Containers]
+	 *     tags: [Revisions]
 	 *     operationId: createNewContainerRevision
 	 *     parameters:
 	 *       - name: teamspace
@@ -208,8 +208,8 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}:
 	 *   patch:
 	 *     description: Update a revision. Currently only the void status can be updated.
-	 *     tags: [Containers]
-	 *     operationId: updateRevisionStatus
+	 *     tags: [Revisions]
+	 *     operationId: updateContainerRevisionStatus
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -260,8 +260,8 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
 	 *   get:
 	 *     description: Downloads the model files of the selected revision
-	 *     tags: [Containers]
-	 *     operationId: downloadRevisionFiles
+	 *     tags: [Revisions]
+	 *     operationId: downloadContainerRevisionFiles
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
