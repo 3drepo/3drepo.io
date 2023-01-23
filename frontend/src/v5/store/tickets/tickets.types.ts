@@ -36,6 +36,7 @@ export interface ITicket {
 	type: string,
 	properties: Property,
 	modules?: Record<string, Property>,
+	comments?: IComment[],
 }
 
 export interface TemplateModule {
@@ -52,7 +53,12 @@ export interface ITemplate {
 	code: string;
 	properties: PropertyDefinition[];
 	modules?: TemplateModule[];
-	config: any;
+	config: {
+		comments: boolean;
+		defaultView: boolean;
+		issueProperties: boolean;
+		pin: boolean;
+	};
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;
@@ -76,4 +82,30 @@ export type Viewpoint = {
 	screenshot?: any;
 	camera: Camera;
 	clippingPlanes?: ClippingPlane[];
+};
+
+export type MinimumComment = {
+	comment: string, // long description format (optional)
+	images: string[], // list of resource id references (optional)
+	author: string,
+	createdAt: Date,
+	deleted: boolean,
+};
+
+export type IComment = MinimumComment & {
+	_id: string,
+	// ticket: string, 
+	// teamspace: string,
+	// project: string,
+	// model: string,
+	updatedAt: Date,
+	// history: Array<ICommentBody & { timestamp : Date }>,
+};
+
+export type IRichComment = IComment & {
+	teamspace: string,
+	project: string,
+	model: string,
+	ticket: string, 
+	history: Array<MinimumComment & { timestamp : Date }>,
 };

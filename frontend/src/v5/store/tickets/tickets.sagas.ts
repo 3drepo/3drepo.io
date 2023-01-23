@@ -29,6 +29,7 @@ import {
 	CreateTicketAction,
 	FetchTemplateAction,
 	FetchRiskCategoriesAction,
+	FetchTicketCommentsAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -61,6 +62,24 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model} ' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+		}));
+	}
+}
+
+export function* fetchTicketComments({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketCommentsAction) {
+	try {
+		const fetchModelTicketComments = isFederation
+			? API.Tickets.fetchFederationTicketComments
+			: API.Tickets.fetchContainerTicketComments;
+		const comments = yield fetchModelTicketComments(teamspace, projectId, modelId, ticketId);
+		yield put(TicketsActions.fetchTicketCommentsSuccess(modelId, ticketId, comments));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket commetns for {model} ' },
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
@@ -171,6 +190,7 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
+	yield takeLatest(TicketsTypes.FETCH_TICKET_COMMENTS, fetchTicketComments);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);

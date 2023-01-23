@@ -21,17 +21,23 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceId } from '../store.types';
-import { ITemplate, ITicket, NewTicket } from './tickets.types';
+import { IRichComment, ITemplate, ITicket, NewTicket } from './tickets.types';
 
 const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
 	if (isArray(target)) return src; // If its an array that is merging just use the newest
 	return undefined;
 });
 
+const getTicketByModelId = (state, modelId, ticketId) => (
+	state.ticketsByModelId?.[modelId].find(({ _id }) => _id === ticketId)
+);
+
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
 	fetchTicketsSuccess: ['modelId', 'tickets'],
+	fetchTicketComments: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
+	fetchTicketCommentsSuccess: ['modelId', 'ticketId', 'comments'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
 	replaceTemplateSuccess: ['modelId', 'template'],
@@ -56,7 +62,23 @@ export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: 
 export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
-	const modelTicket = state.ticketsByModelId[modelId].find(({ _id }) => _id === ticket._id);
+	const modelTicket = getTicketByModelId(state, modelId, ticket._id);
+
+	mergeWithArray(modelTicket, ticket);
+
+	if (!modelTicket) {
+		state.ticketsByModelId[modelId].push(ticket as ITicket);
+	}
+};
+
+export const fetchTicketCommentsSuccess = (state: ITicketsState, { modelId, ticketId, comments }: FetchTicketCommentsSuccessAction) => {
+	getTicketByModelId(state, modelId, ticketId).comments = comments;
+};
+
+export const upsertTicketCommentSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
+	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
+
+	const modelTicket = getTicketByModelId(state, modelId, ticket._id);
 
 	mergeWithArray(modelTicket, ticket);
 
@@ -90,6 +112,7 @@ export const fetchRiskCategoriesSuccess = (
 
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
+	[TicketsTypes.FETCH_TICKET_COMMENTS_SUCCESS]: fetchTicketCommentsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
@@ -107,6 +130,8 @@ export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceAndProjectId &
 export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, ticket: Partial<ITicket>, isFederation: boolean };
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
+export type FetchTicketCommentsAction = Action<'FETCH_TICKET_COMMENTS'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
+export type FetchTicketCommentsSuccessAction = Action<'FETCH_TICKET_COMMENTS_SUCCESS'> & { modelId: string, ticketId: string, comments: IRichComment[] };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & { modelId: string, ticket: Partial<ITicket> };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & { modelId: string, template: ITemplate };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
@@ -129,6 +154,18 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 		isFederation: boolean,
 	) => FetchTicketAction;
+	fetchTicketComments: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+		isFederation: boolean,
+	) => FetchTicketCommentsAction;
+	fetchTicketCommentsSuccess: (
+		modelId: string,
+		ticketId: string,
+		comments: IRichComment[],
+	) => FetchTicketCommentsAction;
 	updateTicket: (
 		teamspace: string,
 		projectId: string,
