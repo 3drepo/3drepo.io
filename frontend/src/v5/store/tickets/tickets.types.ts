@@ -94,16 +94,6 @@ export type MinimumComment = {
 	deleted: boolean,
 };
 
-// export type IComment = MinimumComment & {
-// 	_id: string,
-// 	// ticket: string, 
-// 	// teamspace: string,
-// 	// project: string,
-// 	// model: string,
-// 	updatedAt: Date,
-// 	// history: Array<ICommentBody & { timestamp : Date }>,
-// };
-
 export type IComment = MinimumComment & {
 	teamspace: string,
 	project: string,

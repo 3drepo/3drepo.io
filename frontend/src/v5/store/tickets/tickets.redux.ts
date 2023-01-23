@@ -39,7 +39,9 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTicketComments: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
 	fetchTicketCommentsSuccess: ['modelId', 'ticketId', 'comments'],
 	createTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'comment'],
-	createTicketCommentSuccess: ['modelId', 'ticketId', 'comment'],
+	updateTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'comment'],
+	deleteTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId'],
+	upsertTicketCommentSuccess: ['modelId', 'ticketId', 'comment'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
 	replaceTemplateSuccess: ['modelId', 'template'],
@@ -73,12 +75,25 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 	}
 };
 
-export const fetchTicketCommentsSuccess = (state: ITicketsState, { modelId, ticketId, comments }: FetchTicketCommentsSuccessAction) => {
+export const fetchTicketCommentsSuccess = (state: ITicketsState, { modelId, ticketId, comments = [] }: FetchTicketCommentsSuccessAction) => {
 	getTicketByModelId(state, modelId, ticketId).comments = comments;
 };
 
 export const createTicketCommentSuccess = (state: ITicketsState, { modelId, ticketId, comment }) => {
 	getTicketByModelId(state, modelId, ticketId).comments.push(comment);
+};
+
+export const upsertTicketCommentSuccess = (state: ITicketsState, { modelId, ticketId, comment }: UpsertTicketCommentSuccessAction) => {
+	const modelTicket = getTicketByModelId(state, modelId, ticketId);
+	modelTicket.comments ||= [];
+
+	const ticketComment = modelTicket.comments.find(({ _id }) => _id === comment._id);
+
+	if (ticketComment) {
+		mergeWithArray(ticketComment, comment);
+	} else {
+		modelTicket.comments.push(comment);
+	}
 };
 
 export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template }: ReplaceTemplateSuccessAction) => {
@@ -107,7 +122,7 @@ export const fetchRiskCategoriesSuccess = (
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TICKET_COMMENTS_SUCCESS]: fetchTicketCommentsSuccess,
-	[TicketsTypes.CREATE_TICKET_COMMENT_SUCCESS]: createTicketCommentSuccess,
+	[TicketsTypes.UPSERT_TICKET_COMMENT_SUCCESS]: upsertTicketCommentSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
@@ -128,7 +143,9 @@ export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { mode
 export type FetchTicketCommentsAction = Action<'FETCH_TICKET_COMMENTS'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
 export type FetchTicketCommentsSuccessAction = Action<'FETCH_TICKET_COMMENTS_SUCCESS'> & { modelId: string, ticketId: string, comments: IComment[] };
 export type CreateTicketCommentAction = Action<'CREATE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, comment: MinimumComment };
-export type CreateTicketCommentSuccessAction = Action<'CREATE_TICKET_COMMENT_SUCCESS'> & { modelId: string, ticketId: string, comment: IComment };
+export type UpdateTicketCommentAction = Action<'UPDATE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, comment: Partial<MinimumComment> };
+export type DeleteTicketCommentAction = Action<'DELETE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId };
+export type UpsertTicketCommentSuccessAction = Action<'UPSERT_TICKET_COMMENT_SUCCESS'> & { modelId: string, ticketId: string, comment: Partial<MinimumComment> };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & { modelId: string, ticket: Partial<ITicket> };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & { modelId: string, template: ITemplate };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
@@ -171,11 +188,27 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 		comment: MinimumComment,
 	) => CreateTicketCommentAction;
-	createTicketCommentSuccess: (
+	updateTicketComment: (
+		teamspace: string,
+		projectId: string,
 		modelId: string,
 		ticketId: string,
-		comment: MinimumComment,
-	) => CreateTicketCommentSuccessAction;
+		isFederation: boolean,
+		comment: Partial<MinimumComment>,
+	) => UpdateTicketCommentAction;
+	deleteTicketComment: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+		isFederation: boolean,
+		commentId: string,
+	) => DeleteTicketCommentAction;
+	upsertTicketCommentSuccess: (
+		modelId: string,
+		ticketId: string,
+		comment: Partial<MinimumComment>,
+	) => UpsertTicketCommentSuccessAction;
 	updateTicket: (
 		teamspace: string,
 		projectId: string,

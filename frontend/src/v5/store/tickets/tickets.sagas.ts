@@ -31,6 +31,8 @@ import {
 	FetchRiskCategoriesAction,
 	FetchTicketCommentsAction,
 	CreateTicketCommentAction,
+	UpdateTicketCommentAction,
+	DeleteTicketCommentAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -97,7 +99,7 @@ export function* createTicketComment({ teamspace, projectId, modelId, ticketId, 
 		const createModelTicketComment = isFederation
 			? API.Tickets.createFederationTicketComment
 			: API.Tickets.createContainerTicketComment;
-		const _id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment );
+		const _id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
 		const now = new Date();
 		const fullComment = {
 			...comment,
@@ -105,7 +107,7 @@ export function* createTicketComment({ teamspace, projectId, modelId, ticketId, 
 			updatedAt: now,
 			_id,
 		};
-		yield put(TicketsActions.createTicketCommentSuccess(modelId, ticketId, fullComment));
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, fullComment));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -115,6 +117,50 @@ export function* createTicketComment({ teamspace, projectId, modelId, ticketId, 
 			error,
 			details: formatMessage({
 				id: 'tickets.createTicketComment.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
+export function* updateTicketComment({ teamspace, projectId, modelId, ticketId, isFederation, comment }: UpdateTicketCommentAction) {
+	try {
+		const updateModelTicketComment = isFederation
+			? API.Tickets.updateFederationTicketComment
+			: API.Tickets.updateContainerTicketComment;
+		yield updateModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, comment));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicketComment.error', defaultMessage: 'trying to update the comment for {model} ticket' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+			details: formatMessage({
+				id: 'tickets.updateTicketComment.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
+export function* deleteTicketComment({ teamspace, projectId, modelId, ticketId, isFederation, commentId }: DeleteTicketCommentAction) {
+	try {
+		const deleteModelTicketComment = isFederation
+			? API.Tickets.deleteFederationTicketComment
+			: API.Tickets.deleteContainerTicketComment;
+		yield deleteModelTicketComment(teamspace, projectId, modelId, ticketId, commentId);
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentId, deleted: true }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.deleteTicketComment.error', defaultMessage: 'trying to delete the comment for {model} ticket' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+			details: formatMessage({
+				id: 'tickets.deleteTicketComment.error.details',
 				defaultMessage: 'If reloading the page doesn\'t work please contact support',
 			}),
 		}));
@@ -224,9 +270,11 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
-	yield takeLatest(TicketsTypes.FETCH_TICKET_COMMENTS, fetchTicketComments);
-	yield takeLatest(TicketsTypes.CREATE_TICKET_COMMENT, createTicketComment);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
+	yield takeLatest(TicketsTypes.FETCH_TICKET_COMMENTS, fetchTicketComments);
+	yield takeLatest(TicketsTypes.CREATE_TICKET_COMMENT, createTicketComment);
+	yield takeLatest(TicketsTypes.UPDATE_TICKET_COMMENT, updateTicketComment);
+	yield takeLatest(TicketsTypes.DELETE_TICKET_COMMENT, deleteTicketComment);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 }

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITicket, ITemplate, NewTicket, MinimumComment } from '@/v5/store/tickets/tickets.types';
+// import { pick } from 'lodash';
 import api from './default';
 
 export const fetchContainerTemplates = async (
@@ -173,8 +174,9 @@ export const createFederationTicketComment = async (
 	ticketId: string,
 	comment: MinimumComment,
 ) => {
-	// const { data } = await api.get(
-		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments`,
+	// const { data } = await api.post(
+		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
+		// pick(comment, ['comment', 'images']),
 	// );
 	// return data;
 	return new Date().toString();
@@ -187,38 +189,62 @@ export const createContainerTicketComment = async (
 	ticketId: string,
 	comment: MinimumComment,
 ) => {
-	// const { data } = await api.get(
-		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments`,
+	// const { data } = await api.post(
+		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
+		// pick(comment, ['comment', 'images']),
 	// );
 	// return data;
 	return new Date().toString();
 };
 
-export const createFederationsComment = async (
+export const deleteFederationTicketComment = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
 	ticketId: string,
-	comment: string,
+	commentId: string,
 ) => {
-	const { data } = await api.post(
-		`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments`,
-		{ comment },
-	);
-	return data;
+	// const { data } = await api.delete(
+		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${commentId}`,
+	// );
 };
 
-export const createContainerComment = async (
+export const deleteContainerTicketComment = async (
 	teamspace: string,
 	projectId: string,
 	containerId: string,
 	ticketId: string,
-	comment: string,
+	commentId: string,
 ) => {
-	const { data } = await api.post(
-		`/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments`,
-		{ comment },
-	);
+	// const { data } = await api.delete(
+		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${commentId}`,
+	// );
+};
+
+export const updateFederationTicketComment = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	ticketId: string,
+	comment: Partial<MinimumComment>,
+) => {
+	// const { data } = await api.put(
+		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
+		// pick(comment, ['comment', 'images']),
+	// );
+};
+
+export const updateContainerTicketComment = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	ticketId: string,
+	comment: Partial<MinimumComment>,
+) => {
+	// const { data } = await api.put(
+		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
+		// pick(comment, ['comment', 'images']),
+	// );
 };
 
 const MOCK_COMMENTS = [
