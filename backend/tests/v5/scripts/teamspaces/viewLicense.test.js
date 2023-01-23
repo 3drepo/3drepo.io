@@ -27,7 +27,7 @@ const { src, utilScripts } = require('../../helper/path');
 
 const ViewLicense = require(`${utilScripts}/teamspaces/viewLicense`);
 
-const { editSubscriptions } = require(`${src}/models/teamspaces`);
+const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 const { SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 

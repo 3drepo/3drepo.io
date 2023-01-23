@@ -22,8 +22,8 @@ const { generateRandomString } = require('../../../helper/services');
 jest.mock('../../../../../src/v5/models/tickets.templates');
 const TemplateModel = require(`${src}/models/tickets.templates`);
 
-jest.mock('../../../../../src/v5/models/teamspaces');
-const SettingsModel = require(`${src}/models/teamspaces`);
+jest.mock('../../../../../src/v5/models/teamspaceSettings');
+const SettingsModel = require(`${src}/models/teamspaceSettings`);
 
 const Settings = require(`${src}/processors/teamspaces/settings`);
 const { generateUUID } = require(`${src}/utils/helper/uuids`);

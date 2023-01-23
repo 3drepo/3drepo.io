@@ -16,7 +16,6 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
@@ -169,7 +168,6 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		permissions: [],
 		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true }),
 	};
 
@@ -202,9 +200,6 @@ User.verify = async (username) => {
 
 	return customData;
 };
-
-User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
-	{ $push: { 'customData.permissions': { user: username, permissions: [TEAMSPACE_ADMIN] } } });
 
 User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
 	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
