@@ -30,6 +30,7 @@ import {
 	FetchTemplateAction,
 	FetchRiskCategoriesAction,
 	FetchTicketCommentsAction,
+	CreateTicketCommentAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -61,7 +62,7 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model} ' },
+				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
@@ -79,10 +80,43 @@ export function* fetchTicketComments({ teamspace, projectId, modelId, ticketId, 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket commetns for {model} ' },
+				{ id: 'tickets.fetchTicketComments.error', defaultMessage: 'trying to fetch the comments for {model} ticket' },
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
+			details: formatMessage({
+				id: 'tickets.fetchTicketComments.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
+		}));
+	}
+}
+
+export function* createTicketComment({ teamspace, projectId, modelId, ticketId, isFederation, comment }: CreateTicketCommentAction) {
+	try {
+		const createModelTicketComment = isFederation
+			? API.Tickets.createFederationTicketComment
+			: API.Tickets.createContainerTicketComment;
+		const _id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment );
+		const now = new Date();
+		const fullComment = {
+			...comment,
+			createdAt: now,
+			updatedAt: now,
+			_id,
+		};
+		yield put(TicketsActions.createTicketCommentSuccess(modelId, ticketId, fullComment));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.createTicketComment.error', defaultMessage: 'trying to create the comment for {model} ticket' },
+				{ model: isFederation ? 'federation' : 'container' },
+			),
+			error,
+			details: formatMessage({
+				id: 'tickets.createTicketComment.error.details',
+				defaultMessage: 'If reloading the page doesn\'t work please contact support',
+			}),
 		}));
 	}
 }
@@ -191,6 +225,7 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_COMMENTS, fetchTicketComments);
+	yield takeLatest(TicketsTypes.CREATE_TICKET_COMMENT, createTicketComment);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
