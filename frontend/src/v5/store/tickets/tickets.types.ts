@@ -36,7 +36,7 @@ export interface ITicket {
 	type: string,
 	properties: Property,
 	modules?: Record<string, Property>,
-	comments?: IComment[],
+	comments?: MinimumComment[],
 }
 
 export interface TemplateModule {
@@ -85,24 +85,26 @@ export type Viewpoint = {
 };
 
 export type MinimumComment = {
+	_id: string,
 	comment: string, // long description format (optional)
 	images: string[], // list of resource id references (optional)
 	author: string,
 	createdAt: Date,
+	updatedAt: Date,
 	deleted: boolean,
 };
 
-export type IComment = MinimumComment & {
-	_id: string,
-	// ticket: string, 
-	// teamspace: string,
-	// project: string,
-	// model: string,
-	updatedAt: Date,
-	// history: Array<ICommentBody & { timestamp : Date }>,
-};
+// export type IComment = MinimumComment & {
+// 	_id: string,
+// 	// ticket: string, 
+// 	// teamspace: string,
+// 	// project: string,
+// 	// model: string,
+// 	updatedAt: Date,
+// 	// history: Array<ICommentBody & { timestamp : Date }>,
+// };
 
-export type IRichComment = IComment & {
+export type IComment = MinimumComment & {
 	teamspace: string,
 	project: string,
 	model: string,
