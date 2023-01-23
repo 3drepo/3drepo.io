@@ -32,7 +32,7 @@ const { src, utilScripts, tmpDir } = require('../../helper/path');
 
 const AllActiveLicenses = require(`${utilScripts}/teamspaces/allActiveLicenses`);
 
-const { editSubscriptions } = require(`${src}/models/teamspaces`);
+const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const runTest = (testData) => {

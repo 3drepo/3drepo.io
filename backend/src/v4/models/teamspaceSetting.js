@@ -22,47 +22,23 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 const utils = require("../utils");
 const Mitigation = require("./mitigation");
+const {v5Path} = require("../../interop");
+const TeamspaceModelV5 = require(`${v5Path}/models/teamspaceSettings`);
+const SettingProcessorV5 = require(`${v5Path}/processors/teamspaces/settings`);
+
 const colName = "teamspace";
 
 class TeamspaceSettings {
-	async createTeamspaceSettings(account) {
-		const settings = {
-			"_id" : account,
-			"topicTypes" : [
-				"Clash",
-				"Diff",
-				"RFI",
-				"Risk",
-				"H&S",
-				"Design",
-				"Constructibility",
-				"GIS",
-				"For information",
-				"VR"
-			],
-			"riskCategories" : [
-				"Commercial Issue",
-				"Environmental Issue",
-				"Health - Material effect",
-				"Health - Mechanical effect",
-				"Safety Issue - Fall",
-				"Safety Issue - Trapped",
-				"Safety Issue - Event",
-				"Safety Issue - Handling",
-				"Safety Issue - Struck",
-				"Safety Issue - Public",
-				"Social Issue",
-				"Other Issue",
-				"Unknown"
-			]
-		};
-		const settingsColl = await this.getTeamspaceSettingsCollection(account);
-
-		return await settingsColl.insertOne(settings);
+	createTeamspaceSettings(teamspace) {
+		return TeamspaceModelV5.createTeamspaceSettings(teamspace);
 	}
 
 	getTeamspaceSettingsCollection(account) {
 		return db.getCollection(account, colName);
+	}
+
+	grantAdminToUser(teamspace, username) {
+		return TeamspaceModelV5.grantAdminToUser(teamspace, username);
 	}
 
 	async getTeamspaceSettings(account, projection = {}) {
@@ -75,16 +51,8 @@ class TeamspaceSettings {
 		return foundSettings;
 	}
 
-	async getRiskCategories(account) {
-		const settings = await this.getTeamspaceSettings(account, { riskCategories: 1 });
-
-		return settings.riskCategories || [];
-	}
-
-	async getTopicTypes(account) {
-		const settings = await this.getTeamspaceSettings(account, { topicTypes: 1 });
-
-		return settings.topicTypes || [];
+	async getRiskCategories(teamspace) {
+		return (await SettingProcessorV5.getRiskCategories(teamspace)) || [];
 	}
 
 	async processMitigationsFile(account, username, sessionId, filename, file) {
@@ -162,6 +130,18 @@ class TeamspaceSettings {
 		const updatedSettings = {...oldSettings, ...toUpdate};
 
 		return updatedSettings;
+	}
+
+	async updatePermissions(teamspace, updatedPermissions) {
+		await db.updateOne(teamspace, colName, {_id: teamspace}, {$set: {permissions: updatedPermissions}});
+	}
+
+	async updateSubscriptions(teamspace, subscriptions) {
+		await Promise.all(Object.keys(subscriptions).map((subType) => TeamspaceModelV5.editSubscriptions(teamspace, subType, {
+			collaborators: subscriptions[subType].collaborators,
+			data: subscriptions[subType].data,
+			expiryDate: subscriptions[subType].expiryDate
+		})));
 	}
 }
 

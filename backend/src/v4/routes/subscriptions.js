@@ -100,8 +100,8 @@ function listSubscriptions(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
-		.then(user => {
-			const subscriptions =  UserBilling.getActiveSubscriptions(user.customData.billing);
+		.then(async ({ user }) => {
+			const subscriptions = await UserBilling.getSubscriptions(user);
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		})

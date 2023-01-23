@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Metadata = require('../../../../processors/teamspaces/projects/models/metadata');
+const Metadata = require('../../../../../processors/teamspaces/projects/models/metadata');
 const { Router } = require('express');
-const { hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateCustomMetadata } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/metadata');
+const { hasWriteAccessToContainer } = require('../../../../../middleware/permissions/permissions');
+const { respond } = require('../../../../../utils/responder');
+const { templates } = require('../../../../../utils/responseCodes');
+const { validateUpdateCustomMetadata } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/metadata');
 
 const updateCustomMetadata = async (req, res) => {
 	const { teamspace, container, metadata } = req.params;
@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
 	 *   patch:
 	 *     description: Adds, removes or edits custom metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
-	 *     tags: [Containers]
+	 *     tags: [Metadata]
 	 *     operationId: updateCustomMetadata
 	 *     parameters:
 	 *       - name: teamspace
