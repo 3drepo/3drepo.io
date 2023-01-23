@@ -23,7 +23,8 @@
 	const responseCodes = require("../response_codes.js");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser,  removePermissionsFromModels } = require("./modelSetting");
+	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser, removePermissionsFromModels } = require("./modelSetting");
+	const { getTeamspaceSettings } = require("./teamspaceSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
@@ -105,7 +106,7 @@
 		return db.updateOne(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
 	};
 
-	Project.createProject = async function(teamspace, name, username, userPermissions) {
+	Project.createProject = async function (teamspace, name, username, userPermissions) {
 		checkProjectNameValid(name);
 
 		const project = {
@@ -300,11 +301,10 @@
 
 	Project.listModels = async function(account, project, username, filters) {
 		const AccountPermissions = require("./accountPermissions");
-		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
 		const [dbUser, projectObj] = await Promise.all([
-			await User.findByUserName(account),
+			getTeamspaceSettings(account),
 			Project.findOneProject(account, {name: project})
 		]);
 
