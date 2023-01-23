@@ -290,7 +290,7 @@ const testLink = () => {
 					.expect(templates.invalidArguments.status);
 			});
 
-			test('should redirect the user to Microsoft authentication page', async () => {
+			test('should respond with a link to Microsoft authentication page', async () => {
 				const res = await testSession.get(`/v5/sso/aad/link?redirectUri=${redirectUri}`)
 					.expect(templates.ok.status);
 				const resUri = new URL(res.body.link);
