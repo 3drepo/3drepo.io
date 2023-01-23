@@ -22,7 +22,7 @@ const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const Favourites = {};
 
 const checkModelsAreValid = (accessibleModels, favourites) => {
-	if (!favourites.length) {
+	if (!favourites?.length) {
 		throw createResponseCode(templates.invalidArguments, 'The favourites list provided is empty');
 	}
 

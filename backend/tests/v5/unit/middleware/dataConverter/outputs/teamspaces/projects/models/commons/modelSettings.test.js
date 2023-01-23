@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
+const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -31,8 +31,8 @@ const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/
 const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testFormatModelSettings = () => {
-	const withoutDefaultView = { ...generateRandomModelProperties() };
-	delete withoutDefaultView.defaultView;
+	const withoutDefaultView = { ...generateRandomModelProperties(), defaultView: undefined };
+	const withoutDefaultLegend = { ...generateRandomModelProperties(), defaultLegend: undefined };
 	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };
 	const withErrorReason = { ...generateRandomModelProperties(),
 		errorReason: {
@@ -51,24 +51,29 @@ const testFormatModelSettings = () => {
 		defaultView: generateUUID(),
 	};
 
+	const withUuidDefaultLegend = { ...generateRandomModelProperties(),
+		defaultLegend: generateUUID(),
+	};
+
 	describe.each([
 		[generateRandomModelProperties(), 'no timestamp, no errorReason'],
 		[withoutDefaultView, 'no defaultView'],
+		[withoutDefaultLegend, 'no defaultLegend'],
 		[withTimestamp, 'timestamp'],
 		[withErrorReason, 'errorReason'],
 		[withErrorReasonNoTimestamp, 'errorReason without timestamp'],
 		[withUuidDefaultView, 'with defaultView that is UUID'],
+		[withUuidDefaultLegend, 'with defaultLegend that is UUID'],
 	])('Format model settings data', (data, desc) => {
 		test(`should format correctly with ${desc}`,
 			() => {
-				const nextIdx = respondFn.mock.calls.length;
-				ModelSettingsOutputMiddlewares.formatModelSettings({ outputData: cloneDeep(data) }, {}, () => {});
-				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
-				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
-
+				const req = { outputData: cloneDeep(data) };
+				const res = {};
+				ModelSettingsOutputMiddlewares.formatModelSettings(req, res, () => {});
 				const formattedSettings = {
 					...data,
 					defaultView: UUIDToString(data.defaultView),
+					defaultLegend: UUIDToString(data.defaultLegend),
 					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
 					code: data.properties.code,
 					unit: data.properties.unit,
@@ -80,11 +85,51 @@ const testFormatModelSettings = () => {
 				};
 				delete formattedSettings.properties;
 
-				expect(respondFn.mock.calls[nextIdx][3]).toEqual({ ...formattedSettings });
+				expect(respondFn).toHaveBeenCalledTimes(1);
+				expect(respondFn).toHaveBeenCalledWith(req, res, templates.ok, formattedSettings);
 			});
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings', () => {
+const testFormatModelStats = () => {
+	describe.each([
+		[true, { lastUpdated: new Date() }, 'lastUpdated field'],
+		[true, {}, 'no lastUpdated field'],
+		[false, { revisions: {} }, 'no data to convert'],
+		[false, { revisions: {
+			lastUpdated: new Date(),
+			latestRevision: generateUUID(),
+		},
+		errorReason: { timestamp: new Date() } }, 'data to convert'],
+	])('Format model stats data', (isFed, data, desc) => {
+		test(`[${isFed ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
+			async () => {
+				const req = { outputData: cloneDeep(data) };
+				const res = {};
+				await ModelSettingsOutputMiddlewares.formatModelStats(isFed)(req, res);
+
+				const formattedStats = {
+					...data,
+				};
+
+				if (isFed) {
+					formattedStats.lastUpdated = data.lastUpdated ? data.lastUpdated.getTime() : undefined;
+				} else {
+					formattedStats.revisions.lastUpdated = formattedStats.revisions.lastUpdated
+						? formattedStats.revisions.lastUpdated.getTime() : undefined;
+					if (formattedStats.errorReason?.timestamp) {
+						formattedStats.errorReason.timestamp = formattedStats.errorReason.timestamp.getTime();
+					}
+					formattedStats.revisions.latestRevision = UUIDToString(formattedStats.revisions.latestRevision);
+				}
+
+				expect(respondFn).toHaveBeenCalledTimes(1);
+				expect(respondFn).toHaveBeenCalledWith(req, res, templates.ok, formattedStats);
+			});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testFormatModelSettings();
+	testFormatModelStats();
 });

@@ -16,8 +16,8 @@
  */
 
 import { PureComponent } from 'react';
-import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
-import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
+import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
+import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel, TaskListLabelTime } from '../../sequences.styles';
 import { IActivity, TaskItem } from './sequenceTaskItem.component';
 
 interface IProps {
@@ -46,7 +46,14 @@ export class TasksList extends PureComponent<IProps, IState> {
 	public get durationLabel() {
 		const  {  startDate, endDate } = this.props;
 
-		return 'Activities from ' + formatShortDateTime(startDate) + ' to ' + formatShortDateTime(endDate);
+		return (
+			<>
+				Activities from
+				<TaskListLabelTime> {formatShortDateTime(startDate)} </TaskListLabelTime>
+				to
+				<TaskListLabelTime> {formatShortDateTime(endDate)}</TaskListLabelTime>
+			</>
+		);
 	}
 
 	private handleItemClick = (task) => this.props.fetchActivityDetails(task.id);
