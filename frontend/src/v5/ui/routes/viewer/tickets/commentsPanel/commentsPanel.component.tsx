@@ -64,13 +64,14 @@ export const CommentsPanel = () => {
 	const commentsListIsEmpty = comments?.length > 0;
 
 	const handleDeleteComment = (commentId) => {
-		// setComments(comments.map((comment) => {
-		// 	if (comment._id !== commentId) return comment;
-		// 	return {
-		// 		...comment,
-		// 		deleted: true,
-		// 	} 
-		// }));
+		TicketsActionsDispatchers.deleteTicketComment(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+			commentId,
+		);
 	};
 
 	const handleReplyToComment = (commentId) => {
@@ -78,11 +79,15 @@ export const CommentsPanel = () => {
 		setCommentReply(comment);
 	};
 
-	const handleEditToComment = (commentId, newComment: { comment?: string, images?: string[] }) => {
-		// setComments(comments.map((comment) => {
-		// 	if (comment._id !== commentId) return comment;
-		// 	return { ...comment, ...newComment }; 
-		// }));
+	const handleEditToComment = (commentId, newComment) => {
+		TicketsActionsDispatchers.updateTicketComment(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+			{ ...newComment, _id: commentId },
+		);
 	};
 	
 	const createComment = async () => {
