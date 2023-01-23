@@ -240,11 +240,14 @@ const testAuthenticate = () => {
 			const req = { query: { redirectUri: generateRandomString() }, headers: {} };
 			addPkceCodes(req);
 
+			const authURL = generateRandomURL();
+			AadServices.getAuthenticationCodeUrl.mockResolvedValueOnce(authURL);
+
 			await Aad.authenticate(redirectUri)(req, res);
 			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(AadServices.getAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, expect.anything());
-			expect(Responder.respond.mock.calls[0][3]).toHaveProperty('link');
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: authURL });
 			expect(req.authParams).toEqual({
 				redirectUri,
 				state: JSON.stringify({ redirectUri: req.query.redirectUri }),
@@ -261,11 +264,14 @@ const testAuthenticate = () => {
 			};
 			addPkceCodes(req);
 
+			const authURL = generateRandomURL();
+			AadServices.getAuthenticationCodeUrl.mockResolvedValueOnce(authURL);
+
 			await Aad.authenticate(redirectUri)(req, res);
 			expect(Sso.addPkceProtection).toHaveBeenCalledTimes(1);
+			expect(AadServices.getAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok,
-				expect.objectContaining({ link: expect.any(String) }));
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: authURL });
 			expect(req.authParams).toEqual({
 				redirectUri,
 				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
