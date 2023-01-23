@@ -16,6 +16,8 @@
  */
 
 const db = require('../handler/db');
+const { publish } = require('../services/eventsManager/eventsManager');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
@@ -52,6 +54,8 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 	const createdAt = new Date();
 	const comment = { ...commentData, _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt };
 	await insertOne(teamspace, comment);
+	publish(events.NEW_COMMENT, { teamspace, project, model, 
+		data: { ticket, _id, comment: comment.comment, images: comment.images, author: comment.author, updatedAt: createdAt } });
 	return _id;
 };
 

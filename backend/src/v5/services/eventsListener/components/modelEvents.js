@@ -126,6 +126,16 @@ const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, c
 	}
 };
 
+const ticketCommentAdded = async ({ teamspace, project, model, data }) => {
+	try {		
+		const isFed = await isFederationCheck(teamspace, model);
+		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET_COMMENT : chatEvents.CONTAINER_NEW_TICKET_COMMENT;		
+		await createModelMessage(event, { ...data, teamspace, project, model }, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to process ticket updated event ${err.message}`);
+	}
+};
+
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
@@ -139,6 +149,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.DELETE_MODEL, modelDeleted);
 	subscribe(events.NEW_TICKET, modelTicketAdded);
 	subscribe(events.UPDATE_TICKET, modelTicketUpdated);
+	subscribe(events.NEW_COMMENT, ticketCommentAdded);
 };
 
 module.exports = ModelEventsListener;
