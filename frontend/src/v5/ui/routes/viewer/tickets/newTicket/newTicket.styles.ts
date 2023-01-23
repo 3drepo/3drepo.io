@@ -20,7 +20,7 @@ import { CircleButton } from '@controls/circleButton';
 import styled from 'styled-components';
 
 export const Form = styled.form`
-	min-height: calc(100% - 53px);
+	min-height: calc(100% - 49px);
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;

@@ -19,8 +19,8 @@ const { src } = require('../../../helper/path');
 
 const Permissions = require(`${src}/utils/permissions/permissions`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-jest.mock('../../../../../src/v5/models/teamspaces');
-const Teamspaces = require(`${src}/models/teamspaces`);
+jest.mock('../../../../../src/v5/models/teamspaceSettings');
+const Teamspaces = require(`${src}/models/teamspaceSettings`);
 jest.mock('../../../../../src/v5/models/projectSettings');
 const Projects = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/modelSettings');
