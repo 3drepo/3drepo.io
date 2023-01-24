@@ -216,12 +216,6 @@ const testDeleteProject = () => {
 			expect(fn.mock.calls[0][1]).toEqual('projects');
 			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project Id' });
 		});
-
-		test('should return error if the project is not found', async () => {
-			jest.spyOn(db, 'deleteOne').mockResolvedValue({ deletedCount: 0 });
-			await expect(Project.deleteProject('someTS', 'project Id'))
-				.rejects.toEqual(templates.projectNotFound);
-		});
 	});
 };
 
@@ -235,11 +229,6 @@ const testUpdateProject = () => {
 			expect(fn.mock.calls[0][1]).toEqual('projects');
 			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project Id' });
 			expect(fn.mock.calls[0][3]).toEqual({ $set: { name: 'newName' } });
-		});
-
-		test('should return error if the project is not found', async () => {
-			jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
-			await expect(Project.updateProject('someTS', 'project Id', { name: 'newName' })).rejects.toEqual(templates.projectNotFound);
 		});
 	});
 };

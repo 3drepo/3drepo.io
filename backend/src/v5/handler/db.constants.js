@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { TEAM_MEMBER } = require('./roles.constants');
-const db = require('../handler/db');
+const DbConstants = {};
 
-const Roles = {};
+DbConstants.ADMIN_DB = 'admin';
+DbConstants.INTERNAL_DB = 'internal';
 
-Roles.createTeamspaceRole = (teamspace) => db.createRole(teamspace, TEAM_MEMBER);
-
-Roles.removeTeamspaceRole = (teamspace) => db.dropRole(teamspace, TEAM_MEMBER);
-
-Roles.grantTeamspaceRoleToUser = (teamspace, username) => db.grantRole(teamspace, TEAM_MEMBER, username);
-
-Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => db.revokeRole(teamspace, TEAM_MEMBER, username);
-
-module.exports = Roles;
+module.exports = DbConstants;
