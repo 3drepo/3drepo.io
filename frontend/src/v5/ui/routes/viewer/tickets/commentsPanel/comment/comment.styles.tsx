@@ -18,6 +18,7 @@
 import { HoverPopover as HoverPopoverBase } from '@controls/hoverPopover/hoverPopover.component';
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
+import { FormTextArea } from '@controls/inputs/formInputs.component';
 
 export const CommentAuthor = styled.div`
 	font-weight: 600;
@@ -46,7 +47,11 @@ export const CommentTime = styled.span`
 	text-align: right;
 `;
 
-const commentStyling = css<{ 'data-author': string }>`
+type CommentProps = {
+	'data-author': string,
+	$deleted?: boolean,
+};
+const BasicComment = styled.div<CommentProps>`
 	max-width: 241px;
 	width: fit-content;
 	padding: 10px 19px 12px 15px;
@@ -84,10 +89,7 @@ const commentStyling = css<{ 'data-author': string }>`
 	}
 `;
 
-export const CurrentUserMessageContainer = styled.div.attrs({
-	isCurrentUser: true,
-})<{ 'data-author': string, $deleted?: boolean }>`
-	${commentStyling}
+export const CurrentUserMessageContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	border-top-right-radius: 0;
@@ -127,8 +129,7 @@ export const HoverPopover = styled(HoverPopoverBase)`
 	}
 `;
 
-export const OtherUserMessageContainer = styled.div<{ 'data-author': string, $deleted?: boolean }>`
-	${commentStyling}
+export const OtherUserMessageContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-left: 37px;
@@ -157,4 +158,25 @@ export const OtherUserMessageContainer = styled.div<{ 'data-author': string, $de
 			}
 		}
 	}
+`;
+
+export const EditCommentContainer = styled(BasicComment)`
+	border-radius: 0;
+	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+	border-bottom-color: ${({ theme }) => theme.palette.primary.main};
+	margin-left: auto;
+	width: 380px;
+`;
+
+export const EditCommentInput = styled(FormTextArea)`
+	.MuiInputBase-multiline {
+		padding: 8px 0 0;
+		line-height: 16px;
+	}
+`;
+
+export const EditCommentButtons = styled.div`
+    margin: 4px 5px 0 auto;
+	display: flex;
+	flex-direction: row;
 `;
