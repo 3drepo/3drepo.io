@@ -23,6 +23,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 (() => {
 	const { findModelSettingById, findPermissionByUser } = require("../models/modelSetting");
 	const { findOneProject, findProjectPermsByUser } = require("../models/project");
+	const { getTeamspaceSettings } = require("../models/teamspaceSetting");
 	const User = require("../models/user");
 	const ResponseCodes = require("../response_codes");
 
@@ -42,18 +43,16 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			accountLevel: function(username) {
 
-				return this.getUser().then(user => {
-					if(!user) {
-						throw ResponseCodes.RESOURCE_NOT_FOUND;
-					}
-
-					const permission = AccountPermissions.findByUser(user, username);
+				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
+					const permission = AccountPermissions.findByUser(settings, username);
 
 					if(!permission) {
 						return [];
 					}
 
 					return permission.permissions;
+				}).catch(() => {
+					throw ResponseCodes.RESOURCE_NOT_FOUND;
 				});
 			},
 

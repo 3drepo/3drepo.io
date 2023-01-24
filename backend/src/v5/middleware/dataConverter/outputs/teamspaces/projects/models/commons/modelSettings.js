@@ -22,13 +22,14 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 const ModelSettings = {};
 
 ModelSettings.formatModelSettings = (req, res) => {
-	const { defaultView, ...settings } = req.outputData;
+	const { defaultView, defaultLegend, ...settings } = req.outputData;
 	const formattedSettings = {
 		...settings,
 		timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
 		code: settings.properties.code,
 		unit: settings.properties.unit,
 		...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
+		...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
 		errorReason: settings.errorReason ? {
 			message: settings.errorReason.message,
 			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
@@ -39,6 +40,23 @@ ModelSettings.formatModelSettings = (req, res) => {
 	delete formattedSettings.properties;
 
 	respond(req, res, templates.ok, formattedSettings);
+};
+
+ModelSettings.formatModelStats = (isFed) => (req, res) => {
+	const { outputData } = req;
+
+	if (isFed) {
+		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
+	} else {
+		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated
+			? outputData.revisions.lastUpdated.getTime() : undefined;
+		if (outputData.errorReason?.timestamp) {
+			outputData.errorReason.timestamp = outputData.errorReason.timestamp.getTime();
+		}
+		outputData.revisions.latestRevision = UUIDToString(outputData.revisions.latestRevision);
+	}
+
+	respond(req, res, templates.ok, outputData);
 };
 
 module.exports = ModelSettings;

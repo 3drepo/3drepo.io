@@ -29,7 +29,8 @@ Containers.validateUpdateSettingsData = validateUpdateSettingsData(false);
 Containers.canDeleteContainer = async (req, res, next) => {
 	try {
 		const { teamspace, container } = req.params;
-		const fed = await getModelByQuery(teamspace, { 'subModels.model': container }, { _id: 1, name: 1 }).catch(() => {});
+		const query = { $or: [{ 'subModels.model': container }, { subModels: container }] };
+		const fed = await getModelByQuery(teamspace, query, { _id: 1, name: 1 }).catch(() => {});
 		if (fed) {
 			respond(req, res, createResponseCode(templates.containerIsSubModel, `Container is an active sub model of ${fed.name}(${fed._id})`));
 		} else {

@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { dropIndex, indexExists } = require(`${v5Path}/handler/db`);
+const { dropIndex } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const indexToRemove = 'metadata.IFC GUID_1_parents_1';
@@ -27,9 +27,7 @@ const processTeamspace = async (teamspace) => {
 	const collections = await getCollectionsEndsWith(teamspace, '.scene');
 	const proms = collections.map(async ({ name: colName }) => {
 		logger.logInfo(`\t\t\t${colName}`);
-		if (await indexExists(teamspace, colName, indexToRemove)) {
-			await dropIndex(teamspace, colName, indexToRemove);
-		}
+		await dropIndex(teamspace, colName, indexToRemove).catch(() => {});
 	});
 
 	return Promise.all(proms);

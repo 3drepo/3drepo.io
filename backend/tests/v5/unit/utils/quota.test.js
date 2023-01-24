@@ -85,9 +85,9 @@ const testGetQuotaInfo = () => {
 		[tsWithFreeQuota]: {},
 	};
 
-	jest.spyOn(db, 'findOne').mockImplementation((ts, col, { user }) => {
-		const subscriptions = subsByTeamspace[user];
-		return Promise.resolve({ customData: { billing: { subscriptions } } });
+	jest.spyOn(db, 'findOne').mockImplementation((ts, col, { _id }) => {
+		const subscriptions = subsByTeamspace[_id];
+		return Promise.resolve({ subscriptions });
 	});
 
 	describe.each([
@@ -179,7 +179,7 @@ const testSufficientQuota = () => {
 
 		test('should return error if quota exceeds the limit', async () => {
 			jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({
-				customData: { billing: { subscriptions: { enterprise: { data: 1, collaborators: 2 } } } },
+				subscriptions: { enterprise: { data: 1, collaborators: 2 } },
 			}));
 
 			jest.spyOn(db, 'listCollections').mockImplementationOnce(() => Promise.resolve([
@@ -195,7 +195,7 @@ const testSufficientQuota = () => {
 
 		test('should succeed if quota does not exceed the limit', async () => {
 			jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({
-				customData: { billing: { subscriptions: [{ data: 1, collaborators: 2 }] } },
+				subscriptions: [{ data: 1, collaborators: 2 }],
 			}));
 
 			jest.spyOn(db, 'listCollections').mockImplementationOnce(() => Promise.resolve([

@@ -27,7 +27,7 @@ const { src, utilScripts } = require('../../helper/path');
 
 const RemoveTeamspace = require(`${utilScripts}/teamspaces/removeTeamspaceAndOwner`);
 
-const { getMembersInfo, getRiskCategories } = require(`${src}/models/teamspaces`);
+const { getMembersInfo, getRiskCategories } = require(`${src}/models/teamspaceSettings`);
 const { getUserByUsername } = require(`${src}/models/users`);
 const { grantTeamspaceRoleToUser } = require(`${src}/models/roles`);
 const { templates } = require(`${src}/utils/responseCodes`);

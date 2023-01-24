@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { Header } from '@controls/modal/formModal/formDialog.styles';
 import { DialogTabs, NeutralActionButton, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { ResourceIconContainer, IconButton } from '@/v4/routes/components/resources/resources.styles';
@@ -33,10 +32,6 @@ import {
 import { LoaderContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 
 const AttachResourcesContainer = css`
-	${Header} {
-		position: relative;
-	}
-
 	${DialogTabs} {
 		padding-left: 10px;
 		margin: -30px -30px 0;
