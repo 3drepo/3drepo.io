@@ -16,10 +16,13 @@
  */
 
 /* eslint-disable no-underscore-dangle */
+/* eslint-enable no-var */
+
+import { IndexedDbCache } from './unity-indexedbcache';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
 declare let createUnityInstance;
-/* eslint-enable no-var */
 
 export class UnityUtil {
 	/** @hidden */
@@ -63,6 +66,11 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static unityInstance;
+
+	/** A URL pointing to the Unity folder of a distribution. E.g. www.3drepo.io/unity/.
+	 * This is where the Unity Build and the IndexedDb worker can be found. */
+	/** @hidden */
+	public static unityUrl: URL;
 
 	/** @hidden */
 	public static readyPromise: Promise<void>;
@@ -164,7 +172,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static _loadUnity(canvas: any, unityURL): Promise<void> {
+	public static _loadUnity(canvas: any, domainURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -180,7 +188,9 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const buildUrl = `${unityURL ? `${unityURL}/` : ''}unity/Build`;
+		UnityUtil.unityUrl = new URL(domainURL || window.location.origin);
+
+		const buildUrl = new URL('/unity/Build', UnityUtil.unityUrl);
 
 		const config = {
 			dataUrl: `${buildUrl}/unity.data.unityweb`,
@@ -866,6 +876,127 @@ export class UnityUtil {
 		UnityUtil.toUnity('DeselectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
+	public static setStreamingModelPriority(modelNamespace: string, priority: number) {
+		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ modelNamespace, priority }));
+	}
+
+	public static setStreamingFovWeight(weight: number) {
+		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, Number(weight));
+	}
+
+	/**
+	 * The amount of space the geometry streaming should leave in the
+	 * unmanaged heap.
+	 * The unmanaged heap is not measured directly, but considered to be
+	 * the space between the top of the Unity heap (typically 2Gb) and the
+	 * top of the managed heap.
+	 * (The available space for geometry will shrink dynamically as the
+	 * managed heap grows, always leaving thresholdInMb available to
+	 * Unity for other uses).
+	 * @category Streaming
+	 */
+	public static setStreamingMemoryThreshold(thresholdInMb: number) {
+		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, Number(thresholdInMb));
+	}
+
+	/**
+	 * Constrains the geometry streaming to use at most maxMemoryInMb
+	 * regardless of the available unmanaged memory allocated by
+	 * thresholdInMb.
+	 * Use this to improve performance on weaker platforms.
+	 * @category Streaming
+	 */
+	public static setStreamingMemoryLimit(maxMemoryInMb: number) {
+		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, Number(maxMemoryInMb));
+	}
+
+	/**
+	 * Sets the colour of the bounding boxes representing yet-to-be-loaded Supermeshes
+	 * @category Streaming
+	 * @code UnityUtil.setStreamingBundlesColor([0.2,0.8,0.2]);
+	 */
+	public static setStreamingBundlesColor(colour: number[]) {
+		const params = {
+			color: colour,
+		};
+		UnityUtil.toUnity('SetStreamingBundlesColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Sets the colour of the bounding boxes representing yet-to-be-loaded individual model elements
+	 * @category Streaming
+	 * @code UnityUtil.setStreamingElementsColor([0.2,0.8,0.2]);
+	 */
+	public static setStreamingElementsColor(colour: number[]) {
+		const params = {
+			color: colour,
+		};
+		UnityUtil.toUnity('SetStreamingElementsColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Sets the three parameters that control the fade in and out of the Supermesh bounding boxes based on camera distance
+	 * @category Streaming
+	 * @param distance - how quickly the bounds fade-in with respect to the distance from the camera (to the far plane). (Does not have to be between 0 and 1 - making it larger will make the fade in more gradual.)
+	 * @param bias - distance from the far plane that the bounds should start to fade out. When this is zero the bounds will not fade out. Should otherwise be above 1.
+	 * @param power - how sharply the fade out occurs
+	 * @code UnityUtil.SetStreamingBundlesFade(0.7,1.6,5);
+	 */
+	public static setStreamingBundlesFade(distance: number, bias: number, power: number) {
+		const params = {
+			bias,
+			distance,
+			power,
+		};
+		UnityUtil.toUnity('SetStreamingBundlesFade', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Sets the transparency of the Supermesh Bounding Boxes faces/sides. Setting both this and the Lines Alpha to zero
+	 * will disable the Supermesh Bounds.
+	 * @category Streaming
+	 */
+	public static setStreamingBundlesFacesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
+	}
+
+	/**
+	 * Sets the transparency of the Supermesh Bounding Boxes edges/outlines. Setting both this and the Faces Alpha to zero
+	 * will disable the Supermesh Bounds.
+	 * @category Streaming
+	 */
+	public static setStreamingBundlesLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
+	}
+
+	/**
+	 * Sets the transparency of the Elements Bounding Boxes faces/sides. Setting both this and the Lines Alpha to zero
+	 * will disable the Elements Bounds.
+	 * @category Streaming
+	 */
+	public static setStreamingElementsFacesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
+	}
+
+	/**
+	 * Sets the transparency of the Elements Bounding Boxes edges/outlines. Setting both this and the Faces Alpha to zero
+	 * will disable the Elements Bounds.
+	 * @category Streaming
+	 */
+	public static setStreamingElementsLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
+	}
+
+	/**
+	 * Sets the radius - as fraction of the camera near/far plane - within which the bounding boxes of individual
+	 * yet-to-be-loaded elemenets should be drawn.
+	 * @category Streaming
+	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
+	 */
+	public static setStreamingElementsRadius(radius: number) {
+		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius));
+	}
+
 	/**
 	 * Add a Risk pin
 	 * @category Pins
@@ -1466,6 +1597,14 @@ export class UnityUtil {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
+	public static setMaxFarPlane(value: number) {
+		UnityUtil.toUnity('SetMaxFarPlane', UnityUtil.LoadingState.VIEWER_READY, Number(value));
+	}
+
+	public static setMaxNearPlane(value: number) {
+		UnityUtil.toUnity('SetMaxNearPlane', UnityUtil.LoadingState.VIEWER_READY, Number(value));
+	}
+
 	/**
 	* Set the maximum rending distance for shadows. Smaller value may increase shadow quality.
 	* @category Configurations
@@ -1792,6 +1931,18 @@ export class UnityUtil {
 		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/** How many non-trivial jobs the viewer can complete per frame when the
+	 * camera isnt moving */
+	public static setJobsPerFrameStatic(numJobs: number) {
+		UnityUtil.toUnity('SetNumStaticJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
+	}
+
+	/** How many non-trivial jobs the viewer can complete per frame when the
+	 * camera is moving */
+	public static setJobsPerFrameDynamic(numJobs: number) {
+		UnityUtil.toUnity('SetNumDynamicJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
+	}
+
 	/**
 	 * Move mesh/meshes by a given transformation matrix.
 	 * NOTE: this currently only works as desired in Synchro Scenarios
@@ -1828,5 +1979,13 @@ export class UnityUtil {
 			};
 			UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
+	}
+
+	/**
+	 * Creates an IndexedDbCache object which provides access to cached web requests using IndexedDb.
+	 * @param unityInstance
+	 */
+	public static createIndexedDbCache(gameObjectName: string) {
+		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
 	}
 }

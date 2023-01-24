@@ -868,6 +868,20 @@ export class ViewerService {
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
+	public setMaxNearPlane = (nearplane: number) => {
+		if (nearplane === undefined) {
+ 			return;
+		}
+		UnityUtil.setMaxNearPlane(nearplane);
+	}
+
+	public setMaxFarPlane = (farplane: number) => {
+		if (farplane === undefined) {
+ 			return;
+		}
+		UnityUtil.setMaxFarPlane(farplane);
+	}
+
 	public setFarPlaneSamplingPoints = (farplaneSample: number) => {
 		if (farplaneSample === undefined) {
  			return;
@@ -895,6 +909,85 @@ export class ViewerService {
 		}
 		UnityUtil.setPlaneBorderColor(color);
 	}
+
+	public setStreamingMemoryThreshold = (thresholdMB: number) => {
+		if (thresholdMB === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingMemoryThreshold(thresholdMB);
+	}
+
+	public setStreamingMemoryLimit = (limitMB: number) => {
+		if (limitMB === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingMemoryLimit(limitMB);
+	}
+
+	public setStreamingFovWeight = (weight: number) => {
+		if (weight === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingFovWeight(weight);
+	}
+
+	public setStreamingBundlesFade = (distance: number, bias: number, power: number) => {
+		if (distance === undefined || bias === undefined || power === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingBundlesFade(distance, bias, power);
+	}
+
+	public setStreamingBundlesColor = (color: number[]) => {
+		if (color === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingBundlesColor(color);
+	}
+
+	public setStreamingElementsColor = (color: number[]) => {
+		if (color === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingElementsColor(color);
+	}
+
+	public setStreamingBundlesFacesAlpha = (alpha: number) => {
+		if (alpha === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingBundlesFacesAlpha(alpha);
+	}
+
+	public setStreamingBundlesLinesAlpha = (alpha: number) => {
+		if (alpha === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingBundlesLinesAlpha(alpha);
+	}
+
+
+	public setStreamingElementsFacesAlpha = (alpha: number) => {
+		if (alpha === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingElementsFacesAlpha(alpha);
+	}
+
+	public setStreamingElementsLinesAlpha = (alpha: number) => {
+		if (alpha === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingElementsLinesAlpha(alpha);
+	}
+
+	public setStreamingElementsRenderingRadius = (radius: number) => {
+		if (radius === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingElementsRadius(radius);
+	}
+
 
 	/**
 	 * Map
