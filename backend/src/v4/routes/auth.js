@@ -561,10 +561,12 @@ function login(req, res, next) {
 	}
 
 	const { user, password } = req.body;
-	UsersV5.login(user, password).then((loginData) => {
-		req.loginData = loginData;
+	UsersV5.login(user, password).then(() => {
+		req.loginData = {username: user};
 		next();
-	}).catch((err) => respondV5(req, res, err));
+	}).catch((err) =>{
+		respondV5(req, res, err);
+	});
 }
 
 function checkLogin(req, res, next) {
