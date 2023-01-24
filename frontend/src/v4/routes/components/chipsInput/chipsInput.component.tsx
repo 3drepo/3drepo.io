@@ -42,6 +42,7 @@ export const ChipsInput: FunctionComponent<IProps> = ({ name, onChange, placehol
 			{...props}
 			multiple
 			freeSolo
+			disablePortal
 			options={[]}
 			onChange={handleChipChange}
 			defaultValue={getValues()}
