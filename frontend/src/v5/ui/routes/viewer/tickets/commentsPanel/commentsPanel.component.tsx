@@ -25,7 +25,7 @@ import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
-import { MinimumComment } from '@/v5/store/tickets/tickets.types';
+import { IComment, MinimumComment } from '@/v5/store/tickets/tickets.types';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../../routes.constants';
@@ -43,12 +43,12 @@ import {
 	CommentReplyContainer,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { addAuthor, addReply } from './comment/commentMarkDown/commentMarkDown.helpers';
+import { addReply } from './comment/commentMarkDown/commentMarkDown.helpers';
 import { MDCommentReply } from './comment/commentMarkDown/markDownElements/markDownComponents.component';
 import { CHARS_LIMIT } from './comment/comment.helpers';
 
 export const CommentsPanel = () => {
-	const [commentReply, setCommentReply] = useState(null);
+	const [commentReply, setCommentReply] = useState<IComment>(null);
 	const formData = useForm<{ comment: string }>({ mode: 'all' });
 	const inputComment = formData.watch('comment');
 
@@ -75,8 +75,7 @@ export const CommentsPanel = () => {
 	};
 
 	const handleReplyToComment = (commentId) => {
-		const { comment } = comments.find(({ _id }) => _id === commentId);
-		setCommentReply(comment);
+		setCommentReply(comments.find(({ _id }) => _id === commentId));
 	};
 
 	const handleEditToComment = (commentId, newComment) => {
@@ -93,12 +92,10 @@ export const CommentsPanel = () => {
 	const createComment = async () => {
 		let comment = inputComment;
 		if (commentReply) {
-			comment = addReply(commentReply, comment); 
+			comment = addReply(commentReply, comment);
 		}
-		const author = currentUser.username;
-		comment = addAuthor(author, comment);
 		const newComment: MinimumComment = {
-			author,
+			author: currentUser.username,
 			comment,
 			images: [],
 			createdAt: new Date(),
@@ -158,7 +155,7 @@ export const CommentsPanel = () => {
 				<BottomSection>
 					{commentReply && (
 						<CommentReplyContainer>
-							<MDCommentReply>{commentReply}</MDCommentReply>
+							<MDCommentReply {...commentReply} />
 							<DeleteButton onClick={() => setCommentReply(null)}>
 								<DeleteIcon />
 							</DeleteButton>
