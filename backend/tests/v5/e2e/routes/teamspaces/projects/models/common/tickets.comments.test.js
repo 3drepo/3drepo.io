@@ -122,6 +122,7 @@ const testGetComment = () => {
 					expectedComment.author = users.tsAdmin.user;
 					expectedComment.createdAt = res.body.createdAt;
 					expectedComment.updatedAt = res.body.updatedAt;
+					expectedComment.images = res.body.images;
 					expect(res.body).toEqual(expectedComment);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
@@ -205,6 +206,7 @@ const testGetCommentsList = () => {
 						expectedComment.author = users.tsAdmin.user;
 						expectedComment.createdAt = comment.createdAt;
 						expectedComment.updatedAt = comment.updatedAt;
+						expectedComment.images = comment.images;
 					}
 					expect(res.body).toEqual({ comments: expectedComments.sort((a, b) => b.createdAt - a.createdAt) });
 				} else {
@@ -346,7 +348,7 @@ const testUpdateComment = () => {
 				});
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 
-				const updateData = { comment: ServiceHelper.generateRandomString() };
+				const updateData = { comment: ServiceHelper.generateRandomString(), images: model.comment?.images };
 				const res = await agent.put(endpoint).send(updateData).expect(expectedStatus);
 
 				if (success) {
@@ -356,10 +358,15 @@ const testUpdateComment = () => {
 					const expectedComment = {
 						...model.comment,
 						...updateData,
+						images: updatedComment.images,
 						author: users.tsAdmin.user,
 						createdAt: updatedComment.createdAt,
 						updatedAt: updatedComment.updatedAt,
-						history: [{ comment: model.comment.comment, timestamp: updatedComment.createdAt }],
+						history: [{
+							comment: model.comment.comment,
+							timestamp: updatedComment.createdAt,
+							images: updatedComment.history[0].images,
+						}],
 					};
 
 					expect(updatedComment).toEqual(expectedComment);
@@ -444,9 +451,14 @@ const testDeleteComment = () => {
 						author: users.tsAdmin.user,
 						createdAt: deletedComment.createdAt,
 						updatedAt: deletedComment.updatedAt,
-						history: [{ comment: model.comment.comment, timestamp: deletedComment.createdAt }],
+						history: [{
+							comment: model.comment.comment,
+							timestamp: deletedComment.createdAt,
+							images: deletedComment.history[0].images,
+						}],
 					};
 					delete expectedComment.comment;
+					delete expectedComment.images;
 
 					expect(deletedComment).toEqual(expectedComment);
 				} else {
