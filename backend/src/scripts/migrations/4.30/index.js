@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const addVertexCountsToMeshBSONs = require('./addVertexCountsToMeshBSONs');
 const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
 
 const scripts = [
+	{ script: addVertexCountsToMeshBSONs, desc: 'Add vertex counts to mesh BSONs for streaming' },
 	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
 ];
 
