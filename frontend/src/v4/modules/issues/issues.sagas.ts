@@ -113,16 +113,9 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			};
 		}
 
-		if (issueData.descriptionThumbnail ) {
-			issue.viewpoint = {
-				...(issue.viewpoint || {}),
-				screenshot: issueData.descriptionThumbnail.substring(issueData.descriptionThumbnail.indexOf(',') + 1 )
-			};
-		}
-
 		const extraIssueData = omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']);
 
-		if (issue?.viewpoint?.position) {
+		if (!issueData?.viewpoint?.position) {
 			delete extraIssueData.viewpoint;
 		}
 

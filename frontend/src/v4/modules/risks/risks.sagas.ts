@@ -119,7 +119,6 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			yield generateViewpoint( teamspace, model, riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
-			// .substring(screenshot.indexOf(',') + 1);
 		if (riskData.descriptionThumbnail ) {
 			risk.viewpoint = {
 				...(risk.viewpoint || {}),
@@ -129,7 +128,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 
 		const extraRiskData = omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']);
 
-		if (risk?.viewpoint?.position) {
+		if (!riskData?.viewpoint?.position) {
 			delete extraRiskData.viewpoint;
 		}
 
