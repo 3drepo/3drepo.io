@@ -36,7 +36,7 @@ export interface ITicket {
 	type: string,
 	properties: Property,
 	modules?: Record<string, Property>,
-	comments?: MinimumComment[],
+	comments?: IComment[],
 }
 
 export interface TemplateModule {
