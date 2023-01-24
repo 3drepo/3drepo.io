@@ -116,8 +116,12 @@ const boardContainerStyles = css`
 	${Title} {
 		display: none;
 	}
-
+	
 	/* general select styling */
+	.MuiInputBase-root.Mui-focused .MuiSelect-select {
+		box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
+	}
+	
 	.MuiSelect-select {
 		padding-left: 15px;
 		border-style: solid;
