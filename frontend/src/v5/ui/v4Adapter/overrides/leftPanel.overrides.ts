@@ -39,20 +39,17 @@ export default css`
 			height: 48px;
 			font-size: 17px;
 
-			.panelTitle {
+			.panelTitle { 
 				margin: 0 0 0 -16px;
 				width: calc(100% + 16px);
 			}
 
 			// back arrow icon
 			${TitleIcon} {
-				width: 30px;
-				padding-left: 8px;
-
 				svg {
 					font-size: 1.4rem;
 				}
-
+				
 				.MuiIconButton-root {
 					background: transparent;
 					color: ${({ theme }) => theme.palette.primary.main};
@@ -69,13 +66,68 @@ export default css`
 				height: 32px;
 				width: 32px;
 				margin: 0 0 0 5px;
-
 				svg {
 					font-size: 1.2rem;
 				}
 
 				&[hidden] {
 					display: none;
+				}
+			}
+		}
+		
+		// Filter components
+		${FiltersButton} {
+			top: 13px;
+		}
+
+		${FilterPanelContainer} {
+			.Mui-focused .MuiOutlinedInput-notchedOutline, .MuiOutlinedInput-notchedOutline {
+				box-sizing: border-box;
+				box-shadow: none;
+				border: 0;
+				border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+				height: 48px;
+				font-size: 17px;
+
+				.panelTitle {
+					margin: 0 0 0 -16px;
+					width: calc(100% + 16px);
+				}
+
+				// back arrow icon
+				${TitleIcon} {
+					width: 30px;
+					padding-left: 8px;
+
+					svg {
+						font-size: 1.4rem;
+					}
+
+					.MuiIconButton-root {
+						background: transparent;
+						color: ${({ theme }) => theme.palette.primary.main};
+						border-radius: 0;
+						margin: 0;
+					}
+				}
+
+				// action icons
+				.MuiIconButton-root {
+					background-color: #edf0f8; // TODO - fix after new palette is released
+					color: currentColor;
+					border-radius: 50%;
+					height: 32px;
+					width: 32px;
+					margin: 0 0 0 5px;
+
+					svg {
+						font-size: 1.2rem;
+					}
+
+					&[hidden] {
+						display: none;
+					}
 				}
 			}
 		}

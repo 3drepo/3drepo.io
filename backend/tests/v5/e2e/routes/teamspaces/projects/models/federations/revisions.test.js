@@ -16,8 +16,8 @@
  */
 
 const SuperTest = require('supertest');
-const ServiceHelper = require('../../../../../helper/services');
-const { src } = require('../../../../../helper/path');
+const ServiceHelper = require('../../../../../../helper/services');
+const { src } = require('../../../../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 

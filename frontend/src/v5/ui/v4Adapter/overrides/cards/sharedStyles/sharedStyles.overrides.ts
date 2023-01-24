@@ -15,13 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import sequences from './sequences.overrides';
+import { SearchField } from '@/v4/routes/viewerGui/components/views/views.styles';
+import sequencesTab from './sequencesTab.overrides';
 import selectMenus from './selectMenus.overrides';
 import shapes from './shapes.overrides';
 import attachments from './attachments.overrides';
 
+const CardSearchInputStyles = css`
+	${SearchField} {
+		.MuiOutlinedInput-notchedOutline, .Mui-focused .MuiOutlinedInput-notchedOutline {
+			box-sizing: border-box;
+			box-shadow: none;
+			border: 0;
+			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			border-radius: 0;
+		}
+	}
+`;
+
 export default css`
-	${sequences}
+	${CardSearchInputStyles}
+	${sequencesTab}
 	${shapes}
 	${selectMenus}
 	${attachments}

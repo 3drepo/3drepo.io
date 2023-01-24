@@ -18,13 +18,13 @@
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
-const { createTeamspaceSettings, getMembersInfo, removeUserFromAdminPrivilege } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
+const { createTeamspaceSettings, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
+const { getAccessibleTeamspaces } = require('../../models/users');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
@@ -55,9 +55,9 @@ Teamspaces.initTeamspace = async (username) => {
 		await Promise.all([
 			grantTeamspaceRoleToUser(username, username),
 			createTeamspaceSettings(username),
-			grantAdminToUser(username, username),
 			assignUserToJob(username, DEFAULT_OWNER_JOB, username),
 		]);
+		await grantAdminToUser(username, username);
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${username}`);
 	}

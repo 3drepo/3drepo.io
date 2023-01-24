@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { ADMIN_DB } = require('../handler/db.constants');
+
 const UserConstants = {};
 
 UserConstants.AVATARS_COL_NAME = 'avatars.ref';
-UserConstants.USERS_DB_NAME = 'admin';
+UserConstants.USERS_DB_NAME = ADMIN_DB;
+UserConstants.USERS_COL = 'system.users';
 
 UserConstants.USERNAME_BLACKLIST = [
 	'payment',
