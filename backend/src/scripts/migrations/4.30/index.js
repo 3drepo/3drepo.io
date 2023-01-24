@@ -16,9 +16,11 @@
  */
 
 const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
+const moveNotificationsToInternal = require('./moveNotificationsToInternal');
 
 const scripts = [
-	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
+	// { script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
+	{ script: moveNotificationsToInternal, desc: 'Move notifications to internal DB' },
 ];
 
 module.exports = scripts;
