@@ -138,7 +138,7 @@ export class IndexedDbCacheWorker {
 				size: record.size,
 				result: record,
 			});
-		} else if (!Object.prototype.hasOwnProperty.apply(this.index.hasOwnProperty, key)) {
+		} else if (!(key in this.index)) {
 			// We know the database doesnt have the key, so return immediately again
 			this.sendGetTransactionComplete({
 				id,
@@ -224,21 +224,21 @@ export class IndexedDbCacheWorker {
 		self.postMessage({
 			type: 'OnSetTransactionComplete',
 			parms,
-		}, '*');
+		});
 	}
 
 	sendGetTransactionComplete(parms: any) {
 		self.postMessage({
 			type: 'OnGetTransactionComplete',
 			parms,
-		}, '*');
+		});
 	}
 
 	sendIndexedDbUpdated(parms: any) {
 		self.postMessage({
 			type: 'OnIndexedDbUpdated',
 			parms,
-		}, '*');
+		});
 	}
 
 	commitMemoryCache() {
