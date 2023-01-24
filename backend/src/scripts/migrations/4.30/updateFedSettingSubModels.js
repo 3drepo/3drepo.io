@@ -21,8 +21,10 @@ const { getTeamspaceList } = require('../../utils');
 const { find, bulkWrite } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
+const SETTINGS_COLL = 'settings';
+
 const processTeamspace = async (teamspace) => {
-	const oldSchemaFedSettings = await find(teamspace, 'settings', { 'subModels.model': { $exists: true } }, { subModels: 1 });
+	const oldSchemaFedSettings = await find(teamspace, SETTINGS_COLL, { 'subModels.model': { $exists: true } }, { subModels: 1 });
 	const settingsUpdates = oldSchemaFedSettings.map(({ _id, subModels }) => ({ updateOne: {
 		filter: { _id },
 		update: { $set: { subModels: subModels.map((subModel) => (subModel.model ? subModel.model : subModel)) } },
@@ -30,7 +32,7 @@ const processTeamspace = async (teamspace) => {
 
 	if (settingsUpdates.length) {
 		logger.logInfo(`\t\t\t-Updating ${settingsUpdates.length} documents in ${teamspace}`);
-		await bulkWrite(teamspace, 'settings', settingsUpdates);
+		await bulkWrite(teamspace, SETTINGS_COLL, settingsUpdates);
 	}
 };
 
