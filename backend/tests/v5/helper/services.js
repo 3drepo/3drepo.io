@@ -18,6 +18,8 @@
 const Crypto = require('crypto');
 const amqp = require('amqplib');
 const http = require('http');
+const fs = require('fs');
+const { times } = require('lodash');
 
 const { src, srcV4 } = require('./path');
 
@@ -31,10 +33,11 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
+const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
@@ -64,6 +67,24 @@ queue.purgeQueues = async () => {
 	}
 };
 
+db.reset = async () => {
+	const dbs = await DbHandler.listDatabases(true);
+	const protectedDB = [USERS_DB_NAME, 'local'];
+	const dbProms = dbs.map(({ name }) => {
+		if (!protectedDB.includes(name)) {
+			return DbHandler.dropDatabase(name);
+		}
+		return Promise.resolve();
+	});
+
+	const cols = await DbHandler.listCollections(USERS_DB_NAME);
+
+	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
+
+	await Promise.all([...dbProms, ...colProms]);
+	DbHandler.reset();
+};
+
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
@@ -73,15 +94,15 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-// breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = (teamspace, admins = [], breaking = false, customData) => {
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
-	return Promise.all([
-		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
-			{ permissions: breaking ? undefined : permissions, ...customData }),
-		ServiceHelper.db.createTeamspaceRole(teamspace),
-		createTeamspaceSettings(teamspace),
-	]);
+db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
+	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
+	await initTeamspace(teamspace);
+	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
+
+	if (subscriptions) {
+		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
+			subType, subscriptions[subType])));
+	}
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
@@ -112,6 +133,18 @@ db.createRevision = async (teamspace, modelId, revision) => {
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	delete formattedRevision.refData;
 	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+};
+
+db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
+	const seqCol = `${model}.sequences`;
+	const actCol = `${model}.activities`;
+
+	await Promise.all([
+		DbHandler.insertOne(teamspace, seqCol, sequence),
+		DbHandler.insertMany(teamspace, actCol, activities),
+		states.map(({ id, buffer }) => FilesManager.storeFile(teamspace, seqCol, id, buffer)),
+		FilesManager.storeFile(teamspace, actCol, UUIDToString(sequence._id), activityTree),
+	]);
 };
 
 db.createGroups = (teamspace, modelId, groups = []) => {
@@ -198,6 +231,15 @@ db.addLoginRecords = async (records) => {
 };
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+ServiceHelper.fileExists = (filePath) => {
+	let flag = true;
+	try {
+		fs.accessSync(filePath, fs.constants.F_OK);
+	} catch (e) {
+		flag = false;
+	}
+	return flag;
+};
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
@@ -206,7 +248,54 @@ ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
-ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.${ServiceHelper.generateRandomString(3)}/`;
+ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
+
+ServiceHelper.generateSequenceEntry = (rid) => {
+	const startDate = ServiceHelper.generateRandomDate();
+	const endDate = ServiceHelper.generateRandomDate(startDate);
+
+	const sequence = {
+		_id: generateUUID(),
+		rev_id: rid,
+		name: ServiceHelper.generateRandomString(),
+		startDate,
+		endDate,
+		frames: [
+			{
+				dateTime: startDate,
+				state: ServiceHelper.generateUUIDString(),
+			},
+			{
+				dateTime: startDate,
+				state: ServiceHelper.generateUUIDString(),
+			},
+		],
+	};
+
+	const generateDate = () => ServiceHelper.generateRandomDate(startDate, endDate);
+	const states = sequence.frames.map(({ state }) => ({
+		id: state,
+		buffer: Buffer.from(ServiceHelper.generateRandomString(), 'utf-8'),
+	}));
+
+	const activities = times(5, () => ({
+		_id: generateUUID(),
+		name: ServiceHelper.generateRandomString(),
+		startDate: generateDate(),
+		endDate: generateDate(),
+		sequenceId: sequence._id,
+		data: times(3, () => ({
+
+			key: ServiceHelper.generateRandomString(),
+			value: ServiceHelper.generateRandomString(),
+		})),
+
+	}));
+
+	const activityTree = Buffer.from(ServiceHelper.generateRandomString(), 'utf-8');
+
+	return { sequence, states, activities, activityTree };
+};
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -225,7 +314,7 @@ ServiceHelper.generateUserCredentials = () => ({
 });
 
 ServiceHelper.determineTestGroup = (path) => {
-	const match = path.match(/^.*[/|\\](e2e|unit|drivers)[/|\\](.*).test.js$/);
+	const match = path.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
 	if (match?.length === 3) {
 		return `${match[1].toUpperCase()} ${match[2]}`;
 	}
@@ -256,7 +345,7 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...ServiceHelper.generateRandomModelProperties(isFederation),
 			...(isFederation ? { federate: true } : {}),
 			...properties,
 			permissions,
@@ -509,6 +598,12 @@ ServiceHelper.closeApp = async (server) => {
 	if (server) await server.close();
 	EventsManager.reset();
 	QueueHandler.close();
+};
+
+ServiceHelper.resetFileshare = () => {
+	const fsDir = config.fs.path;
+	fs.rmSync(fsDir, { recursive: true });
+	fs.mkdirSync(fsDir);
 };
 
 module.exports = ServiceHelper;

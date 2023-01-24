@@ -23,7 +23,7 @@ import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
-import ChevronIcon from '@assets/icons/chevron.svg';
+import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
@@ -52,7 +52,7 @@ export const COLOR = {
 	BASE_MID: '#565768',
 	BASE_LIGHT: '#BCBECA',
 	BASE_LIGHTER: '#C1C8D5',
-	BASE_LIGHTEST: '#E0E5F0',
+	BASE_LIGHTEST: '#D0D9EB',
 	ERROR_MAIN: '#BE4343',
 	ERROR_DARK: '#A33232',
 	ERROR_DARKEST: '#8E2A2A',
@@ -432,7 +432,13 @@ export const theme = createTheme({
 					color: null,
 				},
 				colorPrimary: {
-					color: COLOR.PRIMARY_MAIN,
+					color: COLOR.BASE_LIGHT,
+					'&.Mui-checked': {
+						color: COLOR.PRIMARY_MAIN,
+					},
+					'&.Mui-disabled': {
+						color: COLOR.BASE_LIGHTEST,
+					},
 				},
 			},
 		},
@@ -866,9 +872,12 @@ export const theme = createTheme({
 						height: 35,
 						lineHeight: '35px',
 					},
-					'input, textarea, .MuiInputAdornment-root': {
+					'input, textarea': {
 						...typography.body1,
 						color: COLOR.SECONDARY_MAIN,
+					},
+					'.MuiInputAdornment-root': {
+						color: COLOR.BASE_MAIN,
 					},
 					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
 						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
@@ -878,18 +887,18 @@ export const theme = createTheme({
 					'&, &:focus, &:active, &:hover': {
 						'.MuiOutlinedInput-notchedOutline': {
 							borderRadius: 5,
-							border: `1px solid ${COLOR.BASE_LIGHTER}`,
+							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 						},
 						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.BASE_LIGHT,
+							borderColor: COLOR.SECONDARY_LIGHTEST,
 						},
 						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
 							borderColor: COLOR.ERROR_MAIN,
 						},
 					},
 					'&.Mui-disabled': {
-						borderColor: COLOR.BASE_LIGHT,
-						'input, textarea, .MuiInputAdornment-root, .MuiSelect-select': {
+						borderColor: COLOR.BASE_LIGHTEST,
+						'input, textarea, .MuiInputAdornment-root svg, .MuiSelect-select, .MuiSelect-icon': {
 							color: COLOR.BASE_LIGHT,
 							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
 						},
@@ -924,7 +933,7 @@ export const theme = createTheme({
 					position: 'absolute',
 					top: 'unset',
 					boxSizing: 'border-box',
-					border: `1px solid ${COLOR.BASE_LIGHTER}`,
+					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 					legend: {
 						display: 'none',
 					},
@@ -954,7 +963,7 @@ export const theme = createTheme({
 						width: 10,
 						top: '40%',
 						pointerEvents: 'none',
-						color: COLOR.SECONDARY_MAIN,
+						color: COLOR.BASE_MAIN,
 					},
 				},
 			},
@@ -1023,9 +1032,12 @@ export const theme = createTheme({
 		MuiFormHelperText: {
 			styleOverrides: {
 				contained: {
-					position: 'absolute',
-					bottom: -18,
-					margin: 0,
+					position: 'relative',
+					margin: '-12px 0 0',
+					bottom: -14,
+					lineHeight: '12px',
+					height: 12,
+					maxHeight: 12,
 				},
 			},
 		},
@@ -1204,6 +1216,8 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					textTransform: 'none',
+					whiteSpace: 'nowrap',
+					overflow: 'visible',
 				},
 			},
 		},

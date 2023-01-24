@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { BottomNavigation } from '@mui/material';
-import Logo from '@assets/icons/colored_logo.svg';
+import Logo from '@assets/icons/filled/logo_text-filled.svg';
 import { COLOR } from '@/v5/ui/themes/theme';
 
 const FOOTER_HEIGHT = 42;

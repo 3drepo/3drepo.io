@@ -23,7 +23,6 @@ jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString } = require('../../helper/services');
-const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const userCol = 'system.users';
@@ -423,7 +422,6 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 				company: newUserData.company,
 			},
 		},
-		permissions: newUserData.permissions,
 	};
 
 	if (newUserData.sso) {
@@ -452,7 +450,6 @@ const testAddUser = () => {
 				mailListAgreed: true,
 				countryCode: 'GB',
 				company: generateRandomString(),
-				permissions: [],
 			};
 
 			const fn = jest.spyOn(db, 'createUser');
@@ -476,7 +473,6 @@ const testAddUser = () => {
 				mailListAgreed: true,
 				countryCode: 'GB',
 				company: generateRandomString(),
-				permissions: [],
 				sso: {
 					type: generateRandomString(),
 					id: generateRandomString(),
@@ -517,20 +513,6 @@ const testVerify = () => {
 	});
 };
 
-const testGrantTeamspacePermissionToUser = () => {
-	describe('Grant teamspace permission to user', () => {
-		test('Should grant teamspace permission to user', async () => {
-			const teamspace = generateRandomString();
-			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
-			await User.grantAdminToUser(username, teamspace);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, userCol, { user: username },
-				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
-		});
-	});
-};
-
 const testRemoveUser = () => {
 	describe('Drop user', () => {
 		test('Should call dropUser to remove the user from the database', async () => {
@@ -563,6 +545,66 @@ const testIsAccountActive = () => {
 	});
 };
 
+const testUnlinkFromSso = () => {
+	describe('Unlink user from SSO', () => {
+		test('Should unlink user from SSO', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const fn2 = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			const username = generateRandomString();
+			const password = generateRandomString();
+			await User.unlinkFromSso(username, password);
+
+			expect(fn).toHaveBeenCalledTimes(2);
+			expect(fn).toHaveBeenNthCalledWith(1, 'admin', 'system.users', { user: username }, { $unset: { 'customData.sso': 1 } });
+			expect(fn).toHaveBeenNthCalledWith(2, 'admin', 'system.users', { user: username }, { $unset: { 'customData.resetPasswordToken': 1 } });
+			expect(fn2).toHaveBeenCalledTimes(1);
+			expect(fn2).toHaveBeenCalledWith('admin', { updateUser: username, pwd: password });
+		});
+	});
+};
+
+const testLinkToSso = () => {
+	describe('Link user to SSO', () => {
+		test('Should link user to SSO', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const username = generateRandomString();
+			const email = generateRandomString();
+			const ssoData = { type: generateRandomString(), id: generateRandomString() };
+			await User.linkToSso(username, email, firstName, lastName, ssoData);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+				{ $set: { 'customData.email': email, 'customData.firstName': firstName, 'customData.lastName': lastName, 'customData.sso': ssoData } });
+		});
+	});
+};
+
+const testIsSso = () => {
+	describe('Check if user is SSO', () => {
+		test('Should return true if user is SSO', async () => {
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
+
+			await User.isSsoUser(username);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
+		});
+
+		test('Should return false if user is non SSO', async () => {
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { } });
+
+			await User.isSsoUser(username);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username }, { 'customData.sso': 1 }, undefined);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -579,6 +621,8 @@ describe('models/users', () => {
 	testAddUser();
 	testRemoveUser();
 	testVerify();
-	testGrantTeamspacePermissionToUser();
 	testIsAccountActive();
+	testUnlinkFromSso();
+	testLinkToSso();
+	testIsSso();
 });

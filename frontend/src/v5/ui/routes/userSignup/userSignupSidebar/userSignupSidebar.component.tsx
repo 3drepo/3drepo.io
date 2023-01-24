@@ -24,7 +24,7 @@ import {
 	BulletPointTitle,
 	BulletPointBody,
 	BulletPointIcon,
-	Check,
+	Tick,
 	BookADemoButton,
 	LaptopIcon,
 	MainTitle,
@@ -48,7 +48,7 @@ export const UserSignupSidebar = () => (
 		</MainTitle>
 		<BulletPoint>
 			<BulletPointIcon>
-				<Check />
+				<Tick />
 			</BulletPointIcon>
 			<BulletPointMessage>
 				<BulletPointTitle>
@@ -67,7 +67,7 @@ export const UserSignupSidebar = () => (
 		</BulletPoint>
 		<BulletPoint>
 			<BulletPointIcon>
-				<Check />
+				<Tick />
 			</BulletPointIcon>
 			<BulletPointMessage>
 				<BulletPointTitle>
@@ -86,7 +86,7 @@ export const UserSignupSidebar = () => (
 		</BulletPoint>
 		<BulletPoint>
 			<BulletPointIcon>
-				<Check />
+				<Tick />
 			</BulletPointIcon>
 			<BulletPointMessage>
 				<BulletPointTitle>

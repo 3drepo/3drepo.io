@@ -24,22 +24,22 @@ interface IProps {
 	children: ReactChild;
 	footerLabel?: string | ReactNode[];
 	withHeader?: boolean;
+	className?: string;
 }
 
 export const UserManagementTab = (props: IProps) => {
 	const {footerLabel, children} = props;
 	return (
-		<>
-			<Container
-				container
-				direction="column"
-				alignItems="stretch"
-				wrap="nowrap"
-				justifyContent="space-between"
-			>
-				<Content item header={props.withHeader}>{children}</Content>
-				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
-			</Container>
-		</>
+		<Container
+			container
+			direction="column"
+			alignItems="stretch"
+			wrap="nowrap"
+			justifyContent="space-between"
+			className={props.className}
+		>
+			<Content item header={props.withHeader}>{children}</Content>
+			{footerLabel && (<Footer item>{footerLabel}</Footer>)}
+		</Container>
 	);
 };

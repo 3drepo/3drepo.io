@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import NotFoundIcon from '@assets/icons/404.svg';
+import NotFoundIcon from '@assets/icons/filled/404-filled.svg';
 import { Link } from 'react-router-dom';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';

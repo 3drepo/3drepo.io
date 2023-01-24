@@ -20,12 +20,13 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { removeSubscription, removeAddOns, getMembersInfo } = require(`${v5Path}/models/teamspaces`);
+const { removeSubscription, removeAddOns, getMembersInfo } = require(`${v5Path}/models/teamspaceSettings`);
 const { revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
-const { getProjectList, deleteProject } = require(`${v5Path}/processors/teamspaces/projects`);
+const { deleteProject } = require(`${v5Path}/processors/teamspaces/projects`);
+const { getProjectList } = require(`${v5Path}/models/projectSettings`);
 
 const removeAllProjects = async (teamspace) => {
-	const projects = await getProjectList(teamspace, teamspace);
+	const projects = await getProjectList(teamspace);
 	return Promise.all(projects.map(({ _id }) => deleteProject(teamspace, _id)));
 };
 
@@ -38,7 +39,9 @@ const removeAllUsersFromTS = async (teamspace) => {
 };
 
 const run = async (teamspaces) => {
+	if (!teamspaces?.length) throw new Error('A list of teamspaces must be provided');
 	const teamspaceArr = teamspaces.split(',');
+
 	for (const teamspace of teamspaceArr) {
 		logger.logInfo(`-${teamspace}`);
 		const opsProms = [
@@ -53,6 +56,7 @@ const run = async (teamspaces) => {
 			// eslint-disable-next-line no-await-in-loop
 			await Promise.all(opsProms);
 		} catch (err) {
+			/* istanbul ignore next */
 			logger.logError(`\tFailed to remove data from ${teamspace}: ${err?.message}`);
 		}
 	}
@@ -60,7 +64,7 @@ const run = async (teamspaces) => {
 	logger.logInfo('done');
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspaces',
 		{

@@ -19,6 +19,8 @@
 
 const BillingAddress = require("./billingAddress");
 const config = require("../config");
+const {v5Path} = require("../../interop");
+const TeamspaceModelV5 = require(`${v5Path}/models/teamspaceSettings`);
 
 /*
 // Wrapper for VAT calculation and payment information
@@ -447,29 +449,13 @@ billingSchema.methods.executeBillingAgreement = function(user) {
 
 const UserBilling = {};
 
-UserBilling.getActiveSubscriptions = function(userBilling) {
-	const res = { basic: config.subscriptions.basic};
-	Object.keys(userBilling.subscriptions || {}).forEach(key => {
-		if(key === "paypal") {
-			res.paypal = [];
-			userBilling.subscriptions.paypal.forEach(ppPlan => {
-				if(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
-					res.paypal.push(ppPlan);
-				}
-			});
-		} else {
-			if(!userBilling.subscriptions[key].expiryDate ||
-				userBilling.subscriptions[key].expiryDate > Date.now()) {
-				res[key] = userBilling.subscriptions[key];
-			}
-
-		}
-	});
-
-	return res;
+UserBilling.getSubscriptions = async (teamspace) => {
+	const subscriptions = await TeamspaceModelV5.getSubscriptions(teamspace);
+	return { basic: config.subscriptions.basic, ...subscriptions };
 };
 
-UserBilling.getSubscriptionLimits = function(userBilling) {
+UserBilling.getSubscriptionLimits = async (teamspace) => {
+	const subscriptions = await TeamspaceModelV5.getSubscriptions(teamspace);
 	const sumLimits = {};
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
@@ -483,11 +469,11 @@ UserBilling.getSubscriptionLimits = function(userBilling) {
 	if(!sumLimits.collaboratorLimit) {
 		sumLimits.collaboratorLimit = 0;
 	}
-	if(userBilling.subscriptions)	{
-		Object.keys(userBilling.subscriptions).forEach(key => {
+	if(subscriptions)	{
+		Object.keys(subscriptions).forEach(key => {
 			if(key === "paypal") {
-				if (userBilling.subscriptions.paypal.length > 0) {
-					userBilling.subscriptions.paypal.forEach(ppPlan => {
+				if (subscriptions.paypal.length > 0) {
+					subscriptions.paypal.forEach(ppPlan => {
 						const plan = config.subscriptions.plans[ppPlan.plan];
 						if(plan &&
 							(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now())) {
@@ -500,12 +486,12 @@ UserBilling.getSubscriptionLimits = function(userBilling) {
 					});
 				}
 			} else {
-				if(!userBilling.subscriptions[key].expiryDate ||
-					userBilling.subscriptions[key].expiryDate > Date.now()) {
-					sumLimits.spaceLimit += userBilling.subscriptions[key].data;
+				if(!subscriptions[key].expiryDate ||
+					subscriptions[key].expiryDate > Date.now()) {
+					sumLimits.spaceLimit += subscriptions[key].data;
 					if(sumLimits.collaboratorLimit !== "unlimited") {
-						sumLimits.collaboratorLimit = userBilling.subscriptions[key].collaborators === "unlimited" ?
-							"unlimited" : sumLimits.collaboratorLimit + userBilling.subscriptions[key].collaborators;
+						sumLimits.collaboratorLimit = subscriptions[key].collaborators === "unlimited" ?
+							"unlimited" : sumLimits.collaboratorLimit + subscriptions[key].collaborators;
 					}
 				}
 

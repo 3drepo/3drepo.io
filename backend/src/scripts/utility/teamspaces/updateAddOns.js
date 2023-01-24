@@ -20,7 +20,8 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getAddOns, removeAddOns, updateAddOns } = require(`${v5Path}/models/teamspaces`);
+const { getAddOns, removeAddOns, updateAddOns } = require(`${v5Path}/models/teamspaceSettings`);
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 
 const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled, removeAll) => {
 	const addOns = await getAddOns(teamspace);
@@ -29,12 +30,12 @@ const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled
 	if (removeAll) {
 		await removeAddOns(teamspace);
 	} else {
-		const toUpdate = {
-			...(vrEnabled === undefined ? {} : { vrEnabled }),
-			...(hereEnabled === undefined ? {} : { hereEnabled }),
-			...(srcEnabled === undefined ? {} : { srcEnabled }),
-			...(powerBIEnabled === undefined ? {} : { powerBIEnabled }),
-		};
+		const toUpdate = deleteIfUndefined({
+			vrEnabled,
+			hereEnabled,
+			srcEnabled,
+			powerBIEnabled,
+		});
 
 		if (!Object.keys(toUpdate).length) {
 			throw new Error('Must specify at least 1 add on');
@@ -45,7 +46,7 @@ const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled
 	logger.logInfo(`${teamspace} has been updated. Current subscription(s): ${JSON.stringify(addOnsUpdated)}`);
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('vrEnabled',
 		{

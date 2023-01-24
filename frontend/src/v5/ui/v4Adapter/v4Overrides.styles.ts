@@ -22,6 +22,9 @@ import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
 import customTable from './overrides/customTable.overrides';
+import newUserForm from './overrides/newUserForm.overrides';
+import invitationsList from './overrides/invitationsList.overrides';
+import inviteUserForm from './overrides/inviteUserForm.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
@@ -37,6 +40,7 @@ import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 import gis from './overrides/cards/gis.overrides';
 import compare from './overrides/cards/compare.overrides';
+import sequences from './overrides/cards/sequences.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -44,6 +48,9 @@ export const V4OverridesContainer = styled.div`
 	height: 100%;
 
 	${customTable}
+	${newUserForm}
+	${invitationsList}
+	${inviteUserForm}
 
 	${avatarPopover}
 
@@ -70,6 +77,7 @@ export const V4OverridesContainer = styled.div`
 	${measurements}
 	${issues}
 	${safetiBase}
+	${sequences}
 
 	${views}
 	${gis}

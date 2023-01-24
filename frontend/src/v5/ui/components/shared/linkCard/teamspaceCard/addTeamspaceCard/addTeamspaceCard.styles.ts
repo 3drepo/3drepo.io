@@ -17,7 +17,7 @@
 
 import { Card } from '@mui/material';
 import styled from 'styled-components';
-import AddCircleIcon from '@assets/icons/add_circle_filled.svg';
+import AddCircleIcon from '@assets/icons/twoToned/add_circle-two_toned.svg';
 
 export const Container = styled(Card)`
 	color: ${({ theme }) => theme.palette.primary.main};
@@ -32,9 +32,7 @@ export const Container = styled(Card)`
 	cursor: pointer;
 `;
 
-export const AddTeamspaceIcon = styled(AddCircleIcon).attrs(({ theme }) => ({
-	fillColour: theme.palette.primary.contrast,
-}))`
+export const AddTeamspaceIcon = styled(AddCircleIcon)`
 	width: 37px;
 	height: 37px;
 `;

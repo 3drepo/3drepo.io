@@ -20,6 +20,7 @@ import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
@@ -38,20 +39,30 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 	const { formState } = useFormContext();
 	return (
 		<>
-			{properties.map((property) => {
-				const { name, type } = property;
+			{properties.map(({
+				name,
+				type,
+				default: defaultValue,
+				readOnly: disabled,
+				required,
+				values,
+			}) => {
 				const inputName = `${module}.${name}`;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
 				return (
 					<>
-						<PropertyComponent
-							property={property}
+						<InputController
+							Input={PropertyComponent}
+							label={name}
+							disabled={disabled}
+							required={required}
 							name={inputName}
 							formError={formError}
-							defaultValue={propertiesValues[name] ?? property.default}
+							defaultValue={propertiesValues[name] ?? defaultValue}
 							key={name}
 							onBlur={onPropertyBlur}
+							values={values}
 						/>
 						{formError && <ErrorTextGap />}
 					</>
@@ -112,7 +123,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
-								key={module.name}
+								key={module.name || module.type}
 								module={module}
 								moduleValues={ticket.modules[module.name]}
 								{...rest}
