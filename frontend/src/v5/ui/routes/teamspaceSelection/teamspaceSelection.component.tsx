@@ -18,7 +18,6 @@
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AppBar } from '@components/shared/appBar';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
-import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -58,7 +57,6 @@ export const TeamspaceSelection = (): JSX.Element => {
 				</HomeContent>
 				<DashboardFooter variant="dark" />
 			</ScrollBar>
-			<ModalsDispatcher />
 		</>
 	);
 };

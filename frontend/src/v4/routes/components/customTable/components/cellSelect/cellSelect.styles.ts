@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import MenuItem from '@mui/material/MenuItem';
 import styled, { css } from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
@@ -52,11 +53,24 @@ export const Item = styled(MenuItem)<{ group: number }>`
 		padding-top: 12px;
 		padding-bottom: 12px;
 
-		${({ group }) => group ? css`
+		${({ theme, group }) => group ? css`
 			height: 12px;
 			font-weight: ${FONT_WEIGHT.BOLD};
 			border-top: 1px solid ${COLOR.BLACK_20};
+
+			${isV5() && css`
+				&& {
+					${theme.typography.h3}
+					opacity: 1;
+					padding: 17px 14px 8px;
+					height: fit-content;
+					border-color: ${theme.palette.secondary.lightest};
+				}
+			`}
 		` : ''}
+		${({ disabled, group }) => isV5() && disabled && !group && css`
+			padding-top: 2px;
+		`}
 	}
 `;
 

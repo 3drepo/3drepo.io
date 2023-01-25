@@ -652,24 +652,12 @@ function importModel(account, model, username, modelSetting, source, data) {
 
 }
 
-function isSubModel(account, model) {
-	return findModelSettings(account, { federate: true }).then((feds) => {
-		const promises = [];
-
-		feds.forEach(modelSetting => {
-			promises.push(listSubModels(account, modelSetting._id).then(subModels => {
-				return subModels.find(subModel => subModel.model === model);
-			}));
-		});
-
-		return Promise.all(promises).then((results) => {
-			return results.reduce((isSub, current) => isSub || current, false);
-		});
-	});
+async function isSubModel(account, model) {
+	return (await findModelSettings(account, { subModels: model })).length > 0;
 }
 
 function removeModel(account, model, forceRemove, projectId) {
-	return findModelSettingById(account, model).then(setting => {
+	return findModelSettingById(account, model).then((setting) => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}

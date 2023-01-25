@@ -14,30 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Scrollbars from 'react-custom-scrollbars';
-import styled from 'styled-components';
-import { COLOR } from '@/v5/ui/themes/theme';
+import { forwardRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { ScrollbarProps } from 'react-custom-scrollbars';
 import { isV5 } from '@/v4/helpers/isV5';
+import { ConditionalV5OrViewerScrollAreaBase } from './conditionalV5OrViewerScrollArea.styles';
 
-const ThumbVertical = styled.div`
-	background-color: ${COLOR.BASE_LIGHTEST};
-	right: ${isV5() ? 3 : 2}px;
-	bottom: 6px;
-	top: 0px;
-	border-radius: 3px;
-	width: 6px;
-	z-index: 10;
-`;
-
-const ThumbHorizontal = styled.div`
-	display: none;
-`;
-
-export const ViewerScrollAreaBase = styled(Scrollbars).attrs({
-	autoHideTimeout: 1000,
-	autoHideDuration: 300,
-	autoHide: true,
-	renderThumbVertical: ({ style }) => <ThumbVertical style={style} />,
-	renderThumbHorizontal: ({ style }) => <ThumbHorizontal style={style} />,
-})`` as any;
+export const ConditionalV5OrViewerScrollArea = forwardRef(({ children, ...props }: ScrollbarProps, ref: any) => {
+	const { pathname } = useLocation();
+	const isViewer = pathname.startsWith('/viewer');
+	if (isV5() || isViewer) {
+		return (
+			<ConditionalV5OrViewerScrollAreaBase {...props} ref={ref}>
+				{children}
+			</ConditionalV5OrViewerScrollAreaBase>
+		);
+	}
+	return <div ref={ref}>{children}</div>;
+});
