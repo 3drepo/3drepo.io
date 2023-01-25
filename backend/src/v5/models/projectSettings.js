@@ -79,20 +79,11 @@ Projects.createProject = async (teamspace, name) => {
 	return addedProject._id;
 };
 
-Projects.deleteProject = async (teamspace, projectId) => {
-	const { deletedCount } = await db.deleteOne(teamspace, COL_NAME, { _id: projectId });
+Projects.deleteProject = (teamspace, projectId) => db.deleteOne(teamspace, COL_NAME, { _id: projectId });
 
-	if (deletedCount === 0) {
-		throw templates.projectNotFound;
-	}
-};
-
-Projects.updateProject = async (teamspace, projectId, updatedProject) => {
-	const { matchedCount } = await updateOneProject(teamspace, { _id: projectId }, { $set: updatedProject });
-	if (matchedCount === 0) {
-		throw templates.projectNotFound;
-	}
-};
+Projects.updateProject = (teamspace, projectId, updatedProject) => updateOneProject(
+	teamspace, { _id: projectId }, { $set: updatedProject },
+);
 
 Projects.removeUserFromAllProjects = async (teamspace, user) => {
 	await db.updateMany(

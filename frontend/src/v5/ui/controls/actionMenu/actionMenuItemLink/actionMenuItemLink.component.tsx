@@ -22,6 +22,7 @@ type ActionMenuItemLinkProps = {
 	Icon?: any;
 	to?: string;
 	children?: React.ReactNode;
+	onClick?: () => void;
 };
 
 export const ActionMenuItemLink = ({ Icon, to = '#', children, ...otherProps }: ActionMenuItemLinkProps) => (

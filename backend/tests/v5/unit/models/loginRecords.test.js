@@ -19,6 +19,7 @@ const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const db = require(`${src}/handler/db`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 
@@ -69,7 +70,7 @@ const testSaveRecordHelper = (testFailed = false) => {
 		const { loginTime, _id } = fn.mock.calls[0][2];
 		const baseProps = testFailed ? { failed: true, _id, loginTime } : { loginTime };
 		const loginRecord = { ...expectedResult, ...baseProps };
-		expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { ...loginRecord, user });
+		expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol, { ...loginRecord, user });
 
 		if (testFailed) {
 			expect(EventsManager.publish).not.toHaveBeenCalled();
@@ -163,7 +164,7 @@ const testIsAccountLocked = () => {
 			expect(findLastLoginFn).toHaveBeenCalledTimes(1);
 
 			expect(findRecordsFn).toHaveBeenCalledTimes(1);
-			expect(findRecordsFn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+			expect(findRecordsFn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: true }, { loginTime: 1 }, { loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
 		});
 
@@ -176,7 +177,7 @@ const testIsAccountLocked = () => {
 			expect(findLastLoginFn).toHaveBeenCalledTimes(1);
 
 			expect(findRecordsFn).toHaveBeenCalledTimes(1);
-			expect(findRecordsFn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+			expect(findRecordsFn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: true, loginTime: { $gt: date } }, { loginTime: 1 },
 				{ loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
 		});
@@ -248,7 +249,7 @@ const testRemoveAllUserRecords = () => {
 			await expect(LoginRecord.removeAllUserRecords(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol, { user });
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol, { user });
 		});
 	});
 };
@@ -263,7 +264,7 @@ const testGetLastLoginDate = () => {
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toEqual(expectedDate);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 
@@ -274,7 +275,7 @@ const testGetLastLoginDate = () => {
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 	});
@@ -286,7 +287,7 @@ const testInitialise = () => {
 			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
 			await LoginRecord.initialise();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(db.INTERNAL_DB, loginRecordsCol,
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
 		});
 	});
