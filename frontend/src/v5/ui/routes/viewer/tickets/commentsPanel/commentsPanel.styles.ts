@@ -75,7 +75,11 @@ export const DeleteButton = styled.div`
 	}
 `;
 
-export const MessageInput = styled(FormTextAreaFixedSize)`
+export const CommentInput = styled(FormTextAreaFixedSize).attrs({
+	inputProps: {
+		maxlength: 1200,
+	},
+})`
 	.MuiInputBase-multiline {
 		padding: 8px 0 0;
 		line-height: 16px;
@@ -102,7 +106,7 @@ export const CharsCounter = styled(Typography).attrs({
 })<{ $error?: boolean }>`
 	margin: 1px 0 0 11px;
 	font-weight: 500;
-	color: ${({ theme: { palette }, $error }) => $error ? palette.error.main : palette.base.lighter};
+	color: ${({ theme: { palette }, $error }) => ($error ? palette.error.main : palette.base.lighter)};
 `;
 
 export const FileIconButton = styled.div`
