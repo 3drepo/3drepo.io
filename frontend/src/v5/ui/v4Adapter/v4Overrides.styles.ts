@@ -41,6 +41,7 @@ import tree from './overrides/cards/tree.overrides';
 import views from './overrides/cards/views.overrides';
 import gis from './overrides/cards/gis.overrides';
 import compare from './overrides/cards/compare.overrides';
+import board from './overrides/dashboard/board.overrides';
 import sequences from './overrides/cards/sequences.overrides';
 
 export const V4OverridesContainer = styled.div`
@@ -87,4 +88,6 @@ export const V4OverridesContainer = styled.div`
 	${RevisionsSwitchContainer} {
 		display: none;
 	}
+
+	${board}
 `;
