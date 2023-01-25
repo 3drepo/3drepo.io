@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,12 @@
 
 const addVertexCountsToMeshBSONs = require('./addVertexCountsToMeshBSONs');
 const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
+const updateFedSettingSubModels = require('./updateFedSettingSubModels');
 
 const scripts = [
 	{ script: addVertexCountsToMeshBSONs, desc: 'Add vertex counts to mesh BSONs for streaming' },
 	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
+	{ script: updateFedSettingSubModels, desc: 'Update subModels in federation settings' },
 ];
 
 module.exports = scripts;
