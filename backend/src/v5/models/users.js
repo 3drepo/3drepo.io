@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -24,10 +24,9 @@ const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
-const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
-const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
+const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, USERS_COL, query, projection, sort);
+const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, USERS_COL, { user: username }, action);
 
 User.isAccountActive = async (user) => {
 	const projection = { 'customData.inactive': 1 };
@@ -36,18 +35,10 @@ User.isAccountActive = async (user) => {
 };
 
 User.authenticate = async (user, password) => {
-	try {
-		await db.authenticate(user, password);
-	} catch (err) {
-		if (err.code === templates.incorrectUsernameOrPassword.code) {
-			publish(events.FAILED_LOGIN_ATTEMPT, { user });
-			throw templates.incorrectUsernameOrPassword;
-		}
+	if (await db.authenticate(user, password)) return;
 
-		throw err;
-	}
-
-	return { username: user };
+	publish(events.FAILED_LOGIN_ATTEMPT, { user });
+	throw templates.incorrectUsernameOrPassword;
 };
 
 User.getUserByQuery = async (query, projection) => {
@@ -121,12 +112,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 };
 
 User.updatePassword = async (username, newPassword) => {
-	const updateUserCmd = {
-		updateUser: username,
-		pwd: newPassword,
-	};
-
-	await db.runCommand(USERS_DB_NAME, updateUserCmd);
+	await db.setPassword(username, newPassword);
 	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
@@ -180,10 +166,10 @@ User.addUser = async (newUserData) => {
 	await db.createUser(newUserData.username, newUserData.password, customData);
 };
 
-User.removeUser = (user) => db.dropUser(user);
+User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
 
 User.verify = async (username) => {
-	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, COLL_NAME, { user: username },
+	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, USERS_COL, { user: username },
 		{
 			$unset: {
 				'customData.inactive': 1,

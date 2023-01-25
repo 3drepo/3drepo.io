@@ -146,7 +146,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 				<StyledFormControl>
-					<InputLabel shrink htmlFor="topic_type">Type</InputLabel>
+					<InputLabel disabled={!canEditBasicProperty || !topicTypes.length} shrink htmlFor="topic_type">Type</InputLabel>
 					<Field name="topic_type" render={({ field }) => (
 						<CellSelect
 							{...field}

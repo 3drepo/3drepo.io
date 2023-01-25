@@ -65,7 +65,7 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
-		subModels: [{ model: 'container1' }, { model: 'container2' }],
+		subModels: ['container1', 'container2'],
 		defaultView: 2,
 		defaultLegend: 3,
 		permissions: [1, 2, 3],
@@ -246,7 +246,7 @@ const testDeleteFavourites = () => {
 
 const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
 	...(settings.desc ? { desc: settings.desc } : {}),
-	...(settings.subModels ? { containers: settings.subModels.map((m) => m.model || m) } : {}),
+	...(settings.subModels ? { containers: settings.subModels } : {}),
 	code: settings.properties.code,
 	status: settings.status,
 	lastUpdated,

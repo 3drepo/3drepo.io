@@ -701,6 +701,10 @@ export const theme = createTheme({
 
 					'&.Mui-selected, &.Mui-selected:hover, &:hover': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+
+						'&.Mui-disabled': {
+							backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
+						},
 					},
 				},
 			},
@@ -957,6 +961,7 @@ export const theme = createTheme({
 					width: '100%',
 					boxSizing: 'border-box',
 					pointerEvents: 'auto',
+					borderColor: COLOR.BASE_LIGHTER,
 					'& ~ svg': {
 						position: 'absolute',
 						right: 14,
@@ -964,6 +969,14 @@ export const theme = createTheme({
 						top: '40%',
 						pointerEvents: 'none',
 						color: COLOR.BASE_MAIN,
+					},
+
+					'&.Mui-disabled': {
+						borderColor: COLOR.SECONDARY_LIGHTEST,
+						color: COLOR.BASE_LIGHT,
+						'& ~ svg': {
+							color: COLOR.BASE_LIGHT,
+						},
 					},
 				},
 			},
