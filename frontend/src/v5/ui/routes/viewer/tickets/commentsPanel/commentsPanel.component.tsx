@@ -25,7 +25,7 @@ import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
-import { IComment, MinimumComment } from '@/v5/store/tickets/tickets.types';
+import { IComment } from '@/v5/store/tickets/tickets.types';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../../routes.constants';
@@ -37,15 +37,15 @@ import {
 	FileIconButton,
 	SendButton,
 	BottomSection,
-	MessageInput,
+	CommentInput,
 	EmptyCommentsBox,
 	DeleteButton,
 	CommentReplyContainer,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { addReply } from './comment/commentMarkDown/commentMarkDown.helpers';
-import { MDCommentReply } from './comment/commentMarkDown/markDownElements/markDownComponents.component';
+import { addReply, parseComment } from './comment/commentMarkDown/commentMarkDown.helpers';
 import { CHARS_LIMIT } from './comment/comment.helpers';
+import { CommentReply } from './comment/commentReply/commentReply.component';
 
 export const CommentsPanel = () => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
@@ -75,33 +75,34 @@ export const CommentsPanel = () => {
 	};
 
 	const handleReplyToComment = (commentId) => {
-		setCommentReply(comments.find(({ _id }) => _id === commentId));
+		const comment = comments.find(({ _id }) => _id === commentId);
+		setCommentReply(comment);
 	};
 
-	const handleEditToComment = (commentId, newComment) => {
+	const handleEditComment = (commentId, newComment) => {
 		TicketsActionsDispatchers.updateTicketComment(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			{ ...newComment, _id: commentId },
+			{ comment: newComment, _id: commentId },
 		);
 	};
-	
+
 	const createComment = async () => {
-		let comment = inputComment;
+		let comment = parseComment(inputComment);
 		if (commentReply) {
 			comment = addReply(commentReply, comment);
 		}
-		const newComment: MinimumComment = {
+		const newComment = {
 			author: currentUser.username,
 			comment,
 			images: [],
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			deleted: false,
-		};
+		} as any;
 		TicketsActionsDispatchers.createTicketComment(
 			teamspace,
 			project,
@@ -122,7 +123,7 @@ export const CommentsPanel = () => {
 			containerOrFederation,
 			ticketId,
 			isFederation,
-		)
+		);
 	}, [number]);
 
 	return (
@@ -140,34 +141,32 @@ export const CommentsPanel = () => {
 									key={comment._id}
 									onDelete={handleDeleteComment}
 									onReply={handleReplyToComment}
-									onEdit={handleEditToComment}
-									commentReply={commentReply}
+									onEdit={handleEditComment}
 								/>
 							))}
 						</Comments>
 					)}
 					{!commentsListIsEmpty && (
 						<EmptyCommentsBox>
-							<FormattedMessage id="ticket.comments.empty" defaultMessage='No comments' />
+							<FormattedMessage id="ticket.comments.empty" defaultMessage="No comments" />
 						</EmptyCommentsBox>
 					)}
 				</ScrollArea>
 				<BottomSection>
 					{commentReply && (
 						<CommentReplyContainer>
-							<MDCommentReply {...commentReply} />
+							<CommentReply author={commentReply.author} reply={commentReply.comment} />
 							<DeleteButton onClick={() => setCommentReply(null)}>
 								<DeleteIcon />
 							</DeleteButton>
 						</CommentReplyContainer>
 					)}
-					<MessageInput
-						name='comment'
+					<CommentInput
+						name="comment"
 						placeholder={formatMessage({
 							id: 'customTicket.panel.comments.leaveAMessage',
 							defaultMessage: 'leave a message',
 						})}
-						inputProps={{ maxlength: 1200 }}
 					/>
 					{/* <Images /> */}
 					<Controls>
