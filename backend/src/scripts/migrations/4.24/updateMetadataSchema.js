@@ -18,13 +18,10 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { aggregate, indexExists } = require(`${v5Path}/handler/db`);
+const { aggregate } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processModel = async (teamspace, scene) => {
-	if (await indexExists(teamspace, scene, 'metadata.key_1_metadata.value_1')) {
-		return;
-	}
 	const query = [
 		// filter for all metasdata that has not been converted
 		{ $match: { type: 'meta', metadata: { $not: { $type: 'array' } } } },

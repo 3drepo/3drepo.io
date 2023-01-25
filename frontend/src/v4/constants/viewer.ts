@@ -109,7 +109,22 @@ export const DEFAULT_SETTINGS = {
 	maxShadowDistance: 10000,
 	numCacheThreads: 3,
 	clipPlaneBorderWidth: 0.8,
-	clipPlaneBorderColor: [0.02, 0.16, 0.32]
+	clipPlaneBorderColor: [0.02, 0.16, 0.32],
+	memoryThreshold: 500,
+	memoryLimit: 2032,
+	maxNearPlane: -1,
+	maxFarPlane: -1,
+	fovWeight: 2,
+	phBundleColor: [0, 0.757, 0.828],
+	phBundleFadeDistance: 2,
+	phBundleFadeBias: 0,
+	phBundleFadePower: 80,
+	phBundleFaceAlpha: 0.1,
+	phBundleLineAlpha: 0.1,
+	phElementColor: [0.0898, 0.168, 0.3008],
+	phElementRenderingRadius: 0.1,
+	phElementFaceAlpha: 0.05,
+	phElementLineAlpha: 0.3,
 };
 
 export const VIEWER_PANELS = {

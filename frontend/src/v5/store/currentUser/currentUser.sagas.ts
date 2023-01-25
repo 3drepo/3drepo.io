@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ViewerActions } from '@/v4/modules/viewer';
 import * as API from '@/v5/services/api';
 import { getUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
@@ -34,6 +35,7 @@ export function* fetchUser() {
 			...userData,
 			avatarUrl,
 		}));
+		yield put(ViewerActions.fetchSettings());
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'currentUser.fetchUser.error', defaultMessage: 'trying to fetch current user details' }),
