@@ -27,8 +27,7 @@ import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { IssueProperties, TicketsCardViews } from '../tickets.constants';
+import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 
