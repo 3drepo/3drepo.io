@@ -29,7 +29,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
@@ -217,7 +217,10 @@ const unexpandedStyles  = css`
 	}
 `;
 
-export const ScrollableContainer = styled(ViewerScrollArea)`
+export const ScrollableContainer = styled(ConditionalV5OrViewerScrollArea).attrs({
+	autoHeight: true,
+	autoHeightMax: '100%',
+})`
 	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;

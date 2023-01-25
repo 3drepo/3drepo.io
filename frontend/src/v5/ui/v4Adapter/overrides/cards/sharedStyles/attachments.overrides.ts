@@ -29,6 +29,7 @@ export default css`
 	${ResourcesContainer} {
 
 		${ResourcesList} {
+			margin-top: 10px;
 			font-size: 12px;
 
 			${ResourceItemContainer} {
