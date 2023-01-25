@@ -91,9 +91,6 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
-		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
-		if (!(view?.camera)) return;
-		ViewerService.setViewpoint(view);
 	}, [ticket._id]);
 
 	if (!ticket) return (<></>);
