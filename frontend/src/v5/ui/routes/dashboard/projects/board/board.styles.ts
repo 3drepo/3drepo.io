@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import { css } from 'styled-components';
-import issueProperties from './properties.overrides';
-
-export default css`
-	#issues-card-details {
-		${issueProperties}
-	}
+export const Container = styled.div`
+	position: absolute;
+	left: 0;
+	width: 100vw;
+	height: calc(100vh - 182px);
+	box-sizing: border-box;
+	max-width: unset;
 `;

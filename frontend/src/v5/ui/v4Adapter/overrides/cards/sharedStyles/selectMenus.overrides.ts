@@ -96,11 +96,16 @@ export const FieldsRowStyles = css`
 		.MuiInputBase-input, .MuiSelect-select, .MuiOutlinedInput-notchedOutline {
 			box-sizing: border-box;
 			margin: 0;
-			color: ${({ theme }) => theme.palette.secondary.main};
 			~ svg {
 				margin-top: 0px;
 				top: 10px;
+			}
+
+			&:not(.Mui-disabled) {
 				color: ${({ theme }) => theme.palette.secondary.main};
+				~ svg {
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 		input, fieldset {
@@ -108,11 +113,12 @@ export const FieldsRowStyles = css`
 		}
 		${StyledFormControl} {
 			margin: 0;
-			&:first-child {
-				margin-right: 5px;
-			}
 			&:last-child {
 				margin-left: 5px;
+			}
+			&:first-child {
+				margin-right: 5px;
+				margin-left: 0;
 			}
 			${IssuesDateFieldContainer},
 			${RisksDateFieldContainer} {
@@ -156,4 +162,12 @@ export default css`
 		${EditableFieldStyles}
 	}
 	${FieldsRowStyles}
+
+	.MuiSelect-select {
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	}
+
+	.Mui-focused .MuiSelect-select {
+		border-color: ${({ theme }) => theme.palette.primary.main};
+	}
 `;
