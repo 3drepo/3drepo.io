@@ -20,7 +20,7 @@ import { MinimumComment } from '@/v5/store/tickets/tickets.types';
 import { getMemberImgSrc, USER_NOT_FOUND } from '@/v5/store/users/users.helpers';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UserCircle } from '@controls/assignees/assignees.styles';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
@@ -174,15 +174,21 @@ type CommentProps = MinimumComment & {
 	onDelete?: (messageId) => void;
 	onReply: (messageId) => void;
 	onEdit?: (messageId, newMessage) => void;
-}
+};
 
 export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...props }: CommentProps) => {
-	// const [commentAge, _] = useState(getRelativeTime(createdAt));
+	const [commentAge, setCommentAge] = useState(getRelativeTime(createdAt));
+
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(commentWithMetdata);
 	const comment = extractComment(commentWithMetdata);
 
 	const UserComment = isCurrentUser ? CurrentUserMessage : OtherUserMessage;
 
-	return (<UserComment {...props} author={author} commentAge={getRelativeTime(createdAt)} metadata={metadata} comment={comment} />);
+	useEffect(() => {
+		const intervalId = window.setInterval(() => setCommentAge(getRelativeTime(createdAt)), 10_000);
+		return () => clearInterval(intervalId);
+	}, []);
+
+	return (<UserComment {...props} author={author} commentAge={commentAge} metadata={metadata} comment={comment} />);
 };
