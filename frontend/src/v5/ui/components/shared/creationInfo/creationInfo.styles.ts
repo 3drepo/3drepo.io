@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,26 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export enum TicketsCardViews {
-	List = 'list',
-	Details = 'details',
-	New = 'new',
-}
+import styled from 'styled-components';
 
-export enum IssueProperties {
-	DUE_DATE = 'Due Date',
-	STATUS = 'Status',
-	PRIORITY = 'Priority',
-	ASSIGNEES = 'Assignees',
-	DEFAULT_VIEW = 'Default View',
-	PIN = 'Pin',
-	CREATED_AT = 'Created at',
-	UPDATED_AT = 'Updated at',
-	OWNER = 'Owner',
-}
+export const CreationInfoContainer = styled.div`
+    display: flex;
+	${({ theme }) => theme.typography.caption};
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 0 10px;
+	gap: 2px;
+`;
 
-export enum SafetibaseProperties {
-	TREATMENT_STATUS = 'Treatment Status',
-	LEVEL_OF_RISK = 'Level of Risk',
-	TREATED_LEVEL_OF_RISK = 'Treated Level of Risk',
-}
+export const TruncateName = styled.div`
+	display: inline-block;
+	text-decoration: underline;
+	max-width: 90px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	vertical-align: bottom;
+`;

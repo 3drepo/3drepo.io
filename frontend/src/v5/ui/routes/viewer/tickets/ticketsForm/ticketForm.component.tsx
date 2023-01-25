@@ -27,6 +27,8 @@ import { UnsupportedProperty } from './properties/unsupportedProperty.component'
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
+import { IssueProperties } from '../tickets.constants';
+import { CreationInfo } from '../../../../components/shared/creationInfo/creationInfo.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -115,6 +117,11 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 					})}
 					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={rest?.onPropertyBlur}
+				/>
+				<CreationInfo
+					owner={ticket.properties?.[IssueProperties.OWNER]}
+					createdAt={ticket.properties?.[IssueProperties.CREATED_AT]}
+					updatedAt={ticket.properties?.[IssueProperties.UPDATED_AT]}
 				/>
 			</TitleContainer>
 			<CardContent>
