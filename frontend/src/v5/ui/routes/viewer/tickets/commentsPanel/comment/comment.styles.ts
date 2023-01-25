@@ -170,12 +170,25 @@ export const EditCommentContainer = styled(BasicComment)`
 	width: 380px;
 `;
 
-export const EditCommentInput = styled(FormTextArea)`
+export const EditCommentInput = styled(CommentInput).attrs({
+	as: FormTextArea,
+	minRows: 1,
+})`
 	.MuiInputBase-multiline {
-		padding: 8px 0 0;
-		line-height: 16px;
+		padding: 0;
+
+		& fieldset,
+		&:hover fieldset {
+			border: none;
+		}
 	}
-`;;
+	
+		
+	.Mui-focused:not(.Mui-disabled) fieldset.MuiOutlinedInput-notchedOutline {
+		border: none;
+		box-shadow: none;
+	}
+`;
 
 export const EditCommentButtons = styled.div`
     margin: 4px 5px 0 auto;
