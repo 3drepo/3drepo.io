@@ -16,45 +16,16 @@
  */
 
 const { TEAM_MEMBER } = require('./roles.constants');
-const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 
 const Roles = {};
 
-Roles.createTeamspaceRole = async (teamspace) => {
-	const createRoleCmd = {
-		createRole: TEAM_MEMBER,
-		privileges: [],
-		roles: [],
-	};
+Roles.createTeamspaceRole = (teamspace) => db.createRole(teamspace, TEAM_MEMBER);
 
-	await db.runCommand(teamspace, createRoleCmd);
-};
+Roles.removeTeamspaceRole = (teamspace) => db.dropRole(teamspace, TEAM_MEMBER);
 
-Roles.removeTeamspaceRole = async (teamspace) => {
-	const cmd = {
-		dropRole: TEAM_MEMBER,
-	};
+Roles.grantTeamspaceRoleToUser = (teamspace, username) => db.grantRole(teamspace, TEAM_MEMBER, username);
 
-	await db.runCommand(teamspace, cmd);
-};
-
-Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{ role: TEAM_MEMBER, db: teamspace }],
-	};
-
-	return db.runCommand(USERS_DB_NAME, grantRoleCmd);
-};
-
-Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => {
-	const revokeRoleCmd = {
-		revokeRolesFromUser: username,
-		roles: [{ role: TEAM_MEMBER, db: teamspace }],
-	};
-
-	return db.runCommand(USERS_DB_NAME, revokeRoleCmd);
-};
+Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => db.revokeRole(teamspace, TEAM_MEMBER, username);
 
 module.exports = Roles;

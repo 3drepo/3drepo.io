@@ -25,14 +25,13 @@ const {
 	riskLevels,
 	riskLevelsToNum } = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
+const { getAllUsersInTeamspace, getRiskCategories } = require('../../models/teamspaceSettings');
 const { isDate, isObject } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
-const { getAllUsersInTeamspace } = require('../../models/teamspaces');
 const { getJobNames } = require('../../models/jobs');
-const { getRiskCategories } = require('../../models/teamspaces');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 

@@ -22,7 +22,7 @@ import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import { ViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ConditionalV5OrViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../../styles';
@@ -35,8 +35,9 @@ export const StyledTypography = styled(Typography).attrs({
 	}
 `;
 
-export const StyledList = styled(List)`
-`;
+export const StyledList = styled(List)``;
+
+export const TextLabel = styled.span``;
 
 export const StyledListItem = styled(ListItem)`
 	&& {
@@ -81,7 +82,7 @@ export const Container = styled.div`
 
 export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
 	autoHeight: true,
-	autoHeightMax: isV5() ? 'calc(100vh - 205px)' : '60vh',
+	autoHeightMax: isV5() ? '100%' : '60vh',
 })`
 	margin-top: 66px;
 `;

@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { removeSubscription, removeAddOns, getMembersInfo } = require(`${v5Path}/models/teamspaces`);
+const { removeSubscription, removeAddOns, getMembersInfo } = require(`${v5Path}/models/teamspaceSettings`);
 const { revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
 const { deleteProject } = require(`${v5Path}/processors/teamspaces/projects`);
 const { getProjectList } = require(`${v5Path}/models/projectSettings`);

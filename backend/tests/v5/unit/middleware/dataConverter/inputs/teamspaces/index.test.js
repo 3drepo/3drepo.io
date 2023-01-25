@@ -21,8 +21,8 @@ const { src } = require('../../../../../helper/path');
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../src/v5/models/teamspaces');
-const TeamspacesModel = require(`${src}/models/teamspaces`);
+jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
+const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions');
 const PermissionsUtils = require(`${src}/utils/permissions/permissions`);

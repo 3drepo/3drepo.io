@@ -18,7 +18,6 @@
 const { src } = require('../../helper/path');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
 const { generateRandomString } = require('../../helper/services');
-const { USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 
 const Roles = require(`${src}/models/roles`);
 const db = require(`${src}/handler/db`);
@@ -27,15 +26,11 @@ const testCreateTeamspaceRole = () => {
 	describe('Create teamspace role', () => {
 		test('should create a new teamspace role', async () => {
 			const teamspace = generateRandomString();
-			const expectedCommand = {
-				createRole: TEAM_MEMBER,
-				privileges: [],
-				roles: [],
-			};
-			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+
+			const fn = jest.spyOn(db, 'createRole').mockImplementationOnce(() => { });
 			await Roles.createTeamspaceRole(teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, expectedCommand);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER);
 		});
 	});
 };
@@ -44,13 +39,11 @@ const testRemoveTeamspaceRole = () => {
 	describe('Remove teamspace role', () => {
 		test('should remove the teamspace role', async () => {
 			const teamspace = generateRandomString();
-			const expectedCommand = {
-				dropRole: TEAM_MEMBER,
-			};
-			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+
+			const fn = jest.spyOn(db, 'dropRole').mockImplementationOnce(() => { });
 			await Roles.removeTeamspaceRole(teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, expectedCommand);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER);
 		});
 	});
 };
@@ -60,15 +53,11 @@ const testGrantTeamspaceRoleToUser = () => {
 		test('should assign a teamspace role to the user', async () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
-			const expectedCommand = {
-				grantRolesToUser: username,
-				roles: [{ role: TEAM_MEMBER, db: teamspace }],
-			};
 
-			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			const fn = jest.spyOn(db, 'grantRole').mockImplementationOnce(() => { });
 			await Roles.grantTeamspaceRoleToUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, expectedCommand);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER, username);
 		});
 	});
 };
@@ -78,15 +67,10 @@ const testRevokeTeamspaceRoleFromUser = () => {
 		test('should revoke teamspace role from the user', async () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
-			const expectedCommand = {
-				revokeRolesFromUser: username,
-				roles: [{ role: TEAM_MEMBER, db: teamspace }],
-			};
-
-			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			const fn = jest.spyOn(db, 'revokeRole').mockImplementationOnce(() => { });
 			await Roles.revokeTeamspaceRoleFromUser(teamspace, username);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, expectedCommand);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAM_MEMBER, username);
 		});
 	});
 };
