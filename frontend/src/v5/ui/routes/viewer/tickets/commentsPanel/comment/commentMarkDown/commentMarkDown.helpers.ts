@@ -17,71 +17,50 @@
 
 import { IComment } from '@/v5/store/tickets/tickets.types';
 
-const breakLine = (textBeforeLineBreak, textAfterLineBreak) => `${textBeforeLineBreak}\n\n${textAfterLineBreak}`;
-
 export type Metadata = {
 	author: string,
 	referenceId: string,
 	reply: string,
 };
 
-const addMetadataValue = (comment: string, metadataName: keyof Metadata, metadataValue: string) => (
-	`[${metadataName}]:- ${metadataValue}\n${comment}`
+const extractMetadataValue = (comment: string, metadataName: keyof Metadata) => {
+	// @ts-ignore
+	const regex = new RegExp(`\\[${metadataName}\\]:- "([^\"]*)"\\n`);
+	return regex.exec(comment)?.[1] || '';
+};
+
+export const extractMetadata = (comment: string): Metadata => ({
+	author: extractMetadataValue(comment, "author"),
+	referenceId: extractMetadataValue(comment, "referenceId"),
+	reply: extractMetadataValue(comment, "reply"),
+});
+
+export const extractComment = (comment: string) => comment.replaceAll(/\[[a-zA-Z]*\]:- ".*"\n[\n]?/g, "");
+
+export const parseComment = (comment: string) => comment.replaceAll('"', '&#34;').replaceAll("\n", "<br />");
+export const stringifyComment = (comment: string) => comment.replaceAll('&#34;', '"').replaceAll("<br />", "\n");
+
+const createMetadataValue = (metadataName: keyof Metadata, metadataValue: string) => (
+	`[${metadataName}]:- "${metadataValue}"\n`
 );
 
-const replyToMetadata = (text: string) => text.replace("\n", "<br />");
-const metadataToReply = (text: string) => text.replace("<br />", "\n");
-
-export const addMetadata = (comment: string, { author, referenceId, reply }: Metadata) => {
-	let metadata = addMetadataValue(comment, 'author', author);
-	metadata = addMetadataValue(metadata, 'referenceId', referenceId);
-	metadata = addMetadataValue(metadata, 'reply', replyToMetadata(reply));
-	return metadata;
+const createMetadata = ({ author, _id, comment }: Partial<IComment>) => {
+	const reply = extractComment(comment);
+	const metadata = [
+		createMetadataValue("author", author),
+		createMetadataValue("referenceId", _id),
+		createMetadataValue("reply", reply),
+	];
+	return metadata.join("");
 };
 
-const getMetadataValue = (comment, metadataName) => {
-	const regex = new RegExp(`\\[${metadataName}\\]:- (.*)`);
-	const line = regex.exec(comment);
-	if (line?.[1]) return line[1];
-	return '';
-};
+export const addReply = (comment: Partial<IComment>, newComment: string) => `${createMetadata(comment)}\n${newComment}`;
 
-export const getMetadata = (comment: string): Metadata => ({
-	author: getMetadataValue(comment, 'author'),
-	referenceId: getMetadataValue(comment, 'referenceId'),
-	reply: metadataToReply(getMetadataValue(comment, 'reply')),
-})
-
-export const addAuthor = (author, comment) => breakLine(`# ${author}`, comment);
-
-export const addReply = ({ comment, author, _id }: IComment, newComment: string) => {
-	const reply = addMetadata(newComment, {
-		author,
-		reply: comment,
-		referenceId: _id,
-	});
-	return breakLine(reply, newComment);
-};
-
-export const destructureComment = (comment: string) => {
-	const commentElements = {
-		id: comment.match(/\!\[\dCommentReference\]\([]\)/),
-		author: '',
-		reply: '',
-		message: '',
+export const updateComment = (metadata: Metadata, newComment: string) => {
+	const comment: Partial<IComment> = {
+		author: metadata.author,
+		_id: metadata.referenceId,
+		comment: metadata.reply,
 	};
-
-	const lines = comment.split("\n");
-	commentElements.author = lines.shift();
-	const commentMessage = [];
-	for (const line of comment.split("\n").reverse()) {
-		if (line.startsWith(">")) {
-			commentElements.reply = lines.reverse().join("\n");
-			break;
-		}
-		commentMessage.push(lines.pop());
-	}
-	commentElements.message = commentMessage.reverse().join("\n");
-
-	return commentElements;
-}
+	return addReply(comment, newComment);
+};
