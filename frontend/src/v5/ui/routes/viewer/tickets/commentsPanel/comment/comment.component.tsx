@@ -23,32 +23,89 @@ import { UserCircle } from '@controls/assignees/assignees.styles';
 import { useState } from 'react';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import { deletedCommentText, deletedCurrentUserCommentTime, deletedOtherUserCommentTime, getRelativeTime } from './comment.helpers';
-import { CurrentUserMessageContainer, CommentAuthor, CommentBody, CommentTime, HoverPopover, OtherUserMessageContainer, CommentButtons } from './comment.styles';
+import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
+import { formatMessage } from '@/v5/services/intl';
+import { useForm } from 'react-hook-form';
 import { ErrorCommentButton, PrimaryCommentButton } from './commentButton/commentButton.styles';
-import { CommentMarkDown } from './commentMarkDown/commentMarkDownElements';
+import { extractMetadata, Metadata, extractComment, updateComment, stringifyComment, parseComment } from './commentMarkDown/commentMarkDown.helpers';
+import { CommentReply } from './commentReply/commentReply.component';
+import { CommentMarkDown } from './commentMarkDown/commentMarkDown';
+import { deletedCommentText, deletedCurrentUserCommentTime, deletedOtherUserCommentTime, getRelativeTime } from './comment.helpers';
+import {
+	CurrentUserMessageContainer,
+	CommentAuthor,
+	CommentTime,
+	HoverPopover,
+	OtherUserMessageContainer,
+	CommentButtons,
+	EditCommentContainer,
+	EditCommentButtons,
+	EditCommentInput,
+} from './comment.styles';
 
 type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
-	messageAge: string;
-}
+	commentAge: string;
+	metadata?: Metadata;
+};
 
 const CurrentUserMessage = ({
 	_id,
 	author,
 	deleted,
 	comment,
-	messageAge,
+	commentAge,
+	metadata,
 	onDelete,
 	onReply,
+	onEdit,
 }: UserCommentProps) => {
+	const [isEditMode, setIsEditMode] = useState(false);
+	const { control, watch } = useForm<{ editComment }>({
+		defaultValues: { editComment: stringifyComment(comment) },
+	});
+
 	if (deleted) {
 		return (
 			<CurrentUserMessageContainer $deleted data-author={author}>
 				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
 				<CommentTime>{deletedCurrentUserCommentTime}</CommentTime>
 			</CurrentUserMessageContainer>
-		)
+		);
+	}
+
+	if (isEditMode) {
+		const updateMessage = () => {
+			const newComment = parseComment(watch('editComment'));
+			const updatedComment = updateComment(metadata, newComment);
+			onEdit(_id, updatedComment);
+			setIsEditMode(false);
+		};
+
+		return (
+			<>
+				<EditCommentContainer data-author={author}>
+					{metadata.reply && (<CommentReply {...metadata} />)}
+					<EditCommentInput
+						name="editComment"
+						placeholder={formatMessage({
+							id: 'customTicket.panel.comments.edit',
+							defaultMessage: ' ',
+						})}
+						control={control}
+					/>
+				</EditCommentContainer>
+				<EditCommentButtons>
+					<ErrorCommentButton onClick={() => setIsEditMode(false)}>
+						<CancelIcon />
+					</ErrorCommentButton>
+					<PrimaryCommentButton onClick={updateMessage} disabled={!watch('editComment').length}>
+						<TickIcon />
+					</PrimaryCommentButton>
+				</EditCommentButtons>
+			</>
+		);
 	}
 
 	return (
@@ -60,12 +117,13 @@ const CurrentUserMessage = ({
 				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
-				<PrimaryCommentButton>
+				<PrimaryCommentButton onClick={() => setIsEditMode(true)}>
 					<EditIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
+			{metadata.reply && (<CommentReply variant="secondary" {...metadata} />)}
 			<CommentMarkDown>{comment}</CommentMarkDown>
-			<CommentTime>{messageAge}</CommentTime>
+			<CommentTime>{commentAge}</CommentTime>
 		</CurrentUserMessageContainer>
 	);
 };
@@ -79,7 +137,7 @@ const OtherUserMessagePopoverWrapper = ({ deleted = false, user, children }) => 
 	</OtherUserMessageContainer>
 );
 
-const OtherUserMessage = ({ _id, deleted, comment, messageAge, author, onReply }: UserCommentProps) => {
+const OtherUserMessage = ({ _id, deleted, comment, commentAge, author, onReply, metadata }: UserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	let user = UsersHooksSelectors.selectUser(teamspace, author);
 	if (user) {
@@ -104,24 +162,27 @@ const OtherUserMessage = ({ _id, deleted, comment, messageAge, author, onReply }
 					<ReplyIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
+			<CommentAuthor>{author}</CommentAuthor>
+			{metadata.reply && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
 			<CommentMarkDown>{comment}</CommentMarkDown>
-			<CommentTime>{messageAge}</CommentTime>
+			<CommentTime>{commentAge}</CommentTime>
 		</OtherUserMessagePopoverWrapper>
 	);
 };
 
 type CommentProps = MinimumComment & {
-	commentReply?: MinimumComment;
 	onDelete?: (messageId) => void;
 	onReply: (messageId) => void;
 	onEdit?: (messageId, newMessage) => void;
 }
 
-export const Comment = ({ createdAt, author, ...props }: CommentProps) => {
-	const [messageAge, _] = useState(getRelativeTime(createdAt));
+export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...props }: CommentProps) => {
+	// const [commentAge, _] = useState(getRelativeTime(createdAt));
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
+	const metadata = extractMetadata(commentWithMetdata);
+	const comment = extractComment(commentWithMetdata);
 
 	const UserComment = isCurrentUser ? CurrentUserMessage : OtherUserMessage;
 
-	return (<UserComment author={author} {...props} messageAge={messageAge} />);
+	return (<UserComment {...props} author={author} commentAge={getRelativeTime(createdAt)} metadata={metadata} comment={comment} />);
 };
