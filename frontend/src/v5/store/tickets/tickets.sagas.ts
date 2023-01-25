@@ -72,7 +72,13 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 	}
 }
 
-export function* fetchTicketComments({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketCommentsAction) {
+export function* fetchTicketComments({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	isFederation,
+}: FetchTicketCommentsAction) {
 	try {
 		const fetchModelTicketComments = isFederation
 			? API.Tickets.fetchFederationTicketComments
@@ -94,18 +100,25 @@ export function* fetchTicketComments({ teamspace, projectId, modelId, ticketId, 
 	}
 }
 
-export function* createTicketComment({ teamspace, projectId, modelId, ticketId, isFederation, comment }: CreateTicketCommentAction) {
+export function* createTicketComment({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	isFederation,
+	comment,
+}: CreateTicketCommentAction) {
 	try {
 		const createModelTicketComment = isFederation
 			? API.Tickets.createFederationTicketComment
 			: API.Tickets.createContainerTicketComment;
-		const _id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
+		const id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
 		const now = new Date();
 		const fullComment = {
 			...comment,
 			createdAt: now,
 			updatedAt: now,
-			_id,
+			_id: id,
 		};
 		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, fullComment));
 	} catch (error) {
@@ -123,7 +136,14 @@ export function* createTicketComment({ teamspace, projectId, modelId, ticketId, 
 	}
 }
 
-export function* updateTicketComment({ teamspace, projectId, modelId, ticketId, isFederation, comment }: UpdateTicketCommentAction) {
+export function* updateTicketComment({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	isFederation,
+	comment,
+}: UpdateTicketCommentAction) {
 	try {
 		const updateModelTicketComment = isFederation
 			? API.Tickets.updateFederationTicketComment
@@ -145,7 +165,14 @@ export function* updateTicketComment({ teamspace, projectId, modelId, ticketId, 
 	}
 }
 
-export function* deleteTicketComment({ teamspace, projectId, modelId, ticketId, isFederation, commentId }: DeleteTicketCommentAction) {
+export function* deleteTicketComment({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	isFederation,
+	commentId,
+}: DeleteTicketCommentAction) {
 	try {
 		const deleteModelTicketComment = isFederation
 			? API.Tickets.deleteFederationTicketComment

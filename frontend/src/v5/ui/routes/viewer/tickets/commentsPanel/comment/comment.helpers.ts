@@ -49,7 +49,7 @@ export const getRelativeTime = (from: Date) => {
 
 	timeDifference /= 60;
 	if (timeDifference < 24) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.hour);
-	
+
 	timeDifference /= 24;
 	if (timeDifference < 30) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.day);
 	const daysDifference = timeDifference;

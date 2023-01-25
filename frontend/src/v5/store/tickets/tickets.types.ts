@@ -98,6 +98,6 @@ export type IComment = MinimumComment & {
 	teamspace: string,
 	project: string,
 	model: string,
-	ticket: string, 
+	ticket: string,
 	history: Array<MinimumComment & { timestamp : Date }>,
 };
