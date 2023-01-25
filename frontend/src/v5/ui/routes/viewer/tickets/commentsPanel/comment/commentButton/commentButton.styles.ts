@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const CommentButtonStyling = styled.div`
 	height: 24px;
@@ -23,8 +23,8 @@ const CommentButtonStyling = styled.div`
 	margin: 2px;	
 	border-radius: 100%;
 	display: flex;
-    justify-content: center;
-    align-items: center;
+	justify-content: center;
+	align-items: center;
 	cursor: pointer;
 
 	& > svg {
@@ -32,9 +32,14 @@ const CommentButtonStyling = styled.div`
 	}
 `;
 
-export const PrimaryCommentButton = styled(CommentButtonStyling)`
+export const PrimaryCommentButton = styled(CommentButtonStyling)<{ disabled?: boolean }>`
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.lightest};
+
+	${({ theme, disabled }) => disabled && css`
+		color: ${theme.palette.primary.contrast};
+		background-color: ${theme.palette.base.lightest};
+	`}
 `;
 
 export const ErrorCommentButton = styled(CommentButtonStyling)`
