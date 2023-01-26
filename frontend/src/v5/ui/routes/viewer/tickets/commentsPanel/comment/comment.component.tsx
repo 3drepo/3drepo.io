@@ -18,8 +18,7 @@
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IComment } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
-import { getRelativeTime } from './comment.helpers';
-import { extractMessage, extractMetadata } from './commentMarkDown/commentMarkDown.helpers';
+import { extractMessage, extractMetadata, getRelativeTime } from './comment.helpers';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 

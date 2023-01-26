@@ -43,8 +43,7 @@ import {
 	CommentReplyContainer,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { addReply, createMetadata, sanitiseMessage } from './comment/commentMarkDown/commentMarkDown.helpers';
-import { CHARS_LIMIT } from './comment/comment.helpers';
+import { MAX_MESSAGE_LENGTH, addReply, createMetadata, sanitiseMessage } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
 
 export const CommentsPanel = () => {
@@ -60,7 +59,7 @@ export const CommentsPanel = () => {
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const charsCount = messageInput?.length || 0;
-	const charsLimitIsReached = charsCount >= CHARS_LIMIT;
+	const charsLimitIsReached = charsCount >= MAX_MESSAGE_LENGTH;
 	const commentsListIsEmpty = comments?.length > 0;
 
 	const handleDeleteComment = (commentId) => {
@@ -172,7 +171,7 @@ export const CommentsPanel = () => {
 						<FileIconButton>
 							<FileIcon />
 						</FileIconButton>
-						<CharsCounter $error={charsLimitIsReached}>{charsCount}/{CHARS_LIMIT}</CharsCounter>
+						<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 						<SendButton disabled={!charsCount} onClick={createComment}>
 							<SendIcon />
 						</SendButton>
