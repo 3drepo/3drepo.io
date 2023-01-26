@@ -43,7 +43,15 @@ const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => 
 	</CommentContainer>
 );
 
-export const OtherUserComment = ({ _id, deleted, comment, commentAge, author, onReply, metadata }: OtherUserCommentProps) => {
+export const OtherUserComment = ({
+	_id,
+	deleted,
+	comment,
+	commentAge,
+	author,
+	onReply,
+	metadata,
+}: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	let user = UsersHooksSelectors.selectUser(teamspace, author);
 	if (user) {
