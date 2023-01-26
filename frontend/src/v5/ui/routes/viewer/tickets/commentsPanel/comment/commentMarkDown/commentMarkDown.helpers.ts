@@ -19,7 +19,7 @@ import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types
 import _ from 'lodash';
 
 const extractMetadataValue = (comment: string, metadataName: keyof CommentReplyMetadata) => {
-	// @ts-ignore
+	// eslint-disable-next-line security/detect-non-literal-regexp
 	const regex = new RegExp(`\\[${metadataName}\\]:- "([^"]*)"\\n`);
 	return regex.exec(comment)?.[1] || '';
 };
