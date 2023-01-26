@@ -249,17 +249,39 @@ export const updateContainerTicketComment = async (
 
 const MOCK_COMMENTS = [
 	{
-		// teamspace: 'localuser1',
-		author: 'localuser1',
-		comment: `[author]:- "localuser1"\n[_id]:- "1"\n[comment]:- "original"\n\nreply`,
-		createdAt: new Date('1 1 2022'),
+		author: 'localuser2',
+		comment: `[author]:- "localuser1"\n[_id]:- "2"\n[comment]:- "comment by current user"\n\nreply by other user`,
+		createdAt: new Date('1 1 2020'),
+		deleted: true,
+	},
+	{
+		author: 'localuser2',
+		comment: `[author]:- "localuser1"\n[_id]:- "2"\n[comment]:- "comment by current user"\n\nreply by other user`,
+		createdAt: new Date('1 1 2021'),
 		deleted: false,
 	},
 	{
-		// teamspace: 'localuser1',
+		author: 'localuser1',
+		comment: `[author]:- "localuser1"\n[_id]:- "1"\n[comment]:- "original"\n\nreply`,
+		createdAt: new Date('1 1 2023'),
+		deleted: false,
+	},
+	{
 		author: 'localuser2',
 		comment: `[author]:- "localuser1"\n[_id]:- "2"\n[comment]:- "comment by current user"\n\nreply by other user`,
-		createdAt: new Date('1 1 2022'),
+		createdAt: new Date('1 25 2023'),
+		deleted: false,
+	},
+	{
+		author: 'localuser1',
+		comment: `[author]:- "localuser1"\n[_id]:- "2"\n[comment]:- "comment by current user"\n\nreply by other user`,
+		createdAt: new Date('1 25 2023'),
+		deleted: true,
+	},
+	{
+		author: 'localuser1',
+		comment: `[author]:- "localuser1"\n[_id]:- "2"\n[comment]:- "comment by current user"\n\nreply by other user`,
+		createdAt: new Date('1 26 2023'),
 		deleted: false,
 	},
 ].map((x, index) => ({ ...x, _id: index+"" }));
