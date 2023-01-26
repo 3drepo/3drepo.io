@@ -30,7 +30,7 @@ const Aad = {};
 
 const checkStateIsValid = async (req, res, next) => {
 	try {
-		req.state = JSON.parse(decryptCryptoHash(req.query.state));
+		req.state = JSON.parse(decryptCryptoHash(req.body.state));
 
 		if (req.session.csrfToken !== req.state.csrfToken) {
 			throw createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again');
@@ -68,6 +68,7 @@ const authenticate = (redirectUri) => async (req, res) => {
 			})),
 			codeChallenge: req.session.pkceCodes.challenge,
 			codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+			responseMode: 'form_post',
 		};
 
 		const link = await getAuthenticationCodeUrl(req.authParams);

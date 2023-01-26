@@ -79,7 +79,7 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
-	router.get(authenticateRedirectEndpoint, notLoggedIn, hasAssociatedAccount,
+	router.post(authenticateRedirectEndpoint, notLoggedIn, hasAssociatedAccount,
 		updateSession, redirectToStateURL);
 
 	/**
@@ -133,7 +133,7 @@ const establishRoutes = () => {
 	 */
 	router.post('/signup', validateSsoSignUpData, authenticate(signupRedirectUri));
 
-	router.get(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
+	router.post(signupRedirectEndpoint, verifyNewUserDetails, signUpPost, redirectToStateURL);
 
 	/**
 	 * @openapi
