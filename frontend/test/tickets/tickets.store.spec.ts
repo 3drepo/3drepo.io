@@ -83,7 +83,7 @@ describe('Tickets: store', () => {
 			const comment = commentMockFactory();
 			dispatch(TicketsActions.fetchTicketCommentsSuccess(modelId, ticket._id, [comment]));
 	
-			const updatedComment = commentMockFactory({ ...comment, comment: 'modified comment' });	
+			const updatedComment = commentMockFactory({ ...comment, message: 'modified message' });	
 			dispatch(TicketsActions.upsertTicketCommentSuccess(modelId, ticket._id, updatedComment));
 			const commentFromStore = selectTicketById(getState(), modelId, ticket._id).comments[0];
 	
