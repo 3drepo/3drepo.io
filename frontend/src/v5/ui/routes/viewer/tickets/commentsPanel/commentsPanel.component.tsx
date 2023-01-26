@@ -50,7 +50,7 @@ import { CommentReply } from './comment/commentReply/commentReply.component';
 export const CommentsPanel = () => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
 	const formData = useForm<{ message: string }>({ mode: 'all' });
-	const inputMessage = formData.watch('message');
+	const messageInput = formData.watch('message');
 
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -59,7 +59,7 @@ export const CommentsPanel = () => {
 
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
-	const charsCount = inputMessage?.length || 0;
+	const charsCount = messageInput?.length || 0;
 	const charsLimitIsReached = charsCount >= CHARS_LIMIT;
 	const commentsListIsEmpty = comments?.length > 0;
 
@@ -92,7 +92,7 @@ export const CommentsPanel = () => {
 	};
 
 	const createComment = async () => {
-		let message = sanitiseMessage(inputMessage);
+		let message = sanitiseMessage(messageInput);
 		if (commentReply) {
 			message = addReply(createMetadata(commentReply), message);
 		}
