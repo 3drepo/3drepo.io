@@ -39,6 +39,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
+import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -64,7 +65,7 @@ export const FederationsList = ({
 	const hasFederations = federations.length > 0;
 
 	const { sortedList, setSortConfig } = useOrderedList(filteredFederations, DEFAULT_SORT_CONFIG);
-
+	const isAdmin = hasProjectAdminAccess();
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
 
@@ -78,17 +79,19 @@ export const FederationsList = ({
 					<CollapseSideElementGroup>
 						<SearchInput
 							placeholder={formatMessage({ id: 'federations.search.placeholder',
-								defaultMessage: 'Search...' })}
+								defaultMessage: 'Search federations...' })}
 							disabled={isListPending}
 						/>
-						<Button
-							startIcon={<AddCircleIcon />}
-							variant="contained"
-							color="primary"
-							onClick={onClickCreate}
-						>
-							<FormattedMessage id="federations.newFederation" defaultMessage="New Federation" />
-						</Button>
+						{ isAdmin && (
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={onClickCreate}
+							>
+								<FormattedMessage id="federations.newFederation" defaultMessage="New Federation" />
+							</Button>
+						)}
 					</CollapseSideElementGroup>
 				)}
 			>
@@ -130,7 +133,7 @@ export const FederationsList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasFederations && (
+				{showBottomButton && !isListPending && hasFederations && isAdmin && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
 						onClick={onClickCreate}

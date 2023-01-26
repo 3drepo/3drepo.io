@@ -29,6 +29,7 @@ import { Button } from '@controls/button';
 import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FEDERATION_SEARCH_FIELDS } from '@/v5/store/federations/federations.helpers';
+import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 import { CreateFederationForm } from './createFederationForm';
@@ -44,6 +45,7 @@ export const Federations = (): JSX.Element => {
 
 	const { teamspace, project } = useParams<DashboardParams>();
 	const [createFedOpen, setCreateFedOpen] = useState(false);
+	const isAdmin = hasProjectAdminAccess();
 
 	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
 
@@ -96,14 +98,16 @@ export const Federations = (): JSX.Element => {
 							<DashboardListEmptyText>
 								<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
 							</DashboardListEmptyText>
-							<Button
-								startIcon={<AddCircleIcon />}
-								variant="contained"
-								color="primary"
-								onClick={() => setCreateFedOpen(true)}
-							>
-								<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
-							</Button>
+							{isAdmin && (
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+									onClick={() => setCreateFedOpen(true)}
+								>
+									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
+								</Button>
+							)}
 						</>
 					)}
 				/>
