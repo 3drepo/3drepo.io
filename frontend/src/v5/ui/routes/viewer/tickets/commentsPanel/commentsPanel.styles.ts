@@ -78,7 +78,7 @@ export const DeleteButton = styled.div`
 
 export const MessageInput = styled(FormTextAreaFixedSize).attrs({
 	inputProps: {
-		maxlength: MAX_MESSAGE_LENGTH,
+		maxLength: MAX_MESSAGE_LENGTH,
 	},
 })`
 	.MuiInputBase-multiline {
