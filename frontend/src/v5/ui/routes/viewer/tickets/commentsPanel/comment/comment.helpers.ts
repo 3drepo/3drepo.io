@@ -22,6 +22,7 @@ import _ from 'lodash';
 // Message metadata and text functions
 export const MAX_MESSAGE_LENGTH = 1200;
 export const deletedCommentMessage = formatMessage({ id: 'ticket.comment.message.deleted', defaultMessage: 'Message deleted' });
+export const editedCommentMessage = formatMessage({ id: 'ticket.comment.message.edited', defaultMessage: 'edited' });
 
 const extractMetadataValue = (message: string, metadataName: keyof CommentReplyMetadata) => {
 	// eslint-disable-next-line security/detect-non-literal-regexp

@@ -25,8 +25,8 @@ import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentMessage } from '../comment.helpers';
-import { CommentAuthor, CommentButtons, CommentTime } from '../comment.styles';
+import { deletedCommentMessage, editedCommentMessage } from '../comment.helpers';
+import { CommentAuthor, CommentButtons, CommentTime, EditedCommentLabel } from '../comment.styles';
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 
 type OtherUserCommentProps = Omit<IComment, 'createdAt'> & {
@@ -49,6 +49,7 @@ export const OtherUserComment = ({
 	message,
 	commentAge,
 	author,
+	history,
 	onReply,
 	metadata,
 }: OtherUserCommentProps) => {
@@ -83,6 +84,7 @@ export const OtherUserComment = ({
 				</PrimaryCommentButton>
 			</CommentButtons>
 			<CommentAuthor>{author}</CommentAuthor>
+			{history.length > 0 && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
 			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>

@@ -84,19 +84,21 @@ export type Viewpoint = {
 	clippingPlanes?: ClippingPlane[];
 };
 
+export type CommentHistoryBlock = {
+	message: string,
+	images: string[],
+	timestamp: Date,
+};
+
 export type IComment = {
 	_id: string,
-	message?: string, // long description format (optional)
-	images?: string[], // list of resource id references (optional)
+	message?: string, 
+	images?: string[],
 	author: string,
 	createdAt: Date,
 	updatedAt: Date,
 	deleted: boolean,
-	history: {
-		message: string,
-		images: string[],
-		timestamp: Date,
-	}[],
+	history: CommentHistoryBlock[],
 };
 
 export type CommentReplyMetadata = {

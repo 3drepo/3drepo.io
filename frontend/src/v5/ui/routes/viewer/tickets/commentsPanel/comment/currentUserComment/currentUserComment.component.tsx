@@ -28,8 +28,8 @@ import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentMessage, desanitiseMessage, sanitiseMessage, addReply } from '../comment.helpers';
-import { CommentTime, CommentButtons } from '../comment.styles';
+import { deletedCommentMessage, desanitiseMessage, sanitiseMessage, addReply, editedCommentMessage } from '../comment.helpers';
+import { CommentTime, CommentButtons, EditedCommentLabel } from '../comment.styles';
 import { CommentContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
 
 type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
@@ -46,6 +46,7 @@ export const CurrentUserComment = ({
 	message,
 	commentAge,
 	metadata,
+	history,
 	onDelete,
 	onReply,
 	onEdit,
@@ -82,7 +83,7 @@ export const CurrentUserComment = ({
 				<EditCommentContainer data-author={author}>
 					{metadata.message && (<CommentReply {...metadata} />)}
 					<EditCommentInput
-						name="editComment"
+						name="editMessage"
 						placeholder={formatMessage({
 							id: 'customTicket.panel.comments.editMessage',
 							defaultMessage: ' ',
@@ -116,6 +117,7 @@ export const CurrentUserComment = ({
 				</PrimaryCommentButton>
 			</CommentButtons>
 			{metadata.message && (<CommentReply variant="secondary" {...metadata} />)}
+			{history.length > 0 && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</CommentContainer>

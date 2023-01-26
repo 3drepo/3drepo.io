@@ -80,13 +80,23 @@ export const CommentsPanel = () => {
 	};
 
 	const handleEditComment = (commentId, message: string) => {
+		const oldComment = comments.find(({ _id }) => _id === commentId);
+		const newHistory = oldComment.history.concat({
+			message: oldComment.message,
+			images: oldComment.images,
+			timestamp: new Date()
+		});
 		TicketsActionsDispatchers.updateTicketComment(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			{ message, _id: commentId },
+			{
+				_id: commentId,
+				history: newHistory,
+				message,
+			},
 		);
 	};
 
@@ -95,10 +105,15 @@ export const CommentsPanel = () => {
 		if (commentReply) {
 			message = addReply(createMetadata(commentReply), message);
 		}
+		const now = new Date();
 		const newComment = {
 			author: currentUser.username,
 			message,
 			images: [],
+			createdAt: now,
+			updatedAt: now,
+			deleted: false,
+			history: [],
 		} as any;
 		TicketsActionsDispatchers.createTicketComment(
 			teamspace,

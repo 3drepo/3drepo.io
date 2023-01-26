@@ -39,10 +39,17 @@ export const CommentMessage = styled(Typography).attrs({ variant: 'body1' })`
 	word-break: break-word;
 `;
 
-export const CommentTime = styled.span`
+const CommentSmallText = styled.span`
 	font-weight: 400;
 	font-size: 9px;
 	line-height: 16px;
+`;
+
+export const EditedCommentLabel = styled(CommentSmallText)`
+	text-align: left;
+`;
+
+export const CommentTime = styled(CommentSmallText)`
 	text-align: right;
 `;
 
