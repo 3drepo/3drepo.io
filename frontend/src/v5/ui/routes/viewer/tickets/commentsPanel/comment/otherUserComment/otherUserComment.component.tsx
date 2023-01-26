@@ -62,7 +62,7 @@ export const OtherUserComment = ({
 	if (deleted) {
 		return (
 			<OtherUserCommentPopoverWrapper deleted user={user}>
-				<CommentAuthor>{author}</CommentAuthor>
+				<CommentAuthor>{user.firstName} {user.lastName}</CommentAuthor>
 				<CommentMarkDown>{deletedCommentMessage}</CommentMarkDown>
 				<CommentTime>
 					<FormattedMessage
