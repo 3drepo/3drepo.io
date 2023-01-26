@@ -79,7 +79,7 @@ export const CommentsPanel = () => {
 		setCommentReply(comment);
 	};
 
-	const handleEditComment = (commentId, newComment) => {
+	const handleEditComment = (commentId, newComment: string) => {
 		TicketsActionsDispatchers.updateTicketComment(
 			teamspace,
 			project,

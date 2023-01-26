@@ -20,7 +20,7 @@ import { FormTextArea } from '@controls/inputs/formInputs.component';
 import { CommentInput } from '../../commentsPanel.styles';
 import { BasicComment, CommentAuthor, CommentBody, CommentButtons } from '../comment.styles';
 
-export const CurrentUserMessageContainer = styled(BasicComment)`
+export const CommentContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	border-top-right-radius: 0;

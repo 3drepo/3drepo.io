@@ -29,7 +29,7 @@ export const HoverPopover = styled(HoverPopoverBase)`
 	}
 `;
 
-export const OtherUserMessageContainer = styled(BasicComment)`
+export const CommentContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-left: 37px;

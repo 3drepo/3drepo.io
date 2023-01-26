@@ -30,14 +30,14 @@ import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentText, deletedCurrentUserCommentTime } from '../comment.helpers';
 import { CommentTime, CommentButtons } from '../comment.styles';
 import { CommentProps } from '../comment.component';
-import { CurrentUserMessageContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
+import { CommentContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
 
 type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
 	commentAge: string;
 	metadata?: Metadata;
 };
 
-export const CurrentUserMessage = ({
+export const CurrentUserComment = ({
 	_id,
 	author,
 	deleted,
@@ -55,10 +55,10 @@ export const CurrentUserMessage = ({
 
 	if (deleted) {
 		return (
-			<CurrentUserMessageContainer $deleted data-author={author}>
+			<CommentContainer $deleted data-author={author}>
 				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
 				<CommentTime>{deletedCurrentUserCommentTime}</CommentTime>
-			</CurrentUserMessageContainer>
+			</CommentContainer>
 		);
 	}
 
@@ -96,7 +96,7 @@ export const CurrentUserMessage = ({
 	}
 
 	return (
-		<CurrentUserMessageContainer data-author={author}>
+		<CommentContainer data-author={author}>
 			<CommentButtons>
 				<ErrorCommentButton onClick={() => onDelete(_id)}>
 					<DeleteIcon />
@@ -111,6 +111,6 @@ export const CurrentUserMessage = ({
 			{metadata.reply && (<CommentReply variant="secondary" {...metadata} />)}
 			<CommentMarkDown>{comment}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
-		</CurrentUserMessageContainer>
+		</CommentContainer>
 	);
 };

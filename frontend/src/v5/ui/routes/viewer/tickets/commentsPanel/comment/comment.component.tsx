@@ -20,13 +20,14 @@ import { MinimumComment } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { getRelativeTime } from './comment.helpers';
 import { extractComment, extractMetadata } from './commentMarkDown/commentMarkDown.helpers';
-import { CurrentUserMessage } from './currentUserComment/currentUserComment.component';
-import { OtherUserMessage } from './otherUserMessage/otherUserMessage.component';
+import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
+import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
 export type CommentProps = MinimumComment & {
-	onDelete?: (messageId) => void;
-	onReply: (messageId) => void;
-	onEdit?: (messageId, newMessage) => void;
+	onDelete?: (commentId) => void;
+	onReply: (commentId) => void;
+	// TODO - check newComment type
+	onEdit?: (commentId, newComment: string) => void;
 };
 
 export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...props }: CommentProps) => {
@@ -36,7 +37,7 @@ export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...pro
 	const metadata = extractMetadata(commentWithMetdata);
 	const comment = extractComment(commentWithMetdata);
 
-	const UserComment = isCurrentUser ? CurrentUserMessage : OtherUserMessage;
+	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 
 	useEffect(() => {
 		const intervalId = window.setInterval(() => setCommentAge(getRelativeTime(createdAt)), 10_000);

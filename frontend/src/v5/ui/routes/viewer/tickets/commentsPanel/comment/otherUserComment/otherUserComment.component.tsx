@@ -27,22 +27,22 @@ import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentText, deletedOtherUserCommentTime } from '../comment.helpers';
 import { CommentAuthor, CommentButtons, CommentTime } from '../comment.styles';
 import { CommentProps } from '../comment.component';
-import { HoverPopover, OtherUserMessageContainer } from './otherUserMessage.styles';
+import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 
 type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
 	commentAge: string;
 	metadata?: Metadata;
 };
-const OtherUserMessagePopoverWrapper = ({ deleted = false, user, children }) => (
-	<OtherUserMessageContainer $deleted={deleted} data-author={user.user}>
+const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => (
+	<CommentContainer $deleted={deleted} data-author={user.user}>
 		<HoverPopover anchor={(props) => <UserCircle user={user} {...props} />}>
 			<UserPopover user={user} />
 		</HoverPopover>
 		{children}
-	</OtherUserMessageContainer>
+	</CommentContainer>
 );
 
-export const OtherUserMessage = ({ _id, deleted, comment, commentAge, author, onReply, metadata }: UserCommentProps) => {
+export const OtherUserComment = ({ _id, deleted, comment, commentAge, author, onReply, metadata }: UserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	let user = UsersHooksSelectors.selectUser(teamspace, author);
 	if (user) {
@@ -52,16 +52,16 @@ export const OtherUserMessage = ({ _id, deleted, comment, commentAge, author, on
 	}
 	if (deleted) {
 		return (
-			<OtherUserMessagePopoverWrapper deleted user={user}>
+			<OtherUserCommentPopoverWrapper deleted user={user}>
 				<CommentAuthor>{author}</CommentAuthor>
 				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
 				<CommentTime>{deletedOtherUserCommentTime(user.firstName)}</CommentTime>
-			</OtherUserMessagePopoverWrapper>
+			</OtherUserCommentPopoverWrapper>
 		);
 	}
 
 	return (
-		<OtherUserMessagePopoverWrapper user={user}>
+		<OtherUserCommentPopoverWrapper user={user}>
 			<CommentButtons>
 				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
@@ -71,6 +71,6 @@ export const OtherUserMessage = ({ _id, deleted, comment, commentAge, author, on
 			{metadata.reply && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
 			<CommentMarkDown>{comment}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
-		</OtherUserMessagePopoverWrapper>
+		</OtherUserCommentPopoverWrapper>
 	);
 };
