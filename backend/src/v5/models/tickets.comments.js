@@ -16,6 +16,7 @@
  */
 
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
@@ -56,13 +57,14 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 };
 
 const getUpdatedComment = (oldComment, updateData) => {
-	const updatedAt = new Date();
-	const formattedComment = { ...updateData, updatedAt };
+	const formattedComment = { ...updateData, updatedAt: new Date() };
 
 	const historyEntry = {
 		timestamp: oldComment.updatedAt,
-		...(oldComment.comment ? { comment: oldComment.comment } : {}),
-		...(oldComment.images ? { images: oldComment.images } : {}),
+		...deleteIfUndefined({
+			comment: oldComment.comment,
+			images: oldComment.images,
+		}),
 	};
 
 	formattedComment.history = [...(oldComment.history ?? []), historyEntry];
@@ -73,15 +75,15 @@ const getUpdatedComment = (oldComment, updateData) => {
 TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 	const formattedComment = getUpdatedComment(oldComment, updateData);
 
-	const toSet = { $set: { ...formattedComment } };
-	const toUnset = {
+	const updateObj = {
+		$set: { ...formattedComment },
 		$unset: {
 			...(updateData.comment ? { } : { comment: 1 }),
 			...(updateData.images ? { } : { images: 1 }),
 		},
 	};
 
-	await updateOne(teamspace, { _id: oldComment._id }, { ...toSet, ...toUnset });
+	await updateOne(teamspace, { _id: oldComment._id }, updateObj);
 };
 
 TicketComments.deleteComment = async (teamspace, oldComment) => {

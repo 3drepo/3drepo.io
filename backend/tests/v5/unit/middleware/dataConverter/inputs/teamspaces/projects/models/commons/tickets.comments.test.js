@@ -91,9 +91,10 @@ const testValidateUpdateComment = () => {
 			[{ ...req, body: { comment: generateRandomString() } }, true, 'with valid comment'],
 			[{ ...req, body: { images: [] } }, false, 'with invalid images'],
 			[{ ...req, body: { images: [FS.readFileSync(image, { encoding: 'base64' })] } }, true, 'with valid base64 image'],
-			[{ ...req, body: { images: [UUIDToString(existingRef)] } }, true, 'with valid image ref', { ...existingComment, history: undefined }],
-			[{ ...req, body: { images: [UUIDToString(existingRef2)] } }, true, 'with valid image ref (ref exists in history)'],
+			[{ ...req, body: { images: [UUIDToString(existingRef), UUIDToString(existingRef2)] } }, true, 'with valid image refs'],
+			[{ ...req, body: { images: [UUIDToString(existingRef2)] } }, true, 'with valid image ref from history'],
 			[{ ...req, body: { images: [UUIDToString(generateUUID())] } }, false, 'with invalid image ref'],
+			[{ ...req, body: { images: [UUIDToString(existingRef2)], comment: generateRandomString() } }, true, 'with both an image ref and a new message'],
 			[{ ...req, body: {} }, false, 'with empty body'],
 		])('Check if req arguments for new comment are valid', (request, shouldPass, desc, comment = existingComment, error = templates.invalidArguments) => {
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
