@@ -26,10 +26,10 @@ import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { stringifyComment, parseComment, addReply } from '../commentMarkDown/commentMarkDown.helpers';
+import { stringifyMessage, parseMessage, addReply } from '../commentMarkDown/commentMarkDown.helpers';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentText } from '../comment.helpers';
+import { deletedCommentMessage } from '../comment.helpers';
 import { CommentTime, CommentButtons } from '../comment.styles';
 import { CommentContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
 
@@ -38,13 +38,13 @@ type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
 	metadata?: CommentReplyMetadata;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newComment: string) => void;
+	onEdit: (commentId, newMessage: string) => void;
 };
 export const CurrentUserComment = ({
 	_id,
 	author,
 	deleted,
-	comment,
+	message,
 	commentAge,
 	metadata,
 	onDelete,
@@ -52,17 +52,17 @@ export const CurrentUserComment = ({
 	onEdit,
 }: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
-	const { control, watch } = useForm<{ editComment }>({
-		defaultValues: { editComment: stringifyComment(comment) },
+	const { control, watch } = useForm<{ editMessage }>({
+		defaultValues: { editMessage: stringifyMessage(message) },
 	});
 
 	if (deleted) {
 		return (
 			<CommentContainer $deleted data-author={author}>
-				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
+				<CommentMarkDown>{deletedCommentMessage}</CommentMarkDown>
 				<CommentTime>
 					<FormattedMessage
-						id="ticket.currentUser.comment.time.delete"
+						id="ticket.currentUser.comment.time.deleted"
 						defaultMessage="You deleted this message"
 					/>
 				</CommentTime>
@@ -72,20 +72,20 @@ export const CurrentUserComment = ({
 
 	if (isEditMode) {
 		const updateMessage = () => {
-			const newComment = parseComment(watch('editComment'));
-			const updatedComment = addReply(metadata, newComment);
-			onEdit(_id, updatedComment);
+			const newMessage = parseMessage(watch('editMessage'));
+			const updatedMessage = addReply(metadata, newMessage);
+			onEdit(_id, updatedMessage);
 			setIsEditMode(false);
 		};
 
 		return (
 			<>
 				<EditCommentContainer data-author={author}>
-					{metadata.comment && (<CommentReply {...metadata} />)}
+					{metadata.message && (<CommentReply {...metadata} />)}
 					<EditCommentInput
 						name="editComment"
 						placeholder={formatMessage({
-							id: 'customTicket.panel.comments.edit',
+							id: 'customTicket.panel.comments.editMessage',
 							defaultMessage: ' ',
 						})}
 						control={control}
@@ -95,7 +95,7 @@ export const CurrentUserComment = ({
 					<ErrorCommentButton onClick={() => setIsEditMode(false)}>
 						<CancelIcon />
 					</ErrorCommentButton>
-					<PrimaryCommentButton onClick={updateMessage} disabled={!watch('editComment').length}>
+					<PrimaryCommentButton onClick={updateMessage} disabled={!watch('editMessage').length}>
 						<TickIcon />
 					</PrimaryCommentButton>
 				</EditCommentButtons>
@@ -116,8 +116,8 @@ export const CurrentUserComment = ({
 					<EditIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-			{metadata.comment && (<CommentReply variant="secondary" {...metadata} />)}
-			<CommentMarkDown>{comment}</CommentMarkDown>
+			{metadata.message && (<CommentReply variant="secondary" {...metadata} />)}
+			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</CommentContainer>
 	);

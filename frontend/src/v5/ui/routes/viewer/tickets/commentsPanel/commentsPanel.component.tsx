@@ -37,20 +37,20 @@ import {
 	FileIconButton,
 	SendButton,
 	BottomSection,
-	CommentInput,
+	MessageInput,
 	EmptyCommentsBox,
 	DeleteButton,
 	CommentReplyContainer,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { addReply, extractMetadataFromObject, parseComment } from './comment/commentMarkDown/commentMarkDown.helpers';
+import { addReply, createMetadata, parseMessage } from './comment/commentMarkDown/commentMarkDown.helpers';
 import { CHARS_LIMIT } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
 
 export const CommentsPanel = () => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
-	const formData = useForm<{ comment: string }>({ mode: 'all' });
-	const inputComment = formData.watch('comment');
+	const formData = useForm<{ message: string }>({ mode: 'all' });
+	const inputMessage = formData.watch('message');
 
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -59,7 +59,7 @@ export const CommentsPanel = () => {
 
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
-	const charsCount = inputComment?.length || 0;
+	const charsCount = inputMessage?.length || 0;
 	const charsLimitIsReached = charsCount >= CHARS_LIMIT;
 	const commentsListIsEmpty = comments?.length > 0;
 
@@ -75,32 +75,31 @@ export const CommentsPanel = () => {
 	};
 
 	const handleReplyToComment = (commentId) => {
+		// TODO - create selector?
 		const comment = comments.find(({ _id }) => _id === commentId);
 		setCommentReply(comment);
 	};
 
-	const handleEditComment = (commentId, newComment: string) => {
+	const handleEditComment = (commentId, message: string) => {
 		TicketsActionsDispatchers.updateTicketComment(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			{ comment: newComment, _id: commentId },
+			{ message, _id: commentId },
 		);
 	};
 
 	const createComment = async () => {
-		let comment = parseComment(inputComment);
+		let message = parseMessage(inputMessage);
 		if (commentReply) {
-			comment = addReply(extractMetadataFromObject(commentReply), comment);
+			message = addReply(createMetadata(commentReply), message);
 		}
 		const newComment = {
 			author: currentUser.username,
-			comment,
+			message,
 			images: [],
-			createdAt: new Date(),
-			updatedAt: new Date(),
 			deleted: false,
 		} as any;
 		TicketsActionsDispatchers.createTicketComment(
@@ -155,14 +154,14 @@ export const CommentsPanel = () => {
 				<BottomSection>
 					{commentReply && (
 						<CommentReplyContainer>
-							<CommentReply {...extractMetadataFromObject(commentReply)} />
+							<CommentReply {...createMetadata(commentReply)} />
 							<DeleteButton onClick={() => setCommentReply(null)}>
 								<DeleteIcon />
 							</DeleteButton>
 						</CommentReplyContainer>
 					)}
-					<CommentInput
-						name="comment"
+					<MessageInput
+						name="message"
 						placeholder={formatMessage({
 							id: 'customTicket.panel.comments.leaveAMessage',
 							defaultMessage: 'leave a message',

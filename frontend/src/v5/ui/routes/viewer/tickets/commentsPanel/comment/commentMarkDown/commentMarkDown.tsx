@@ -16,9 +16,9 @@
  */
 
 import ReactMarkdown from 'react-markdown';
-import { CommentBody } from '../comment.styles';
+import { CommentMessage } from '../comment.styles';
 
-const RENDERERS = { paragraph: CommentBody };
+const RENDERERS = { paragraph: CommentMessage };
 
 export const CommentMarkDown = ({ children, ...props }) => (
 	<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>

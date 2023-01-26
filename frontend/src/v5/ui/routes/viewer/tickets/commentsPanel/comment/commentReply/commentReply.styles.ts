@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { CommentBody } from '../comment.styles';
+import { CommentMessage } from '../comment.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary' }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
@@ -37,7 +37,7 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 		`;
 	}}
 	
-	${CommentBody} {
+	${CommentMessage} {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;

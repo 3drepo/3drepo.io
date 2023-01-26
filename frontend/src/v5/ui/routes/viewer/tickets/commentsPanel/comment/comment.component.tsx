@@ -19,21 +19,21 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IComment } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { getRelativeTime } from './comment.helpers';
-import { extractComment, extractMetadata } from './commentMarkDown/commentMarkDown.helpers';
+import { extractMessage, extractMetadata } from './commentMarkDown/commentMarkDown.helpers';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
 export type CommentProps = IComment & {
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newComment: string) => void;
+	onEdit: (commentId, newMessage: string) => void;
 };
-export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...props }: CommentProps) => {
+export const Comment = ({ createdAt, author, message, ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState(getRelativeTime(createdAt));
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
-	const metadata = extractMetadata(commentWithMetdata);
-	const comment = extractComment(commentWithMetdata);
+	const metadata = extractMetadata(message);
+	const noMetadataMessage = extractMessage(message);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 
@@ -42,5 +42,5 @@ export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...pro
 		return () => clearInterval(intervalId);
 	}, []);
 
-	return (<UserComment {...props} author={author} commentAge={commentAge} metadata={metadata} comment={comment} />);
+	return (<UserComment {...props} author={author} commentAge={commentAge} metadata={metadata} message={noMetadataMessage} />);
 };

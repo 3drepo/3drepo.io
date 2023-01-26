@@ -25,7 +25,7 @@ import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentText } from '../comment.helpers';
+import { deletedCommentMessage } from '../comment.helpers';
 import { CommentAuthor, CommentButtons, CommentTime } from '../comment.styles';
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 
@@ -46,7 +46,7 @@ const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => 
 export const OtherUserComment = ({
 	_id,
 	deleted,
-	comment,
+	message,
 	commentAge,
 	author,
 	onReply,
@@ -63,10 +63,10 @@ export const OtherUserComment = ({
 		return (
 			<OtherUserCommentPopoverWrapper deleted user={user}>
 				<CommentAuthor>{author}</CommentAuthor>
-				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
+				<CommentMarkDown>{deletedCommentMessage}</CommentMarkDown>
 				<CommentTime>
 					<FormattedMessage
-						id="ticket.otherUser.comment.time.delete"
+						id="ticket.otherUser.comment.time.deleted"
 						defaultMessage="{name} deleted this message"
 						values={{ name: user.firstName }}
 					/>
@@ -83,8 +83,8 @@ export const OtherUserComment = ({
 				</PrimaryCommentButton>
 			</CommentButtons>
 			<CommentAuthor>{author}</CommentAuthor>
-			{metadata.comment && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
-			<CommentMarkDown>{comment}</CommentMarkDown>
+			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
+			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</OtherUserCommentPopoverWrapper>
 	);

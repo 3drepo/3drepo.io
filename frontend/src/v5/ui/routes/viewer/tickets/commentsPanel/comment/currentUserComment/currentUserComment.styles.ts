@@ -17,8 +17,8 @@
 
 import styled, { css } from 'styled-components';
 import { FormTextArea } from '@controls/inputs/formInputs.component';
-import { CommentInput } from '../../commentsPanel.styles';
-import { BasicComment, CommentAuthor, CommentBody, CommentButtons } from '../comment.styles';
+import { MessageInput } from '../../commentsPanel.styles';
+import { BasicComment, CommentAuthor, CommentMessage, CommentButtons } from '../comment.styles';
 
 export const CommentContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
@@ -34,7 +34,7 @@ export const CommentContainer = styled(BasicComment)`
 		left: -94px;
 	}
 
-	${CommentBody} {
+	${CommentMessage} {
 		${({ $deleted, theme }) => $deleted && css`
 			color: ${theme.palette.secondary.light};
 			text-align: right;
@@ -58,7 +58,7 @@ export const EditCommentContainer = styled(BasicComment)`
 	width: 380px;
 `;
 
-export const EditCommentInput = styled(CommentInput).attrs({
+export const EditCommentInput = styled(MessageInput).attrs({
 	as: FormTextArea,
 	minRows: 1,
 })`

@@ -35,7 +35,7 @@ export const CommentButtons = styled.div`
 	top: 0;
 `;
 
-export const CommentBody = styled(Typography).attrs({ variant: 'body1' })`
+export const CommentMessage = styled(Typography).attrs({ variant: 'body1' })`
 	word-break: break-word;
 `;
 

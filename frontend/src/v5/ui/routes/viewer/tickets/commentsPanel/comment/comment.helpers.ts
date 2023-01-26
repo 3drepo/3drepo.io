@@ -19,7 +19,7 @@ import { formatMessage, formatRelativeTime } from '@/v5/services/intl';
 
 export const CHARS_LIMIT = 1200;
 
-export const deletedCommentText = formatMessage({ id: 'ticket.comment.message.delete', defaultMessage: 'Message deleted' });
+export const deletedCommentMessage = formatMessage({ id: 'ticket.comment.message.deleted', defaultMessage: 'Message deleted' });
 
 const TIME_UNIT = {
 	second: formatMessage({ id: 'timeUnit.second', defaultMessage: 'second' }),

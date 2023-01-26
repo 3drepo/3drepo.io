@@ -75,7 +75,7 @@ export const DeleteButton = styled.div`
 	}
 `;
 
-export const CommentInput = styled(FormTextAreaFixedSize).attrs({
+export const MessageInput = styled(FormTextAreaFixedSize).attrs({
 	inputProps: {
 		maxlength: 1200,
 	},

@@ -17,7 +17,7 @@
 
 import { HoverPopover as HoverPopoverBase } from '@controls/hoverPopover/hoverPopover.component';
 import styled, { css } from 'styled-components';
-import { BasicComment, CommentBody, CommentButtons } from '../comment.styles';
+import { BasicComment, CommentMessage, CommentButtons } from '../comment.styles';
 
 export const HoverPopover = styled(HoverPopoverBase)`
 	position: absolute;
@@ -43,7 +43,7 @@ export const CommentContainer = styled(BasicComment)`
 		right: -40px;
 	}
 
-	${CommentBody} {
+	${CommentMessage} {
 		${({ $deleted, theme }) => $deleted && css`
 			color: ${theme.palette.base.light};
 		`}

@@ -25,7 +25,7 @@ type CommentReplyProps = CommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	isCurrentUserComment?: boolean,
 };
-export const CommentReply = ({ comment, author, variant = 'primary', isCurrentUserComment = true }: CommentReplyProps) => {
+export const CommentReply = ({ message, author, variant = 'primary', isCurrentUserComment = true }: CommentReplyProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
@@ -35,7 +35,7 @@ export const CommentReply = ({ comment, author, variant = 'primary', isCurrentUs
 	return (
 		<CommentReplyContainer variant={variant}>
 			<CommentAuthor>{authorDisplayName}</CommentAuthor>
-			<CommentMarkDown>{comment}</CommentMarkDown>
+			<CommentMarkDown>{message}</CommentMarkDown>
 		</CommentReplyContainer>
 	);
 };

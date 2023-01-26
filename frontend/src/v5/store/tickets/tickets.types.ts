@@ -86,14 +86,14 @@ export type Viewpoint = {
 
 export type IComment = {
 	_id: string,
-	comment?: string, // long description format (optional)
+	message?: string, // long description format (optional)
 	images?: string[], // list of resource id references (optional)
 	author: string,
 	createdAt: Date,
 	updatedAt: Date,
 	deleted: boolean,
 	history: Array<{
-		comment: string,
+		message: string,
 		images: string[],
 		timestamp : Date,
 	}>,
@@ -101,6 +101,6 @@ export type IComment = {
 
 export type CommentReplyMetadata = {
 	_id: string,
-	comment: string,
+	message: string,
 	author: string,
 };

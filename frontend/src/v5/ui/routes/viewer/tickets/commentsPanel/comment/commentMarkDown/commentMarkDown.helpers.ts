@@ -18,37 +18,37 @@
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
 
-const extractMetadataValue = (comment: string, metadataName: keyof CommentReplyMetadata) => {
+const extractMetadataValue = (message: string, metadataName: keyof CommentReplyMetadata) => {
 	// eslint-disable-next-line security/detect-non-literal-regexp
 	const regex = new RegExp(`\\[${metadataName}\\]:- "([^"]*)"\\n`);
-	return regex.exec(comment)?.[1] || '';
+	return regex.exec(message)?.[1] || '';
 };
 
-export const extractMetadata = (comment: string): CommentReplyMetadata => ({
-	_id: extractMetadataValue(comment, '_id'),
-	author: extractMetadataValue(comment, 'author'),
-	comment: extractMetadataValue(comment, 'comment'),
+export const extractMetadata = (message: string): CommentReplyMetadata => ({
+	_id: extractMetadataValue(message, '_id'),
+	author: extractMetadataValue(message, 'author'),
+	message: extractMetadataValue(message, 'message'),
 });
 
-export const extractMetadataFromObject = (comment: IComment): CommentReplyMetadata => (
-	_.pick(comment, '_id', 'author', 'comment') as CommentReplyMetadata
+export const createMetadata = (comment: IComment): CommentReplyMetadata => (
+	_.pick(comment, '_id', 'author', 'message') as CommentReplyMetadata
 );
 
-export const extractComment = (comment: string) => comment.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
-export const parseComment = (comment: string) => comment.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
-export const stringifyComment = (comment: string) => comment.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
+export const extractMessage = (message: string) => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
+export const parseMessage = (message: string) => message.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
+export const stringifyMessage = (message: string) => message.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
 
 const createMetadataValue = (metadataName: keyof CommentReplyMetadata, metadataValue: string) => (
 	`[${metadataName}]:- "${metadataValue}"\n`
 );
 
-const stringifyMetadata = ({ author, _id, comment }: CommentReplyMetadata) => {
+const stringifyMetadata = ({ author, _id, message }: CommentReplyMetadata) => {
 	const metadata = [
 		createMetadataValue('_id', _id),
 		createMetadataValue('author', author),
-		createMetadataValue('comment', extractComment(comment)),
+		createMetadataValue('message', extractMessage(message)),
 	];
 	return metadata.join('');
 };
 
-export const addReply = (metadata: CommentReplyMetadata, newComment: string) => `${stringifyMetadata(metadata)}\n${newComment}`;
+export const addReply = (metadata: CommentReplyMetadata, newMessage: string) => `${stringifyMetadata(metadata)}\n${newMessage}`;
