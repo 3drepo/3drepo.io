@@ -24,12 +24,10 @@ import { CurrentUserComment } from './currentUserComment/currentUserComment.comp
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
 export type CommentProps = IComment & {
-	onDelete?: (commentId) => void;
+	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	// TODO - check newComment type
-	onEdit?: (commentId, newComment: string) => void;
+	onEdit: (commentId, newComment: string) => void;
 };
-
 export const Comment = ({ createdAt, author, comment: commentWithMetdata, ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState(getRelativeTime(createdAt));
 

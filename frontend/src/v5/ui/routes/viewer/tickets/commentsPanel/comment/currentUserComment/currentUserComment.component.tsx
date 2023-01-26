@@ -22,7 +22,7 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
+import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
@@ -31,14 +31,15 @@ import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentText } from '../comment.helpers';
 import { CommentTime, CommentButtons } from '../comment.styles';
-import { CommentProps } from '../comment.component';
 import { CommentContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
 
-type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
+type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
 	metadata?: CommentReplyMetadata;
+	onDelete: (commentId) => void;
+	onReply: (commentId) => void;
+	onEdit: (commentId, newComment: string) => void;
 };
-
 export const CurrentUserComment = ({
 	_id,
 	author,
@@ -49,7 +50,7 @@ export const CurrentUserComment = ({
 	onDelete,
 	onReply,
 	onEdit,
-}: UserCommentProps) => {
+}: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
 	const { control, watch } = useForm<{ editComment }>({
 		defaultValues: { editComment: stringifyComment(comment) },

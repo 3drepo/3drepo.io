@@ -21,18 +21,18 @@ import { UserPopover } from '@components/shared/userPopover/userPopover.componen
 import { UserCircle } from '@controls/assignees/assignees.styles';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
+import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentText } from '../comment.helpers';
 import { CommentAuthor, CommentButtons, CommentTime } from '../comment.styles';
-import { CommentProps } from '../comment.component';
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 
-type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
+type OtherUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
 	metadata?: CommentReplyMetadata;
+	onReply: (commentId) => void;
 };
 const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => (
 	<CommentContainer $deleted={deleted} data-author={user.user}>
@@ -43,7 +43,7 @@ const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => 
 	</CommentContainer>
 );
 
-export const OtherUserComment = ({ _id, deleted, comment, commentAge, author, onReply, metadata }: UserCommentProps) => {
+export const OtherUserComment = ({ _id, deleted, comment, commentAge, author, onReply, metadata }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	let user = UsersHooksSelectors.selectUser(teamspace, author);
 	if (user) {
