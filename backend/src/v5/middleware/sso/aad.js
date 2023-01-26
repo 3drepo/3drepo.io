@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
-const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const { decryptCryptoHash, generateCryptoHash, getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getUserByEmail, getUserByQuery } = require('../../models/users');
@@ -31,10 +31,15 @@ const Aad = {};
 const checkStateIsValid = async (req, res, next) => {
 	try {
 		req.state = JSON.parse(decryptCryptoHash(req.query.state));
+
+		if (req.session.csrfToken !== req.state.csrfToken) {
+			throw createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again');
+		}
 		await next();
 	} catch (err) {
-		logger.logError('Failed to parse req.query.state');
-		respond(req, res, createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON'));
+		const response = codeExists(err.code) ? err
+			: createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON');
+		respond(req, res, response);
 	}
 };
 
@@ -57,6 +62,7 @@ const authenticate = (redirectUri) => async (req, res) => {
 		req.authParams = {
 			redirectUri,
 			state: generateCryptoHash(JSON.stringify({
+				csrfToken: req.session.csrfToken,
 				redirectUri: req.query.redirectUri,
 				...(req.body || {}),
 			})),
