@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 
 export const CreationInfoContainer = styled.div`
-    display: flex;
+	display: flex;
 	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
 	padding: 0 10px;

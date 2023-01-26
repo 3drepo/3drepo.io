@@ -28,7 +28,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { IssueProperties, TicketsCardViews } from '../tickets.constants';
+import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 
@@ -91,7 +91,7 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
-		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
+		const view = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
 	}, [ticket._id]);

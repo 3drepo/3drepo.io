@@ -21,16 +21,24 @@ export enum TicketsCardViews {
 	New = 'new',
 }
 
+export enum BaseProperties {
+	TITLE = 'title',
+	DESCRIPTION = 'Description',
+	OWNER = 'Owner',
+	CREATED_AT = 'Created at',
+	UPDATED_AT = 'Updated at',
+}
+
 export enum IssueProperties {
 	DUE_DATE = 'Due Date',
 	STATUS = 'Status',
 	PRIORITY = 'Priority',
 	ASSIGNEES = 'Assignees',
+}
+
+export enum AdditionalProperties {
 	DEFAULT_VIEW = 'Default View',
 	PIN = 'Pin',
-	CREATED_AT = 'Created at',
-	UPDATED_AT = 'Updated at',
-	OWNER = 'Owner',
 }
 
 export enum SafetibaseProperties {

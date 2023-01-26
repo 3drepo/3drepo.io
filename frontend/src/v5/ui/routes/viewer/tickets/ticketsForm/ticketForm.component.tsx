@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { get } from 'lodash';
+import { filter, get, isEmpty } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { InputController } from '@controls/inputs/inputController.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
+import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
-import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
+import { BaseTicketInfo, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
-import { IssueProperties } from '../tickets.constants';
+import { BaseProperties, IssueProperties } from '../tickets.constants';
 import { CreationInfo } from '../../../../components/shared/creationInfo/creationInfo.component';
 
 interface PropertiesListProps {
@@ -74,15 +74,18 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 	);
 };
 
-const PropertiesPanel = (props: PropertiesListProps) => (
-	<Accordion
-		defaultExpanded
-		Icon={PropetiesIcon}
-		title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
-	>
-		<PropertiesList {...props} />
-	</Accordion>
-);
+const PropertiesPanel = ({ properties, ...props }: PropertiesListProps) => {
+	if (isEmpty(properties)) return <></>;
+	return (
+		<Accordion
+			defaultExpanded
+			Icon={PropetiesIcon}
+			title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
+		>
+			<PropertiesList properties={properties} {...props} />
+		</Accordion>
+	);
+};
 
 interface ModulePanelProps {
 	module: TemplateModule;
@@ -102,31 +105,40 @@ interface Props {
 	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
+export const TicketForm = ({ template, ticket, focusOnTitle, onPropertyBlur, ...rest }: Props) => {
 	const { formState } = useFormContext();
+	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
+	const PropertiesPanelProperties = filter(template?.properties, ({ name }) => !topPanelProperties.includes(name));
+
 	return (
 		<>
-			<TitleContainer>
+			<BaseTicketInfo>
 				<TitleProperty
-					name={TITLE_INPUT_NAME}
-					defaultValue={ticket[TITLE_INPUT_NAME]}
-					formError={formState.errors[TITLE_INPUT_NAME]}
+					name={BaseProperties.TITLE}
+					defaultValue={ticket[BaseProperties.TITLE]}
+					formError={formState.errors[BaseProperties.TITLE]}
 					placeholder={formatMessage({
 						id: 'customTicket.newTicket.titlePlaceholder',
 						defaultMessage: 'Ticket name',
 					})}
 					inputProps={{ autoFocus: focusOnTitle }}
-					onBlur={rest?.onPropertyBlur}
+					onBlur={onPropertyBlur}
 				/>
 				<CreationInfo
-					owner={ticket.properties?.[IssueProperties.OWNER]}
-					createdAt={ticket.properties?.[IssueProperties.CREATED_AT]}
-					updatedAt={ticket.properties?.[IssueProperties.UPDATED_AT]}
+					owner={ticket.properties?.[BaseProperties.OWNER]}
+					createdAt={ticket.properties?.[BaseProperties.CREATED_AT]}
+					updatedAt={ticket.properties?.[BaseProperties.UPDATED_AT]}
 				/>
-			</TitleContainer>
+			</BaseTicketInfo>
 			<CardContent>
 				<PanelsContainer>
-					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
+					<PropertiesPanel
+						module="properties"
+						properties={PropertiesPanelProperties || []}
+						propertiesValues={ticket.properties}
+						onPropertyBlur={onPropertyBlur}
+						{...rest}
+					/>
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel

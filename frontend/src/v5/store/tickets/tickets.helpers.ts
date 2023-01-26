@@ -26,8 +26,6 @@ import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { EditableTicket, ITemplate } from './tickets.types';
 
-export const TITLE_INPUT_NAME = 'title';
-
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );

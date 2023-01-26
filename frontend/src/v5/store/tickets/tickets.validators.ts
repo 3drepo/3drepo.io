@@ -16,9 +16,10 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import * as Yup from 'yup';
-import { getEditableProperties, TITLE_INPUT_NAME } from './tickets.helpers';
+import { getEditableProperties } from './tickets.helpers';
 import { PropertyDefinition } from './tickets.types';
 
 const MAX_TEXT_LENGTH = 120;
@@ -119,7 +120,7 @@ export const getTicketValidator = (template) => {
 		title: propertyValidator({
 			required: true,
 			type: 'text',
-			name: TITLE_INPUT_NAME,
+			name: BaseProperties.TITLE,
 		}),
 	};
 	const editableTemplate = getEditableProperties(template);
@@ -141,7 +142,7 @@ export const getValidators = (template) => {
 		title: propertyValidator({
 			required: true,
 			type: 'longText',
-			name: TITLE_INPUT_NAME,
+			name: BaseProperties.TITLE,
 		}),
 	};
 

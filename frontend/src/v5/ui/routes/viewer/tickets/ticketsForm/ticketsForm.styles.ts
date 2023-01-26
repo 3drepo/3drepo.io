@@ -45,7 +45,7 @@ export const PanelsContainer = styled.div`
 	}
 `;
 
-export const TitleContainer = styled.div`
+export const BaseTicketInfo = styled.div`
 	width: 100%;
 	padding: 10px 15px;
 	position: relative;
