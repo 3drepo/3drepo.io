@@ -348,7 +348,7 @@ const testUpdateComment = () => {
 				});
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 
-				const updateData = { comment: ServiceHelper.generateRandomString(), images: model.comment?.images };
+				const updateData = { message: ServiceHelper.generateRandomString(), images: model.comment?.images };
 				const res = await agent.put(endpoint).send(updateData).expect(expectedStatus);
 
 				if (success) {
@@ -457,7 +457,7 @@ const testDeleteComment = () => {
 							images: deletedComment.history[0].images,
 						}],
 					};
-					delete expectedComment.comment;
+					delete expectedComment.message;
 					delete expectedComment.images;
 
 					expect(deletedComment).toEqual(expectedComment);
