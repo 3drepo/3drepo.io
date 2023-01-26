@@ -84,7 +84,7 @@ export const CommentsPanel = () => {
 		const newHistory = oldComment.history.concat({
 			message: oldComment.message,
 			images: oldComment.images,
-			timestamp: new Date()
+			timestamp: new Date(),
 		});
 		TicketsActionsDispatchers.updateTicketComment(
 			teamspace,
