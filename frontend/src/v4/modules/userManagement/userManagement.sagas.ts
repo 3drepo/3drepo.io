@@ -294,7 +294,14 @@ export function* fetchProject({ project }) {
 
 		yield put(UserManagementActions.setProjectsPending(false));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
+		if (isV5()) {
+			DialogsActionsDispatchers.open('alert', {
+				currentActions: formatMessage({ id: 'projectPermissions.alert', defaultMessage: 'trying to access project permissions' }),
+			error,
+			})
+		} else {
+			yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
+		}
 		yield put(UserManagementActions.setProjectsPending(false));
 	}
 }
