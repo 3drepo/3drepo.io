@@ -21,16 +21,6 @@ export const CHARS_LIMIT = 1200;
 
 export const deletedCommentText = formatMessage({ id: 'ticket.comment.message.delete', defaultMessage: 'Message deleted' });
 
-export const deletedOtherUserCommentTime = (name) => formatMessage({
-	id: 'ticket.otherUser.comment.time.delete',
-	defaultMessage: '{name} deleted this message',
-}, { name });
-
-export const deletedCurrentUserCommentTime = formatMessage({
-	id: 'ticket.currentUser.comment.time.delete',
-	defaultMessage: 'You deleted this message',
-});
-
 const TIME_UNIT = {
 	second: formatMessage({ id: 'timeUnit.second', defaultMessage: 'second' }),
 	minute: formatMessage({ id: 'timeUnit.minute', defaultMessage: 'minute' }),

@@ -24,11 +24,12 @@ import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
 import { useForm } from 'react-hook-form';
+import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { updateComment, stringifyComment, parseComment, addReply } from '../commentMarkDown/commentMarkDown.helpers';
+import { stringifyComment, parseComment, addReply } from '../commentMarkDown/commentMarkDown.helpers';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentText, deletedCurrentUserCommentTime } from '../comment.helpers';
+import { deletedCommentText } from '../comment.helpers';
 import { CommentTime, CommentButtons } from '../comment.styles';
 import { CommentProps } from '../comment.component';
 import { CommentContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
@@ -58,7 +59,12 @@ export const CurrentUserComment = ({
 		return (
 			<CommentContainer $deleted data-author={author}>
 				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
-				<CommentTime>{deletedCurrentUserCommentTime}</CommentTime>
+				<CommentTime>
+					<FormattedMessage
+						id="ticket.currentUser.comment.time.delete"
+						defaultMessage="You deleted this message"
+					/>
+				</CommentTime>
 			</CommentContainer>
 		);
 	}

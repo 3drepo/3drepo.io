@@ -20,11 +20,12 @@ import { getMemberImgSrc, USER_NOT_FOUND } from '@/v5/store/users/users.helpers'
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UserCircle } from '@controls/assignees/assignees.styles';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
-import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
+import { FormattedMessage } from 'react-intl';
 import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
+import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentText, deletedOtherUserCommentTime } from '../comment.helpers';
+import { deletedCommentText } from '../comment.helpers';
 import { CommentAuthor, CommentButtons, CommentTime } from '../comment.styles';
 import { CommentProps } from '../comment.component';
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
@@ -55,7 +56,13 @@ export const OtherUserComment = ({ _id, deleted, comment, commentAge, author, on
 			<OtherUserCommentPopoverWrapper deleted user={user}>
 				<CommentAuthor>{author}</CommentAuthor>
 				<CommentMarkDown>{deletedCommentText}</CommentMarkDown>
-				<CommentTime>{deletedOtherUserCommentTime(user.firstName)}</CommentTime>
+				<CommentTime>
+					<FormattedMessage
+						id="ticket.otherUser.comment.time.delete"
+						defaultMessage="{name} deleted this message"
+						values={{ name: user.firstName }}
+					/>
+				</CommentTime>
 			</OtherUserCommentPopoverWrapper>
 		);
 	}
