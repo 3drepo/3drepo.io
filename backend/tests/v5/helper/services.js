@@ -30,6 +30,7 @@ const { io: ioClient } = require('socket.io-client');
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -82,7 +83,7 @@ db.reset = async () => {
 	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
 
 	await Promise.all([...dbProms, ...colProms]);
-	DbHandler.reset();
+	await DbHandler.disconnect();
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
@@ -240,7 +241,7 @@ db.createAvatar = async (username, type, avatarData) => {
 };
 
 db.addLoginRecords = async (records) => {
-	await DbHandler.insertMany(DbHandler.INTERNAL_DB, 'loginRecords', records);
+	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

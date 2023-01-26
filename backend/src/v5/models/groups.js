@@ -50,7 +50,7 @@ Groups.addGroups = async (teamspace, model, groups) => {
 Groups.updateGroup = async (teamspace, model, _id, action) => {
 	const res = await db.updateOne(teamspace, `${model}.groups`, { _id }, { $set: { ...action } });
 
-	if (!res || res.matchedCount === 0) {
+	if (!res) {
 		throw templates.groupNotFound;
 	}
 	EventsManager.publish(events.UPDATE_GROUP, { teamspace, model, _id, action });

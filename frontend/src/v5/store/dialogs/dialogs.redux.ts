@@ -16,6 +16,7 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
+import { getErrorCode, isPathNotFound } from '@/v5/validation/errors.helpers';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
@@ -32,6 +33,13 @@ export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
 export const openHandler = (state, { modalType, props }: OpenAction) => {
+	// avoid opening 2+ redirect modals
+	if (getErrorCode(props?.error)) {
+		const currentErrorIsPathNotFound = isPathNotFound(props?.error);
+		const pathNotFoundErrorAlreadyExists = state.dialogs.find((dialog) => isPathNotFound(dialog.props?.error));
+		if (currentErrorIsPathNotFound && pathNotFoundErrorAlreadyExists) return;
+	}
+
 	const dialog = {
 		id: uuid(),
 		modalType,

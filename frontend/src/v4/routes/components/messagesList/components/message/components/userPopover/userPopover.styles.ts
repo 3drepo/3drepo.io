@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
+import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
 
@@ -33,6 +34,14 @@ export const UserData = styled.div`
 	margin-left: 10px;
 	margin-right: 10px;
 	overflow: hidden;
+
+	/* Cannot style in v4Overrides because of react-textarea-autocomplete */
+	${isV5() && css`
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 100%;
+		margin-right: 0;
+	`}
 `;
 
 export const Name = styled.span`

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Scrollbars from 'react-custom-scrollbars';
 import styled from 'styled-components';
-import { COLOR } from '@/v5/ui/themes/theme';
-import { isV5 } from '@/v4/helpers/isV5';
 
-const ThumbVertical = styled.div`
-	background-color: ${COLOR.BASE_LIGHTEST};
-	right: ${isV5() ? 3 : 2}px;
-	bottom: 6px;
-	top: 0px;
-	border-radius: 3px;
-	width: 6px;
-	z-index: 10;
+export const VisualSettingsModalContent = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	width: 400px;
+	overflow: hidden;
 `;
-
-const ThumbHorizontal = styled.div`
-	display: none;
-`;
-
-export const ViewerScrollAreaBase = styled(Scrollbars).attrs({
-	autoHideTimeout: 1000,
-	autoHideDuration: 300,
-	autoHide: true,
-	renderThumbVertical: ({ style }) => <ThumbVertical style={style} />,
-	renderThumbHorizontal: ({ style }) => <ThumbHorizontal style={style} />,
-})`` as any;
