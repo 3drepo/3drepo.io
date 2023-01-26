@@ -44,6 +44,7 @@ Comments.serialiseComment = (req, res) => {
 	try {
 		respond(req, res, templates.ok, serialiseComment(req.commentData));
 	} catch (err) {
+		// istanbul ignore next
 		logger.logError(`Failed to serialise comment: ${err.message || err}`);
 		respond(req, res, templates.unknown);
 	}
@@ -54,6 +55,7 @@ Comments.serialiseCommentList = (req, res) => {
 		const comments = req.comments.map(serialiseComment);
 		respond(req, res, templates.ok, { comments });
 	} catch (err) {
+		// istanbul ignore next
 		logger.logError(`Failed to serialise comments: ${err.message || err}`);
 		respond(req, res, templates.unknown);
 	}

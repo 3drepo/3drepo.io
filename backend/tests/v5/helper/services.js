@@ -505,7 +505,7 @@ ServiceHelper.generateComment = () => {
 		_id: ServiceHelper.generateUUIDString(),
 		createdAt: ServiceHelper.generateRandomDate(),
 		updatedAt: ServiceHelper.generateRandomDate(),
-		comment: ServiceHelper.generateRandomString(),
+		message: ServiceHelper.generateRandomString(),
 		images: [base64img],
 	};
 };

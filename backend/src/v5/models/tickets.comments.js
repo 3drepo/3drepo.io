@@ -62,7 +62,7 @@ const getUpdatedComment = (oldComment, updateData) => {
 	const historyEntry = {
 		timestamp: oldComment.updatedAt,
 		...deleteIfUndefined({
-			comment: oldComment.comment,
+			message: oldComment.message,
 			images: oldComment.images,
 		}),
 	};
@@ -78,7 +78,7 @@ TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 	const updateObj = {
 		$set: { ...formattedComment },
 		$unset: {
-			...(updateData.comment ? { } : { comment: 1 }),
+			...(updateData.message ? { } : { message: 1 }),
 			...(updateData.images ? { } : { images: 1 }),
 		},
 	};
@@ -89,7 +89,7 @@ TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 TicketComments.deleteComment = async (teamspace, oldComment) => {
 	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
 	await updateOne(teamspace, { _id: oldComment._id },
-		{ $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });
+		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1 } });
 };
 
 module.exports = TicketComments;

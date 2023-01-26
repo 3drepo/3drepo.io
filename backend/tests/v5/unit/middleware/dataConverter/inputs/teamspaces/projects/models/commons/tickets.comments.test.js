@@ -38,9 +38,9 @@ const testValidateNewComment = () => {
 	describe('Validate new comment', () => {
 		const params = {};
 		describe.each([
-			[{ params, body: { comment: '' } }, false, 'with empty comment'],
-			[{ params, body: { comment: generateRandomString(1201) } }, false, 'with too long comment'],
-			[{ params, body: { comment: generateRandomString() } }, true, 'with valid comment'],
+			[{ params, body: { message: '' } }, false, 'with empty message'],
+			[{ params, body: { message: generateRandomString(1201) } }, false, 'with too long message'],
+			[{ params, body: { message: generateRandomString() } }, true, 'with valid message'],
 			[{ params, body: { images: [] } }, false, 'with invalid images'],
 			[{ params, body: { images: [FS.readFileSync(image, { encoding: 'base64' })] } }, true, 'with valid image'],
 			[{ params, body: {} }, false, 'with empty body'],
@@ -79,22 +79,24 @@ const testValidateUpdateComment = () => {
 		const existingRef = generateUUID();
 		const existingRef2 = generateUUID();
 		const existingComment = {
+			message: generateRandomString(),
 			author: req.session.user.username,
 			images: [existingRef],
-			history: [{ images: [existingRef2] }],
+			history: [{ images: [existingRef2] }, { message: generateRandomString() }],
 		};
 
 		describe.each([
-			[{ ...req, body: { comment: generateRandomString() } }, false, 'with non authorized user', { ...existingComment, author: generateRandomString() }, templates.notAuthorized],
-			[{ ...req, body: { comment: generateRandomString() } }, false, 'with deleted comment', { ...existingComment, deleted: true }],
-			[{ ...req, body: { comment: '' } }, false, 'with invalid comment'],
-			[{ ...req, body: { comment: generateRandomString() } }, true, 'with valid comment'],
+			[{ ...req, body: { message: generateRandomString() } }, false, 'with non authorized user', { ...existingComment, author: generateRandomString() }, templates.notAuthorized],
+			[{ ...req, body: { message: generateRandomString() } }, false, 'with deleted comment', { ...existingComment, deleted: true }],
+			[{ ...req, body: { message: '' } }, false, 'with invalid message'],
+			[{ ...req, body: { message: generateRandomString() } }, true, 'with valid message'],
 			[{ ...req, body: { images: [] } }, false, 'with invalid images'],
 			[{ ...req, body: { images: [FS.readFileSync(image, { encoding: 'base64' })] } }, true, 'with valid base64 image'],
 			[{ ...req, body: { images: [UUIDToString(existingRef), UUIDToString(existingRef2)] } }, true, 'with valid image refs'],
 			[{ ...req, body: { images: [UUIDToString(existingRef2)] } }, true, 'with valid image ref from history'],
 			[{ ...req, body: { images: [UUIDToString(generateUUID())] } }, false, 'with invalid image ref'],
-			[{ ...req, body: { images: [UUIDToString(existingRef2)], comment: generateRandomString() } }, true, 'with both an image ref and a new message'],
+			[{ ...req, body: { images: [UUIDToString(existingRef2)], message: generateRandomString() } }, true, 'with both an image ref and a new message'],
+			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, 'with no actual changes', { ...existingComment, history: undefined }],
 			[{ ...req, body: {} }, false, 'with empty body'],
 		])('Check if req arguments for new comment are valid', (request, shouldPass, desc, comment = existingComment, error = templates.invalidArguments) => {
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {

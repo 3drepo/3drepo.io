@@ -139,24 +139,24 @@ const testAddComment = () => {
 
 const testUpdateComment = () => {
 	describe('Update comment', () => {
-		test('should update the comment property of a comment', async () => {
+		test('should update the message property of a comment', async () => {
 			const teamspace = generateRandomString();
 			const comment = {
 				_id: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
-				comment: generateRandomString(),
+				message: generateRandomString(),
 				images: [generateRandomString()],
 			};
 
-			const updateData = { comment: generateRandomString() };
+			const updateData = { message: generateRandomString() };
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
 
 			await Comments.updateComment(teamspace, comment, updateData);
 
 			const updatedComment = {
-				comment: updateData.comment,
+				message: updateData.message,
 				history: [{
-					comment: comment.comment,
+					message: comment.message,
 					images: comment.images,
 					timestamp: fn.mock.calls[0][3].$set.history[0].timestamp,
 				}],
@@ -173,7 +173,7 @@ const testUpdateComment = () => {
 			const comment = {
 				_id: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
-				comment: generateRandomString(),
+				message: generateRandomString(),
 				images: [generateRandomString()],
 			};
 
@@ -186,7 +186,7 @@ const testUpdateComment = () => {
 				images: updateData.images,
 				history: [{
 					images: comment.images,
-					comment: comment.comment,
+					message: comment.message,
 					timestamp: fn.mock.calls[0][3].$set.history[0].timestamp,
 				}],
 				updatedAt: fn.mock.calls[0][3].$set.updatedAt,
@@ -194,19 +194,19 @@ const testUpdateComment = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
-				{ $set: { ...updatedComment }, $unset: { comment: 1 } });
+				{ $set: { ...updatedComment }, $unset: { message: 1 } });
 		});
 	});
 };
 
 const testDeleteComment = () => {
 	describe('Delete comment', () => {
-		test('should delete a comment that has comment property set', async () => {
+		test('should delete a comment that has message property set', async () => {
 			const teamspace = generateRandomString();
 			const comment = {
 				_id: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
-				comment: generateRandomString(),
+				message: generateRandomString(),
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
@@ -216,7 +216,7 @@ const testDeleteComment = () => {
 			const updatedComment = {
 				deleted: true,
 				history: [{
-					comment: comment.comment,
+					message: comment.message,
 					timestamp: fn.mock.calls[0][3].$set.history[0].timestamp,
 				}],
 				updatedAt: fn.mock.calls[0][3].$set.updatedAt,
@@ -224,7 +224,7 @@ const testDeleteComment = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
-				{ $set: { ...updatedComment }, $unset: { comment: 1, images: 1 } });
+				{ $set: { ...updatedComment }, $unset: { message: 1, images: 1 } });
 		});
 
 		test('should update a comment that has images property set', async () => {
@@ -250,7 +250,7 @@ const testDeleteComment = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
-				{ $set: { ...updatedComment }, $unset: { comment: 1, images: 1 } });
+				{ $set: { ...updatedComment }, $unset: { message: 1, images: 1 } });
 		});
 	});
 };

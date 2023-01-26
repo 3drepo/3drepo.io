@@ -363,7 +363,7 @@ const testUpdateComment = () => {
 						createdAt: updatedComment.createdAt,
 						updatedAt: updatedComment.updatedAt,
 						history: [{
-							comment: model.comment.comment,
+							message: model.comment.message,
 							timestamp: updatedComment.createdAt,
 							images: updatedComment.history[0].images,
 						}],
@@ -452,7 +452,7 @@ const testDeleteComment = () => {
 						createdAt: deletedComment.createdAt,
 						updatedAt: deletedComment.updatedAt,
 						history: [{
-							comment: model.comment.comment,
+							message: model.comment.message,
 							timestamp: deletedComment.createdAt,
 							images: deletedComment.history[0].images,
 						}],
