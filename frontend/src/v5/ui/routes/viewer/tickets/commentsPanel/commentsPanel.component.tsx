@@ -99,7 +99,6 @@ export const CommentsPanel = () => {
 			author: currentUser.username,
 			message,
 			images: [],
-			deleted: false,
 		} as any;
 		TicketsActionsDispatchers.createTicketComment(
 			teamspace,

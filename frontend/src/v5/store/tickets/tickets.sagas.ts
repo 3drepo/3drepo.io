@@ -116,9 +116,10 @@ export function* createTicketComment({
 		const now = new Date();
 		const fullComment = {
 			...comment,
+			_id: id,
 			createdAt: now,
 			updatedAt: now,
-			_id: id,
+			deleted: false,
 		};
 		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, fullComment));
 	} catch (error) {
