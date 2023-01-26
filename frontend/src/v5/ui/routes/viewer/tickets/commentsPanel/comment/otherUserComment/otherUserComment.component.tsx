@@ -84,8 +84,8 @@ export const OtherUserComment = ({
 				</PrimaryCommentButton>
 			</CommentButtons>
 			<CommentAuthor>{author}</CommentAuthor>
-			{history.length > 0 && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
+			{history.length > 0 && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</OtherUserCommentPopoverWrapper>
