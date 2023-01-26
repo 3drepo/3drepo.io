@@ -22,9 +22,10 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
+import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
 import { useForm } from 'react-hook-form';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { Metadata, updateComment, stringifyComment, parseComment } from '../commentMarkDown/commentMarkDown.helpers';
+import { updateComment, stringifyComment, parseComment, addReply } from '../commentMarkDown/commentMarkDown.helpers';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentText, deletedCurrentUserCommentTime } from '../comment.helpers';
@@ -34,7 +35,7 @@ import { CommentContainer, EditCommentButtons, EditCommentContainer, EditComment
 
 type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
 	commentAge: string;
-	metadata?: Metadata;
+	metadata?: CommentReplyMetadata;
 };
 
 export const CurrentUserComment = ({
@@ -65,7 +66,7 @@ export const CurrentUserComment = ({
 	if (isEditMode) {
 		const updateMessage = () => {
 			const newComment = parseComment(watch('editComment'));
-			const updatedComment = updateComment(metadata, newComment);
+			const updatedComment = addReply(metadata, newComment);
 			onEdit(_id, updatedComment);
 			setIsEditMode(false);
 		};
@@ -73,7 +74,7 @@ export const CurrentUserComment = ({
 		return (
 			<>
 				<EditCommentContainer data-author={author}>
-					{metadata.reply && (<CommentReply {...metadata} />)}
+					{metadata.comment && (<CommentReply {...metadata} />)}
 					<EditCommentInput
 						name="editComment"
 						placeholder={formatMessage({
@@ -108,7 +109,7 @@ export const CurrentUserComment = ({
 					<EditIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-			{metadata.reply && (<CommentReply variant="secondary" {...metadata} />)}
+			{metadata.comment && (<CommentReply variant="secondary" {...metadata} />)}
 			<CommentMarkDown>{comment}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</CommentContainer>

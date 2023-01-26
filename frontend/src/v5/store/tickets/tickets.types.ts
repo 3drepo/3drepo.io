@@ -86,8 +86,8 @@ export type Viewpoint = {
 
 export type IComment = {
 	_id: string,
-	comment: string, // long description format (optional)
-	images: string[], // list of resource id references (optional)
+	comment?: string, // long description format (optional)
+	images?: string[], // list of resource id references (optional)
 	author: string,
 	createdAt: Date,
 	updatedAt: Date,
@@ -97,4 +97,10 @@ export type IComment = {
 		images: string[],
 		timestamp : Date,
 	}>,
+};
+
+export type CommentReplyMetadata = {
+	_id: string,
+	comment: string,
+	author: string,
 };

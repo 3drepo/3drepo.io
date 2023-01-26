@@ -16,17 +16,16 @@
  */
 
 import { CurrentUserHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
 import { CommentAuthor } from '../comment.styles';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { CommentReplyContainer } from './commentReply.styles';
 
-type CommentReplyProps = {
-	reply: string,
-	author: string,
+type CommentReplyProps = CommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	isCurrentUserComment?: boolean,
 };
-export const CommentReply = ({ reply, author, variant = 'primary', isCurrentUserComment = true }: CommentReplyProps) => {
+export const CommentReply = ({ comment, author, variant = 'primary', isCurrentUserComment = true }: CommentReplyProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
@@ -36,7 +35,7 @@ export const CommentReply = ({ reply, author, variant = 'primary', isCurrentUser
 	return (
 		<CommentReplyContainer variant={variant}>
 			<CommentAuthor>{authorDisplayName}</CommentAuthor>
-			<CommentMarkDown>{reply}</CommentMarkDown>
+			<CommentMarkDown>{comment}</CommentMarkDown>
 		</CommentReplyContainer>
 	);
 };

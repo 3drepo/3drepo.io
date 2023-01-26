@@ -251,14 +251,14 @@ const MOCK_COMMENTS = [
 	{
 		// teamspace: 'localuser1',
 		author: 'localuser1',
-		comment: `[author]:- "localuser1"\n[referenceId]:- "1"\n[reply]:- "original"\n\nreply`,
+		comment: `[author]:- "localuser1"\n[_id]:- "1"\n[comment]:- "original"\n\nreply`,
 		createdAt: new Date('1 1 2022'),
 		deleted: false,
 	},
 	{
 		// teamspace: 'localuser1',
 		author: 'localuser2',
-		comment: `[author]:- "localuser1"\n[referenceId]:- "2"\n[reply]:- "comment by current user"\n\nreply by other user`,
+		comment: `[author]:- "localuser1"\n[_id]:- "2"\n[comment]:- "comment by current user"\n\nreply by other user`,
 		createdAt: new Date('1 1 2022'),
 		deleted: false,
 	},

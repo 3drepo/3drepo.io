@@ -43,7 +43,7 @@ import {
 	CommentReplyContainer,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { addReply, parseComment } from './comment/commentMarkDown/commentMarkDown.helpers';
+import { addReply, extractMetadataFromObject, parseComment } from './comment/commentMarkDown/commentMarkDown.helpers';
 import { CHARS_LIMIT } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
 
@@ -93,7 +93,7 @@ export const CommentsPanel = () => {
 	const createComment = async () => {
 		let comment = parseComment(inputComment);
 		if (commentReply) {
-			comment = addReply(commentReply, comment);
+			comment = addReply(extractMetadataFromObject(commentReply), comment);
 		}
 		const newComment = {
 			author: currentUser.username,
@@ -155,7 +155,7 @@ export const CommentsPanel = () => {
 				<BottomSection>
 					{commentReply && (
 						<CommentReplyContainer>
-							<CommentReply author={commentReply.author} reply={commentReply.comment} />
+							<CommentReply {...extractMetadataFromObject(commentReply)} />
 							<DeleteButton onClick={() => setCommentReply(null)}>
 								<DeleteIcon />
 							</DeleteButton>

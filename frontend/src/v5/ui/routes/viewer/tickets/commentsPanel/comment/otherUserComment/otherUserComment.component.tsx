@@ -21,7 +21,7 @@ import { UserPopover } from '@components/shared/userPopover/userPopover.componen
 import { UserCircle } from '@controls/assignees/assignees.styles';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { Metadata } from '../commentMarkDown/commentMarkDown.helpers';
+import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentText, deletedOtherUserCommentTime } from '../comment.helpers';
@@ -31,7 +31,7 @@ import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 
 type UserCommentProps = Omit<CommentProps, 'createdAt'> & {
 	commentAge: string;
-	metadata?: Metadata;
+	metadata?: CommentReplyMetadata;
 };
 const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => (
 	<CommentContainer $deleted={deleted} data-author={user.user}>
@@ -68,7 +68,7 @@ export const OtherUserComment = ({ _id, deleted, comment, commentAge, author, on
 				</PrimaryCommentButton>
 			</CommentButtons>
 			<CommentAuthor>{author}</CommentAuthor>
-			{metadata.reply && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
+			{metadata.comment && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
 			<CommentMarkDown>{comment}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</OtherUserCommentPopoverWrapper>
