@@ -54,3 +54,7 @@ export const BaseTicketInfo = styled.div`
 	box-sizing: border-box;
 	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
 `;
+
+export const DescriptionProperty = styled.div`
+	margin: 10px 0;
+`;

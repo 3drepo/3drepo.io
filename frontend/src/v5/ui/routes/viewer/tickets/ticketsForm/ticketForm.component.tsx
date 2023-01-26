@@ -23,9 +23,10 @@ import { Accordion } from '@controls/accordion/accordion.component';
 import { InputController } from '@controls/inputs/inputController.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
+import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
-import { BaseTicketInfo, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
+import { BaseTicketInfo, PanelsContainer, ErrorTextGap, DescriptionProperty } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
 import { BaseProperties, IssueProperties } from '../tickets.constants';
 import { CreationInfo } from '../../../../components/shared/creationInfo/creationInfo.component';
@@ -129,6 +130,17 @@ export const TicketForm = ({ template, ticket, focusOnTitle, onPropertyBlur, ...
 					createdAt={ticket.properties?.[BaseProperties.CREATED_AT]}
 					updatedAt={ticket.properties?.[BaseProperties.UPDATED_AT]}
 				/>
+				<DescriptionProperty>
+					<InputController
+						Input={TextAreaFixedSize}
+						name={`properties[${BaseProperties.DESCRIPTION}]`}
+						onBlur={onPropertyBlur}
+						placeholder={formatMessage({
+							id: 'customTicket.newTicket.description',
+							defaultMessage: 'Description',
+						})}
+					/>
+				</DescriptionProperty>
 			</BaseTicketInfo>
 			<CardContent>
 				<PanelsContainer>
