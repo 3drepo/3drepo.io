@@ -92,11 +92,11 @@ export type IComment = {
 	createdAt: Date,
 	updatedAt: Date,
 	deleted: boolean,
-	history: Array<{
+	history: {
 		message: string,
 		images: string[],
-		timestamp : Date,
-	}>,
+		timestamp: Date,
+	}[],
 };
 
 export type CommentReplyMetadata = {
