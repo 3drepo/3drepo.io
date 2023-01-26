@@ -26,7 +26,7 @@ import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { stringifyMessage, parseMessage, addReply } from '../commentMarkDown/commentMarkDown.helpers';
+import { desanitiseMessage, sanitiseMessage, addReply } from '../commentMarkDown/commentMarkDown.helpers';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentMessage } from '../comment.helpers';
@@ -53,7 +53,7 @@ export const CurrentUserComment = ({
 }: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
 	const { control, watch } = useForm<{ editMessage }>({
-		defaultValues: { editMessage: stringifyMessage(message) },
+		defaultValues: { editMessage: desanitiseMessage(message) },
 	});
 
 	if (deleted) {
@@ -72,7 +72,7 @@ export const CurrentUserComment = ({
 
 	if (isEditMode) {
 		const updateMessage = () => {
-			const newMessage = parseMessage(watch('editMessage'));
+			const newMessage = sanitiseMessage(watch('editMessage'));
 			const updatedMessage = addReply(metadata, newMessage);
 			onEdit(_id, updatedMessage);
 			setIsEditMode(false);

@@ -43,7 +43,7 @@ import {
 	CommentReplyContainer,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { addReply, createMetadata, parseMessage } from './comment/commentMarkDown/commentMarkDown.helpers';
+import { addReply, createMetadata, sanitiseMessage } from './comment/commentMarkDown/commentMarkDown.helpers';
 import { CHARS_LIMIT } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
 
@@ -92,7 +92,7 @@ export const CommentsPanel = () => {
 	};
 
 	const createComment = async () => {
-		let message = parseMessage(inputMessage);
+		let message = sanitiseMessage(inputMessage);
 		if (commentReply) {
 			message = addReply(createMetadata(commentReply), message);
 		}
