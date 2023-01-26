@@ -113,15 +113,7 @@ export function* createTicketComment({
 			? API.Tickets.createFederationTicketComment
 			: API.Tickets.createContainerTicketComment;
 		const id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
-		const now = new Date();
-		const fullComment = {
-			...comment,
-			_id: id,
-			createdAt: now,
-			updatedAt: now,
-			deleted: false,
-		};
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, fullComment));
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { ...comment, _id: id }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
