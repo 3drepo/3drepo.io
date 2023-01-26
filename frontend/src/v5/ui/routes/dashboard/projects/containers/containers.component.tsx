@@ -27,6 +27,7 @@ import { FormattedMessage } from 'react-intl';
 import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
+import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -36,6 +37,7 @@ export const IsMainList = createContext(false);
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isAdmin = hasProjectAdminAccess();
 	const {
 		containers,
 		favouriteContainers,
@@ -96,14 +98,16 @@ export const Containers = (): JSX.Element => {
 								<DashboardListEmptyText>
 									<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
 								</DashboardListEmptyText>
-								<Button
-									startIcon={<AddCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => setCreateContainerOpen(true)}
-								>
-									<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-								</Button>
+								{ isAdmin && (
+									<Button
+										startIcon={<AddCircleIcon />}
+										variant="contained"
+										color="primary"
+										onClick={() => setCreateContainerOpen(true)}
+									>
+										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+									</Button>
+								)}
 							</>
 						)}
 					/>

@@ -39,6 +39,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
+import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { SkeletonListItem } from './skeletonListItem';
@@ -65,7 +66,7 @@ export const ContainersList = ({
 	// eslint-disable-next-line max-len
 	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
-
+	const isAdmin = hasProjectAdminAccess();
 	const { sortedList, setSortConfig } = useOrderedList(filteredContainers, DEFAULT_SORT_CONFIG);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
@@ -86,22 +87,26 @@ export const ContainersList = ({
 						<SearchInput
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						<Button
-							startIcon={<AddCircleIcon />}
-							variant="outlined"
-							color="secondary"
-							onClick={onClickCreate}
-						>
-							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-						</Button>
-						<Button
-							startIcon={<ArrowUpCircleIcon />}
-							variant="contained"
-							color="primary"
-							onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
-						>
-							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-						</Button>
+						{ isAdmin && (
+							<>
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="outlined"
+									color="secondary"
+									onClick={onClickCreate}
+								>
+									<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+								</Button>
+								<Button
+									startIcon={<ArrowUpCircleIcon />}
+									variant="contained"
+									color="primary"
+									onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+								>
+									<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+								</Button>
+							</>
+						)}
 					</CollapseSideElementGroup>
 				)}
 			>
@@ -142,7 +147,7 @@ export const ContainersList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasContainers && (
+				{showBottomButton && !isListPending && hasContainers && isAdmin && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
 						onClick={onClickCreate}
