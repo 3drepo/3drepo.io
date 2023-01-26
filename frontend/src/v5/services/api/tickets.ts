@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket, ITemplate, NewTicket, MinimumComment } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate, NewTicket, IComment } from '@/v5/store/tickets/tickets.types';
 // import { pick } from 'lodash';
 import api from './default';
 
@@ -172,7 +172,7 @@ export const createFederationTicketComment = async (
 	projectId: string,
 	federationId: string,
 	ticketId: string,
-	comment: MinimumComment,
+	comment: IComment,
 ) => {
 	// const { data } = await api.post(
 		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
@@ -187,7 +187,7 @@ export const createContainerTicketComment = async (
 	projectId: string,
 	containerId: string,
 	ticketId: string,
-	comment: MinimumComment,
+	comment: IComment,
 ) => {
 	// const { data } = await api.post(
 		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
@@ -226,7 +226,7 @@ export const updateFederationTicketComment = async (
 	projectId: string,
 	federationId: string,
 	ticketId: string,
-	comment: Partial<MinimumComment>,
+	comment: Partial<IComment>,
 ) => {
 	// const { data } = await api.put(
 		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
@@ -239,7 +239,7 @@ export const updateContainerTicketComment = async (
 	projectId: string,
 	containerId: string,
 	ticketId: string,
-	comment: Partial<MinimumComment>,
+	comment: Partial<IComment>,
 ) => {
 	// const { data } = await api.put(
 		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
@@ -250,52 +250,17 @@ export const updateContainerTicketComment = async (
 const MOCK_COMMENTS = [
 	{
 		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('12 12 2021'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
 		author: 'localuser1',
-		comment: 'This is n current user comment',
+		comment: `[author]:- "localuser1"\n[referenceId]:- "1"\n[reply]:- "original"\n\nreply`,
 		createdAt: new Date('1 1 2022'),
 		deleted: false,
 	},
 	{
 		// teamspace: 'localuser1',
 		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('12 12 2021'),
-		deleted: true,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('12 12 2021'),
+		comment: `[author]:- "localuser1"\n[referenceId]:- "2"\n[reply]:- "comment by current user"\n\nreply by other user`,
+		createdAt: new Date('1 1 2022'),
 		deleted: false,
-	},
-	// {
-	// 	// teamspace: 'localuser1',
-	// 	author: 'localuser1',
-	// 	comment: '> ___________Super duper uper bonder longgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg sdfs dfs dfs df sdf sd fs df sdf sdf sdfsd fsdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf sdf\n\nok',
-	// 	createdAt: new Date('1 1 2022'),
-	// 	deleted: false,
-	// },
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('12 12 2021'),
-		deleted: false,
-	},
-	{
-		// teamspace: 'localuser1',
-		author: 'localuser2',
-		comment: 'A comment from an external user',
-		createdAt: new Date('12 12 2021'),
-		deleted: true,
 	},
 ].map((x, index) => ({ ...x, _id: index+"" }));
 

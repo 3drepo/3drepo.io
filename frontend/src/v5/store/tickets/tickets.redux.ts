@@ -21,7 +21,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceId } from '../store.types';
-import { IComment, ITemplate, ITicket, MinimumComment, NewTicket } from './tickets.types';
+import { ITemplate, ITicket, IComment, NewTicket } from './tickets.types';
 
 const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
 	if (isArray(target)) return src; // If its an array that is merging just use the newest
@@ -146,16 +146,16 @@ export type CreateTicketCommentAction = Action<'CREATE_TICKET_COMMENT'> & Teamsp
 	modelId: string,
 	ticketId: string,
 	isFederation: boolean,
-	comment: MinimumComment,
+	comment: IComment,
 };
 export type UpdateTicketCommentAction = Action<'UPDATE_TICKET_COMMENT'> & TeamspaceAndProjectId & {
 	modelId: string,
 	ticketId: string,
 	isFederation: boolean,
-	comment: Partial<MinimumComment>,
+	comment: Partial<IComment>,
 };
 export type DeleteTicketCommentAction = Action<'DELETE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId };
-export type UpsertTicketCommentSuccessAction = Action<'UPSERT_TICKET_COMMENT_SUCCESS'> & { modelId: string, ticketId: string, comment: Partial<MinimumComment> };
+export type UpsertTicketCommentSuccessAction = Action<'UPSERT_TICKET_COMMENT_SUCCESS'> & { modelId: string, ticketId: string, comment: Partial<IComment> };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & { modelId: string, ticket: Partial<ITicket> };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & { modelId: string, template: ITemplate };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
@@ -196,7 +196,7 @@ export interface ITicketsActionCreators {
 		modelId: string,
 		ticketId: string,
 		isFederation: boolean,
-		comment: MinimumComment,
+		comment: IComment,
 	) => CreateTicketCommentAction;
 	updateTicketComment: (
 		teamspace: string,
@@ -204,7 +204,7 @@ export interface ITicketsActionCreators {
 		modelId: string,
 		ticketId: string,
 		isFederation: boolean,
-		comment: Partial<MinimumComment>,
+		comment: Partial<IComment>,
 	) => UpdateTicketCommentAction;
 	deleteTicketComment: (
 		teamspace: string,
@@ -217,7 +217,7 @@ export interface ITicketsActionCreators {
 	upsertTicketCommentSuccess: (
 		modelId: string,
 		ticketId: string,
-		comment: Partial<MinimumComment>,
+		comment: Partial<IComment>,
 	) => UpsertTicketCommentSuccessAction;
 	updateTicket: (
 		teamspace: string,

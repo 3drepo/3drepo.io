@@ -84,7 +84,7 @@ export type Viewpoint = {
 	clippingPlanes?: ClippingPlane[];
 };
 
-export type MinimumComment = {
+export type IComment = {
 	_id: string,
 	comment: string, // long description format (optional)
 	images: string[], // list of resource id references (optional)
@@ -92,12 +92,9 @@ export type MinimumComment = {
 	createdAt: Date,
 	updatedAt: Date,
 	deleted: boolean,
-};
-
-export type IComment = MinimumComment & {
-	teamspace: string,
-	project: string,
-	model: string,
-	ticket: string,
-	history: Array<MinimumComment & { timestamp : Date }>,
+	history: Array<{
+		comment: string,
+		images: string[],
+		timestamp : Date,
+	}>,
 };
