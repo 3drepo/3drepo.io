@@ -17,7 +17,7 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
+import { useRouteMatch, Switch, Redirect, useLocation } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
@@ -31,9 +31,11 @@ import { UserPermissions } from './userPermissions/userPermissions.component';
 import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
 import { Content, DashboardScroll } from './projects.styles';
 import { ProjectSettings } from './projectSettings/projectSettings.component';
+import { Board } from './board/board.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
+	const { pathname } = useLocation();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 
@@ -53,6 +55,12 @@ export const ProjectContent = () => {
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
 						<Containers />
+					</Route>
+					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
+						<Board />
+					</Route>
+					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board`}>
+						<Redirect to={`${discardSlash(pathname)}/issues`} />
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.tasks', defaultMessage: ':project - Tasks' })} exact path={`${path}/t/tasks`}>
 						Tasks

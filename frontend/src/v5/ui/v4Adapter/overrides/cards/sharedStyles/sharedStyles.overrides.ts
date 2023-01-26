@@ -19,6 +19,7 @@ import { SearchField } from '@/v4/routes/viewerGui/components/views/views.styles
 import sequencesTab from './sequencesTab.overrides';
 import selectMenus from './selectMenus.overrides';
 import shapes from './shapes.overrides';
+import attachments from './attachments.overrides';
 
 const CardSearchInputStyles = css`
 	${SearchField} {
@@ -37,4 +38,5 @@ export default css`
 	${sequencesTab}
 	${shapes}
 	${selectMenus}
+	${attachments}
 `;

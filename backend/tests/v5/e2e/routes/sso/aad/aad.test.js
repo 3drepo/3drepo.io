@@ -57,11 +57,11 @@ const testAuthenticate = () => {
 			await agent.get('/v5/sso/aad/authenticate').expect(templates.invalidArguments.status);
 		});
 
-		test('should redirect the user to Microsoft authentication page', async () => {
+		test('respond with a link to Microsoft authentication page', async () => {
 			const redirectUri = generateRandomString();
 			const res = await agent.get(`/v5/sso/aad/authenticate?redirectUri=${redirectUri}`)
-				.expect(302);
-			const resUri = new URL(res.headers.location);
+				.expect(templates.ok.status);
+			const resUri = new URL(res.body.link);
 			expect(resUri.hostname).toEqual('login.microsoftonline.com');
 			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
 			const { searchParams } = resUri;
@@ -189,9 +189,9 @@ const signup = () => {
 
 			const res = await agent.post(`/v5/sso/aad/signup?redirectUri=${redirectUri}`)
 				.send(newUserData)
-				.expect(302);
+				.expect(templates.ok.status);
 
-			const resUri = new URL(res.headers.location);
+			const resUri = new URL(res.body.link);
 			expect(resUri.hostname).toEqual('login.microsoftonline.com');
 			expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
 			expect(resUri.searchParams.get('redirect_uri')).toEqual(signupRedirectUri);
@@ -290,10 +290,10 @@ const testLink = () => {
 					.expect(templates.invalidArguments.status);
 			});
 
-			test('should redirect the user to Microsoft authentication page', async () => {
+			test('should respond with a link to Microsoft authentication page', async () => {
 				const res = await testSession.get(`/v5/sso/aad/link?redirectUri=${redirectUri}`)
-					.expect(302);
-				const resUri = new URL(res.headers.location);
+					.expect(templates.ok.status);
+				const resUri = new URL(res.body.link);
 				expect(resUri.hostname).toEqual('login.microsoftonline.com');
 				expect(resUri.pathname).toEqual('/common/oauth2/v2.0/authorize');
 				const { searchParams } = resUri;
