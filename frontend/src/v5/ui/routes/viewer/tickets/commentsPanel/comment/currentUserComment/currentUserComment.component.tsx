@@ -51,11 +51,6 @@ export const CurrentUserComment = ({
 	onReply,
 	onEdit,
 }: CurrentUserCommentProps) => {
-	const [isEditMode, setIsEditMode] = useState(false);
-	const { control, watch } = useForm<{ editMessage }>({
-		defaultValues: { editMessage: desanitiseMessage(message) },
-	});
-
 	if (deleted) {
 		return (
 			<CommentContainer $deleted data-author={author}>
@@ -69,6 +64,11 @@ export const CurrentUserComment = ({
 			</CommentContainer>
 		);
 	}
+
+	const [isEditMode, setIsEditMode] = useState(false);
+	const { control, watch } = useForm<{ editMessage }>({
+		defaultValues: { editMessage: desanitiseMessage(message) },
+	});
 
 	if (isEditMode) {
 		const updateMessage = () => {

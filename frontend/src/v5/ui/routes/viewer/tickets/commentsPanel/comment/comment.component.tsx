@@ -27,12 +27,12 @@ export type CommentProps = IComment & {
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage: string) => void;
 };
-export const Comment = ({ createdAt, author, message, ...props }: CommentProps) => {
+export const Comment = ({ createdAt, author, message, deleted, ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState(getRelativeTime(createdAt));
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
-	const noMetadataMessage = extractMessage(message);
+	const noMetadataMessage = !deleted ? extractMessage(message) : message;
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 
@@ -41,5 +41,14 @@ export const Comment = ({ createdAt, author, message, ...props }: CommentProps) 
 		return () => clearInterval(intervalId);
 	}, []);
 
-	return (<UserComment {...props} author={author} commentAge={commentAge} metadata={metadata} message={noMetadataMessage} />);
+	return (
+		<UserComment
+			{...props}
+			author={author}
+			commentAge={commentAge}
+			metadata={metadata}
+			message={noMetadataMessage}
+			deleted={deleted}
+		/>
+	);
 };
