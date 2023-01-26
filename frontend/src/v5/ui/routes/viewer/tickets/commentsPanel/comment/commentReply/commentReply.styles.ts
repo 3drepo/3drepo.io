@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components'
+import styled, { css } from 'styled-components';
 import { CommentBody } from '../comment.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary' }>`

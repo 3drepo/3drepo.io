@@ -20,7 +20,7 @@ import styled, { css } from 'styled-components';
 const CommentButtonStyling = styled.div`
 	height: 24px;
 	width: 24px;
-	margin: 2px;	
+	margin: 2px;
 	border-radius: 100%;
 	display: flex;
 	justify-content: center;
