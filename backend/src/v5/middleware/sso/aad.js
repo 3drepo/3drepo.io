@@ -16,8 +16,8 @@
  */
 const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { decryptCryptoHash, generateCryptoHash, getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
-const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { getUserByEmail, getUserByQuery } = require('../../models/users');
 const { redirectWithError, setSessionReferer } = require('.');
 const { addPkceProtection } = require('./pkce');
@@ -30,7 +30,7 @@ const Aad = {};
 
 const checkStateIsValid = async (req, res, next) => {
 	try {
-		req.state = JSON.parse(req.query.state);
+		req.state = JSON.parse(decryptCryptoHash(req.query.state));
 		await next();
 	} catch (err) {
 		logger.logError('Failed to parse req.query.state');
@@ -56,10 +56,10 @@ const authenticate = (redirectUri) => async (req, res) => {
 
 		req.authParams = {
 			redirectUri,
-			state: JSON.stringify({
+			state: generateCryptoHash(JSON.stringify({
 				redirectUri: req.query.redirectUri,
 				...(req.body || {}),
-			}),
+			})),
 			codeChallenge: req.session.pkceCodes.challenge,
 			codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 		};
