@@ -23,13 +23,11 @@ import { Accordion } from '@controls/accordion/accordion.component';
 import { InputController } from '@controls/inputs/inputController.component';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
-import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { TicketProperty } from './properties/properties.helper';
-import { BaseTicketInfo, PanelsContainer, ErrorTextGap, DescriptionProperty } from './ticketsForm.styles';
-import { TitleProperty } from './properties/titleProperty.component';
+import { PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { BaseProperties, IssueProperties } from '../tickets.constants';
-import { CreationInfo } from '../../../../components/shared/creationInfo/creationInfo.component';
+import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -106,49 +104,20 @@ interface Props {
 	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, focusOnTitle, onPropertyBlur, ...rest }: Props) => {
+export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 	const { formState } = useFormContext();
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const PropertiesPanelProperties = filter(template?.properties, ({ name }) => !topPanelProperties.includes(name));
 
 	return (
 		<>
-			<BaseTicketInfo>
-				<TitleProperty
-					name={BaseProperties.TITLE}
-					defaultValue={ticket[BaseProperties.TITLE]}
-					formError={formState.errors[BaseProperties.TITLE]}
-					placeholder={formatMessage({
-						id: 'customTicket.newTicket.titlePlaceholder',
-						defaultMessage: 'Ticket name',
-					})}
-					inputProps={{ autoFocus: focusOnTitle }}
-					onBlur={onPropertyBlur}
-				/>
-				<CreationInfo
-					owner={ticket.properties?.[BaseProperties.OWNER]}
-					createdAt={ticket.properties?.[BaseProperties.CREATED_AT]}
-					updatedAt={ticket.properties?.[BaseProperties.UPDATED_AT]}
-				/>
-				<DescriptionProperty>
-					<InputController
-						Input={TextAreaFixedSize}
-						name={`properties[${BaseProperties.DESCRIPTION}]`}
-						onBlur={onPropertyBlur}
-						placeholder={formatMessage({
-							id: 'customTicket.newTicket.description',
-							defaultMessage: 'Description',
-						})}
-					/>
-				</DescriptionProperty>
-			</BaseTicketInfo>
+			<TicketsTopPanel ticket={ticket} formState={formState} {...rest} />
 			<CardContent>
 				<PanelsContainer>
 					<PropertiesPanel
 						module="properties"
 						properties={PropertiesPanelProperties || []}
 						propertiesValues={ticket.properties}
-						onPropertyBlur={onPropertyBlur}
 						{...rest}
 					/>
 					{
