@@ -30,6 +30,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import { getRevisionFileUrl } from '@/v5/services/api/revisions';
+import { hasCollaboratorAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -52,6 +53,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 		e.preventDefault();
 		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revision._id);
 	};
+	const hasPermissions = hasCollaboratorAccess(containerId);
 
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
@@ -61,21 +63,23 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
 			<RevisionsListItemCode width="20%" tabletWidth={150}> {tag} </RevisionsListItemCode>
 			<RevisionsListItemText hideWhenSmallerThan={887} active={active}> {desc} </RevisionsListItemText>
-			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
-			<Tooltip
-				title={(
-					<FormattedMessage
-						id="revisionDetails.list.item.download.tooltip"
-						defaultMessage="Download revision"
-					/>
-				)}
-			>
-				<DownloadButton
-					onClick={downloadRevision}
+			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermissions} />
+			{ hasPermissions && (
+				<Tooltip
+					title={(
+						<FormattedMessage
+							id="revisionDetails.list.item.download.tooltip"
+							defaultMessage="Download revision"
+						/>
+					)}
 				>
-					<DownloadIcon />
-				</DownloadButton>
-			</Tooltip>
+					<DownloadButton
+						onClick={downloadRevision}
+					>
+						<DownloadIcon />
+					</DownloadButton>
+				</Tooltip>
+			)}
 		</Container>
 	);
 };
