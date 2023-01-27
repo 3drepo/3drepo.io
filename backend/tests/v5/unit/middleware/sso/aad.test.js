@@ -45,7 +45,7 @@ const addPkceCodes = (req) => {
 };
 
 const testVerifyNewUserDetails = () => {
-	describe('Get user MS details, check email availability and assign details to body', () => {
+	describe('Verify new user details', () => {
 		const aadUserDetails = {
 			email: 'example@email.com',
 			firstName: generateRandomString(),
@@ -54,13 +54,14 @@ const testVerifyNewUserDetails = () => {
 		};
 
 		const redirectUri = generateRandomURL();
+		const csrfToken = generateRandomString();
 		const res = { redirect: jest.fn() };
 		const getRequest = () => ({
-			query: {
+			body: {
 				code: generateRandomString(),
 				state: JSON.stringify({ username: generateRandomString(), redirectUri }),
 			},
-			session: { pkceCodes: { verifier: generateRandomString() } },
+			session: { pkceCodes: { verifier: generateRandomString() }, csrfToken },
 		});
 
 		test(`should respond ${templates.invalidArguments.code} if state is not valid JSON`, async () => {
@@ -306,7 +307,7 @@ const testAuthenticate = () => {
 };
 
 const testHasAssociatedAccount = () => {
-	describe('Check if Microsoft account is linked to 3D repo', () => {
+	describe('Has associated account', () => {
 		const aadUserDetails = {
 			email: 'example@email.com',
 			firstName: generateRandomString(),
