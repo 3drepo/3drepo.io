@@ -145,6 +145,7 @@ export default css`
 			${Details} {
 				${StyledButton} {
 					margin: 9px 4px 0 0;
+					min-width: 73px;
 				}
 			}
 

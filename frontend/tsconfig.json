@@ -17,7 +17,8 @@
       "es2019",
       "dom",
       "es2020.string",
-      "es2021.string"
+      "es2021.string",
+      "WebWorker"
     ],
     "jsx": "react-jsx",
     "removeComments": true,

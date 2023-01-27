@@ -55,7 +55,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /sso/aad/authenticate:
 	*   get:
-	*     description: Redirects the user to Microsoft's authentication page and then to a URI provided upon success
+	*     description: Returns a link to Microsoft's authentication page and then to a URI provided upon success
 	*     tags: [Aad]
 	*     operationId: aadAuthenticate
 	*     parameters:
@@ -65,8 +65,17 @@ const establishRoutes = () => {
 	*           type: string
 	*         description: a URI to redirect to when authentication finished
 	*     responses:
-	*       302:
-	*         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
+	*       200:
+	*         description: returns a link to Microsoft's authentication page and then to a provided URI upon success
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 link:
+	*                   type: string
+	*                   description: link to Microsoft's authenticator
+	*
 	*/
 	router.get('/authenticate', authenticate(authenticateRedirectUri));
 
@@ -130,7 +139,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /sso/aad/link:
 	 *   get:
-	 *     description: Redirects the user to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. See schemas/errorCodes for more details.
+	 *     description: Returns a link to Microsoft's authentication page and links the users account to SSO. Upon successful link the user is redirected to the URI provided. In case an error is occured during the link process the user is redirected to the provided URI with the error code specified in the query. See schemas/errorCodes for more details.
 	 *     tags: [Aad]
 	 *     operationId: aadLink
 	 *     parameters:
@@ -140,10 +149,17 @@ const establishRoutes = () => {
 	 *           type: string
 	 *         description: a URI to redirect to when authentication finished
 	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/invalidArguments"
-	 *       302:
-	 *         description: Redirects the user to Microsoft's authentication page and then to a provided URI upon success
+	 *       200:
+ 	 *         description: returns a link to Microsoft's authentication page and then to a provided URI upon success
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 link:
+	 *                   type: string
+	 *                   description: link to Microsoft's authenticator
+	 *
 	 */
 	router.get('/link', isLoggedIn, isNonSsoUser, authenticate(linkRedirectUri));
 

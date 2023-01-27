@@ -268,8 +268,10 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 };
 
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
-	const caster = generateCastObject({ ...fullTemplate,
-		properties: fullTemplate.properties.concat(defaultProperties) }, stripDeprecated);
+	const caster = generateCastObject({
+		...fullTemplate,
+		properties: fullTemplate.properties.concat(defaultProperties),
+	}, stripDeprecated);
 	return caster.cast(ticket);
 };
 

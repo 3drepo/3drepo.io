@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
+import { formatMessage } from '@/v5/services/intl';
 import { groupBy } from 'lodash';
 
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
@@ -58,12 +60,18 @@ export const getProjectModels = (teamspaces = [], projectsMap, modelsMap, curren
 		const list = [];
 
 		if (federations) {
-			const { label, items } = getItemsGroup('Federations', federations);
+			const { label, items } = getItemsGroup(
+				isV5() ? formatMessage({ defaultMessage: 'Federations', id: 'board.group.federations'}) : 'Federations',
+				federations,
+			);
 			list.push(label, ...items);
 		}
 
 		if (models) {
-			const { label, items } = getItemsGroup('Models', models);
+			const { label, items } = getItemsGroup(
+				isV5() ? formatMessage({ defaultMessage: 'Containers', id: 'board.group.containers'}) : 'Models',
+				models,
+			);
 			list.push(label, ...items);
 		}
 
