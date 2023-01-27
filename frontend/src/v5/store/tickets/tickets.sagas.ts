@@ -84,15 +84,14 @@ export function* fetchTicketComments({
 		const fetchModelTicketComments = isFederation
 			? API.Tickets.fetchFederationTicketComments
 			: API.Tickets.fetchContainerTicketComments;
-		const rawComments = yield fetchModelTicketComments(teamspace, projectId, modelId, ticketId);
-		const comments = rawComments.map(({ createdAt, updatedAt, ...comment }) => ({
+		const { comments } = yield fetchModelTicketComments(teamspace, projectId, modelId, ticketId);
+		const richComments = comments.map(({ createdAt, updatedAt, ...comment }) => ({
 			...comment,
 			createdAt: new Date(createdAt),
 			updatedAt: new Date(updatedAt),
-			history: [],
 		}));
 
-		yield put(TicketsActions.fetchTicketCommentsSuccess(modelId, ticketId, comments));
+		yield put(TicketsActions.fetchTicketCommentsSuccess(modelId, ticketId, richComments));
 	} catch (error) {
 		console.log(error)
 		yield put(DialogsActions.open('alert', {
@@ -151,8 +150,16 @@ export function* createTicketComment({
 		const createModelTicketComment = isFederation
 			? API.Tickets.createFederationTicketComment
 			: API.Tickets.createContainerTicketComment;
-		const id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { ...comment, _id: id }));
+		const { _id } = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
+		const now = new Date();
+		const richComment = {
+			...comment,
+			_id,
+			createdAt: now,
+			updatedAt: now,
+			deleted: false,
+		};
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, richComment));
 		onSuccess();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
