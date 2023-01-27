@@ -351,6 +351,18 @@ const testHasAssociatedAccount = () => {
 			});
 		});
 
+		test(`should respond with ${templates.invalidArguments.code} if CSRF token doesn't match`, async () => {
+			const req = getRequest();
+
+			req.session.csrfToken = generateRandomString();
+			await Aad.hasAssociatedAccount(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
+				...templates.invalidArguments, message: 'CSRF Token mismatched. Please clear your cookies and try again',
+			});
+		});
+
 		test(`should respond with error code ${errorCodes.UNKNOWN} if getUserDetails fails`, async () => {
 			AadServices.getUserDetails.mockRejectedValueOnce(errorCodes.UNKNOWN);
 			await Aad.hasAssociatedAccount(getRequest(), res, mockCB);
