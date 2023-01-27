@@ -16,21 +16,17 @@
  */
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
-import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { DialogProps } from '@mui/material/Dialog';
 import { FormattedMessage } from 'react-intl';
 import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
-	Title,
-	Header,
-	CloseButton,
 	FormDialogContent,
 	FormDialogActions,
 	RemoveWhiteCorners,
-	Subtitle,
 	SubmitButton,
 } from './formDialog.styles';
+import { FormModalHeader } from './formModalHeader/formModalHeader.component';
 
 export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
@@ -85,17 +81,12 @@ export const FormModal = (props: IFormModal) => {
 			fullWidth={!!maxWidth}
 		>
 			<Form {...formProps}>
-				<Header>
-					<div>
-						<Title>
-							{title}
-						</Title>
-						{subtitle && <Subtitle>{subtitle}</Subtitle>}
-					</div>
-					<CloseButton aria-label="Close dialog" onClick={handleClose} disabled={disableClosing}>
-						<CloseIcon />
-					</CloseButton>
-				</Header>
+				<FormModalHeader
+					title={title}
+					subtitle={subtitle}
+					handleClose={handleClose}
+					disableClosing={disableClosing}
+				/>
 				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight hideHorizontal={hideHorizontalScroll}>
 					<FormDialogContent>
 						{children}

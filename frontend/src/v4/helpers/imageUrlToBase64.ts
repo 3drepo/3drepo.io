@@ -18,9 +18,18 @@
 import { Buffer } from 'buffer';
 import api from '../services/api/';
 
-export const imageUrlToBase64 = (url: string) => api
+const imageUrlToBase64 = (url: string) => api
 	.get((url.split('/api/')[1]), {
 		responseType: 'arraybuffer'
 	})
 	.then((response) =>
 		Buffer.from(response.data, 'binary').toString('base64'));
+
+const BASE_64_PREFIX = 'data:image/png;base64,';
+
+export const imageUrlToBase64IfNotAlready = async (image: string) => {
+	if (image?.startsWith(BASE_64_PREFIX)) {
+		return image;
+	}
+	return BASE_64_PREFIX + await imageUrlToBase64(image);
+};

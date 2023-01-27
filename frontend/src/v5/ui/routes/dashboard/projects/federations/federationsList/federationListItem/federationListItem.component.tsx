@@ -73,6 +73,7 @@ export const FederationListItem = memo(({
 
 	// eslint-disable-next-line max-len
 	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsForm, { federationId: federation._id });
+	const onClickEdit = () => DialogsActionsDispatchers.open(EditFederationModal, { federation });
 
 	useEffect(() => combineSubscriptions(
 		enableRealtimeFederationUpdateSettings(teamspace, project, federation._id),
@@ -128,7 +129,7 @@ export const FederationListItem = memo(({
 					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={Display.Tablet}
-						onClick={() => setOpenModal(MODALS.editFederation)}
+						onClick={onClickEdit}
 						width={165}
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
@@ -156,7 +157,7 @@ export const FederationListItem = memo(({
 						<FederationEllipsisMenu
 							federation={federation}
 							openShareModal={onClickShare}
-							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
+							openEditFederationModal={onClickEdit}
 							openFederationSettings={onClickSettings}
 						/>
 					</DashboardListItemIcon>

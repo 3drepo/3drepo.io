@@ -31,13 +31,6 @@ export default css`
 				padding: 0px 11px;
 			}
 
-			.MuiSelect-select {
-				border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-			}
-			.Mui-focused .MuiSelect-select {
-				border-color: ${({ theme }) => theme.palette.primary.main};
-			}
-
 			// Drop down icon for date selector
 			.MuiInputAdornment-root {
 				position: absolute;
@@ -51,7 +44,6 @@ export default css`
 			}
 
 			&:last-of-type:first-child {
-				margin-left: 0;
 				margin-right: 10px;
 			}
 		}

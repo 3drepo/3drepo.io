@@ -16,6 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
+import { useEffect } from 'react';
 
 import { AuthActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import TeamspacesIcon from '@assets/icons/filled/teamspaces-filled.svg';
@@ -24,6 +25,10 @@ import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { Avatar } from '@controls/avatar';
 import { ActionMenuSection, ActionMenuItem, ActionMenuItemLink } from '@controls/actionMenu';
+import { selectSettings, ViewerActions } from '@/v4/modules/viewer';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useSelector } from 'react-redux';
+import { dispatch } from '@/v4/modules/store';
 import {
 	ActionMenu,
 	AvatarContainer,
@@ -35,6 +40,7 @@ import {
 	TruncatableName,
 } from './userMenu.styles';
 import { EditProfileModal } from './editProfileModal/editProfileModal.component';
+import { VisualSettingsModal } from './visualSettingsModal/visualSettingsModal.component';
 
 type UserMenuProps = {
 	user: ICurrentUser;
@@ -44,6 +50,21 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 	const signOut = () => AuthActionsDispatchers.logout();
 
 	const onClickEditProfile = () => DialogsActionsDispatchers.open(EditProfileModal, { user });
+
+	const visualSettings = useSelector(selectSettings);
+	const currentUser = CurrentUserHooksSelectors.selectCurrentUser().username;
+	const updateSettings = (username, settings) => dispatch(ViewerActions.updateSettings(username, settings));
+	const onClickVisualSettings = () => {
+		DialogsActionsDispatchers.open(VisualSettingsModal, {
+			visualSettings,
+			updateSettings,
+			currentUser,
+		});
+	};
+
+	useEffect(() => {
+		dispatch(ViewerActions.fetchSettings());
+	}, []);
 
 	return (
 		<AvatarContainer>
@@ -82,6 +103,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 					</ActionMenuItemLink>
 					<ActionMenuItemLink
 						Icon={VisualSettingsIcon}
+						onClick={onClickVisualSettings}
 					>
 						<FormattedMessage
 							id="userMenu.visualSettings"

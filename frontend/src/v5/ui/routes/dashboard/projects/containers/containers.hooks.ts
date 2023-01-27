@@ -25,8 +25,8 @@ export const useContainersData = () => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
-
 	useEffect(() => {
+		if (!teamspace || !project) return;
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [project]);
 
