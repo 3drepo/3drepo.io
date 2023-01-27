@@ -117,7 +117,7 @@ export const CurrentUserComment = ({
 				</PrimaryCommentButton>
 			</CommentButtons>
 			{metadata.message && (<CommentReply variant="secondary" {...metadata} />)}
-			{history?.length > 0 && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+			{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</CommentContainer>
