@@ -165,31 +165,6 @@ export const fetchContainerTicketComments = async (
 	);
 	return data;
 };
-export const fetchFederationTicketCommentWithHistory = async (
-	teamspace: string,
-	projectId: string,
-	federationId: string,
-	ticketId: string,
-	commentId: string,
-): Promise<FetchTicketCommentsResponse> => {
-	const { data } = await api.get(
-		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments/${commentId}`,
-	);
-	return data;
-};
-
-export const fetchContainerTicketCommentWithHistory = async (
-	teamspace: string,
-	projectId: string,
-	containerId: string,
-	ticketId: string,
-	commentId: string,
-): Promise<FetchTicketCommentsResponse> => {
-	const { data } = await api.get(
-		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments/${commentId}`,
-	);
-	return data;
-};
 
 export const createFederationTicketComment = async (
 	teamspace: string,

@@ -38,7 +38,6 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTicketComments: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
 	fetchTicketCommentsSuccess: ['modelId', 'ticketId', 'comments'],
-	fetchTicketCommentWithHistory: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId'],
 	createTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'comment', 'onSuccess'],
 	updateTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'comment'],
 	deleteTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId'],
@@ -151,7 +150,6 @@ export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceAndProjectId
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
 export type FetchTicketCommentsAction = Action<'FETCH_TICKET_COMMENTS'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
 export type FetchTicketCommentsSuccessAction = Action<'FETCH_TICKET_COMMENTS_SUCCESS'> & { modelId: string, ticketId: string, comments: IComment[] };
-export type FetchTicketCommentWithHistoryAction = Action<'FETCH_TICKET_COMMENT_WITH_HISTORY'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId };
 export type CreateTicketCommentAction = Action<'CREATE_TICKET_COMMENT'> & TeamspaceAndProjectId & OnSuccess & { modelId: string, ticketId: string, isFederation: boolean, comment: IComment };
 export type UpdateTicketCommentAction = Action<'UPDATE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, comment: Partial<IComment> };
 export type DeleteTicketCommentAction = Action<'DELETE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId: string };
@@ -190,14 +188,6 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 		comments: IComment[],
 	) => FetchTicketCommentsSuccessAction;
-	fetchTicketCommentWithHistory: (
-		teamspace: string,
-		projectId: string,
-		modelId: string,
-		ticketId: string,
-		isFederation: boolean,
-		commentId: string,
-	) => FetchTicketCommentWithHistoryAction;
 	createTicketComment: (
 		teamspace: string,
 		projectId: string,

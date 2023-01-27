@@ -15,13 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IComment } from '@/v5/store/tickets/tickets.types';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { extractMessage, extractMetadata, getRelativeTime } from './comment.helpers';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
@@ -33,9 +29,6 @@ export type CommentProps = IComment & {
 };
 export const Comment = ({ createdAt, author, message, deleted, _id, ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState(getRelativeTime(createdAt));
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const isFederation = modelIsFederation(containerOrFederation);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
@@ -44,14 +37,6 @@ export const Comment = ({ createdAt, author, message, deleted, _id, ...props }: 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicketCommentWithHistory(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticketId,
-			isFederation,
-			_id,
-		);
 		const intervalId = window.setInterval(() => setCommentAge(getRelativeTime(createdAt)), 10_000);
 		return () => clearInterval(intervalId);
 	}, []);

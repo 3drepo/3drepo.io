@@ -33,7 +33,6 @@ import {
 	CreateTicketCommentAction,
 	UpdateTicketCommentAction,
 	DeleteTicketCommentAction,
-	FetchTicketCommentWithHistoryAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
@@ -93,7 +92,6 @@ export function* fetchTicketComments({
 
 		yield put(TicketsActions.fetchTicketCommentsSuccess(modelId, ticketId, richComments));
 	} catch (error) {
-		console.log(error)
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTicketComments.error', defaultMessage: 'trying to fetch the comments for {model} ticket' },
@@ -102,35 +100,6 @@ export function* fetchTicketComments({
 			error,
 			details: formatMessage({
 				id: 'tickets.fetchTicketComments.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
-		}));
-	}
-}
-
-export function* fetchTicketCommentWithHistory({
-	teamspace,
-	projectId,
-	modelId,
-	ticketId,
-	isFederation,
-	commentId,
-}: FetchTicketCommentWithHistoryAction) {
-	try {
-		const fetchModelTicketCommentWithHistory = isFederation
-			? API.Tickets.fetchFederationTicketCommentWithHistory
-			: API.Tickets.fetchContainerTicketCommentWithHistory;
-		const { history } = yield fetchModelTicketCommentWithHistory(teamspace, projectId, modelId, ticketId, commentId);
-		
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentId, history }));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketCommentWithHistory.error', defaultMessage: 'trying to fetch the comment history' },
-			),
-			error,
-			details: formatMessage({
-				id: 'tickets.fetchTicketCommentWithHistory.error.details',
 				defaultMessage: 'If reloading the page doesn\'t work please contact support',
 			}),
 		}));
@@ -340,7 +309,6 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_COMMENTS, fetchTicketComments);
-	yield takeEvery(TicketsTypes.FETCH_TICKET_COMMENT_WITH_HISTORY, fetchTicketCommentWithHistory);
 	yield takeLatest(TicketsTypes.CREATE_TICKET_COMMENT, createTicketComment);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_COMMENT, updateTicketComment);
 	yield takeLatest(TicketsTypes.DELETE_TICKET_COMMENT, deleteTicketComment);
