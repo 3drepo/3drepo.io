@@ -84,8 +84,14 @@ export function* fetchTicketComments({
 		const fetchModelTicketComments = isFederation
 			? API.Tickets.fetchFederationTicketComments
 			: API.Tickets.fetchContainerTicketComments;
-		const comments = yield fetchModelTicketComments(teamspace, projectId, modelId, ticketId);
-		
+		const rawComments = yield fetchModelTicketComments(teamspace, projectId, modelId, ticketId);
+		const comments = rawComments.map(({ createdAt, updatedAt, ...comment }) => ({
+			...comment,
+			createdAt: new Date(createdAt),
+			updatedAt: new Date(updatedAt),
+			history: [],
+		}));
+
 		yield put(TicketsActions.fetchTicketCommentsSuccess(modelId, ticketId, comments));
 	} catch (error) {
 		console.log(error)
