@@ -185,9 +185,9 @@ const establishRoutes = (isFed) => {
 	 *                   format: uuid
 	 *                   description: The ID of the comment
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                 comment:
+	 *                 message:
 	 *                   type: string
-	 *                   example: Example comment
+	 *                   example: Example message
 	 *                   description: Content of the comment
 	 *                 images:
 	 *                   type: array
@@ -205,9 +205,9 @@ const establishRoutes = (isFed) => {
 	 *                       type: number
 	 *                       example: 1632821119000
 	 *                       description: Timestamp of the update
-	 *                     comment:
+	 *                     message:
 	 *                       type: string
-	 *                       example: Example comment
+	 *                       example: Example message
 	 *                       description: The content of the comment
 	 *                     images:
 	 *                       type: array
@@ -294,9 +294,9 @@ const establishRoutes = (isFed) => {
 	 *                     format: uuid
 	 *                     description: The ID of the comment
 	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   comment:
+	 *                   message:
 	 *                     type: string
-	 *                     example: Example comment
+	 *                     example: Example message
 	 *                     description: Content of the comment
 	 *                   images:
 	 *                     type: array
@@ -370,10 +370,10 @@ const establishRoutes = (isFed) => {
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *               comment:
+	 *               message:
 	 *                 type: string
 	 *                 description: Content of the comment
-	 *                 example: Example comment
+	 *                 example: Example message
 	 *               images:
 	 *                 description: Images of the comment
 	 *                 type: array
@@ -441,10 +441,10 @@ const establishRoutes = (isFed) => {
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *                 comment:
+	 *                 message:
 	 *                   type: string
 	 *                   description: Content of the comment
-	 *                   example: Example comment
+	 *                   example: Example message
 	 *                 images:
 	 *                   description: Images of the comment
 	 *                   type: array

@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import IconButton from '@mui/material/IconButton';
+import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg'
 
 export const Container = styled.div``;
 
@@ -25,4 +26,16 @@ export const StyledIconButton = styled(IconButton)`
 	&& {
 		padding: 6px;
 	}
+`;
+
+export const SkipPreviousIconV5 = styled(ChevronIcon)`
+	transform: rotate(90deg);
+	width: 14px;
+	height: 14px;
+`;
+
+export const SkipNextIconV5 = styled(ChevronIcon)`
+	transform: rotate(-90deg);
+	width: 14px;
+	height: 14px;
 `;

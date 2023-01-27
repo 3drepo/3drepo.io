@@ -32,7 +32,9 @@ export const Header = styled.div`
 
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
-})``;
+})`
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
 
 export const ActionComponents = styled.div`
 	display: flex;

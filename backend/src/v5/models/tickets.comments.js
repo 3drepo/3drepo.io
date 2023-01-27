@@ -16,6 +16,7 @@
  */
 
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -67,14 +68,13 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 };
 
 const getUpdatedComment = (oldComment, updateData) => {
-	const updatedAt = new Date();
-	const formattedComment = { ...updateData, updatedAt };
+	const formattedComment = { ...updateData, updatedAt: new Date() };
 
-	const historyEntry = {
+	const historyEntry = deleteIfUndefined({
 		timestamp: oldComment.updatedAt,
-		...(oldComment.comment ? { comment: oldComment.comment } : {}),
-		...(oldComment.images ? { images: oldComment.images } : {}),
-	};
+		message: oldComment.message,
+		images: oldComment.images,
+	});
 
 	formattedComment.history = [...(oldComment.history ?? []), historyEntry];
 
@@ -84,31 +84,35 @@ const getUpdatedComment = (oldComment, updateData) => {
 TicketComments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
 	const formattedComment = getUpdatedComment(oldComment, updateData);
 
-	const toSet = { $set: { ...formattedComment } };
-	const toUnset = {
+	const updateObj = {
+		$set: { ...formattedComment },
 		$unset: {
-			...(updateData.comment ? { } : { comment: 1 }),
+			...(updateData.message ? { } : { message: 1 }),
 			...(updateData.images ? { } : { images: 1 }),
 		},
 	};
 
-	await updateOne(teamspace, { _id: oldComment._id }, { ...toSet, ...toUnset });
+	await updateOne(teamspace, { _id: oldComment._id }, updateObj);
 
-	publish(events.UPDATE_COMMENT, { teamspace,
+	publish(events.UPDATE_COMMENT, {
+		teamspace,
 		project,
 		model,
-		data: { ticket,
+		data: {
+			ticket,
 			_id: oldComment._id,
 			comment: updateData.comment,
 			images: updateData.images,
 			author: oldComment.author,
-			updatedAt: formattedComment.updatedAt } });
+			updatedAt: formattedComment.updatedAt
+		}
+	});
 };
 
 TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComment) => {
 	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
 	await updateOne(teamspace, { _id: oldComment._id },
-		{ $set: { ...formattedComment }, $unset: { comment: 1, images: 1 } });
+		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1 } });
 
 	publish(events.UPDATE_COMMENT, { teamspace, project, model, data: { ticket, _id: oldComment._id, deleted: true } });
 };

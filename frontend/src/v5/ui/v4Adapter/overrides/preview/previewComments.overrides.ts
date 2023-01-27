@@ -22,9 +22,107 @@ import { Container as CommentPadding } from '@/v4/routes/components/messagesList
 import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollapsableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
-import { Container as TabContainer, TabContent as TabContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { TabContent as TabContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { Container as TabContainer, TabContent as TabContentRisks, Content as ContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { TabContent as TabContentIssues, Content as ContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
+
+export const CommentListStyling = css`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	padding: 15px 16px 10px;
+
+	// comments header section
+	${FilterWrapper} {
+		padding: 0 0 13px 0;
+		& > .MuiFormControl-root {
+			padding-top: 0
+		}
+
+		${ShowLabel} {
+			font-size: 10px;
+			font-weight: 500;
+		}
+		
+		// dropdown
+		${Select} {
+			.MuiSelect-outlined {
+				margin: 0;
+				height: 24px;
+				width: 170px;
+				display: flex;
+				align-items: center;
+				padding-left: 7px;
+				color: ${({ theme }) => theme.palette.secondary.main};
+				font-size: 10px;
+				font-weight: 500;
+			}
+			.MuiSelect-select {
+				border: 0;
+				box-shadow: none;
+			}
+
+			svg {
+				right: 8px;
+				margin-top: 0;
+			}
+		}
+	}
+
+	// comments body section
+	${CommentListContainer} {
+		padding: 0;
+
+		${CommentAndDeleteButtonContainer} {
+			&:not(:hover) [aria-label="Remove"] > button {
+				display: none;
+			} 
+
+			// delete comment icon
+			[aria-label="Remove"] > button {
+				margin: 8px 48px 0 0;
+				padding: 3px;
+				
+				svg {
+					font-size: 1rem;
+				}
+			}
+		}
+
+		${CommentContainer} {
+			border-radius: 5px;
+			margin: 0 10px;
+			padding: 8px 14px 0 14px;
+
+			// just the text
+			${Comment} {
+				color: ${({ theme }) => theme.palette.secondary.main};
+				word-break: break-word;
+			}
+
+			${CommentFooter} {
+				${Username} {
+					color: ${({ theme }) => theme.palette.base.main};
+					font-style: unset;
+				}
+
+				${Date} {
+					color: ${({ theme }) => theme.palette.base.main};
+					font-style: unset;
+					&::before {
+						content: '';
+					}
+				}
+
+				button {
+					margin: 10px 0 10px 10px;
+				}
+			}
+		}
+
+		${CommentPadding} {
+			padding: 5px 0 10px;
+		}
+	}
+`;
 
 export default css`
 	${Collapsable} {
@@ -47,7 +145,14 @@ export default css`
 
 		${TabContentIssues}, ${TabContentRisks} {
 			background-color: inherit;
-			padding: 0 16px;
+			padding: 0;
+
+			${ContentIssues}, ${ContentRisks} {
+				padding: 0 16px;
+				margin-bottom: 16px;
+				height: 100%;
+				box-sizing: border-box;
+			}
 
 			${EmptyStateInfo} {
 				margin-left: 0;
@@ -69,103 +174,8 @@ export default css`
 	}
 
 	${NotCollapsableContent} {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		padding: 15px 16px 10px;
-
-		// comments header section
-		${FilterWrapper} {
-			padding: 0 0 13px 0;
-			& > .MuiFormControl-root {
-				padding-top: 0
-			}
-
-			${ShowLabel} {
-				font-size: 10px;
-				font-weight: 500;
-			}
-			
-			// dropdown
-			${Select} {
-				.MuiSelect-outlined {
-					margin: 0;
-					height: 24px;
-					width: 170px;
-					display: flex;
-					align-items: center;
-					padding-left: 7px;
-					color: ${({ theme }) => theme.palette.secondary.main};
-					font-size: 10px;
-					font-weight: 500;
-				}
-				.MuiSelect-select {
-					border: 0;
-					box-shadow: none;
-				}
-
-				svg {
-					right: 8px;
-					margin-top: 0;
-				}
-			}
-		}
-		
-		// comments body section
-		${CommentListContainer} {
-			padding: 0;
-
-			${CommentAndDeleteButtonContainer} {
-				&:not(:hover) [aria-label="Remove"] > button {
-					display: none;
-				} 
-
-				// delete comment icon
-				[aria-label="Remove"] > button {
-					margin: 8px 48px 0 0;
-					padding: 3px;
-					
-					svg {
-						font-size: 1rem;
-					}
-				}
-			}
-
-			${CommentContainer} {
-				border-radius: 5px;
-				margin: 0 10px;
-				padding: 8px 14px 0 14px;
-
-				// just the text
-				${Comment} {
-					color: ${({ theme }) => theme.palette.secondary.main};
-					word-break: break-word;
-				}
-
-				${CommentFooter} {
-					${Username} {
-						color: ${({ theme }) => theme.palette.base.main};
-						font-style: unset;
-					}
-	
-					${Date} {
-						color: ${({ theme }) => theme.palette.base.main};
-						font-style: unset;
-						&::before {
-							content: '';
-						}
-					}
-
-					button {
-						margin: 10px 0 10px 10px;
-					}
-				}
-			}
-	
-			${CommentPadding} {
-				padding: 5px 0 10px;
-			}
-		}
+		${CommentListStyling}
 	}
-
 
 	${AddNewCommentContainer} {
 

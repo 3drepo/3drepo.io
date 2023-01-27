@@ -64,7 +64,8 @@ const authenticate = (redirectUri) => async (req, res) => {
 			codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 		};
 
-		res.redirect(await getAuthenticationCodeUrl(req.authParams));
+		const link = await getAuthenticationCodeUrl(req.authParams);
+		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);
 	}

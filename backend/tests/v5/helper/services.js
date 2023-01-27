@@ -21,7 +21,7 @@ const http = require('http');
 const fs = require('fs');
 const { times } = require('lodash');
 
-const { src, srcV4 } = require('./path');
+const { image, src, srcV4 } = require('./path');
 
 const { createApp: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
@@ -30,6 +30,7 @@ const { io: ioClient } = require('socket.io-client');
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -55,7 +56,7 @@ queue.purgeQueues = async () => {
 		const conn = await amqp.connect(host);
 		const channel = await conn.createChannel();
 
-		channel.on('error', () => {});
+		channel.on('error', () => { });
 
 		await Promise.all([
 			channel.purgeQueue(worker_queue),
@@ -82,7 +83,7 @@ db.reset = async () => {
 	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
 
 	await Promise.all([...dbProms, ...colProms]);
-	DbHandler.reset();
+	await DbHandler.disconnect();
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
@@ -240,7 +241,7 @@ db.createAvatar = async (username, type, avatarData) => {
 };
 
 db.addLoginRecords = async (records) => {
-	await DbHandler.insertMany(DbHandler.INTERNAL_DB, 'loginRecords', records);
+	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -258,7 +259,7 @@ ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
-    + Math.random() * (end.getTime() - start.getTime()));
+	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
@@ -498,12 +499,17 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 	return ticket;
 };
 
-ServiceHelper.generateComment = () => ({
-	_id: ServiceHelper.generateUUIDString(),
-	createdAt: ServiceHelper.generateRandomDate(),
-	updatedAt: ServiceHelper.generateRandomDate(),
-	comment: ServiceHelper.generateRandomString(),
-});
+ServiceHelper.generateComment = () => {
+	const base64img = fs.readFileSync(image).toString('base64');
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		createdAt: ServiceHelper.generateRandomDate(),
+		updatedAt: ServiceHelper.generateRandomDate(),
+		message: ServiceHelper.generateRandomString(),
+		images: [base64img],
+	};
+};
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
