@@ -66,15 +66,20 @@ export const CurrentUserComment = ({
 	}
 
 	const [isEditMode, setIsEditMode] = useState(false);
-	const { control, watch } = useForm<{ editMessage }>({
-		defaultValues: { editMessage: desanitiseMessage(message) },
+	const { control, watch } = useForm<{ editedMessage }>({
+		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
 
-	if (isEditMode) {
+	if (isEditMode) {	
+		const editedMessage = watch('editedMessage');
+		const canUpdate = message !== editedMessage && editedMessage.length > 0;
+
 		const updateMessage = () => {
-			const newMessage = sanitiseMessage(watch('editMessage'));
-			const updatedMessage = addReply(metadata, newMessage);
-			onEdit(_id, updatedMessage);
+			let newMessage = sanitiseMessage(editedMessage);
+			if (metadata._id) {
+				newMessage = addReply(metadata, newMessage);
+			}
+			onEdit(_id, newMessage);
 			setIsEditMode(false);
 		};
 
@@ -83,9 +88,9 @@ export const CurrentUserComment = ({
 				<EditCommentContainer data-author={author}>
 					{metadata.message && (<CommentReply {...metadata} />)}
 					<EditCommentInput
-						name="editMessage"
+						name="editedMessage"
 						placeholder={formatMessage({
-							id: 'customTicket.panel.comments.editMessage',
+							id: 'customTicket.panel.comments.editedMessage',
 							defaultMessage: ' ',
 						})}
 						control={control}
@@ -95,7 +100,7 @@ export const CurrentUserComment = ({
 					<ErrorCommentButton onClick={() => setIsEditMode(false)}>
 						<CancelIcon />
 					</ErrorCommentButton>
-					<PrimaryCommentButton onClick={updateMessage} disabled={!watch('editMessage').length}>
+					<PrimaryCommentButton onClick={updateMessage} disabled={!canUpdate}>
 						<TickIcon />
 					</PrimaryCommentButton>
 				</EditCommentButtons>

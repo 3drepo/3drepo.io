@@ -98,7 +98,7 @@ export type IComment = {
 	createdAt: Date,
 	updatedAt: Date,
 	deleted: boolean,
-	history: CommentHistoryBlock[],
+	history?: CommentHistoryBlock[],
 };
 
 export type CommentReplyMetadata = {

@@ -122,7 +122,7 @@ export function* fetchTicketCommentWithHistory({
 			: API.Tickets.fetchContainerTicketCommentWithHistory;
 		const { history } = yield fetchModelTicketCommentWithHistory(teamspace, projectId, modelId, ticketId, commentId);
 		
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, {_id: commentId, history }));
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentId, history }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(

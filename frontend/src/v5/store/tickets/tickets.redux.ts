@@ -16,7 +16,7 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { isArray, mergeWith } from 'lodash';
+import { isArray, merge, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
@@ -99,7 +99,7 @@ export const upsertTicketCommentSuccess = (state: ITicketsState, {
 	const ticketComment = modelTicket.comments.find(({ _id }) => _id === comment._id);
 
 	if (ticketComment) {
-		mergeWithArray(ticketComment, comment);
+		merge(ticketComment, comment);
 	} else {
 		modelTicket.comments.push(comment);
 	}
