@@ -145,6 +145,7 @@ export function* createTicketComment({
 	ticketId,
 	isFederation,
 	comment,
+	onSuccess,
 }: CreateTicketCommentAction) {
 	try {
 		const createModelTicketComment = isFederation
@@ -152,6 +153,7 @@ export function* createTicketComment({
 			: API.Tickets.createContainerTicketComment;
 		const id = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
 		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { ...comment, _id: id }));
+		onSuccess();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(

@@ -122,9 +122,11 @@ export const CommentsPanel = () => {
 			ticketId,
 			isFederation,
 			newComment,
+			() => {
+				setCommentReply(null);
+				formData.reset();
+			},
 		);
-		setCommentReply(null);
-		formData.reset();
 	};
 
 	useEffect(() => {
