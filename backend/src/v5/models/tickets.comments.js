@@ -59,13 +59,11 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 const getUpdatedComment = (oldComment, updateData) => {
 	const formattedComment = { ...updateData, updatedAt: new Date() };
 
-	const historyEntry = {
+	const historyEntry = deleteIfUndefined({
 		timestamp: oldComment.updatedAt,
-		...deleteIfUndefined({
-			message: oldComment.message,
-			images: oldComment.images,
-		}),
-	};
+		message: oldComment.message,
+		images: oldComment.images,
+	});
 
 	formattedComment.history = [...(oldComment.history ?? []), historyEntry];
 
