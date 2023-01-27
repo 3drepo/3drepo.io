@@ -69,7 +69,7 @@ const testAuthenticate = () => {
 			expect(searchParams.has('client_id')).toEqual(true);
 			expect(searchParams.has('code_challenge')).toEqual(true);
 			expect(searchParams.get('code_challenge_method')).toEqual('S256');
-			expect(JSON.parse(searchParams.get('state'))).toEqual({ redirectUri });
+			expect(JSON.parse(Aad.decryptCryptoHash(searchParams.get('state')))).toEqual({ redirectUri, csrfToken: expect.any(String) });
 		});
 	});
 };
