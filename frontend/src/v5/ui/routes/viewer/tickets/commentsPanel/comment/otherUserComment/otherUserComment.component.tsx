@@ -60,10 +60,12 @@ export const OtherUserComment = ({
 	} else {
 		user = USER_NOT_FOUND;
 	}
+	const authorDisplayName = `${user.firstName} ${user.lastName}`;
+
 	if (deleted) {
 		return (
 			<OtherUserCommentPopoverWrapper deleted user={user}>
-				<CommentAuthor>{user.firstName} {user.lastName}</CommentAuthor>
+				<CommentAuthor>{authorDisplayName}</CommentAuthor>
 				<CommentMarkDown>{deletedCommentMessage}</CommentMarkDown>
 				<CommentTime>
 					<FormattedMessage
@@ -83,9 +85,9 @@ export const OtherUserComment = ({
 					<ReplyIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-			<CommentAuthor>{author}</CommentAuthor>
+			<CommentAuthor>{authorDisplayName}</CommentAuthor>
 			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
-			{history?.length > 0 && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+			{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			<CommentMarkDown>{message}</CommentMarkDown>
 			<CommentTime>{commentAge}</CommentTime>
 		</OtherUserCommentPopoverWrapper>
