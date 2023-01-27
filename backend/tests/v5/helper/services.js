@@ -311,6 +311,7 @@ ServiceHelper.generateUserCredentials = () => ({
 	basicData: {
 		firstName: ServiceHelper.generateRandomString(),
 		lastName: ServiceHelper.generateRandomString(),
+		email: `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`,
 		billing: {
 			billingInfo: {
 				company: ServiceHelper.generateRandomString(),
