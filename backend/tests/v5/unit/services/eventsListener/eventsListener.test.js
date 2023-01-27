@@ -587,6 +587,27 @@ const testModelEventsListener = () => {
 			await addCommentTest(true);
 		});
 
+		test(`Should fail gracefully on error if there is an ${events.NEW_COMMENT} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.NEW_COMMENT, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+		});
+
 		const updateCommentTest = async (isFederation) => {
 			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
 			const data = {
@@ -628,6 +649,27 @@ const testModelEventsListener = () => {
 
 		test(`Should create a ${chatEvents.FEDERATION_UPDATE_TICKET_COMMENT} if there is a ${events.UPDATE_COMMENT} (Federation)`, async () => {
 			await updateCommentTest(true);
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.UPDATE_COMMENT} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.UPDATE_COMMENT, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
 		});
 	});
 };

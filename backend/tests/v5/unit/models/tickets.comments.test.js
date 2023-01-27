@@ -18,6 +18,10 @@
 const { generateRandomString } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const Comments = require(`${src}/models/tickets.comments`);
 
 const db = require(`${src}/handler/db`);
@@ -122,9 +126,13 @@ const testAddComment = () => {
 			const model = generateRandomString();
 			const ticket = generateRandomString();
 			const author = generateRandomString();
+			const newComment = {
+				message: generateRandomString(),
+				images: [generateRandomString()],
+			};
 
-			const newComment = { [generateRandomString()]: generateRandomString() };
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(newComment);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 
 			const _id = await Comments.addComment(teamspace, project, model, ticket, newComment, author);
 
@@ -133,25 +141,36 @@ const testAddComment = () => {
 			const { createdAt } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
 				{ _id, teamspace, project, model, ticket, author, ...newComment, updatedAt, createdAt });
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.NEW_COMMENT, { teamspace,
+				project,
+				model,
+				data: { ticket, _id, author, createdAt, ...newComment } });
 		});
 	});
 };
 
 const testUpdateComment = () => {
 	describe('Update comment', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+
 		test('should update the message property of a comment', async () => {
-			const teamspace = generateRandomString();
 			const comment = {
 				_id: generateRandomString(),
-				[generateRandomString()]: generateRandomString(),
 				message: generateRandomString(),
 				images: [generateRandomString()],
+				author: generateRandomString(),
 			};
 
 			const updateData = { message: generateRandomString() };
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 
-			await Comments.updateComment(teamspace, comment, updateData);
+			await Comments.updateComment(teamspace, project, model, ticket, comment, updateData);
 
 			const updatedComment = {
 				message: updateData.message,
@@ -166,21 +185,26 @@ const testUpdateComment = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
 				{ $set: { ...updatedComment }, $unset: { images: 1 } });
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.UPDATE_COMMENT, { teamspace,
+				project,
+				model,
+				data: { ticket, ...comment, ...updateData, images: undefined, updatedAt: updatedComment.updatedAt } });
 		});
 
-		test('should update a comment that has images property set', async () => {
-			const teamspace = generateRandomString();
+		test('should update the images of a comment', async () => {
 			const comment = {
 				_id: generateRandomString(),
-				[generateRandomString()]: generateRandomString(),
 				message: generateRandomString(),
 				images: [generateRandomString()],
 			};
 
 			const updateData = { images: [generateRandomString()] };
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 
-			await Comments.updateComment(teamspace, comment, updateData);
+			await Comments.updateComment(teamspace, project, model, ticket, comment, updateData);
 
 			const updatedComment = {
 				images: updateData.images,
@@ -195,14 +219,24 @@ const testUpdateComment = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
 				{ $set: { ...updatedComment }, $unset: { message: 1 } });
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.UPDATE_COMMENT, { teamspace,
+				project,
+				model,
+				data: { ticket, ...comment, ...updateData, message: undefined, updatedAt: updatedComment.updatedAt } });
 		});
 	});
 };
 
 const testDeleteComment = () => {
 	describe('Delete comment', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+
 		test('should delete a comment that has message property set', async () => {
-			const teamspace = generateRandomString();
 			const comment = {
 				_id: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
@@ -210,8 +244,9 @@ const testDeleteComment = () => {
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 
-			await Comments.deleteComment(teamspace, comment);
+			await Comments.deleteComment(teamspace, project, model, ticket, comment);
 
 			const updatedComment = {
 				deleted: true,
@@ -225,10 +260,14 @@ const testDeleteComment = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
 				{ $set: { ...updatedComment }, $unset: { message: 1, images: 1 } });
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.UPDATE_COMMENT, { teamspace,
+				project,
+				model,
+				data: { ticket, _id: comment._id, deleted: true } });
 		});
 
 		test('should update a comment that has images property set', async () => {
-			const teamspace = generateRandomString();
 			const comment = {
 				_id: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
@@ -236,8 +275,9 @@ const testDeleteComment = () => {
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 
-			await Comments.deleteComment(teamspace, comment);
+			await Comments.deleteComment(teamspace, project, model, ticket, comment);
 
 			const updatedComment = {
 				deleted: true,
@@ -251,6 +291,12 @@ const testDeleteComment = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { _id: comment._id },
 				{ $set: { ...updatedComment }, $unset: { message: 1, images: 1 } });
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.UPDATE_COMMENT, { teamspace,
+				project,
+				model,
+				data: { ticket, _id: comment._id, deleted: true } });
 		});
 	});
 };

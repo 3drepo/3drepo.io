@@ -54,16 +54,19 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 	const _id = generateUUID();
 	const createdAt = new Date();
 	const comment = { ...commentData, _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt };
+
 	await insertOne(teamspace, comment);
+
 	publish(events.NEW_COMMENT, { teamspace,
 		project,
 		model,
 		data: { ticket,
 			_id,
-			comment: comment.comment,
+			message: comment.message,
 			images: comment.images,
 			author: comment.author,
-			updatedAt: createdAt } });
+			createdAt } });
+
 	return _id;
 };
 
@@ -101,11 +104,11 @@ TicketComments.updateComment = async (teamspace, project, model, ticket, oldComm
 		data: {
 			ticket,
 			_id: oldComment._id,
-			comment: updateData.comment,
+			message: updateData.message,
 			images: updateData.images,
 			author: oldComment.author,
-			updatedAt: formattedComment.updatedAt
-		}
+			updatedAt: formattedComment.updatedAt,
+		},
 	});
 };
 
