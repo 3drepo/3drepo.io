@@ -141,6 +141,7 @@ export const fetchRiskCategories = async (
 	return data;
 };
 
+// comments
 export const fetchFederationTicketComments = async (
 	teamspace: string,
 	projectId: string,
@@ -148,10 +149,10 @@ export const fetchFederationTicketComments = async (
 	ticketId: string,
 ) => {
 	// const { data } = await api.get(
-		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments`,
+	// 	`teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments`,
 	// );
-	// return data;
-	return MOCK_COMMENTS;
+	// return data.comments;
+	return MOCK_COMMENTS.map(({ history, ...props }) => ({ ...props }));
 };
 
 export const fetchContainerTicketComments = async (
@@ -161,10 +162,37 @@ export const fetchContainerTicketComments = async (
 	ticketId: string,
 ) => {
 	// const { data } = await api.get(
-		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments`,
+	// 	`teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments`,
+	// );
+	// return data.comments;
+	return MOCK_COMMENTS.map(({ history, ...props }) => ({ ...props }));
+};
+export const fetchFederationTicketCommentWithHistory = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	ticketId: string,
+	commentId: string,
+) => {
+	// const { data } = await api.get(
+	// 	`teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${commentId}`,
 	// );
 	// return data;
-	return MOCK_COMMENTS;
+	return MOCK_COMMENTS.find(({ _id }) => _id === commentId);
+};
+
+export const fetchContainerTicketCommentWithHistory = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	ticketId: string,
+	commentId: string,
+) => {
+	// const { data } = await api.get(
+	// 	`teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${commentId}`,
+	// );
+	// return data;
+	return MOCK_COMMENTS.find(({ _id }) => _id === commentId);
 };
 
 export const createFederationTicketComment = async (
@@ -175,7 +203,7 @@ export const createFederationTicketComment = async (
 	comment: IComment,
 ) => {
 	// const { data } = await api.post(
-		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
+		// `teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
 		// pick(comment, ['comment', 'images']),
 	// );
 	// return data;
@@ -190,7 +218,7 @@ export const createContainerTicketComment = async (
 	comment: IComment,
 ) => {
 	// const { data } = await api.post(
-		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
+		// `teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
 		// pick(comment, ['comment', 'images']),
 	// );
 	// return data;
@@ -205,7 +233,7 @@ export const deleteFederationTicketComment = async (
 	commentId: string,
 ) => {
 	// const { data } = await api.delete(
-		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${commentId}`,
+		// `teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${commentId}`,
 	// );
 };
 
@@ -217,7 +245,7 @@ export const deleteContainerTicketComment = async (
 	commentId: string,
 ) => {
 	// const { data } = await api.delete(
-		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${commentId}`,
+		// `teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${commentId}`,
 	// );
 };
 
@@ -229,7 +257,7 @@ export const updateFederationTicketComment = async (
 	comment: Partial<IComment>,
 ) => {
 	// const { data } = await api.put(
-		// `/teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
+		// `teamspaces/${teamspace}/projects/${projectId}/federation/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
 		// pick(comment, ['comment', 'images']),
 	// );
 };
@@ -242,7 +270,7 @@ export const updateContainerTicketComment = async (
 	comment: Partial<IComment>,
 ) => {
 	// const { data } = await api.put(
-		// `/teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
+		// `teamspaces/${teamspace}/projects/${projectId}/container/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
 		// pick(comment, ['comment', 'images']),
 	// );
 };
@@ -270,6 +298,7 @@ const MOCK_COMMENTS = [
 		author: 'localuser2',
 		message: `[author]:- "localuser1"\n[_id]:- "2"\n[message]:- "message by current user"\n\nreply by other user`,
 		createdAt: new Date('1 25 2023'),
+		history: [1],
 		deleted: false,
 	},
 	{
@@ -284,7 +313,22 @@ const MOCK_COMMENTS = [
 		createdAt: new Date('1 26 2023'),
 		deleted: false,
 	},
-].map((x, index) => ({ ...x, _id: index+"" }));
+	{
+		author: 'localuser1',
+		createdAt: new Date('1 26 2023'),
+		deleted: true,
+	},
+	{
+		author: 'localuser2',
+		createdAt: new Date('1 26 2023'),
+		deleted: true,
+	},
+	{
+		author: 'localuser3',
+		createdAt: new Date('1 26 2023'),
+		deleted: true,
+	},
+].map((x, index) => ({ history: [], ...x, images: [], _id: index + "" }));
 
 /**
  * Types
