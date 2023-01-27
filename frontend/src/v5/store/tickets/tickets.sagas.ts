@@ -121,9 +121,9 @@ export function* fetchTicketCommentWithHistory({
 		const fetchModelTicketCommentWithHistory = isFederation
 			? API.Tickets.fetchFederationTicketCommentWithHistory
 			: API.Tickets.fetchContainerTicketCommentWithHistory;
-		const comment = yield fetchModelTicketCommentWithHistory(teamspace, projectId, modelId, ticketId, commentId);
+		const { history } = yield fetchModelTicketCommentWithHistory(teamspace, projectId, modelId, ticketId, commentId);
 		
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, comment));
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, {_id: commentId, history }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
