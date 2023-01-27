@@ -40,6 +40,9 @@ Sso.addPkceProtection.mockImplementation((req, res, next) => next());
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
+AadServices.decryptCryptoHash.mockImplementation((a) => a);
+AadServices.generateCryptoHash.mockImplementation((a) => a);
+
 const addPkceCodes = (req) => {
 	req.session = { pkceCodes: { challenge: generateRandomString(), challengeMethod: generateRandomString() } };
 };
@@ -59,14 +62,14 @@ const testVerifyNewUserDetails = () => {
 		const getRequest = () => ({
 			body: {
 				code: generateRandomString(),
-				state: JSON.stringify({ username: generateRandomString(), redirectUri }),
+				state: JSON.stringify({ username: generateRandomString(), redirectUri, csrfToken }),
 			},
 			session: { pkceCodes: { verifier: generateRandomString() }, csrfToken },
 		});
 
 		test(`should respond ${templates.invalidArguments.code} if state is not valid JSON`, async () => {
 			const req = getRequest();
-			req.query.state = generateRandomString();
+			req.body.state = generateRandomString();
 			const mockCB = jest.fn();
 			await Aad.verifyNewUserDetails(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -110,14 +113,14 @@ const testVerifyNewUserDetails = () => {
 			UsersModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
 			const mockCB = jest.fn();
 			const req = getRequest();
+			const reqStateJson = JSON.parse(req.body.state);
+			const { redirectUri: d1, csrfToken: d2, ...stateData } = reqStateJson;
 			await Aad.verifyNewUserDetails(req, res, mockCB);
-			const reqStateJson = JSON.parse(req.query.state);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(res.redirect).not.toHaveBeenCalled();
 			expect(req.body).toEqual(
 				{
-					...reqStateJson,
-					redirectUri: undefined,
+					...stateData,
 					email: aadUserDetails.email,
 					firstName: aadUserDetails.firstName,
 					lastName: aadUserDetails.lastName,
@@ -130,7 +133,7 @@ const testVerifyNewUserDetails = () => {
 };
 
 const testEmailNotUsed = () => {
-	describe('Get user MS email, check email availability and assign email and SSO id to body', () => {
+	describe('Check MS mail not in use', () => {
 		const aadUserDetails = {
 			email: 'example@email.com',
 			id: generateRandomString(),
@@ -139,19 +142,23 @@ const testEmailNotUsed = () => {
 		};
 		const redirectUri = generateRandomURL();
 		const res = { redirect: jest.fn() };
+		const csrfToken = generateRandomString();
 
 		const getRequest = () => ({
-			query: {
+			body: {
 				code: generateRandomString(),
-				state: JSON.stringify({ username: generateRandomString(), redirectUri }),
+				state: JSON.stringify({ username: generateRandomString(),
+					redirectUri,
+					csrfToken,
+				}),
 			},
-			session: { pkceCodes: { verifier: generateRandomString() } },
+			session: { pkceCodes: { verifier: generateRandomString() }, csrfToken },
 		});
 
 		test(`should respond ${templates.invalidArguments.code} if state is not valid JSON`, async () => {
 			const mockCB = jest.fn();
 			const req = getRequest();
-			req.query.state = generateRandomString();
+			req.body.state = generateRandomString();
 
 			await Aad.emailNotUsed(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
@@ -251,6 +258,7 @@ const testAuthenticate = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: authURL });
 			expect(req.authParams).toEqual({
 				redirectUri,
+				responseMode: 'form_post',
 				state: JSON.stringify({ redirectUri: req.query.redirectUri }),
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
@@ -275,6 +283,7 @@ const testAuthenticate = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: authURL });
 			expect(req.authParams).toEqual({
 				redirectUri,
+				responseMode: 'form_post',
 				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
@@ -297,6 +306,7 @@ const testAuthenticate = () => {
 			expect(Responder.respond.mock.calls[0][3]).toHaveProperty('link');
 			expect(req.authParams).toEqual({
 				redirectUri,
+				responseMode: 'form_post',
 				state: JSON.stringify({ redirectUri: req.query.redirectUri, username: req.body.username }),
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
@@ -316,22 +326,23 @@ const testHasAssociatedAccount = () => {
 		};
 
 		const redirectUri = generateRandomURL();
+		const csrfToken = generateRandomString();
 		const res = { redirect: jest.fn() };
 
 		const getRequest = () => ({
-			body: {},
-			query: {
+			body: {
 				code: generateRandomString(),
-				state: JSON.stringify({ redirectUri }),
+				state: JSON.stringify({ redirectUri, csrfToken }),
 			},
-			session: { pkceCodes: { verifier: generateRandomString() } },
+			session: { pkceCodes: { verifier: generateRandomString() }, csrfToken },
 		});
 
 		const mockCB = jest.fn();
 
 		test(`should respond with ${templates.invalidArguments.code} if state is not valid JSON`, async () => {
 			const req = getRequest();
-			req.query.state = generateRandomString();
+
+			req.body.state = generateRandomString();
 			await Aad.hasAssociatedAccount(req, res, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);

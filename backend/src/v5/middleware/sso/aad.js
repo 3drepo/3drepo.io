@@ -39,6 +39,7 @@ const checkStateIsValid = async (req, res, next) => {
 	} catch (err) {
 		const response = codeExists(err.code) ? err
 			: createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON');
+
 		respond(req, res, response);
 	}
 };
@@ -80,22 +81,22 @@ const authenticate = (redirectUri) => async (req, res) => {
 
 const verifyNewUserDetails = async (req, res, next) => {
 	try {
-		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
+		const { id, email, firstName, lastName } = await getUserDetails(req.body.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByEmail(email, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
 			throw user.customData.sso ? errorCodes.EMAIL_EXISTS_WITH_SSO : errorCodes.EMAIL_EXISTS;
 		} else {
+			const { redirectUri, csrfToken, ...data } = req.state;
 			req.body = {
-				...req.state,
+				...data,
 				email,
 				firstName,
 				lastName,
 				sso: { type: providers.AAD, id },
 			};
 
-			delete req.body.redirectUri;
 			await next();
 		}
 	} catch (errorCode) {
@@ -108,7 +109,7 @@ Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails
 const emailNotUsed = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
+		const { id, email, firstName, lastName } = await getUserDetails(req.body.code,
 			linkRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } })
@@ -121,7 +122,7 @@ const emailNotUsed = async (req, res, next) => {
 			await next();
 		}
 	} catch (errorCode) {
-		const state = JSON.parse(req.query.state);
+		const state = JSON.parse(req.body.state);
 		redirectWithError(res, state.redirectUri, errorCode);
 	}
 };
@@ -132,7 +133,7 @@ Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionR
 
 const hasAssociatedAccount = async (req, res, next) => {
 	try {
-		const { id, email } = await getUserDetails(req.query.code, authenticateRedirectUri,
+		const { id, email } = await getUserDetails(req.body.code, authenticateRedirectUri,
 			req.session.pkceCodes?.verifier);
 
 		const { user, customData: { sso } } = await getUserByEmail(email, { _id: 0, user: 1, 'customData.sso': 1 });
