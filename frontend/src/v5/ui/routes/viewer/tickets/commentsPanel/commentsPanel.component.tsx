@@ -45,6 +45,7 @@ import {
 import { Comment } from './comment/comment.component';
 import { MAX_MESSAGE_LENGTH, addReply, createMetadata, sanitiseMessage } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
+import { sortBy } from 'lodash';
 
 export const CommentsPanel = () => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
@@ -81,7 +82,7 @@ export const CommentsPanel = () => {
 
 	const handleEditComment = (commentId, message: string) => {
 		const oldComment = comments.find(({ _id }) => _id === commentId);
-		const newHistory = oldComment.history.concat({
+		const newHistory = (oldComment.history || []).concat({
 			message: oldComment.message,
 			images: oldComment.images,
 			timestamp: new Date(),
@@ -105,15 +106,9 @@ export const CommentsPanel = () => {
 		if (commentReply) {
 			message = addReply(createMetadata(commentReply), message);
 		}
-		const now = new Date();
 		const newComment = {
 			author: currentUser.username,
 			message,
-			images: [],
-			createdAt: now,
-			updatedAt: now,
-			deleted: false,
-			history: [],
 		} as any;
 		TicketsActionsDispatchers.createTicketComment(
 			teamspace,
@@ -149,7 +144,7 @@ export const CommentsPanel = () => {
 				<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400}>
 					{commentsListIsEmpty && (
 						<Comments>
-							{comments.map((comment) => (
+							{sortBy(comments, 'createdAt').map((comment) => (
 								<Comment
 									{...comment}
 									key={comment._id}
