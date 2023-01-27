@@ -22,7 +22,7 @@ import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/s
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@mui/material';
 import { DashboardFooter } from '@components/shared/dashboardFooter';

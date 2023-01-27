@@ -16,5 +16,30 @@
  */
 
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Roles } from './currentUser.types';
 
 export const avatarFileIsTooBig = (file): boolean => (file.size > clientConfigService.avatarSizeLimit);
+
+const getContainerOrFederationRole = (containerOrFederationId: string): Roles => {
+	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederationId);
+	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederationId);
+
+	if (selectedFederation) return FederationsHooksSelectors.selectFederationById(containerOrFederationId)?.role;
+	if (selectedContainer) return ContainersHooksSelectors.selectContainerById(containerOrFederationId)?.role;
+	return Roles.NONE;
+};
+
+export const hasTeamspaceAdminAccess = () => TeamspacesHooksSelectors.selectCurrentTeamspaceDetails()?.isAdmin;
+
+export const hasProjectAdminAccess = () => ProjectsHooksSelectors.selectCurrentProjectDetails()?.isAdmin;
+
+export const hasCollaboratorAccess = (containerOrFederationId: string) => {
+	const role = getContainerOrFederationRole(containerOrFederationId);
+	return [Roles.ADMIN, Roles.COLLABORATOR].includes(role);
+};
+
+export const hasCommenterAccess = (containerOrFederationId: string) => {
+	const role = getContainerOrFederationRole(containerOrFederationId);
+	return [Roles.ADMIN, Roles.COLLABORATOR, Roles.COMMENTER].includes(role);
+};
