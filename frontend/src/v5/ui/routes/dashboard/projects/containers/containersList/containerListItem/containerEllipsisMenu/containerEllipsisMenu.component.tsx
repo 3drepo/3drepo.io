@@ -23,6 +23,7 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellips
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { hasCollaboratorAccess, hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
 
 type ContainerEllipsisMenuProps = {
@@ -41,7 +42,8 @@ export const ContainerEllipsisMenu = ({
 	openContainerSettings,
 }: ContainerEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
-
+	const isProjectAdmin = hasProjectAdminAccess();
+	const isCollaborator = hasCollaboratorAccess(container._id);
 	return (
 		<EllipsisMenu selected={selected}>
 			<EllipsisMenuItem
@@ -59,6 +61,7 @@ export const ContainerEllipsisMenu = ({
 				})}
 				onClick={() => uploadToContainer(container._id)}
 				disabled={!canUploadToBackend(container.status)}
+				hidden={!isCollaborator}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -87,6 +90,7 @@ export const ContainerEllipsisMenu = ({
 					pathname: './user_permissions',
 					search: `?modelId=${container._id}`,
 				}}
+				hidden={!isProjectAdmin}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -125,6 +129,7 @@ export const ContainerEllipsisMenu = ({
 						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
 					}),
 				})}
+				hidden={!isProjectAdmin}
 			/>
 		</EllipsisMenu>
 	);
