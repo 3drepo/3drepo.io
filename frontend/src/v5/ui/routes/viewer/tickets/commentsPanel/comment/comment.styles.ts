@@ -55,8 +55,8 @@ export const CommentTime = styled(CommentSmallText)`
 
 export type CommentProps = {
 	'data-author': string,
-	$deleted?: boolean,
 };
+
 export const BasicComment = styled.div<CommentProps>`
 	max-width: 241px;
 	width: fit-content;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { FormTextArea } from '@controls/inputs/formInputs.component';
 import { MessageInput } from '../../commentsPanel.styles';
 import { BasicComment, CommentAuthor, CommentMessage, CommentButtons } from '../comment.styles';
@@ -34,13 +34,6 @@ export const CommentContainer = styled(BasicComment)`
 		left: -94px;
 	}
 
-	${CommentMessage} {
-		${({ $deleted, theme }) => $deleted && css`
-			color: ${theme.palette.secondary.light};
-			text-align: right;
-		`}
-	}
-
 	& > ${CommentAuthor} {
 		display: none;
 	}
@@ -48,6 +41,11 @@ export const CommentContainer = styled(BasicComment)`
 	& + & {
 		border-top-right-radius: 10px;
 	}
+`;
+
+export const CommentMessageDeleted = styled(CommentMessage)`
+	color: ${({ theme }) => theme.palette.secondary.light};
+	text-align: right;
 `;
 
 export const EditCommentContainer = styled(BasicComment)`

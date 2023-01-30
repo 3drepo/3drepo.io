@@ -30,7 +30,7 @@ import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentMessage, desanitiseMessage, sanitiseMessage, addReply, editedCommentMessage } from '../comment.helpers';
 import { CommentTime, CommentButtons, EditedCommentLabel } from '../comment.styles';
-import { CommentContainer, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
+import { CommentContainer, CommentMessageDeleted, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
 
 type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
@@ -53,8 +53,8 @@ export const CurrentUserComment = ({
 }: CurrentUserCommentProps) => {
 	if (deleted) {
 		return (
-			<CommentContainer $deleted data-author={author}>
-				<CommentMarkDown>{deletedCommentMessage}</CommentMarkDown>
+			<CommentContainer data-author={author}>
+				<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
 				<CommentTime>
 					<FormattedMessage
 						id="ticket.currentUser.comment.time.deleted"

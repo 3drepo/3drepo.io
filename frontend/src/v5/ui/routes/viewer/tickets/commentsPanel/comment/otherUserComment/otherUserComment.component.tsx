@@ -27,15 +27,15 @@ import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { deletedCommentMessage, editedCommentMessage } from '../comment.helpers';
 import { CommentAuthor, CommentButtons, CommentTime, EditedCommentLabel } from '../comment.styles';
-import { HoverPopover, CommentContainer } from './otherUserComment.styles';
+import { HoverPopover, CommentContainer, CommentMessageDeleted } from './otherUserComment.styles';
 
 type OtherUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
 	metadata?: CommentReplyMetadata;
 	onReply: (commentId) => void;
 };
-const OtherUserCommentPopoverWrapper = ({ deleted = false, user, children }) => (
-	<CommentContainer $deleted={deleted} data-author={user.user}>
+const OtherUserCommentPopoverWrapper = ({ user, children }) => (
+	<CommentContainer data-author={user.user}>
 		<HoverPopover anchor={(props) => <UserCircle user={user} {...props} />}>
 			<UserPopover user={user} />
 		</HoverPopover>
@@ -64,9 +64,9 @@ export const OtherUserComment = ({
 
 	if (deleted) {
 		return (
-			<OtherUserCommentPopoverWrapper deleted user={user}>
+			<OtherUserCommentPopoverWrapper user={user}>
 				<CommentAuthor>{authorDisplayName}</CommentAuthor>
-				<CommentMarkDown>{deletedCommentMessage}</CommentMarkDown>
+				<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
 				<CommentTime>
 					<FormattedMessage
 						id="ticket.otherUser.comment.time.deleted"

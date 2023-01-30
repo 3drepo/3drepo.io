@@ -16,7 +16,7 @@
  */
 
 import { HoverPopover as HoverPopoverBase } from '@controls/hoverPopover/hoverPopover.component';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { BasicComment, CommentMessage, CommentButtons } from '../comment.styles';
 
 export const HoverPopover = styled(HoverPopoverBase)`
@@ -43,12 +43,6 @@ export const CommentContainer = styled(BasicComment)`
 		right: -40px;
 	}
 
-	${CommentMessage} {
-		${({ $deleted, theme }) => $deleted && css`
-			color: ${theme.palette.base.light};
-		`}
-	}
-
 	&[data-author="${(props) => props['data-author']}"] {
 		& + & {
 			border-top-left-radius: 10px;
@@ -58,4 +52,8 @@ export const CommentContainer = styled(BasicComment)`
 			}
 		}
 	}
+`;
+
+export const CommentMessageDeleted = styled(CommentMessage)`
+	color: ${({ theme }) => theme.palette.base.light};
 `;
