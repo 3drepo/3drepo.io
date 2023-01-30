@@ -25,8 +25,8 @@ const getContainerOrFederationRole = (containerOrFederationId: string): Roles =>
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederationId);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederationId);
 
-	if (selectedFederation) return FederationsHooksSelectors.selectFederationById(containerOrFederationId)?.role;
-	if (selectedContainer) return ContainersHooksSelectors.selectContainerById(containerOrFederationId)?.role;
+	if (selectedFederation) return selectedFederation.role;
+	if (selectedContainer) return selectedContainer.role;
 	return Roles.NONE;
 };
 
