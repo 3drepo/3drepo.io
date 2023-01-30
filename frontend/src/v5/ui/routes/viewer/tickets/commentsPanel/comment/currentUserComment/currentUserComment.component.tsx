@@ -70,7 +70,7 @@ export const CurrentUserComment = ({
 		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
 
-	if (isEditMode) {	
+	if (isEditMode) {
 		const editedMessage = watch('editedMessage');
 		const canUpdate = message !== editedMessage && editedMessage.length > 0;
 

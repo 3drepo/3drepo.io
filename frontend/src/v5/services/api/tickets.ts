@@ -247,7 +247,7 @@ export const updateContainerTicketComment = async (
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
 type FetchTicketsResponse = { tickets: ITicket[] };
-type CreateTicketResponse = { _id: string }; 
+type CreateTicketResponse = { _id: string };
 type FetchTicketCommentsResponse = { comments: Partial<IComment>[] };
 type CreateTicketCommentsResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };

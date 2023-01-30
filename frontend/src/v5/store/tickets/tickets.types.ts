@@ -92,7 +92,7 @@ export type CommentHistoryBlock = {
 
 export type IComment = {
 	_id: string,
-	message?: string, 
+	message?: string,
 	images?: string[],
 	author: string,
 	createdAt: Date,
