@@ -119,11 +119,11 @@ export function* createTicketComment({
 		const createModelTicketComment = isFederation
 			? API.Tickets.createFederationTicketComment
 			: API.Tickets.createContainerTicketComment;
-		const { _id } = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
+		const data = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
 		const now = new Date();
 		const richComment = {
 			...comment,
-			_id,
+			_id: data._id,
 			createdAt: now,
 			updatedAt: now,
 			deleted: false,
