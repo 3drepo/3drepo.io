@@ -26,37 +26,43 @@ const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
 	const { user, password } = req.body;
-	Users.login(user, password).then((loginData) => {
-		req.loginData = loginData;
-		next();
-	}).catch((err) => respond(req, res, err));
+	try {
+		await Users.login(user, password);
+		req.loginData = { username: user };
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const getUsername = (req, res) => {
 	respond(req, res, templates.ok, { username: req.session.user.username });
 };
 
-const getProfile = (req, res) => {
-	const user = getUserFromSession(req.session);
-	Users.getProfileByUsername(user).then((profile) => {
+const getProfile = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		const profile = await Users.getProfileByUsername(user);
 		respond(req, res, templates.ok, profile);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
-const updateProfile = (req, res) => {
-	const user = getUserFromSession(req.session);
-	const updatedProfile = req.body;
-	Users.updateProfile(user, updatedProfile).then(() => {
+const updateProfile = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		const updatedProfile = req.body;
+		await Users.updateProfile(user, updatedProfile);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 const generateApiKey = (req, res) => {
@@ -272,6 +278,10 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   description: The API key of the user
 	 *                   example: 23b61deadbba098fec517dc4fcc84d68
+	 *                 isSso:
+	 *                   type: boolean
+	 *                   description: Whether or not the user is an SSO user
+	 *                   example: true
 	 *
 	 */
 	router.get('/user', validSession, getProfile);
@@ -291,15 +301,15 @@ const establishRoutes = () => {
 	*             properties:
 	*               firstName:
 	*                 type: string
-	*                 description: The first name of the user
+	*                 description: The first name of the user (applies only to non SSO users)
 	*                 example: Jason
 	*               lastName:
 	*                 type: string
-	*                 description: The last name of the user
+	*                 description: The last name of the user (applies only to non SSO users)
 	*                 example: Voorhees
 	*               email:
 	*                 type: string
-	*                 description: The email of the user
+	*                 description: The email of the user (applies only to non SSO users)
 	*                 example: jason@vorhees.com
 	*                 format: email
 	*               company:
@@ -312,12 +322,12 @@ const establishRoutes = () => {
 	*                 example: GB
 	*               oldPassword:
 	*                 type: string
-	*                 description: The old password of the user
+	*                 description: The old password of the user (applies only to non SSO users)
 	*                 example: password12345
     *                 format: password
 	*               newPassword:
 	*                 type: string
-	*                 description: The new password of the user
+	*                 description: The new password of the user (applies only to non SSO users)
 	*                 example: password12345
     *                 format: password
 	*     responses:

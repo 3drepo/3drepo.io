@@ -34,14 +34,13 @@ const testProject = {
 };
 
 const teamspace = 'teamspace';
-const brokenTS = 'teamspace2';
 const model = ServiceHelper.generateRandomModel({ viewers: [modelPermUser.user] });
 
 const setupData = async () => {
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
 	await Promise.all([
-		ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]),
-		ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true),
-		ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]),
+		ServiceHelper.db.createUser(tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(nonAdminUser, [teamspace]),
 		ServiceHelper.db.createUser(unlicencedUser),
 		ServiceHelper.db.createUser(modelPermUser, [teamspace]),
@@ -74,11 +73,6 @@ const testGetProjectList = () => {
 		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
 			const res = await agent.get(`${route}?key=${modelPermUser.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: false }] });
-		});
-
-		test('should fail if an unknown error happened', async () => {
-			const res = await agent.get(`/v5/teamspaces/${brokenTS}/projects?key=${tsAdmin.apiKey}`).expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 	});
 };

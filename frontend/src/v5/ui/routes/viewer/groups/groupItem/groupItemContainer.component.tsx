@@ -20,7 +20,7 @@ import { ArrowButton, StyledArrowIcon } from '@/v4/routes/viewerGui/components/p
 import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { Checkbox } from '@mui/material';
 import { isV5 } from '@/v4/helpers/isV5';
-import { GroupsTreeListItem, GroupsTreeListItemContainer, ButtonsContainer } from './groupItem.styles';
+import { GroupsTreeListItem, GroupsTreeListItemContainer, ButtonsContainer, Separator } from './groupItem.styles';
 
 interface Props {
 	onClick: (event: any) => void;
@@ -53,8 +53,8 @@ export const GroupsTreeListItemComponent = (
 		className,
 	}:Props,
 ) => (
-	<GroupsTreeListItem onClick={onClick} className={className}>
-		<GroupsTreeListItemContainer $depth={depth} $highlighted={highlighted}>
+	<GroupsTreeListItem onClick={onClick} $highlighted={highlighted} className={className}>
+		<GroupsTreeListItemContainer $depth={depth}>
 			{children}
 			<ButtonsContainer>
 				{!isV5() && <TooltipButton action={onClickIsolate} label="Isolate" Icon={Visibility} disabled={disabled} />}
@@ -67,6 +67,7 @@ export const GroupsTreeListItemComponent = (
 				</ArrowButton>
 			)}
 		</GroupsTreeListItemContainer>
+		<Separator />
 		{grandChildren}
 	</GroupsTreeListItem>
 );

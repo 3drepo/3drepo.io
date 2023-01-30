@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import TickIconBase from '@assets/icons/fat_tick.svg';
+import TickIconBase from '@assets/icons/outlined/fat_tick-outlined.svg';
 
 export const PostSubmitSuccessfulMessage = styled.div`
 	${({ theme }) => theme.typography.body1};

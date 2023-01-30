@@ -16,7 +16,7 @@
  */
 
 import { PasswordForgotSchema } from '@/v5/validation/userSchemes/passwordChangeSchemes';
-import EmailIcon from '@assets/icons/email.svg';
+import EmailIcon from '@assets/icons/filled/email-filled.svg';
 import { AuthTemplate } from '@components/authTemplate';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -25,7 +25,7 @@ import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
 import { ReturnLink } from '../components/returnLink.component';
-import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
+import { AuthHeading, AuthParagraph, FormUsernameField } from '../components/components.styles';
 
 export const PasswordForgot = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
@@ -58,7 +58,11 @@ export const PasswordForgot = (): JSX.Element => {
 						</AuthParagraph>
 					) : (
 						<>
-							<UsernameField control={control} />
+							<FormUsernameField
+								control={control}
+								name="username"
+								required
+							/>
 							<SubmitButton disabled={!isValid} startIcon={<EmailIcon />}>
 								<FormattedMessage id="auth.forgotPassword.buttonText" defaultMessage="Send request" />
 							</SubmitButton>

@@ -20,6 +20,8 @@ import styled, { css } from 'styled-components';
 import { Grid, IconButton, Input } from '@mui/material';
 import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
+import PlayIcon from '@assets/icons/filled/play-filled.svg';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	VIEWER_PANELS,
@@ -43,7 +45,7 @@ export const SequencesContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.SEQUENCES]}px;
 `;
 
-export const SequenceItemIcon =  styled(SequencesIcon)`
+export const SequenceItemIcon =  styled(isV5() ? PlayIcon : SequencesIcon)`
 	&& {
 		font-size: 67px;
 		margin-right: 13px;
@@ -71,6 +73,9 @@ export const TaskListLabel = styled.div`
 	font-weight: 500;
 	padding: 15px;
 `;
+
+export const TaskListLabelTime = styled.span``;
+
 
 export const SequenceTasksListItem = styled.div`
 	&& {
@@ -164,6 +169,12 @@ export const DatePicker = styled(DateField)`
 		font-size: 20px;
 	}
 `;
+
+export const SequencePlayerAllInputs = styled.div`
+	display: contents;
+`;
+
+export const StepLabel = styled.span``;
 
 export const StepInput = styled(Input).attrs({
 	inputProps: {

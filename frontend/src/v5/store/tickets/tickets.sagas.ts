@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
@@ -38,7 +38,6 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
-		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -97,11 +96,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
 		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
-		yield put(TicketsActions.fetchRiskCategories(teamspace));
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
-		yield all(templates.map(
-			(template) => put(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, isFederation)),
-		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({

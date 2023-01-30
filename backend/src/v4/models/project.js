@@ -23,7 +23,8 @@
 	const responseCodes = require("../response_codes.js");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
+	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser, removePermissionsFromModels } = require("./modelSetting");
+	const { getTeamspaceSettings } = require("./teamspaceSetting");
 	const PermissionTemplates = require("./permissionTemplates");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
@@ -105,7 +106,7 @@
 		return db.updateOne(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
 	};
 
-	Project.createProject = async function(teamspace, name, username, userPermissions) {
+	Project.createProject = async function (teamspace, name, username, userPermissions) {
 		checkProjectNameValid(name);
 
 		const project = {
@@ -300,11 +301,10 @@
 
 	Project.listModels = async function(account, project, username, filters) {
 		const AccountPermissions = require("./accountPermissions");
-		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
 		const [dbUser, projectObj] = await Promise.all([
-			await User.findByUserName(account),
+			getTeamspaceSettings(account),
 			Project.findOneProject(account, {name: project})
 		]);
 
@@ -469,7 +469,7 @@
 		}
 
 		if (data.permissions) {
-			data.permissions.forEach((permissionUpdate) => {
+			await Promise.all(data.permissions.map(async (permissionUpdate) => {
 				const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
 
 				if (-1 !== userIndex) {
@@ -480,11 +480,21 @@
 					}
 				} else if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
 					project.permissions.push(permissionUpdate);
+					await removePermissionsFromModels(account, project.models, permissionUpdate.user);
 				}
-			});
+			}));
 		}
 
 		return Project.updateAttrs(account, projectName, project);
+	};
+
+	Project.removePermissionsFromAllProjects = async (account, userToRemove) => {
+		const projects = await Project.listProjects(account, {}, { name:1, models: 1 });
+
+		await Promise.all(projects.map((project) => {
+			Project.updateProject(account, project.name, { permissions: [{ user: userToRemove, permissions: [] }] });
+			removePermissionsFromModels(account, project.models, userToRemove);
+		}));
 	};
 
 	module.exports = Project;

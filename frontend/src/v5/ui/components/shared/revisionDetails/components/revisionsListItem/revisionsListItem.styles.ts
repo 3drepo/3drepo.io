@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import DownloadIconBase from '@assets/icons/download_arrow.svg';
+import DownloadIconBase from '@assets/icons/filled/download_arrow-filled.svg';
 import { IconButton } from '@mui/material';
-
+import { Container as fixedOrGrowContainer } from '@/v5/ui/controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 import { Link } from 'react-router-dom';
 
 export const Container = styled(Link)`
@@ -26,11 +26,18 @@ export const Container = styled(Link)`
 	height: 100%;
 	padding-left: 20px;
 	padding-right: 13px;
+	color: ${({ theme }) => theme.palette.primary.contrast};
 
 	&:link { text-decoration: none; }
 	&:visited { text-decoration: none; }
 	&:hover { text-decoration: none; }
 	&:active { text-decoration: none; }
+
+	${fixedOrGrowContainer} > * {
+		text-overflow: ellipsis;
+		overflow: hidden;
+		padding-right: 10px;
+	}
 `;
 
 export const DownloadIcon = styled(DownloadIconBase)`

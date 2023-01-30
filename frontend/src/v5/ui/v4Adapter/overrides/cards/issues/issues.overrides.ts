@@ -17,11 +17,9 @@
 
 import { css } from 'styled-components';
 import issueProperties from './properties.overrides';
-import issueAttachments from './attachments.overrides';
 
 export default css`
 	#issues-card-details {
 		${issueProperties}
-		${issueAttachments}
 	}
 `;

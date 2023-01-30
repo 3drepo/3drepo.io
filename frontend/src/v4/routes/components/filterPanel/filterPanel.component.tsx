@@ -25,7 +25,7 @@ import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ViewerScrollArea } from '@/v5/ui/v4Adapter/components/viewerScrollArea.component';
+import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
@@ -516,7 +516,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 	public renderSelectedFilters = () => {
 		const { selectedFilters, filtersOpen, removableFilterIndex } = this.state;
 		return (
-			<ViewerScrollArea
+			<ConditionalV5OrViewerScrollArea
 				autoHeight
 				autoHeightMax={240}
 				autoHeightMin={!selectedFilters.length ? 0 : 45}
@@ -540,7 +540,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 						}
 					</Chips>
 				</SelectedFilters>
-			</ViewerScrollArea>
+			</ConditionalV5OrViewerScrollArea>
 		);
 	}
 

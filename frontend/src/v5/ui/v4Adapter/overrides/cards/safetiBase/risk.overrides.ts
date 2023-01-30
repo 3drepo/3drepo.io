@@ -18,6 +18,7 @@
 import { css } from 'styled-components';
 import { DescriptionImage } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
+import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
 
 export default css`
 	#risks-card-details {
@@ -25,7 +26,12 @@ export default css`
 			border-radius: 5px;
 		}
 		${UpdateButtonsContainer} {
-			margin-bottom: 5px;
+			justify-content: left;
+			padding-top: 0;
+	
+			${ButtonContainer} {
+				min-height: 26px;
+			}
 		}
 	}
 `;

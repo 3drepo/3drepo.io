@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import SmallChevron from '@assets/icons/small_chevron.svg';
+import SmallChevron from '@assets/icons/outlined/small_chevron-outlined.svg';
 import { ChevronStyledIconButton } from '@controls/chevronButton/chevronButton.styles';
 import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
@@ -35,7 +35,16 @@ const GroupSetNameV4 = styled.div`
 	line-height: 16px;
 `;
 
-export const GroupSetName = isV5() ? GroupSetNameV5 : GroupSetNameV4;
+export const GroupSetName = styled(isV5() ? GroupSetNameV5 : GroupSetNameV4)`
+	display: flex;
+	overflow: hidden;
+`;
+
+export const GroupSetTitle = styled.div`
+	max-width: 100%;
+	text-overflow: ellipsis;
+	overflow: hidden;
+`;
 
 export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>`
 	${ChevronStyledIconButton} {

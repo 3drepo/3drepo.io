@@ -19,12 +19,12 @@ import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
 import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { isEqual, pick, defaults } from 'lodash';
+import { FormPasswordField, FormTextField } from '@controls/inputs/formInputs.component';
 import { NextStepButton } from '../userSignupFormStep.styles';
 import { IconContainer } from './userSignupFormStepAccount.styles';
 
@@ -109,6 +109,13 @@ export const UserSignupFormStepAccount = ({
 	return (
 		<>
 			<FormTextField
+				InputProps={{
+					startAdornment: (
+						<IconContainer>
+							<UserIcon />
+						</IconContainer>
+					),
+				}}
 				name="username"
 				control={control}
 				label={formatMessage({
@@ -117,15 +124,15 @@ export const UserSignupFormStepAccount = ({
 				})}
 				required
 				formError={errors.username}
+			/>
+			<FormTextField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>
-							<UserIcon />
+							<EmailIcon />
 						</IconContainer>
 					),
 				}}
-			/>
-			<FormTextField
 				name="email"
 				control={control}
 				label={formatMessage({
@@ -134,24 +141,26 @@ export const UserSignupFormStepAccount = ({
 				})}
 				required
 				formError={errors.email}
+
+			/>
+			<FormPasswordField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>
-							<EmailIcon />
+							<PasswordIcon />
 						</IconContainer>
 					),
 				}}
-			/>
-			<FormTextField
 				name="password"
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.password',
 					defaultMessage: 'Password',
 				})}
-				type="password"
 				required
 				formError={errors.password}
+			/>
+			<FormPasswordField
 				InputProps={{
 					startAdornment: (
 						<IconContainer>
@@ -159,25 +168,15 @@ export const UserSignupFormStepAccount = ({
 						</IconContainer>
 					),
 				}}
-			/>
-			<FormTextField
 				name="confirmPassword"
 				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.confirmPassword',
 					defaultMessage: 'Confirm password',
 				})}
-				type="password"
 				required
 				disabled={!password}
 				formError={errors.confirmPassword}
-				InputProps={{
-					startAdornment: (
-						<IconContainer>
-							<PasswordIcon />
-						</IconContainer>
-					),
-				}}
 			/>
 			<NextStepButton
 				disabled={!formIsValid}

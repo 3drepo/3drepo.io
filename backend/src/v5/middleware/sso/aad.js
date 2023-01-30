@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticateRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
+const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
-const { URL } = require('url');
+const { getUserByEmail, getUserByQuery } = require('../../models/users');
+const { redirectWithError, setSessionReferer } = require('.');
 const { addPkceProtection } = require('./pkce');
-const { getURLDomain } = require('../../utils/helper/strings');
-const { getUserByEmail } = require('../../models/users');
+const { getUserFromSession } = require('../../utils/sessions');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
@@ -38,10 +38,13 @@ const checkStateIsValid = async (req, res, next) => {
 	}
 };
 
-const redirectWithError = (res, url, errorCode) => {
-	const urlRedirect = new URL(url);
-	urlRedirect.searchParams.set('error', errorCode);
-	res.redirect(urlRedirect.href);
+Aad.redirectToStateURL = (req, res) => {
+	try {
+		res.redirect(req.state.redirectUri);
+	} catch (err) {
+		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
+		respond(req, res, templates.unknown);
+	}
 };
 
 const authenticate = (redirectUri) => async (req, res) => {
@@ -61,7 +64,8 @@ const authenticate = (redirectUri) => async (req, res) => {
 			codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 		};
 
-		res.redirect(await getAuthenticationCodeUrl(req.authParams));
+		const link = await getAuthenticationCodeUrl(req.authParams);
+		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);
 	}
@@ -94,22 +98,28 @@ const verifyNewUserDetails = async (req, res, next) => {
 
 Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails]);
 
-Aad.redirectToStateURL = (req, res) => {
+const emailNotUsed = async (req, res, next) => {
 	try {
-		res.redirect(req.state.redirectUri);
-	} catch (err) {
-		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
-		respond(req, res, templates.unknown);
+		const username = getUserFromSession(req.session);
+		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
+			linkRedirectUri, req.session.pkceCodes?.verifier);
+
+		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } })
+			.catch(() => undefined);
+		if (user) {
+			throw errorCodes.EMAIL_EXISTS;
+		} else {
+			req.body = { email, firstName, lastName, sso: { type: providers.AAD, id } };
+
+			await next();
+		}
+	} catch (errorCode) {
+		const state = JSON.parse(req.query.state);
+		redirectWithError(res, state.redirectUri, errorCode);
 	}
 };
 
-const setSessionReferer = async (req, res, next) => {
-	if (req.headers.referer) {
-		req.session.referer = getURLDomain(req.headers.referer);
-	}
-
-	await next();
-};
+Aad.emailNotUsed = validateMany([checkStateIsValid, emailNotUsed]);
 
 Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionReferer, authenticate(redirectUri)]);
 

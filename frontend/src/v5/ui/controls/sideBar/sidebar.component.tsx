@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ExpandIcon from '@assets/icons/expand_panel.svg';
+import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
 
 interface ISidebar {
@@ -34,7 +34,7 @@ export const Sidebar = ({
 	children,
 }: ISidebar): JSX.Element => (
 	<SidebarContainer className={className} open={open} hidden={hidden}>
-		<ExpandButton onClick={onClick} variant="main">
+		<ExpandButton onClick={onClick}>
 			<ExpandIcon />
 		</ExpandButton>
 		<SidebarContent>

@@ -188,7 +188,6 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 
 	if (data.subModels) {
 		setting.federate = true;
-		setting.subModels = data.subModels;
 	}
 
 	if (data.surveyPoints) {
@@ -403,15 +402,6 @@ ModelSetting.setCorrelationId = async function(account, model, correlationId, ad
 	return correlationId;
 };
 
-ModelSetting.updateSubModels = async function(account, model, subModels) {
-	const data = {
-		subModels,
-		timestamp: new Date()
-	};
-
-	return ModelSetting.updateModelSetting(account, model, data);
-};
-
 ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	if (!Number.isInteger(newSpeed)) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -563,6 +553,12 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	}
 
 	return ModelSetting.prepareDefaultView(account, model, setting);
+};
+
+ModelSetting.removePermissionsFromModels = async (account, models, userToRemove) => {
+	await Promise.all(models.map((model)=> {
+		ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}]);
+	}));
 };
 
 module.exports = ModelSetting;
