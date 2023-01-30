@@ -22,7 +22,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
@@ -38,7 +38,8 @@ export const FederationEllipsisMenu = ({
 	openEditFederationModal,
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const isProjectAdmin = hasProjectAdminAccess();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+
 	return (
 		<EllipsisMenu>
 			<EllipsisMenuItem

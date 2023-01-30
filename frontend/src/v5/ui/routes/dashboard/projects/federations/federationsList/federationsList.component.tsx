@@ -31,7 +31,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SearchInput } from '@controls/search/searchInput';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -39,7 +39,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
-import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -65,7 +64,7 @@ export const FederationsList = ({
 	const hasFederations = federations.length > 0;
 
 	const { sortedList, setSortConfig } = useOrderedList(filteredFederations, DEFAULT_SORT_CONFIG);
-	const isAdmin = hasProjectAdminAccess();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
 
@@ -82,7 +81,7 @@ export const FederationsList = ({
 								defaultMessage: 'Search federations...' })}
 							disabled={isListPending}
 						/>
-						{ isAdmin && (
+						{ isProjectAdmin && (
 							<Button
 								startIcon={<AddCircleIcon />}
 								variant="contained"
@@ -133,7 +132,7 @@ export const FederationsList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasFederations && isAdmin && (
+				{showBottomButton && !isListPending && hasFederations && isProjectAdmin && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
 						onClick={onClickCreate}

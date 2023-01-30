@@ -27,7 +27,7 @@ import { FormattedMessage } from 'react-intl';
 import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
-import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -37,7 +37,7 @@ export const IsMainList = createContext(false);
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const isAdmin = hasProjectAdminAccess();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const {
 		containers,
 		favouriteContainers,
@@ -98,7 +98,7 @@ export const Containers = (): JSX.Element => {
 								<DashboardListEmptyText>
 									<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
 								</DashboardListEmptyText>
-								{ isAdmin && (
+								{ isProjectAdmin && (
 									<Button
 										startIcon={<AddCircleIcon />}
 										variant="contained"

@@ -17,13 +17,13 @@
 import { useRouteMatch } from 'react-router-dom';
 import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
-import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
-	const isProjectAdmin = hasProjectAdminAccess();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<Container>

@@ -17,18 +17,19 @@
 import { useRouteMatch } from 'react-router-dom';
 import { discardTab } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
-import { hasTeamspaceAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const TeamspaceNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardTab(url);
+	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	return (
 		<Container>
 			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
 			<Link to={`${url}/settings`}><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
-			{hasTeamspaceAdminAccess() && <Link to={`${url}/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
+			{isAdmin && <Link to={`${url}/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
 		</Container>
 	);
 };

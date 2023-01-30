@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
+import { Roles } from '../currentUser/currentUser.types';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
@@ -47,4 +48,19 @@ export const selectContainerById = createSelector(
 	selectContainers,
 	(_, id) => id,
 	(containers, id): IContainer | null => containers.find((container) => (container._id === id)),
+);
+
+export const selectContainerRole = createSelector(
+	selectContainerById,
+	(container): Roles | null => container?.role || null,
+);
+
+export const selectHasCollaboratorAccess = createSelector(
+	selectContainerRole,
+	(role): boolean | null => [Roles.ADMIN, Roles.COLLABORATOR].includes(role),
+);
+
+export const selectHasCommenterAccess = createSelector(
+	selectContainerRole,
+	(role): boolean | null => [Roles.ADMIN, Roles.COLLABORATOR, Roles.COMMENTER].includes(role),
 );

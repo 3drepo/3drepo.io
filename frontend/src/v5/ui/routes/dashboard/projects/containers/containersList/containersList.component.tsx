@@ -31,7 +31,7 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
@@ -39,7 +39,6 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
-import { hasProjectAdminAccess } from '@/v5/store/currentUser/currentUser.helpers';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { SkeletonListItem } from './skeletonListItem';
@@ -66,7 +65,6 @@ export const ContainersList = ({
 	// eslint-disable-next-line max-len
 	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
-	const isAdmin = hasProjectAdminAccess();
 	const { sortedList, setSortConfig } = useOrderedList(filteredContainers, DEFAULT_SORT_CONFIG);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
@@ -75,6 +73,7 @@ export const ContainersList = ({
 	const selectOrToggleItem = useCallback((id: string) => {
 		setSelectedItemId((state) => (state === id ? null : id));
 	}, []);
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<Container>
@@ -87,7 +86,7 @@ export const ContainersList = ({
 						<SearchInput
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						{ isAdmin && (
+						{ isProjectAdmin && (
 							<>
 								<Button
 									startIcon={<AddCircleIcon />}
@@ -147,7 +146,7 @@ export const ContainersList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasContainers && isAdmin && (
+				{showBottomButton && !isListPending && hasContainers && isProjectAdmin && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
 						onClick={onClickCreate}
