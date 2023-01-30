@@ -60,9 +60,9 @@ const setupData = async () => {
 	await ServiceHelper.db.createTemplates(teamspace, [template]);
 	await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
 	await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
-	await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id, 
+	await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
 		containerComment);
-	await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id, 
+	await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
 		federationComment);
 };
 
