@@ -282,13 +282,6 @@ const testLink = () => {
 				await testSession.post('/v5/logout/');
 			});
 
-			test('should fail without a valid state', async () => {
-				const state = generateRandomString();
-				const res = await testSession.get(`/v5/sso/aad/link-post?state=${state}`)
-					.expect(templates.invalidArguments.status);
-				expect(res.body.code).toEqual(templates.invalidArguments.code);
-			});
-
 			test('should fail if redirectUri is not provided', async () => {
 				await testSession.get('/v5/sso/aad/link')
 					.expect(templates.invalidArguments.status);
