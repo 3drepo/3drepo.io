@@ -344,7 +344,7 @@ const testLinkPost = () => {
 			const redirectUri = generateRandomURL();
 			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await testSession.post('/v5/sso/aad/link-post').send({ state });
+			const res = await testSession.post('/v5/sso/aad/link-post').send({ state })
 				.expect(302);
 			expect(res.headers.location).toEqual(`${redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
 		});
