@@ -20,7 +20,7 @@ import * as TicketsSaga from '@/v5/store/tickets/tickets.sagas';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import MockDate from 'mockdate'
 import { mockServer } from '../../internals/testing/mockServer';
-import { commentMockFactory, mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
+import { commentHistoryMockFactory, commentMockFactory, mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 import { alertAction } from '../test.helpers';
 
 describe('Tickets: sagas', () => {
@@ -173,7 +173,7 @@ describe('Tickets: sagas', () => {
 		const ticketId = 'ticketId';
 
 		// Containers
-		it('should call ticket\'s comments endpoint', async () => {
+		it('should call fetch containers ticket\'s comments endpoint', async () => {
 			const { history, ...commentNoHistory } = comment;
 			const response = { comments: [commentNoHistory] };
 			mockServer
@@ -186,7 +186,7 @@ describe('Tickets: sagas', () => {
 				.silentRun();
 		});
 
-		it('should call ticket\'s comments endpoint with a 404', async () => {
+		it('should call fetch containers ticket\'s comments endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments`)
 				.reply(404);
@@ -243,7 +243,7 @@ describe('Tickets: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(200);
 
-			const commentUpdate = { message: 'updatedMessage', history: [{ timestamp: new Date(), message: comment.message, images: comment.images }] };
+			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.updateTicketComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate))
@@ -256,7 +256,7 @@ describe('Tickets: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(404);
 
-			const commentUpdate = { message: 'updatedMessage', history: [{ timestamp: new Date(), message: comment.message, images: comment.images }] };
+			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.updateTicketComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate))
@@ -287,7 +287,7 @@ describe('Tickets: sagas', () => {
 		});
 
 		// Federations
-		it('should call ticket\'s comments endpoint', async () => {
+		it('should call fetch federation ticket\'s comments endpoint', async () => {
 			const { history, ...commentNoHistory } = comment;
 			const response = { comments: [commentNoHistory] };
 			mockServer
@@ -300,7 +300,7 @@ describe('Tickets: sagas', () => {
 				.silentRun();
 		});
 
-		it('should call ticket\'s comments endpoint with a 404', async () => {
+		it('should call fetch federation ticket\'s comments endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments`)
 				.reply(404);
@@ -357,7 +357,7 @@ describe('Tickets: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(200);
 
-			const commentUpdate = { message: 'updatedMessage', history: [{ timestamp: new Date(), message: comment.message, images: comment.images }] };
+			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.updateTicketComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate))
@@ -370,7 +370,7 @@ describe('Tickets: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(404);
 
-			const commentUpdate = { message: 'updatedMessage', history: [{ timestamp: new Date(), message: comment.message, images: comment.images }] };
+			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.updateTicketComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate))
