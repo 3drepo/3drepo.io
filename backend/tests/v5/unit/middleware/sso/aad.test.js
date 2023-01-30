@@ -75,7 +75,7 @@ const testVerifyNewUserDetails = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
-				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON',
+				...templates.invalidArguments, message: 'state is required and must be valid JSON',
 			});
 		});
 
@@ -164,7 +164,7 @@ const testEmailNotUsed = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
-				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON',
+				...templates.invalidArguments, message: 'state is required and must be valid JSON',
 			});
 		});
 
@@ -347,7 +347,7 @@ const testHasAssociatedAccount = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, {
-				...templates.invalidArguments, message: 'state(query string) is required and must be valid JSON',
+				...templates.invalidArguments, message: 'state is required and must be valid JSON',
 			});
 		});
 
