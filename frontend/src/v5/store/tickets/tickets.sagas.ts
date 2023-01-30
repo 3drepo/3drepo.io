@@ -114,6 +114,7 @@ export function* createTicketComment({
 	isFederation,
 	comment,
 	onSuccess,
+	onError,
 }: CreateTicketCommentAction) {
 	try {
 		const createModelTicketComment = isFederation
@@ -131,6 +132,7 @@ export function* createTicketComment({
 		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, richComment));
 		onSuccess();
 	} catch (error) {
+		onError(error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.createTicketComment.error', defaultMessage: 'trying to create the comment for {model} ticket' },
@@ -310,8 +312,8 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_COMMENTS, fetchTicketComments);
-	yield takeLatest(TicketsTypes.CREATE_TICKET_COMMENT, createTicketComment);
-	yield takeLatest(TicketsTypes.UPDATE_TICKET_COMMENT, updateTicketComment);
-	yield takeLatest(TicketsTypes.DELETE_TICKET_COMMENT, deleteTicketComment);
+	yield takeEvery(TicketsTypes.CREATE_TICKET_COMMENT, createTicketComment);
+	yield takeEvery(TicketsTypes.UPDATE_TICKET_COMMENT, updateTicketComment);
+	yield takeEvery(TicketsTypes.DELETE_TICKET_COMMENT, deleteTicketComment);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 }

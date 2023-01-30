@@ -20,7 +20,7 @@ import { isArray, merge, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { OnSuccess, TeamspaceAndProjectId, TeamspaceId } from '../store.types';
+import { OnError, OnSuccess, TeamspaceAndProjectId, TeamspaceId } from '../store.types';
 import { ITemplate, ITicket, IComment, NewTicket } from './tickets.types';
 
 const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
@@ -38,7 +38,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTicketComments: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
 	fetchTicketCommentsSuccess: ['modelId', 'ticketId', 'comments'],
-	createTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'comment', 'onSuccess'],
+	createTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'comment', 'onSuccess', 'onError'],
 	updateTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId', 'comment'],
 	deleteTicketComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId'],
 	upsertTicketCommentSuccess: ['modelId', 'ticketId', 'comment'],
@@ -150,7 +150,7 @@ export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceAndProjectId
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
 export type FetchTicketCommentsAction = Action<'FETCH_TICKET_COMMENTS'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
 export type FetchTicketCommentsSuccessAction = Action<'FETCH_TICKET_COMMENTS_SUCCESS'> & { modelId: string, ticketId: string, comments: IComment[] };
-export type CreateTicketCommentAction = Action<'CREATE_TICKET_COMMENT'> & TeamspaceAndProjectId & OnSuccess & { modelId: string, ticketId: string, isFederation: boolean, comment: Partial<IComment> };
+export type CreateTicketCommentAction = Action<'CREATE_TICKET_COMMENT'> & TeamspaceAndProjectId & OnSuccess & OnError & { modelId: string, ticketId: string, isFederation: boolean, comment: Partial<IComment> };
 export type UpdateTicketCommentAction = Action<'UPDATE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId: string, comment: Partial<IComment> };
 export type DeleteTicketCommentAction = Action<'DELETE_TICKET_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId: string };
 export type UpsertTicketCommentSuccessAction = Action<'UPSERT_TICKET_COMMENT_SUCCESS'> & { modelId: string, ticketId: string, comment: Partial<IComment> };
@@ -196,6 +196,7 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 		comment: Partial<IComment>,
 		onSuccess: () => void,
+		onError: () => void,
 	) => CreateTicketCommentAction;
 	updateTicketComment: (
 		teamspace: string,

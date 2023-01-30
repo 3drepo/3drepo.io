@@ -29,10 +29,11 @@ describe('Tickets: sagas', () => {
 	const modelId = 'modelId';
 	const tickets = [ticketMockFactory()];
 	const comment = commentMockFactory();
-	let onSuccess;
+	let onSuccess, onError;
 
 	beforeEach(() => {
 		onSuccess = jest.fn();
+		onError = jest.fn();
 	})
 
 	describe('tickets', () => {
@@ -214,12 +215,13 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id: commentToBeCreated._id });
 
 			await expectSaga(TicketsSaga.default)
-				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, false, inputComment, onSuccess))
+				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, false, inputComment, onSuccess, onError))
 				// date time fucks it up here
 				.put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated }))
 				.silentRun();
 
 			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 			MockDate.reset();
 		});
 
@@ -231,11 +233,12 @@ describe('Tickets: sagas', () => {
 				.reply(404);
 
 			await expectSaga(TicketsSaga.default)
-				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, false, newComment, onSuccess))
+				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, false, newComment, onSuccess, onError))
 				.put.like(alertAction('trying to create the comment for container ticket'))
 				.silentRun();
 
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 		
 		it('should call container`s update ticket comment endpoint', async () => {
@@ -328,12 +331,13 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id: commentToBeCreated._id });
 
 			await expectSaga(TicketsSaga.default)
-				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, true, inputComment, onSuccess))
+				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, true, inputComment, onSuccess, onError))
 				// date time fucks it up here
 				.put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated }))
 				.silentRun();
 
 			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 			MockDate.reset();
 		});
 
@@ -345,11 +349,12 @@ describe('Tickets: sagas', () => {
 				.reply(404);
 
 			await expectSaga(TicketsSaga.default)
-				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, true, newComment, onSuccess))
+				.dispatch(TicketsActions.createTicketComment(teamspace, projectId, modelId, ticketId, true, newComment, onSuccess, onError))
 				.put.like(alertAction('trying to create the comment for federation ticket'))
 				.silentRun();
 
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 		
 		it('should call federation`s update ticket comment endpoint', async () => {

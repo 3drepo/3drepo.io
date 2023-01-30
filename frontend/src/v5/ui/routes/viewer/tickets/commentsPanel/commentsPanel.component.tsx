@@ -49,6 +49,7 @@ import { CommentReply } from './comment/commentReply/commentReply.component';
 
 export const CommentsPanel = () => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
+	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const formData = useForm<{ message: string }>({ mode: 'all' });
 	const messageInput = formData.watch('message');
 
@@ -75,7 +76,6 @@ export const CommentsPanel = () => {
 	};
 
 	const handleReplyToComment = (commentId) => {
-		// TODO - create selector?
 		const comment = comments.find(({ _id }) => _id === commentId);
 		setCommentReply(comment);
 	};
@@ -99,6 +99,7 @@ export const CommentsPanel = () => {
 	};
 
 	const createComment = async () => {
+		setIsSubmittingMessage(true);
 		let message = sanitiseMessage(messageInput);
 		if (commentReply) {
 			message = addReply(createMetadata(commentReply), message);
@@ -117,7 +118,9 @@ export const CommentsPanel = () => {
 			() => {
 				setCommentReply(null);
 				formData.reset();
+				setIsSubmittingMessage(false);
 			},
+			() => { setIsSubmittingMessage(false); },
 		);
 	};
 
@@ -174,13 +177,12 @@ export const CommentsPanel = () => {
 							defaultMessage: 'leave a message',
 						})}
 					/>
-					{/* <Images /> */}
 					<Controls>
 						<FileIconButton>
 							<FileIcon />
 						</FileIconButton>
 						<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
-						<SendButton disabled={!charsCount} onClick={createComment}>
+						<SendButton disabled={!charsCount} onClick={createComment} isPending={isSubmittingMessage}>
 							<SendIcon />
 						</SendButton>
 					</Controls>

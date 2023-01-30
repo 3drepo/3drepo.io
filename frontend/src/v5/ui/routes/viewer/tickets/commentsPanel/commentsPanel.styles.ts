@@ -17,11 +17,11 @@
 
 import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
-import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaFixedSize.styles';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { SubmitButton } from '@controls/submitButton';
 import { MAX_MESSAGE_LENGTH } from './comment/comment.helpers';
 
 export const Accordion = styled(AccordionBase)`
@@ -117,14 +117,15 @@ export const FileIconButton = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
-export const SendButton = styled(Button).attrs({
+export const SendButton = styled(SubmitButton).attrs({
 	color: 'primary',
 	variant: 'contained',
 })`
 	margin: 0 0 0 auto;
 	border-radius: 50%;
 	padding: 0;
-	min-width: 34px;
+	min-width: unset;
+	width: 34px;
 	height: 34px;
 `;
 
