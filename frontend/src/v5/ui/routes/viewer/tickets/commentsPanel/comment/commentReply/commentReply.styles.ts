@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { CommentMessage } from '../comment.styles';
 
+/* eslint-disable */
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary' }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
 	border-left-width: 4px;
@@ -46,8 +47,10 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: initial;
+			/* stylelint-disable-next-line */
 			display: -webkit-box;
 			-webkit-line-clamp: 3;
+			/* stylelint-disable-next-line */
 			-webkit-box-orient: vertical;
 		}
 	}
