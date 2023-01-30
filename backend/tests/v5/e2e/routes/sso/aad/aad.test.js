@@ -305,7 +305,7 @@ const testLink = () => {
 				expect(searchParams.has('client_id')).toEqual(true);
 				expect(searchParams.has('code_challenge')).toEqual(true);
 				expect(searchParams.get('code_challenge_method')).toEqual('S256');
-				expect(JSON.parse(searchParams.get('state'))).toEqual({ redirectUri });
+				expect(JSON.parse(Aad.decryptCryptoHash(searchParams.get('state')))).toEqual({ redirectUri, csrfToken: expect.any(String) });
 			});
 		});
 	});
@@ -334,56 +334,60 @@ const testLinkPost = () => {
 
 		test('should fail without a valid state', async () => {
 			const state = generateRandomString();
-			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await testSession.post('/v5/sso/aad/link-post').send({ state })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test(`should redirect with ${errorCodes.EMAIL_EXISTS} if email is taken by another user`, async () => {
+		test(`1234should redirect with ${errorCodes.EMAIL_EXISTS} if email is taken by another user`, async () => {
 			const userDataFromAad = { email: userEmailSso, id: generateRandomString() };
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = generateRandomURL();
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await testSession.post('/v5/sso/aad/link-post').send({ state });
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
+			expect(res.headers.location).toEqual(`${redirectUri}?error=${errorCodes.EMAIL_EXISTS}`);
 		});
 
 		test('should link user if email is taken by the logged in user', async () => {
 			const userDataFromAad = { email: userEmail, id: generateRandomString() };
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = generateRandomURL();
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 
-			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await testSession.post('/v5/sso/aad/link-post').send({ state })
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}`);
+			expect(res.headers.location).toEqual(redirectUri);
 			const newProfileRes = await testSession.get('/v5/user');
 			expect(newProfileRes.body.sso).toEqual('aad');
 		});
 
 		test('should link user and change email if email is available', async () => {
 			const userDataFromAad = { email: generateRandomString(), id: generateRandomString() };
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = generateRandomURL();
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await testSession.post('/v5/sso/aad/link-post').send({ state })
 				.expect(302);
 
-			expect(res.headers.location).toEqual(`${state.redirectUri}`);
+			expect(res.headers.location).toEqual(redirectUri);
 			const newProfileRes = await testSession.get('/v5/user');
 			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
 		});
 
 		test('should link user and change email if email is available even if user is already SSO', async () => {
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = generateRandomURL();
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 
 			Aad.getUserDetails.mockResolvedValueOnce({ email: generateRandomString(), id: generateRandomString() });
-			await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`);
+			await testSession.post('/v5/sso/aad/link-post').send({ state });
 
 			const userDataFromAad = { email: generateRandomString(), id: generateRandomString() };
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await testSession.post('/v5/sso/aad/link-post').send({ state })
 				.expect(302);
 
-			expect(res.headers.location).toEqual(`${state.redirectUri}`);
+			expect(res.headers.location).toEqual(redirectUri);
 			const newProfileRes = await testSession.get('/v5/user');
 			expect(newProfileRes.body.email).toEqual(userDataFromAad.email);
 		});

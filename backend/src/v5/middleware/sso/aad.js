@@ -122,8 +122,7 @@ const emailNotUsed = async (req, res, next) => {
 			await next();
 		}
 	} catch (errorCode) {
-		const state = JSON.parse(req.body.state);
-		redirectWithError(res, state.redirectUri, errorCode);
+		redirectWithError(res, req.state.redirectUri, errorCode);
 	}
 };
 

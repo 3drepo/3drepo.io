@@ -163,7 +163,7 @@ const establishRoutes = () => {
 	 */
 	router.get('/link', isLoggedIn, isNonSsoUser, authenticate(linkRedirectUri));
 
-	router.get(linkRedirectEndpoint, emailNotUsed, linkPost, redirectToStateURL);
+	router.post(linkRedirectEndpoint, emailNotUsed, linkPost, redirectToStateURL);
 
 	return router;
 };
