@@ -151,14 +151,15 @@ export function* updateTicketComment({
 	modelId,
 	ticketId,
 	isFederation,
+	commentId,
 	comment,
 }: UpdateTicketCommentAction) {
 	try {
 		const updateModelTicketComment = isFederation
 			? API.Tickets.updateFederationTicketComment
 			: API.Tickets.updateContainerTicketComment;
-		yield updateModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, comment));
+		yield updateModelTicketComment(teamspace, projectId, modelId, ticketId, commentId, comment);
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentId, ...comment }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(

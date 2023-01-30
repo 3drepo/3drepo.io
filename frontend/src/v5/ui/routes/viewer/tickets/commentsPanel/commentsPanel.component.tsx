@@ -93,11 +93,8 @@ export const CommentsPanel = () => {
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			{
-				_id: commentId,
-				history: newHistory,
-				message,
-			},
+			commentId,
+			{ history: newHistory, message },
 		);
 	};
 
@@ -109,7 +106,7 @@ export const CommentsPanel = () => {
 		const newComment = {
 			author: currentUser.username,
 			message,
-		} as any;
+		};
 		TicketsActionsDispatchers.createTicketComment(
 			teamspace,
 			project,

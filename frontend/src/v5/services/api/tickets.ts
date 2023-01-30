@@ -171,7 +171,7 @@ export const createFederationTicketComment = async (
 	projectId: string,
 	federationId: string,
 	ticketId: string,
-	comment: IComment,
+	comment: Partial<IComment>,
 ): Promise<CreateTicketCommentsResponse> => {
 	const { data } = await api.post(
 		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments`,
@@ -185,7 +185,7 @@ export const createContainerTicketComment = async (
 	projectId: string,
 	containerId: string,
 	ticketId: string,
-	comment: IComment,
+	comment: Partial<IComment>,
 ): Promise<CreateTicketCommentsResponse> => {
 	const { data } = await api.post(
 		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments`,
@@ -219,10 +219,11 @@ export const updateFederationTicketComment = async (
 	projectId: string,
 	federationId: string,
 	ticketId: string,
+	commentId: string,
 	comment: Partial<IComment>,
 ) => (
 	api.put(
-		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments/${comment._id}`,
+		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments/${commentId}`,
 		pick(comment, ['message', 'images']),
 	)
 );
@@ -232,10 +233,11 @@ export const updateContainerTicketComment = async (
 	projectId: string,
 	containerId: string,
 	ticketId: string,
+	commentId: string,
 	comment: Partial<IComment>,
 ) => (
 	api.put(
-		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments/${comment._id}`,
+		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments/${commentId}`,
 		pick(comment, ['message', 'images']),
 	)
 );
