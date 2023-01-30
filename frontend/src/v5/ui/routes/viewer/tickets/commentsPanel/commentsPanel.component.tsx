@@ -27,6 +27,7 @@ import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
 import { IComment } from '@/v5/store/tickets/tickets.types';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
+import { sortBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../../routes.constants';
 import {
@@ -45,7 +46,6 @@ import {
 import { Comment } from './comment/comment.component';
 import { MAX_MESSAGE_LENGTH, addReply, createMetadata, sanitiseMessage } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
-import { sortBy } from 'lodash';
 
 export const CommentsPanel = () => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
