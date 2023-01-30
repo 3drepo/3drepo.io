@@ -38,7 +38,7 @@ const checkStateIsValid = async (req, res, next) => {
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err
-			: createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON');
+			: createResponseCode(templates.invalidArguments, 'state is required and must be valid JSON');
 
 		respond(req, res, response);
 	}

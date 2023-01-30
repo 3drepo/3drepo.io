@@ -83,11 +83,12 @@ const testAuthenticatePost = () => {
 				firstName: generateRandomString(),
 				lastName: generateRandomString(),
 			};
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = `${generateRandomURL()}`;
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.USER_NOT_FOUND}`);
+			expect(res.headers.location).toEqual(`${redirectUri}?error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test(`should redirect with ${errorCodes.NON_SSO_USER} if user is a non SSO user`, async () => {
@@ -97,11 +98,12 @@ const testAuthenticatePost = () => {
 				firstName: generateRandomString(),
 				lastName: generateRandomString(),
 			};
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = `${generateRandomURL()}`;
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}?error=${errorCodes.NON_SSO_USER}`);
+			expect(res.headers.location).toEqual(`${redirectUri}?error=${errorCodes.NON_SSO_USER}`);
 		});
 
 		test('should retain a query param in the redirectUri if it redirects with error', async () => {
@@ -111,11 +113,12 @@ const testAuthenticatePost = () => {
 				firstName: generateRandomString(),
 				lastName: generateRandomString(),
 			};
-			const state = { redirectUri: `${generateRandomURL()}?queryParam=someValue` };
+			const redirectUri = `${generateRandomURL()}?queryParam=someValue`;
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
-			expect(res.headers.location).toEqual(`${state.redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
+			expect(res.headers.location).toEqual(`${redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
 		test('should fail if the user is already logged in', async () => {
@@ -125,14 +128,15 @@ const testAuthenticatePost = () => {
 				firstName: generateRandomString(),
 				lastName: generateRandomString(),
 			};
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = `${generateRandomURL()}?queryParam=someValue`;
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
 
-			const res1 = await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res1 = await testSession.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
-			expect(res1.headers.location).toEqual(state.redirectUri);
+			expect(res1.headers.location).toEqual(redirectUri);
 
-			const res2 = await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res2 = await testSession.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(templates.alreadyLoggedIn.status);
 			expect(res2.body.code).toEqual(templates.alreadyLoggedIn.code);
 			await testSession.post('/v5/logout/');
@@ -145,11 +149,12 @@ const testAuthenticatePost = () => {
 				firstName: generateRandomString(),
 				lastName: generateRandomString(),
 			};
-			const state = { redirectUri: generateRandomURL() };
+			const redirectUri = `${generateRandomURL()}?queryParam=someValue`;
+			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
 			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-			const res = await agent.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
-			expect(res.headers.location).toEqual(state.redirectUri);
+			expect(res.headers.location).toEqual(redirectUri);
 		});
 	});
 };
@@ -198,16 +203,15 @@ const signup = () => {
 			expect(resUri.searchParams.has('client_id')).toEqual(true);
 			expect(resUri.searchParams.has('code_challenge')).toEqual(true);
 			expect(resUri.searchParams.get('code_challenge_method')).toEqual('S256');
-			const state = JSON.parse(resUri.searchParams.get('state'));
-			expect(state).toEqual({ redirectUri, ...newUserData });
+			const state = JSON.parse(Aad.decryptCryptoHash(resUri.searchParams.get('state')));
+			expect(state).toEqual({ redirectUri, ...newUserData, csrfToken: expect.any(String) });
 		});
 	});
 };
 
 const signupPost = () => {
 	describe('Sign Up Post', () => {
-		const redirectUri = 'http://www.example.com';
-
+		const redirectUri = generateRandomURL().slice(0, -1); // remove last / to make checking easier
 		const newUserData = {
 			redirectUri,
 			username: generateRandomString(),
@@ -223,10 +227,10 @@ const signupPost = () => {
 			id: generateRandomString(),
 		};
 
-		test('should redirect and add error to the query if email already exists', async () => {
-			const state = { ...newUserData };
+		test('1234should redirect and add error to the query if email already exists', async () => {
+			const state = Aad.generateCryptoHash(JSON.stringify(newUserData));
 			Aad.getUserDetails.mockResolvedValueOnce({ ...newUserDataFromAad, email: userEmail });
-			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await agent.post('/v5/sso/aad/signup-post').send({ state })
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
@@ -234,9 +238,9 @@ const signupPost = () => {
 		});
 
 		test('should redirect and add error to the query if email already exists (SSO user)', async () => {
-			const state = { ...newUserData };
+			const state = Aad.generateCryptoHash(JSON.stringify(newUserData));
 			Aad.getUserDetails.mockResolvedValueOnce({ ...newUserDataFromAad, email: userEmailSso });
-			const res = await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			const res = await agent.post('/v5/sso/aad/signup-post').send({ state })
 				.expect(302);
 			const resUri = new URL(res.headers.location);
 			expect(resUri.origin).toEqual(redirectUri);
@@ -244,9 +248,9 @@ const signupPost = () => {
 		});
 
 		test('should sign a new user up and set them to active', async () => {
-			const state = { ...newUserData };
+			const state = Aad.generateCryptoHash(JSON.stringify(newUserData));
 			Aad.getUserDetails.mockResolvedValueOnce(newUserDataFromAad);
-			await agent.get(`/v5/sso/aad/signup-post?state=${encodeURIComponent(JSON.stringify(state))}`)
+			await agent.post('/v5/sso/aad/signup-post').send({ state })
 				.expect(302);
 
 			// ensure user is created and is active
