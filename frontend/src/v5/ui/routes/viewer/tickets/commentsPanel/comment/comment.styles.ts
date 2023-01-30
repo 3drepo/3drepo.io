@@ -31,7 +31,7 @@ export const CommentButtons = styled.div`
 	align-items: center;
 	height: 100%;
 	margin: 0 6px;
-    position: absolute;
+	position: absolute;
 	top: 0;
 `;
 

@@ -68,7 +68,7 @@ export const DeleteButton = styled.div`
 
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 100%;
-	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
 	cursor: pointer;
 
 	svg {

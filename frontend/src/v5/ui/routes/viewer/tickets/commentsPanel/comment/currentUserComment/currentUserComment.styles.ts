@@ -24,7 +24,7 @@ export const CommentContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	border-top-right-radius: 0;
-    align-self: end;
+	align-self: end;
 
 	&::before {
 		right: 100%;
@@ -79,7 +79,7 @@ export const EditCommentInput = styled(MessageInput).attrs({
 `;
 
 export const EditCommentButtons = styled.div`
-    margin: 4px 5px 0 auto;
+	margin: 4px 5px 0 auto;
 	display: flex;
 	flex-direction: row;
 `;
