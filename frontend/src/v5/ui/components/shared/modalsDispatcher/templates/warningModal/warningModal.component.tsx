@@ -16,7 +16,7 @@
  */
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { DialogContainer, Actions, WarningIcon } from '@/v5/ui/components/shared/modalsDispatcher/modalsDispatcher.styles';
+import { DialogContainer, Actions, WarningIcon } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 
 interface IWarningModal {
 	message: string;

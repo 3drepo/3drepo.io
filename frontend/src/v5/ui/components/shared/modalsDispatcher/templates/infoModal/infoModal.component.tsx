@@ -16,7 +16,7 @@
  */
 
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { DialogContainer, Actions } from '@/v5/ui/components/shared/modalsDispatcher/modalsDispatcher.styles';
+import { DialogContainer, Actions } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { formatMessage } from '@/v5/services/intl';
 
 interface IInfoModal {
