@@ -372,18 +372,15 @@ export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 }
 
 export function* shareViewpointLink({ teamspace, modelId, viewpointId, project, revision }) {
-	let url;
-	if (isV5()) {
-		const pathOptions = {
-			teamspace,
-			project,
-			model: modelId,
-			revision,
-		};
-		url = prefixBaseDomain(`${generatePath(ROUTES.V5_MODEL_VIEWER, pathOptions)}?viewId=${viewpointId}`);
-	} else {
-		url = `${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?viewId=${viewpointId}`;
-	}
+	const pathParams = {
+		teamspace,
+		project,
+		model: modelId,
+		revision,
+	};
+	const basePath = generatePath(isV5() ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER, pathParams);
+	const url = prefixBaseDomain(`${basePath}?viewId=${viewpointId}`);
+
 	copy(url);
 	yield put(SnackbarActions.show('Share link copied to clipboard'));
 }
