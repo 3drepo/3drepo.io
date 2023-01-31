@@ -30,6 +30,7 @@ import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/
 import { FlexContainer } from './createContainerForm.styles';
 
 interface ICreateContainer {
+	open: boolean;
 	onClickClose: () => void;
 }
 
@@ -41,7 +42,7 @@ interface IFormInput {
 	type: string;
 }
 
-export const CreateContainerForm = ({ onClickClose }: ICreateContainer): JSX.Element => {
+export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const {
 		handleSubmit,
@@ -78,6 +79,7 @@ export const CreateContainerForm = ({ onClickClose }: ICreateContainer): JSX.Ele
 
 	return (
 		<FormModal
+			open={open}
 			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}

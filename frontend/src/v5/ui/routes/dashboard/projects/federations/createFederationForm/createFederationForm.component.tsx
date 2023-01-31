@@ -31,6 +31,7 @@ import { EditFederation } from '../editFederationModal/editFederation';
 import { CreateFederationFormSettings } from './createFederationSettings';
 
 interface ICreateFederation {
+	open: boolean;
 	onClickClose: () => void;
 }
 
@@ -41,7 +42,7 @@ const defaultValues = {
 	code: '',
 };
 
-export const CreateFederationForm = ({ onClickClose }: ICreateFederation): JSX.Element => {
+export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -107,6 +108,7 @@ export const CreateFederationForm = ({ onClickClose }: ICreateFederation): JSX.E
 
 	return (
 		<FormModal
+			open={open}
 			isValid={isValid}
 			onClickClose={onClickClose}
 			isSubmitting={isSubmitting}

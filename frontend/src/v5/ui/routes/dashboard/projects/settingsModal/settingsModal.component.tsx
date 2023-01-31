@@ -117,6 +117,7 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 };
 
 type ISettingsModal = {
+	open: boolean;
 	containerOrFederation: IContainer | IFederation;
 	settingsSchema: any;
 	isContainer?: boolean;
@@ -134,6 +135,7 @@ type ISettingsModal = {
 };
 
 export const SettingsModal = ({
+	open,
 	containerOrFederation,
 	settingsSchema,
 	isContainer,
@@ -229,6 +231,7 @@ export const SettingsModal = ({
 
 	return (
 		<FormModal
+			open={open}
 			title={formatMessage({ id: 'settings.title', defaultMessage: `${containerOrFederationName} settings` })}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}

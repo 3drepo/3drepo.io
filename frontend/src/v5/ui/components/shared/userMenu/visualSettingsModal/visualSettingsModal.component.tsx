@@ -23,6 +23,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
+	open: boolean;
 	onClickClose: () => void;
 	visualSettings: any;
 	updateSettings: (username, settings) => void;
@@ -31,11 +32,12 @@ type IVisualSettingsModal = {
 };
 
 export const VisualSettingsModal = ({
+	open,
 	onClickClose,
 	...visualSettingsProps
 }: IVisualSettingsModal) => (
 	<Dialog
-		open
+		open={open}
 		PaperComponent={RemoveWhiteCorners}
 	>
 		<FormModalHeader
