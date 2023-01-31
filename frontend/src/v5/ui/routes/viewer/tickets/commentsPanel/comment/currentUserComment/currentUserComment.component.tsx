@@ -94,6 +94,7 @@ export const CurrentUserComment = ({
 							defaultMessage: ' ',
 						})}
 						control={control}
+						autoFocus
 					/>
 				</EditCommentContainer>
 				<EditCommentButtons>
