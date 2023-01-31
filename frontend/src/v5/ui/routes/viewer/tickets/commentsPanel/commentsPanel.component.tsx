@@ -164,7 +164,7 @@ export const CommentsPanel = () => {
 				<BottomSection>
 					{commentReply && (
 						<CommentReplyContainer>
-							<CommentReply {...createMetadata(commentReply)} />
+							<CommentReply {...createMetadata(commentReply)} shortMessage />
 							<DeleteButton onClick={() => setCommentReply(null)}>
 								<DeleteIcon />
 							</DeleteButton>

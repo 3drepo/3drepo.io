@@ -18,8 +18,7 @@
 import styled, { css } from 'styled-components';
 import { CommentMessage } from '../comment.styles';
 
-/* eslint-disable */
-export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary' }>`
+export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
 	border-left-width: 4px;
 	border-radius: 5px;
@@ -38,20 +37,22 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 		`;
 	}}
 	
-	${CommentMessage} {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-
-		@supports (-webkit-line-clamp: 3) {
+	${({ shortMessage }) => shortMessage && css`
+		${CommentMessage} {
 			overflow: hidden;
 			text-overflow: ellipsis;
-			white-space: initial;
-			/* stylelint-disable-next-line */
-			display: -webkit-box;
-			-webkit-line-clamp: 3;
-			/* stylelint-disable-next-line */
-			-webkit-box-orient: vertical;
+			white-space: nowrap;
+
+			@supports (-webkit-line-clamp: 3) {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: initial;
+				/* stylelint-disable-next-line */
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				/* stylelint-disable-next-line */
+				-webkit-box-orient: vertical;
+			}
 		}
-	}
+	`}
 `;

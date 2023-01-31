@@ -24,8 +24,9 @@ import { CommentReplyContainer } from './commentReply.styles';
 type CommentReplyProps = CommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	isCurrentUserComment?: boolean,
+	shortMessage?: boolean,
 };
-export const CommentReply = ({ message, author, variant = 'primary', isCurrentUserComment = true }: CommentReplyProps) => {
+export const CommentReply = ({ message, author, variant = 'primary', isCurrentUserComment = true, ...props }: CommentReplyProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
@@ -33,7 +34,7 @@ export const CommentReply = ({ message, author, variant = 'primary', isCurrentUs
 	const authorDisplayName = (isCurrentUserComment && author === currentUser) ? '' : `${user.firstName} ${user.lastName}`;
 
 	return (
-		<CommentReplyContainer variant={variant}>
+		<CommentReplyContainer variant={variant} {...props}>
 			<CommentAuthor>{authorDisplayName}</CommentAuthor>
 			<CommentMarkDown>{message}</CommentMarkDown>
 		</CommentReplyContainer>
