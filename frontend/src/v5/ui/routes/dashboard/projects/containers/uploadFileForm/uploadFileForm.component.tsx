@@ -44,6 +44,7 @@ import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsL
 type IUploadFileForm = {
 	presetContainerId?: string;
 	presetFile?: File;
+	open: boolean;
 	onClickClose: () => void;
 };
 
@@ -87,6 +88,7 @@ const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) =>
 export const UploadFileForm = ({
 	presetContainerId,
 	presetFile,
+	open,
 	onClickClose,
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -200,6 +202,7 @@ export const UploadFileForm = ({
 	return (
 		<FormProvider {...methods}>
 			<Modal
+				open={open}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
