@@ -39,6 +39,7 @@ export const VisualSettingsModal = ({
 	<Dialog
 		open={open}
 		PaperComponent={RemoveWhiteCorners}
+		onClose={onClickClose}
 	>
 		<FormModalHeader
 			title={formatMessage({
