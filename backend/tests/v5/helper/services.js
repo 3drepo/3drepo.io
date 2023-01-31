@@ -21,7 +21,7 @@ const http = require('http');
 const fs = require('fs');
 const { times } = require('lodash');
 
-const { src, srcV4 } = require('./path');
+const { image, src, srcV4 } = require('./path');
 
 const { createApp: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
@@ -30,13 +30,15 @@ const { io: ioClient } = require('socket.io-client');
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { createTeamspaceSettings } = require(`${src}/models/teamspaces`);
+const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
+const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
@@ -54,7 +56,7 @@ queue.purgeQueues = async () => {
 		const conn = await amqp.connect(host);
 		const channel = await conn.createChannel();
 
-		channel.on('error', () => {});
+		channel.on('error', () => { });
 
 		await Promise.all([
 			channel.purgeQueue(worker_queue),
@@ -81,7 +83,7 @@ db.reset = async () => {
 	const colProms = cols.map(({ name }) => (name === 'system.version' ? Promise.resolve() : DbHandler.deleteMany(USERS_DB_NAME, name, {})));
 
 	await Promise.all([...dbProms, ...colProms]);
-	DbHandler.reset();
+	await DbHandler.disconnect();
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
@@ -93,15 +95,15 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-// breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = async (teamspace, admins = [], breaking = false, customData) => {
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
-	await ServiceHelper.db.createTeamspaceRole(teamspace);
-	return Promise.all([
-		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [teamspace],
-			{ permissions: breaking ? undefined : permissions, ...customData }),
-		createTeamspaceSettings(teamspace),
-	]);
+db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
+	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
+	await initTeamspace(teamspace);
+	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
+
+	if (subscriptions) {
+		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
+			subType, subscriptions[subType])));
+	}
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
@@ -193,6 +195,19 @@ db.createTicket = (teamspace, project, model, ticket) => {
 	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
 };
 
+db.createComment = (teamspace, project, model, ticket, comment) => {
+	const formattedComment = {
+		...comment,
+		_id: stringToUUID(comment._id),
+		project: stringToUUID(project),
+		ticket: stringToUUID(ticket),
+		teamspace,
+		model,
+	};
+
+	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
+};
+
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
@@ -226,7 +241,7 @@ db.createAvatar = async (username, type, avatarData) => {
 };
 
 db.addLoginRecords = async (records) => {
-	await DbHandler.insertMany(DbHandler.INTERNAL_DB, 'loginRecords', records);
+	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -244,7 +259,7 @@ ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
-    + Math.random() * (end.getTime() - start.getTime()));
+	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
@@ -344,7 +359,7 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...ServiceHelper.generateRandomModelProperties(isFederation),
 			...(isFederation ? { federate: true } : {}),
 			...properties,
 			permissions,
@@ -482,6 +497,18 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 	};
 
 	return ticket;
+};
+
+ServiceHelper.generateComment = () => {
+	const base64img = fs.readFileSync(image).toString('base64');
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		createdAt: ServiceHelper.generateRandomDate(),
+		updatedAt: ServiceHelper.generateRandomDate(),
+		message: ServiceHelper.generateRandomString(),
+		images: [base64img],
+	};
 };
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {

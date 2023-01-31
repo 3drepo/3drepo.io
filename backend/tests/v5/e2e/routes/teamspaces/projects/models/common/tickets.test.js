@@ -627,8 +627,6 @@ const testUpdateTicket = () => {
 					ticketToAdd.properties[basePropertyLabels.UPDATED_AT] = new Date();
 				}));
 
-				/* eslint-enable no-param-reassign */
-
 				await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 			}));
 		});
@@ -727,7 +725,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-
 	testGetAllTemplates();
 	testGetTemplateDetails();
 	testAddTicket();

@@ -17,25 +17,11 @@
 
 import styled from 'styled-components';
 
-import { Typography } from '@controls/typography';
 import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
-import { DialogActions, DialogContent, IconButton, Paper } from '@mui/material';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { DialogActions, DialogContent, Paper } from '@mui/material';
 
 export const RemoveWhiteCorners = styled(Paper)`
-	background-color: rgba(0, 0, 0, 0);
-`;
-
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 10.5px;
-		right: 11px;
-
-		svg path {
-			stroke: ${({ theme }) => theme.palette.primary.contrast}
-		}
-	}
+	background-color: transparent;
 `;
 
 export const Form = styled.form`
@@ -45,32 +31,6 @@ export const Form = styled.form`
 
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 15px; /* prevents white pixels in corners */
-`;
-
-export const Header = styled.div`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 74px;
-	width: 100%;
-	box-sizing: border-box;
-	align-items: center;
-	display: flex;
-	padding: 0 35px;
-`;
-
-export const Title = styled(Typography).attrs({
-	variant: 'h2',
-	component: 'div',
-})`
-	text-align: left;
-`;
-
-export const Subtitle = styled(Typography).attrs({
-	variant: 'h5',
-	component: 'div',
-})`
-	text-align: left;
-	color: ${({ theme }) => hexToOpacity(theme.palette.secondary.lightest, 60)};
 `;
 
 export const FormDialogContent = styled(DialogContent)`

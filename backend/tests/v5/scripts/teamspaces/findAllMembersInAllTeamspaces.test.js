@@ -35,7 +35,8 @@ const { src, utilScripts, tmpDir } = require('../../helper/path');
 const FindAllMembers = require(`${utilScripts}/teamspaces/findAllMembersInAllTeamspaces`);
 
 const { saveSuccessfulLoginRecord } = require(`${src}/models/loginRecords`);
-const { updateOne, INTERNAL_DB } = require(`${src}/handler/db`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
+const { updateOne } = require(`${src}/handler/db`);
 
 const runTest = (testData) => {
 	describe('Find all members in all teamspaces', () => {

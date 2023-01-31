@@ -21,6 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { ProjectsList } from '../projects/projectsList.component';
+import { TeamspaceSettings } from '../settings/teamspaceSettings.component';
 import { UsersList } from '../users/usersList.component';
 
 export const TeamspaceContent = () => {
@@ -33,7 +34,7 @@ export const TeamspaceContent = () => {
 				<ProjectsList />
 			</Route>
 			<Route title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })} exact path={`${path}/t/settings`}>
-				Settings
+				<TeamspaceSettings />
 			</Route>
 			<Route title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })} exact path={`${path}/t/users`}>
 				<UsersList />
