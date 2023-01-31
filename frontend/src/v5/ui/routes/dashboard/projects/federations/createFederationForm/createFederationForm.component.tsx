@@ -108,7 +108,6 @@ export const CreateFederationForm = ({ onClickClose }: ICreateFederation): JSX.E
 	return (
 		<FormModal
 			isValid={isValid}
-			open
 			onClickClose={onClickClose}
 			isSubmitting={isSubmitting}
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}

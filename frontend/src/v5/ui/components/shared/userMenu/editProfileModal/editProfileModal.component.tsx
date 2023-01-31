@@ -98,7 +98,6 @@ export const EditProfileModal = ({ user, onClickClose }: EditProfileModalProps) 
 
 	return (
 		<FormModal
-			open
 			title={formatMessage(
 				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },

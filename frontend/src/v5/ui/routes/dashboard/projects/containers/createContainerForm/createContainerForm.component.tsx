@@ -79,7 +79,6 @@ export const CreateContainerForm = ({ onClickClose }: ICreateContainer): JSX.Ele
 	return (
 		<FormModal
 			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
-			open
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}

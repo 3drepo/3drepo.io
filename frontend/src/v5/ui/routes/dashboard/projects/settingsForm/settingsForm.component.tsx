@@ -229,7 +229,6 @@ export const SettingsForm = ({
 
 	return (
 		<FormModal
-			open
 			title={formatMessage({ id: 'settings.title', defaultMessage: `${containerOrFederationName} settings` })}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
