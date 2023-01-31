@@ -41,7 +41,7 @@ export const Tickets = () => {
 	useEffect(() => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
-		
+
 		return () => { TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List); };
 	}, []);
 
