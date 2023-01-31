@@ -25,6 +25,7 @@ AadConstants.authenticateRedirectEndpoint = '/authenticate-post';
 AadConstants.authenticateRedirectUri = createUri(AadConstants.authenticateRedirectEndpoint);
 AadConstants.signupRedirectEndpoint = '/signup-post';
 AadConstants.signupRedirectUri = createUri(AadConstants.signupRedirectEndpoint);
-AadConstants.msGraphUserDetailsUri = 'https://graph.microsoft.com/v1.0/me';
+AadConstants.linkRedirectEndpoint = '/link-post';
+AadConstants.linkRedirectUri = createUri(AadConstants.linkRedirectEndpoint);
 
 module.exports = AadConstants;

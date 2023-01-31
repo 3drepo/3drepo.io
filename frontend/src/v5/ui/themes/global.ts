@@ -18,7 +18,10 @@ import { createGlobalStyle } from 'styled-components';
 import { DefaultTheme } from '@mui/styles';
 import { COLOR } from '@/v4/styles/colors';
 
-export type Theme = DefaultTheme & { typography: any };
+export type Theme = DefaultTheme & {
+	typography: any,
+	palette: any,
+};
 
 export const GlobalStyle = createGlobalStyle`
 	html, body {
@@ -79,4 +82,42 @@ export const GlobalStyle = createGlobalStyle`
 		background: ${COLOR.TRANSPARENT} !important;
 	}
 
+	// React-textarea-autocomplete
+	.rta__autocomplete {
+		position: absolute;
+		z-index: 1400;
+		display: block;
+		max-width: 380px;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	.rta__autocomplete--top {
+		border-radius: 4px;
+	}
+
+	.rta__list {
+		margin: 0;
+		padding: 10px 0;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		box-shadow:
+			0 5px 5px -3px rgb(0 0 0 / 20%),
+			0 8px 10px 1px rgb(0 0 0 / 14%),
+			0 3px 14px 2px rgb(0 0 0 / 12%);
+		list-style: none;
+		border-radius: 6px;
+	}
+
+	.rta__entity {
+		width: 100%;
+		outline: none;
+	}
+
+	.rta__entity:hover {
+		cursor: pointer;
+	}
+
+	.rta__entity--selected {
+		text-decoration: none;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 `;

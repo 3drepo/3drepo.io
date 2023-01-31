@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { selectTicketPins } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -53,7 +54,8 @@ const mapStateToProps = createStructuredSelector({
 	issuesShapes: selectIssuesShapes,
 	issuesHighlightedShapes: selectIssuesHighlightedShapes,
 	risksShapes: selectRisksShapes,
-	risksHighlightedShapes: selectRisksHighlightedShapes
+	risksHighlightedShapes: selectRisksHighlightedShapes,
+	ticketPins: selectTicketPins
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

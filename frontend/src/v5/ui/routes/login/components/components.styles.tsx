@@ -16,12 +16,12 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
-import UserIcon from '@assets/icons/user.svg';
-import PasswordIcon from '@assets/icons/lock.svg';
-import styled from 'styled-components';
+import UserIcon from '@assets/icons/outlined/user-outlined.svg';
+import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
+import styled, { css } from 'styled-components';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
+import { FormTextField, FormPasswordField as FormPasswordFieldBase } from '@controls/inputs/formInputs.component';
 
 export const AuthHeading = styled(Typography).attrs({
 	variant: 'h1',
@@ -31,34 +31,37 @@ export const AuthHeading = styled(Typography).attrs({
 	margin-bottom: 22px;
 `;
 
-export const AuthField = styled(FormTextField).attrs({
-	required: true,
-
-})`
-	margin-top: 26px;
+const authFieldStyles = css`
+	margin-top: 8px;
 	margin-bottom: 14px;
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;
 
-export const UsernameField = styled(AuthField).attrs({
+export const FormUsernameField = styled(FormTextField).attrs({
 	InputProps: {
 		startAdornment: <UserIcon />,
 	},
-	name: 'username',
 	label: formatMessage({
 		id: 'auth.login.usernameLabel',
 		defaultMessage: 'Username or email',
 	}),
 	autoComplete: 'login',
-})``;
+})`
+	svg {
+		width: 16px;
+		height: 15px;
+	}
+	${authFieldStyles}
+`;
 
-export const PasswordField = styled(AuthField).attrs({
+export const FormPasswordField = styled(FormPasswordFieldBase).attrs({
 	InputProps: {
 		startAdornment: <PasswordIcon />,
 	},
 	autoComplete: 'current-password',
-	type: 'password',
-})``;
+})`
+	${authFieldStyles}
+`;
 
 export const ErrorMessage = styled(ErrorMessageBase)`
 	margin-top: 5px;

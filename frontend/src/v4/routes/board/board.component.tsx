@@ -23,8 +23,13 @@ import Add from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
-import { useParams } from 'react-router-dom';
+import { useParams, generatePath } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
+import { isV5 } from '@/v4/helpers/isV5';
+import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { formatMessage } from '@/v5/services/intl';
+import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
@@ -155,7 +160,9 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
-	const { type, teamspace, project, modelId } = useParams<RouteParams>();
+	const { type, teamspace, project: projectId, modelId: v4Model, containerOrFederation } = useParams<RouteParams>();
+	const project = isV5() ? props.projectsMap[projectId]?.name : projectId;
+	const modelId = isV5() ? containerOrFederation : v4Model;
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';
@@ -224,8 +231,17 @@ export function Board(props: IProps) {
 
 	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
+	const getV5Path = ({ typePath = type, modelPath = modelId }: any) => generatePath(BOARD_ROUTE, {
+		type: typePath,
+		containerOrFederation: modelPath,
+		project: projectId,
+		teamspace,
+	});
+
 	const handleTypeChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
+		const url = isV5()
+			? getV5Path({ typePath: e.target.value })
+			: `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
 		props.history.push(url);
 		props.setBoardType(e.target.value);
 	};
@@ -236,13 +252,23 @@ export function Board(props: IProps) {
 	};
 
 	const handleProjectChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${e.target.value}`;
+		const url = isV5()
+			? getV5Path({ projectPath: e.target.value })
+			: `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${e.target.value}`;
 		props.history.push(url);
 	};
 
+	useEffect(() => {
+		if (isV5() && boardRef.current) {
+			handleModelChange({ target: { value: null } });
+		}
+	}, [projectId]);
+
 	const handleModelChange = (e) => {
 		const newModelId = e.target.value;
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
+		const url = isV5()
+			? getV5Path({ modelPath: newModelId })
+			: `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
 
 		if (!isIssuesBoard) {
 			props.unsubscribeOnRiskChanges(teamspace, modelId);
@@ -352,9 +378,17 @@ export function Board(props: IProps) {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (
 			<FormControl>
-				<InputLabel shrink htmlFor="model-select">Model/Federation</InputLabel>
+				<InputLabel shrink htmlFor="model-select">
+					{isV5()
+						? formatMessage({ id: 'board.select.federationOrContainer.label', defaultMessage: 'Federation / Container' })
+						: 'Model/Federation'
+					}
+				</InputLabel>
 				<CellSelect
-					placeholder="Select model/federation"
+					placeholder={isV5()
+						? formatMessage({ id: 'board.select.federationOrContainer.placeholder', defaultMessage: 'Select Federation / Container' })
+						: 'Select model/federation'
+					}
 					items={models}
 					value={models.length ? modelId : ''}
 					onChange={handleModelChange}
@@ -375,6 +409,8 @@ export function Board(props: IProps) {
 			disabled={props.isPending || !modelId || !project}
 		>
 			<Add />
+			{isV5() && isIssuesBoard && formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}
+			{isV5() && !isIssuesBoard && formatMessage({ id: 'board.newRisk.button', defaultMessage: 'New risk' })}
 		</AddButton>
 	);
 
@@ -385,13 +421,13 @@ export function Board(props: IProps) {
 			<>
 				<SelectContainer>
 					<FormControl>
-						<InputLabel shrink htmlFor="type-select">Show</InputLabel>
+						<InputLabel disabled={isV5() && !containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
 						<CellSelect
 							placeholder="Select type"
 							items={types}
 							value={type}
 							onChange={handleTypeChange}
-							disabled={!types.length}
+							disabled={!types.length || (isV5() && !containerOrFederation)}
 							disabledPlaceholder
 							inputId="type-select"
 						/>
@@ -399,13 +435,13 @@ export function Board(props: IProps) {
 				</SelectContainer>
 				<SelectContainer>
 					<FormControl>
-						<InputLabel shrink htmlFor="group-select">Group by</InputLabel>
+						<InputLabel disabled={isV5() && !containerOrFederation} shrink htmlFor="group-select">Group by</InputLabel>
 						<CellSelect
 							placeholder="Select grouping type"
 							items={FILTER_VALUES}
 							value={props.filterProp}
 							onChange={handleFilterClick}
-							disabled={!FILTER_VALUES.length}
+							disabled={!FILTER_VALUES.length || (isV5() && !containerOrFederation)}
 							disabledPlaceholder
 							inputId="group-select"
 						/>
@@ -416,12 +452,17 @@ export function Board(props: IProps) {
 	};
 
 	const components = {
-		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
+		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard,
+		...(isV5() && { ScrollableLane: ScrollArea }),
 	};
 
 	const renderBoard = renderWhenTrue(() => (
-			<BoardContainer>
-				<div ref={boardRef}>
+		<BoardContainer>
+			<div ref={boardRef}>
+				<ConditionalV5Wrapper
+					v5Wrapper={ScrollArea}
+					v5WrapperProps={{ style: { height: '100%' } }}
+				>
 					<TrelloBoard
 						data={boardData}
 						hideCardDeleteIcon
@@ -431,8 +472,9 @@ export function Board(props: IProps) {
 						components={components}
 						cardDraggable
 					/>
-				</div>
-			</BoardContainer>
+				</ConditionalV5Wrapper>
+			</div>
+		</BoardContainer>
 	));
 
 	const renderLoader = renderWhenTrue(() => (
@@ -452,7 +494,9 @@ export function Board(props: IProps) {
 		const noModel = !modelId;
 		const messagePrefix = 'You have to choose';
 		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
-		const chooseMessage = `${messagePrefix} ${messageSufix} to show board.`;
+		const chooseMessage = isV5()
+			? formatMessage({ defaultMessage: `Select the federation or container to show board`, id: 'board.emptyBoard.placeholder' })
+			: `${messagePrefix} ${messageSufix} to show board.`;
 		const areModels =
 			getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project).length > 1;
 

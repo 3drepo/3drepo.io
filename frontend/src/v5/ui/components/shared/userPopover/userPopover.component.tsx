@@ -16,24 +16,41 @@
  */
 import { IUser } from '@/v5/store/users/users.redux';
 import { Avatar } from '@controls/avatar';
-import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
+import { compact } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { AvatarWrapper, PopoverContainer, Employment, Username, Heading, Data } from './userPopover.styles';
 
 interface IUserPopover {
 	user: IUser;
 }
 
 export const UserPopover = ({ user }: IUserPopover) => {
-	const { firstName, lastName, company, job } = user;
+	if (!user) {
+		return (
+			<PopoverContainer>
+				<Data>
+					<Username>
+						<FormattedMessage
+							id="userPopover.noUser"
+							defaultMessage="The user is not currently a teamspace member"
+						/>
+					</Username>
+				</Data>
+			</PopoverContainer>
+		);
+	}
+
+	const { firstName, lastName, company, job, user: username } = user;
 	return (
-		<Container>
+		<PopoverContainer>
 			<AvatarWrapper>
 				<Avatar user={user} />
 			</AvatarWrapper>
-			<UserData>
-				<Name>{firstName} {lastName}</Name>
-				<Company>{company}</Company>
-				<Job>{job}</Job>
-			</UserData>
-		</Container>
+			<Data>
+				<Heading>{firstName} {lastName}</Heading>
+				<Username>{username}</Username>
+				<Employment>{compact([job, company]).join(', ')}</Employment>
+			</Data>
+		</PopoverContainer>
 	);
 };

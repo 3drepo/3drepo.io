@@ -15,21 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
-const { USERS_DB_NAME } = require('./users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
-const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
-const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, COLL_NAME, query, projection, sort);
-const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, COLL_NAME, { user: username }, action);
+const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, USERS_COL, query, projection, sort);
+const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, USERS_COL, { user: username }, action);
 
 User.isAccountActive = async (user) => {
 	const projection = { 'customData.inactive': 1 };
@@ -38,18 +35,10 @@ User.isAccountActive = async (user) => {
 };
 
 User.authenticate = async (user, password) => {
-	try {
-		await db.authenticate(user, password);
-	} catch (err) {
-		if (err.code === templates.incorrectUsernameOrPassword.code) {
-			publish(events.FAILED_LOGIN_ATTEMPT, { user });
-			throw templates.incorrectUsernameOrPassword;
-		}
+	if (await db.authenticate(user, password)) return;
 
-		throw err;
-	}
-
-	return { username: user };
+	publish(events.FAILED_LOGIN_ATTEMPT, { user });
+	throw templates.incorrectUsernameOrPassword;
 };
 
 User.getUserByQuery = async (query, projection) => {
@@ -66,8 +55,9 @@ User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.e
 
 User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
 	$or: [{ user: usernameOrEmail },
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }] }, projection);
+	// eslint-disable-next-line security/detect-non-literal-regexp
+		{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }],
+}, projection);
 
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
@@ -122,12 +112,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 };
 
 User.updatePassword = async (username, newPassword) => {
-	const updateUserCmd = {
-		updateUser: username,
-		pwd: newPassword,
-	};
-
-	await db.runCommand(USERS_DB_NAME, updateUserCmd);
+	await db.setPassword(username, newPassword);
 	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
@@ -157,7 +142,6 @@ User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.a
 User.addUser = async (newUserData) => {
 	const customData = {
 		createdAt: new Date(),
-		inactive: true,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
@@ -170,24 +154,22 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		permissions: [],
-		...deleteIfUndefined({ sso: newUserData.sso }),
+		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true }),
 	};
 
-	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
-	customData.emailVerifyToken = {
-		token: newUserData.token,
-		expiredAt: expiryAt,
-	};
+	if (!newUserData.sso) {
+		const expiryAt = new Date();
+		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
+		customData.emailVerifyToken = { token: newUserData.token, expiredAt: expiryAt };
+	}
 
 	await db.createUser(newUserData.username, newUserData.password, customData);
 };
 
-User.removeUser = (user) => db.dropUser(user);
+User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
 
 User.verify = async (username) => {
-	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, COLL_NAME, { user: username },
+	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, USERS_COL, { user: username },
 		{
 			$unset: {
 				'customData.inactive': 1,
@@ -205,10 +187,27 @@ User.verify = async (username) => {
 	return customData;
 };
 
-User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
-	{ $push: { 'customData.permissions': { user: username, permissions: [TEAMSPACE_ADMIN] } } });
-
 User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
 	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
+
+User.unlinkFromSso = async (username, newPassword) => {
+	await updateUser(username, { $unset: { 'customData.sso': 1 } });
+	await User.updatePassword(username, newPassword);
+};
+
+User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(username,
+	{
+		$set: {
+			'customData.email': email,
+			'customData.firstName': firstName,
+			'customData.lastName': lastName,
+			'customData.sso': ssoData,
+		},
+	});
+
+User.isSsoUser = async (username) => {
+	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });
+	return !!sso;
+};
 
 module.exports = User;

@@ -57,7 +57,7 @@ export default css`
 			padding-top: 22px;
 		}
 	}
-
+	
 	${UserNameCell} {
 		${({ theme }) => theme.typography.h5};
 		color: ${({ theme }) => theme.palette.secondary.main};
@@ -69,11 +69,10 @@ export default css`
 
 	${SortLabel} {
 		margin: 0;
-		padding-left: 10px;
+		padding: 0;
 		${({ theme }) => theme.typography.kicker};
 		flex-direction: row;
 		svg {
-			fill: transparent;
 			width: 10px;
 			margin-left: 2px;
 		}
@@ -120,11 +119,12 @@ export default css`
 		}
 
 		.search-field__label {
+			position: absolute;
 			margin-top: 3px;
-			transform: translate(13px,39px) scale(1);
+			transform: translate(13px, 12px) scale(1);
 
 			&[data-shrink='true'] {
-				transform: translate(13px, 20px) scale(1) !important;
+				transform: translate(13px, 18px) scale(1) !important;
 			}
 		}
 	}

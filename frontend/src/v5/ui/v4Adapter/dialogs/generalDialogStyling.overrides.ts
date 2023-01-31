@@ -16,8 +16,11 @@
  */
 import { css } from 'styled-components';
 import { DialogTitle } from '@/v4/routes/components/dialogContainer/components/dialog/dialog.styles';
+import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { Footer as InvitationsListFooter } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
+import { Footer as NewInviteFooter } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
 
-export default css`
+const titleStyling = css`
 	${DialogTitle} {
 		background: ${({ theme }) => theme.palette.gradient.secondary};
 		color: ${({ theme }) => theme.palette.primary.contrast};
@@ -40,9 +43,55 @@ export default css`
 			padding: 0;
 		}
 	}
+`;
 
+const contentStyling = css`
 	.MuiDialogContent-root {
-		padding: 0px;
 		overflow-x: hidden;
+		max-width: 600px;
+		padding: 30px;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) => theme.typography.body1}
+
+		code {
+			font-family: ${({ theme }) => theme.typography.fontFamily};
+			font-weight: 500;
+		}
 	}
+`;
+
+const buttonContainerStyling = css`
+	.MuiDialogActions-root, ${InvitationsListFooter}, ${NewInviteFooter} {
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
+		z-index: 0;
+		padding: 8px;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+
+		.MuiButtonBase-root.MuiButtonBase-root:last-child {
+			${labelButtonPrimaryStyles}
+			line-height: 1;
+
+			&, &:hover, &:active {
+				border: 0;
+			}
+		}
+	}
+`;
+
+export const secondaryButtonStyling = css`
+	border: 1px solid ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	line-height: 1;
+	:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		text-decoration: none;
+	}
+`;
+
+export default css`
+	${titleStyling}
+	${contentStyling}
+	${buttonContainerStyling}
 `;

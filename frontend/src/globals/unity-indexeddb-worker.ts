@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable class-methods-use-this */
 
 /**
  * This entire script/file is run inside a WebWorker to service requests from
@@ -25,7 +27,13 @@
  * by this worker.
  */
 
-class IndexedDbCacheWorker {
+declare global {
+	interface Window {
+		repoCache: any;
+	}
+}
+
+export class IndexedDbCacheWorker {
 	constructor() {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
@@ -93,7 +101,7 @@ class IndexedDbCacheWorker {
 			const req = objectStore.getAllKeys();
 			req.onsuccess = () => {
 				this.index = {};
-				req.result.forEach((x) => this.index[x] = 1); // Give any value here - we will only check the existence of the key (property)
+				req.result.forEach((x) => { this.index[x] = 1; }); // Give any value here - we will only check the existence of the key (property)
 				this.sendIndexedDbUpdated({
 					state: 'Open',
 				});
@@ -130,7 +138,7 @@ class IndexedDbCacheWorker {
 				size: record.size,
 				result: record,
 			});
-		} else if (!this.index.hasOwnProperty(key)) {
+		} else if (!(key in this.index)) {
 			// We know the database doesnt have the key, so return immediately again
 			this.sendGetTransactionComplete({
 				id,
@@ -190,9 +198,7 @@ class IndexedDbCacheWorker {
 					this.numReadTransactions--;
 				};
 
-				readTransaction.onabort = () => {
-					this.numReadTransactions--;
-				};
+				readTransaction.onabort = readTransaction.onerror;
 
 				this.numReadTransactions++;
 			} catch (e) {
@@ -268,19 +274,14 @@ class IndexedDbCacheWorker {
 			const transaction = this.db.transaction(this.objectStoreName, 'readwrite');
 			const objectStore = transaction.objectStore(this.objectStoreName);
 
-			let numRequests = 0;
-
 			// eslint-disable-next-line guard-for-in
-			for (const key of keys) {
+			for (const key of keys.slice(0, 5)) { // Don't try and commit too much in one transaction otherwise we may block users' get requests
 				const record = this.memoryCache[key];
 				const request = objectStore.put(record, key);
 				request.onsuccess = () => {
 					delete this.memoryCache[key]; // Delete the local copy
 					this.index[key] = 1; // Update the index as we go
 				};
-				if (numRequests++ > 5) { // Don't try and commit too much in one transaction otherwise we may block users' get requests
-					break;
-				}
 			}
 
 			transaction.oncomplete = () => {
@@ -292,9 +293,7 @@ class IndexedDbCacheWorker {
 				this.committing = false;
 			};
 
-			transaction.onabort = () => {
-				this.committing = false;
-			};
+			transaction.onabort = transaction.onerror;
 
 			// The request can fail in two ways: an exception is thrown when
 			// creating the request (handled below) or during processing of the
@@ -333,7 +332,8 @@ class IndexedDbCacheWorker {
 			const start = performance.now();
 			const request = objectStore.get(key);
 
-			request.onsuccess = (ev) => {
+			request.onsuccess = () => {
+				// eslint-disable-next-line no-console
 				console.log(`Time ${performance.now() - start}`);
 			};
 		}
@@ -346,14 +346,12 @@ onmessage = (e) => {
 	}
 
 	if (e.data.message === 'Set') {
-		const { key } = e.data;
-		const { record } = e.data;
+		const { key, record } = e.data;
 		self.repoCache.memoryCache[key] = record; // Will be written later by commitMemoryCache
 	}
 
 	if (e.data.message === 'Get') {
-		const { key } = e.data;
-		const { id } = e.data;
+		const { key, id } = e.data;
 		self.repoCache.createGetTransaction(id, key);
 	}
 };

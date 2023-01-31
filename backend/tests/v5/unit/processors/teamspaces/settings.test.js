@@ -22,6 +22,9 @@ const { generateRandomString } = require('../../../helper/services');
 jest.mock('../../../../../src/v5/models/tickets.templates');
 const TemplateModel = require(`${src}/models/tickets.templates`);
 
+jest.mock('../../../../../src/v5/models/teamspaceSettings');
+const SettingsModel = require(`${src}/models/teamspaceSettings`);
+
 const Settings = require(`${src}/processors/teamspaces/settings`);
 const { generateUUID } = require(`${src}/utils/helper/uuids`);
 
@@ -71,8 +74,23 @@ const testGetTemplateList = () => {
 	});
 };
 
+const testGetRiskCategories = () => {
+	describe('Get risk cateogires', () => {
+		test('should call getRiskCategories in the model object', async () => {
+			const teamspace = generateRandomString();
+			const data = generateRandomString();
+			SettingsModel.getRiskCategories.mockResolvedValueOnce(data);
+			await expect(Settings.getRiskCategories(teamspace)).resolves.toEqual(data);
+
+			expect(SettingsModel.getRiskCategories).toHaveBeenCalledTimes(1);
+			expect(SettingsModel.getRiskCategories).toHaveBeenCalledWith(teamspace);
+		});
+	});
+};
+
 describe('processors/teamspaces/settings', () => {
 	testAddTemplate();
 	testUpdateTemplate();
 	testGetTemplateList();
+	testGetRiskCategories();
 });

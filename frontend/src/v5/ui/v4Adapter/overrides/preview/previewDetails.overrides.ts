@@ -17,7 +17,7 @@
 
 import { css } from 'styled-components';
 import { Details, Container as IssueDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
-import { Container, Header, TitleNumber, Grid, Details as Accordion } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Container, Header, TitleNumber, Grid, Details as Accordion, StyledForm } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
@@ -55,7 +55,22 @@ export default css`
 			align-items: start;
 			min-height: unset;
 
+			.MuiAccordionSummary {
+				&-content {
+					margin: 12px 0 5px;
+					max-width: 100%;
+				}
+				
+				&-expandIconWrapper {
+					display: none;
+				}
+			}
+
 			${Grid} {
+
+				${StyledForm} {
+					width: 94%;
+				}
 
 				${TitleNumber} {
 					color: ${({ theme }) => theme.palette.secondary.main};
@@ -94,16 +109,18 @@ export default css`
 					font-weight: 500;
 				}
 
-				.MuiOutlinedInput-notchedOutline {
-					top: -1px;
-				}
-
 				span {
 					color: ${({ theme }) => theme.palette.base.lighter};
 					border: solid 1px ${({ theme }) => theme.palette.base.lighter};
 					margin: 0;
 					box-sizing: border-box;
 					height: 100%;
+					width: 100%;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					overflow: hidden;
+					display: inline-block;
+					line-height: 20px;
 				}
 
 				// weird floating legend
@@ -127,7 +144,8 @@ export default css`
 			// user + status + clone button
 			${Details} {
 				${StyledButton} {
-					margin: 9px 5px 0 0;
+					margin: 9px 4px 0 0;
+					min-width: 73px;
 				}
 			}
 

@@ -30,6 +30,7 @@ export default {
 			defaultValue: 10,
 		},
 	},
+	parameters: { controls: { exclude: 'icons' } },
 } as ComponentMeta<any>;
 
 export const Icons = IconsTemplate.bind({});

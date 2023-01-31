@@ -85,6 +85,7 @@ interface IProps {
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
+	setProjectionModeSuccess: (mode) => void;
 }
 
 interface IState {
@@ -145,6 +146,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		}
 
 		fetchTeamspaces(currentTeamspace);
+		this.props.viewer.on(VIEWER_EVENTS.CAMERA_PROJECTION_SET, this.props.setProjectionModeSuccess);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -165,6 +167,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
+			this.props.resetPanelsStates();
 			this.props.unsubscribeOnIssueChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.unsubscribeOnRiskChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.fetchData(params.teamspace, params.model);

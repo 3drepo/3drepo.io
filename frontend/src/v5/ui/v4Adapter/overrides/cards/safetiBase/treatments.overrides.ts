@@ -29,25 +29,25 @@ export default css`
 		margin-top: 15px;
 
 		${TextField} {
-			margin: 25px 0 0;
+			margin: 8px 0 0;
 
 			.MuiFormControl-root {
 				label {
-					top: -17px;
+					margin-top: -1px;
 				}
 			}
 
 			label {
-				top: -16px;
-				left: 0;
+				position: unset;
 				font-size: 15px;
 				transform: scale(.7);
+				margin-bottom: -2px;
 				
 				& ~ span {
 					margin-top: 0;
 					padding-top: 2px;
-					min-height: 24px;
-					border: 1px solid ${({ theme }) => theme.palette.base.lighter};
+					min-height: 26px;
+					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					word-break: break-word;
 				}
 				
@@ -55,11 +55,11 @@ export default css`
 					position: relative;
 					border-radius: 4px;
 					background: ${({ theme }) => theme.palette.primary.contrast};
-					min-height: 23px;
+					min-height: 25px;
 					box-sizing: border-box;
 					line-height: 18px;
 					padding: 0 10px;
-					margin: -1px 0 0;
+					margin: 0;
 					font-size: 12px;
 					color: ${({ theme }) => theme.palette.secondary.main};
 
@@ -90,8 +90,7 @@ export default css`
 			padding-top: 0;
 
 			${StyledSelect} svg {
-				/* TODO: fix after new palette is released */
-				color: #C1C8D5;
+				color: ${({ theme }) => theme.palette.base.lighter};
 				top: -13px;
 			}
 
@@ -101,7 +100,7 @@ export default css`
 		}
 
 		${SuggestionButtonWrapper} ~ * {
-			margin-top: 10px;
+			margin-top: -9px;
 		}
 	}
 `;

@@ -16,7 +16,6 @@
  */
 
 /* eslint-disable no-underscore-dangle */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 /* eslint-enable no-var */
 
 import { IndexedDbCache } from './unity-indexedbcache';
@@ -67,6 +66,11 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static unityInstance;
+
+	/** A URL pointing to the Unity folder of a distribution. E.g. www.3drepo.io/unity/.
+	 * This is where the Unity Build and the IndexedDb worker can be found. */
+	/** @hidden */
+	public static unityUrl: URL;
 
 	/** @hidden */
 	public static readyPromise: Promise<void>;
@@ -168,7 +172,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static _loadUnity(canvas: any, unityURL): Promise<void> {
+	public static _loadUnity(canvas: any, domainURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -184,7 +188,9 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const buildUrl = `${unityURL ? `${unityURL}/` : ''}unity/Build`;
+		UnityUtil.unityUrl = new URL(domainURL || window.location.origin);
+
+		const buildUrl = new URL('/unity/Build', UnityUtil.unityUrl);
 
 		const config = {
 			dataUrl: `${buildUrl}/unity.data.unityweb`,
@@ -874,6 +880,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ modelNamespace, priority }));
 	}
 
+	public static setStreamingFovWeight(weight: number) {
+		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, Number(weight));
+	}
+
 	/**
 	 * The amount of space the geometry streaming should leave in the
 	 * unmanaged heap.
@@ -886,7 +896,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 */
 	public static setStreamingMemoryThreshold(thresholdInMb: number) {
-		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, thresholdInMb);
+		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, Number(thresholdInMb));
 	}
 
 	/**
@@ -897,7 +907,7 @@ export class UnityUtil {
 	 * @category Streaming
 	 */
 	public static setStreamingMemoryLimit(maxMemoryInMb: number) {
-		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, maxMemoryInMb);
+		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, Number(maxMemoryInMb));
 	}
 
 	/**
@@ -932,7 +942,7 @@ export class UnityUtil {
 	 * @param power - how sharply the fade out occurs
 	 * @code UnityUtil.SetStreamingBundlesFade(0.7,1.6,5);
 	 */
-	public static SetStreamingBundlesFade(distance: number, bias: number, power: number) {
+	public static setStreamingBundlesFade(distance: number, bias: number, power: number) {
 		const params = {
 			bias,
 			distance,
@@ -946,8 +956,8 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingBundlesFacesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingBundlesFacesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -955,8 +965,8 @@ export class UnityUtil {
 	 * will disable the Supermesh Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingBundlesLinesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingBundlesLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingBundlesLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -964,8 +974,8 @@ export class UnityUtil {
 	 * will disable the Elements Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingElementsFacesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingElementsFacesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingElementsFacesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -973,8 +983,8 @@ export class UnityUtil {
 	 * will disable the Elements Bounds.
 	 * @category Streaming
 	 */
-	public static SetStreamingElementsLinesAlpha(alpha: number) {
-		UnityUtil.toUnity('SetStreamingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, alpha);
+	public static setStreamingElementsLinesAlpha(alpha: number) {
+		UnityUtil.toUnity('SetStreamingElementsLinesAlpha', UnityUtil.LoadingState.VIEWER_READY, Number(alpha));
 	}
 
 	/**
@@ -983,8 +993,8 @@ export class UnityUtil {
 	 * @category Streaming
 	 * @param radius - the distance from the camera towards the far plane, between 0 and 1.
 	 */
-	public static SetStreamingElementRadius(radius: number) {
-		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, radius);
+	public static setStreamingElementsRadius(radius: number) {
+		UnityUtil.toUnity('SetStreamingElementRadius', UnityUtil.LoadingState.VIEWER_READY, Number(radius));
 	}
 
 	/**
@@ -1535,7 +1545,7 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @return returns a promises which will resolve with the viewpoint information
 	 */
-	public static requestViewpoint(account: string, model: string): Promise<object> {
+	public static requestViewpoint(account: string, model: string): Promise<any> {
 		const newViewpointPromise = new Promise((resolve, reject) => {
 			this.viewpointsPromises.push({ resolve, reject });
 		});
@@ -1585,6 +1595,14 @@ export class UnityUtil {
 	 */
 	public static setFarPlaneSampleSize(value: number) {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
+	public static setMaxFarPlane(value: number) {
+		UnityUtil.toUnity('SetMaxFarPlane', UnityUtil.LoadingState.VIEWER_READY, Number(value));
+	}
+
+	public static setMaxNearPlane(value: number) {
+		UnityUtil.toUnity('SetMaxNearPlane', UnityUtil.LoadingState.VIEWER_READY, Number(value));
 	}
 
 	/**
@@ -1913,6 +1931,18 @@ export class UnityUtil {
 		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/** How many non-trivial jobs the viewer can complete per frame when the
+	 * camera isnt moving */
+	public static setJobsPerFrameStatic(numJobs: number) {
+		UnityUtil.toUnity('SetNumStaticJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
+	}
+
+	/** How many non-trivial jobs the viewer can complete per frame when the
+	 * camera is moving */
+	public static setJobsPerFrameDynamic(numJobs: number) {
+		UnityUtil.toUnity('SetNumDynamicJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
+	}
+
 	/**
 	 * Move mesh/meshes by a given transformation matrix.
 	 * NOTE: this currently only works as desired in Synchro Scenarios
@@ -1956,6 +1986,6 @@ export class UnityUtil {
 	 * @param unityInstance
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
-		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName);
+		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
 	}
 }

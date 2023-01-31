@@ -21,7 +21,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { isValidType, validateSchema } = require(`${v5Path}/schemas/subscriptions`);
-const { getSubscriptions, editSubscriptions, removeSubscription } = require(`${v5Path}/models/teamspaces`);
+const { getSubscriptions, editSubscriptions, removeSubscription } = require(`${v5Path}/models/teamspaceSettings`);
 
 const run = async (teamspace, remove, removeAll, type, collaborators, data, expiryDate) => {
 	const subs = await getSubscriptions(teamspace);
@@ -43,7 +43,7 @@ const run = async (teamspace, remove, removeAll, type, collaborators, data, expi
 	logger.logInfo(`${teamspace} has been updated. Current subscription(s): ${JSON.stringify(subsUpdated)}`);
 };
 
-const genYargs = (yargs) => {
+const genYargs = /* istanbul ignore next */ (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('users',
 		{

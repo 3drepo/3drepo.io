@@ -22,8 +22,11 @@ SsoConstants.providers = {
 };
 
 SsoConstants.errorCodes = {
-	emailExists: 1,
-	emailExistsWithSSO: 2,
+	EMAIL_EXISTS: 1,
+	EMAIL_EXISTS_WITH_SSO: 2,
+	NON_SSO_USER: 3,
+	USER_NOT_FOUND: 4,
+	UNKNOWN: 5,
 };
 
 module.exports = SsoConstants;

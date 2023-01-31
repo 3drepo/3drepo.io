@@ -16,10 +16,10 @@
  */
 
 "use strict";
-const {v5Path} = require("../../interop");
+const { v5Path } = require("../../interop");
 
 const express = require("express");
-const router = express.Router({mergeParams: true});
+const router = express.Router({ mergeParams: true });
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
@@ -31,9 +31,9 @@ const UsersV5 = require(`${v5Path}/processors/users`);
 const { createSession, destroySession } = require(`${v5Path}/middleware/sessions`);
 const { canLogin } = require(`${v5Path}/middleware/auth`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
-const { validateLoginData} = require(`${v5Path}/middleware/dataConverter/inputs/users`);
+const { validateLoginData } = require(`${v5Path}/middleware/dataConverter/inputs/users`);
 
-const { respond: respondV5} = require(`${v5Path}/utils/responder`);
+const { respond: respondV5 } = require(`${v5Path}/utils/responder`);
 
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
@@ -42,6 +42,7 @@ const FileType = require("file-type");
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
+const { getUserByUsernameOrEmail, isSsoUser } = require("../../v5/models/users");
 
 /**
  * @api {post} /login Login
@@ -555,26 +556,32 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function login(req, res, next) {
-	if(req?.session?.user?.username) {
+	if (req?.session?.user?.username) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 	}
 
 	const { user, password } = req.body;
-	UsersV5.login(user, password).then((loginData) => {
-		req.loginData = loginData;
+	UsersV5.login(user, password).then(() => {
+		req.loginData = {username: user};
 		next();
-	}).catch((err) => respondV5(req, res, err));
+	}).catch((err) =>{
+		respondV5(req, res, err);
+	});
 }
 
 function checkLogin(req, res, next) {
-	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
+	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, { username: req.session.user.username });
 }
 
-function updateUser(req, res, next) {
+async function updateUser(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	if(req.body.oldPassword) {
-		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
+	if (await isSsoUser(req.params.account)) {
+		return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
+
+	if (req.body.oldPassword) {
+		if (Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
 			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
 			// Update password
 			User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
@@ -601,11 +608,11 @@ function signUp(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
-	if(!config.auth.register) {
+	if (!config.auth.register) {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.REGISTER_DISABLE, responseCodes.REGISTER_DISABLE);
 	}
 
-	if(!req.body.password) {
+	if (!req.body.password) {
 		const err = responseCodes.SIGN_UP_PASSWORD_MISSING;
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
@@ -634,7 +641,7 @@ function signUp(req, res, next) {
 
 		checkCaptcha.then(resBody => {
 
-			if(resBody.success) {
+			if (resBody.success) {
 				return User.createUser(req.params.account, req.body.password, {
 
 					email: req.body.email,
@@ -649,13 +656,13 @@ function signUp(req, res, next) {
 					// phoneNumber: req.body.phoneNumber
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
+				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES });
 			}
 
 		}).then(data => {
 			// send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
-				token : data.token,
+				token: data.token,
 				email: req.body.email,
 				firstName: utils.ucFirst(req.body.firstName),
 				username: req.params.account,
@@ -687,36 +694,43 @@ function verify(req, res, next) {
 	User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? err.resCode : err);
 	});
 }
 
 function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
-		User.getForgotPasswordToken(req.body.userNameOrEmail).then(data => {
-			if (data.email && data.token && data.username) {
-				// send forgot password email
-				return Mailer.sendResetPasswordEmail(data.email, {
-					token : data.token,
-					email: data.email,
-					username: data.username,
-					firstName:data.firstName
-				}).catch(err => {
-					// catch email error instead of returning to client
-					systemLogger.logDebug(`Email error - ${err.message}`);
-					return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
-				});
-			}
-		}).then(emailRes => {
-			systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
+
+	getUserByUsernameOrEmail(req.body.userNameOrEmail, { "customData.sso": 1 }).then(({ customData: { sso } }) => {
+		if (sso) {
+			return responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+		}
+
+		if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
+			User.getForgotPasswordToken(req.body.userNameOrEmail).then(data => {
+				if (data.email && data.token && data.username) {
+					// send forgot password email
+					return Mailer.sendResetPasswordEmail(data.email, {
+						token: data.token,
+						email: data.email,
+						username: data.username,
+						firstName: data.firstName
+					}).catch(err => {
+						// catch email error instead of returning to client
+						systemLogger.logDebug(`Email error - ${err.message}`);
+						return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
+					});
+				}
+			}).then(emailRes => {
+				systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+			}).catch(err => {
+				responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? err.resCode : err);
+			});
+		} else {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+	}).catch(responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {}));
 }
 
 function getAvatar(req, res, next) {
@@ -725,8 +739,8 @@ function getAvatar(req, res, next) {
 	// Update user info
 	UsersV5.getAvatar(req.params[C.REPO_REST_API_ACCOUNT]).then(async avatar => {
 
-		if(!avatar) {
-			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
+		if (!avatar) {
+			return Promise.reject({ resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 		const fileExt = await fileExtensionFromBuffer(avatar);
 		req.params.format = fileExt || "png";
@@ -746,11 +760,11 @@ function uploadAvatar(req, res, next) {
 
 		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(!C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
-			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+		if (!C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
+			return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
-		if(size > config.avatarSizeLimit) {
+		if (size > config.avatarSizeLimit) {
 			return cb({ resCode: responseCodes.AVATAR_SIZE_LIMIT });
 		}
 
@@ -764,11 +778,11 @@ function uploadAvatar(req, res, next) {
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
-			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		} else {
 			FileType.fromBuffer(req.file.buffer).then(type => {
 				if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
-					throw(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+					throw (responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 				}
 			}).then(async () => {
 				const username = req.params[C.REPO_REST_API_ACCOUNT];
@@ -801,14 +815,14 @@ async function listUserInfo(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const user = await User.findByUserName(req.params.account);
 
-	if(!user) {
-		throw {resCode: responseCodes.USER_NOT_FOUND};
+	if (!user) {
+		throw { resCode: responseCodes.USER_NOT_FOUND };
 	}
 
 	const accounts = await User.listAccounts(user);
 
-	const {firstName, lastName, email, billing: { billingInfo }}  = user.customData;
-	const hasAvatar = await fileExists("admin", "avatars.ref" , user.user);
+	const { firstName, lastName, email, billing: { billingInfo } } = user.customData;
+	const hasAvatar = await fileExists("admin", "avatars.ref", user.user);
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 		accounts,
 		firstName,
@@ -823,17 +837,17 @@ function listInfo(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
-	if(req.session.user.username !== req.params.account) {
+	if (req.session.user.username !== req.params.account) {
 
 		let getType;
 
-		if(C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1) {
+		if (C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1) {
 			getType = Promise.resolve("blacklisted");
 		} else {
 			getType = User.findByUserName(req.params.account).then(_user => {
-				if(!_user) {
+				if (!_user) {
 					return "";
-				} else if(!_user.customData.email) {
+				} else if (!_user.customData.email) {
 					return "database";
 				} else {
 					return "user";
@@ -842,7 +856,7 @@ function listInfo(req, res, next) {
 		}
 
 		getType.then(type => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {type});
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { type });
 		});
 
 	} else {

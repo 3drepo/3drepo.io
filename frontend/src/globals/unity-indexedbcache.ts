@@ -27,9 +27,10 @@
  * between it and Unity.
  */
 export class IndexedDbCache {
-	constructor(unityInstance: any, gameObjectName: string) {
+	constructor(unityInstance: any, gameObjectName: string, host: URL) {
 		this.unityInstance = unityInstance;
 		this.gameObjectName = gameObjectName;
+		this.host = host;
 		this.transactions = {};
 		this.createWorker();
 	}
@@ -48,13 +49,16 @@ export class IndexedDbCache {
 	 * class gets its own worker. */
 	worker: any;
 
+	/** The host on which to find the WebWorker script. */
+	host: URL;
+
 	// IndexedDb actions are offloaded to a WebWorker. This is for performance
 	// reasons. WebWorkers run individual scripts in their own thread, and
 	// interact with the main thread (of their creator) by posting messages.
 	// When messages are passed, a deep copy is created.
 
 	createWorker() {
-		this.worker = new Worker(new URL('dist/indexeddbworker.js', window.location.origin));
+		this.worker = new Worker(new URL('unity/indexeddbworker.js', this.host));
 		this.worker.onmessage = (ev) => {
 			// The state of the IndexedDb has changed, so we may need to pause
 			// requests.

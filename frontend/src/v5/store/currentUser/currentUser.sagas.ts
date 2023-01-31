@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { clientConfigService } from '@/v4/services/clientConfig';
+import { ViewerActions } from '@/v4/modules/viewer';
 import * as API from '@/v5/services/api';
-import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { getUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -30,11 +30,12 @@ import {
 export function* fetchUser() {
 	try {
 		const userData = yield API.CurrentUser.fetchUser();
-		const avatarUrl = generateV5ApiUrl(`user/avatar?${Date.now()}`, clientConfigService.GET_API);
+		const avatarUrl = getUrl(`user/avatar?${Date.now()}`);
 		yield put(CurrentUserActions.fetchUserSuccess({
 			...userData,
 			avatarUrl,
 		}));
+		yield put(ViewerActions.fetchSettings());
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'currentUser.fetchUser.error', defaultMessage: 'trying to fetch current user details' }),
@@ -84,7 +85,7 @@ export function* deleteApiKey() {
 	yield put(CurrentUserActions.setApiKeyIsUpdating(false));
 }
 
-export default function* AuthSaga() {
+export default function* CurrentUserSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.UPDATE_PERSONAL_DATA, updatePersonalData);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);

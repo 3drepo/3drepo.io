@@ -24,25 +24,32 @@ import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
 import { debounce, noop } from 'lodash';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { IFrame } from '../../../../../../modules/sequences';
 import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
-import { LONG_DATE_TIME_FORMAT_NO_MINUTES } from '../../../../../../services/formatting/formatDate';
+import { LONG_DATE_TIME_FORMAT_NO_MINUTES, LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
 	IntervalRow,
+	SequencePlayerAllInputs,
 	SequencePlayerColumn,
 	SequencePlayerContainer,
 	SequenceRow,
 	SequenceSlider,
 	SliderRow,
 	StepInput,
+	StepLabel,
 	StyledLoader,
 } from '../../sequences.styles';
+
+interface IFrame {
+	dateTime: Date;
+	state: string;
+}
 
 interface IProps {
 	max: Date;
@@ -282,40 +289,43 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 		return (
             <SequencePlayerContainer>
 				<SequencePlayerColumn>
-					<SequenceRow>
-						<Grid item>
-							<IconButton disabled={this.isFirstDay} onClick={this.rewind} size="small">
-								<StepBackIcon fontSize="large" />
-							</IconButton>
-						</Grid>
-						<Grid item>
-							<DatePicker
-								shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
-								name="date"
-								value={value}
-								inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES}
-								onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
-								placeholder="date"
-								dateTime
-							/>
-						</Grid>
-						<Grid item>
-							<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">
-								<StepForwardIcon fontSize="large" />
-							</IconButton>
-						</Grid>
-					</SequenceRow>
-					<IntervalRow>
-						Step interval: <StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
-						&nbsp;
-						<Select value={stepScale} onChange={this.onChangeStepScale} >
-							<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
-							<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
-							<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
-							<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
-							<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
-						</Select>
-					</IntervalRow>
+					<SequencePlayerAllInputs>
+						<SequenceRow>
+							<Grid item>
+								<IconButton disabled={this.isFirstDay} onClick={this.rewind} size="small">
+									<StepBackIcon fontSize="large" />
+								</IconButton>
+							</Grid>
+							<Grid item>
+								<DatePicker
+									shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+									name="date"
+									value={value}
+									inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 : LONG_DATE_TIME_FORMAT_NO_MINUTES}
+									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
+									placeholder="date"
+									dateTime
+								/>
+							</Grid>
+							<Grid item>
+								<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">
+									<StepForwardIcon fontSize="large" />
+								</IconButton>
+							</Grid>
+						</SequenceRow>
+						<IntervalRow>
+							<StepLabel>Step interval:</StepLabel>
+							<StepInput value={stepInterval} onChange={this.onChangeStepInterval} />
+							&nbsp;
+							<Select value={stepScale} onChange={this.onChangeStepScale} >
+								<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
+							</Select>
+						</IntervalRow>
+					</SequencePlayerAllInputs>
 					<SliderRow>
 						<Grid item>
 							<IconButton onClick={this.onClickPlayStop} size="large"><this.PlayButtonIcon /></IconButton>

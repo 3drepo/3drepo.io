@@ -18,7 +18,14 @@
 import styled from 'styled-components';
 import { Button } from '@controls/button';
 import { Link } from '@mui/material';
-import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
+import { Menu } from '@controls/actionMenu/actionMenu.styles';
+
+export const ActionMenu = styled(ActionMenuBase)`
+	${Menu} {
+		width: 230px;
+	}
+`;
 
 export const AvatarContainer = styled.div`
 	&& {
@@ -35,12 +42,14 @@ export const AvatarSection = styled.div`
 	margin-bottom: 11px;
 `;
 
-export const TruncatableName = styled(Truncate).attrs({
-	lines: 1,
-	width: 210,
-})`
+export const TruncatableName = styled.div`
 	text-align: center;
 	display: inline-block;
+	max-width: 200px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	padding-right: 2px;
 `;
 
 export const UserFullName = styled.div`
@@ -49,7 +58,7 @@ export const UserFullName = styled.div`
 	text-align: center;
 `;
 
-export const UserUserName = styled.div`
+export const UserUserName = styled(TruncatableName)`
 	font-size: 12px;
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-bottom: 11px;

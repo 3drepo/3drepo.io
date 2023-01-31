@@ -16,11 +16,13 @@
  */
 
 const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
+const { getRiskCategories } = require('../../models/teamspaceSettings');
 
 const Settings = {};
 
 Settings.addTicketTemplate = addTemplate;
 Settings.updateTicketTemplate = updateTemplate;
 Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
+Settings.getRiskCategories = getRiskCategories;
 
 module.exports = Settings;

@@ -74,7 +74,7 @@ const user = {
 	},
 };
 
-const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation((username) => {
+UsersModel.getUserByUsername.mockImplementation((username) => {
 	if (username === user.user) {
 		return user;
 	}
@@ -102,7 +102,7 @@ const testLogin = () => {
 	});
 };
 
-const formatUser = (userProfile, hasAvatar, hash) => ({
+const formatUser = (userProfile, hasAvatar, hash, sso) => ({
 	username: userProfile.user,
 	firstName: userProfile.customData.firstName,
 	lastName: userProfile.customData.lastName,
@@ -112,64 +112,65 @@ const formatUser = (userProfile, hasAvatar, hash) => ({
 	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
 	...(hash ? { intercomRef: hash } : {}),
+	...(sso ? { sso } : {}),
 });
 
 const tesGetProfileByUsername = () => {
 	describe('Get user profile by username', () => {
+		const projection = {
+			user: 1,
+			'customData.firstName': 1,
+			'customData.lastName': 1,
+			'customData.email': 1,
+			'customData.apiKey': 1,
+			'customData.billing.billingInfo.countryCode': 1,
+			'customData.billing.billingInfo.company': 1,
+			'customData.sso': 1,
+		};
+
 		test('should return user profile', async () => {
-			const projection = {
-				user: 1,
-				'customData.firstName': 1,
-				'customData.lastName': 1,
-				'customData.email': 1,
-				'customData.apiKey': 1,
-				'customData.billing.billingInfo.countryCode': 1,
-				'customData.billing.billingInfo.company': 1,
-			};
+			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
 			FilesManager.fileExists.mockResolvedValueOnce(false);
+
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, false));
-			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
-			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
 		});
 
 		test('should return user profile with intercom reference if configured', async () => {
-			const projection = {
-				user: 1,
-				'customData.firstName': 1,
-				'customData.lastName': 1,
-				'customData.email': 1,
-				'customData.apiKey': 1,
-				'customData.billing.billingInfo.countryCode': 1,
-				'customData.billing.billingInfo.company': 1,
-			};
+			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
 			FilesManager.fileExists.mockResolvedValueOnce(false);
 
 			const hash = generateRandomString();
 			Intercom.generateUserHash.mockReturnValueOnce(hash);
-
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, false, hash));
-			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
-			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
 		});
 
 		test('should return user profile with avatar', async () => {
-			const projection = {
-				user: 1,
-				'customData.firstName': 1,
-				'customData.lastName': 1,
-				'customData.email': 1,
-				'customData.apiKey': 1,
-				'customData.billing.billingInfo.countryCode': 1,
-				'customData.billing.billingInfo.company': 1,
-			};
-
+			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
 			FilesManager.fileExists.mockResolvedValueOnce(true);
+
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, true));
-			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
-			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+		});
+
+		test('should return user profile with SSO user', async () => {
+			const ssoType = generateRandomString();
+			UsersModel.getUserByUsername.mockResolvedValueOnce({
+				...user, customData: { ...user.customData, sso: { id: generateRandomString(), type: ssoType } },
+			});
+			FilesManager.fileExists.mockResolvedValueOnce(true);
+
+			const res = await Users.getProfileByUsername(user.user);
+			expect(res).toEqual(formatUser(user, true, undefined, ssoType));
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
 		});
 	});
 };
@@ -235,9 +236,12 @@ const testSignUp = () => {
 			email: generateRandomString(),
 			password: generateRandomString(),
 			firstName: generateRandomString(),
+			lastName: generateRandomString(),
+			company: generateRandomString(),
+			mailListOptOut: true,
 		};
 
-		test('should sign a user up', async () => {
+		test('should sign a user up and send verification email (non SSO user)', async () => {
 			await Users.signUp(newUserData);
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: exampleHashString });
@@ -248,24 +252,26 @@ const testSignUp = () => {
 				firstName: newUserData.firstName,
 				username: newUserData.username,
 			});
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 
-		test('should generate a password and sign a user up', async () => {
+		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
 			const sso = { id: generateRandomString() };
 			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({
 				...newUserData,
 				password: exampleHashString,
-				token: exampleHashString,
 				sso,
 			});
-			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
-				token: exampleHashString,
-				email: newUserData.email,
-				firstName: newUserData.firstName,
+			expect(Mailer.sendEmail).not.toHaveBeenCalled();
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_VERIFIED, {
 				username: newUserData.username,
+				email: newUserData.email,
+				fullName: `${newUserData.firstName} ${newUserData.lastName}`,
+				company: newUserData.company,
+				mailListOptOut: newUserData.mailListOptOut,
 			});
 		});
 	});

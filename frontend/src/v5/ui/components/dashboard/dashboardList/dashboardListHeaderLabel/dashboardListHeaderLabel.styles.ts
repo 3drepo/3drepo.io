@@ -38,13 +38,13 @@ export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Di
 export const Label = styled(Typography).attrs({
 	variant: 'kicker',
 })`
-	color: ${({ theme }) => theme.palette.base.main};
 	line-height: normal;
 `;
 
 export const Button = styled(ButtonComponent).attrs({
 	variant: 'text',
 })`
+	color: ${({ theme }) => theme.palette.base.main};
 	justify-content: flex-start;
 	padding: 0;
 	margin: 0;

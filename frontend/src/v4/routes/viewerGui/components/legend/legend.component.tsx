@@ -81,7 +81,7 @@ export class Legend extends PureComponent<IProps, IState> {
 	}
 
 	public renderEmptyState = renderWhenTrue(() => (
-		<EmptyStateInfo>No legend have been created yet</EmptyStateInfo>
+		<EmptyStateInfo>No legend has been created yet</EmptyStateInfo>
 	));
 
 	public renderActionsMenu = () => (

@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
 import { useParams } from 'react-router';
 
-import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
-import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
+import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IUser } from '@/v5/store/users/users.redux';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Text } from './revisionsListItemAuthor.styles';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
+import { Text, Name, FixedOrGrowContainer } from './revisionsListItemAuthor.styles';
 
 interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
@@ -35,48 +34,25 @@ export const RevisionsListItemAuthor = ({
 	active = false,
 	...rest
 }: IRevisionsListItemAuthor): JSX.Element => {
-	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const { teamspace } = useParams<DashboardParams>();
 	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
 
-	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-		setAnchorEl(event.currentTarget);
-	};
-
-	const handlePopoverClose = () => {
-		setAnchorEl(null);
-	};
-
-	const open = Boolean(anchorEl);
-
 	return (
-		<FixedOrGrowContainer {...rest}>
-			<Text
-				aria-owns={open ? 'mouse-over-popover' : undefined}
-				aria-haspopup="true"
-				onMouseEnter={handlePopoverOpen}
-				onMouseLeave={handlePopoverClose}
-				$active={active}
-			>
-				{author.firstName} {author.lastName}
-			</Text>
-			<Popover
-				id="mouse-over-popover"
-				open={open}
-				anchorEl={anchorEl}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'center',
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'left',
-				}}
-				onClose={handlePopoverClose}
-				disableRestoreFocus
+		<FixedOrGrowContainer {...rest} $active={active}>
+			<HoverPopover
+				anchor={(props) => (
+					<Text
+						aria-haspopup="true"
+						$active={active}
+						{...props}
+					>
+						<Name>{author?.firstName || authorName}</Name>
+						<Name>{author?.lastName}</Name>
+					</Text>
+				)}
 			>
 				<UserPopover user={author} />
-			</Popover>
+			</HoverPopover>
 		</FixedOrGrowContainer>
 	);
 };

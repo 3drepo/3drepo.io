@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
+import { formatMessage } from '@/v5/services/intl';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { goBack, push } from 'connected-react-router';
 import { matchPath } from 'react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
@@ -59,7 +62,14 @@ function* fetchData({ teamspace, model }) {
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
-		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
+		if (isV5()) {
+			yield put(DialogsActions.open('alert', {
+				currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
+				error,
+			}));
+		} else {
+			yield put(DialogActions.showRedirectToTeamspaceDialog(error, teamspace));
+		}
 		return;
 	}
 
@@ -248,7 +258,6 @@ function* goToExtent() {
 function* setProjectionMode({mode}) {
 	try {
 		yield Viewer.setProjectionMode(mode);
-		yield put(ViewerGuiActions.setProjectionModeSuccess(mode));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'projection mode', error));
 	}

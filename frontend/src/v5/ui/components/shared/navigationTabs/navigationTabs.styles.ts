@@ -25,6 +25,7 @@ export const Container = styled.nav`
 	box-shadow: 0 0 13px -7px;
 	position: relative;
 	z-index: 1;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const Link: typeof NavLink = styled(LinkComponent).attrs({

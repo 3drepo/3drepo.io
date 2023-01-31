@@ -24,6 +24,39 @@ import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 export const Container = styled(Breadcrumbs)`
 	&& {
 		margin-left: 15px;
+
+		a {
+			text-overflow: ellipsis;
+			overflow: hidden;
+			display: block;
+			white-space: nowrap;
+		}
+
+		.MuiBreadcrumbs-li {
+			max-width: fit-content;
+			overflow: hidden;
+			margin: 0 4px;
+
+			&:nth-of-type(1) {
+				height: 37px;
+			}
+
+			&:nth-of-type(3) {
+				flex: 3;
+			}
+
+			&:nth-of-type(5) {
+				flex: 5;
+			}
+
+			&:nth-of-type(7) {
+				flex: 7;
+			}
+
+			&:nth-of-type(9) {
+				flex: 9;
+			}
+		}
 	}
 `;
 
@@ -34,7 +67,7 @@ export const Breadcrumb: typeof Link = styled(Button).attrs({
 	&& {
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		padding: 5px;
-		margin: 0 4px;
+		margin: 0;
 		min-width: auto;
 
 		&:hover {
@@ -56,10 +89,13 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 		color: ${({ theme }) => theme.palette.primary.main};
 		max-width: 100%;
 		padding-right: 9px;
-		margin-right: 0;
 		${({ $secondary }) => $secondary && css`
 		font-weight: ${FONT_WEIGHT.SLIM}
 		`};
+
+		.MuiButton-endIcon {
+			margin-top: 1px;
+		}
 	}
 `;
 
