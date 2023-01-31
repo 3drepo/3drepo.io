@@ -69,11 +69,23 @@ export const BasicComment = styled.div<CommentProps>`
 	position: relative;
 
 	${CommentButtons} {
-		display: none;
+		display: flex;
+		opacity: 0;
+		transition: opacity .3s;
+			pointer-events: none;
+	}
+
+	@keyframes activateButtons {
+		100% {
+			pointer-events: initial;
+		}
 	}
 
 	&:hover ${CommentButtons} {
-		display: flex;
+		opacity: 1;
+		transition-delay: .3s;
+		animation: activateButtons forwards;
+		animation-delay: .5s;
 	}
 
 	&::before {
