@@ -72,7 +72,7 @@ export const CurrentUserComment = ({
 
 	if (isEditMode) {
 		const editedMessage = watch('editedMessage');
-		const canUpdate = message !== editedMessage && editedMessage.length > 0;
+		const canUpdate = sanitiseMessage(message) !== editedMessage && editedMessage.length > 0;
 
 		const updateMessage = () => {
 			let newMessage = sanitiseMessage(editedMessage);
