@@ -339,6 +339,36 @@ const commentUpdatedTest = () => {
 
 			socket.close();
 		});
+
+		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_COMMENT} event when a container ticket comment has been deleted`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.CONTAINER_UPDATE_TICKET_COMMENT, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: containerComment._id,
+					ticket: containerTicket._id,
+					deleted: true,
+					updatedAt: getRes.body.updatedAt,
+				},
+			});
+
+			socket.close();
+		});
 	});
 };
 

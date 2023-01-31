@@ -264,7 +264,7 @@ const testDeleteComment = () => {
 			expect(publishFn).toHaveBeenCalledWith(events.UPDATE_COMMENT, { teamspace,
 				project,
 				model,
-				data: { ticket, _id: comment._id, deleted: true } });
+				data: { ticket, _id: comment._id, deleted: true, updatedAt: updatedComment.updatedAt } });
 		});
 
 		test('should update a comment that has images property set', async () => {
@@ -296,7 +296,7 @@ const testDeleteComment = () => {
 			expect(publishFn).toHaveBeenCalledWith(events.UPDATE_COMMENT, { teamspace,
 				project,
 				model,
-				data: { ticket, _id: comment._id, deleted: true } });
+				data: { ticket, _id: comment._id, deleted: true, updatedAt: updatedComment.updatedAt } });
 		});
 	});
 };

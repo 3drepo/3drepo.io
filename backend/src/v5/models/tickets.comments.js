@@ -117,7 +117,10 @@ TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComm
 	await updateOne(teamspace, { _id: oldComment._id },
 		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1 } });
 
-	publish(events.UPDATE_COMMENT, { teamspace, project, model, data: { ticket, _id: oldComment._id, deleted: true } });
+	publish(events.UPDATE_COMMENT, { teamspace,
+		project,
+		model,
+		data: { ticket, _id: oldComment._id, deleted: true, updatedAt: formattedComment.updatedAt } });
 };
 
 module.exports = TicketComments;
