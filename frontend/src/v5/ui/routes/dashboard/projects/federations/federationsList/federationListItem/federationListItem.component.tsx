@@ -30,7 +30,6 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { Display } from '@/v5/ui/themes/media';
-import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
 import { useParams } from 'react-router-dom';
@@ -39,6 +38,7 @@ import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, e
 import { DialogsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { FederationSettingsModal } from '../../federationSettingsModal/federationSettingsModal.component';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
@@ -72,7 +72,7 @@ export const FederationListItem = memo(({
 	};
 
 	// eslint-disable-next-line max-len
-	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsForm, { federationId: federation._id });
+	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsModal, { federationId: federation._id });
 	const onClickEdit = () => DialogsActionsDispatchers.open(EditFederationModal, { federation });
 
 	useEffect(() => combineSubscriptions(

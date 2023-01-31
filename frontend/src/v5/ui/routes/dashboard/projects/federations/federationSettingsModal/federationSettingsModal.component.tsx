@@ -18,20 +18,20 @@
 import { FederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { SettingsForm } from '../../settingsForm/settingsForm.component';
+import { SettingsModal } from '../../settingsModal/settingsModal.component';
 
-type FederationSettingsFormProps = {
+type FederationSettingsModalProps = {
 	federationId: string;
 	onClickClose: () => void;
 };
 
-export const FederationSettingsForm = ({
+export const FederationSettingsModal = ({
 	federationId,
 	...otherProps
-}: FederationSettingsFormProps) => {
+}: FederationSettingsModalProps) => {
 	const federation = FederationsHooksSelectors.selectFederationById(federationId);
 	return (
-		<SettingsForm
+		<SettingsModal
 			containerOrFederation={federation}
 			settingsSchema={FederationSettingsSchema}
 			fetchSettings={FederationsActionsDispatchers.fetchFederationSettings}

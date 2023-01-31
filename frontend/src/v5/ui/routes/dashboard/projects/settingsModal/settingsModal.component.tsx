@@ -31,7 +31,7 @@ import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormNumberField, FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
+import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsModal.styles';
 
 const UNITS = [
 	{
@@ -116,7 +116,7 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 	};
 };
 
-type ISettingsForm = {
+type ISettingsModal = {
 	containerOrFederation: IContainer | IFederation;
 	settingsSchema: any;
 	isContainer?: boolean;
@@ -133,7 +133,7 @@ type ISettingsForm = {
 	) => void;
 };
 
-export const SettingsForm = ({
+export const SettingsModal = ({
 	containerOrFederation,
 	settingsSchema,
 	isContainer,
@@ -141,7 +141,7 @@ export const SettingsForm = ({
 	fetchViews,
 	updateSettings,
 	onClickClose,
-}: ISettingsForm) => {
+}: ISettingsModal) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isValid, setIsValid] = useState(false);
 	const DEFAULT_VALUES = getDefaultValues(containerOrFederation, isContainer) as any;

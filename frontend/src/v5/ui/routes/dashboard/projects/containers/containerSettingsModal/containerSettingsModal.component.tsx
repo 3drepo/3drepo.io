@@ -18,20 +18,20 @@
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { SettingsForm } from '../../settingsForm/settingsForm.component';
+import { SettingsModal } from '../../settingsModal/settingsModal.component';
 
-type ContainerSettingsFormProps = {
+type ContainerSettingsModalProps = {
 	containerId: string;
 	onClickClose: () => void;
 };
 
-export const ContainerSettingsForm = ({
+export const ContainerSettingsModal = ({
 	containerId,
 	...otherProps
-}: ContainerSettingsFormProps) => {
+}: ContainerSettingsModalProps) => {
 	const container = ContainersHooksSelectors.selectContainerById(containerId);
 	return (
-		<SettingsForm
+		<SettingsModal
 			containerOrFederation={container}
 			isContainer
 			settingsSchema={ContainerSettingsSchema}

@@ -44,7 +44,7 @@ import { formatDate, formatMessage } from '@/v5/services/intl';
 import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
+import { ContainerSettingsModal } from '../../containerSettingsModal/containerSettingsModal.component';
 import { IsMainList } from '../../containers.component';
 
 interface IContainerListItem {
@@ -94,7 +94,8 @@ export const ContainerListItem = memo(({
 		});
 	};
 
-	const onClickSettings = () => DialogsActionsDispatchers.open(ContainerSettingsForm, { containerId: container._id });
+	// eslint-disable-next-line max-len
+	const onClickSettings = () => DialogsActionsDispatchers.open(ContainerSettingsModal, { containerId: container._id });
 
 	return (
 		<DashboardListItem
