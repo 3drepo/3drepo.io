@@ -72,7 +72,7 @@ export const BasicComment = styled.div<CommentProps>`
 		display: flex;
 		opacity: 0;
 		transition: opacity .3s;
-			pointer-events: none;
+		pointer-events: none;
 	}
 
 	@keyframes activateButtons {
