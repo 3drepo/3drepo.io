@@ -220,7 +220,6 @@ export const SettingsModal = ({
 	useEffect(() => {
 		fetchSettings(teamspace, project, containerOrFederation._id);
 		fetchViews(teamspace, project, containerOrFederation._id);
-		setAlreadyExistingNames([]);
 	}, []);
 
 	useEffect(() => {
