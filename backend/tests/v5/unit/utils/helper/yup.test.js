@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
+const { src, image } = require('../../../helper/path');
+const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
+const config = require('../../../../../src/v5/utils/config');
+const fs = require('fs');
 
 const YupHelper = require(`${src}/utils/helper/yup`);
 
@@ -134,6 +137,23 @@ const testEmbeddedImage = () => {
 	});
 };
 
+const testEmbeddedImageOrRef = () => {
+	const existingRef = generateUUID();
+	const imageBuffer = fs.readFileSync(image, { encoding: 'base64' });
+	const tooLargeImageBuffer = generateRandomBuffer(config.fileUploads.resourceSizeLimit + 1).toString('base64');
+
+	describe.each([
+		['null', null, false],
+		['valid ref', UUIDToString(existingRef), true],
+		['image buffer', imageBuffer, true],
+		['too large image buffer', tooLargeImageBuffer, false],
+	])('Image validator', (description, data, res) => {
+		test(`${description} should return ${res}`, async () => {
+			await expect(YupHelper.types.embeddedImageOrRef().isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
 describe('utils/helper/yup', () => {
 	testId();
 	testColorArr();
@@ -143,4 +163,5 @@ describe('utils/helper/yup', () => {
 	testLongDesc();
 	testTimestamp();
 	testEmbeddedImage();
+	testEmbeddedImageOrRef();
 });
