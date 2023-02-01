@@ -25,7 +25,7 @@ import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { editedCommentMessage } from '../comment.helpers';
-import { CommentAuthor, CommentButtons, CommentTime, EditedCommentLabel } from '../comment.styles';
+import { CommentAuthor, CommentButtons, CommentAge, EditedCommentLabel } from '../comment.styles';
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
@@ -77,7 +77,7 @@ export const OtherUserComment = ({
 						{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
 						{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 						<CommentMarkDown>{message}</CommentMarkDown>
-						<CommentTime>{commentAge}</CommentTime>
+						<CommentAge>{commentAge}</CommentAge>
 					</>
 				)}
 		</OtherUserCommentPopoverWrapper>

@@ -25,7 +25,7 @@ import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { editedCommentMessage } from '../comment.helpers';
 import { CommentContainer } from './currentUserComment.styles';
-import { CommentTime, CommentButtons, EditedCommentLabel } from '../comment.styles';
+import { CommentAge, CommentButtons, EditedCommentLabel } from '../comment.styles';
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
@@ -81,7 +81,7 @@ export const CurrentUserComment = ({
 			{metadata.message && (<CommentReply variant="secondary" {...metadata} />)}
 			{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			<CommentMarkDown>{message}</CommentMarkDown>
-			<CommentTime>{commentAge}</CommentTime>
+			<CommentAge>{commentAge}</CommentAge>
 		</CommentContainer>
 	);
 };

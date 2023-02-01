@@ -49,7 +49,7 @@ export const EditedCommentLabel = styled(CommentSmallText)`
 	text-align: left;
 `;
 
-export const CommentTime = styled(CommentSmallText)`
+export const CommentAge = styled(CommentSmallText)`
 	text-align: right;
 `;
 

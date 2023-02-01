@@ -17,19 +17,19 @@
 
 import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '../../comment.helpers';
-import { CommentAuthor, CommentTime } from '../../comment.styles';
+import { CommentAuthor, CommentAge } from '../../comment.styles';
 import { CommentMessageDeleted } from './deletedComment.styles';
 
 export const DeletedComment = ({ user, authorDisplayName }) => (
 	<>
 		<CommentAuthor>{authorDisplayName}</CommentAuthor>
 		<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
-		<CommentTime>
+		<CommentAge>
 			<FormattedMessage
 				id="ticket.otherUser.comment.time.deleted"
 				defaultMessage="{name} deleted this message"
 				values={{ name: user.firstName }}
 			/>
-		</CommentTime>
+		</CommentAge>
 	</>
 );
