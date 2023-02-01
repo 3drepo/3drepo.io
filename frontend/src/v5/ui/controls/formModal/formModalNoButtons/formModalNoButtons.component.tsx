@@ -17,9 +17,9 @@
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Dialog } from '@mui/material';
 import { DialogProps } from '@mui/material/Dialog';
-import { Form, RemoveWhiteCorners } from '../formModal.styles';
-import { ModalHeader } from '../../modalHeader/modalHeader.component';
-import { ModalBody } from '../../modalBody/modalBody.component';
+import { Form, RemoveWhiteCorners } from './formModal/formModal.styles';
+import { ModalHeader } from '../modalHeader/modalHeader.component';
+import { ModalBody } from '../modalBody/modalBody.component';
 
 export interface IFormModalNoButtons extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref' | 'onSubmit'> {
 	onClickClose?: () => void;

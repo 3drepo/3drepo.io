@@ -16,8 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { FormModal as FormModalBase } from '@controls/headedModal/formModal/formModal.component';
-import { FormModalContent } from '@controls/headedModal/modalBody/modalBody.styles';
+import { FormModal as FormModalBase } from '@controls/formModal/formModal.component';
+import { FormModalContent } from '@controls/formModal/modalBody/modalBody.styles';
 
 export const FormModal = styled(FormModalBase)`
 	${FormModalContent} {

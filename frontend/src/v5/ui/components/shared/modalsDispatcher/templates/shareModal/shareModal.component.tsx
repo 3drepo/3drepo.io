@@ -18,9 +18,9 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
-import { ModalHeader } from '@controls/headedModal/modalHeader/modalHeader.component';
-import { ModalBody } from '@controls/headedModal/modalBody/modalBody.component';
-import { Form } from '@controls/headedModal/formModal/formModal.styles';
+import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
+import { ModalBody } from '@controls/formModal/modalBody/modalBody.component';
+import { Form } from '@controls/formModal/formModal/formModal.styles';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {

@@ -17,8 +17,8 @@
 
 import { VisualSettingsDialog } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
 import { Dialog } from '@mui/material';
-import { ModalHeader } from '@controls/headedModal/modalHeader/modalHeader.component';
-import { RemoveWhiteCorners } from '@controls/headedModal/formModal/formModal.styles';
+import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
+import { RemoveWhiteCorners } from '@controls/formModal/formModal/formModal.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 

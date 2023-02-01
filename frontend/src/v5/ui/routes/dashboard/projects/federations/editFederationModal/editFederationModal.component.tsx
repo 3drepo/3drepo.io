@@ -21,7 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IFormModal } from '@controls/headedModal/formModal/formModal.component';
+import { IFormModal } from '@controls/formModal/formModal.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEqual } from 'lodash';
 import { EditFederation } from './editFederation';
