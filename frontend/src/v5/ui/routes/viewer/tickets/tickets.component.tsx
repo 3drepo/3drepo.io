@@ -61,12 +61,14 @@ export const Tickets = () => {
 			containerOrFederation,
 			isFederation,
 		);
-		TicketsActionsDispatchers.fetchTemplates(
-			teamspace,
-			project,
-			containerOrFederation,
-			isFederation,
-		);
+		if (view === TicketsCardViews.List) {
+			TicketsActionsDispatchers.fetchTemplates(
+				teamspace,
+				project,
+				containerOrFederation,
+				isFederation,
+			);
+		}
 	}, [containerOrFederation]);
 
 	return (
