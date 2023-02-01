@@ -27,7 +27,6 @@ import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
 import { IComment } from '@/v5/store/tickets/tickets.types';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
-import { sortBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../../routes.constants';
 import {
@@ -144,7 +143,7 @@ export const CommentsPanel = () => {
 				<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400}>
 					{commentsListIsEmpty && (
 						<Comments>
-							{sortBy(comments, 'createdAt').map((comment) => (
+							{comments.map((comment) => (
 								<Comment
 									{...comment}
 									key={comment._id}

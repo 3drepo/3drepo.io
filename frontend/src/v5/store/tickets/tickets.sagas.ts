@@ -18,6 +18,7 @@
 import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
+import { sortBy } from 'lodash';
 import { SnackbarActions } from '@/v4/modules/snackbar';
 import {
 	TicketsTypes,
@@ -84,7 +85,7 @@ export function* fetchTicketComments({
 			? API.Tickets.fetchFederationTicketComments
 			: API.Tickets.fetchContainerTicketComments;
 		const { comments } = yield fetchModelTicketComments(teamspace, projectId, modelId, ticketId);
-		const richComments = comments.map(({ createdAt, updatedAt, ...comment }) => ({
+		const richComments = sortBy(comments, 'createdAt').map(({ createdAt, updatedAt, ...comment }) => ({
 			...comment,
 			createdAt: new Date(createdAt),
 			updatedAt: new Date(updatedAt),
