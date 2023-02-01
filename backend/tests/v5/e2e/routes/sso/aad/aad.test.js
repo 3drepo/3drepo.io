@@ -227,7 +227,7 @@ const signupPost = () => {
 			id: generateRandomString(),
 		};
 
-		test('1234should redirect and add error to the query if email already exists', async () => {
+		test('should redirect and add error to the query if email already exists', async () => {
 			const state = Aad.generateCryptoHash(JSON.stringify(newUserData));
 			Aad.getUserDetails.mockResolvedValueOnce({ ...newUserDataFromAad, email: userEmail });
 			const res = await agent.post('/v5/sso/aad/signup-post').send({ state })
@@ -332,7 +332,7 @@ const testLinkPost = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test(`1234should redirect with ${errorCodes.EMAIL_EXISTS} if email is taken by another user`, async () => {
+		test(`should redirect with ${errorCodes.EMAIL_EXISTS} if email is taken by another user`, async () => {
 			const userDataFromAad = { email: userEmailSso, id: generateRandomString() };
 			const redirectUri = generateRandomURL();
 			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
