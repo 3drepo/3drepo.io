@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const db = require('../handler/db');
 const { INTERNAL_DB } = require('../handler/db.constants');
+const db = require('../handler/db');
 
 const Notifications = {};
 const NOTIFICATIONS_COLL = 'notifications';

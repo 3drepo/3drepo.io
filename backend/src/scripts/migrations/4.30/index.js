@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const addVertexCountsToMeshBSONs = require('./addVertexCountsToMeshBSONs');
-const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
-const updateFedSettingSubModels = require('./updateFedSettingSubModels');
+// const addVertexCountsToMeshBSONs = require('./addVertexCountsToMeshBSONs');
+// const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
+// const updateFedSettingSubModels = require('./updateFedSettingSubModels');
 const moveNotificationsToInternal = require('./moveNotificationsToInternal');
 
 const scripts = [
