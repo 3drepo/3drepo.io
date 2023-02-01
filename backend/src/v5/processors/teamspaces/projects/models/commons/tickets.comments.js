@@ -55,7 +55,7 @@ Comments.addComment = async (teamspace, project, model, ticket, commentData, aut
 
 Comments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
 	const refsAndBinary = processCommentImages(updateData.images);
-	await updateComment(teamspace, oldComment, updateData);
+	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
 	await storeFiles(teamspace, project, model, ticket, refsAndBinary);
 };
 
