@@ -18,21 +18,18 @@
 import { useState } from 'react';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
-import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { formatMessage } from '@/v5/services/intl';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
-import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentMessage, desanitiseMessage, sanitiseMessage, addReply, editedCommentMessage } from '../comment.helpers';
+import { deletedCommentMessage, editedCommentMessage } from '../comment.helpers';
 import { CommentTime, CommentButtons, EditedCommentLabel } from '../comment.styles';
-import { CommentContainer, CommentMessageDeleted, EditCommentButtons, EditCommentContainer, EditCommentInput } from './currentUserComment.styles';
+import { CommentContainer, CommentMessageDeleted } from './currentUserComment.styles';
+import { EditComment } from './editComment/editComment.component';
 
-type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
+export type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
 	metadata?: CommentReplyMetadata;
 	onDelete: (commentId) => void;
@@ -66,46 +63,17 @@ export const CurrentUserComment = ({
 	}
 
 	const [isEditMode, setIsEditMode] = useState(false);
-	const { control, watch } = useForm<{ editedMessage }>({
-		defaultValues: { editedMessage: desanitiseMessage(message) },
-	});
 
 	if (isEditMode) {
-		const editedMessage = watch('editedMessage');
-		const canUpdate = message !== sanitiseMessage(editedMessage) && editedMessage.length > 0;
-
-		const updateMessage = () => {
-			let newMessage = sanitiseMessage(editedMessage);
-			if (metadata._id) {
-				newMessage = addReply(metadata, newMessage);
-			}
-			onEdit(_id, newMessage);
-			setIsEditMode(false);
-		};
-
 		return (
-			<>
-				<EditCommentContainer data-author={author}>
-					{metadata.message && (<CommentReply {...metadata} />)}
-					<EditCommentInput
-						name="editedMessage"
-						placeholder={formatMessage({
-							id: 'customTicket.panel.comments.editedMessage',
-							defaultMessage: ' ',
-						})}
-						control={control}
-						autoFocus
-					/>
-				</EditCommentContainer>
-				<EditCommentButtons>
-					<ErrorCommentButton onClick={() => setIsEditMode(false)}>
-						<CancelIcon />
-					</ErrorCommentButton>
-					<PrimaryCommentButton onClick={updateMessage} disabled={!canUpdate}>
-						<TickIcon />
-					</PrimaryCommentButton>
-				</EditCommentButtons>
-			</>
+			<EditComment
+				_id={_id}
+				message={message}
+				author={author}
+				metadata={metadata}
+				onEdit={onEdit}
+				onClose={() => setIsEditMode(false)}
+			/>
 		);
 	}
 

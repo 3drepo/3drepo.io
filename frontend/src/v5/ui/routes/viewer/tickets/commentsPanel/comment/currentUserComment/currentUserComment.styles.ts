@@ -16,8 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { FormTextArea } from '@controls/inputs/formInputs.component';
-import { MessageInput } from '../../commentsPanel.styles';
 import { BasicComment, CommentAuthor, CommentMessage, CommentButtons } from '../comment.styles';
 
 export const CommentContainer = styled(BasicComment)`
@@ -46,38 +44,4 @@ export const CommentContainer = styled(BasicComment)`
 export const CommentMessageDeleted = styled(CommentMessage)`
 	color: ${({ theme }) => theme.palette.secondary.light};
 	text-align: right;
-`;
-
-export const EditCommentContainer = styled(BasicComment)`
-	border-radius: 0;
-	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-	border-bottom-color: ${({ theme }) => theme.palette.primary.main};
-	margin-left: auto;
-	width: 380px;
-`;
-
-export const EditCommentInput = styled(MessageInput).attrs({
-	as: FormTextArea,
-	minRows: 1,
-})`
-	.MuiInputBase-multiline {
-		padding: 0;
-
-		& fieldset,
-		&:hover fieldset {
-			border: none;
-		}
-	}
-	
-		
-	.Mui-focused:not(.Mui-disabled) fieldset.MuiOutlinedInput-notchedOutline {
-		border: none;
-		box-shadow: none;
-	}
-`;
-
-export const EditCommentButtons = styled.div`
-	margin: 4px 5px 0 auto;
-	display: flex;
-	flex-direction: row;
 `;
