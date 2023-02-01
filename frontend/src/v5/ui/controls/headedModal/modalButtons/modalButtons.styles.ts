@@ -16,17 +16,24 @@
  */
 
 import styled from 'styled-components';
-import { Paper } from '@mui/material';
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
+import { DialogActions } from '@mui/material';
+import { Button } from '@controls/button';
 
-export const RemoveWhiteCorners = styled(Paper)`
-	background-color: transparent;
+export const FormDialogActions = styled(DialogActions)`
+	background: ${({ theme }) => theme.palette.tertiary.lightest};
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 `;
 
-export const Form = styled.form`
-	display: flex;
-	flex-direction: column;
-	min-width: 520px;
+export const CancelButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+	size: 'medium',
+})``;
 
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	border-radius: 15px; /* prevents white pixels in corners */
+export const SubmitButton = styled(SubmitButtonBase).attrs({
+	size: 'medium',
+	fullWidth: false,
+})`
+	margin: 8px;
 `;

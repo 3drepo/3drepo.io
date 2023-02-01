@@ -21,7 +21,7 @@ import { Form, RemoveWhiteCorners } from '../formModal.styles';
 import { ModalHeader } from '../../modalHeader/modalHeader.component';
 import { ModalBody } from '../../modalBody/modalBody.component';
 
-export interface IFormModalNoButtons extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
+export interface IFormModalNoButtons extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref' | 'onSubmit'> {
 	onClickClose?: () => void;
 	onClickCancel?: () => void;
 	title?: any;
@@ -46,7 +46,7 @@ export const FormModalNoButtons = ({
 	...formProps
 }: IFormModalNoButtons) => {
 	const handleClose = () => {
-		if (!disableClosing) return;
+		if (disableClosing) return;
 		(onClickCancel || onClickClose)();
 	};
 

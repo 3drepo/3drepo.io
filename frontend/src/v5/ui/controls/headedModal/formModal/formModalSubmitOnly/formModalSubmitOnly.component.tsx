@@ -17,13 +17,9 @@
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Dialog } from '@mui/material';
 import { DialogProps } from '@mui/material/Dialog';
-import { FormattedMessage } from 'react-intl';
-import {
-	Form,
-	FormDialogActions,
-	RemoveWhiteCorners,
-	SubmitButton,
-} from '../formModal.styles';
+import { FormDialogActions } from '@controls/headedModal/modalButtons/modalButtons.styles';
+import { ModalSubmitButton } from '@controls/headedModal/modalButtons/modalButtons.component';
+import { Form, RemoveWhiteCorners } from '../formModal.styles';
 import { ModalHeader } from '../../modalHeader/modalHeader.component';
 import { ModalBody } from '../../modalBody/modalBody.component';
 
@@ -81,15 +77,9 @@ export const FormModal = ({
 					{children}
 				</ModalBody>
 				<FormDialogActions>
-					<SubmitButton
-						disabled={!isValid}
-						onClick={onSubmit}
-						size="medium"
-						isPending={isSubmitting}
-						fullWidth={false}
-					>
-						{confirmLabel || <FormattedMessage id="formModal.actions.ok" defaultMessage="OK" />}
-					</SubmitButton>
+					<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
+						{confirmLabel}
+					</ModalSubmitButton>
 				</FormDialogActions>
 			</Form>
 		</Dialog>

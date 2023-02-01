@@ -15,17 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
-import { Button, Dialog } from '@mui/material';
+import { Dialog } from '@mui/material';
 import { DialogProps } from '@mui/material/Dialog';
-import { FormattedMessage } from 'react-intl';
-import {
-	Form,
-	FormDialogActions,
-	RemoveWhiteCorners,
-	SubmitButton,
-} from './formModal.styles';
+import { Form, RemoveWhiteCorners } from './formModal.styles';
 import { ModalHeader } from '../modalHeader/modalHeader.component';
 import { ModalBody } from '../modalBody/modalBody.component';
+import { FormDialogActions } from '../modalButtons/modalButtons.styles';
+import { ModalCancelButton, ModalSubmitButton } from '../modalButtons/modalButtons.component';
 
 export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onSubmit?: (event) => void;
@@ -81,18 +77,12 @@ export const FormModal = ({
 					{children}
 				</ModalBody>
 				<FormDialogActions>
-					<Button autoFocus onClick={handleClose} variant="outlined" color="secondary" size="medium" disabled={isSubmitting}>
-						{cancelLabel || <FormattedMessage id="formModal.actions.cancel" defaultMessage="Cancel" />}
-					</Button>
-					<SubmitButton
-						disabled={!isValid}
-						onClick={onSubmit}
-						size="medium"
-						isPending={isSubmitting}
-						fullWidth={false}
-					>
-						{confirmLabel || <FormattedMessage id="formModal.actions.ok" defaultMessage="OK" />}
-					</SubmitButton>
+					<ModalCancelButton onClick={handleClose} disabled={isSubmitting}>
+						{cancelLabel}
+					</ModalCancelButton>
+					<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
+						{confirmLabel}
+					</ModalSubmitButton>
 				</FormDialogActions>
 			</Form>
 		</Dialog>
