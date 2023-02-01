@@ -106,10 +106,10 @@ const updateComment = (isFed) => async (req, res) => {
 
 const deleteComment = (isFed) => async (req, res) => {
 	const { params, commentData } = req;
-
+	const { teamspace, project, model, ticket } = params;
 	try {
 		const deleteComm = isFed ? deleteFedComment : deleteConComment;
-		await deleteComm(params.teamspace, commentData);
+		await deleteComm(teamspace, project, model, ticket, commentData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
