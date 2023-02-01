@@ -20,7 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
 import { ModalBody } from '@controls/formModal/modalBody/modalBody.component';
-import { Form } from '@controls/formModal/formModal/formModal.styles';
+import { Form } from '@controls/formModal/formModal.styles';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
