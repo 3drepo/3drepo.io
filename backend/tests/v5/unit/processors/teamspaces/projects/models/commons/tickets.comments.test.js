@@ -90,7 +90,8 @@ const testUpdateComment = () => {
 				.resolves.toEqual(undefined);
 
 			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, oldComment, updateData);
+			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
+				oldComment, updateData);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		});
@@ -105,9 +106,10 @@ const testUpdateComment = () => {
 			await expect(Comments.updateComment(teamspace, project, model, ticket, oldComment, updateData))
 				.resolves.toEqual(undefined);
 
-			const imgRef = CommentsModel.updateComment.mock.calls[0][2].images[0];
+			const imgRef = CommentsModel.updateComment.mock.calls[0][5].images[0];
 			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, oldComment, updateData);
+			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
+				oldComment, updateData);
 
 			const meta = { teamspace, project, model, ticket };
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
