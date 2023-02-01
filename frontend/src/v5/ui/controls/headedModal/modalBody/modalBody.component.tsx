@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ScrollArea } from '@controls/scrollArea';
-import { FormDialogContent } from './modalBody.styles';
+import { FormModalContent } from './modalBody.styles';
 
 export interface IModalBody {
 	children: any,
@@ -27,8 +27,8 @@ export const ModalBody = ({
 	hideHorizontalScroll = true,
 }: IModalBody) => (
 	<ScrollArea variant="base" autoHeightMax="70vh" autoHeight hideHorizontal={hideHorizontalScroll}>
-		<FormDialogContent>
+		<FormModalContent>
 			{children}
-		</FormDialogContent>
+		</FormModalContent>
 	</ScrollArea>
 );

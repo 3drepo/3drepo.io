@@ -20,7 +20,7 @@ import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
 import { DialogActions } from '@mui/material';
 import { Button } from '@controls/button';
 
-export const FormDialogActions = styled(DialogActions)`
+export const FormModalActions = styled(DialogActions)`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 `;

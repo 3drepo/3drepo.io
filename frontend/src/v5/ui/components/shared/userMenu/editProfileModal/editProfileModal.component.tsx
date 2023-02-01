@@ -24,7 +24,7 @@ import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor'
 import { yupResolver } from '@hookform/resolvers/yup';
 import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/headedModal/modalButtons/modalButtons.component';
-import { FormDialogActions } from '@controls/headedModal/modalButtons/modalButtons.styles';
+import { FormModalActions } from '@controls/headedModal/modalButtons/modalButtons.styles';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
@@ -143,7 +143,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 					/>
 				</TabPanel>
 			</TabContext>
-			<FormDialogActions>
+			<FormModalActions>
 				<ModalCancelButton disabled={isSubmitting} onClick={onClose} />
 				{activeTab !== INTEGRATIONS_TAB && (
 					<ModalSubmitButton
@@ -154,7 +154,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 						{CONFIRM_LABELS[activeTab]}
 					</ModalSubmitButton>
 				)}
-			</FormDialogActions>
+			</FormModalActions>
 		</FormModal>
 	);
 };

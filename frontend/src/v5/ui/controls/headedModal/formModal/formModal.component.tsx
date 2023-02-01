@@ -20,7 +20,7 @@ import { DialogProps } from '@mui/material/Dialog';
 import { Form, RemoveWhiteCorners } from './formModal.styles';
 import { ModalHeader } from '../modalHeader/modalHeader.component';
 import { ModalBody } from '../modalBody/modalBody.component';
-import { FormDialogActions } from '../modalButtons/modalButtons.styles';
+import { FormModalActions } from '../modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '../modalButtons/modalButtons.component';
 
 export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
@@ -76,14 +76,14 @@ export const FormModal = ({
 				<ModalBody hideHorizontalScroll={hideHorizontalScroll}>
 					{children}
 				</ModalBody>
-				<FormDialogActions>
+				<FormModalActions>
 					<ModalCancelButton onClick={handleClose} disabled={isSubmitting}>
 						{cancelLabel}
 					</ModalCancelButton>
 					<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
 						{confirmLabel}
 					</ModalSubmitButton>
-				</FormDialogActions>
+				</FormModalActions>
 			</Form>
 		</Dialog>
 	);

@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 import { FormModal as FormModalBase } from '@controls/headedModal/formModal/formModal.component';
-import { FormDialogContent } from '@controls/headedModal/modalBody/modalBody.styles';
+import { FormModalContent } from '@controls/headedModal/modalBody/modalBody.styles';
 
 export const FormModal = styled(FormModalBase)`
-	${FormDialogContent} {
+	${FormModalContent} {
 		padding: 7px 24px 22px;
 	}
 `;
