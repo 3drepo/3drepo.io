@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Buffer } from 'buffer';
-import api from '../services/api/';
+const { UUIDToString } = require('../../utils/helper/uuids');
+const Yup = require('yup');
+const { types } = require('../../utils/helper/yup');
 
-const imageUrlToBase64 = (url: string) => api
-	.get((url.split('/api/')[1]), {
-		responseType: 'arraybuffer'
-	})
-	.then((response) =>
-		Buffer.from(response.data, 'binary').toString('base64'));
+const Comments = {};
 
-const BASE_64_PREFIX = 'data:image/png;base64,';
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
 
-export const imageUrlToBase64IfNotAlready = async (image: string) => {
-	if (image?.startsWith(BASE_64_PREFIX)) {
-		return image;
-	}
-	return BASE_64_PREFIX + await imageUrlToBase64(image);
+Comments.serialiseComment = (comment) => {
+	const caster = Yup.object({
+		_id: uuidString,
+		ticket: uuidString,
+		createdAt: types.timestamp,
+		updatedAt: types.timestamp,
+		images: Yup.array().of(uuidString),
+		history: Yup.array().of(Yup.object({
+			timestamp: types.timestamp,
+			images: Yup.array().of(uuidString),
+		})),
+	});
+	return caster.cast(comment);
 };
+
+module.exports = Comments;

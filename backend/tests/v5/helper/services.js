@@ -21,7 +21,7 @@ const http = require('http');
 const fs = require('fs');
 const { times } = require('lodash');
 
-const { src, srcV4 } = require('./path');
+const { image, src, srcV4 } = require('./path');
 
 const { createApp: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
@@ -56,7 +56,7 @@ queue.purgeQueues = async () => {
 		const conn = await amqp.connect(host);
 		const channel = await conn.createChannel();
 
-		channel.on('error', () => {});
+		channel.on('error', () => { });
 
 		await Promise.all([
 			channel.purgeQueue(worker_queue),
@@ -195,6 +195,19 @@ db.createTicket = (teamspace, project, model, ticket) => {
 	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
 };
 
+db.createComment = (teamspace, project, model, ticket, comment) => {
+	const formattedComment = {
+		...comment,
+		_id: stringToUUID(comment._id),
+		project: stringToUUID(project),
+		ticket: stringToUUID(ticket),
+		teamspace,
+		model,
+	};
+
+	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
+};
+
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
@@ -246,7 +259,7 @@ ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
-    + Math.random() * (end.getTime() - start.getTime()));
+	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
@@ -484,6 +497,19 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 	};
 
 	return ticket;
+};
+
+ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
+	const base64img = fs.readFileSync(image).toString('base64');
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		createdAt: ServiceHelper.generateRandomDate(),
+		updatedAt: ServiceHelper.generateRandomDate(),
+		message: ServiceHelper.generateRandomString(),
+		images: [base64img],
+		author,
+	};
 };
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
