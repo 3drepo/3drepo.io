@@ -16,10 +16,13 @@
  */
 
 const db = require('../handler/db');
+const { INTERNAL_DB } = require('../handler/db.constants');
 
 const Notifications = {};
-const NOTIFICATIONS_DB = 'notifications';
+const NOTIFICATIONS_COLL = 'notifications';
 
-Notifications.removeAllUserNotifications = (user) => db.dropCollection(NOTIFICATIONS_DB, user);
+Notifications.removeAllUserNotifications = async (user) => {
+	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
+};
 
 module.exports = Notifications;
