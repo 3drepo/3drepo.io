@@ -20,14 +20,14 @@ import { getMemberImgSrc, USER_NOT_FOUND } from '@/v5/store/users/users.helpers'
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UserCircle } from '@controls/assignees/assignees.styles';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
-import { FormattedMessage } from 'react-intl';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentMessage, editedCommentMessage } from '../comment.helpers';
+import { editedCommentMessage } from '../comment.helpers';
 import { CommentAuthor, CommentButtons, CommentTime, EditedCommentLabel } from '../comment.styles';
-import { HoverPopover, CommentContainer, CommentMessageDeleted } from './otherUserComment.styles';
+import { HoverPopover, CommentContainer } from './otherUserComment.styles';
+import { DeletedComment } from './deletedComment/deletedComment.component';
 
 type OtherUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
@@ -62,34 +62,24 @@ export const OtherUserComment = ({
 	}
 	const authorDisplayName = `${user.firstName} ${user.lastName}`;
 
-	if (deleted) {
-		return (
-			<OtherUserCommentPopoverWrapper user={user}>
-				<CommentAuthor>{authorDisplayName}</CommentAuthor>
-				<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
-				<CommentTime>
-					<FormattedMessage
-						id="ticket.otherUser.comment.time.deleted"
-						defaultMessage="{name} deleted this message"
-						values={{ name: user.firstName }}
-					/>
-				</CommentTime>
-			</OtherUserCommentPopoverWrapper>
-		);
-	}
-
 	return (
 		<OtherUserCommentPopoverWrapper user={user}>
-			<CommentButtons>
-				<PrimaryCommentButton onClick={() => onReply(_id)}>
-					<ReplyIcon />
-				</PrimaryCommentButton>
-			</CommentButtons>
-			<CommentAuthor>{authorDisplayName}</CommentAuthor>
-			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
-			{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
-			<CommentMarkDown>{message}</CommentMarkDown>
-			<CommentTime>{commentAge}</CommentTime>
+			{deleted
+				? (<DeletedComment user={user} authorDisplayName={authorDisplayName} />)
+				: (
+					<>
+						<CommentButtons>
+							<PrimaryCommentButton onClick={() => onReply(_id)}>
+								<ReplyIcon />
+							</PrimaryCommentButton>
+						</CommentButtons>
+						<CommentAuthor>{authorDisplayName}</CommentAuthor>
+						{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
+						{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+						<CommentMarkDown>{message}</CommentMarkDown>
+						<CommentTime>{commentAge}</CommentTime>
+					</>
+				)}
 		</OtherUserCommentPopoverWrapper>
 	);
 };

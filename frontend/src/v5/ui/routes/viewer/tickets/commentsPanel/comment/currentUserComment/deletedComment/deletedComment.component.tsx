@@ -15,28 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { BasicComment, CommentAuthor, CommentButtons } from '../comment.styles';
+import { FormattedMessage } from 'react-intl';
+import { deletedCommentMessage } from '../../comment.helpers';
+import { CommentTime } from '../../comment.styles';
+import { CommentContainer } from '../currentUserComment.styles';
+import { CommentMessageDeleted } from './deletedComment.styles';
 
-export const CommentContainer = styled(BasicComment)`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	border-top-right-radius: 0;
-	align-self: end;
-
-	&::before {
-		right: 100%;
-	}
-
-	${CommentButtons} {
-		left: -94px;
-	}
-
-	& > ${CommentAuthor} {
-		display: none;
-	}
-
-	& + & {
-		border-top-right-radius: 10px;
-	}
-`;
+export const DeletedComment = ({ author }) => (
+	<CommentContainer data-author={author}>
+		<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
+		<CommentTime>
+			<FormattedMessage
+				id="ticket.currentUser.comment.time.deleted"
+				defaultMessage="You deleted this message"
+			/>
+		</CommentTime>
+	</CommentContainer>
+);

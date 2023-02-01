@@ -20,14 +20,14 @@ import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
-import { FormattedMessage } from 'react-intl';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { deletedCommentMessage, editedCommentMessage } from '../comment.helpers';
+import { editedCommentMessage } from '../comment.helpers';
+import { CommentContainer } from './currentUserComment.styles';
 import { CommentTime, CommentButtons, EditedCommentLabel } from '../comment.styles';
-import { CommentContainer, CommentMessageDeleted } from './currentUserComment.styles';
 import { EditComment } from './editComment/editComment.component';
+import { DeletedComment } from './deletedComment/deletedComment.component';
 
 export type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
 	commentAge: string;
@@ -48,21 +48,9 @@ export const CurrentUserComment = ({
 	onReply,
 	onEdit,
 }: CurrentUserCommentProps) => {
-	if (deleted) {
-		return (
-			<CommentContainer data-author={author}>
-				<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
-				<CommentTime>
-					<FormattedMessage
-						id="ticket.currentUser.comment.time.deleted"
-						defaultMessage="You deleted this message"
-					/>
-				</CommentTime>
-			</CommentContainer>
-		);
-	}
-
 	const [isEditMode, setIsEditMode] = useState(false);
+
+	if (deleted) return (<DeletedComment author={author} />);
 
 	if (isEditMode) {
 		return (

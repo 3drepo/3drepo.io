@@ -16,27 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { BasicComment, CommentAuthor, CommentButtons } from '../comment.styles';
+import { CommentMessage } from '../../comment.styles';
 
-export const CommentContainer = styled(BasicComment)`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	border-top-right-radius: 0;
-	align-self: end;
-
-	&::before {
-		right: 100%;
-	}
-
-	${CommentButtons} {
-		left: -94px;
-	}
-
-	& > ${CommentAuthor} {
-		display: none;
-	}
-
-	& + & {
-		border-top-right-radius: 10px;
-	}
+export const CommentMessageDeleted = styled(CommentMessage)`
+	color: ${({ theme }) => theme.palette.secondary.light};
+	text-align: right;
 `;
