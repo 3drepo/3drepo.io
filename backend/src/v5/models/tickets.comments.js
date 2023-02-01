@@ -17,7 +17,9 @@
 
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const TicketComments = {};
@@ -52,7 +54,19 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 	const _id = generateUUID();
 	const createdAt = new Date();
 	const comment = { ...commentData, _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt };
+
 	await insertOne(teamspace, comment);
+
+	publish(events.NEW_COMMENT, { teamspace,
+		project,
+		model,
+		data: { ticket,
+			_id,
+			message: comment.message,
+			images: comment.images,
+			author: comment.author,
+			createdAt } });
+
 	return _id;
 };
 
@@ -70,7 +84,7 @@ const getUpdatedComment = (oldComment, updateData) => {
 	return formattedComment;
 };
 
-TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
+TicketComments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
 	const formattedComment = getUpdatedComment(oldComment, updateData);
 
 	const updateObj = {
@@ -82,12 +96,31 @@ TicketComments.updateComment = async (teamspace, oldComment, updateData) => {
 	};
 
 	await updateOne(teamspace, { _id: oldComment._id }, updateObj);
+
+	publish(events.UPDATE_COMMENT, {
+		teamspace,
+		project,
+		model,
+		data: {
+			ticket,
+			_id: oldComment._id,
+			message: updateData.message,
+			images: updateData.images,
+			author: oldComment.author,
+			updatedAt: formattedComment.updatedAt,
+		},
+	});
 };
 
-TicketComments.deleteComment = async (teamspace, oldComment) => {
+TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComment) => {
 	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
 	await updateOne(teamspace, { _id: oldComment._id },
 		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1 } });
+
+	publish(events.UPDATE_COMMENT, { teamspace,
+		project,
+		model,
+		data: { ticket, _id: oldComment._id, deleted: true, updatedAt: formattedComment.updatedAt } });
 };
 
 module.exports = TicketComments;
