@@ -34,6 +34,8 @@ const events = [
 	'containerRemoved',
 	'containerNewTicket',
 	'containerUpdateTicket',
+	'containerNewTicketComment',
+	'containerUpdateTicketComment',
 
 	// Federation events
 	'federationSettingsUpdate',
@@ -42,6 +44,8 @@ const events = [
 	'federationRemoved',
 	'federationNewTicket',
 	'federationUpdateTicket',
+	'federationNewTicketComment',
+	'federationUpdateTicketComment',
 ];
 
 const errors = [
