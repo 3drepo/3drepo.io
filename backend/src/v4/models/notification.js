@@ -149,8 +149,8 @@ const fillModelData = async function(fullNotifications) {
 
 };
 
-const getNotification = (username, type, criteria) =>
-	db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { username, type, ...criteria });
+const getNotification = (user, type, criteria) =>
+	db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, type, ...criteria });
 
 const getHistoricAssignedRoles = (issue) => {
 	const comments = issue.comments;
