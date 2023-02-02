@@ -48,11 +48,12 @@ export const BottomSection = styled.section`
 	flex-direction: column;
 	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
 	border-top-width: 1px;
-	padding: 11px 15px;
+	padding: 0 15px 11px;
 `;
 
 export const CommentReplyContainer = styled.div`
 	position: relative;
+	margin-top: 11px;
 `;
 
 export const DeleteButton = styled.div`
@@ -82,7 +83,7 @@ export const MessageInput = styled(FormTextAreaFixedSize).attrs({
 	},
 })`
 	.MuiInputBase-multiline {
-		padding: 8px 0 0;
+		padding: 8px 0 6px;
 		line-height: 16px;
 	}
 
