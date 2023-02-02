@@ -17,7 +17,7 @@
 
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatDate, formatMessage } from '@/v5/services/intl';
+import { formatDate } from '@/v5/services/intl';
 
 import {
 	DashboardListItemButton,
@@ -36,9 +36,7 @@ import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { DialogsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { FederationSettingsModal } from '../../federationSettingsModal/federationSettingsModal.component';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
@@ -50,19 +48,6 @@ export const FederationListItem = memo(({
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
-	const onClickShare = () => {
-		const link = prefixBaseDomain(viewerRoute(teamspace, project, federation));
-		const subject = formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' });
-		const title = formatMessage({ id: 'shareModal.federation.title', defaultMessage: 'Share Federation' });
-
-		DialogsActionsDispatchers.open('share', {
-			name: federation.name,
-			subject,
-			title,
-			link,
-		});
-	};
-
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
 			FederationsActionsDispatchers.addFavourite(teamspace, project, federation._id);
@@ -71,8 +56,6 @@ export const FederationListItem = memo(({
 		}
 	};
 
-	// eslint-disable-next-line max-len
-	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsModal, { federationId: federation._id });
 	const onClickEdit = () => DialogsActionsDispatchers.open(EditFederationModal, { federation });
 
 	useEffect(() => combineSubscriptions(
@@ -83,9 +66,7 @@ export const FederationListItem = memo(({
 
 	return (
 		<>
-			<DashboardListItem
-				key={federation._id}
-			>
+			<DashboardListItem key={federation._id}>
 				<DashboardListItemRow>
 					<DashboardListItemFederationTitle
 						minWidth={90}
@@ -154,12 +135,7 @@ export const FederationListItem = memo(({
 						/>
 					</DashboardListItemIcon>
 					<DashboardListItemIcon>
-						<FederationEllipsisMenu
-							federation={federation}
-							openShareModal={onClickShare}
-							openEditFederationModal={onClickEdit}
-							openFederationSettings={onClickSettings}
-						/>
+						<FederationEllipsisMenu federation={federation} onClickEdit={onClickEdit} />
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
 			</DashboardListItem>

@@ -40,11 +40,9 @@ import { RevisionDetails } from '@components/shared/revisionDetails';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
-import { formatDate, formatMessage } from '@/v5/services/intl';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
-import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatDate } from '@/v5/services/intl';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { ContainerSettingsModal } from '../../containerSettingsModal/containerSettingsModal.component';
 import { IsMainList } from '../../containers.component';
 
 interface IContainerListItem {
@@ -80,22 +78,6 @@ export const ContainerListItem = memo(({
 			ContainersActionsDispatchers.removeFavourite(teamspace, project, container._id);
 		}
 	};
-
-	const onClickShare = () => {
-		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
-		const subject = formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
-		const title = formatMessage({ id: 'shareModal.container.title', defaultMessage: 'Share Container' });
-
-		DialogsActionsDispatchers.open('share', {
-			name: container.name,
-			subject,
-			title,
-			link,
-		});
-	};
-
-	// eslint-disable-next-line max-len
-	const onClickSettings = () => DialogsActionsDispatchers.open(ContainerSettingsModal, { containerId: container._id });
 
 	return (
 		<DashboardListItem
@@ -155,8 +137,6 @@ export const ContainerListItem = memo(({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={onClickShare}
-						openContainerSettings={onClickSettings}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
