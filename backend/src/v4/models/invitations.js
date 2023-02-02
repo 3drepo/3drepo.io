@@ -249,10 +249,4 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 	});
 };
 
-// Ensure the index exists at init
-getCollection().then((coll) => coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true }))
-	.catch((err)=> {
-		systemLogger.logError("failed to create index for invitations", err);
-	});
-
 module.exports = invitations;
