@@ -131,16 +131,16 @@ const ensureDefaultRoleExists = () => {
 
 DBHandler.canConnect = () => DBHandler.authenticate();
 DBHandler.disconnect = async () => {
-	const dummyObj = { close: () => {} };
+	const dummyObj = { close: /* istanbul ignore next */ () => {} };
 	if (dbConn) {
-		const conn = await dbConn.catch(() => dummyObj);
+		const conn = await dbConn.catch(/* istanbul ignore next */ () => dummyObj);
 		await conn.close();
 		dbConn = null;
 		defaultRoleProm = null;
 	}
 
 	if (sessionConn) {
-		const conn = await sessionConn.catch(() => dummyObj);
+		const conn = await sessionConn.catch(/* istanbul ignore next */ () => dummyObj);
 		await conn.close();
 		sessionConn = null;
 	}
