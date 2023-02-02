@@ -31,6 +31,7 @@ const { getMembersInfo, getRiskCategories } = require(`${src}/models/teamspaceSe
 const { getUserByUsername } = require(`${src}/models/users`);
 const { grantTeamspaceRoleToUser } = require(`${src}/models/roles`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { disconnect } = require(`${src}/handler/db`);
 
 const { times } = require('lodash');
 
@@ -135,4 +136,5 @@ const runTest = () => {
 
 describe(determineTestGroup(__filename), () => {
 	runTest();
+	afterAll(disconnect);
 });
