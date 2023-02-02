@@ -24,6 +24,7 @@ const { deleteIfUndefined } = require('../utils/helper/objects');
 const { templates } = require('../utils/responseCodes');
 
 let dbConn;
+let sessionConn;
 let defaultRoleProm;
 const DBHandler = {};
 
@@ -128,6 +129,11 @@ DBHandler.disconnect = async () => {
 		await dbConn.close();
 		dbConn = null;
 		defaultRoleProm = null;
+	}
+
+	if (sessionConn) {
+		await (await sessionConn).close();
+		sessionConn = null;
 	}
 };
 
@@ -408,11 +414,13 @@ DBHandler.setPassword = async (user, newPassword) => {
 };
 
 DBHandler.getSessionStore = /* istanbul ignore next */() => {
+	return;
 	// For some reason this library is very problematic...
 	// eslint-disable-next-line global-require
 	const MongoStore = require('connect-mongo');
+	sessionConn = connect();
 	const sessionStore = MongoStore.create({
-		clientPromise: connect(),
+		clientPromise: sessionConn,
 		dbName: 'admin',
 		collectionName: 'sessions',
 		stringify: false,
