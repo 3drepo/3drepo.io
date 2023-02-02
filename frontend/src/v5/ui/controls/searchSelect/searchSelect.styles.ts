@@ -25,11 +25,11 @@ export const SearchInputContainer = styled.div`
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: -10px 0 0;
-    padding: 12px;
-    background: ${({ theme }) => theme.palette.primary.contrast};
-    z-index: 2;
-    position: sticky;
-    top: 0;
+	padding: 12px;
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	z-index: 2;
+	position: sticky;
+	top: 0;
 `;
 
 export const NoResults = styled.div`
