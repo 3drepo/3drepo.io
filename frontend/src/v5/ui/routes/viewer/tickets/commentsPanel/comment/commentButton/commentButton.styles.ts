@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-const CommentButtonStyling = styled.div`
+const CommentButtonStyling = styled.button`
 	height: 24px;
 	width: 24px;
 	margin: 2px;
@@ -26,6 +26,7 @@ const CommentButtonStyling = styled.div`
 	justify-content: center;
 	align-items: center;
 	cursor: pointer;
+	border: none;
 
 	& > svg {
 		max-width: 14px;
@@ -39,6 +40,7 @@ export const PrimaryCommentButton = styled(CommentButtonStyling)<{ disabled?: bo
 	${({ theme, disabled }) => disabled && css`
 		color: ${theme.palette.primary.contrast};
 		background-color: ${theme.palette.base.lightest};
+		cursor: initial;
 	`}
 `;
 
