@@ -22,7 +22,6 @@ import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaFixedSize.styles';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { SubmitButton } from '@controls/submitButton';
-import { MAX_MESSAGE_LENGTH } from './comment/comment.helpers';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
@@ -77,11 +76,7 @@ export const DeleteButton = styled.div`
 	}
 `;
 
-export const MessageInput = styled(FormTextAreaFixedSize).attrs({
-	inputProps: {
-		maxLength: MAX_MESSAGE_LENGTH,
-	},
-})`
+export const MessageInput = styled(FormTextAreaFixedSize)`
 	.MuiInputBase-multiline {
 		padding: 8px 0 6px;
 		line-height: 16px;

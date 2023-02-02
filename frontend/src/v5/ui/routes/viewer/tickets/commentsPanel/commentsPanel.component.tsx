@@ -59,7 +59,8 @@ export const CommentsPanel = () => {
 
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
-	const charsCount = messageInput?.length || 0;
+	const commentReplyLength = commentReply ? addReply(createMetadata(commentReply), '').length : 0;
+	const charsCount = (messageInput?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount >= MAX_MESSAGE_LENGTH;
 	const commentsListIsEmpty = comments?.length > 0;
 
@@ -175,13 +176,20 @@ export const CommentsPanel = () => {
 							id: 'customTicket.panel.comments.leaveAComment',
 							defaultMessage: 'Leave a comment',
 						})}
+						inputProps={{
+							maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
+						}}
 					/>
 					<Controls>
 						<FileIconButton>
 							<FileIcon />
 						</FileIconButton>
 						<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
-						<SendButton disabled={!charsCount} onClick={createComment} isPending={isSubmittingMessage}>
+						<SendButton
+							disabled={!messageInput?.length || charsLimitIsReached}
+							onClick={createComment}
+							isPending={isSubmittingMessage}
+						>
 							<SendIcon />
 						</SendButton>
 					</Controls>
