@@ -32,9 +32,10 @@ export const Viewer = () => {
 	useContainersData();
 	useFederationsData();
 
-	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
-	const isListPending = FederationsHooksSelectors.selectIsListPending();
-	const isLoading = areStatsPending || isListPending;
+	const areFederationStatsPending = FederationsHooksSelectors.selectAreStatsPending();
+	const isFederationListPending = FederationsHooksSelectors.selectIsListPending();
+	const areContainersPending = ContainersHooksSelectors.selectAreStatsPending();
+	const isLoading = areFederationStatsPending || isFederationListPending || areContainersPending;
 
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
