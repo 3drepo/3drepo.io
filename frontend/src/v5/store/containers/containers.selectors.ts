@@ -64,3 +64,8 @@ export const selectHasCommenterAccess = createSelector(
 	selectContainerRole,
 	(role): boolean | null => [Roles.ADMIN, Roles.COLLABORATOR, Roles.COMMENTER].includes(role),
 );
+
+export const selectCanUploadToProject = createSelector(
+	selectContainers,
+	(containers) => containers.some(({ role }) => [Roles.ADMIN, Roles.COLLABORATOR].includes(role)),
+);

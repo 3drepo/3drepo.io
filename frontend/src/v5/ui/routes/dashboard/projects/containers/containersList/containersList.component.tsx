@@ -69,6 +69,7 @@ export const ContainersList = ({
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
+	const canUpload = ContainersHooksSelectors.selectCanUploadToProject();
 
 	const selectOrToggleItem = useCallback((id: string) => {
 		setSelectedItemId((state) => (state === id ? null : id));
@@ -87,24 +88,24 @@ export const ContainersList = ({
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
 						{ isProjectAdmin && (
-							<>
-								<Button
-									startIcon={<AddCircleIcon />}
-									variant="outlined"
-									color="secondary"
-									onClick={onClickCreate}
-								>
-									<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-								</Button>
-								<Button
-									startIcon={<ArrowUpCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
-								>
-									<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-								</Button>
-							</>
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="outlined"
+								color="secondary"
+								onClick={onClickCreate}
+							>
+								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+							</Button>
+						)}
+						{ canUpload && (
+							<Button
+								startIcon={<ArrowUpCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+							>
+								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+							</Button>
 						)}
 					</CollapseSideElementGroup>
 				)}
