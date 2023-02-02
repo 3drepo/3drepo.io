@@ -101,6 +101,8 @@ export const Controls = styled.div`
 	justify-content: flex-start;
 	padding-top: 6px;
 	box-sizing: border-box;
+	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+	position: relative;
 `;
 
 export const CharsCounter = styled(Typography).attrs({
