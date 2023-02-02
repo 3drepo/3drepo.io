@@ -22,8 +22,8 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
 	border-left-width: 4px;
 	border-radius: 5px;
-	padding: 6px 10px 6px 6px;
-	margin-bottom: 4px;
+	padding: 6px 10px 6px 9px;
+	margin-bottom: 10px;
 	${({ theme, variant }) => {
 		if (variant === 'primary') {
 			return css`

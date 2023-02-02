@@ -21,7 +21,7 @@ import { BasicComment, CommentMessage, CommentButtons } from '../comment.styles'
 
 export const HoverPopover = styled(HoverPopoverBase)`
 	position: absolute;
-	left: -32px;
+	left: -34px;
 	margin-top: -10px;
 
 	.MuiAvatar-root {
@@ -32,7 +32,7 @@ export const HoverPopover = styled(HoverPopoverBase)`
 export const CommentContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
-	margin-left: 37px;
+	margin-left: 39px;
 	border-top-left-radius: 0;
 
 	&::before {

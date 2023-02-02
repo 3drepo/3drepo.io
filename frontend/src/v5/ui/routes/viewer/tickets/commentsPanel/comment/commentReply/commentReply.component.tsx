@@ -35,7 +35,7 @@ export const CommentReply = ({ message, author, variant = 'primary', isCurrentUs
 
 	return (
 		<CommentReplyContainer variant={variant} {...props}>
-			<CommentAuthor>{authorDisplayName}</CommentAuthor>
+			{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
 			<CommentMarkDown>{message}</CommentMarkDown>
 		</CommentReplyContainer>
 	);
