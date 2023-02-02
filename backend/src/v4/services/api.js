@@ -26,7 +26,6 @@ const bodyParser = require("body-parser");
 const bodyParserErrorHandler = require("express-body-parser-error-handler");
 const utils = require("../utils");
 const keyAuthentication =  require("../middlewares/keyAuthentication");
-const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 const { initialiseSystem } = require(`${v5Path}/services/initialiser`);
 
 const APIService = {};
@@ -97,7 +96,8 @@ const addV4Routes = (app) => {
 };
 
 APIService.createAppAsync = async (config, v5Init = true) => {
-// Express app
+	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
+	// Express app
 	const app = express();
 
 	if (config && !config.using_ssl && config.public_protocol === "https") {
@@ -159,6 +159,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 };
 
 APIService.createApp = (config, v5Init = true) => {
+	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 	// Express app
 	const app = express();
 
