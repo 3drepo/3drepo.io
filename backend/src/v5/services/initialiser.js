@@ -20,9 +20,10 @@ const { initialise: initLoginRecs } = require('../models/loginRecords');
 
 const Initialiser = {};
 
-Initialiser.initialiseSystem = () => Promise.all([
-	initLoginRecs(),
-	initInvites(),
-]);
+Initialiser.initialiseSystem = async () => {
+	// For some reason jest hangs (without forceExit) if we use Promise.all here.
+	await initLoginRecs();
+	await initInvites();
+};
 
 module.exports = Initialiser;
