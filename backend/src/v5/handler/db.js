@@ -59,10 +59,10 @@ const connect = (username, password) => MongoClient.connect(
 
 const getDB = async (db) => {
 	if (!dbConn) {
-		dbConn = await connect();
+		dbConn = connect();
 	}
 
-	return dbConn.db(db);
+	return (await dbConn).db(db);
 };
 
 const getCollection = async (db, col) => {
@@ -125,14 +125,17 @@ const ensureDefaultRoleExists = () => {
 
 DBHandler.canConnect = () => DBHandler.authenticate();
 DBHandler.disconnect = async () => {
+	const dummyObj = { close: () => {} };
 	if (dbConn) {
-		await dbConn.close();
+		const conn = await dbConn.catch(() => dummyObj);
+		await conn.close();
 		dbConn = null;
 		defaultRoleProm = null;
 	}
 
 	if (sessionConn) {
-		await (await sessionConn).close();
+		const conn = await sessionConn.catch(() => dummyObj);
+		await conn.close();
 		sessionConn = null;
 	}
 };
@@ -414,7 +417,6 @@ DBHandler.setPassword = async (user, newPassword) => {
 };
 
 DBHandler.getSessionStore = /* istanbul ignore next */() => {
-	return;
 	// For some reason this library is very problematic...
 	// eslint-disable-next-line global-require
 	const MongoStore = require('connect-mongo');
