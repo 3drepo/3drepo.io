@@ -22,6 +22,7 @@ import { SettingsModal } from '../../settingsModal/settingsModal.component';
 
 type FederationSettingsModalProps = {
 	federationId: string;
+	open: boolean;
 	onClickClose: () => void;
 };
 
