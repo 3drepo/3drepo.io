@@ -219,11 +219,11 @@ const modelDeletedTest = () => {
 	});
 };
 
-describe('E2E Chat Service (Model Settings)', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {
-		server = ServiceHelper.app();
+		server = await ServiceHelper.app();
 		chatApp = await ServiceHelper.chatApp();
 		agent = await SuperTest(server);
 		await setupData();
