@@ -28,6 +28,4 @@ config.coveragePathIgnorePatterns = [
 
 config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
 
-config.forceExit = false;
-
 module.exports = config;

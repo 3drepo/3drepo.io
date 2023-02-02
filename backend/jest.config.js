@@ -54,7 +54,7 @@ module.exports = {
 	//   "clover"
 	// ],
 	//
-	forceExit: true,
+	//forceExit: true,
 
 	// An object that configures minimum threshold enforcement for coverage results
 	coverageThreshold: {
