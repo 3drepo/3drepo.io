@@ -172,8 +172,8 @@ export const CommentsPanel = () => {
 					<MessageInput
 						name="message"
 						placeholder={formatMessage({
-							id: 'customTicket.panel.comments.leaveAMessage',
-							defaultMessage: 'leave a message',
+							id: 'customTicket.panel.comments.leaveAComment',
+							defaultMessage: 'Leave a comment',
 						})}
 					/>
 					<Controls>
