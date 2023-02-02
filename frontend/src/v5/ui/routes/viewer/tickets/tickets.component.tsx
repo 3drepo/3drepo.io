@@ -55,13 +55,13 @@ export const Tickets = () => {
 				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
 			);
 		}
-		TicketsActionsDispatchers.fetchTickets(
-			teamspace,
-			project,
-			containerOrFederation,
-			isFederation,
-		);
 		if (view === TicketsCardViews.List) {
+			TicketsActionsDispatchers.fetchTickets(
+				teamspace,
+				project,
+				containerOrFederation,
+				isFederation,
+			);
 			TicketsActionsDispatchers.fetchTemplates(
 				teamspace,
 				project,
