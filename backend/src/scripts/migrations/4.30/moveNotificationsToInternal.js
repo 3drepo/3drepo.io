@@ -19,6 +19,7 @@ const { v5Path } = require('../../../interop');
 
 const { bulkWrite, dropDatabase, find, listCollections } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
+const { initialise } = require(`${v5Path}/models/notifications`);
 
 const INTERNAL_DB = 'internal';
 const NOTIFICATIONS_DB = 'notifications';
@@ -41,19 +42,17 @@ const processCollection = async (user) => {
 };
 
 const run = async () => {
-	const collections = await listCollections(NOTIFICATIONS_DB);
+	const [collections] = await Promise.all([
+		listCollections(NOTIFICATIONS_DB),
+		initialise(),
+	]);
 
 	if (collections.length === 0) {
-		logger.logInfo(`\t-Database not found: ${NOTIFICATIONS_DB}`);
+		logger.logInfo(`\t-No collections found in: ${NOTIFICATIONS_DB}`);
 		return;
 	}
 
-	const moveToInternalOperations = await Promise.all(collections.map(({ name }) => {
-		if (name === 'charence') {
-			return processCollection(name);
-		}
-		return [];
-	}));
+	const moveToInternalOperations = await Promise.all(collections.map(({ name }) => processCollection(name)));
 
 	if (moveToInternalOperations.length) {
 		logger.logInfo(`\t-Migrating ${moveToInternalOperations.length} collections from ${NOTIFICATIONS_DB}`);

@@ -21,6 +21,9 @@ const db = require('../handler/db');
 const Notifications = {};
 const NOTIFICATIONS_COLL = 'notifications';
 
+Notifications.initialise = () => db.createIndex(INTERNAL_DB, NOTIFICATIONS_COLL,
+	{ user: 1, timestamp: -1 }, { runInBackground: true });
+
 Notifications.removeAllUserNotifications = async (user) => {
 	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
 };

@@ -39,7 +39,7 @@ const types = {
 const NOTIFICATIONS_COLL = "notifications";
 
 const generateNotification = function(type, data) {
-	const timestamp = (new Date()).getTime();
+	const timestamp = new Date();
 	return Object.assign({_id:utils.generateUUID(), read:false, type, timestamp}, data);
 };
 
@@ -87,7 +87,7 @@ const upsertNotification = async (username, data, type, criteria, opts) => {
 	}
 
 	const n = notifications[0];
-	const timestamp = (new Date()).getTime();
+	const timestamp = new Date();
 
 	const mergedData = {..._.mergeWith(n, data, unionArrayMerger(opts)), read:false,timestamp};
 

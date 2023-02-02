@@ -39,6 +39,19 @@ const testRemoveAllUserNotifications = () => {
 	});
 };
 
+const testInitialise = () => {
+	describe('Initialise', () => {
+		test('should ensure indices exist', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
+			await Notifications.initialise();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL,
+				{ user: 1, timestamp: -1 }, { runInBackground: true });
+		});
+	});
+};
+
 describe('models/notifications', () => {
 	testRemoveAllUserNotifications();
+	testInitialise();
 });
