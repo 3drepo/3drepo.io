@@ -357,25 +357,6 @@ describe("Check DB handler", function() {
 			}
 		});
 	});
-
-	describe("getSessionStore", function () {
-		const expressSession = require("express-session");
-
-		it("get session store with valid session should succeed", async function() {
-			const store = await db.getSessionStore(expressSession);
-			expect(store).to.be.instanceof(Object);
-		});
-
-		it("get session store with invalid session should fail", async function() {
-			try {
-				await db.getSessionStore("wrong");
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err).to.be.empty;
-			}
-		});
-	});
-
 	describe("count", function () {
 		it("count jobs should succeed", async function() {
 			const jobs = await db.count(account, "jobs", {});
