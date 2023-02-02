@@ -35,7 +35,7 @@ export const EditComment = ({ _id, message, author, metadata, onEdit, onClose }:
 		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
 	const editedMessage = watch('editedMessage');
-	const canUpdate = message !== sanitiseMessage(editedMessage) && editedMessage.length > 0;
+	const canUpdate = message !== sanitiseMessage(editedMessage) && editedMessage.trim().length > 0;
 
 	const updateMessage = () => {
 		let newMessage = sanitiseMessage(editedMessage);

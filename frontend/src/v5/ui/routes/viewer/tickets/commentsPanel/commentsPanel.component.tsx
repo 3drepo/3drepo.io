@@ -186,7 +186,7 @@ export const CommentsPanel = () => {
 						</FileIconButton>
 						<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 						<SendButton
-							disabled={!messageInput?.length || charsLimitIsReached}
+							disabled={!messageInput?.trim()?.length || charsLimitIsReached}
 							onClick={createComment}
 							isPending={isSubmittingMessage}
 						>
