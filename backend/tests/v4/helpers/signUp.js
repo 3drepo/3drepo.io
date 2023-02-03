@@ -38,17 +38,18 @@ function signUpAndLogin(params) {
 		agent = request.agent(server);
 
 		return ServiceHelperV5.db.createUser({user:  username, password}).then(() => {
+			return ServiceHelperV5.db.createTeamspace(username, [], undefined, false).then(() => {
+				// login
+				agent.post("/login")
+					.send({ username, password })
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username);
+						console.log(typeof done);
+						done(err, agent);
 
-			// login
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					console.log(typeof done);
-					done(err, agent);
+					});
 
-				});
-
+			})
 		}).catch(err => {
 			done(err, agent);
 		});

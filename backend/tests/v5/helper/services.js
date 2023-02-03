@@ -93,13 +93,16 @@ db.reset = async () => {
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
+	return DbHandler.createUser(user, password, { billing: { billingInfo: {} },
+		...basicData,
+		...customData,
+		apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
-	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
+db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true) => {
+	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
 	await initTeamspace(teamspace);
 	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
 

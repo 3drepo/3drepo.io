@@ -240,7 +240,6 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the viewer should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(401, done);
 		});
 
@@ -610,7 +609,6 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the commenter should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(401, done);
 		});
 
