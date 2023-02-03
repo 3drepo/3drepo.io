@@ -97,15 +97,14 @@ describe('Uploading a model', () => {
 		});
 	});
 
-	after((done) => {
+	after(function(done) {
 		purgeQueues().then(() => {
-			server.close(() => {
-				console.log('API test server is closed');
+			server.close(function() {
+				console.log("API test server is closed");
 				done();
 			});
 		});
 	});
-
 	describe('without quota', () => {
 		it('should return error (no subscriptions)', (done) => {
 			agent.post(`/${username}/${model1.id}/upload`)

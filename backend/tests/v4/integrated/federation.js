@@ -64,13 +64,12 @@ describe("Federated Model", function () {
 	});
 
 	after(function(done) {
-		purgeQueues().then(()=>{
+		purgeQueues().then(() => {
 			server.close(function() {
 				console.log("API test server is closed");
 				done();
 			});
 		});
-
 	});
 
 	it("should be created successfully", function(done) {
