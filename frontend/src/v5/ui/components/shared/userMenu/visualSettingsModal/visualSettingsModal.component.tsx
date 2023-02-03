@@ -16,11 +16,9 @@
  */
 
 import { VisualSettingsDialog } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
-import { Dialog } from '@mui/material';
-import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
-import { RemoveWhiteCorners } from '@controls/formModal/formModal.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
+import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
 
 type IVisualSettingsModal = {
 	onClickClose: () => void;
@@ -34,19 +32,19 @@ export const VisualSettingsModal = ({
 	onClickClose,
 	...visualSettingsProps
 }: IVisualSettingsModal) => (
-	<Dialog open PaperComponent={RemoveWhiteCorners}>
-		<ModalHeader
-			title={formatMessage({
-				id: 'visualSettingsModal.title',
-				defaultMessage: 'Visual Settings',
-			})}
-			onClickClose={onClickClose}
-		/>
+	<FormModalNoButtons
+		title={formatMessage({
+			id: 'visualSettingsModal.title',
+			defaultMessage: 'Visual Settings',
+		})}
+		onClickClose={onClickClose}
+		open
+	>
 		<VisualSettingsModalContent>
 			<VisualSettingsDialog
 				handleClose={onClickClose}
 				{...visualSettingsProps}
 			/>
 		</VisualSettingsModalContent>
-	</Dialog>
+	</FormModalNoButtons>
 );
