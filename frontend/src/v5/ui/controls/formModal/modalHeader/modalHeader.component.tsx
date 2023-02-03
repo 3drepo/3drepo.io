@@ -19,7 +19,7 @@ import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { Title, Header, CloseButton, Subtitle } from './ModalHeader.styles';
 
 export interface IModalHeader extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
-	onClickClose?: () => void;
+	onClickClose: () => void;
 	title: any;
 	subtitle?: string;
 	disableClosing?: boolean;
