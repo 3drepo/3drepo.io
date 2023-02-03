@@ -144,6 +144,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 		]);
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
+	addV4Routes(app);
 
 	app.use(function(err, req, res, next) {
 		if(err) {
@@ -154,7 +155,6 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 		// next(err);
 	});
 
-	addV4Routes(app);
 	return app;
 };
 
@@ -205,6 +205,7 @@ APIService.createApp = (config, v5Init = true) => {
 		initialiseSystem();
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
+	addV4Routes(app);
 
 	app.use(function(err, req, res, next) {
 		if(err) {
@@ -215,7 +216,6 @@ APIService.createApp = (config, v5Init = true) => {
 		// next(err);
 	});
 
-	addV4Routes(app);
 	return app;
 };
 
