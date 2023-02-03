@@ -52,10 +52,9 @@ describe("JSON Assets", function () {
 
 		after(function(done) {
 			purgeQueues().then(() => {
-					server.close(function() {
-						console.log("API test server is closed");
-						done();
-					});
+				server.close(function() {
+					console.log("API test server is closed");
+					done();
 				});
 			});
 		});
