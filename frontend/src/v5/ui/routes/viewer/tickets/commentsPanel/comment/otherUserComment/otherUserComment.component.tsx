@@ -29,7 +29,7 @@ import { CommentAuthor, CommentButtons, CommentAge, EditedCommentLabel } from '.
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
-type OtherUserCommentProps = Omit<IComment, 'createdAt'> & {
+type OtherUserCommentProps = Omit<IComment, 'updatedAt'> & {
 	commentAge: string;
 	metadata?: CommentReplyMetadata;
 	onReply: (commentId) => void;

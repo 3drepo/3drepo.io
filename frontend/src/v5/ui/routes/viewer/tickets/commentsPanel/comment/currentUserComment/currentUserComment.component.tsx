@@ -29,7 +29,7 @@ import { CommentAge, CommentButtons, EditedCommentLabel } from '../comment.style
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
-export type CurrentUserCommentProps = Omit<IComment, 'createdAt'> & {
+export type CurrentUserCommentProps = Omit<IComment, 'updatedAt'> & {
 	commentAge: string;
 	metadata?: CommentReplyMetadata;
 	onDelete: (commentId) => void;

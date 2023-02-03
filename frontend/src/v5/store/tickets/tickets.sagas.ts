@@ -162,7 +162,11 @@ export function* updateTicketComment({
 			? API.Tickets.updateFederationTicketComment
 			: API.Tickets.updateContainerTicketComment;
 		yield updateModelTicketComment(teamspace, projectId, modelId, ticketId, commentId, comment);
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: commentId, ...comment }));
+		yield put(TicketsActions.upsertTicketCommentSuccess(
+			modelId,
+			ticketId,
+			{ _id: commentId, ...comment, updatedAt: new Date() },
+		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
