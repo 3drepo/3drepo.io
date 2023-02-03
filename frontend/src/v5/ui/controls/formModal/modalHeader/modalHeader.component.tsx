@@ -16,7 +16,7 @@
  */
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { Title, Header, CloseButton, Subtitle } from './ModalHeader.styles';
+import { Title, Header, CloseButton, Subtitle } from './modalHeader.styles';
 
 export interface IModalHeader extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose: () => void;
