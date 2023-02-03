@@ -24,7 +24,7 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 	border-radius: 5px;
 	padding: 6px 10px 6px 9px;
 	margin-bottom: 10px;
-    overflow-x: hidden;
+	overflow-x: hidden;
 	${({ theme, variant }) => {
 		if (variant === 'primary') {
 			return css`

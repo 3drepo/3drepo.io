@@ -46,7 +46,7 @@ import { Comment } from './comment/comment.component';
 import { MAX_MESSAGE_LENGTH, addReply, createMetadata, sanitiseMessage } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
 
-export const CommentsPanel = () => {
+export const CommentsPanel = ({ scrollPanelIntoView }) => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const formData = useForm<{ message: string }>({ mode: 'all' });
@@ -139,6 +139,7 @@ export const CommentsPanel = () => {
 		<Accordion
 			title={formatMessage({ id: 'customTicket.panel.comments', defaultMessage: 'Comments' })}
 			Icon={CommentIcon}
+			onChange={scrollPanelIntoView}
 		>
 			<FormProvider {...formData}>
 				<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400}>
