@@ -71,7 +71,13 @@ describe("Sharing/Unsharing a model", function () {
 
 	after(function(done) {
 
-		purgeQueues().then(done);
+		purgeQueues().then(() => {
+			server.close(function() {
+				console.log("API test server is closed");
+				done();
+			});
+		});
+
 	});
 
 	describe("for view only", function() {
