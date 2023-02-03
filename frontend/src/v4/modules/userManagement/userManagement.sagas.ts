@@ -296,8 +296,8 @@ export function* fetchProject({ project }) {
 	} catch (error) {
 		if (isV5()) {
 			DialogsActionsDispatchers.open('alert', {
-				currentActions: formatMessage({ id: 'projectPermissions.alert', defaultMessage: 'trying to access project permissions' }),
-			error,
+				currentActions: formatMessage({ id: 'projectPermissions.alert', defaultMessage: 'trying to fetch a project' }),
+				error,
 			})
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
