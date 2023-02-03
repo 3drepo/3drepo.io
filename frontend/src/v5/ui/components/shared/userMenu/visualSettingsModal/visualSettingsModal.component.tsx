@@ -17,8 +17,8 @@
 
 import { VisualSettingsDialog } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
 import { formatMessage } from '@/v5/services/intl';
-import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
+import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
 	onClickClose: () => void;
