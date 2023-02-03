@@ -17,6 +17,8 @@
 
 "use strict";
 
+const ServiceHelperV5 = require("../../v5/helper/services")
+
 function signUpAndLogin(params) {
 
 	const server = params.server;
@@ -35,12 +37,7 @@ function signUpAndLogin(params) {
 
 		agent = request.agent(server);
 
-		// create a user
-		return User.createUser(username, password, {
-			email: email
-		}, 200000).then(emailVerifyToken => {
-			return User.verify(username, emailVerifyToken.token, {skipImportToyModel : true, skipCreateBasicPlan: noBasicPlan});
-		}).then(user => {
+		return ServiceHelperV5.db.createUser({user:  username, password}).then(() => {
 
 			// login
 			agent.post("/login")
