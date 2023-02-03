@@ -37,7 +37,7 @@ function signUpAndLogin(params) {
 
 		agent = request.agent(server);
 
-		return ServiceHelperV5.db.createUser({user:  username, password}).then(() => {
+		return ServiceHelperV5.db.createUser({user:  username, password, basicData: {email}}).then(() => {
 			return ServiceHelperV5.db.createTeamspace(username, [], undefined, false).then(() => {
 				// login
 				agent.post("/login")
