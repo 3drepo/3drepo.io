@@ -16,11 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { Paper } from '@mui/material';
-
-export const RemoveWhiteCorners = styled(Paper)`
-	background-color: transparent;
-`;
 
 export const Form = styled.form`
 	display: flex;

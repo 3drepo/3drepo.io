@@ -30,6 +30,7 @@ export const DialogContainer = styled.div`
 	align-items: center;
 	min-width: 633px;
 	padding: 43px 0 25px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const Actions = styled.div`

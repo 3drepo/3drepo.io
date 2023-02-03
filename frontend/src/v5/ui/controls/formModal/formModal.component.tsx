@@ -17,7 +17,7 @@
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Dialog } from '@mui/material';
 import { DialogProps } from '@mui/material/Dialog';
-import { Form, RemoveWhiteCorners } from './formModal.styles';
+import { Form } from './formModal.styles';
 import { ModalHeader } from './modalHeader/modalHeader.component';
 import { ModalBody } from './modalBody/modalBody.component';
 import { FormModalActions } from './modalButtons/modalButtons.styles';
@@ -66,7 +66,6 @@ export const FormModal = ({
 		<Dialog
 			onClose={handleClose}
 			open={open}
-			PaperComponent={RemoveWhiteCorners}
 			className={className}
 			maxWidth={maxWidth}
 			fullWidth={!!maxWidth}
