@@ -17,6 +17,7 @@
 
 import { CurrentUserHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
+import { USER_NOT_FOUND } from '@/v5/store/users/users.helpers';
 import { CommentAuthor } from '../comment.styles';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { CommentReplyContainer } from './commentReply.styles';
@@ -28,8 +29,8 @@ type CommentReplyProps = CommentReplyMetadata & {
 };
 export const CommentReply = ({ message, author, variant = 'primary', isCurrentUserComment = true, ...props }: CommentReplyProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
+	const user = UsersHooksSelectors.selectUser(teamspace, author) || USER_NOT_FOUND;
 
 	const authorDisplayName = (isCurrentUserComment && author === currentUser) ? '' : `${user.firstName} ${user.lastName}`;
 

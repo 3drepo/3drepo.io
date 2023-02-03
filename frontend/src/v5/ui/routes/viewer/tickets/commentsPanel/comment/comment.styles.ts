@@ -22,7 +22,7 @@ export const CommentAuthor = styled.div`
 	font-weight: 600;
 	font-size: 11px;
 	line-height: 18px;
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 `;
 
 export const CommentButtons = styled.div`
