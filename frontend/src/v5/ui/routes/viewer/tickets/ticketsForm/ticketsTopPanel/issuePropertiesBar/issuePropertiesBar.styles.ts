@@ -32,3 +32,9 @@ export const PropertyTitle = styled.div`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 `;
+
+export const ColumnSeparator = styled.div`
+	height: 100%;
+	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+	margin: 0 10px;
+`;
