@@ -52,10 +52,6 @@ export const EditComment = ({ _id, message, author, metadata, onEdit, onClose }:
 				{metadata.message && (<CommentReply {...metadata} />)}
 				<EditCommentInput
 					name="editedMessage"
-					placeholder={formatMessage({
-						id: 'customTicket.panel.comments.editedMessage',
-						defaultMessage: ' ',
-					})}
 					control={control}
 					autoFocus
 				/>
