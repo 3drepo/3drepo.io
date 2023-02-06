@@ -28,7 +28,7 @@ export type CommentProps = IComment & {
 	onEdit: (commentId, newMessage: string) => void;
 };
 export const Comment = ({ updatedAt, author, message, deleted, _id, ...props }: CommentProps) => {
-	const [commentAge, setCommentAge] = useState(getRelativeTime(updatedAt));
+	const [commentAge, setCommentAge] = useState('');
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
@@ -37,12 +37,10 @@ export const Comment = ({ updatedAt, author, message, deleted, _id, ...props }: 
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
 
 	useEffect(() => {
+		updateMessageAge();
 		const intervalId = window.setInterval(updateMessageAge, 10_000);
-		return () => {
-			updateMessageAge();
-			clearInterval(intervalId);
-		};
-	}, [updateMessageAge]);
+		return () => clearInterval(intervalId);
+	}, [updatedAt]);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 	return (
