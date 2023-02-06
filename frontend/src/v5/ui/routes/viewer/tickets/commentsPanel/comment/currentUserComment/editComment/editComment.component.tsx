@@ -17,7 +17,6 @@
 
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './editComment.styles';
