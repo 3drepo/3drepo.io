@@ -70,21 +70,21 @@ const TIME_UNIT = {
 };
 
 export const getRelativeTime = (from: Date) => {
-	let timeDifference = (new Date().getTime() - from.getTime()) / 1000;
-	if (timeDifference < 60) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.second);
+	let timeDifference = ((new Date().getTime() - from.getTime()) / 1000) + 1;
+	if (timeDifference < 60) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.second);
 
 	timeDifference /= 60;
-	if (timeDifference < 60) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.minute);
+	if (timeDifference < 60) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.minute);
 
 	timeDifference /= 60;
-	if (timeDifference < 24) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.hour);
+	if (timeDifference < 24) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.hour);
 
 	timeDifference /= 24;
-	if (timeDifference < 30) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.day);
+	if (timeDifference < 30) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.day);
 	const daysDifference = timeDifference;
 
 	timeDifference /= 30;
-	if (timeDifference < 12) return formatRelativeTime(-Math.ceil(timeDifference), TIME_UNIT.month);
+	if (timeDifference < 12) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.month);
 
-	return formatRelativeTime(-Math.ceil(daysDifference / 365), TIME_UNIT.year);
+	return formatRelativeTime(-Math.floor(daysDifference / 365), TIME_UNIT.year);
 };
