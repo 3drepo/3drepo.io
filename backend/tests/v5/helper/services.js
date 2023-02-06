@@ -627,7 +627,7 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 
 ServiceHelper.closeApp = async (server) => {
 	if (server) await server.close();
-	await DbHandler.disconnect();
+	await db.reset();
 	EventsManager.reset();
 	QueueHandler.close();
 };
