@@ -122,7 +122,7 @@ export const UploadListItemDestination = ({
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
-			.filter(({ name, role }) => (name !== value.name) && (role === 'collaborator'));
+			.filter(({ name, role }) => (name !== value.name) && (role === Role.COLLABORATOR));
 
 		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
 		if (inputValue && !containerNameExists) {
