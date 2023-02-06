@@ -25,7 +25,7 @@ import {
 } from '@/v5/store/federations/federations.types';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { Roles } from '../currentUser/currentUser.types';
+import { Role } from '../currentUser/currentUser.types';
 
 export const FEDERATION_SEARCH_FIELDS = ['code', 'name', 'desc', 'category'];
 
@@ -43,7 +43,7 @@ export const prepareNewFederation = (
 		lastUpdated: new Date(),
 		category: '',
 		hasStatsPending: false,
-		role: Roles.NONE,
+		role: Role.NONE,
 		isFavourite: false,
 	}
 );

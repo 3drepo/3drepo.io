@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { Roles } from '../currentUser/currentUser.types';
+import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
 
 export enum UploadStatuses {
@@ -113,7 +113,7 @@ export interface IContainer {
 	code: string;
 	status: UploadStatuses;
 	isFavourite: boolean;
-	role: Roles;
+	role: Role;
 	hasStatsPending: boolean;
 	errorResponse?: {
 		message: string;
@@ -130,7 +130,7 @@ export interface IContainer {
 export interface MinimumContainer {
 	_id: string,
 	name: string,
-	role: Roles,
+	role: Role,
 	isFavourite: boolean
 }
 

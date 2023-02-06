@@ -23,7 +23,7 @@ import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/conta
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
-import { Roles } from '@/v5/store/currentUser/currentUser.types';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
@@ -44,7 +44,7 @@ interface IUploadListItemDestination {
 const emptyOption = prepareSingleContainerData({
 	_id: '',
 	name: '',
-	role: Roles.NONE,
+	role: Role.NONE,
 	isFavourite: false,
 });
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });

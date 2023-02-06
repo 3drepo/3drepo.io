@@ -20,7 +20,7 @@ import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
-import { Roles } from '../currentUser/currentUser.types';
+import { Role } from '../currentUser/currentUser.types';
 
 const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
@@ -60,15 +60,15 @@ export const selectContainersByFederationId = createSelector(
 
 export const selectFederationRole = createSelector(
 	selectFederationById,
-	(federation): Roles | null => federation?.role || null,
+	(federation): Role | null => federation?.role || null,
 );
 
 export const selectHasCollaboratorAccess = createSelector(
 	selectFederationRole,
-	(role): boolean | null => [Roles.ADMIN, Roles.COLLABORATOR].includes(role),
+	(role): boolean | null => [Role.ADMIN, Role.COLLABORATOR].includes(role),
 );
 
 export const selectHasCommenterAccess = createSelector(
 	selectFederationRole,
-	(role): boolean | null => [Roles.ADMIN, Roles.COLLABORATOR, Roles.COMMENTER].includes(role),
+	(role): boolean | null => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER].includes(role),
 );
