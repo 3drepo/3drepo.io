@@ -505,7 +505,7 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 	return ticket;
 };
 
-ServiceHelper.generateComment = () => {
+ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
 	const base64img = fs.readFileSync(image).toString('base64');
 
 	return {
@@ -514,6 +514,7 @@ ServiceHelper.generateComment = () => {
 		updatedAt: ServiceHelper.generateRandomDate(),
 		message: ServiceHelper.generateRandomString(),
 		images: [base64img],
+		author,
 	};
 };
 

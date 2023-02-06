@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,29 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 
-export const SearchInputContainer = styled.div`
-	display: contents;
-	margin: 0;
-	padding: 0;
-`;
+const { UUIDToString } = require('../../utils/helper/uuids');
+const Yup = require('yup');
+const { types } = require('../../utils/helper/yup');
 
-export const SearchInput = styled(SearchInputBase)`
-	margin: -10px 0 0;
-	padding: 12px;
-	background: ${({ theme }) => theme.palette.primary.contrast};
-	z-index: 2;
-	position: sticky;
-	top: 0;
-`;
+const Comments = {};
 
-export const NoResults = styled.div`
-	height: 34px;
-	display: flex;
-	align-items: center;
-	padding-left: 12px;
-	color: ${({ theme }) => theme.palette.base.main};
-	${({ theme }) => theme.typography.body1};
-`;
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+
+Comments.serialiseComment = (comment) => {
+	const caster = Yup.object({
+		_id: uuidString,
+		ticket: uuidString,
+		createdAt: types.timestamp,
+		updatedAt: types.timestamp,
+		images: Yup.array().of(uuidString),
+		history: Yup.array().of(Yup.object({
+			timestamp: types.timestamp,
+			images: Yup.array().of(uuidString),
+		})),
+	});
+	return caster.cast(comment);
+};
+
+module.exports = Comments;
