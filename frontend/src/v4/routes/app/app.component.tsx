@@ -137,6 +137,9 @@ export class App extends PureComponent<IProps, IState> {
 				<Route component={ViewerCanvas} />
 				{this.renderHeader(!isStaticRoute(location.pathname))}
 				<Switch>
+					<Route exact path="/">
+						<Redirect to="v5/" />
+					</Route>
 					{this.renderLoginRoute()}
 					<Route exact path={ROUTES.SIGN_UP}>
 						<Redirect to="v5/signup" />
