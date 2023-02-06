@@ -21,9 +21,10 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
-import { BaseProperties } from '../../tickets.constants';
+import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
-import { BaseTicketInfo, DescriptionProperty } from './ticketsTopPanel.styles';
+import { IssuePropertiesBar } from './issuePropertiesBar/issuePropertiesBar.component';
+import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
 
 type ITicketsTopPanel = {
 	ticket: Partial<ITicket>;
@@ -33,33 +34,44 @@ type ITicketsTopPanel = {
 };
 
 export const TicketsTopPanel = ({ ticket, formState, focusOnTitle, onPropertyBlur }: ITicketsTopPanel) => (
-	<BaseTicketInfo>
-		<TitleProperty
-			name={BaseProperties.TITLE}
-			defaultValue={ticket[BaseProperties.TITLE]}
-			formError={formState.errors[BaseProperties.TITLE]}
-			placeholder={formatMessage({
-				id: 'customTicket.topPanel.titlePlaceholder',
-				defaultMessage: 'Ticket name',
-			})}
-			inputProps={{ autoFocus: focusOnTitle }}
-			onBlur={onPropertyBlur}
-		/>
-		<CreationInfo
-			owner={ticket.properties?.[BaseProperties.OWNER]}
-			createdAt={ticket.properties?.[BaseProperties.CREATED_AT]}
-			updatedAt={ticket.properties?.[BaseProperties.UPDATED_AT]}
-		/>
-		<DescriptionProperty>
-			<InputController
-				Input={TextAreaFixedSize}
-				name={`properties[${BaseProperties.DESCRIPTION}]`}
-				onBlur={onPropertyBlur}
+	<TopPanel>
+		<BaseTicketInfo>
+			<TitleProperty
+				name={BaseProperties.TITLE}
+				defaultValue={ticket[BaseProperties.TITLE]}
+				formError={formState.errors[BaseProperties.TITLE]}
 				placeholder={formatMessage({
-					id: 'customTicket.topPanel.description',
-					defaultMessage: 'Description',
+					id: 'customTicket.topPanel.titlePlaceholder',
+					defaultMessage: 'Ticket name',
 				})}
+				inputProps={{ autoFocus: focusOnTitle }}
+				onBlur={onPropertyBlur}
 			/>
-		</DescriptionProperty>
-	</BaseTicketInfo>
+			<CreationInfo
+				owner={ticket.properties?.[BaseProperties.OWNER]}
+				createdAt={ticket.properties?.[BaseProperties.CREATED_AT]}
+				updatedAt={ticket.properties?.[BaseProperties.UPDATED_AT]}
+			/>
+			<DescriptionProperty>
+				<InputController
+					Input={TextAreaFixedSize}
+					name={`properties[${BaseProperties.DESCRIPTION}]`}
+					onBlur={onPropertyBlur}
+					placeholder={formatMessage({
+						id: 'customTicket.topPanel.description',
+						defaultMessage: 'Description',
+					})}
+				/>
+			</DescriptionProperty>
+		</BaseTicketInfo>
+		{ticket.properties[IssueProperties.PRIORITY] && (
+			<IssuePropertiesBar
+				priority={ticket.properties[IssueProperties.PRIORITY]}
+				dueDate={ticket.properties[IssueProperties.DUE_DATE]}
+				status={ticket.properties[IssueProperties.STATUS]}
+				assignees={ticket.properties[IssueProperties.ASSIGNEES]}
+				onBlur={onPropertyBlur}
+			/>
+		)}
+	</TopPanel>
 );
