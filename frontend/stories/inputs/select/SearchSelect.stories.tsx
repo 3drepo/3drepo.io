@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { MenuItem, SelectChangeEvent } from '@mui/material';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
@@ -30,9 +30,6 @@ export default {
 		error: {
 			type: 'boolean',
 		},
-		helperText: {
-			type: 'string',
-		},
 		required: {
 			type: 'boolean',
 		},
@@ -47,15 +44,12 @@ export default {
 		},
 	},
 	component: SearchSelect,
-	parameters: { controls: { exclude: ['control', 'margin', 'hiddenLabel', 'ref'] } },
+	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
 } as ComponentMeta<typeof SearchSelect>;
 
 const Controlled: ComponentStory<typeof SearchSelect> = ({ values, ...args }: any) => (
 	<FormContainer>
-		<SearchSelect
-			name="select"
-			{...args}
-		>
+		<SearchSelect {...args}>
 			{values.map((value) => (
 				<MenuItem value={value} key={value} style={{ padding: '8px 14px' }}>
 					{value}
@@ -82,12 +76,11 @@ const SearchSelectMultipleControlledStory: ComponentStory<typeof SearchSelect> =
 	return (
 		<FormContainer>
 			<SearchSelect
-				name="select"
 				{...args}
 				value={value}
 				onChange={handleChange}
 				multiple
-				renderValue={(val) => (val as any[]).join(',')}
+				renderValue={(val) => (val as any[]).join(', ')}
 			>
 				{values.map((valueItem) => (
 					<MultiSelectMenuItem value={valueItem} key={valueItem}>

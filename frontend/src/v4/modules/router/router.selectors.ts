@@ -53,7 +53,7 @@ const selectV4UrlParams = createSelector(
 const selectV5UrlParams = createSelector(
 	selectLocation, (location) => {
 		const viewerPath = ROUTES.V5_MODEL_VIEWER;
-		const boardPath = ROUTES.BOARD_SPECIFIC;
+		const boardPath = ROUTES.V5_BOARD_SPECIFIC;
 
 		const viewerParams = matchPath<RouteParams>(location.pathname, { path: viewerPath });
 		const boardParams = matchPath<RouteParams>(location.pathname, { path: boardPath });

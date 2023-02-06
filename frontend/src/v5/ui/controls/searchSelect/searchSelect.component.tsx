@@ -17,14 +17,14 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
-import { SelectWithLabel, SelectWithLabelProps } from '@controls/selectWithLabel/selectWithLabel.component';
+import { Select, SelectProps } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { ReactNode } from 'react';
 import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
 import { SearchInputContainer, SearchInput, NoResults } from './searchSelect.styles';
 
-export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
+export const SearchSelect = ({ children, ...props }: SelectProps) => {
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') {
 			e.stopPropagation();
@@ -39,7 +39,15 @@ export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
 		<SearchContextComponent filteringFunction={filterItems} items={children as ReactNode[]}>
 			<SearchContext.Consumer>
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => (
-					<SelectWithLabel {...props}>
+					<Select
+						{...props}
+						MenuProps={{
+							disableAutoFocusItem: true,
+							PaperProps: {
+								style: { maxHeight: 231 },
+							},
+						}}
+					>
 						<SearchInputContainer>
 							<SearchInput
 								placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
@@ -56,7 +64,7 @@ export const SearchSelect = ({ children, ...props }: SelectWithLabelProps) => {
 								/>
 							</NoResults>
 						)}
-					</SelectWithLabel>
+					</Select>
 				)}
 			</SearchContext.Consumer>
 		</SearchContextComponent>

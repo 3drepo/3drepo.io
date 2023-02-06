@@ -120,7 +120,7 @@ const testUpdateGroup = () => {
 		const teamspace = 'someTS';
 		const model = 'someModel';
 		test('should update successfully if the id is found', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue(true);
 			await expect(Group.updateGroup(teamspace, model, _id, updateObj)).resolves.toBe(undefined);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
@@ -130,7 +130,7 @@ const testUpdateGroup = () => {
 		});
 
 		test('should throw an error if the id is not found', async () => {
-			jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			jest.spyOn(db, 'updateOne').mockResolvedValue(false);
 			await expect(Group.updateGroup(teamspace, model, _id, updateObj)).rejects.toEqual(templates.groupNotFound);
 		});
 	});

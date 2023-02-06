@@ -16,13 +16,13 @@
  */
 import { useParams } from 'react-router';
 
-import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
+import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IUser } from '@/v5/store/users/users.redux';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { Text } from './revisionsListItemAuthor.styles';
+import { Text, Name, FixedOrGrowContainer } from './revisionsListItemAuthor.styles';
 
 interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
@@ -38,7 +38,7 @@ export const RevisionsListItemAuthor = ({
 	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
 
 	return (
-		<FixedOrGrowContainer {...rest}>
+		<FixedOrGrowContainer {...rest} $active={active}>
 			<HoverPopover
 				anchor={(props) => (
 					<Text
@@ -46,7 +46,8 @@ export const RevisionsListItemAuthor = ({
 						$active={active}
 						{...props}
 					>
-						{author.firstName} {author.lastName}
+						<Name>{author?.firstName || authorName}</Name>
+						<Name>{author?.lastName}</Name>
 					</Text>
 				)}
 			>

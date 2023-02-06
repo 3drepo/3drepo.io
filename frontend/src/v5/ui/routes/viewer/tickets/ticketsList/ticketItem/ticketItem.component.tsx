@@ -37,7 +37,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const hasIssueProperties = template?.config?.issueProperties;
+	const hasIssueProperties = ticket?.properties?.Priority;
 	const {
 		number,
 		properties: {

@@ -19,8 +19,11 @@ const Path = require('path');
 
 const PathHelper = {};
 
+PathHelper.tmpDir = require('os').tmpdir();
+
 PathHelper.src = `${__dirname}/../../../src/v5`;
 PathHelper.srcV4 = `${__dirname}/../../../src/v4`;
+PathHelper.utilScripts = `${__dirname}/../../../src/scripts/utility`;
 PathHelper.modelFolder = `${__dirname}/../resources/models`;
 PathHelper.imagesFolder = `${__dirname}/../resources/images`;
 PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');

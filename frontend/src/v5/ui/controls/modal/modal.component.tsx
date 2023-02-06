@@ -16,7 +16,7 @@
  */
 import { Dialog } from '@mui/material';
 
-import CloseIcon from '@assets/icons/close.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { CloseButton } from './modal.styles';
 
 interface IModal {
@@ -31,7 +31,7 @@ export const Modal = ({ onClickClose, open, children, className }: IModal) => (
 		open={open}
 		onClose={onClickClose}
 		className={className}
-		maxWidth={false}
+		maxWidth="md"
 	>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 			<CloseIcon />

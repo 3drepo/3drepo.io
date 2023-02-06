@@ -25,7 +25,7 @@ import { TEAMSPACE_ROUTE_BASE, ViewerParams } from '../../routes.constants';
 
 export const CheckLatestRevisionReadiness = (): JSX.Element => {
 	const history = useHistory();
-	const { containerOrFederation, teamspace } = useParams<ViewerParams>();
+	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
 

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledIconButton } from '@controls/ellipsisButton/ellipsisButton.styles';
+import { EllipsisMenu as EllipsisMenuBase } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import styled from 'styled-components';
 
 export const ProjectImage = styled.img`
@@ -30,8 +30,10 @@ export const EllipsisMenuContainer = styled.div`
 	top: 6px;
 	position: relative;
 	float: right;
+`;
 
-	${StyledIconButton} {
-		margin: 0;
+export const EllipsisMenu = styled(EllipsisMenuBase)`
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	}
 `;

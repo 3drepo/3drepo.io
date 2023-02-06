@@ -18,16 +18,16 @@
 import { StyledIconButton } from '@controls/avatar/avatar.styles';
 import { Avatar } from '@mui/material';
 
-export type IExtraAssignees = {
-	assignees: string[];
+type IExtraAssignees = {
+	overflowValue: number;
 };
 
-export const ExtraAssigneesCircle = ({ assignees, ...props }: IExtraAssignees) => (
+export const ExtraAssigneesCircle = ({ overflowValue, ...props }: IExtraAssignees) => (
 	<StyledIconButton
 		{...props}
 	>
 		<Avatar>
-			+{assignees.length}
+			+{overflowValue}
 		</Avatar>
 	</StyledIconButton>
 );

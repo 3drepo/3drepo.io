@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
+
 const { generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
@@ -39,7 +40,7 @@ const { stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`
 
 const testValidateNewTicket = () => {
 	describe('Validate new ticket', () => {
-		test(`Should respond with ${templates.invalidArguments.code} if template type is not provided`, async () => {
+		test(`Should respond with ${templates.invalidArguments.code} if template is not provided`, async () => {
 			const fn = jest.fn();
 			const req = { body: {} };
 			const res = {};
@@ -47,7 +48,7 @@ const testValidateNewTicket = () => {
 			expect(fn).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'Template type must be provided'));
+				createResponseCode(templates.invalidArguments, 'Template must be provided'));
 		});
 
 		test('Should not call next if template doesn\'t exist', async () => {
@@ -80,7 +81,7 @@ const testValidateNewTicket = () => {
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'Template type has been deprecated'));
+				createResponseCode(templates.invalidArguments, 'Template has been deprecated'));
 
 			expect(fn).not.toHaveBeenCalled();
 		});

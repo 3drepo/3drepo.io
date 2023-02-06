@@ -14,20 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { forwardRef, Ref } from 'react';
-import EllipsisIcon from '@assets/icons/ellipsis.svg';
-import { IconButtonProps } from '@mui/material/IconButton';
-import { StyledIconButton } from './ellipsisButton.styles';
+import EllipsisIcon from '@assets/icons/outlined/ellipsis-outlined.svg';
+import { CircleButton } from './ellipsisButton.styles';
 
-export type IEllipsisButton = IconButtonProps & {
-	isOn?: boolean;
+export type IEllipsisButton = {
+	className?: string,
 	variant?: 'primary' | 'secondary';
+	onClick?: (e) => void;
 };
 
-export const EllipsisButton = forwardRef(
-	({ isOn, variant = 'primary', ...props }: IEllipsisButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
-		<StyledIconButton variant={variant} $isOn={isOn} {...props} ref={ref}>
-			<EllipsisIcon />
-		</StyledIconButton>
-	),
+export const EllipsisButton = (props: IEllipsisButton): JSX.Element => (
+	<CircleButton {...props}>
+		<EllipsisIcon />
+	</CircleButton>
 );

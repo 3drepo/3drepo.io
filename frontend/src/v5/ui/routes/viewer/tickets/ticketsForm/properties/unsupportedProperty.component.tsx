@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 
-export const UnsupportedProperty = ({ property, value }: {property: PropertyDefinition, value:any}) => (
+export const UnsupportedProperty = ({ name, value }: FormInputProps) => (
 	<div>
-		Unsupported property {`${property.name}:${property.type}`} (for now)
+		Unsupported property {`${name}`} (for now)
 		{(`${JSON.stringify(value)}`).substring(0, 80)}
 	</div>
 );

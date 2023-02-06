@@ -18,9 +18,9 @@
 import { InputLabel } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ error?: string }>`
+export const Container = styled.div<{ error?: boolean }>`
 	padding: 13px;
-	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 5px;
 	display: flex;

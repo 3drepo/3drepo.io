@@ -21,68 +21,66 @@ import { DateFieldContainer as IssuesDateFieldContainer } from '@/v4/routes/view
 import { StyledFormControl, FieldsContainer, FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { ActionsLine, StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 
-export const DescriptionStyles = css`
-	.description {
-		margin: 14px 0;
+export const EditableFieldStyles = css`
+	margin: 14px 0;
 
-		${StyledTextField} {
+	${StyledTextField} {
+		margin: 0;
+	}
+
+	label {
+		font-size: 10px;
+		transform: scale(1);
+		left: 1px;
+		top: -18px;
+		position: absolute;
+	}
+
+	.MuiFormControl-root {
+		margin-top: 0;
+		.MuiInputBase-root {
+			padding: 0;
+			& > textarea {
+				min-height: 2rem;
+				padding: 5px 10px;
+			}
+			.MuiOutlinedInput-notchedOutline {
+				height: calc(100%);
+				min-height: 42px;
+			}
+		}
+	}
+
+	button {
+		margin: 0 10px 0 0;
+		height: 15px;
+		width: 15px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+
+		&:hover {
+			background-color: transparent;
+		}
+
+		svg {
+			font-size: 1rem;
+		}
+	}
+
+	${ActionsLine} {
+		top: 4px;
+		right: 0;
+	}
+	${StyledMarkdownField} {
+		border: 1px solid ${({ theme }) => theme.palette.base.lighter};
+		border-radius: 5px;
+		min-height: 32px;
+		padding: 4px 10px;
+		margin-top: 0px;
+		margin-bottom: 0px;
+		font-size: 0.75rem;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		p {
 			margin: 0;
-		}
-
-		label {
-			font-size: 10px;
-			transform: scale(1);
-			left: 1px;
-			top: -18px;
-			position: absolute;
-		}
-
-		.MuiFormControl-root {
-			margin-top: 0;
-			.MuiInputBase-root {
-				padding: 0;
-				& > textarea {
-					min-height: 2rem;
-					padding: 5px 10px;
-				}
-				.MuiOutlinedInput-notchedOutline {
-					height: calc(100%);
-					min-height: 42px;
-				}
-			}
-		}
-
-		button {
-			margin: 0 10px 0 0;
-			height: 15px;
-			width: 15px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-
-			&:hover {
-				background-color: transparent;
-			}
-
-			svg {
-				font-size: 1rem;
-			}
-		}
-
-		${ActionsLine} {
-			top: 4px;
-			right: 0;
-		}
-		${StyledMarkdownField} {
-			border: 1px solid ${({ theme }) => theme.palette.base.lighter};
-			border-radius: 5px;
-			min-height: 32px;
-			padding: 4px 10px;
-			margin-top: 0px;
-			margin-bottom: 0px;
-			font-size: 0.75rem;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			p {
-				margin: 0;
-			}
 		}
 	}
 `;
@@ -98,11 +96,16 @@ export const FieldsRowStyles = css`
 		.MuiInputBase-input, .MuiSelect-select, .MuiOutlinedInput-notchedOutline {
 			box-sizing: border-box;
 			margin: 0;
-			color: ${({ theme }) => theme.palette.secondary.main};
 			~ svg {
 				margin-top: 0px;
 				top: 10px;
+			}
+
+			&:not(.Mui-disabled) {
 				color: ${({ theme }) => theme.palette.secondary.main};
+				~ svg {
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 		input, fieldset {
@@ -110,11 +113,12 @@ export const FieldsRowStyles = css`
 		}
 		${StyledFormControl} {
 			margin: 0;
-			&:first-child {
-				margin-right: 5px;
-			}
 			&:last-child {
 				margin-left: 5px;
+			}
+			&:first-child {
+				margin-right: 5px;
+				margin-left: 0;
 			}
 			${IssuesDateFieldContainer},
 			${RisksDateFieldContainer} {
@@ -154,6 +158,16 @@ export const FieldsRowStyles = css`
 `;
 
 export default css`
-	${DescriptionStyles}
+	.description {
+		${EditableFieldStyles}
+	}
 	${FieldsRowStyles}
+
+	.MuiSelect-select {
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	}
+
+	.Mui-focused .MuiSelect-select {
+		border-color: ${({ theme }) => theme.palette.primary.main};
+	}
 `;
