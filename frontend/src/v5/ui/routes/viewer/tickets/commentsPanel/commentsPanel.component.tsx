@@ -98,6 +98,12 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 		);
 	};
 
+	const resetCommentBox = () => {
+		setCommentReply(null);
+		formData.reset();
+		setIsSubmittingMessage(false);
+	};
+
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
 		let message = sanitiseMessage(messageInput);
@@ -115,12 +121,8 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 			ticketId,
 			isFederation,
 			newComment,
-			() => {
-				setCommentReply(null);
-				formData.reset();
-				setIsSubmittingMessage(false);
-			},
-			() => { setIsSubmittingMessage(false); },
+			resetCommentBox,
+			() => setIsSubmittingMessage(false),
 		);
 	};
 
@@ -133,6 +135,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 			ticketId,
 			isFederation,
 		);
+		resetCommentBox();
 	}, [number]);
 
 	return (
