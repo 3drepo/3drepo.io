@@ -21,6 +21,7 @@ import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { Role } from '../currentUser/currentUser.types';
+import { isCollaboratorRole, isCommenterRole } from '../store.helpers';
 
 const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
@@ -65,10 +66,10 @@ export const selectFederationRole = createSelector(
 
 export const selectHasCollaboratorAccess = createSelector(
 	selectFederationRole,
-	(role): boolean | null => [Role.ADMIN, Role.COLLABORATOR].includes(role),
+	(role): boolean => isCollaboratorRole(role),
 );
 
 export const selectHasCommenterAccess = createSelector(
 	selectFederationRole,
-	(role): boolean | null => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER].includes(role),
+	(role): boolean => isCommenterRole(role),
 );

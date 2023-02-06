@@ -20,6 +20,7 @@ import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
 import { Role } from '../currentUser/currentUser.types';
+import { isCollaboratorRole, isCommenterRole } from '../store.helpers';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
@@ -57,15 +58,15 @@ export const selectContainerRole = createSelector(
 
 export const selectHasCollaboratorAccess = createSelector(
 	selectContainerRole,
-	(role): boolean | null => [Role.ADMIN, Role.COLLABORATOR].includes(role),
+	(role): boolean => isCollaboratorRole(role),
 );
 
 export const selectHasCommenterAccess = createSelector(
 	selectContainerRole,
-	(role): boolean | null => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER].includes(role),
+	(role): boolean => isCommenterRole(role),
 );
 
 export const selectCanUploadToProject = createSelector(
 	selectContainers,
-	(containers) => containers.some(({ role }) => [Role.ADMIN, Role.COLLABORATOR].includes(role)),
+	(containers): boolean => containers.some(({ role }) => isCollaboratorRole(role)),
 );
