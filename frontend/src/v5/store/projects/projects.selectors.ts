@@ -23,7 +23,7 @@ import { IProject } from './projects.types';
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
 export const selectProjects = createSelector(
-	selectProjectsDomain, (state) => state.projectsByTeamspace ?? [],
+	selectProjectsDomain, (state) => state.projectsByTeamspace ?? {},
 );
 
 export const selectCurrentProjects = createSelector(
