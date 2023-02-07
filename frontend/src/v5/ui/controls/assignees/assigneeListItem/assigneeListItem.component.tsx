@@ -18,13 +18,13 @@
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { UserPopover } from '@components/shared/userPopover/userPopover.component';
+import { UserCirclePopover } from '@components/shared/userCirclePopover/userCirclePopover.component';
 import { JobPopover } from '@components/shared/jobPopover/jobPopover.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { useSelector } from 'react-redux';
 import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
 import { getMemberImgSrc } from '@/v5/store/users/users.helpers';
-import { JobCircle, UserCircle } from '../assignees.styles';
+import { JobCircle } from '../assignees.styles';
 
 type IAssigneeListItem = {
 	assignee: string;
@@ -39,14 +39,13 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 		user = { ...user, avatarUrl: getMemberImgSrc(teamspace, assignee), hasAvatar: true };
 	}
 
-	if (!isJob && !user) return <></>;
-	return isJob ? (
+	if (!isJob && !user) return (<></>);
+
+	if (!isJob) return (<UserCirclePopover user={user} />);
+
+	return (
 		<HoverPopover anchor={(props) => <JobCircle job={assignee} {...props} />}>
 			<JobPopover job={assignee} />
-		</HoverPopover>
-	) : (
-		<HoverPopover anchor={(props) => <UserCircle user={user} {...props} />}>
-			<UserPopover user={user} />
 		</HoverPopover>
 	);
 };
