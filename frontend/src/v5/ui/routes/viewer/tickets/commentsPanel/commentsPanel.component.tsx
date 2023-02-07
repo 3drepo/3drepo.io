@@ -27,29 +27,47 @@ import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
 import { IComment } from '@/v5/store/tickets/tickets.types';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
+import { uploadFile } from '@controls/fileUploader/uploadFile';
+import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { useEffect, useState } from 'react';
+import uuid from 'uuidv4';
 import { ViewerParams } from '../../../routes.constants';
 import {
 	Accordion,
 	Comments,
 	Controls,
 	CharsCounter,
-	FileIconButton,
+	FileIconInput,
 	SendButton,
 	BottomSection,
 	MessageInput,
 	EmptyCommentsBox,
 	DeleteButton,
 	CommentReplyContainer,
+	Images,
+	Image,
+	ImageContainer,
+	ErroredImageMessage,
 } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { MAX_MESSAGE_LENGTH, addReply, createMetadata, sanitiseMessage } from './comment/comment.helpers';
+import { MAX_MESSAGE_LENGTH, addReply, createMetadata, sanitiseMessage, imageIsTooBig } from './comment/comment.helpers';
 import { CommentReply } from './comment/commentReply/commentReply.component';
 
-export const CommentsPanel = ({ scrollPanelIntoView }) => {
+type ImageToUpload = {
+	id: string,
+	name: string,
+	src: string,
+	error?: boolean,
+};
+
+type CommentsPanelProps = {
+	scrollPanelIntoView: (event, isExpanding) => void,
+};
+export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const [commentReply, setCommentReply] = useState<IComment>(null);
+	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>([]);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
-	const formData = useForm<{ message: string }>({ mode: 'all' });
+	const formData = useForm<{ message: string, images: File[] }>({ mode: 'all' });
 	const messageInput = formData.watch('message');
 
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -63,6 +81,27 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 	const charsCount = (messageInput?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount >= MAX_MESSAGE_LENGTH;
 	const commentsListIsEmpty = comments?.length > 0;
+
+	const erroredImages = imagesToUpload.filter(({ error }) => error);
+	const disableSendMessage = (!messageInput?.trim()?.length && !imagesToUpload.length)
+		|| charsLimitIsReached
+		|| erroredImages.length > 0;
+
+
+	const uploadImages = async () => {
+		const files = await uploadFile(getSupportedImageExtensions(), true) as File[];
+		const imgSrcs = await Promise.all(files.map(async (file) => ({
+			name: file.name,
+			src: await convertFileToImageSrc(file) as string,
+			error: imageIsTooBig(file),
+			id: uuid(),
+		})));
+		setImagesToUpload(imagesToUpload.concat(imgSrcs));
+	};
+
+	const deleteImage = (idToDelete) => {
+		setImagesToUpload(imagesToUpload.filter(({ id }) => id !== idToDelete));
+	};
 
 	const handleDeleteComment = (commentId) => {
 		TicketsActionsDispatchers.deleteTicketComment(
@@ -99,21 +138,25 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 	};
 
 	const resetCommentBox = () => {
-		setCommentReply(null);
 		formData.reset();
+		setCommentReply(null);
 		setIsSubmittingMessage(false);
+		setImagesToUpload([]);
 	};
 
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
-		let message = sanitiseMessage(messageInput);
-		if (commentReply) {
-			message = addReply(createMetadata(commentReply), message);
-		}
-		const newComment = {
+		const newComment: Partial<IComment> = {
 			author: currentUser.username,
-			message,
+			images: imagesToUpload.map(({ src }) => src),
 		};
+		if (messageInput?.trim()) {
+			let message = sanitiseMessage(messageInput.trim() || '');
+			if (commentReply) {
+				message = addReply(createMetadata(commentReply), message);
+			}
+			newComment.message = message;
+		}
 		TicketsActionsDispatchers.createTicketComment(
 			teamspace,
 			project,
@@ -184,13 +227,32 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 							maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 						}}
 					/>
+					<Images>
+						{imagesToUpload.map(({ src, id, error }) => (
+							<ImageContainer key={id}>
+								<Image src={src} error={error} />
+								<DeleteButton onClick={() => deleteImage(id)} error={error}>
+									<DeleteIcon />
+								</DeleteButton>
+							</ImageContainer>
+						))}
+					</Images>
+					{erroredImages.length > 0 && erroredImages.map(({ name }) => (
+						<ErroredImageMessage>
+							<strong>{name} </strong> 
+							<FormattedMessage
+								id="customTicket.comments.images.error"
+								defaultMessage="is too big. Please reduce the size of the file."
+							/>
+						</ErroredImageMessage>
+					))}
 					<Controls>
-						<FileIconButton>
+						<FileIconInput onClick={uploadImages}>
 							<FileIcon />
-						</FileIconButton>
+						</FileIconInput>
 						<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 						<SendButton
-							disabled={!messageInput?.trim()?.length || charsLimitIsReached}
+							disabled={disableSendMessage}
 							onClick={createComment}
 							isPending={isSubmittingMessage}
 						>

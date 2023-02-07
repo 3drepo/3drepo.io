@@ -20,6 +20,7 @@ import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { sortBy } from 'lodash';
 import { SnackbarActions } from '@/v4/modules/snackbar';
+import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -121,7 +122,11 @@ export function* createTicketComment({
 		const createModelTicketComment = isFederation
 			? API.Tickets.createFederationTicketComment
 			: API.Tickets.createContainerTicketComment;
-		const data = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, comment);
+		let commentToCreate = { ...comment };
+		if (comment.images) {
+			commentToCreate.images = comment.images.map(stripBase64Prefix)
+		}
+		const data = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, commentToCreate);
 		const now = new Date();
 		const richComment = {
 			...comment,

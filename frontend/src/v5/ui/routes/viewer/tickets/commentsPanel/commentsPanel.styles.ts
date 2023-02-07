@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { Typography } from '@controls/typography';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
@@ -55,7 +55,7 @@ export const CommentReplyContainer = styled.div`
 	margin-top: 11px;
 `;
 
-export const DeleteButton = styled.div`
+export const DeleteButton = styled.div<{ error?: boolean }>`
 	position: absolute;
 	top: -7px;
 	right: -7px;
@@ -68,12 +68,45 @@ export const DeleteButton = styled.div`
 
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 100%;
-	box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 3px 8px 3px rgba(0, 0, 0, 0.15);
 	cursor: pointer;
 
 	svg {
 		width: 10px;
 	}
+	
+	${({ error, theme }) => error && css`
+		background-color: ${theme.palette.error.lightest};
+		color: ${theme.palette.error.main};
+	`}
+`;
+
+export const Images = styled.div`
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 10px;
+`;
+
+export const ImageContainer = styled.div`
+	position: relative;
+`;
+
+export const Image = styled.img<{ error?: boolean }>`
+	width: 44px;
+    height: 44px;
+    object-fit: cover;
+	border-radius: 5px;
+	overflow: hidden;
+	
+	${({ error, theme }) => error && css`
+		border: solid 1px ${theme.palette.error.main};
+	`}
+`;
+
+export const ErroredImageMessage = styled.div`
+	color: ${({ theme }) => theme.palette.error.main};
 `;
 
 export const MessageInput = styled(FormTextAreaFixedSize)`
@@ -108,7 +141,7 @@ export const CharsCounter = styled(Typography).attrs({
 	color: ${({ theme: { palette }, $error }) => ($error ? palette.error.main : palette.base.lighter)};
 `;
 
-export const FileIconButton = styled.div`
+export const FileIconInput = styled.div`
 	cursor: pointer;
 	display: flex;
 	padding: 4px;
