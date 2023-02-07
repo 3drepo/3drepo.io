@@ -27,7 +27,7 @@ export type CommentProps = IComment & {
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage: string) => void;
 };
-export const Comment = ({ updatedAt, author, message, deleted, _id, ...props }: CommentProps) => {
+export const Comment = ({ updatedAt, author, message = '', deleted, _id, ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState(getRelativeTime(updatedAt));
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
